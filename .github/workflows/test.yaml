@@ -29,7 +29,7 @@ jobs:
           go-version: ${{ inputs.go-version }}
       - name: Run unit tests
         run: go test ./... -cover -v -coverprofile=coverage.out
-        working-directory: ${{ inputs.path }}}
+        working-directory: ./${{ inputs.path }}}
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
