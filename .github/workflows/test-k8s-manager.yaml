@@ -27,7 +27,6 @@ jobs:
         with:
           version: latest
           working-directory: ./engine/k8s-manager
-          only-new-issues: true
       - name: Run unit tests
         run: go test ./... -cover -v -coverprofile=coverage.out
         working-directory: ./engine/k8s-manager
