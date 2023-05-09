@@ -18,8 +18,6 @@ type GocloakManagerClient struct {
 	cfg    *config.Config
 }
 
-// TODO: main should initialize keycloak client and pass it to the service
-// TODO: user service should use the keycloak client to manage users
 func NewGocloakManager(cfg *config.Config) (*GocloakManagerClient, error) {
 	wrapErr := errors.Wrapper("new gocloak manager: %w")
 
@@ -61,23 +59,23 @@ func (gm *GocloakManagerClient) CreateUser(userData entity.UserGocloakData) erro
 	return nil
 }
 
-func (gm *GocloakManagerClient) GetUserByID(userID string) (*gocloak.User, error) {
+func (gm *GocloakManagerClient) GetUserByID(userID string) (entity.UserGocloakData, error) {
 	wrapErr := errors.Wrapper("gocloak get user by id: %w")
 
 	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, userID)
 	if err != nil {
-		return nil, wrapErr(err)
+		return entity.UserGocloakData{}, wrapErr(err)
 	}
 
-	return user, err
+	return gocloakUserToUserData(user), nil
 }
 
 func (gm *GocloakManagerClient) UpdateUserRoles(userID string, product string, roles []string) error {
 	wrapErr := errors.Wrapper("gocloak update user roles: %w")
 
-	user, err := gm.GetUserByID(userID)
+	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, userID)
 	if err != nil {
-		return wrapErr(err)
+		wrapErr(err)
 	}
 
 	rolesAttribute, ok := (*user.Attributes)["product_roles"]
@@ -113,7 +111,7 @@ func (gm *GocloakManagerClient) UpdateUserRoles(userID string, product string, r
 	return nil
 }
 
-func GocloakUserToUserData(user *gocloak.User) entity.UserGocloakData {
+func gocloakUserToUserData(user *gocloak.User) entity.UserGocloakData {
 	return entity.UserGocloakData{
 		ID:        *user.ID,
 		FirstName: *user.FirstName,
@@ -124,7 +122,7 @@ func GocloakUserToUserData(user *gocloak.User) entity.UserGocloakData {
 	}
 }
 
-func UserDataToGocloak(userData entity.UserGocloakData) gocloak.User {
+func userDataToGocloak(userData entity.UserGocloakData) gocloak.User {
 	return gocloak.User{
 		ID:        gocloak.StringP(userData.ID),
 		Username:  gocloak.StringP(userData.Username),
