@@ -42,22 +42,6 @@ func (suite *ContextUserManagerSuite) GetTestUserData() entity.UserGocloakData {
 	}
 }
 
-func (suite *ContextUserManagerSuite) TestCreateUser() {
-	testUserData := suite.GetTestUserData()
-	suite.mockGokeycloak.EXPECT().CreateUser(testUserData).Times(1).Return(nil)
-	err := suite.userManager.CreateUser(testUserData)
-	suite.NoError(err)
-}
-
-func (suite *ContextUserManagerSuite) TestCreateUserError() {
-	testUserData := suite.GetTestUserData()
-	suite.mockGokeycloak.EXPECT().CreateUser(testUserData).Times(1).Return(fmt.Errorf("error"))
-
-	err := suite.userManager.CreateUser(testUserData)
-	suite.Error(err)
-	suite.ErrorContains(err, "create user")
-}
-
 func (suite *ContextUserManagerSuite) TestGetUserByID() {
 	testUserData := suite.GetTestUserData()
 	suite.mockGokeycloak.EXPECT().GetUserByID(testUserData.ID).Times(1).Return(testUserData, nil)

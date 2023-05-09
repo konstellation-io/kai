@@ -29,17 +29,6 @@ func NewUserInteractor(
 	}
 }
 
-func (ui *UserInteractor) CreateUser(userData entity.UserGocloakData) error {
-	wrapErr := errors.Wrapper("create user: %w")
-
-	err := ui.gocloakManager.CreateUser(userData)
-	if err != nil {
-		return wrapErr(err)
-	}
-
-	return nil
-}
-
 func (ui *UserInteractor) GetUserByID(userID string) (entity.UserGocloakData, error) {
 	wrapErr := errors.Wrapper("get user by id: %w")
 
