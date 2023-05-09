@@ -60,23 +60,23 @@ func (suite *ContextUserManagerSuite) TestGetUserByIDError() {
 	suite.ErrorContains(err, "get user by id")
 }
 
-func (suite *ContextUserManagerSuite) TestUpdateUserRoles() {
+func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissions() {
 	testUserData := suite.GetTestUserData()
 	testProduct := "test-product"
 	roles := []string{"role1", "role2"}
-	suite.mockGokeycloak.EXPECT().UpdateUserRoles(testUserData.ID, testProduct, roles).Times(1).Return(nil)
+	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, roles).Times(1).Return(nil)
 
-	err := suite.userManager.UpdateUserRoles(testUserData.ID, testProduct, roles)
+	err := suite.userManager.UpdateUserProductPermissions(testUserData.ID, testProduct, roles)
 	suite.NoError(err)
 }
 
-func (suite *ContextUserManagerSuite) TestUpdateUserRolesError() {
+func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsError() {
 	testUserData := suite.GetTestUserData()
 	testProduct := "test-product"
 	roles := []string{"role1", "role2"}
-	suite.mockGokeycloak.EXPECT().UpdateUserRoles(testUserData.ID, testProduct, roles).Times(1).Return(fmt.Errorf("error"))
+	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, roles).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.UpdateUserRoles(testUserData.ID, testProduct, roles)
+	err := suite.userManager.UpdateUserProductPermissions(testUserData.ID, testProduct, roles)
 	suite.Error(err)
 	suite.ErrorContains(err, "update user roles")
 }
@@ -84,18 +84,18 @@ func (suite *ContextUserManagerSuite) TestUpdateUserRolesError() {
 func (suite *ContextUserManagerSuite) TestRevokeProductRoles() {
 	testUserData := suite.GetTestUserData()
 	testProduct := "test-product"
-	suite.mockGokeycloak.EXPECT().UpdateUserRoles(testUserData.ID, testProduct, []string{}).Times(1).Return(nil)
+	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(nil)
 
-	err := suite.userManager.RevokeProductRoles(testUserData.ID, testProduct)
+	err := suite.userManager.RevokeUserProductPermissions(testUserData.ID, testProduct)
 	suite.NoError(err)
 }
 
 func (suite *ContextUserManagerSuite) TestRevokeProductRolesError() {
 	testUserData := suite.GetTestUserData()
 	testProduct := "test-product"
-	suite.mockGokeycloak.EXPECT().UpdateUserRoles(testUserData.ID, testProduct, []string{}).Times(1).Return(fmt.Errorf("error"))
+	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.RevokeProductRoles(testUserData.ID, testProduct)
+	err := suite.userManager.RevokeUserProductPermissions(testUserData.ID, testProduct)
 	suite.Error(err)
 	suite.ErrorContains(err, "revoke user roles")
 }

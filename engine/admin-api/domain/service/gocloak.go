@@ -9,5 +9,5 @@ import (
 type GocloakService interface {
 	CreateUser(userData entity.UserGocloakData) error
 	GetUserByID(userID string) (entity.UserGocloakData, error)
-	UpdateUserRoles(userID string, product string, roles []string) error
+	UpdateUserProductPermissions(userID string, product string, roles []string) error
 }

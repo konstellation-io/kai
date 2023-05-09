@@ -63,16 +63,16 @@ func (mr *MockGocloakServiceMockRecorder) GetUserByID(userID interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockGocloakService)(nil).GetUserByID), userID)
 }
 
-// UpdateUserRoles mocks base method.
-func (m *MockGocloakService) UpdateUserRoles(userID, product string, roles []string) error {
+// UpdateUserProductPermissions mocks base method.
+func (m *MockGocloakService) UpdateUserProductPermissions(userID, product string, roles []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUserRoles", userID, product, roles)
+	ret := m.ctrl.Call(m, "UpdateUserProductPermissions", userID, product, roles)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UpdateUserRoles indicates an expected call of UpdateUserRoles.
-func (mr *MockGocloakServiceMockRecorder) UpdateUserRoles(userID, product, roles interface{}) *gomock.Call {
+// UpdateUserProductPermissions indicates an expected call of UpdateUserProductPermissions.
+func (mr *MockGocloakServiceMockRecorder) UpdateUserProductPermissions(userID, product, roles interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserRoles", reflect.TypeOf((*MockGocloakService)(nil).UpdateUserRoles), userID, product, roles)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProductPermissions", reflect.TypeOf((*MockGocloakService)(nil).UpdateUserProductPermissions), userID, product, roles)
 }

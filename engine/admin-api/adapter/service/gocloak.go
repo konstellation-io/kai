@@ -70,7 +70,7 @@ func (gm *GocloakManagerClient) GetUserByID(userID string) (entity.UserGocloakDa
 	return gocloakUserToUserData(user), nil
 }
 
-func (gm *GocloakManagerClient) UpdateUserRoles(userID string, product string, roles []string) error {
+func (gm *GocloakManagerClient) UpdateUserProductPermissions(userID string, product string, roles []string) error {
 	wrapErr := errors.Wrapper("gocloak update user roles: %w")
 
 	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, userID)

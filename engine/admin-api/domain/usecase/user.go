@@ -40,10 +40,10 @@ func (ui *UserInteractor) GetUserByID(userID string) (entity.UserGocloakData, er
 	return user, nil
 }
 
-func (ui *UserInteractor) UpdateUserRoles(userID string, product string, roles []string) error {
+func (ui *UserInteractor) UpdateUserProductPermissions(userID string, product string, roles []string) error {
 	wrapErr := errors.Wrapper("update user roles: %w")
 
-	err := ui.gocloakManager.UpdateUserRoles(userID, product, roles)
+	err := ui.gocloakManager.UpdateUserProductPermissions(userID, product, roles)
 	if err != nil {
 		return wrapErr(err)
 	}
@@ -51,10 +51,10 @@ func (ui *UserInteractor) UpdateUserRoles(userID string, product string, roles [
 	return nil
 }
 
-func (ui *UserInteractor) RevokeProductRoles(userID string, product string) error {
+func (ui *UserInteractor) RevokeUserProductPermissions(userID string, product string) error {
 	wrapErr := errors.Wrapper("revoke user roles: %w")
 
-	err := ui.gocloakManager.UpdateUserRoles(userID, product, []string{})
+	err := ui.gocloakManager.UpdateUserProductPermissions(userID, product, []string{})
 	if err != nil {
 		return wrapErr(err)
 	}
