@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"github.com/konstellation-io/kre/engine/admin-api/adapter/auth"
 	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kre/engine/admin-api/adapter/repository/influx"
@@ -24,27 +26,20 @@ func main() {
 	defer db.Disconnect()
 	mongodbClient := db.Connect()
 
-	verificationCodeRepo := mongodb.NewVerificationCodeRepoMongoDB(cfg, logger, mongodbClient)
-	userRepo := mongodb.NewUserRepoMongoDB(cfg, logger, mongodbClient)
-	runtimeRepo := mongodb.NewRuntimeRepoMongoDB(cfg, logger, mongodbClient)
-	settingRepo := mongodb.NewSettingRepoMongoDB(cfg, logger, mongodbClient)
-	sessionRepo := mongodb.NewSessionRepoMongoDB(cfg, logger, mongodbClient)
-	apiTokenRepo, err := mongodb.NewAPITokenRepoMongoDB(cfg, logger, mongodbClient)
-	if err != nil {
-		log.Fatal(err)
-	}
-	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
-	versionMongoRepo := mongodb.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
-	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
-	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
-	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
+	initApp(cfg, logger, mongodbClient)
+}
+
+func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) {
+	verificationCodeRepo, userRepo, runtimeRepo, settingRepo, sessionRepo, apiTokenRepo, err, userActivityRepo, versionMongoRepo, nodeLogRepo, metricRepo, measurementRepo := initRepositories(cfg, logger, mongodbClient)
 
 	versionService, err := service.NewK8sVersionClient(cfg, logger)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	natsManagerService, err := service.NewNatsManagerClient(cfg, logger)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -141,4 +136,27 @@ func main() {
 		metricsInteractor,
 	)
 	app.Start()
+}
+
+func initRepositories(cfg *config.Config, logger logging.Logger,
+	mongodbClient *mongo.Client) (*mongodb.VerificationCodeRepoMongoDB, *mongodb.UserRepoMongoDB,
+	*mongodb.RuntimeRepoMongoDB, *mongodb.SettingRepoMongoDB, *mongodb.SessionRepoMongoDB,
+	*mongodb.APITokenRepoMongoDB, error, *mongodb.UserActivityRepoMongoDB, *mongodb.VersionRepoMongoDB,
+	*mongodb.NodeLogMongoDBRepo, *mongodb.MetricsMongoDBRepo, *influx.MeasurementRepoInfluxDB) {
+	verificationCodeRepo := mongodb.NewVerificationCodeRepoMongoDB(cfg, logger, mongodbClient)
+	userRepo := mongodb.NewUserRepoMongoDB(cfg, logger, mongodbClient)
+	runtimeRepo := mongodb.NewRuntimeRepoMongoDB(cfg, logger, mongodbClient)
+	settingRepo := mongodb.NewSettingRepoMongoDB(cfg, logger, mongodbClient)
+	sessionRepo := mongodb.NewSessionRepoMongoDB(cfg, logger, mongodbClient)
+	apiTokenRepo, err := mongodb.NewAPITokenRepoMongoDB(cfg, logger, mongodbClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
+	versionMongoRepo := mongodb.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
+	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
+	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
+	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
+	return verificationCodeRepo, userRepo, runtimeRepo, settingRepo, sessionRepo, apiTokenRepo, err,
+		userActivityRepo, versionMongoRepo, nodeLogRepo, metricRepo, measurementRepo
 }

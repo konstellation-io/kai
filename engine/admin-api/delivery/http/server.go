@@ -23,6 +23,8 @@ const logFormat = "${time_rfc3339} INFO remote_ip=${remote_ip}, method=${method}
 	", user_agent=${user_agent}, error=${error}\n"
 
 // NewApp creates a new App instance.
+//
+//nolint:funlen
 func NewApp(
 	cfg *config.Config,
 	logger logging.Logger,

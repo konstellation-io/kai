@@ -17,6 +17,7 @@ func (e AccessControlResource) IsValid() bool {
 	case ResMetrics, ResRuntime, ResVersion, ResSettings, ResUsers, ResAudit, ResLogs:
 		return true
 	}
+
 	return false
 }
 
@@ -34,6 +35,7 @@ func (e AccessControlAction) IsValid() bool {
 	case ActView, ActEdit:
 		return true
 	}
+
 	return false
 }
 

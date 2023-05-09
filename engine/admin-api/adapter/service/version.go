@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/credentials/insecure"
 	"io"
 	"time"
 
@@ -21,8 +22,9 @@ type K8sVersionClient struct {
 }
 
 func NewK8sVersionClient(cfg *config.Config, logger logging.Logger) (*K8sVersionClient, error) {
-	cc, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithInsecure())
+	cc, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	client := versionpb.NewVersionServiceClient(cc)
+
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +72,11 @@ func (k *K8sVersionClient) Start(
 
 func (k *K8sVersionClient) Stop(ctx context.Context, runtimeID string, version *entity.Version) error {
 	workflowEntrypoints := make([]string, 0)
+
 	for _, w := range version.Workflows {
 		workflowEntrypoints = append(workflowEntrypoints, w.Entrypoint)
 	}
+
 	req := versionpb.VersionInfo{
 		Name:      version.Name,
 		RuntimeId: runtimeID,
@@ -158,7 +162,6 @@ func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionCo
 
 		nodes := make([]*versionpb.Workflow_Node, len(w.Nodes))
 		for j, n := range w.Nodes {
-
 			nodeStreamCfg, err := workflowStreamConfig.GetNodeStreamConfig(n.Name)
 			if err != nil {
 				return nil, fmt.Errorf("error getting stream configuration from node %q: %w", n.Name, err)

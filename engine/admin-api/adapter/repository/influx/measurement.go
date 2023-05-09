@@ -26,20 +26,22 @@ func NewMeasurementRepoInfluxDB(cfg *config.Config, logger logging.Logger) *Meas
 func (m *MeasurementRepoInfluxDB) CreateDatabase(runtimeId string) error {
 	createDatabaseCommand := fmt.Sprintf("CREATE DATABASE %q", runtimeId)
 	query, err := m.generateQuery(createDatabaseCommand)
+
 	if err != nil {
 		return err
 	}
 
-	response, err := http.Post(query, "application/x-www-form-urlencoded", nil)
+	response, err := http.Post(query, "application/x-www-form-urlencoded", nil) //nolint:gosec
 	if err != nil {
 		return err
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("influxdb database creation status: %d", response.StatusCode)
+		return fmt.Errorf("influxdb database creation error: %d", response.StatusCode) //nolint:goerr113
 	}
 
 	m.logger.Infof("influxdb database %q successfully created", runtimeId)
+
 	return nil
 }
 

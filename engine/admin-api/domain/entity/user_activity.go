@@ -27,7 +27,11 @@ const (
 
 func (e UserActivityType) IsValid() bool {
 	switch e {
-	case UserActivityTypeLogin, UserActivityTypeLogout, UserActivityTypeCreateVersion, UserActivityTypePublishVersion, UserActivityTypeUnpublishVersion, UserActivityTypeStartVersion, UserActivityTypeStopVersion, UserActivityTypeUpdateSetting, UserActivityTypeUpdateVersionConfiguration, UserActivityTypeCreateUser, UserActivityTypeRemoveUsers, UserActivityTypeUpdateAccessLevels, UserActivityTypeRevokeSessions:
+	case UserActivityTypeLogin, UserActivityTypeLogout, UserActivityTypeCreateVersion,
+		UserActivityTypePublishVersion, UserActivityTypeUnpublishVersion, UserActivityTypeStartVersion,
+		UserActivityTypeStopVersion, UserActivityTypeUpdateSetting, UserActivityTypeUpdateVersionConfiguration,
+		UserActivityTypeCreateUser, UserActivityTypeRemoveUsers, UserActivityTypeUpdateAccessLevels,
+		UserActivityTypeRevokeSessions:
 		return true
 	}
 	return false

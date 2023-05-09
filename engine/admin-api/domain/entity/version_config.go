@@ -7,15 +7,16 @@ import (
 type VersionConfig struct {
 	KeyValueStore string
 
-	StreamsConfig      *VersionStreamsConfig
-	ObjectStoresConfig *VersionObjectStoresConfig
+	StreamsConfig        *VersionStreamsConfig
+	ObjectStoresConfig   *VersionObjectStoresConfig
 	KeyValueStoresConfig *KeyValueStoresConfig
 }
 
-func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *VersionObjectStoresConfig, keyValueStoresConfig *KeyValueStoresConfig) *VersionConfig {
+func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *VersionObjectStoresConfig,
+	keyValueStoresConfig *KeyValueStoresConfig) *VersionConfig {
 	return &VersionConfig{
-		StreamsConfig:      streamsConfig,
-		ObjectStoresConfig: objectStoresConfig,
+		StreamsConfig:        streamsConfig,
+		ObjectStoresConfig:   objectStoresConfig,
 		KeyValueStoresConfig: keyValueStoresConfig,
 	}
 }

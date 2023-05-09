@@ -31,11 +31,14 @@ func (s VerificationCodeSMTPTransport) Send(recipient, verificationCode string) 
 	messageText := fmt.Sprintf("Your login link:\n%s", loginLink)
 
 	var signInTmpl = template.Must(template.ParseFiles("templates/signin-email.html"))
+
 	var body bytes.Buffer
+
 	data := map[string]string{
 		"LoginLink":                         loginLink,
 		"VerificationCodeDurationInMinutes": strconv.Itoa(s.cfg.Auth.VerificationCodeDurationInMinutes),
 	}
+
 	if err := signInTmpl.Execute(&body, data); err != nil {
 		return err
 	}
@@ -47,6 +50,7 @@ func (s VerificationCodeSMTPTransport) sendEmail(recipient, subject, messageText
 	if !s.cfg.SMTP.Enabled {
 		s.logger.Info("SMTP is disabled, the email will be printed in console:")
 		s.logger.Info(messageText)
+
 		return nil
 	}
 

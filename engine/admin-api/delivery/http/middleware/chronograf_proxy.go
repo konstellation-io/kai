@@ -1,13 +1,9 @@
 package middleware
 
 import (
-	"net/url"
-	"regexp"
-
 	"github.com/labstack/echo"
+	"net/url"
 )
-
-var measurementsURLRegexp = regexp.MustCompile("^/measurements/([^/]+)")
 
 // ChronografProxy creates a reverse proxy to send the incoming request
 // to one of the runtime's Chronograf service.

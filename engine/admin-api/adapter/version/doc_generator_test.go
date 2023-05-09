@@ -1,6 +1,7 @@
 package version_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -14,6 +15,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const versionName = "version1234"
+
 func TestHTTPStaticDocGenerator_Generate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
@@ -24,19 +27,19 @@ func TestHTTPStaticDocGenerator_Generate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	defer os.RemoveAll(docFolder) // clean up
 
 	storageFolder, err := ioutil.TempDir("", "test-api-storage")
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	defer os.RemoveAll(storageFolder) // clean up
 
 	cfg := &config.Config{}
 	cfg.Admin.BaseURL = "http://api.local"
 	cfg.Admin.StoragePath = storageFolder
-
-	versionName := "version1234"
 
 	readmeContent := []byte(`
 # Example
@@ -79,7 +82,7 @@ This is an example:
 	err = generator.Generate(versionName, docFolder)
 	require.Nil(t, err)
 
-	generatedReadme, err := ioutil.ReadFile(path.Join(cfg.Admin.StoragePath, "version/version1234/docs/README.md"))
+	generatedReadme, err := ioutil.ReadFile(path.Join(cfg.Admin.StoragePath, fmt.Sprintf("version/%s/docs/README.md", versionName)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,8 +95,6 @@ func TestHTTPStaticDocGenerator_GenerateWithNoContent(t *testing.T) {
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
 	cfg := &config.Config{}
-
-	versionName := "version1234"
 
 	generator := version.NewHTTPStaticDocGenerator(cfg, logger)
 	err := generator.Generate(versionName, "not-exists-folder")

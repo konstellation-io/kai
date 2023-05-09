@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 
@@ -39,8 +39,8 @@ func CreateDashboardService(cfg *config.Config, logger logging.Logger) domainSer
 	return &Chronograf{cfg, logger, client}
 }
 
-func (c *Chronograf) Create(ctx context.Context, runtimeId, version, dashboardPath string) error {
-	c.logger.Infof("Creating dashboard: %q for version: %q in runtime %q", dashboardPath, version, runtimeId)
+func (c *Chronograf) Create(ctx context.Context, runtimeID, version, dashboardPath string) error {
+	c.logger.Infof("Creating dashboard: %q for version: %q in runtime %q", dashboardPath, version, runtimeID)
 
 	data, err := os.Open(dashboardPath)
 	if err != nil {
@@ -48,7 +48,7 @@ func (c *Chronograf) Create(ctx context.Context, runtimeId, version, dashboardPa
 	}
 	defer data.Close()
 
-	byteData, err := ioutil.ReadAll(data)
+	byteData, err := io.ReadAll(data)
 	if err != nil {
 		return fmt.Errorf("error reading Chronograf dashboard definition: %w", err)
 	}
@@ -59,10 +59,10 @@ func (c *Chronograf) Create(ctx context.Context, runtimeId, version, dashboardPa
 		return fmt.Errorf("error unmarshalling Chronograf dashboard definition: %w", err)
 	}
 
-	dashboard.Name = fmt.Sprintf("%s-%s-%s", runtimeId, version, dashboard.Name)
+	dashboard.Name = fmt.Sprintf("%s-%s-%s", runtimeID, version, dashboard.Name)
 	requestByte, err := json.Marshal(dashboard)
 	if err != nil {
-		return fmt.Errorf("error marshalling Chronograf dashboard definition: %w", err)
+		return fmt.Errorf("error marshaling Chronograf dashboard definition: %w", err)
 	}
 
 	requestReader := bytes.NewReader(requestByte)
@@ -76,6 +76,7 @@ func (c *Chronograf) Create(ctx context.Context, runtimeId, version, dashboardPa
 	}
 
 	res, err := c.client.Do(r)
+
 	if err != nil {
 		return fmt.Errorf("error calling Chronograf: %w", err)
 	}
@@ -83,5 +84,6 @@ func (c *Chronograf) Create(ctx context.Context, runtimeId, version, dashboardPa
 	if res.StatusCode != http.StatusCreated {
 		return fmt.Errorf("error response from Chronograf: received %d when expected %d", res.StatusCode, http.StatusCreated)
 	}
+
 	return nil
 }

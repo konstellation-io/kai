@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"google.golang.org/grpc"
 
@@ -20,7 +21,8 @@ type NatsManagerClient struct {
 }
 
 func NewNatsManagerClient(cfg *config.Config, logger logging.Logger) (*NatsManagerClient, error) {
-	cc, err := grpc.Dial(cfg.Services.NatsManager, grpc.WithInsecure())
+	cc, err := grpc.Dial(cfg.Services.NatsManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +112,7 @@ func (n *NatsManagerClient) CreateKeyValueStores(
 }
 
 // DeleteStreams calls nats-manager to delete NATS streams for given version
-func (n *NatsManagerClient) DeleteStreams(ctx context.Context, runtimeID string, versionName string) error {
+func (n *NatsManagerClient) DeleteStreams(ctx context.Context, runtimeID, versionName string) error {
 	req := natspb.DeleteStreamsRequest{
 		RuntimeId:   runtimeID,
 		VersionName: versionName,
@@ -140,7 +142,8 @@ func (n *NatsManagerClient) DeleteObjectStores(ctx context.Context, runtimeID, v
 }
 
 func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]*natspb.Workflow, error) {
-	var workflows []*natspb.Workflow
+	var workflows = make([]*natspb.Workflow, 0, len(version.Workflows))
+
 	for _, w := range version.Workflows {
 		nodes := make([]*natspb.Node, 0, len(w.Nodes))
 
@@ -151,6 +154,7 @@ func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]
 			}
 			if node.ObjectStore != nil {
 				scope, err := translateObjectStoreEnum(node.ObjectStore.Scope)
+
 				if err != nil {
 					return nil, err
 				}
@@ -159,8 +163,10 @@ func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]
 					Scope: scope,
 				}
 			}
+
 			nodes = append(nodes, &nodeToAppend)
 		}
+
 		workflows = append(workflows, &natspb.Workflow{
 			Entrypoint: w.Entrypoint,
 			Name:       w.Name,
@@ -170,7 +176,7 @@ func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]
 	return workflows, nil
 }
 
-func (n *NatsManagerClient) getWorkflowsEntrypoints(version *entity.Version) []string {
+func (n *NatsManagerClient) getWorkflowsEntrypoints(version *entity.Version) []string { //nolint:unused
 	workflowsEntrypoints := make([]string, 0, len(version.Workflows))
 	for _, workflow := range version.Workflows {
 		workflowsEntrypoints = append(workflowsEntrypoints, workflow.Entrypoint)
@@ -181,7 +187,6 @@ func (n *NatsManagerClient) getWorkflowsEntrypoints(version *entity.Version) []s
 func (n *NatsManagerClient) dtoToVersionStreamConfig(
 	workflows map[string]*natspb.CreateStreamsResponse_WorkflowStreamConfig,
 ) *entity.VersionStreamsConfig {
-
 	workflowsConfig := map[string]*entity.WorkflowStreamConfig{}
 	for workflow, streamCfg := range workflows {
 		workflowsConfig[workflow] = &entity.WorkflowStreamConfig{

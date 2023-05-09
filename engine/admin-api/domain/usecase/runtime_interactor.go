@@ -120,18 +120,18 @@ func (i *RuntimeInteractor) CreateRuntime(ctx context.Context, loggedUserID, run
 	return createdRuntime, nil
 }
 
-func (i *RuntimeInteractor) createDatabaseIndexes(ctx context.Context, runtimeId string) error {
-	err := i.metricRepo.CreateIndexes(ctx, runtimeId)
+func (i *RuntimeInteractor) createDatabaseIndexes(ctx context.Context, runtimeID string) error {
+	err := i.metricRepo.CreateIndexes(ctx, runtimeID)
 	if err != nil {
 		return err
 	}
 
-	err = i.nodeLogRepo.CreateIndexes(ctx, runtimeId)
+	err = i.nodeLogRepo.CreateIndexes(ctx, runtimeID)
 	if err != nil {
 		return err
 	}
 
-	return i.versionRepo.CreateIndexes(ctx, runtimeId)
+	return i.versionRepo.CreateIndexes(ctx, runtimeID)
 }
 
 // Get return the current Runtime

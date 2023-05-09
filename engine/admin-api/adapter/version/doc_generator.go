@@ -2,15 +2,16 @@ package version
 
 import (
 	"fmt"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
-	"github.com/otiai10/copy"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
+
+	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/otiai10/copy"
 )
 
 type HTTPStaticDocGenerator struct {
@@ -20,7 +21,7 @@ type HTTPStaticDocGenerator struct {
 
 var (
 	imgRegExp       = regexp.MustCompile(`!\[(.+)]\(\./(.+)\)`)
-	mdFileExtRegExp = regexp.MustCompile("\\.md$")
+	mdFileExtRegExp = regexp.MustCompile(`\\.md$`)
 )
 
 func NewHTTPStaticDocGenerator(cfg *config.Config, logger logging.Logger) *HTTPStaticDocGenerator {
@@ -44,6 +45,7 @@ func (g *HTTPStaticDocGenerator) Generate(versionName, docFolder string) error {
 
 	g.logger.Infof("[HTTPStaticDocGenerator] Generating doc folder at: %s", destDocFolder)
 	err = copy.Copy(docFolder, destDocFolder)
+
 	if err != nil {
 		return fmt.Errorf("error copying doc folder: %w", err)
 	}
@@ -64,7 +66,7 @@ func (g *HTTPStaticDocGenerator) processMarkdownFiles(docFolder, versionSubfolde
 			return nil
 		}
 
-		fileContent, err := ioutil.ReadFile(path)
+		fileContent, _ := os.ReadFile(path)
 
 		if imgRegExp.Match(fileContent) {
 			g.logger.Debugf("[HTTPStaticDocGenerator] Found relative images into the file %s", info.Name())
@@ -75,7 +77,7 @@ func (g *HTTPStaticDocGenerator) processMarkdownFiles(docFolder, versionSubfolde
 
 			err = ioutil.WriteFile(path, newFileContent, os.ModePerm)
 			if err != nil {
-				return fmt.Errorf("error writting doc file: %w", err)
+				return fmt.Errorf("error writing doc file: %w", err)
 			}
 		}
 
