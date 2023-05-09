@@ -8,32 +8,24 @@ import (
 	"strings"
 	"time"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kre/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
 	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
 )
 
 type UserActivityInteracter interface {
 	Get(ctx context.Context, loggedUserID string, userEmail *string, types []entity.UserActivityType,
 		versionIds []string, fromDate *string, toDate *string, lastID *string) ([]*entity.UserActivity, error)
-	RegisterLogin(userID string) error
-	RegisterLogout(userID string) error
 	RegisterCreateRuntime(userID string, runtime *entity.Runtime) error
 	RegisterCreateAction(userID, runtimeId string, version *entity.Version) error
 	RegisterStartAction(userID, runtimeId string, version *entity.Version, comment string) error
 	RegisterStopAction(userID, runtimeId string, version *entity.Version, comment string) error
 	RegisterPublishAction(userID, runtimeId string, version *entity.Version, prev *entity.Version, comment string) error
 	RegisterUnpublishAction(userID, runtimeId string, version *entity.Version, comment string) error
-	RegisterUpdateSettings(userID string, vars []*entity.UserActivityVar) error
 	RegisterUpdateAccessLevels(userID string, userIDs, userEmails []string, newAccessLevel, comment string) // TODO: Refactor accessLevel to type
-	RegisterRevokeSessions(userID string, userIDs, userEmails []string, comment string)
-	NewUpdateSettingVars(settingName, oldValue, newValue string) []*entity.UserActivityVar
-	RegisterGenerateAPIToken(userID, apiTokenName string) error
-	RegisterDeleteAPIToken(userID, apiTokenName string) error
 }
 
 // UserActivityInteractor  contains app logic about UserActivity entities
@@ -93,16 +85,6 @@ func checkUserActivityError(logger logging.Logger, err error) error {
 		return userActivityErr
 	}
 	return nil
-}
-
-func (i *UserActivityInteractor) RegisterLogin(userID string) error {
-	err := i.create(userID, entity.UserActivityTypeLogin, []*entity.UserActivityVar{})
-	return checkUserActivityError(i.logger, err)
-}
-
-func (i *UserActivityInteractor) RegisterLogout(userID string) error {
-	err := i.create(userID, entity.UserActivityTypeLogout, []*entity.UserActivityVar{})
-	return checkUserActivityError(i.logger, err)
 }
 
 func (i *UserActivityInteractor) RegisterCreateRuntime(userID string, runtime *entity.Runtime) error {
@@ -191,11 +173,6 @@ func (i *UserActivityInteractor) RegisterUnpublishAction(userID, runtimeId strin
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterUpdateSettings(userID string, vars []*entity.UserActivityVar) error {
-	err := i.create(userID, entity.UserActivityTypeUpdateSetting, vars)
-	return checkUserActivityError(i.logger, err)
-}
-
 func (i *UserActivityInteractor) RegisterUpdateAccessLevels(userID string, userIDs, userEmails []string, newAccessLevel, comment string) {
 	err := i.create(
 		userID,
@@ -207,55 +184,4 @@ func (i *UserActivityInteractor) RegisterUpdateAccessLevels(userID string, userI
 			{Key: "COMMENT", Value: comment},
 		})
 	_ = checkUserActivityError(i.logger, err)
-}
-
-func (i *UserActivityInteractor) RegisterRevokeSessions(userID string, userIDs, userEmails []string, comment string) {
-	err := i.create(
-		userID,
-		entity.UserActivityTypeRevokeSessions,
-		[]*entity.UserActivityVar{
-			{Key: "USER_IDS", Value: strings.Join(userIDs, ",")},
-			{Key: "USER_EMAILS", Value: strings.Join(userEmails, ",")},
-			{Key: "COMMENT", Value: comment},
-		})
-	_ = checkUserActivityError(i.logger, err)
-}
-
-func (i *UserActivityInteractor) NewUpdateSettingVars(settingName, oldValue, newValue string) []*entity.UserActivityVar {
-	return []*entity.UserActivityVar{
-		{
-			Key:   "SETTING_NAME",
-			Value: settingName,
-		},
-		{
-			Key:   "OLD_VALUE",
-			Value: oldValue,
-		},
-		{
-			Key:   "NEW_VALUE",
-			Value: newValue,
-		},
-	}
-}
-
-func (i *UserActivityInteractor) RegisterGenerateAPIToken(userID, apiTokenName string) error {
-	err := i.create(
-		userID,
-		entity.UserActivityTypeGenerateAPIToken,
-		[]*entity.UserActivityVar{
-			{Key: "API_TOKEN_NAME", Value: apiTokenName},
-		})
-
-	return checkUserActivityError(i.logger, err)
-}
-
-func (i *UserActivityInteractor) RegisterDeleteAPIToken(userID, apiTokenName string) error {
-	err := i.create(
-		userID,
-		entity.UserActivityTypeDeleteAPIToken,
-		[]*entity.UserActivityVar{
-			{Key: "API_TOKEN_NAME", Value: apiTokenName},
-		})
-
-	return checkUserActivityError(i.logger, err)
 }
