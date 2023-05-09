@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"github.com/labstack/echo"
 	"net/url"
+
+	"github.com/labstack/echo"
 )
 
 // MongoExpressProxy creates a reverse proxy to send the incoming request

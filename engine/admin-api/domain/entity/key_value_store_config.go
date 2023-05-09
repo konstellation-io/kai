@@ -17,7 +17,7 @@ type WorkflowKeyValueStores struct {
 func (w *WorkflowKeyValueStores) GetNodeKeyValueStore(node string) (string, error) {
 	store, ok := w.NodesKeyValueStores[node]
 	if !ok {
-		return "", fmt.Errorf("missing key value store for node %q", node)
+		return "", fmt.Errorf("missing key value store for node %q", node) //nolint:goerr113
 	}
 
 	return store, nil

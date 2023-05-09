@@ -89,7 +89,6 @@ func NewApp(
 
 			return authExists == existCondition
 		}
-
 	}
 
 	jwtCookieMiddleware := middleware.JWTWithConfig(middleware.JWTConfig{

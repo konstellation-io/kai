@@ -27,6 +27,7 @@ func (p *PasswordGenerator) NewPassword() string {
 		if err != nil {
 			return ""
 		}
+
 		b.WriteRune(chars[num.Int64()])
 	}
 

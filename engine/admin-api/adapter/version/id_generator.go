@@ -23,6 +23,7 @@ func (g IDGenerator) NewID() string {
 		if err != nil {
 			panic(err)
 		}
+
 		b[i] = idCharset[bigInt.Int64()]
 	}
 

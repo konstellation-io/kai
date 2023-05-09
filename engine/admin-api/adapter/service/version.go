@@ -3,9 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc/credentials/insecure"
 	"io"
 	"time"
+
+	"google.golang.org/grpc/credentials/insecure"
 
 	"google.golang.org/grpc"
 
@@ -36,7 +37,7 @@ func NewK8sVersionClient(cfg *config.Config, logger logging.Logger) (*K8sVersion
 	}, nil
 }
 
-// Start creates the version resources in k8s
+// Start creates the version resources in k8s.
 func (k *K8sVersionClient) Start(
 	ctx context.Context,
 	runtimeID string,
@@ -45,6 +46,7 @@ func (k *K8sVersionClient) Start(
 ) error {
 	configVars := versionToConfig(version)
 	wf, err := versionToWorkflows(version, versionConfig)
+
 	if err != nil {
 		return err
 	}
@@ -151,16 +153,19 @@ func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionCo
 
 	for i, w := range version.Workflows {
 		workflowStreamConfig, err := versionConfig.GetWorkflowStreamConfig(w.Name)
+
 		if err != nil {
 			return nil, fmt.Errorf("error translating version in workflow %q: %w", w.Name, err)
 		}
 
 		workflowKeyValueStoresConfig, err := versionConfig.GetWorkflowKeyValueStoresConfig(w.Name)
+
 		if err != nil {
 			return nil, fmt.Errorf("error getting workflow %q key-value store: %w", w.Name, err)
 		}
 
 		nodes := make([]*versionpb.Workflow_Node, len(w.Nodes))
+
 		for j, n := range w.Nodes {
 			nodeStreamCfg, err := workflowStreamConfig.GetNodeStreamConfig(n.Name)
 			if err != nil {

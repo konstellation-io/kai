@@ -19,7 +19,7 @@ type WorkflowStreamConfig struct {
 func (w *WorkflowStreamConfig) GetNodeConfig(nodeName string) (*NodeStreamConfig, error) {
 	nodeConfig, ok := w.Nodes[nodeName]
 	if !ok {
-		return nil, fmt.Errorf("error obtaining stream config for node %q", nodeName)
+		return nil, fmt.Errorf("error obtaining stream config for node %q", nodeName) //nolint:goerr113
 	}
 	return nodeConfig, nil
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
 )
 
-// UserInteractor contains app logic to handle User entities
+// UserInteractor contains app logic to handle User entities.
 type UserInteractor struct {
 	logger                 logging.Logger
 	userRepo               repository.UserRepo
@@ -22,7 +22,7 @@ type UserInteractor struct {
 	authInteractor         AuthInteracter
 }
 
-// NewUserInteractor creates a new UserInteractor
+// NewUserInteractor creates a new UserInteractor.
 func NewUserInteractor(
 	logger logging.Logger,
 	userRepo repository.UserRepo,
@@ -43,22 +43,22 @@ func NewUserInteractor(
 	}
 }
 
-// GetByID returns a User by its ID
+// GetByID returns a User by its ID.
 func (i *UserInteractor) GetByID(userID string) (*entity.User, error) {
 	return i.userRepo.GetByID(userID)
 }
 
-// GetByIDs returns a list of User by IDs
+// GetByIDs returns a list of User by IDs.
 func (i *UserInteractor) GetByIDs(userIDs []string) ([]*entity.User, error) {
 	return i.userRepo.GetByIDs(userIDs)
 }
 
-// GetTokensByUserID returns a list of User by IDs
+// GetTokensByUserID returns a list of User by IDs.
 func (i *UserInteractor) GetTokensByUserID(ctx context.Context, userID string) ([]*entity.APIToken, error) {
 	return i.apiTokenRepo.GetByUserID(ctx, userID)
 }
 
-// GetAllUsers returns all existing Users
+// GetAllUsers returns all existing Users.
 func (i *UserInteractor) GetAllUsers(ctx context.Context, loggedUserID string, returnDeleted bool) ([]*entity.User, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResUsers, auth.ActView); err != nil {
 		return nil, err
@@ -169,7 +169,7 @@ func (i *UserInteractor) RemoveUsers(ctx context.Context, userIDs []string, logg
 	return users, nil
 }
 
-// DeleteAPIToken return the deleted APIToken
+// DeleteAPIToken return the deleted APIToken.
 func (i *UserInteractor) DeleteAPIToken(ctx context.Context, tokenID, loggedUserID string) (*entity.APIToken, error) {
 	i.logger.Info("Deleting API token.")
 
@@ -191,7 +191,7 @@ func (i *UserInteractor) DeleteAPIToken(ctx context.Context, tokenID, loggedUser
 	return apiToken, nil
 }
 
-// GenerateAPIToken create a new APIToken and return the internal token
+// GenerateAPIToken create a new APIToken and return the internal token.
 func (i *UserInteractor) GenerateAPIToken(ctx context.Context, name, loggedUserID string) (string, error) {
 	i.logger.Info("Generating API Token.")
 

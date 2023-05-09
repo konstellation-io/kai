@@ -3,23 +3,24 @@ package usecase
 import (
 	"context"
 	"errors"
+	"strings"
+
 	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kre/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
 	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
 	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/runtime"
-	"strings"
 )
 
 var (
-	// ErrRuntimeNotFound error
+	// ErrRuntimeNotFound error.
 	ErrRuntimeNotFound       = errors.New("error runtime not found")
 	ErrRuntimeDuplicated     = errors.New("there is already a runtime with the same id")
 	ErrRuntimeDuplicatedName = errors.New("there is already a runtime with the same name")
 )
 
-// RuntimeInteractor contains app logic to handle Runtime entities
+// RuntimeInteractor contains app logic to handle Runtime entities.
 type RuntimeInteractor struct {
 	cfg               *config.Config
 	logger            logging.Logger
@@ -33,7 +34,7 @@ type RuntimeInteractor struct {
 	accessControl     auth.AccessControl
 }
 
-// NewRuntimeInteractor creates a new RuntimeInteractor
+// NewRuntimeInteractor creates a new RuntimeInteractor.
 func NewRuntimeInteractor(
 	cfg *config.Config,
 	logger logging.Logger,
@@ -60,7 +61,7 @@ func NewRuntimeInteractor(
 	}
 }
 
-// CreateRuntime adds a new Runtime
+// CreateRuntime adds a new Runtime.
 func (i *RuntimeInteractor) CreateRuntime(ctx context.Context, loggedUserID, runtimeID, name, description string) (createdRuntime *entity.Runtime, err error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResRuntime, auth.ActEdit); err != nil {
 		return nil, err
@@ -134,7 +135,7 @@ func (i *RuntimeInteractor) createDatabaseIndexes(ctx context.Context, runtimeID
 	return i.versionRepo.CreateIndexes(ctx, runtimeID)
 }
 
-// Get return the current Runtime
+// Get return the current Runtime.
 func (i *RuntimeInteractor) Get(ctx context.Context, loggedUserID string) (*entity.Runtime, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResRuntime, auth.ActView); err != nil {
 		return nil, err
@@ -143,7 +144,7 @@ func (i *RuntimeInteractor) Get(ctx context.Context, loggedUserID string) (*enti
 	return i.runtimeRepo.Get(ctx)
 }
 
-// GetByID return a Runtime by its ID
+// GetByID return a Runtime by its ID.
 func (i *RuntimeInteractor) GetByID(ctx context.Context, loggedUserID string, runtimeID string) (*entity.Runtime, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResRuntime, auth.ActView); err != nil {
 		return nil, err
@@ -152,7 +153,7 @@ func (i *RuntimeInteractor) GetByID(ctx context.Context, loggedUserID string, ru
 	return i.runtimeRepo.GetByID(ctx, runtimeID)
 }
 
-// FindAll returns a list of all Runtimes
+// FindAll returns a list of all Runtimes.
 func (i *RuntimeInteractor) FindAll(ctx context.Context, loggedUserID string) ([]*entity.Runtime, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResRuntime, auth.ActView); err != nil {
 		return nil, err

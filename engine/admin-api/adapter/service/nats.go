@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"google.golang.org/grpc/credentials/insecure"
 
 	"google.golang.org/grpc"
@@ -36,7 +37,7 @@ func NewNatsManagerClient(cfg *config.Config, logger logging.Logger) (*NatsManag
 	}, nil
 }
 
-// CreateStreams calls nats-manager to create NATS streams for given version
+// CreateStreams calls nats-manager to create NATS streams for given version.
 func (n *NatsManagerClient) CreateStreams(
 	ctx context.Context,
 	runtimeID string,
@@ -61,7 +62,7 @@ func (n *NatsManagerClient) CreateStreams(
 	return n.dtoToVersionStreamConfig(res.Workflows), err
 }
 
-// CreateObjectStores calls nats-manager to create NATS Object Stores for given version
+// CreateObjectStores calls nats-manager to create NATS Object Stores for given version.
 func (n *NatsManagerClient) CreateObjectStores(
 	ctx context.Context,
 	runtimeID string,
@@ -86,7 +87,7 @@ func (n *NatsManagerClient) CreateObjectStores(
 	return n.dtoToVersionObjectStoreConfig(res.Workflows), err
 }
 
-// CreateKeyValueStores calls nats-manager to create NATS Key Value Stores for given version
+// CreateKeyValueStores calls nats-manager to create NATS Key Value Stores for given version.
 func (n *NatsManagerClient) CreateKeyValueStores(
 	ctx context.Context,
 	runtimeID string,
@@ -111,7 +112,7 @@ func (n *NatsManagerClient) CreateKeyValueStores(
 	return n.dtoToVersionKeyValueStoreConfig(res.KeyValueStore, res.Workflows), err
 }
 
-// DeleteStreams calls nats-manager to delete NATS streams for given version
+// DeleteStreams calls nats-manager to delete NATS streams for given version.
 func (n *NatsManagerClient) DeleteStreams(ctx context.Context, runtimeID, versionName string) error {
 	req := natspb.DeleteStreamsRequest{
 		RuntimeId:   runtimeID,
@@ -126,7 +127,7 @@ func (n *NatsManagerClient) DeleteStreams(ctx context.Context, runtimeID, versio
 	return nil
 }
 
-// DeleteObjectStores calls nats-manager to delete NATS Object Stores for given version
+// DeleteObjectStores calls nats-manager to delete NATS Object Stores for given version.
 func (n *NatsManagerClient) DeleteObjectStores(ctx context.Context, runtimeID, versionName string) error {
 	req := natspb.DeleteObjectStoresRequest{
 		RuntimeId:   runtimeID,
@@ -152,6 +153,7 @@ func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]
 				Name:          node.Name,
 				Subscriptions: node.Subscriptions,
 			}
+
 			if node.ObjectStore != nil {
 				scope, err := translateObjectStoreEnum(node.ObjectStore.Scope)
 
@@ -173,6 +175,7 @@ func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]
 			Nodes:      nodes,
 		})
 	}
+
 	return workflows, nil
 }
 

@@ -1,11 +1,12 @@
 package usecase
 
 import (
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kre/engine/admin-api/mocks"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 type userActivitySuite struct {
@@ -59,7 +60,6 @@ func TestRegisterGenerateAPIToken(t *testing.T) {
 
 	err := s.userActivityInteractor.RegisterGenerateAPIToken(userID, name)
 	require.NoError(t, err)
-
 }
 
 func TestRegisterDeleteAPIToken(t *testing.T) {
@@ -77,5 +77,4 @@ func TestRegisterDeleteAPIToken(t *testing.T) {
 
 	err := s.userActivityInteractor.RegisterDeleteAPIToken(userID, name)
 	require.NoError(t, err)
-
 }

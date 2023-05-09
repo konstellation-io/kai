@@ -2,7 +2,6 @@ package version
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path"
@@ -75,7 +74,7 @@ func (g *HTTPStaticDocGenerator) processMarkdownFiles(docFolder, versionSubfolde
 				return fmt.Errorf("error replacing relative images in doc files: %w", err)
 			}
 
-			err = ioutil.WriteFile(path, newFileContent, os.ModePerm)
+			err = os.WriteFile(path, newFileContent, os.ModePerm)
 			if err != nil {
 				return fmt.Errorf("error writing doc file: %w", err)
 			}

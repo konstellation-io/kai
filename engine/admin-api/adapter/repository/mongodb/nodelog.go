@@ -28,7 +28,7 @@ func NewNodeLogMongoDBRepo(cfg *config.Config, logger logging.Logger, client *mo
 }
 
 // TODO use the Search filter: https://jira.mongodb.org/browse/NODE-2162
-// you cannot use a $text matcher on a change stream
+// you cannot use a $text matcher on a change stream.
 func (n *NodeLogMongoDBRepo) WatchNodeLogs(ctx context.Context, runtimeId, versionName string, filters entity.LogFilters) (<-chan *entity.NodeLog, error) {
 	collection := n.client.Database(runtimeId).Collection(logsCollectionName)
 	logsCh := make(chan *entity.NodeLog, 1)

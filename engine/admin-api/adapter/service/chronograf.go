@@ -55,12 +55,14 @@ func (c *Chronograf) Create(ctx context.Context, runtimeID, version, dashboardPa
 
 	var dashboard Dashboard
 	err = json.Unmarshal(byteData, &dashboard)
+
 	if err != nil {
 		return fmt.Errorf("error unmarshalling Chronograf dashboard definition: %w", err)
 	}
 
 	dashboard.Name = fmt.Sprintf("%s-%s-%s", runtimeID, version, dashboard.Name)
 	requestByte, err := json.Marshal(dashboard)
+
 	if err != nil {
 		return fmt.Errorf("error marshaling Chronograf dashboard definition: %w", err)
 	}
@@ -71,6 +73,7 @@ func (c *Chronograf) Create(ctx context.Context, runtimeID, version, dashboardPa
 		c.cfg.Chronograf.Address, c.cfg.K8s.Namespace)
 
 	r, err := http.NewRequest(http.MethodPost, chronografURL, requestReader)
+
 	if err != nil {
 		return fmt.Errorf("error creating Chronograf request: %w", err)
 	}

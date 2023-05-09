@@ -2,6 +2,7 @@ package validator
 
 import (
 	"fmt"
+
 	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt"
 	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
 )
@@ -49,7 +50,6 @@ func (v *KrtValidator) getWorkflowsValidationErrors(workflows []krt.Workflow) []
 	for _, workflow := range workflows {
 		existingNodes := make(map[string]bool, len(workflow.Nodes))
 		for _, node := range workflow.Nodes {
-
 			nodeNameAlreadyInUse := existingNodes[node.Name]
 
 			if nodeNameAlreadyInUse {
@@ -73,11 +73,10 @@ func (v *KrtValidator) getWorkflowsValidationErrors(workflows []krt.Workflow) []
 func (v *KrtValidator) validateExitpoint(workflow krt.Workflow, nodes map[string]bool) error {
 	if workflow.Exitpoint == "" {
 		return fmt.Errorf("missing exitpoint in workflow \"%s\"", workflow.Name)
-	} else {
-		if !isNodeDefined(nodes, workflow.Exitpoint) {
-			return fmt.Errorf("exitpoint node %q not found in workflow %q nodes", workflow.Exitpoint, workflow.Name)
-		}
+	} else if !isNodeDefined(nodes, workflow.Exitpoint) {
+		return fmt.Errorf("exitpoint node %q not found in workflow %q nodes", workflow.Exitpoint, workflow.Name)
 	}
+
 	return nil
 }
 

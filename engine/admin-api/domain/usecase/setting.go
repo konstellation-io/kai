@@ -13,7 +13,7 @@ import (
 	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
 )
 
-// DefaultSessionLifetimeInDays ttl of the users sessions in days
+// DefaultSessionLifetimeInDays ttl of the users sessions in days.
 const DefaultSessionLifetimeInDays = 30
 
 type SettingInteracter interface {
@@ -23,7 +23,7 @@ type SettingInteracter interface {
 	Get(ctx context.Context, loggedUserID string) (*entity.Settings, error)
 }
 
-// SettingInteractor contains app logic about Settings entities
+// SettingInteractor contains app logic about Settings entities.
 type SettingInteractor struct {
 	logger        logging.Logger
 	settingRepo   repository.SettingRepo
@@ -31,7 +31,7 @@ type SettingInteractor struct {
 	accessControl auth.AccessControl
 }
 
-// NewSettingInteractor creates a new SettingInteractor
+// NewSettingInteractor creates a new SettingInteractor.
 func NewSettingInteractor(
 	logger logging.Logger,
 	settingRepo repository.SettingRepo,
@@ -47,11 +47,11 @@ func NewSettingInteractor(
 }
 
 var (
-	// ErrSettingNotFound error
+	// ErrSettingNotFound error.
 	ErrSettingNotFound = errors.New("setting not found")
 )
 
-// CreateDefaults create a new Settings with defaults values
+// CreateDefaults create a new Settings with defaults values.
 func (i *SettingInteractor) CreateDefaults(ctx context.Context) error {
 	_, err := i.settingRepo.Get(ctx)
 
@@ -71,7 +71,7 @@ func (i *SettingInteractor) CreateDefaults(ctx context.Context) error {
 	return nil
 }
 
-// Update change a given Settings to a new value
+// Update change a given Settings to a new value.
 func (i *SettingInteractor) Update(loggedUserID string, settings *entity.Settings, changes []entity.UserActivity) error {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResSettings, auth.ActEdit); err != nil {
 		return err
@@ -87,12 +87,12 @@ func (i *SettingInteractor) Update(loggedUserID string, settings *entity.Setting
 	return i.settingRepo.Update(settings)
 }
 
-// Get returns a Settings
+// Get returns a Settings.
 func (i *SettingInteractor) GetUnprotected(ctx context.Context) (*entity.Settings, error) {
 	return i.settingRepo.Get(ctx)
 }
 
-// Get returns a Settings
+// Get returns a Settings.
 func (i *SettingInteractor) Get(ctx context.Context, loggedUserID string) (*entity.Settings, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResSettings, auth.ActView); err != nil {
 		return nil, err

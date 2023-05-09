@@ -15,7 +15,7 @@ func newHTTPError(statusCode int, code, message string) *echo.HTTPError {
 	return echo.NewHTTPError(statusCode, HTTPErrorWithCode{code, message})
 }
 
-//nolint:gochecknoglobals
+//nolint:gochecknoglobals // This is a list of common errors to be used in the code.
 var (
 	// HTTPErrUnexpected captures all unknown errors.
 	HTTPErrUnexpected = newHTTPError(http.StatusInternalServerError, "unexpected_error", "Unexpected error")

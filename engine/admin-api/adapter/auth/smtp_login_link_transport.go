@@ -69,5 +69,6 @@ func (s VerificationCodeSMTPTransport) sendEmail(recipient, subject, messageText
 	})
 
 	d := gomail.NewDialer(s.cfg.SMTP.Host, s.cfg.SMTP.Port, s.cfg.SMTP.User, s.cfg.SMTP.Pass)
+
 	return d.DialAndSend(m)
 }

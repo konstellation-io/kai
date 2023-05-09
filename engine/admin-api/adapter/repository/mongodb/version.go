@@ -239,7 +239,6 @@ func (r *VersionRepoMongoDB) UploadKRTFile(runtimeId string, version *entity.Ver
 	fileSize, err := uploadStream.Write(data)
 	if err != nil {
 		return fmt.Errorf("writing into the KRT upload stream: %w", err)
-
 	}
 	r.logger.Infof("Uploaded %d bytes of %q to GridFS successfully", filename, fileSize)
 

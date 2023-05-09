@@ -80,5 +80,4 @@ func (m *MongoDB) Disconnect() {
 	}
 
 	m.logger.Info("Connection to MongoDB closed.")
-
 }

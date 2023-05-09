@@ -24,7 +24,6 @@ func (i *VersionInteractor) storeDashboards(ctx context.Context, dashboardsFolde
 			errors = append([]error{fmt.Errorf("error creating dashboard: %w", err)}, errors...)
 			continue
 		}
-
 	}
 	return errors
 }

@@ -90,11 +90,7 @@ const (
 )
 
 func (e KrtVersion) IsValid() bool {
-	if e == KRTVersionV2 {
-		return true
-	}
-
-	return false
+	return e == KRTVersionV2
 }
 
 func (e KrtVersion) String() string {
@@ -105,7 +101,9 @@ func ParseKRTVersionFromString(str string) (KrtVersion, bool) {
 	var krtVersionMap = map[string]KrtVersion{
 		KRTVersionV2.String(): KRTVersionV2,
 	}
+
 	c, ok := krtVersionMap[str]
+
 	return c, ok
 }
 

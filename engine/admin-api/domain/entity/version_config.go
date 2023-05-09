@@ -42,7 +42,7 @@ func (v *VersionConfig) GetNodeObjectStoreConfig(workflow, node string) *string 
 func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStreamConfig, error) {
 	w, ok := v.StreamsConfig.Workflows[workflow]
 	if !ok {
-		return nil, fmt.Errorf("workflow %q stream config not found", workflow)
+		return nil, fmt.Errorf("workflow %q stream config not found", workflow) //nolint:goerr113
 	}
 
 	return w, nil
@@ -51,7 +51,7 @@ func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStrea
 func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*WorkflowKeyValueStores, error) {
 	w, ok := v.KeyValueStoresConfig.WorkflowsKeyValueStores[workflow]
 	if !ok {
-		return nil, fmt.Errorf("workflow %q stream config not found", workflow)
+		return nil, fmt.Errorf("workflow %q stream config not found", workflow) //nolint:goerr113
 	}
 
 	return w, nil

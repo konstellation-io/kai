@@ -45,7 +45,7 @@ func (a *CasbinAccessControl) CheckPermission(userID string, resource auth.Acces
 	}
 
 	if !action.IsValid() {
-		return invalidAccessControlaActionError
+		return invalidAccessControlActionError
 	}
 
 	allowed, err := a.enforcer.Enforce(userID, resource.String(), action.String())
@@ -55,8 +55,10 @@ func (a *CasbinAccessControl) CheckPermission(userID string, resource auth.Acces
 	}
 
 	a.logger.Infof("Checking permission userID[%s] resource[%s] action[%s] allowed[%t]", userID, resource, action, allowed)
+
 	if !allowed {
-		errStr := fmt.Errorf("you are not allowed to %s %s", action, resource)
+		errStr := fmt.Errorf("you are not allowed to %s %s", action, resource) //nolint:goerr113
+
 		return errStr
 	}
 

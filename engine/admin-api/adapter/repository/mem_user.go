@@ -34,6 +34,7 @@ func (r *MemUserRepo) Create(email string) (*entity.User, error) {
 	}
 
 	r.users[user.ID] = user
+
 	return user, nil
 }
 

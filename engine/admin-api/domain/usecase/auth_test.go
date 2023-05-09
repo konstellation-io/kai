@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/auth"
 	"testing"
 	"time"
+
+	"github.com/konstellation-io/kre/engine/admin-api/adapter/auth"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"

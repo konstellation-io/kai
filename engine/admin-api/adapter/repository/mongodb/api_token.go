@@ -35,7 +35,6 @@ func NewAPITokenRepoMongoDB(
 	logger logging.Logger,
 	client *mongo.Client,
 ) (*APITokenRepoMongoDB, error) {
-
 	apiTokens := &APITokenRepoMongoDB{
 		cfg:        cfg,
 		logger:     logger,
@@ -93,7 +92,7 @@ func (a *APITokenRepoMongoDB) salt() ([]byte, error) {
 
 func (a *APITokenRepoMongoDB) hashToken(token string) string {
 	// NOTE: uncomment this line if we want to invalidate all existing tokens when the config secret changes
-	//hash := md5.Sum(append([]byte(token), []byte(a.cfg.Auth.APITokenSecret)...))
+	// hash := md5.Sum(append([]byte(token), []byte(a.cfg.Auth.APITokenSecret)...))
 	hash := md5.Sum([]byte(token))
 	return hex.EncodeToString(hash[:])
 }

@@ -233,7 +233,7 @@ func TestCreateNewRuntime_FailsIfRuntimeWithSameNameAlreadyExists(t *testing.T) 
 	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResRuntime, auth.ActEdit).Return(nil)
 	s.mocks.runtimeRepo.EXPECT().GetByID(ctx, newRuntimeId).Return(nil, usecase.ErrRuntimeNotFound)
 	s.mocks.runtimeRepo.EXPECT().GetByName(ctx, runtimeName).Return(existingRuntime, nil)
-	//s.mocks.runtimeRepo.EXPECT().Create(ctx, expectedRuntime).Return(expectedRuntime, nil)
+	// s.mocks.runtimeRepo.EXPECT().Create(ctx, expectedRuntime).Return(expectedRuntime, nil)
 
 	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeId, runtimeName, newRuntimeDescription)
 

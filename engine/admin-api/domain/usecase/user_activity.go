@@ -38,7 +38,7 @@ type UserActivityInteracter interface {
 	RegisterDeleteAPIToken(userID, apiTokenName string) error
 }
 
-// UserActivityInteractor  contains app logic about UserActivity entities
+// UserActivityInteractor  contains app logic about UserActivity entities.
 type UserActivityInteractor struct {
 	logger           logging.Logger
 	userActivityRepo repository.UserActivityRepo
@@ -46,7 +46,7 @@ type UserActivityInteractor struct {
 	accessControl    auth.AccessControl
 }
 
-// NewUserActivityInteractor creates a new UserActivityInteractor
+// NewUserActivityInteractor creates a new UserActivityInteractor.
 func NewUserActivityInteractor(
 	logger logging.Logger,
 	userActivityRepo repository.UserActivityRepo,
@@ -61,7 +61,7 @@ func NewUserActivityInteractor(
 	}
 }
 
-// Get return a list of UserActivities
+// Get return a list of UserActivities.
 func (i *UserActivityInteractor) Get(
 	ctx context.Context,
 	loggedUserID string,
@@ -94,7 +94,7 @@ func (i *UserActivityInteractor) Get(
 	return i.userActivityRepo.Get(ctx, userIDs, types, versionIds, fromDate, toDate, lastID)
 }
 
-// Create add a new UserActivity to the given user
+// Create add a new UserActivity to the given user.
 func (i *UserActivityInteractor) create(userID string, userActivityType entity.UserActivityType, vars []*entity.UserActivityVar) error {
 	userActivity := entity.UserActivity{
 		ID:     primitive.NewObjectID().Hex(),

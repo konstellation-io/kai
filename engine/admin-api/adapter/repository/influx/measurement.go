@@ -23,15 +23,16 @@ func NewMeasurementRepoInfluxDB(cfg *config.Config, logger logging.Logger) *Meas
 	}
 }
 
-func (m *MeasurementRepoInfluxDB) CreateDatabase(runtimeId string) error {
-	createDatabaseCommand := fmt.Sprintf("CREATE DATABASE %q", runtimeId)
+func (m *MeasurementRepoInfluxDB) CreateDatabase(runtimeID string) error {
+	createDatabaseCommand := fmt.Sprintf("CREATE DATABASE %q", runtimeID)
 	query, err := m.generateQuery(createDatabaseCommand)
 
 	if err != nil {
 		return err
 	}
 
-	response, err := http.Post(query, "application/x-www-form-urlencoded", nil) //nolint:gosec
+	//nolint:gosec // The call is created with controlled parameters, it is not a user input.
+	response, err := http.Post(query, "application/x-www-form-urlencoded", nil)
 	if err != nil {
 		return err
 	}
@@ -40,7 +41,7 @@ func (m *MeasurementRepoInfluxDB) CreateDatabase(runtimeId string) error {
 		return fmt.Errorf("influxdb database creation error: %d", response.StatusCode) //nolint:goerr113
 	}
 
-	m.logger.Infof("influxdb database %q successfully created", runtimeId)
+	m.logger.Infof("influxdb database %q successfully created", runtimeID)
 
 	return nil
 }

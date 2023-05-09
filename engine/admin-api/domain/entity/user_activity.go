@@ -31,7 +31,8 @@ func (e UserActivityType) IsValid() bool {
 		UserActivityTypePublishVersion, UserActivityTypeUnpublishVersion, UserActivityTypeStartVersion,
 		UserActivityTypeStopVersion, UserActivityTypeUpdateSetting, UserActivityTypeUpdateVersionConfiguration,
 		UserActivityTypeCreateUser, UserActivityTypeRemoveUsers, UserActivityTypeUpdateAccessLevels,
-		UserActivityTypeRevokeSessions:
+		UserActivityTypeRevokeSessions, UserActivityTypeCreateRuntime, UserActivityTypeGenerateAPIToken,
+		UserActivityTypeDeleteAPIToken:
 		return true
 	}
 	return false

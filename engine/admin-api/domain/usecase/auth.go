@@ -83,27 +83,27 @@ type TokenClaim struct {
 }
 
 var (
-	// ErrUserNotFound error
+	// ErrUserNotFound error.
 	ErrUserNotFound = errors.New("error user not found")
-	// ErrAPITokenNotFound error
+	// ErrAPITokenNotFound error.
 	ErrAPITokenNotFound = errors.New("API Token not found")
-	// ErrAPITokenNameDup error
+	// ErrAPITokenNameDup error.
 	ErrAPITokenNameDup = errors.New("API Token name duplicated")
-	// ErrUserNotFound error
+	// ErrUserNotFound error.
 	ErrUserEmailInvalid = errors.New("error user email is not valid")
-	// ErrVerificationCodeNotFound error
+	// ErrVerificationCodeNotFound error.
 	ErrVerificationCodeNotFound = errors.New("error the verification not found")
-	// ErrExpiredVerificationCode error
+	// ErrExpiredVerificationCode error.
 	ErrExpiredVerificationCode = errors.New("error the verification code code is expired")
-	// ErrInvalidAPIToken error
+	// ErrInvalidAPIToken error.
 	ErrInvalidAPIToken = errors.New("error invalid API Token")
-	// ErrUserNotAllowed error
+	// ErrUserNotAllowed error.
 	ErrUserNotAllowed = errors.New("error email address not allowed")
-	// ErrInvalidSession error
+	// ErrInvalidSession error.
 	ErrInvalidSession = errors.New("error invalid session")
-	// ErrExpiredSession error
+	// ErrExpiredSession error.
 	ErrExpiredSession = errors.New("error expired session")
-	// ErrSessionNotFound error
+	// ErrSessionNotFound error.
 	ErrSessionNotFound = errors.New("error session not found")
 )
 
@@ -189,7 +189,7 @@ func (a *AuthInteractor) isDomainAllowed(settings *entity.Settings, email string
 	return false
 }
 
-// VerifyCode checks that the given VerificationCode is valid
+// VerifyCode checks that the given VerificationCode is valid.
 func (a *AuthInteractor) VerifyCode(code string) (string, error) {
 	verificationCode, err := a.verificationCodeRepo.Get(code)
 	if err != nil {
@@ -217,7 +217,7 @@ func (a *AuthInteractor) VerifyCode(code string) (string, error) {
 	return verificationCode.UID, nil
 }
 
-// Logout deletes the stored token and registers the User logout request
+// Logout deletes the stored token and registers the User logout request.
 func (a *AuthInteractor) Logout(userID, token string) error {
 	err := a.sessionRepo.DeleteByToken(token)
 	if err != nil {

@@ -58,5 +58,6 @@ func (r *MemTokenRepo) Delete(code string) error {
 	defer r.mu.Unlock()
 
 	delete(r.tokens, code)
+
 	return nil
 }

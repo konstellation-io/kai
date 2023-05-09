@@ -23,27 +23,27 @@ import (
 )
 
 var (
-	// ErrVersionNotFound error
+	// ErrVersionNotFound error.
 	ErrVersionNotFound = errors.New("error version not found")
-	// ErrVersionDuplicated error
+	// ErrVersionDuplicated error.
 	ErrVersionDuplicated = errors.New("error version duplicated")
-	// ErrVersionConfigIncomplete error
+	// ErrVersionConfigIncomplete error.
 	ErrVersionConfigIncomplete = errors.New("version config is incomplete")
-	// ErrVersionConfigInvalidKey error
+	// ErrVersionConfigInvalidKey error.
 	ErrVersionConfigInvalidKey = errors.New("version config contains an unknown key")
-	// ErrUpdatingStartedVersionConfig error
+	// ErrUpdatingStartedVersionConfig error.
 	ErrUpdatingStartedVersionConfig = errors.New("config can't be incomplete for started version")
-	// ErrInvalidVersionStatusBeforeStarting error
+	// ErrInvalidVersionStatusBeforeStarting error.
 	ErrInvalidVersionStatusBeforeStarting = errors.New("the version must be stopped before starting")
-	// ErrInvalidVersionStatusBeforeStopping error
+	// ErrInvalidVersionStatusBeforeStopping error.
 	ErrInvalidVersionStatusBeforeStopping = errors.New("the version must be started before stopping")
-	// ErrInvalidVersionStatusBeforePublishing error
+	// ErrInvalidVersionStatusBeforePublishing error.
 	ErrInvalidVersionStatusBeforePublishing = errors.New("the version must be started before publishing")
-	// ErrInvalidVersionStatusBeforeUnpublishing error
+	// ErrInvalidVersionStatusBeforeUnpublishing error.
 	ErrInvalidVersionStatusBeforeUnpublishing = errors.New("the version must be published before unpublishing")
 )
 
-// VersionInteractor contains app logic about Version entities
+// VersionInteractor contains app logic about Version entities.
 type VersionInteractor struct {
 	cfg                    *config.Config
 	logger                 logging.Logger
@@ -59,7 +59,7 @@ type VersionInteractor struct {
 	nodeLogRepo            repository.NodeLogRepository
 }
 
-// NewVersionInteractor creates a new interactor
+// NewVersionInteractor creates a new interactor.
 func NewVersionInteractor(
 	cfg *config.Config,
 	logger logging.Logger,
@@ -96,7 +96,7 @@ func (i *VersionInteractor) filterConfigVars(loggedUserID string, version *entit
 	}
 }
 
-// GetByName returns a Version by its unique name
+// GetByName returns a Version by its unique name.
 func (i *VersionInteractor) GetByName(ctx context.Context, loggedUserID, runtimeId, name string) (*entity.Version, error) {
 	v, err := i.versionRepo.GetByName(ctx, runtimeId, name)
 	if err != nil {
@@ -112,7 +112,7 @@ func (i *VersionInteractor) GetByID(runtimeId, versionId string) (*entity.Versio
 	return i.versionRepo.GetByID(runtimeId, versionId)
 }
 
-// GetByRuntime returns all Versions of the given Runtime
+// GetByRuntime returns all Versions of the given Runtime.
 func (i *VersionInteractor) GetByRuntime(loggedUserID, runtimeID string) ([]*entity.Version, error) {
 	versions, err := i.versionRepo.GetByRuntime(runtimeID)
 	if err != nil {
@@ -143,7 +143,7 @@ func (i *VersionInteractor) copyStreamToTempFile(krtFile io.Reader) (*os.File, e
 	return tmpFile, nil
 }
 
-// Create creates a Version on the DB based on the content of a KRT file
+// Create creates a Version on the DB based on the content of a KRT file.
 func (i *VersionInteractor) Create(ctx context.Context, loggedUserID string, runtimeID string, krtFile io.Reader) (*entity.Version, chan *entity.Version, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		return nil, nil, err
@@ -248,7 +248,7 @@ func (i *VersionInteractor) completeVersionCreation(
 	contentErrors := parser.ProcessContent(i.logger, krtYml, tmpKrtFile.Name(), tmpDir)
 	if len(contentErrors) > 0 {
 		errorMessage := "error processing krt"
-		contentErrors = append([]error{fmt.Errorf(errorMessage)}, contentErrors...)
+		contentErrors = append([]error{errors.New(errorMessage)}, contentErrors...)
 	}
 
 	dashboardsFolder := path.Join(tmpDir, "metrics/dashboards")
@@ -289,7 +289,7 @@ func (i *VersionInteractor) saveKRTDashboards(ctx context.Context, dashboardsFol
 		err := i.storeDashboards(ctx, dashboardsFolder, runtime.ID, versionCreated.Name)
 		if err != nil {
 			errorMessage := "error creating dashboard"
-			contentErrors = append(contentErrors, fmt.Errorf(errorMessage))
+			contentErrors = append(contentErrors, errors.New(errorMessage))
 		}
 	}
 	return contentErrors
@@ -300,13 +300,13 @@ func (i *VersionInteractor) saveKRTDoc(runtimeId, docFolder string, versionCreat
 		err = i.docGenerator.Generate(versionCreated.Name, docFolder)
 		if err != nil {
 			errorMessage := "error generating version doc"
-			contentErrors = append(contentErrors, fmt.Errorf(errorMessage))
+			contentErrors = append(contentErrors, errors.New(errorMessage))
 		}
 
 		err = i.versionRepo.SetHasDoc(ctx, runtimeId, versionCreated.ID, true)
 		if err != nil {
 			errorMessage := "error updating has doc field"
-			contentErrors = append(contentErrors, fmt.Errorf(errorMessage))
+			contentErrors = append(contentErrors, errors.New(errorMessage))
 		}
 	} else {
 		i.logger.Infof("No documentation found inside the krt files")
@@ -367,7 +367,7 @@ func (i *VersionInteractor) generateWorkflows(krtYml *krt.Krt) ([]*entity.Workfl
 	return workflows, nil
 }
 
-// Start create the resources of the given Version
+// Start create the resources of the given Version.
 func (i *VersionInteractor) Start(
 	ctx context.Context,
 	loggedUserID string,
@@ -432,7 +432,7 @@ func (i *VersionInteractor) Start(
 	return v, notifyStatusCh, nil
 }
 
-// Stop removes the resources of the given Version
+// Stop removes the resources of the given Version.
 func (i *VersionInteractor) Stop(
 	ctx context.Context,
 	loggedUserID string,
@@ -540,7 +540,7 @@ func (i *VersionInteractor) stopAndNotify(
 	i.logger.Infof("[versionInteractor.stopAndNotify] version %q stopped", version.Name)
 }
 
-// Publish set a Version as published on DB and K8s
+// Publish set a Version as published on DB and K8s.
 func (i *VersionInteractor) Publish(ctx context.Context, loggedUserID string, runtimeId string, versionName string, comment string) (*entity.Version, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		return nil, err
@@ -584,7 +584,7 @@ func (i *VersionInteractor) Publish(ctx context.Context, loggedUserID string, ru
 	return v, nil
 }
 
-// Unpublish set a Version as not published on DB and K8s
+// Unpublish set a Version as not published on DB and K8s.
 func (i *VersionInteractor) Unpublish(ctx context.Context, loggedUserID string, runtimeId string, versionName string, comment string) (*entity.Version, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		return nil, err
