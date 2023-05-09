@@ -25,7 +25,7 @@ type UserActivityInteracter interface {
 	RegisterStopAction(userID, runtimeId string, version *entity.Version, comment string) error
 	RegisterPublishAction(userID, runtimeId string, version *entity.Version, prev *entity.Version, comment string) error
 	RegisterUnpublishAction(userID, runtimeId string, version *entity.Version, comment string) error
-	RegisterUpdateAccessLevels(userID string, userIDs, userEmails []string, newAccessLevel, comment string) // TODO: Refactor accessLevel to type
+	RegisterUpdateProductPermissions(userID string, targetUserID string, product string, productPermissions []string, comment string) error
 }
 
 // UserActivityInteractor  contains app logic about UserActivity entities
@@ -67,7 +67,11 @@ func (i *UserActivityInteractor) Get(
 }
 
 // Create add a new UserActivity to the given user
-func (i *UserActivityInteractor) create(userID string, userActivityType entity.UserActivityType, vars []*entity.UserActivityVar) error {
+func (i *UserActivityInteractor) create(
+	userID string,
+	userActivityType entity.UserActivityType,
+	vars []*entity.UserActivityVar,
+) error {
 	userActivity := entity.UserActivity{
 		ID:     primitive.NewObjectID().Hex(),
 		UserID: userID,
@@ -87,7 +91,10 @@ func checkUserActivityError(logger logging.Logger, err error) error {
 	return nil
 }
 
-func (i *UserActivityInteractor) RegisterCreateRuntime(userID string, runtime *entity.Runtime) error {
+func (i *UserActivityInteractor) RegisterCreateRuntime(
+	userID string,
+	runtime *entity.Runtime,
+) error {
 	err := i.create(
 		userID,
 		entity.UserActivityTypeCreateRuntime,
@@ -105,7 +112,10 @@ func (i *UserActivityInteractor) RegisterCreateRuntime(userID string, runtime *e
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterCreateAction(userID, runtimeId string, version *entity.Version) error {
+func (i *UserActivityInteractor) RegisterCreateAction(userID,
+	runtimeId string,
+	version *entity.Version,
+) error {
 	err := i.create(
 		userID,
 		entity.UserActivityTypeCreateVersion,
@@ -118,7 +128,11 @@ func (i *UserActivityInteractor) RegisterCreateAction(userID, runtimeId string, 
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterStartAction(userID, runtimeId string, version *entity.Version, comment string) error {
+func (i *UserActivityInteractor) RegisterStartAction(userID,
+	runtimeId string,
+	version *entity.Version,
+	comment string,
+) error {
 	err := i.create(
 		userID,
 		entity.UserActivityTypeStartVersion,
@@ -132,7 +146,11 @@ func (i *UserActivityInteractor) RegisterStartAction(userID, runtimeId string, v
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterStopAction(userID, runtimeId string, version *entity.Version, comment string) error {
+func (i *UserActivityInteractor) RegisterStopAction(userID,
+	runtimeId string,
+	version *entity.Version,
+	comment string,
+) error {
 	err := i.create(
 		userID,
 		entity.UserActivityTypeStopVersion,
@@ -145,7 +163,12 @@ func (i *UserActivityInteractor) RegisterStopAction(userID, runtimeId string, ve
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterPublishAction(userID, runtimeId string, version *entity.Version, prev *entity.Version, comment string) error {
+func (i *UserActivityInteractor) RegisterPublishAction(userID,
+	runtimeId string,
+	version *entity.Version,
+	prev *entity.Version,
+	comment string,
+) error {
 	err := i.create(
 		userID,
 		entity.UserActivityTypePublishVersion,
@@ -160,7 +183,11 @@ func (i *UserActivityInteractor) RegisterPublishAction(userID, runtimeId string,
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterUnpublishAction(userID, runtimeId string, version *entity.Version, comment string) error {
+func (i *UserActivityInteractor) RegisterUnpublishAction(userID,
+	runtimeId string,
+	version *entity.Version,
+	comment string,
+) error {
 	err := i.create(
 		userID,
 		entity.UserActivityTypeUnpublishVersion,
@@ -173,15 +200,21 @@ func (i *UserActivityInteractor) RegisterUnpublishAction(userID, runtimeId strin
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterUpdateAccessLevels(userID string, userIDs, userEmails []string, newAccessLevel, comment string) {
+// TODO: decide if return error or not
+func (i *UserActivityInteractor) RegisterUpdateProductPermissions(userID string,
+	targetUserID string,
+	product string,
+	productPermissions []string,
+	comment string,
+) error {
 	err := i.create(
 		userID,
-		entity.UserActivityTypeUpdateAccessLevels,
+		entity.UserActivityTypeUpdateProductPermissions,
 		[]*entity.UserActivityVar{
-			{Key: "USER_IDS", Value: strings.Join(userIDs, ",")},
-			{Key: "USER_EMAILS", Value: strings.Join(userEmails, ",")},
-			{Key: "ACCESS_LEVEL", Value: newAccessLevel},
+			{Key: "TARGET_USER_ID", Value: targetUserID},
+			{Key: "PRODUCT", Value: product},
+			{Key: "NEW_PRODUCT_PERMISSIONS", Value: strings.Join(productPermissions, ",")},
 			{Key: "COMMENT", Value: comment},
 		})
-	_ = checkUserActivityError(i.logger, err)
+	return checkUserActivityError(i.logger, err)
 }

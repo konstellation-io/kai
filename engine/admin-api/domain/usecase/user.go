@@ -7,6 +7,13 @@ import (
 	"github.com/konstellation-io/kre/engine/admin-api/internal/errors"
 )
 
+const (
+	getUserByIDWrapper                  = "get user by id"
+	updateUserProductPermissionsWrapper = "update user product permissions"
+	revokeUserProductPermissionsWrapper = "revoke user product permissions"
+	revokedPermissionsComment           = "revoked all permissions"
+)
+
 // UserInteractor contains app logic to handle User entities
 type UserInteractor struct {
 	logger                 logging.Logger
@@ -30,7 +37,7 @@ func NewUserInteractor(
 }
 
 func (ui *UserInteractor) GetUserByID(userID string) (entity.UserGocloakData, error) {
-	wrapErr := errors.Wrapper("get user by id: %w")
+	wrapErr := errors.Wrapper(getUserByIDWrapper + ": %w")
 
 	user, err := ui.gocloakManager.GetUserByID(userID)
 	if err != nil {
@@ -40,10 +47,15 @@ func (ui *UserInteractor) GetUserByID(userID string) (entity.UserGocloakData, er
 	return user, nil
 }
 
-func (ui *UserInteractor) UpdateUserProductPermissions(userID string, product string, roles []string) error {
-	wrapErr := errors.Wrapper("update user roles: %w")
+func (ui *UserInteractor) UpdateUserProductPermissions(triggerUserID string, targetUserID string, product string, permissions []string) error {
+	wrapErr := errors.Wrapper(updateUserProductPermissionsWrapper + ": %w")
 
-	err := ui.gocloakManager.UpdateUserProductPermissions(userID, product, roles)
+	err := ui.gocloakManager.UpdateUserProductPermissions(targetUserID, product, permissions)
+	if err != nil {
+		return wrapErr(err)
+	}
+
+	err = ui.userActivityInteractor.RegisterUpdateProductPermissions(triggerUserID, targetUserID, product, permissions, "")
 	if err != nil {
 		return wrapErr(err)
 	}
@@ -51,10 +63,15 @@ func (ui *UserInteractor) UpdateUserProductPermissions(userID string, product st
 	return nil
 }
 
-func (ui *UserInteractor) RevokeUserProductPermissions(userID string, product string) error {
-	wrapErr := errors.Wrapper("revoke user roles: %w")
+func (ui *UserInteractor) RevokeUserProductPermissions(triggerUserID string, targetUserID string, product string) error {
+	wrapErr := errors.Wrapper(revokeUserProductPermissionsWrapper + ": %w")
 
-	err := ui.gocloakManager.UpdateUserProductPermissions(userID, product, []string{})
+	err := ui.gocloakManager.UpdateUserProductPermissions(targetUserID, product, []string{})
+	if err != nil {
+		return wrapErr(err)
+	}
+
+	err = ui.userActivityInteractor.RegisterUpdateProductPermissions(triggerUserID, targetUserID, product, []string{}, revokedPermissionsComment)
 	if err != nil {
 		return wrapErr(err)
 	}

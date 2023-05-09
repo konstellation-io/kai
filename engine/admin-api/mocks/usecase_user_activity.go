@@ -134,14 +134,16 @@ func (mr *MockUserActivityInteracterMockRecorder) RegisterUnpublishAction(userID
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUnpublishAction", reflect.TypeOf((*MockUserActivityInteracter)(nil).RegisterUnpublishAction), userID, runtimeId, version, comment)
 }
 
-// RegisterUpdateAccessLevels mocks base method.
-func (m *MockUserActivityInteracter) RegisterUpdateAccessLevels(userID string, userIDs, userEmails []string, newAccessLevel, comment string) {
+// RegisterUpdateProductPermissions mocks base method.
+func (m *MockUserActivityInteracter) RegisterUpdateProductPermissions(userID, targetUserID, product string, productPermissions []string, comment string) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "RegisterUpdateAccessLevels", userID, userIDs, userEmails, newAccessLevel, comment)
+	ret := m.ctrl.Call(m, "RegisterUpdateProductPermissions", userID, targetUserID, product, productPermissions, comment)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// RegisterUpdateAccessLevels indicates an expected call of RegisterUpdateAccessLevels.
-func (mr *MockUserActivityInteracterMockRecorder) RegisterUpdateAccessLevels(userID, userIDs, userEmails, newAccessLevel, comment interface{}) *gomock.Call {
+// RegisterUpdateProductPermissions indicates an expected call of RegisterUpdateProductPermissions.
+func (mr *MockUserActivityInteracterMockRecorder) RegisterUpdateProductPermissions(userID, targetUserID, product, productPermissions, comment interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUpdateAccessLevels", reflect.TypeOf((*MockUserActivityInteracter)(nil).RegisterUpdateAccessLevels), userID, userIDs, userEmails, newAccessLevel, comment)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUpdateProductPermissions", reflect.TypeOf((*MockUserActivityInteracter)(nil).RegisterUpdateProductPermissions), userID, targetUserID, product, productPermissions, comment)
 }
