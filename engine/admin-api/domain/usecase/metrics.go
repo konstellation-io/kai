@@ -71,7 +71,7 @@ func (i *MetricsInteractor) GetMetrics(ctx context.Context,
 	return i.CalculateChartsAndValues(metrics)
 }
 
-//nolint:funlen,gocyclo // the statements are needed for metrics calculation
+//nolint:funlen,gocyclo,prealloc // the statements are needed for metrics calculation
 func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.ClassificationMetric) (*entity.Metrics, error) {
 	hits := 0 // items classified correctly
 	newLabels := 0
@@ -117,7 +117,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 		return nil, nil
 	}
 
-	allCategories := make([]string, 0, len(categories))
+	var allCategories []string
 	for k := range categories {
 		allCategories = append(allCategories, k)
 	}
@@ -174,7 +174,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 
 	accuracyWeighted /= float64(totalNoErrors)
 
-	seriesAccuracy := make([]*entity.MetricChartData, 0, len(allCategories))
+	var seriesAccuracy []*entity.MetricChartData
 	for _, cat := range allCategories {
 		seriesAccuracy = append(seriesAccuracy, &entity.MetricChartData{
 			X: strconv.Itoa(int(accuracyByCat[cat] * 100)),
@@ -183,7 +183,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 	}
 
 	// recall is the diagonal of the confusion matrix (tp / (tp + fn))
-	seriesRecall := make([]*entity.MetricChartData, 0, len(allCategories))
+	var seriesRecall []*entity.MetricChartData
 	for _, cat := range allCategories {
 		seriesRecall = append(seriesRecall, &entity.MetricChartData{
 			X: strconv.Itoa(recallByCat[cat]),
@@ -192,7 +192,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 	}
 
 	// support is the num of elements per each class
-	seriesSupport := make([]*entity.MetricChartData, 0, len(allCategories))
+	var seriesSupport []*entity.MetricChartData
 	for _, cat := range allCategories {
 		seriesSupport = append(seriesSupport, &entity.MetricChartData{
 			X: strconv.Itoa(totalByCat[cat]),

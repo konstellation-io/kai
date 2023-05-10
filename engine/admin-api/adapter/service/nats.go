@@ -156,7 +156,6 @@ func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]
 
 			if node.ObjectStore != nil {
 				scope, err := translateObjectStoreEnum(node.ObjectStore.Scope)
-
 				if err != nil {
 					return nil, err
 				}
@@ -178,16 +177,6 @@ func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]
 	}
 
 	return workflows, nil
-}
-
-//nolint:unused // legacy code
-func (n *NatsManagerClient) getWorkflowsEntrypoints(version *entity.Version) []string {
-	workflowsEntrypoints := make([]string, 0, len(version.Workflows))
-	for _, workflow := range version.Workflows {
-		workflowsEntrypoints = append(workflowsEntrypoints, workflow.Entrypoint)
-	}
-
-	return workflowsEntrypoints
 }
 
 func (n *NatsManagerClient) dtoToVersionStreamConfig(

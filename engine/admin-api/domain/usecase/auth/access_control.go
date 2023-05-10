@@ -43,7 +43,7 @@ func (e AccessControlAction) String() string {
 	return string(e)
 }
 
-type AccessControl interface {
+//nolint:godox // Remove this nolint statement after the TODO is done.
+type AccessControl interface { // TODO: move to middleware.
 	CheckPermission(userID string, resource AccessControlResource, action AccessControlAction) error
-	ReloadUserRoles() error
 }

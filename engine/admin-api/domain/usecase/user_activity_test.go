@@ -26,7 +26,6 @@ type userActivitySuiteMocks struct {
 func newUserActivitySuite(t *testing.T) *userActivitySuite {
 	ctrl := gomock.NewController(t)
 	logger := mocks.NewMockLogger(ctrl)
-	userRepo := mocks.NewMockUserRepo(ctrl)
 	userActivityRepo := mocks.NewMockUserActivityRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
 	mocks.AddLoggerExpects(logger)
@@ -34,7 +33,6 @@ func newUserActivitySuite(t *testing.T) *userActivitySuite {
 	userActivityInteractor := NewUserActivityInteractor(
 		logger,
 		userActivityRepo,
-		userRepo,
 		accessControl,
 	)
 
