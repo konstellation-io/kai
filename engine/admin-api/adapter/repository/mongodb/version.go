@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
@@ -80,14 +80,14 @@ func (r *VersionRepoMongoDB) Create(userID, runtimeID string, newVersion *entity
 	return newVersion, nil
 }
 
-func (r *VersionRepoMongoDB) GetByID(runtimeID, versionId string) (*entity.Version, error) {
+func (r *VersionRepoMongoDB) GetByID(runtimeID, versionID string) (*entity.Version, error) {
 	collection := r.client.Database(runtimeID).Collection(versionsCollectionName)
 
 	v := &entity.Version{}
-	filter := bson.D{{"_id", versionId}}
+	filter := bson.D{{"_id", versionID}} //nolint:govet // ignore warning about bson.D
 
 	err := collection.FindOne(context.Background(), filter).Decode(v)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return v, usecase.ErrVersionNotFound
 	}
 
@@ -101,7 +101,7 @@ func (r *VersionRepoMongoDB) GetByName(ctx context.Context, runtimeID, name stri
 	filter := bson.M{"name": name}
 
 	err := collection.FindOne(ctx, filter).Decode(v)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, usecase.ErrVersionNotFound
 	}
 
@@ -119,10 +119,11 @@ func (r *VersionRepoMongoDB) Update(runtimeID string, version *entity.Version) e
 	return nil
 }
 
-//nolint:dupl
+//nolint:dupl // legacy code
 func (r *VersionRepoMongoDB) GetByRuntime(runtimeID string) ([]*entity.Version, error) {
 	collection := r.client.Database(runtimeID).Collection(versionsCollectionName)
 
+	//nolint:govet // legacy code
 	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
 
 	var versions []*entity.Version
@@ -149,10 +150,11 @@ func (r *VersionRepoMongoDB) GetByRuntime(runtimeID string) ([]*entity.Version, 
 	return versions, nil
 }
 
-//nolint:dupl
+//nolint:dupl // legacy code
 func (r *VersionRepoMongoDB) GetAll(runtimeID string) ([]*entity.Version, error) {
 	collection := r.client.Database(runtimeID).Collection(versionsCollectionName)
 
+	//nolint:govet // legacy code
 	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
 
 	var versions []*entity.Version
@@ -230,7 +232,7 @@ func (r *VersionRepoMongoDB) SetErrors(ctx context.Context, runtimeID string, ve
 }
 
 func (r *VersionRepoMongoDB) UploadKRTFile(runtimeID string, version *entity.Version, file string) error {
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return fmt.Errorf("reading KRT file at %s: %w", file, err)
 	}

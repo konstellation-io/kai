@@ -31,8 +31,8 @@ func (m *MeasurementRepoInfluxDB) CreateDatabase(runtimeID string) error {
 		return err
 	}
 
-	//nolint:gosec // The call is created with controlled parameters, it is not a user input.
-	response, err := http.Post(query, "application/x-www-form-urlencoded", nil) //nolint:bodyclose
+	//nolint:gosec,bodyclose,noctx // The call is created with controlled parameters, it is not a user input.
+	response, err := http.Post(query, "application/x-www-form-urlencoded", nil)
 	if err != nil {
 		return err
 	}

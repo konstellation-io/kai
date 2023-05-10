@@ -14,7 +14,7 @@ type APITokenRepo interface {
 	GetByID(ctx context.Context, id string) (*entity.APIToken, error)
 	GetByUserID(ctx context.Context, userID string) ([]*entity.APIToken, error)
 	GetByToken(ctx context.Context, token string) (*entity.APIToken, error)
-	DeleteById(ctx context.Context, token string) error
+	DeleteByID(ctx context.Context, token string) error
 	DeleteByUserIDs(ctx context.Context, userIDs []string) error
 	UpdateLastActivity(ctx context.Context, id string) error
 }

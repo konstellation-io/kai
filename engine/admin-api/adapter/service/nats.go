@@ -180,7 +180,8 @@ func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]
 	return workflows, nil
 }
 
-func (n *NatsManagerClient) getWorkflowsEntrypoints(version *entity.Version) []string { //nolint:unused
+//nolint:unused // legacy code
+func (n *NatsManagerClient) getWorkflowsEntrypoints(version *entity.Version) []string {
 	workflowsEntrypoints := make([]string, 0, len(version.Workflows))
 	for _, workflow := range version.Workflows {
 		workflowsEntrypoints = append(workflowsEntrypoints, workflow.Entrypoint)
@@ -261,6 +262,7 @@ func translateObjectStoreEnum(scope string) (natspb.ObjectStoreScope, error) {
 	case "workflow":
 		return natspb.ObjectStoreScope_SCOPE_WORKFLOW, nil
 	default:
+		//nolint:goerr113 // error needs to be wrapped
 		return natspb.ObjectStoreScope_SCOPE_WORKFLOW, errors.New("invalid object store scope")
 	}
 }

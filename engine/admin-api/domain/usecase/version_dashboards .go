@@ -7,7 +7,7 @@ import (
 	"path"
 )
 
-func (i *VersionInteractor) storeDashboards(ctx context.Context, dashboardsFolder string, runtimeID, version string) []error {
+func (i *VersionInteractor) storeDashboards(ctx context.Context, dashboardsFolder, runtimeID, version string) []error {
 	i.logger.Infof("Storing dashboards for version %q in runtime %q", version, runtimeID)
 
 	var errors []error = nil

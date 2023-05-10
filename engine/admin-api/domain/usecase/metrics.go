@@ -41,7 +41,8 @@ func NewMetricsInteractor(
 	}
 }
 
-func (i *MetricsInteractor) GetMetrics(ctx context.Context, loggedUserID, runtimeID, versionName, startDate, endDate string) (*entity.Metrics, error) {
+func (i *MetricsInteractor) GetMetrics(ctx context.Context,
+	loggedUserID, runtimeID, versionName, startDate, endDate string) (*entity.Metrics, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResMetrics, auth.ActView); err != nil {
 		return nil, err
 	}
@@ -70,7 +71,7 @@ func (i *MetricsInteractor) GetMetrics(ctx context.Context, loggedUserID, runtim
 	return i.CalculateChartsAndValues(metrics)
 }
 
-//nolint:funlen // the statements are needed for metrics calculation
+//nolint:funlen,gocyclo // the statements are needed for metrics calculation
 func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.ClassificationMetric) (*entity.Metrics, error) {
 	hits := 0 // items classified correctly
 	newLabels := 0
@@ -84,13 +85,14 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 	recallByCat := make(map[string]int)
 
 	for _, m := range metrics {
-		if m.Error == MetricsNewLabelsKey {
+		switch m.Error {
+		case MetricsNewLabelsKey:
 			newLabels += 1
-		} else if m.Error == MetricsMissingValuesKey {
+		case MetricsMissingValuesKey:
 			missingValues += 1
-		} else if m.Error != "" {
+		case "":
 			i.logger.Errorf("unexpected metric error value = %q", m.Error)
-		} else {
+		default:
 			totalNoErrors += 1
 
 			categories[m.TrueValue] = true
@@ -100,11 +102,13 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 				hits += 1
 				hitsByCat[m.TrueValue] += 1
 			}
+
 			totalByCat[m.TrueValue] += 1
 
 			if confusion[m.TrueValue] == nil {
 				confusion[m.TrueValue] = make(map[string]int)
 			}
+
 			confusion[m.TrueValue][m.PredictedValue] += 1
 		}
 	}
@@ -113,7 +117,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 		return nil, nil
 	}
 
-	var allCategories []string
+	allCategories := make([]string, 0, len(categories))
 	for k := range categories {
 		allCategories = append(allCategories, k)
 	}
@@ -168,9 +172,9 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 		accuracyWeighted += accuracyByCat[cat] * float64(totalByCat[cat])
 	}
 
-	accuracyWeighted = accuracyWeighted / float64(totalNoErrors)
+	accuracyWeighted /= float64(totalNoErrors)
 
-	var seriesAccuracy []*entity.MetricChartData
+	seriesAccuracy := make([]*entity.MetricChartData, 0, len(allCategories))
 	for _, cat := range allCategories {
 		seriesAccuracy = append(seriesAccuracy, &entity.MetricChartData{
 			X: strconv.Itoa(int(accuracyByCat[cat] * 100)),
@@ -179,7 +183,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 	}
 
 	// recall is the diagonal of the confusion matrix (tp / (tp + fn))
-	var seriesRecall []*entity.MetricChartData
+	seriesRecall := make([]*entity.MetricChartData, 0, len(allCategories))
 	for _, cat := range allCategories {
 		seriesRecall = append(seriesRecall, &entity.MetricChartData{
 			X: strconv.Itoa(recallByCat[cat]),
@@ -188,7 +192,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 	}
 
 	// support is the num of elements per each class
-	var seriesSupport []*entity.MetricChartData
+	seriesSupport := make([]*entity.MetricChartData, 0, len(allCategories))
 	for _, cat := range allCategories {
 		seriesSupport = append(seriesSupport, &entity.MetricChartData{
 			X: strconv.Itoa(totalByCat[cat]),
@@ -205,7 +209,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 		Values: &entity.MetricsValues{
 			Accuracy: &entity.MetricsAccuracy{
 				Total:    accuracyTotal,
-				Micro:    accuracyTotal, // TODO should the accuracy total and micro be the same?
+				Micro:    accuracyTotal,
 				Macro:    accuracyMacro,
 				Weighted: int(accuracyWeighted * 100),
 			},

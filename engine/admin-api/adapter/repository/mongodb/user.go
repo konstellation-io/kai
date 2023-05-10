@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -76,7 +77,7 @@ func (r *UserRepoMongoDB) GetByEmail(email string) (*entity.User, error) {
 	filter := bson.M{"email": email, "deleted": false}
 
 	err := r.collection.FindOne(context.Background(), filter).Decode(user)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return user, usecase.ErrUserNotFound
 	}
 
@@ -108,10 +109,10 @@ func (r *UserRepoMongoDB) GetManyByEmail(ctx context.Context, email string) ([]*
 
 func (r *UserRepoMongoDB) GetByID(userID string) (*entity.User, error) {
 	user := &entity.User{}
-	filter := bson.D{{"_id", userID}}
+	filter := bson.D{{"_id", userID}} //nolint:govet // ignore warning about bson.D
 
 	err := r.collection.FindOne(context.Background(), filter).Decode(user)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return user, usecase.ErrUserNotFound
 	}
 
@@ -119,6 +120,7 @@ func (r *UserRepoMongoDB) GetByID(userID string) (*entity.User, error) {
 }
 
 func (r *UserRepoMongoDB) GetByIDs(keys []string) ([]*entity.User, error) {
+	//nolint:govet // legacy code
 	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
 
 	cursor, err := r.collection.Find(ctx, bson.M{"_id": bson.M{"$in": keys}})

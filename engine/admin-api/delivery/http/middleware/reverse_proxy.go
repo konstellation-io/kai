@@ -63,6 +63,7 @@ func proxyRaw(targetURL *url.URL, c echo.Context) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		in, _, err := c.Response().Hijack()
 		if err != nil {
+			//nolint:goerr113 // error needs to be dynamically generated
 			c.Error(fmt.Errorf("proxy raw, hijack error=%v, url=%s", targetURL, err))
 			return
 		}

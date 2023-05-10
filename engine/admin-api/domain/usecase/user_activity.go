@@ -188,7 +188,8 @@ func (i *UserActivityInteractor) RegisterStopAction(userID, runtimeID string, ve
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterPublishAction(userID, runtimeID string, version *entity.Version, prev *entity.Version, comment string) error {
+func (i *UserActivityInteractor) RegisterPublishAction(userID, runtimeID string,
+	version, prev *entity.Version, comment string) error {
 	err := i.create(
 		userID,
 		entity.UserActivityTypePublishVersion,
@@ -247,7 +248,8 @@ func (i *UserActivityInteractor) RegisterRemoveUsers(userID string, userIDs, use
 	_ = checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterUpdateAccessLevels(userID string, userIDs, userEmails []string, newAccessLevel entity.AccessLevel, comment string) {
+func (i *UserActivityInteractor) RegisterUpdateAccessLevels(userID string, userIDs, userEmails []string,
+	newAccessLevel entity.AccessLevel, comment string) {
 	err := i.create(
 		userID,
 		entity.UserActivityTypeUpdateAccessLevels,

@@ -125,6 +125,7 @@ func ValidateSrcPaths(krtFile *krt.Krt, dstDir string) []error {
 		for _, node := range workflow.Nodes {
 			nodeFile := path.Join(dstDir, node.Src)
 			if !fileExists(nodeFile) {
+				//nolint:goerr113 // errors need to be dynamically generated
 				errs = append(errs, fmt.Errorf("error src file %q for node %q does not exists ", node.Src, node.Name))
 			}
 		}

@@ -29,9 +29,11 @@ func main() {
 	initApp(cfg, logger, mongodbClient)
 }
 
-//nolint:funlen // App initialization
+//nolint:funlen,ineffassign,staticcheck // App initialization
 func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) {
-	verificationCodeRepo, userRepo, runtimeRepo, settingRepo, sessionRepo, apiTokenRepo, err, userActivityRepo, versionMongoRepo, nodeLogRepo, metricRepo, measurementRepo := initRepositories(cfg, logger, mongodbClient)
+	verificationCodeRepo, userRepo, runtimeRepo, settingRepo, sessionRepo, apiTokenRepo,
+		userActivityRepo, versionMongoRepo, nodeLogRepo, metricRepo,
+		measurementRepo, err := initRepositories(cfg, logger, mongodbClient)
 
 	versionService, err := service.NewK8sVersionClient(cfg, logger)
 
@@ -140,11 +142,12 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 	app.Start()
 }
 
+//nolint:gocritic // App initialization
 func initRepositories(cfg *config.Config, logger logging.Logger,
 	mongodbClient *mongo.Client) (*mongodb.VerificationCodeRepoMongoDB, *mongodb.UserRepoMongoDB,
 	*mongodb.RuntimeRepoMongoDB, *mongodb.SettingRepoMongoDB, *mongodb.SessionRepoMongoDB,
-	*mongodb.APITokenRepoMongoDB, error, *mongodb.UserActivityRepoMongoDB, *mongodb.VersionRepoMongoDB,
-	*mongodb.NodeLogMongoDBRepo, *mongodb.MetricsMongoDBRepo, *influx.MeasurementRepoInfluxDB) {
+	*mongodb.APITokenRepoMongoDB, *mongodb.UserActivityRepoMongoDB, *mongodb.VersionRepoMongoDB,
+	*mongodb.NodeLogMongoDBRepo, *mongodb.MetricsMongoDBRepo, *influx.MeasurementRepoInfluxDB, error) {
 	verificationCodeRepo := mongodb.NewVerificationCodeRepoMongoDB(cfg, logger, mongodbClient)
 	userRepo := mongodb.NewUserRepoMongoDB(cfg, logger, mongodbClient)
 	runtimeRepo := mongodb.NewRuntimeRepoMongoDB(cfg, logger, mongodbClient)
@@ -162,6 +165,6 @@ func initRepositories(cfg *config.Config, logger logging.Logger,
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
 
-	return verificationCodeRepo, userRepo, runtimeRepo, settingRepo, sessionRepo, apiTokenRepo, err,
-		userActivityRepo, versionMongoRepo, nodeLogRepo, metricRepo, measurementRepo
+	return verificationCodeRepo, userRepo, runtimeRepo, settingRepo, sessionRepo, apiTokenRepo,
+		userActivityRepo, versionMongoRepo, nodeLogRepo, metricRepo, measurementRepo, err
 }

@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -59,7 +60,7 @@ func (r *RuntimeRepoMongoDB) Get(ctx context.Context) (*entity.Runtime, error) {
 	runtime := &entity.Runtime{}
 
 	err := r.collection.FindOne(ctx, bson.M{}).Decode(runtime)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, usecase.ErrRuntimeNotFound
 	}
 
@@ -68,10 +69,10 @@ func (r *RuntimeRepoMongoDB) Get(ctx context.Context) (*entity.Runtime, error) {
 
 func (r *RuntimeRepoMongoDB) GetByID(ctx context.Context, runtimeID string) (*entity.Runtime, error) {
 	runtime := &entity.Runtime{}
-	filter := bson.D{{"_id", runtimeID}}
+	filter := bson.D{{"_id", runtimeID}} //nolint:govet // ignore warning about bson.D
 
 	err := r.collection.FindOne(ctx, filter).Decode(runtime)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, usecase.ErrRuntimeNotFound
 	}
 
@@ -80,10 +81,10 @@ func (r *RuntimeRepoMongoDB) GetByID(ctx context.Context, runtimeID string) (*en
 
 func (r *RuntimeRepoMongoDB) GetByName(ctx context.Context, name string) (*entity.Runtime, error) {
 	runtime := &entity.Runtime{}
-	filter := bson.D{{"name", name}}
+	filter := bson.D{{"name", name}} //nolint:govet // ignore warning about bson.D
 
 	err := r.collection.FindOne(ctx, filter).Decode(runtime)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, usecase.ErrRuntimeNotFound
 	}
 

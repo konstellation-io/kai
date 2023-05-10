@@ -52,9 +52,9 @@ func (mr *MockAPITokenRepoMockRecorder) Create(ctx, apiToken, code interface{}) 
 }
 
 // DeleteById mocks base method.
-func (m *MockAPITokenRepo) DeleteById(ctx context.Context, token string) error {
+func (m *MockAPITokenRepo) DeleteByID(ctx context.Context, token string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteById", ctx, token)
+	ret := m.ctrl.Call(m, "DeleteByID", ctx, token)
 	ret0, _ := ret[0].(error)
 
 	return ret0
@@ -63,7 +63,7 @@ func (m *MockAPITokenRepo) DeleteById(ctx context.Context, token string) error {
 // DeleteById indicates an expected call of DeleteById.
 func (mr *MockAPITokenRepoMockRecorder) DeleteById(ctx, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteById", reflect.TypeOf((*MockAPITokenRepo)(nil).DeleteById), ctx, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByID", reflect.TypeOf((*MockAPITokenRepo)(nil).DeleteByID), ctx, token)
 }
 
 // DeleteByUserIDs mocks base method.

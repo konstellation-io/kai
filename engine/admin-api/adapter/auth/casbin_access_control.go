@@ -57,7 +57,8 @@ func (a *CasbinAccessControl) CheckPermission(userID string, resource auth.Acces
 	a.logger.Infof("Checking permission userID[%s] resource[%s] action[%s] allowed[%t]", userID, resource, action, allowed)
 
 	if !allowed {
-		errStr := fmt.Errorf("you are not allowed to %s %s", action, resource) //nolint:goerr113
+		//nolint:goerr113 // errors need to be wrapped
+		errStr := fmt.Errorf("you are not allowed to %s %s", action, resource)
 
 		return errStr
 	}

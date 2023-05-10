@@ -247,11 +247,11 @@ func TestCreateNewRuntime_FailsIfCreateRuntimeFails(t *testing.T) {
 	ctx := context.Background()
 	userID := "user1234"
 	newRuntimeName := "runtime-name"
-	newRuntimeId := "new-runtime-id"
+	newRuntimeID := "new-runtime-id"
 	newRuntimeDescription := "This is a runtime description"
 
 	newRuntime := &entity.Runtime{
-		ID:           newRuntimeId,
+		ID:           newRuntimeID,
 		Name:         newRuntimeName,
 		Description:  newRuntimeDescription,
 		Owner:        userID,
@@ -259,11 +259,11 @@ func TestCreateNewRuntime_FailsIfCreateRuntimeFails(t *testing.T) {
 	}
 
 	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResRuntime, auth.ActEdit).Return(nil)
-	s.mocks.runtimeRepo.EXPECT().GetByID(ctx, newRuntimeId).Return(nil, usecase.ErrRuntimeNotFound)
+	s.mocks.runtimeRepo.EXPECT().GetByID(ctx, newRuntimeID).Return(nil, usecase.ErrRuntimeNotFound)
 	s.mocks.runtimeRepo.EXPECT().GetByName(ctx, newRuntimeName).Return(nil, usecase.ErrRuntimeNotFound)
 	s.mocks.runtimeRepo.EXPECT().Create(ctx, newRuntime).Return(nil, errors.New("create runtime error"))
 
-	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeId, newRuntimeName, newRuntimeDescription)
+	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeID, newRuntimeName, newRuntimeDescription)
 
 	require.Error(t, err)
 	require.Nil(t, runtime)

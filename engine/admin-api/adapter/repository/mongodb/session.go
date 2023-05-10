@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -50,7 +51,7 @@ func (r *SessionRepoMongoDB) GetByToken(token string) (entity.Session, error) {
 	filter := bson.M{"token": token}
 
 	err := r.collection.FindOne(context.Background(), filter).Decode(&session)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return session, usecase.ErrSessionNotFound
 	}
 

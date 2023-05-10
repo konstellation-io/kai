@@ -253,6 +253,7 @@ func (p *Parser) processFile(tarReader *tar.Reader, filePath string, fileType by
 		}
 
 	default:
+		//nolint:goerr113 // Errors needs to be dynamically generated
 		return fmt.Errorf("error extracting krt files: uknown type [%v] in [%s]", fileType, filePath)
 	}
 

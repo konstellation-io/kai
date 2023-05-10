@@ -59,7 +59,8 @@ func (i *UserInteractor) GetTokensByUserID(ctx context.Context, userID string) (
 }
 
 // GetAllUsers returns all existing Users.
-func (i *UserInteractor) GetAllUsers(ctx context.Context, loggedUserID string, returnDeleted bool) ([]*entity.User, error) {
+func (i *UserInteractor) GetAllUsers(ctx context.Context, loggedUserID string,
+	returnDeleted bool) ([]*entity.User, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResUsers, auth.ActView); err != nil {
 		return nil, err
 	}
@@ -67,7 +68,8 @@ func (i *UserInteractor) GetAllUsers(ctx context.Context, loggedUserID string, r
 	return i.userRepo.GetAll(ctx, returnDeleted)
 }
 
-func (i *UserInteractor) UpdateAccessLevel(ctx context.Context, userIDs []string, newAccessLevel entity.AccessLevel, loggedUserID string, comment string) ([]*entity.User, error) {
+func (i *UserInteractor) UpdateAccessLevel(ctx context.Context, userIDs []string, newAccessLevel entity.AccessLevel,
+	loggedUserID, comment string) ([]*entity.User, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResUsers, auth.ActEdit); err != nil {
 		return nil, err
 	}
@@ -78,6 +80,7 @@ func (i *UserInteractor) UpdateAccessLevel(ctx context.Context, userIDs []string
 	}
 
 	if len(userIDs) != len(users) {
+		//nolint:goerr113 // errors dynamically generated
 		return nil, errors.New("some user identifiers are not valid")
 	}
 
@@ -96,7 +99,8 @@ func (i *UserInteractor) UpdateAccessLevel(ctx context.Context, userIDs []string
 		updatedUserEmails[i] = u.Email
 	}
 
-	i.userActivityInteractor.RegisterUpdateAccessLevels(loggedUserID, updatedUserIDs, updatedUserEmails, newAccessLevel, comment)
+	i.userActivityInteractor.RegisterUpdateAccessLevels(loggedUserID, updatedUserIDs,
+		updatedUserEmails, newAccessLevel, comment)
 
 	err = i.accessControl.ReloadUserRoles()
 	if err != nil {
@@ -106,17 +110,19 @@ func (i *UserInteractor) UpdateAccessLevel(ctx context.Context, userIDs []string
 	return updatedUsers, nil
 }
 
-func (i *UserInteractor) Create(ctx context.Context, email string, accessLevel entity.AccessLevel, loggedUserID string) (*entity.User, error) {
+func (i *UserInteractor) Create(ctx context.Context, email string,
+	accessLevel entity.AccessLevel, loggedUserID string) (*entity.User, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResUsers, auth.ActEdit); err != nil {
 		return nil, err
 	}
 
 	_, err := i.userRepo.GetByEmail(email)
 	if err == nil {
+		//nolint:goerr113 // errors dynamically generated
 		return nil, fmt.Errorf("already exists an user with email: %s", email)
 	}
 
-	if err != ErrUserNotFound {
+	if !errors.Is(err, ErrUserNotFound) {
 		return nil, err
 	}
 
@@ -182,7 +188,7 @@ func (i *UserInteractor) DeleteAPIToken(ctx context.Context, tokenID, loggedUser
 		return nil, fmt.Errorf("error getting api token: %w", err)
 	}
 
-	err = i.apiTokenRepo.DeleteById(ctx, tokenID)
+	err = i.apiTokenRepo.DeleteByID(ctx, tokenID)
 	if err != nil {
 		return nil, fmt.Errorf("error deleting api token: %w", err)
 	}

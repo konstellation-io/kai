@@ -24,7 +24,7 @@ const logFormat = "${time_rfc3339} INFO remote_ip=${remote_ip}, method=${method}
 
 // NewApp creates a new App instance.
 //
-//nolint:funlen
+//nolint:funlen // The app initialization needs to be defined here
 func NewApp(
 	cfg *config.Config,
 	logger logging.Logger,

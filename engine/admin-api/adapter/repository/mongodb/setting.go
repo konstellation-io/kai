@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -36,7 +37,8 @@ func (r *SettingRepoMongoDB) Get(ctx context.Context) (*entity.Settings, error) 
 	setting := &entity.Settings{}
 
 	err := r.collection.FindOne(ctx, bson.D{}).Decode(&setting)
-	if err == mongo.ErrNoDocuments {
+
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return setting, usecase.ErrSettingNotFound
 	}
 

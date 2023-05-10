@@ -55,7 +55,7 @@ var (
 func (i *SettingInteractor) CreateDefaults(ctx context.Context) error {
 	_, err := i.settingRepo.Get(ctx)
 
-	if err == ErrSettingNotFound {
+	if errors.Is(err, ErrSettingNotFound) {
 		s := entity.Settings{
 			SessionLifetimeInDays: DefaultSessionLifetimeInDays,
 		}

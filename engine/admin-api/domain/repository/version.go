@@ -11,7 +11,7 @@ import (
 type VersionRepo interface {
 	Create(userID, runtimeID string, version *entity.Version) (*entity.Version, error)
 	CreateIndexes(ctx context.Context, runtimeID string) error
-	GetByID(runtimeID, versionId string) (*entity.Version, error)
+	GetByID(runtimeID, versionID string) (*entity.Version, error)
 	GetByName(ctx context.Context, runtimeID, name string) (*entity.Version, error)
 	GetByRuntime(runtimeID string) ([]*entity.Version, error)
 	Update(runtimeID string, version *entity.Version) error

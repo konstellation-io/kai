@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -235,12 +236,12 @@ func (k *K8sVersionClient) WatchNodeStatus(ctx context.Context, runtimeID, versi
 
 			msg, err := stream.Recv()
 
-			if stream.Context().Err() == context.Canceled {
+			if errors.Is(stream.Context().Err(), context.Canceled) {
 				k.logger.Debug("[VersionService.WatchNodeStatus] Context canceled.")
 				return
 			}
 
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				k.logger.Debug("[VersionService.WatchNodeStatus] EOF msg received.")
 				return
 			}

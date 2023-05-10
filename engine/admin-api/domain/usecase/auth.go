@@ -107,7 +107,8 @@ var (
 	ErrSessionNotFound = errors.New("error session not found")
 )
 
-// SignIn creates a temporal on-time-use verification code associated with the user and sends it to the user in the form of a “login link” via email, sms or whatever.
+// SignIn creates a temporal on-time-use verification code associated with the user
+// and sends it to the user in the form of a “login link” via email, sms or whatever.
 func (a *AuthInteractor) SignIn(ctx context.Context, email string, verificationCodeDurationInMinutes int) error {
 	validate := validator.New()
 
@@ -119,13 +120,14 @@ func (a *AuthInteractor) SignIn(ctx context.Context, email string, verificationC
 	user, err := a.userRepo.GetByEmail(email)
 	isNewUser := false
 
-	if err == ErrUserNotFound {
+	if errors.Is(err, ErrUserNotFound) {
 		isNewUser = true
 	} else if err != nil {
 		return err
 	}
 
 	// SignUp user creation
+	//nolint:nestif // legacy code to be removed
 	if isNewUser {
 		// Get allowed domain lists
 		settings, err := a.settingRepo.Get(ctx)
@@ -236,8 +238,8 @@ func (a *AuthInteractor) CreateSession(session entity.Session) error {
 	return a.sessionRepo.Create(session)
 }
 
-func (a *AuthInteractor) VerifyAPIToken(ctx context.Context, inputApiToken string) (string, error) {
-	apiToken, err := a.apiTokenRepo.GetByToken(ctx, inputApiToken)
+func (a *AuthInteractor) VerifyAPIToken(ctx context.Context, inputAPIToken string) (string, error) {
+	apiToken, err := a.apiTokenRepo.GetByToken(ctx, inputAPIToken)
 	if err != nil {
 		a.logger.Errorf("Error getting user API Token: %s", err)
 		return "", ErrInvalidAPIToken

@@ -62,7 +62,8 @@ func NewRuntimeInteractor(
 }
 
 // CreateRuntime adds a new Runtime.
-func (i *RuntimeInteractor) CreateRuntime(ctx context.Context, loggedUserID, runtimeID, name, description string) (createdRuntime *entity.Runtime, err error) {
+func (i *RuntimeInteractor) CreateRuntime(ctx context.Context,
+	loggedUserID, runtimeID, name, description string) (createdRuntime *entity.Runtime, err error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResRuntime, auth.ActEdit); err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (i *RuntimeInteractor) CreateRuntime(ctx context.Context, loggedUserID, run
 	runtimeFromDB, err := i.runtimeRepo.GetByID(ctx, runtimeID)
 	if runtimeFromDB != nil {
 		return nil, ErrRuntimeDuplicated
-	} else if err != ErrRuntimeNotFound {
+	} else if !errors.Is(err, ErrRuntimeNotFound) {
 		return nil, err
 	}
 
@@ -97,7 +98,7 @@ func (i *RuntimeInteractor) CreateRuntime(ctx context.Context, loggedUserID, run
 	runtimeFromDB, err = i.runtimeRepo.GetByName(ctx, name)
 	if runtimeFromDB != nil {
 		return nil, ErrRuntimeDuplicatedName
-	} else if err != ErrRuntimeNotFound {
+	} else if !errors.Is(err, ErrRuntimeNotFound) {
 		return nil, err
 	}
 
@@ -147,7 +148,7 @@ func (i *RuntimeInteractor) Get(ctx context.Context, loggedUserID string) (*enti
 }
 
 // GetByID return a Runtime by its ID.
-func (i *RuntimeInteractor) GetByID(ctx context.Context, loggedUserID string, runtimeID string) (*entity.Runtime, error) {
+func (i *RuntimeInteractor) GetByID(ctx context.Context, loggedUserID, runtimeID string) (*entity.Runtime, error) {
 	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResRuntime, auth.ActView); err != nil {
 		return nil, err
 	}

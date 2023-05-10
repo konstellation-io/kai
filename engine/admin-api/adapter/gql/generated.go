@@ -37,7 +37,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	ApiToken() ApiTokenResolver
+	APIToken() ApiTokenResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	Runtime() RuntimeResolver
@@ -303,28 +303,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 
 	switch typeName + "." + field {
-	case "ApiToken.creationDate":
+	case "APIToken.creationDate":
 		if e.complexity.ApiToken.CreationDate == nil {
 			break
 		}
 
 		return e.complexity.ApiToken.CreationDate(childComplexity), true
 
-	case "ApiToken.id":
+	case "APIToken.id":
 		if e.complexity.ApiToken.ID == nil {
 			break
 		}
 
 		return e.complexity.ApiToken.ID(childComplexity), true
 
-	case "ApiToken.lastActivity":
+	case "APIToken.lastActivity":
 		if e.complexity.ApiToken.LastActivity == nil {
 			break
 		}
 
 		return e.complexity.ApiToken.LastActivity(childComplexity), true
 
-	case "ApiToken.name":
+	case "APIToken.name":
 		if e.complexity.ApiToken.Name == nil {
 			break
 		}
@@ -1341,7 +1341,7 @@ type Mutation {
   updateAccessLevel(input: UpdateAccessLevelInput!): [User!]!
   revokeUserSessions(input: UsersInput!): [User!]!
   createUser(input: CreateUserInput!): User!
-  deleteApiToken(input: DeleteApiTokenInput!): ApiToken!
+  deleteApiToken(input: DeleteApiTokenInput!): APIToken!
   generateApiToken(input: GenerateApiTokenInput!): String!
 }
 
@@ -1426,7 +1426,7 @@ type User {
   creationDate: String!
   lastActivity: String
   activeSessions: Int!
-  apiTokens: [ApiToken!]!
+  apiTokens: [APIToken!]!
 }
 
 enum AccessLevel {
@@ -1435,7 +1435,7 @@ enum AccessLevel {
   ADMIN
 }
 
-type ApiToken {
+type APIToken {
   id: ID!
   name: String!
   creationDate: String!
@@ -2400,7 +2400,7 @@ func (ec *executionContext) _ApiToken_id(ctx context.Context, field graphql.Coll
 
 func (ec *executionContext) fieldContext_ApiToken_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ApiToken",
+		Object:     "APIToken",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2453,7 +2453,7 @@ func (ec *executionContext) _ApiToken_name(ctx context.Context, field graphql.Co
 
 func (ec *executionContext) fieldContext_ApiToken_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ApiToken",
+		Object:     "APIToken",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2483,7 +2483,7 @@ func (ec *executionContext) _ApiToken_creationDate(ctx context.Context, field gr
 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ApiToken().CreationDate(rctx, obj)
+		return ec.resolvers.APIToken().CreationDate(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2506,7 +2506,7 @@ func (ec *executionContext) _ApiToken_creationDate(ctx context.Context, field gr
 
 func (ec *executionContext) fieldContext_ApiToken_creationDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ApiToken",
+		Object:     "APIToken",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -2536,7 +2536,7 @@ func (ec *executionContext) _ApiToken_lastActivity(ctx context.Context, field gr
 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ApiToken().LastActivity(rctx, obj)
+		return ec.resolvers.APIToken().LastActivity(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2555,7 +2555,7 @@ func (ec *executionContext) _ApiToken_lastActivity(ctx context.Context, field gr
 
 func (ec *executionContext) fieldContext_ApiToken_lastActivity(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ApiToken",
+		Object:     "APIToken",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -4923,7 +4923,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteApiToken(ctx context.Con
 			case "lastActivity":
 				return ec.fieldContext_ApiToken_lastActivity(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ApiToken", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type APIToken", field.Name)
 		},
 	}
 
@@ -7861,7 +7861,7 @@ func (ec *executionContext) fieldContext_User_apiTokens(ctx context.Context, fie
 			case "lastActivity":
 				return ec.fieldContext_ApiToken_lastActivity(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ApiToken", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type APIToken", field.Name)
 		},
 	}
 
@@ -12052,7 +12052,7 @@ func (ec *executionContext) unmarshalInputUsersInput(ctx context.Context, obj in
 
 // region    **************************** object.gotpl ****************************
 
-var apiTokenImplementors = []string{"ApiToken"}
+var apiTokenImplementors = []string{"APIToken"}
 
 func (ec *executionContext) _ApiToken(ctx context.Context, sel ast.SelectionSet, obj *entity.APIToken) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, apiTokenImplementors)
@@ -12063,7 +12063,7 @@ func (ec *executionContext) _ApiToken(ctx context.Context, sel ast.SelectionSet,
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("ApiToken")
+			out.Values[i] = graphql.MarshalString("APIToken")
 		case "id":
 			out.Values[i] = ec._ApiToken_id(ctx, field, obj)
 

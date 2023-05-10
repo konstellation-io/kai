@@ -64,6 +64,7 @@ func (v *KrtValidator) getWorkflowsValidationErrors(workflows []krt.Workflow) []
 			existingNodes[node.Name] = true
 
 			if len(node.Subscriptions) < 1 {
+				//nolint:goerr113 // errors need to be dynamically generated
 				validationErrors = append(validationErrors, fmt.Errorf("node %q requires at least one subscription", node.Name))
 			}
 		}
@@ -79,8 +80,10 @@ func (v *KrtValidator) getWorkflowsValidationErrors(workflows []krt.Workflow) []
 
 func (v *KrtValidator) validateExitpoint(workflow krt.Workflow, nodes map[string]bool) error {
 	if workflow.Exitpoint == "" {
+		//nolint:goerr113 // errors need to be dynamically generated
 		return fmt.Errorf("missing exitpoint in workflow \"%s\"", workflow.Name)
 	} else if !isNodeDefined(nodes, workflow.Exitpoint) {
+		//nolint:goerr113 // errors need to be dynamically generated
 		return fmt.Errorf("exitpoint node %q not found in workflow %q nodes", workflow.Exitpoint, workflow.Name)
 	}
 

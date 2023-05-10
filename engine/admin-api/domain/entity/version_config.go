@@ -52,7 +52,8 @@ func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStrea
 func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*WorkflowKeyValueStores, error) {
 	w, ok := v.KeyValueStoresConfig.WorkflowsKeyValueStores[workflow]
 	if !ok {
-		return nil, fmt.Errorf("workflow %q stream config not found", workflow) //nolint:goerr113
+		//nolint:goerr113 // errors need to be dynamic
+		return nil, fmt.Errorf("workflow %q stream config not found", workflow)
 	}
 
 	return w, nil

@@ -4,10 +4,11 @@ import (
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/md5"
+	"crypto/md5" //nolint:gosec // MD5 is used to generate a key
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"io"
 	"time"
 
@@ -158,7 +159,7 @@ func (a *APITokenRepoMongoDB) GetByToken(ctx context.Context, token string) (*en
 	filter := bson.M{"hash": a.hashToken(token)}
 
 	err := a.collection.FindOne(ctx, filter).Decode(&apiToken)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, usecase.ErrAPITokenNotFound
 	}
 
@@ -170,7 +171,7 @@ func (a *APITokenRepoMongoDB) GetByID(ctx context.Context, id string) (*entity.A
 	filter := bson.M{"_id": id}
 
 	err := a.collection.FindOne(ctx, filter).Decode(&apiToken)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, usecase.ErrAPITokenNotFound
 	}
 
@@ -195,7 +196,7 @@ func (a *APITokenRepoMongoDB) GetByUserID(ctx context.Context, userID string) ([
 	return list, err
 }
 
-func (a *APITokenRepoMongoDB) DeleteById(ctx context.Context, id string) error {
+func (a *APITokenRepoMongoDB) DeleteByID(ctx context.Context, id string) error {
 	filter := bson.M{"_id": id}
 
 	result, err := a.collection.DeleteOne(ctx, filter)

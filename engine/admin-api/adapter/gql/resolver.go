@@ -23,7 +23,10 @@ import (
 	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
 )
 
+//nolint:gochecknoglobals // needs to be global to be used in the resolver
 var versionStatusChannels map[string]chan *entity.Version
+
+//nolint:gochecknoglobals // needs to be global to be used in the resolver
 var mux *sync.RWMutex
 
 func initialize() {
@@ -135,6 +138,7 @@ func (r *mutationResolver) StopVersion(ctx context.Context, input StopVersionInp
 }
 
 func (r *mutationResolver) notifyVersionStatus(notifyCh chan *entity.Version) {
+	//nolint:gosimple // legacy code
 	for {
 		select {
 		case v, ok := <-notifyCh:
@@ -227,6 +231,7 @@ func (r *mutationResolver) RemoveUsers(ctx context.Context, input UsersInput) ([
 	loggedUserID := ctx.Value("userID").(string)
 	for _, id := range input.UserIds {
 		if id == loggedUserID {
+			//nolint:goerr113 // errors dynamically generated
 			return nil, errors.New("you cannot remove yourself")
 		}
 	}
@@ -238,6 +243,7 @@ func (r *mutationResolver) UpdateAccessLevel(ctx context.Context, input UpdateAc
 	loggedUserID := ctx.Value("userID").(string)
 	for _, id := range input.UserIds {
 		if id == loggedUserID {
+			//nolint:goerr113 // errors dynamically generated
 			return nil, errors.New("you cannot change your access level")
 		}
 	}
@@ -406,7 +412,8 @@ func (r *subscriptionResolver) WatchNodeStatus(ctx context.Context, versionName,
 	return r.versionInteractor.WatchNodeStatus(ctx, loggedUserID, runtimeID, versionName)
 }
 
-func (r *subscriptionResolver) WatchNodeLogs(ctx context.Context, runtimeID, versionName string, filters entity.LogFilters) (<-chan *entity.NodeLog, error) {
+func (r *subscriptionResolver) WatchNodeLogs(ctx context.Context, runtimeID, versionName string,
+	filters entity.LogFilters) (<-chan *entity.NodeLog, error) {
 	loggedUserID := ctx.Value("userID").(string)
 	return r.versionInteractor.WatchNodeLogs(ctx, loggedUserID, runtimeID, versionName, filters)
 }
@@ -501,7 +508,7 @@ func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionRes
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
 // ApiToken returns APITokenResolver implementation.
-func (r *Resolver) ApiToken() ApiTokenResolver { return &apiTokenResolver{r} }
+func (r *Resolver) APIToken() ApiTokenResolver { return &apiTokenResolver{r} }
 
 // UserActivity returns UserActivityResolver implementation.
 func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityResolver{r} }

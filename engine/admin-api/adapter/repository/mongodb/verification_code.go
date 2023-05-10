@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -46,10 +47,10 @@ func (r *VerificationCodeRepoMongoDB) Store(code, uid string, ttl time.Duration)
 
 func (r *VerificationCodeRepoMongoDB) Get(code string) (*entity.VerificationCode, error) {
 	verificationCode := &entity.VerificationCode{}
-	filter := bson.D{{"code", code}}
+	filter := bson.D{{"code", code}} //nolint:govet // ignore warning about bson.D
 
 	err := r.collection.FindOne(context.Background(), filter).Decode(&verificationCode)
-	if err == mongo.ErrNoDocuments {
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return verificationCode, usecase.ErrVerificationCodeNotFound
 	}
 
@@ -57,6 +58,7 @@ func (r *VerificationCodeRepoMongoDB) Get(code string) (*entity.VerificationCode
 }
 
 func (r *VerificationCodeRepoMongoDB) Delete(code string) error {
+	//nolint:govet // ignore warning about bson.D
 	res, err := r.collection.DeleteOne(context.Background(), bson.D{{"code", code}})
 
 	if err != nil {

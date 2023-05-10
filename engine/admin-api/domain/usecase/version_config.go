@@ -94,7 +94,8 @@ func fillNewConfWithExisting(currentConfig map[string]string, krtYml *krt.Krt) e
 	return conf
 }
 
-func appendConfValue(conf *entity.VersionUserConfig, currentConfig map[string]string, key string, varType entity.ConfigurationVariableType) {
+func appendConfValue(conf *entity.VersionUserConfig, currentConfig map[string]string,
+	key string, varType entity.ConfigurationVariableType) {
 	val := ""
 	if previousVal, ok := currentConfig[key]; ok {
 		val = previousVal

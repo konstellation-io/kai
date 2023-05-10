@@ -86,7 +86,7 @@ func (a *AuthController) SignInVerify(c echo.Context) error {
 
 	a.logger.Info("Verifying authorization code.")
 
-	userId, err := a.authInteractor.VerifyCode(input.VerificationCode)
+	userID, err := a.authInteractor.VerifyCode(input.VerificationCode)
 	if err != nil {
 		switch err {
 		case usecase.ErrExpiredVerificationCode, usecase.ErrVerificationCodeNotFound:
@@ -97,7 +97,7 @@ func (a *AuthController) SignInVerify(c echo.Context) error {
 		}
 	}
 
-	jwtToken, expirationDate, err := a.generateAccessToken(c.Request().Context(), userId)
+	jwtToken, expirationDate, err := a.generateAccessToken(c.Request().Context(), userID)
 	if err != nil {
 		a.logger.Errorf("Error generating token: %s", err)
 		return httperrors.HTTPErrUnexpected
@@ -107,7 +107,7 @@ func (a *AuthController) SignInVerify(c echo.Context) error {
 	auth.CreateSessionCookie(c, a.cfg, jwtToken, *expirationDate)
 
 	err = a.authInteractor.CreateSession(entity.Session{
-		UserID:         userId,
+		UserID:         userID,
 		Token:          jwtToken,
 		CreationDate:   time.Now(),
 		ExpirationDate: *expirationDate,
@@ -156,7 +156,7 @@ func (a *AuthController) SignInWithAPIToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"access_token": jwtToken})
 }
 
-func (a *AuthController) generateAccessToken(c context.Context, userId string) (string, *time.Time, error) {
+func (a *AuthController) generateAccessToken(c context.Context, userID string) (string, *time.Time, error) {
 	a.logger.Info("Generating JWT token.")
 
 	setting, err := a.settingInteractor.GetUnprotected(c)
@@ -168,7 +168,7 @@ func (a *AuthController) generateAccessToken(c context.Context, userId string) (
 	expirationDate := time.Now().Add(ttl)
 
 	claims := jwt.StandardClaims{
-		Subject:   userId,
+		Subject:   userID,
 		ExpiresAt: expirationDate.Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

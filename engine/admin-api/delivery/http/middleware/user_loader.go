@@ -42,6 +42,7 @@ func NewUserLoader(userInteractor *usecase.UserInteractor) echo.MiddlewareFunc {
 					return result, nil
 				},
 			})
+			//nolint:staticcheck // legacy code
 			ctx := context.WithValue(r.Context(), UserLoaderKey, userLoader)
 
 			r = r.WithContext(ctx)

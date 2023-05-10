@@ -50,7 +50,7 @@ func newMetricsSuite(t *testing.T) *metricsSuite {
 	}
 }
 
-//nolint:funlen
+//nolint:funlen // test code
 func TestMetricsInteractor_CalculateMetrics(t *testing.T) {
 	s := newMetricsSuite(t)
 	defer s.ctrl.Finish()
