@@ -78,6 +78,7 @@ func NewConfig() *Config {
 
 		cfg = &Config{}
 		decoder := yaml.NewDecoder(f)
+
 		err = decoder.Decode(cfg)
 		if err != nil {
 			panic(err)

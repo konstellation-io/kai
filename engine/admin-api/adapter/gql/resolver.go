@@ -26,7 +26,7 @@ import (
 var versionStatusChannels map[string]chan *entity.Version
 var mux *sync.RWMutex
 
-func init() {
+func initialize() {
 	versionStatusChannels = map[string]chan *entity.Version{}
 	mux = &sync.RWMutex{}
 }
@@ -54,6 +54,8 @@ func NewGraphQLResolver(
 	authInteractor usecase.AuthInteracter,
 	cfg *config.Config,
 ) *Resolver {
+	initialize()
+
 	return &Resolver{
 		logger,
 		runtimeInteractor,
@@ -90,6 +92,7 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 			extensions := make(map[string]interface{})
 			extensions["code"] = "krt_validation_error"
 			extensions["details"] = errs.Messages
+
 			return nil, &gqlerror.Error{
 				Message:    "the krt.yml file contains errors",
 				Extensions: extensions,
@@ -161,6 +164,7 @@ func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVers
 
 func (r *mutationResolver) UpdateSettings(ctx context.Context, input SettingsInput) (*entity.Settings, error) {
 	loggedUserID := ctx.Value("userID").(string)
+
 	settings, err := r.settingInteractor.Get(ctx, loggedUserID)
 	if err != nil {
 		return nil, err
@@ -201,6 +205,7 @@ func (r *mutationResolver) UpdateSettings(ctx context.Context, input SettingsInp
 
 func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, input UpdateConfigurationInput) (*entity.Version, error) {
 	loggedUserID := ctx.Value("userID").(string)
+
 	v, err := r.versionInteractor.GetByName(ctx, loggedUserID, input.RuntimeID, input.VersionName)
 	if err != nil {
 		return nil, err
@@ -361,6 +366,7 @@ func (r *runtimeResolver) PublishedVersion(ctx context.Context, obj *entity.Runt
 	if obj.PublishedVersion != "" {
 		return r.versionInteractor.GetByID(obj.ID, obj.PublishedVersion)
 	}
+
 	return nil, nil
 }
 
@@ -380,6 +386,7 @@ func (r *subscriptionResolver) WatchVersion(ctx context.Context) (<-chan *entity
 	id := uuid.New().String()
 
 	versionStatusCh := make(chan *entity.Version, 1)
+
 	go func() {
 		<-ctx.Done()
 		mux.Lock()
@@ -423,6 +430,7 @@ func (r *userResolver) LastActivity(_ context.Context, obj *entity.User) (*strin
 	}
 
 	date := obj.LastActivity.Format(time.RFC3339)
+
 	return &date, nil
 }
 
@@ -444,6 +452,7 @@ func (a apiTokenResolver) LastActivity(ctx context.Context, obj *entity.APIToken
 	}
 
 	date := obj.LastActivity.Format(time.RFC3339)
+
 	return &date, nil
 }
 
@@ -460,7 +469,9 @@ func (r *versionResolver) PublicationDate(_ context.Context, obj *entity.Version
 	if obj.PublicationDate == nil {
 		return nil, nil
 	}
+
 	result := obj.PublicationDate.Format(time.RFC3339)
+
 	return &result, nil
 }
 
@@ -470,6 +481,7 @@ func (r *versionResolver) PublicationAuthor(ctx context.Context, obj *entity.Ver
 	}
 
 	userLoader := ctx.Value(middleware.UserLoaderKey).(*dataloader.UserLoader)
+
 	return userLoader.Load(*obj.PublicationUserID)
 }
 

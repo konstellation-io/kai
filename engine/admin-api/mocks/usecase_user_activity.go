@@ -27,6 +27,7 @@ type MockUserActivityInteracterMockRecorder struct {
 func NewMockUserActivityInteracter(ctrl *gomock.Controller) *MockUserActivityInteracter {
 	mock := &MockUserActivityInteracter{ctrl: ctrl}
 	mock.recorder = &MockUserActivityInteracterMockRecorder{mock}
+
 	return mock
 }
 
@@ -41,6 +42,7 @@ func (m *MockUserActivityInteracter) Get(ctx context.Context, loggedUserID strin
 	ret := m.ctrl.Call(m, "Get", ctx, loggedUserID, userEmail, types, versionIds, fromDate, toDate, lastID)
 	ret0, _ := ret[0].([]*entity.UserActivity)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -55,6 +57,7 @@ func (m *MockUserActivityInteracter) NewUpdateSettingVars(settingName, oldValue,
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NewUpdateSettingVars", settingName, oldValue, newValue)
 	ret0, _ := ret[0].([]*entity.UserActivityVar)
+
 	return ret0
 }
 
@@ -69,6 +72,7 @@ func (m *MockUserActivityInteracter) RegisterCreateAction(userID, runtimeID stri
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterCreateAction", userID, runtimeID, version)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -83,6 +87,7 @@ func (m *MockUserActivityInteracter) RegisterCreateRuntime(userID string, runtim
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterCreateRuntime", userID, runtime)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -109,6 +114,7 @@ func (m *MockUserActivityInteracter) RegisterDeleteAPIToken(userID, apiTokenName
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterDeleteAPIToken", userID, apiTokenName)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -123,6 +129,7 @@ func (m *MockUserActivityInteracter) RegisterGenerateAPIToken(userID, apiTokenNa
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterGenerateAPIToken", userID, apiTokenName)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -137,6 +144,7 @@ func (m *MockUserActivityInteracter) RegisterLogin(userID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterLogin", userID)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -151,6 +159,7 @@ func (m *MockUserActivityInteracter) RegisterLogout(userID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterLogout", userID)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -165,6 +174,7 @@ func (m *MockUserActivityInteracter) RegisterPublishAction(userID, runtimeID str
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterPublishAction", userID, runtimeID, version, prev, comment)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -203,6 +213,7 @@ func (m *MockUserActivityInteracter) RegisterStartAction(userID, runtimeID strin
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterStartAction", userID, runtimeID, version, comment)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -217,6 +228,7 @@ func (m *MockUserActivityInteracter) RegisterStopAction(userID, runtimeID string
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterStopAction", userID, runtimeID, version, comment)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -231,6 +243,7 @@ func (m *MockUserActivityInteracter) RegisterUnpublishAction(userID, runtimeID s
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterUnpublishAction", userID, runtimeID, version, comment)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -257,6 +270,7 @@ func (m *MockUserActivityInteracter) RegisterUpdateSettings(userID string, vars 
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterUpdateSettings", userID, vars)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

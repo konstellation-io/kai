@@ -61,6 +61,7 @@ func (i *SettingInteractor) CreateDefaults(ctx context.Context) error {
 		}
 
 		i.logger.Infof("Creating default values for settings")
+
 		return i.settingRepo.Create(s)
 	}
 

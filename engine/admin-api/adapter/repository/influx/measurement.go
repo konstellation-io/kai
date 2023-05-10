@@ -32,13 +32,14 @@ func (m *MeasurementRepoInfluxDB) CreateDatabase(runtimeID string) error {
 	}
 
 	//nolint:gosec // The call is created with controlled parameters, it is not a user input.
-	response, err := http.Post(query, "application/x-www-form-urlencoded", nil)
+	response, err := http.Post(query, "application/x-www-form-urlencoded", nil) //nolint:bodyclose
 	if err != nil {
 		return err
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("influxdb database creation error: %d", response.StatusCode) //nolint:goerr113
+		//nolint:goerr113 // error needs to be dynamically generated
+		return fmt.Errorf("influxdb database creation error: %d", response.StatusCode)
 	}
 
 	m.logger.Infof("influxdb database %q successfully created", runtimeID)

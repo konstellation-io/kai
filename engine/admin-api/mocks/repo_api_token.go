@@ -27,6 +27,7 @@ type MockAPITokenRepoMockRecorder struct {
 func NewMockAPITokenRepo(ctrl *gomock.Controller) *MockAPITokenRepo {
 	mock := &MockAPITokenRepo{ctrl: ctrl}
 	mock.recorder = &MockAPITokenRepoMockRecorder{mock}
+
 	return mock
 }
 
@@ -40,6 +41,7 @@ func (m *MockAPITokenRepo) Create(ctx context.Context, apiToken entity.APIToken,
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, apiToken, code)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -54,6 +56,7 @@ func (m *MockAPITokenRepo) DeleteById(ctx context.Context, token string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteById", ctx, token)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -68,6 +71,7 @@ func (m *MockAPITokenRepo) DeleteByUserIDs(ctx context.Context, userIDs []string
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteByUserIDs", ctx, userIDs)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -83,6 +87,7 @@ func (m *MockAPITokenRepo) GenerateCode(userID string) (string, error) {
 	ret := m.ctrl.Call(m, "GenerateCode", userID)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -98,6 +103,7 @@ func (m *MockAPITokenRepo) GetByID(ctx context.Context, id string) (*entity.APIT
 	ret := m.ctrl.Call(m, "GetByID", ctx, id)
 	ret0, _ := ret[0].(*entity.APIToken)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -113,6 +119,7 @@ func (m *MockAPITokenRepo) GetByToken(ctx context.Context, token string) (*entit
 	ret := m.ctrl.Call(m, "GetByToken", ctx, token)
 	ret0, _ := ret[0].(*entity.APIToken)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -128,6 +135,7 @@ func (m *MockAPITokenRepo) GetByUserID(ctx context.Context, userID string) ([]*e
 	ret := m.ctrl.Call(m, "GetByUserID", ctx, userID)
 	ret0, _ := ret[0].([]*entity.APIToken)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -142,6 +150,7 @@ func (m *MockAPITokenRepo) UpdateLastActivity(ctx context.Context, id string) er
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateLastActivity", ctx, id)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

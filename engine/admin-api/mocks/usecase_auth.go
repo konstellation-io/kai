@@ -27,6 +27,7 @@ type MockAuthInteracterMockRecorder struct {
 func NewMockAuthInteracter(ctrl *gomock.Controller) *MockAuthInteracter {
 	mock := &MockAuthInteracter{ctrl: ctrl}
 	mock.recorder = &MockAuthInteracterMockRecorder{mock}
+
 	return mock
 }
 
@@ -40,6 +41,7 @@ func (m *MockAuthInteracter) CheckSessionIsActive(token string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckSessionIsActive", token)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -55,6 +57,7 @@ func (m *MockAuthInteracter) CountUserSessions(ctx context.Context, userID strin
 	ret := m.ctrl.Call(m, "CountUserSessions", ctx, userID)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -69,6 +72,7 @@ func (m *MockAuthInteracter) CreateSession(session entity.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSession", session)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -83,6 +87,7 @@ func (m *MockAuthInteracter) Logout(userID, token string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Logout", userID, token)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -97,6 +102,7 @@ func (m *MockAuthInteracter) RevokeUserSessions(userIDs []string, loggedUser, co
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RevokeUserSessions", userIDs, loggedUser, comment)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -111,6 +117,7 @@ func (m *MockAuthInteracter) SignIn(ctx context.Context, email string, verificat
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignIn", ctx, email, verificationCodeDurationInMinutes)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -125,6 +132,7 @@ func (m *MockAuthInteracter) UpdateLastActivity(loggedUserID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateLastActivity", loggedUserID)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -140,6 +148,7 @@ func (m *MockAuthInteracter) VerifyAPIToken(ctx context.Context, apiToken string
 	ret := m.ctrl.Call(m, "VerifyAPIToken", ctx, apiToken)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -155,6 +164,7 @@ func (m *MockAuthInteracter) VerifyCode(code string) (string, error) {
 	ret := m.ctrl.Call(m, "VerifyCode", code)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 

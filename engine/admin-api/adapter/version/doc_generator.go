@@ -69,6 +69,7 @@ func (g *HTTPStaticDocGenerator) processMarkdownFiles(docFolder, versionSubfolde
 
 		if imgRegExp.Match(fileContent) {
 			g.logger.Debugf("[HTTPStaticDocGenerator] Found relative images into the file %s", info.Name())
+
 			newFileContent, err := g.replaceRelativeImgs(fileContent, versionSubfolder)
 			if err != nil {
 				return fmt.Errorf("error replacing relative images in doc files: %w", err)

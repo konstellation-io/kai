@@ -141,6 +141,7 @@ func TestUserGenerateAPIToken(t *testing.T) {
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).DoAndReturn(func(activity entity.UserActivity) error {
 		require.Equal(t, entity.UserActivityTypeGenerateAPIToken, activity.Type)
 		require.Equal(t, userID, activity.UserID)
+
 		return nil
 	})
 
@@ -167,6 +168,7 @@ func TestDeleteAPIToken(t *testing.T) {
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).DoAndReturn(func(activity entity.UserActivity) error {
 		require.Equal(t, entity.UserActivityTypeDeleteAPIToken, activity.Type)
 		require.Equal(t, userID, activity.UserID)
+
 		return nil
 	})
 

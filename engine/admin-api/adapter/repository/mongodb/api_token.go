@@ -43,6 +43,7 @@ func NewAPITokenRepoMongoDB(
 
 	apiTokens.createIndexes()
 	err := apiTokens.createSecretKey()
+
 	if err != nil {
 		return nil, err
 	}
@@ -69,15 +70,19 @@ func (a *APITokenRepoMongoDB) createIndexes() {
 
 func (a *APITokenRepoMongoDB) createSecretKey() error {
 	salt, err := a.salt()
+
 	if err != nil {
 		return err
 	}
+
 	key, err := scrypt.Key([]byte(a.cfg.Auth.APITokenSecret), salt, 256*256, 8, 1, 16)
+
 	if err != nil {
 		return err
 	}
 
 	a.tokenSecretKey = key
+
 	return nil
 }
 
@@ -93,16 +98,19 @@ func (a *APITokenRepoMongoDB) salt() ([]byte, error) {
 func (a *APITokenRepoMongoDB) hashToken(token string) string {
 	// NOTE: uncomment this line if we want to invalidate all existing tokens when the config secret changes
 	// hash := md5.Sum(append([]byte(token), []byte(a.cfg.Auth.APITokenSecret)...))
-	hash := md5.Sum([]byte(token))
+	hash := md5.Sum([]byte(token)) //nolint:gosec // This api token file will be removed in future versions
 	return hex.EncodeToString(hash[:])
 }
 
 func (a *APITokenRepoMongoDB) GenerateCode(userID string) (string, error) {
 	block, err := aes.NewCipher(a.tokenSecretKey)
+
 	if err != nil {
 		return "", err
 	}
+
 	salt, err := a.salt()
+
 	if err != nil {
 		return "", err
 	}
@@ -110,9 +118,11 @@ func (a *APITokenRepoMongoDB) GenerateCode(userID string) (string, error) {
 	b := base64.StdEncoding.EncodeToString(append([]byte(userID), salt...))
 	token := make([]byte, aes.BlockSize+len(b))
 	iv := token[:aes.BlockSize]
+
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return "", err
 	}
+
 	cfb := cipher.NewCFBEncrypter(block, iv)
 	cfb.XORKeyStream(token[aes.BlockSize:], []byte(b))
 
@@ -130,6 +140,7 @@ func (a *APITokenRepoMongoDB) Create(ctx context.Context, apiToken entity.APITok
 	if total > 0 {
 		return usecase.ErrAPITokenNameDup
 	}
+
 	if err != nil {
 		return err
 	}
@@ -168,6 +179,7 @@ func (a *APITokenRepoMongoDB) GetByID(ctx context.Context, id string) (*entity.A
 
 func (a *APITokenRepoMongoDB) GetByUserID(ctx context.Context, userID string) ([]*entity.APIToken, error) {
 	var list []*entity.APIToken
+
 	filter := bson.M{"userId": userID}
 
 	cursor, err := a.collection.Find(ctx, filter)

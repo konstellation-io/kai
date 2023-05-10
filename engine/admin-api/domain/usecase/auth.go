@@ -110,6 +110,7 @@ var (
 // SignIn creates a temporal on-time-use verification code associated with the user and sends it to the user in the form of a “login link” via email, sms or whatever.
 func (a *AuthInteractor) SignIn(ctx context.Context, email string, verificationCodeDurationInMinutes int) error {
 	validate := validator.New()
+
 	err := validate.Var(email, "required,email")
 	if err != nil {
 		return ErrUserEmailInvalid
@@ -117,6 +118,7 @@ func (a *AuthInteractor) SignIn(ctx context.Context, email string, verificationC
 
 	user, err := a.userRepo.GetByEmail(email)
 	isNewUser := false
+
 	if err == ErrUserNotFound {
 		isNewUser = true
 	} else if err != nil {
@@ -161,6 +163,7 @@ func (a *AuthInteractor) SignIn(ctx context.Context, email string, verificationC
 	}
 
 	a.logger.Info("Creating a new verification code...")
+
 	ttl := time.Duration(verificationCodeDurationInMinutes) * time.Minute
 	verificationCode := a.verificationCodeGenerator.Generate()
 
@@ -170,6 +173,7 @@ func (a *AuthInteractor) SignIn(ctx context.Context, email string, verificationC
 	}
 
 	a.logger.Info("Sending login link...")
+
 	return a.loginLinkTransport.Send(user.Email, verificationCode)
 }
 
@@ -209,6 +213,7 @@ func (a *AuthInteractor) VerifyCode(code string) (string, error) {
 	}
 
 	a.logger.Info("The verification code is valid")
+
 	err = a.userActivityInteractor.RegisterLogin(verificationCode.UID)
 	if err != nil {
 		return "", err
@@ -274,6 +279,7 @@ func (a *AuthInteractor) CheckSessionIsActive(token string) error {
 		if err != nil {
 			a.logger.Errorf("Error deleting session: %s", err)
 		}
+
 		return ErrExpiredSession
 	}
 
@@ -288,6 +294,7 @@ func (a *AuthInteractor) RevokeUserSessions(userIDs []string, loggedUser, commen
 
 	foundUserIDs := make([]string, len(users))
 	foundUserEmails := make([]string, len(users))
+
 	for i, u := range users {
 		foundUserIDs[i] = u.ID
 		foundUserEmails[i] = u.Email
@@ -312,5 +319,6 @@ func (a *AuthInteractor) CountUserSessions(ctx context.Context, userID string) (
 	if err != nil {
 		return -1, err
 	}
+
 	return len(sessions), nil
 }

@@ -25,6 +25,7 @@ type MockVerificationCodeGeneratorMockRecorder struct {
 func NewMockVerificationCodeGenerator(ctrl *gomock.Controller) *MockVerificationCodeGenerator {
 	mock := &MockVerificationCodeGenerator{ctrl: ctrl}
 	mock.recorder = &MockVerificationCodeGeneratorMockRecorder{mock}
+
 	return mock
 }
 
@@ -38,6 +39,7 @@ func (m *MockVerificationCodeGenerator) Generate() string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Generate")
 	ret0, _ := ret[0].(string)
+
 	return ret0
 }
 

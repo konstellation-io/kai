@@ -27,6 +27,7 @@ type MockVersionServiceMockRecorder struct {
 func NewMockVersionService(ctrl *gomock.Controller) *MockVersionService {
 	mock := &MockVersionService{ctrl: ctrl}
 	mock.recorder = &MockVersionServiceMockRecorder{mock}
+
 	return mock
 }
 
@@ -40,6 +41,7 @@ func (m *MockVersionService) Publish(runtimeID string, version *entity.Version) 
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Publish", runtimeID, version)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -54,6 +56,7 @@ func (m *MockVersionService) Start(ctx context.Context, runtimeID string, versio
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Start", ctx, runtimeID, version, versionConfig)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -68,6 +71,7 @@ func (m *MockVersionService) Stop(ctx context.Context, runtimeID string, version
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Stop", ctx, runtimeID, version)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -82,6 +86,7 @@ func (m *MockVersionService) Unpublish(runtimeID string, version *entity.Version
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Unpublish", runtimeID, version)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -96,6 +101,7 @@ func (m *MockVersionService) UpdateConfig(runtimeID string, version *entity.Vers
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateConfig", runtimeID, version)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -111,6 +117,7 @@ func (m *MockVersionService) WatchNodeStatus(ctx context.Context, runtimeID, ver
 	ret := m.ctrl.Call(m, "WatchNodeStatus", ctx, runtimeID, versionName)
 	ret0, _ := ret[0].(<-chan *entity.Node)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 

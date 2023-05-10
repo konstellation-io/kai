@@ -21,6 +21,7 @@ type UserActivityRepoMongoDB struct {
 
 func NewUserActivityRepoMongoDB(cfg *config.Config, logger logging.Logger, client *mongo.Client) *UserActivityRepoMongoDB {
 	collection := client.Database(cfg.MongoDB.DBName).Collection("userActivity")
+
 	return &UserActivityRepoMongoDB{
 		cfg,
 		logger,
@@ -28,6 +29,7 @@ func NewUserActivityRepoMongoDB(cfg *config.Config, logger logging.Logger, clien
 	}
 }
 
+//nolint:gocyclo,nestif
 func (r *UserActivityRepoMongoDB) Get(
 	ctx context.Context,
 	userIDs []string,
@@ -64,6 +66,7 @@ func (r *UserActivityRepoMongoDB) Get(
 			if err != nil {
 				return nil, err
 			}
+
 			filterDate["$gte"] = from
 		}
 
@@ -72,6 +75,7 @@ func (r *UserActivityRepoMongoDB) Get(
 			if err != nil {
 				return nil, err
 			}
+
 			to = time.Date(to.Year(), to.Month(), to.Day(), 23, 59, 59, 999999999, to.Location())
 			filterDate["$lte"] = to
 		}
@@ -80,7 +84,9 @@ func (r *UserActivityRepoMongoDB) Get(
 	}
 
 	var activities []*entity.UserActivity
+
 	opts := options.Find().SetSort(bson.D{{"_id", -1}}).SetLimit(limit)
+
 	cursor, err := r.collection.Find(ctx, filter, opts)
 	if err != nil {
 		return activities, err

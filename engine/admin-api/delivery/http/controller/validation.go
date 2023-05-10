@@ -6,13 +6,6 @@ import (
 	"github.com/go-playground/validator"
 )
 
-var universalTranslator *ut.UniversalTranslator
-
-func init() {
-	enLocale := en.New()
-	universalTranslator = ut.New(enLocale, enLocale)
-}
-
 type responseValidationError struct {
 	Code             string            `json:"code"`
 	Message          string            `json:"message"`
@@ -26,6 +19,11 @@ type validationError struct {
 }
 
 func newResponseValidationError(err error) *responseValidationError {
+	var universalTranslator *ut.UniversalTranslator
+
+	enLocale := en.New()
+	universalTranslator = ut.New(enLocale, enLocale)
+
 	res := &responseValidationError{}
 	res.Code = "validation_error"
 	res.Message = "Invalid data"

@@ -160,6 +160,7 @@ func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]
 				if err != nil {
 					return nil, err
 				}
+
 				nodeToAppend.ObjectStore = &natspb.ObjectStore{
 					Name:  node.ObjectStore.Name,
 					Scope: scope,
@@ -184,6 +185,7 @@ func (n *NatsManagerClient) getWorkflowsEntrypoints(version *entity.Version) []s
 	for _, workflow := range version.Workflows {
 		workflowsEntrypoints = append(workflowsEntrypoints, workflow.Entrypoint)
 	}
+
 	return workflowsEntrypoints
 }
 

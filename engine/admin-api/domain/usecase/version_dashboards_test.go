@@ -40,7 +40,9 @@ func newVersionDashboardsSuite(t *testing.T) *versionDashboardsSuite {
 
 	mocks.AddLoggerExpects(logger)
 
-	versionInteractor := NewVersionInteractor(cfg, logger, versionRepo, runtimeRepo, versionService, natsManagerService, userActivityInteractor, accessControl, idGenerator, docGenerator, dashboardService, nodeLogRepo)
+	versionInteractor := NewVersionInteractor(cfg, logger, versionRepo, runtimeRepo, versionService,
+		natsManagerService, userActivityInteractor, accessControl, idGenerator, docGenerator,
+		dashboardService, nodeLogRepo)
 
 	return &versionDashboardsSuite{ctrl: ctrl,
 		versionInteractor: versionInteractor,

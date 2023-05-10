@@ -15,6 +15,7 @@ func (e AccessLevel) IsValid() bool {
 	case AccessLevelViewer, AccessLevelManager, AccessLevelAdmin:
 		return true
 	}
+
 	return false
 }
 

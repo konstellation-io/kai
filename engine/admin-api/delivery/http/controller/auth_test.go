@@ -38,6 +38,7 @@ func TestSignInWithAPIToken(t *testing.T) {
 	e.Validator = &testValidator{validator: validator.New()}
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(apiTokenJSON))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	authInteractor.EXPECT().VerifyAPIToken(c.Request().Context(), "123456").Return(userID, nil)

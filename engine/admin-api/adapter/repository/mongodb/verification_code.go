@@ -21,6 +21,7 @@ type VerificationCodeRepoMongoDB struct {
 
 func NewVerificationCodeRepoMongoDB(cfg *config.Config, logger logging.Logger, client *mongo.Client) *VerificationCodeRepoMongoDB {
 	collection := client.Database(cfg.MongoDB.DBName).Collection("verificationCodes")
+
 	return &VerificationCodeRepoMongoDB{
 		cfg,
 		logger,
@@ -63,5 +64,6 @@ func (r *VerificationCodeRepoMongoDB) Delete(code string) error {
 	}
 
 	r.logger.Infof("Deleted %v verification code", res.DeletedCount)
+
 	return nil
 }

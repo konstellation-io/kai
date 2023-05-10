@@ -27,6 +27,7 @@ type MockSessionRepoMockRecorder struct {
 func NewMockSessionRepo(ctrl *gomock.Controller) *MockSessionRepo {
 	mock := &MockSessionRepo{ctrl: ctrl}
 	mock.recorder = &MockSessionRepoMockRecorder{mock}
+
 	return mock
 }
 
@@ -40,6 +41,7 @@ func (m *MockSessionRepo) Create(session entity.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", session)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -54,6 +56,7 @@ func (m *MockSessionRepo) DeleteByToken(token string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteByToken", token)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -68,6 +71,7 @@ func (m *MockSessionRepo) DeleteByUserIDs(userIDs []string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteByUserIDs", userIDs)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -83,6 +87,7 @@ func (m *MockSessionRepo) GetByToken(token string) (entity.Session, error) {
 	ret := m.ctrl.Call(m, "GetByToken", token)
 	ret0, _ := ret[0].(entity.Session)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -98,6 +103,7 @@ func (m *MockSessionRepo) GetUserSessions(ctx context.Context, userID string) ([
 	ret := m.ctrl.Call(m, "GetUserSessions", ctx, userID)
 	ret0, _ := ret[0].([]entity.Session)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 

@@ -27,6 +27,7 @@ type MockVersionRepoMockRecorder struct {
 func NewMockVersionRepo(ctrl *gomock.Controller) *MockVersionRepo {
 	mock := &MockVersionRepo{ctrl: ctrl}
 	mock.recorder = &MockVersionRepoMockRecorder{mock}
+
 	return mock
 }
 
@@ -41,6 +42,7 @@ func (m *MockVersionRepo) ClearPublishedVersion(ctx context.Context, runtimeID s
 	ret := m.ctrl.Call(m, "ClearPublishedVersion", ctx, runtimeID)
 	ret0, _ := ret[0].(*entity.Version)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -56,6 +58,7 @@ func (m *MockVersionRepo) Create(userID, runtimeID string, version *entity.Versi
 	ret := m.ctrl.Call(m, "Create", userID, runtimeID, version)
 	ret0, _ := ret[0].(*entity.Version)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -70,6 +73,7 @@ func (m *MockVersionRepo) CreateIndexes(ctx context.Context, runtimeID string) e
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateIndexes", ctx, runtimeID)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -85,6 +89,7 @@ func (m *MockVersionRepo) GetAll(runtimeID string) ([]*entity.Version, error) {
 	ret := m.ctrl.Call(m, "GetAll", runtimeID)
 	ret0, _ := ret[0].([]*entity.Version)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -100,6 +105,7 @@ func (m *MockVersionRepo) GetByID(runtimeID, versionId string) (*entity.Version,
 	ret := m.ctrl.Call(m, "GetByID", runtimeID, versionId)
 	ret0, _ := ret[0].(*entity.Version)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -115,6 +121,7 @@ func (m *MockVersionRepo) GetByName(ctx context.Context, runtimeID, name string)
 	ret := m.ctrl.Call(m, "GetByName", ctx, runtimeID, name)
 	ret0, _ := ret[0].(*entity.Version)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -130,6 +137,7 @@ func (m *MockVersionRepo) GetByRuntime(runtimeID string) ([]*entity.Version, err
 	ret := m.ctrl.Call(m, "GetByRuntime", runtimeID)
 	ret0, _ := ret[0].([]*entity.Version)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -145,6 +153,7 @@ func (m *MockVersionRepo) SetErrors(ctx context.Context, runtimeID string, versi
 	ret := m.ctrl.Call(m, "SetErrors", ctx, runtimeID, version, errorMessages)
 	ret0, _ := ret[0].(*entity.Version)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -159,6 +168,7 @@ func (m *MockVersionRepo) SetHasDoc(ctx context.Context, runtimeID, versionID st
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetHasDoc", ctx, runtimeID, versionID, hasDoc)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -173,6 +183,7 @@ func (m *MockVersionRepo) SetStatus(ctx context.Context, runtimeID, versionID st
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetStatus", ctx, runtimeID, versionID, status)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -187,6 +198,7 @@ func (m *MockVersionRepo) Update(runtimeID string, version *entity.Version) erro
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", runtimeID, version)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -201,6 +213,7 @@ func (m *MockVersionRepo) UploadKRTFile(runtimeID string, version *entity.Versio
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UploadKRTFile", runtimeID, version, file)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

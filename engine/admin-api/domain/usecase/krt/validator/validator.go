@@ -27,13 +27,17 @@ func NewKrtValidator(logger logging.Logger, fieldsValidator FieldsValidator) Val
 
 func (v *KrtValidator) Run(krtYaml *krt.Krt) error {
 	v.logger.Info("Validating krt.yml")
+
 	var errs []error
+
 	fieldValidationErrors := v.fieldsValidator.Run(krtYaml)
+
 	if fieldValidationErrors != nil {
 		errs = append(errs, fieldValidationErrors...)
 	}
 
 	workflowValidationErrors := v.getWorkflowsValidationErrors(krtYaml.Workflows)
+
 	if workflowValidationErrors != nil {
 		errs = append(errs, workflowValidationErrors...)
 	}
@@ -47,6 +51,7 @@ func (v *KrtValidator) Run(krtYaml *krt.Krt) error {
 
 func (v *KrtValidator) getWorkflowsValidationErrors(workflows []krt.Workflow) []error {
 	var validationErrors []error
+
 	for _, workflow := range workflows {
 		existingNodes := make(map[string]bool, len(workflow.Nodes))
 		for _, node := range workflow.Nodes {
@@ -57,6 +62,7 @@ func (v *KrtValidator) getWorkflowsValidationErrors(workflows []krt.Workflow) []
 			}
 
 			existingNodes[node.Name] = true
+
 			if len(node.Subscriptions) < 1 {
 				validationErrors = append(validationErrors, fmt.Errorf("node %q requires at least one subscription", node.Name))
 			}
@@ -67,6 +73,7 @@ func (v *KrtValidator) getWorkflowsValidationErrors(workflows []krt.Workflow) []
 			validationErrors = append(validationErrors, exitpointError)
 		}
 	}
+
 	return validationErrors
 }
 

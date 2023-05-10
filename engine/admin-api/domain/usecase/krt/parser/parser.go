@@ -106,7 +106,9 @@ func (p *Parser) Extract(krtFilePath string) error {
 func (p *Parser) ValidateContent(krtFile *krt.Krt) []error {
 	p.logger.Info("Validating KRT src paths")
 	errors := validator.ValidateSrcPaths(krtFile, p.dstDir)
+
 	if len(errors) > 0 {
+		//nolint:goerr113 // Errors needs to be dynamically generated
 		errors = append([]error{fmt.Errorf("error on KRT Src validation")}, errors...)
 	}
 
@@ -134,11 +136,11 @@ func generateKrt(yamlFile string) (*krt.Krt, error) {
 func (p *Parser) extractKrtYaml(krtFilePath, dstDir string) (string, error) {
 	krtFile, err := os.Open(krtFilePath)
 
-	defer krtFile.Close()
-
 	if err != nil {
 		return "", fmt.Errorf("error Opening KRT file: %w", err)
 	}
+
+	defer krtFile.Close()
 
 	uncompressed, err := gzip.NewReader(krtFile)
 
@@ -154,32 +156,39 @@ func (p *Parser) extractKrtYaml(krtFilePath, dstDir string) (string, error) {
 		if err == io.EOF {
 			break
 		}
+
 		if err != nil {
 			return "", fmt.Errorf("error reading krt file: %w", err)
 		}
 
-		filePath := filepath.Join(dstDir, tarFile.Name) //nolint:gosec
+		filePath := filepath.Join(dstDir, tarFile.Name) //nolint:gosec // Path joining is secure
 
 		if reYamlFile.MatchString(tarFile.Name) {
 			err = p.processFile(tarReader, filePath, tarFile.Typeflag)
+
 			if err != nil {
 				return "", err
 			}
+
 			return filePath, nil
 		}
 	}
 
+	//nolint:goerr113 // Errors needs to be dynamically generated
 	return "", fmt.Errorf("error krt.yml file missing")
 }
 
 func (p *Parser) extractKrtFile(krtFilePath, dstDir string) (*Metadata, error) {
 	krtFile, err := os.Open(krtFilePath)
-	defer krtFile.Close()
+
 	if err != nil {
 		return nil, fmt.Errorf("error Opening KRT file: %w", err)
 	}
 
+	defer krtFile.Close()
+
 	meta := &Metadata{}
+
 	uncompressed, err := gzip.NewReader(krtFile)
 	if err != nil {
 		return nil, fmt.Errorf("error Decompressing KRT file: %w", err)
@@ -193,24 +202,28 @@ func (p *Parser) extractKrtFile(krtFilePath, dstDir string) (*Metadata, error) {
 		if err == io.EOF {
 			break
 		}
+
 		if err != nil {
 			return nil, fmt.Errorf("error reading krt file: %w", err)
 		}
 
-		filePath := filepath.Join(dstDir, tarFile.Name) //nolint:gosec
+		filePath := filepath.Join(dstDir, tarFile.Name) //nolint:gosec // Path joining is secure
 
 		if reYamlFile.MatchString(tarFile.Name) {
 			meta.yamlFile = filePath
 		} else {
 			err = p.processFile(tarReader, filePath, tarFile.Typeflag)
+
 			if err != nil {
 				return nil, err
 			}
 		}
+
 		meta.files = append(meta.files, filePath)
 	}
 
 	p.logger.Info("All files extracted")
+
 	return meta, nil
 }
 

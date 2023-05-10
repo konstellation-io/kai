@@ -27,6 +27,7 @@ type MockNodeLogRepositoryMockRecorder struct {
 func NewMockNodeLogRepository(ctrl *gomock.Controller) *MockNodeLogRepository {
 	mock := &MockNodeLogRepository{ctrl: ctrl}
 	mock.recorder = &MockNodeLogRepositoryMockRecorder{mock}
+
 	return mock
 }
 
@@ -40,6 +41,7 @@ func (m *MockNodeLogRepository) CreateIndexes(ctx context.Context, runtimeID str
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateIndexes", ctx, runtimeID)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -55,6 +57,7 @@ func (m *MockNodeLogRepository) PaginatedSearch(ctx context.Context, runtimeID s
 	ret := m.ctrl.Call(m, "PaginatedSearch", ctx, runtimeID, searchOpts)
 	ret0, _ := ret[0].(*entity.SearchLogsResult)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -70,6 +73,7 @@ func (m *MockNodeLogRepository) WatchNodeLogs(ctx context.Context, runtimeID, ve
 	ret := m.ctrl.Call(m, "WatchNodeLogs", ctx, runtimeID, versionName, filters)
 	ret0, _ := ret[0].(<-chan *entity.NodeLog)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 

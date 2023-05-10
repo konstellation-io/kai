@@ -77,6 +77,7 @@ func (i *UserActivityInteractor) Get(
 	}
 
 	var userIDs []string
+
 	if userEmail != nil && *userEmail != "" {
 		users, err := i.userRepo.GetManyByEmail(ctx, *userEmail)
 		if err != nil {
@@ -103,6 +104,7 @@ func (i *UserActivityInteractor) create(userID string, userActivityType entity.U
 		Date:   time.Now(),
 		Vars:   vars,
 	}
+
 	return i.userActivityRepo.Create(userActivity)
 }
 
@@ -110,8 +112,10 @@ func checkUserActivityError(logger logging.Logger, err error) error {
 	if err != nil {
 		userActivityErr := fmt.Errorf("error creating userActivity: %w", err)
 		logger.Error(userActivityErr.Error())
+
 		return userActivityErr
 	}
+
 	return nil
 }
 
@@ -180,6 +184,7 @@ func (i *UserActivityInteractor) RegisterStopAction(userID, runtimeID string, ve
 			{Key: "VERSION_NAME", Value: version.Name},
 			{Key: "COMMENT", Value: comment},
 		})
+
 	return checkUserActivityError(i.logger, err)
 }
 
@@ -195,6 +200,7 @@ func (i *UserActivityInteractor) RegisterPublishAction(userID, runtimeID string,
 			{Key: "OLD_PUBLISHED_VERSION_NAME", Value: prev.Name},
 			{Key: "COMMENT", Value: comment},
 		})
+
 	return checkUserActivityError(i.logger, err)
 }
 
@@ -208,6 +214,7 @@ func (i *UserActivityInteractor) RegisterUnpublishAction(userID, runtimeID strin
 			{Key: "VERSION_NAME", Value: version.Name},
 			{Key: "COMMENT", Value: comment},
 		})
+
 	return checkUserActivityError(i.logger, err)
 }
 

@@ -124,11 +124,11 @@ func TestCreateNewRuntime(t *testing.T) {
 
 	ctx := context.Background()
 	userID := "user1234"
-	newRuntimeId := "runtime-id"
+	newRuntimeID := "runtime-id"
 	newRuntimeName := "runtime-name"
 	newRuntimeDescription := "This is a runtime description"
 	expectedRuntime := &entity.Runtime{
-		ID:           newRuntimeId,
+		ID:           newRuntimeID,
 		Name:         newRuntimeName,
 		Description:  newRuntimeDescription,
 		CreationDate: time.Time{},
@@ -136,15 +136,15 @@ func TestCreateNewRuntime(t *testing.T) {
 	}
 
 	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResRuntime, auth.ActEdit).Return(nil)
-	s.mocks.runtimeRepo.EXPECT().GetByID(ctx, newRuntimeId).Return(nil, usecase.ErrRuntimeNotFound)
+	s.mocks.runtimeRepo.EXPECT().GetByID(ctx, newRuntimeID).Return(nil, usecase.ErrRuntimeNotFound)
 	s.mocks.runtimeRepo.EXPECT().GetByName(ctx, newRuntimeName).Return(nil, usecase.ErrRuntimeNotFound)
 	s.mocks.runtimeRepo.EXPECT().Create(ctx, expectedRuntime).Return(expectedRuntime, nil)
-	s.mocks.measurementRepo.EXPECT().CreateDatabase(newRuntimeId).Return(nil)
-	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, newRuntimeId).Return(nil)
-	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, newRuntimeId).Return(nil)
-	s.mocks.nodeLogRepo.EXPECT().CreateIndexes(ctx, newRuntimeId).Return(nil)
+	s.mocks.measurementRepo.EXPECT().CreateDatabase(newRuntimeID).Return(nil)
+	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, newRuntimeID).Return(nil)
+	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, newRuntimeID).Return(nil)
+	s.mocks.nodeLogRepo.EXPECT().CreateIndexes(ctx, newRuntimeID).Return(nil)
 
-	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeId, newRuntimeName, newRuntimeDescription)
+	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeID, newRuntimeName, newRuntimeDescription)
 
 	require.Nil(t, err)
 	require.Equal(t, expectedRuntime, runtime)
@@ -156,7 +156,7 @@ func TestCreateNewRuntime_FailsIfUserHasNotPermission(t *testing.T) {
 
 	ctx := context.Background()
 	userID := "user1234"
-	newRuntimeId := "runtime-id"
+	newRuntimeID := "runtime-id"
 	newRuntimeName := "runtime-name"
 	newRuntimeDescription := "This is a runtime description"
 
@@ -164,7 +164,7 @@ func TestCreateNewRuntime_FailsIfUserHasNotPermission(t *testing.T) {
 
 	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResRuntime, auth.ActEdit).Return(permissionError)
 
-	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeId, newRuntimeName, newRuntimeDescription)
+	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeID, newRuntimeName, newRuntimeDescription)
 
 	require.Error(t, permissionError, err)
 	require.Nil(t, runtime)
@@ -176,14 +176,14 @@ func TestCreateNewRuntime_FailsIfRuntimeHasAnInvalidField(t *testing.T) {
 
 	ctx := context.Background()
 	userID := "user1234"
-	newRuntimeId := "runtime-id"
+	newRuntimeID := "runtime-id"
 	// the runtime name is bigger thant the max length (it should be lte=40)
 	newRuntimeName := "lore ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labores"
 	newRuntimeDescription := "This is a runtime description"
 
 	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResRuntime, auth.ActEdit).Return(nil)
 
-	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeId, newRuntimeName, newRuntimeDescription)
+	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeID, newRuntimeName, newRuntimeDescription)
 
 	require.Error(t, err)
 	require.Nil(t, runtime)
@@ -221,7 +221,7 @@ func TestCreateNewRuntime_FailsIfRuntimeWithSameNameAlreadyExists(t *testing.T) 
 	ctx := context.Background()
 	userID := "user1234"
 	runtimeName := "runtime-name"
-	newRuntimeId := "new-runtime-id"
+	newRuntimeID := "new-runtime-id"
 	newRuntimeDescription := "This is a runtime description"
 
 	existingRuntime := &entity.Runtime{
@@ -231,11 +231,10 @@ func TestCreateNewRuntime_FailsIfRuntimeWithSameNameAlreadyExists(t *testing.T) 
 	}
 
 	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResRuntime, auth.ActEdit).Return(nil)
-	s.mocks.runtimeRepo.EXPECT().GetByID(ctx, newRuntimeId).Return(nil, usecase.ErrRuntimeNotFound)
+	s.mocks.runtimeRepo.EXPECT().GetByID(ctx, newRuntimeID).Return(nil, usecase.ErrRuntimeNotFound)
 	s.mocks.runtimeRepo.EXPECT().GetByName(ctx, runtimeName).Return(existingRuntime, nil)
-	// s.mocks.runtimeRepo.EXPECT().Create(ctx, expectedRuntime).Return(expectedRuntime, nil)
 
-	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeId, runtimeName, newRuntimeDescription)
+	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, newRuntimeID, runtimeName, newRuntimeDescription)
 
 	require.Error(t, err)
 	require.Nil(t, runtime)

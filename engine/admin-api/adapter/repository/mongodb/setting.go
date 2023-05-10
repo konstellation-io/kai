@@ -24,6 +24,7 @@ func NewSettingRepoMongoDB(cfg *config.Config,
 	client *mongo.Client,
 ) *SettingRepoMongoDB {
 	collection := client.Database(cfg.MongoDB.DBName).Collection("settings")
+
 	return &SettingRepoMongoDB{
 		cfg:        cfg,
 		logger:     logger,

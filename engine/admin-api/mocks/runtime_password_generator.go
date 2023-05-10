@@ -25,6 +25,7 @@ type MockPasswordGeneratorMockRecorder struct {
 func NewMockPasswordGenerator(ctrl *gomock.Controller) *MockPasswordGenerator {
 	mock := &MockPasswordGenerator{ctrl: ctrl}
 	mock.recorder = &MockPasswordGeneratorMockRecorder{mock}
+
 	return mock
 }
 
@@ -38,6 +39,7 @@ func (m *MockPasswordGenerator) NewPassword() string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NewPassword")
 	ret0, _ := ret[0].(string)
+
 	return ret0
 }
 

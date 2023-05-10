@@ -35,6 +35,7 @@ func (e UserActivityType) IsValid() bool {
 		UserActivityTypeDeleteAPIToken:
 		return true
 	}
+
 	return false
 }
 

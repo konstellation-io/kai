@@ -27,6 +27,7 @@ type MockSettingInteracterMockRecorder struct {
 func NewMockSettingInteracter(ctrl *gomock.Controller) *MockSettingInteracter {
 	mock := &MockSettingInteracter{ctrl: ctrl}
 	mock.recorder = &MockSettingInteracterMockRecorder{mock}
+
 	return mock
 }
 
@@ -40,6 +41,7 @@ func (m *MockSettingInteracter) CreateDefaults(ctx context.Context) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateDefaults", ctx)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -55,6 +57,7 @@ func (m *MockSettingInteracter) Get(ctx context.Context, loggedUserID string) (*
 	ret := m.ctrl.Call(m, "Get", ctx, loggedUserID)
 	ret0, _ := ret[0].(*entity.Settings)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -70,6 +73,7 @@ func (m *MockSettingInteracter) GetUnprotected(ctx context.Context) (*entity.Set
 	ret := m.ctrl.Call(m, "GetUnprotected", ctx)
 	ret0, _ := ret[0].(*entity.Settings)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -84,6 +88,7 @@ func (m *MockSettingInteracter) Update(loggedUserID string, settings *entity.Set
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", loggedUserID, settings, changes)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

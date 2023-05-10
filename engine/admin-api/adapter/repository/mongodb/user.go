@@ -60,12 +60,14 @@ func (r *UserRepoMongoDB) Create(ctx context.Context, email string, accessLevel 
 		Email:        email,
 		AccessLevel:  accessLevel,
 	}
+
 	res, err := r.collection.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
 	user.ID = res.InsertedID.(string)
+
 	return user, nil
 }
 
@@ -95,6 +97,7 @@ func (r *UserRepoMongoDB) GetManyByEmail(ctx context.Context, email string) ([]*
 	}
 
 	var users []*entity.User
+
 	err = cursor.All(ctx, &users)
 	if err != nil {
 		return nil, err
@@ -117,12 +120,14 @@ func (r *UserRepoMongoDB) GetByID(userID string) (*entity.User, error) {
 
 func (r *UserRepoMongoDB) GetByIDs(keys []string) ([]*entity.User, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
+
 	cursor, err := r.collection.Find(ctx, bson.M{"_id": bson.M{"$in": keys}})
 	if err != nil {
 		return nil, err
 	}
 
 	var users []*entity.User
+
 	err = cursor.All(ctx, &users)
 	if err != nil {
 		return nil, err
@@ -142,6 +147,7 @@ func (r *UserRepoMongoDB) GetByAccessLevel(ctx context.Context, level entity.Acc
 	}
 
 	var users []*entity.User
+
 	err = cursor.All(ctx, &users)
 	if err != nil {
 		return nil, err
@@ -162,6 +168,7 @@ func (r *UserRepoMongoDB) GetAll(ctx context.Context, returnDeleted bool) ([]*en
 	}
 
 	var users []*entity.User
+
 	err = cursor.All(ctx, &users)
 	if err != nil {
 		return nil, err
@@ -194,6 +201,7 @@ func (r *UserRepoMongoDB) UpdateAccessLevel(ctx context.Context, userIDs []strin
 	}
 
 	var updatedUsers []*entity.User
+
 	err = cursor.All(ctx, &updatedUsers)
 	if err != nil {
 		return nil, err
@@ -226,6 +234,7 @@ func (r *UserRepoMongoDB) MarkAsDeleted(ctx context.Context, userIDs []string) (
 	}
 
 	var updatedUsers []*entity.User
+
 	err = cursor.All(ctx, &updatedUsers)
 	if err != nil {
 		return nil, err

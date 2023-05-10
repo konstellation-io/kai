@@ -29,6 +29,7 @@ func main() {
 	initApp(cfg, logger, mongodbClient)
 }
 
+//nolint:funlen // App initialization
 func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) {
 	verificationCodeRepo, userRepo, runtimeRepo, settingRepo, sessionRepo, apiTokenRepo, err, userActivityRepo, versionMongoRepo, nodeLogRepo, metricRepo, measurementRepo := initRepositories(cfg, logger, mongodbClient)
 
@@ -46,6 +47,7 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 
 	loginLinkTransport := auth.NewSMTPLoginLinkTransport(cfg, logger)
 	verificationCodeGenerator := auth.NewUUIDVerificationCodeGenerator()
+
 	accessControl, err := auth.NewCasbinAccessControl(logger, userRepo, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -148,15 +150,18 @@ func initRepositories(cfg *config.Config, logger logging.Logger,
 	runtimeRepo := mongodb.NewRuntimeRepoMongoDB(cfg, logger, mongodbClient)
 	settingRepo := mongodb.NewSettingRepoMongoDB(cfg, logger, mongodbClient)
 	sessionRepo := mongodb.NewSessionRepoMongoDB(cfg, logger, mongodbClient)
+
 	apiTokenRepo, err := mongodb.NewAPITokenRepoMongoDB(cfg, logger, mongodbClient)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
 	versionMongoRepo := mongodb.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
 	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
+
 	return verificationCodeRepo, userRepo, runtimeRepo, settingRepo, sessionRepo, apiTokenRepo, err,
 		userActivityRepo, versionMongoRepo, nodeLogRepo, metricRepo, measurementRepo
 }

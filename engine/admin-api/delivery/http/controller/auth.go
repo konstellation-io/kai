@@ -85,6 +85,7 @@ func (a *AuthController) SignInVerify(c echo.Context) error {
 	}
 
 	a.logger.Info("Verifying authorization code.")
+
 	userId, err := a.authInteractor.VerifyCode(input.VerificationCode)
 	if err != nil {
 		switch err {
@@ -157,6 +158,7 @@ func (a *AuthController) SignInWithAPIToken(c echo.Context) error {
 
 func (a *AuthController) generateAccessToken(c context.Context, userId string) (string, *time.Time, error) {
 	a.logger.Info("Generating JWT token.")
+
 	setting, err := a.settingInteractor.GetUnprotected(c)
 	if err != nil {
 		return "", nil, err
@@ -173,6 +175,7 @@ func (a *AuthController) generateAccessToken(c context.Context, userId string) (
 
 	jwtKey := []byte(a.cfg.Auth.JWTSignSecret)
 	jwtToken, err := token.SignedString(jwtKey)
+
 	return jwtToken, &expirationDate, err
 }
 
@@ -182,6 +185,7 @@ func (a *AuthController) Logout(c echo.Context) error {
 	userID := claims["sub"].(string)
 
 	a.logger.Info("Logout for user " + userID)
+
 	err := a.authInteractor.Logout(userID, user.Raw)
 	if err != nil {
 		a.logger.Errorf("Unexpected error in logout: %s", err.Error())

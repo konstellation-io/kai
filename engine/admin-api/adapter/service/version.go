@@ -69,6 +69,7 @@ func (k *K8sVersionClient) Start(
 	}
 
 	_, err = k.client.Start(ctx, &req)
+
 	return err
 }
 
@@ -106,6 +107,7 @@ func (k *K8sVersionClient) UpdateConfig(runtimeID string, version *entity.Versio
 	defer cancel()
 
 	_, err := k.client.UpdateConfig(ctx, &req)
+
 	return err
 }
 
@@ -119,6 +121,7 @@ func (k *K8sVersionClient) Unpublish(runtimeID string, version *entity.Version) 
 	defer cancel()
 
 	_, err := k.client.Unpublish(ctx, &req)
+
 	return err
 }
 
@@ -132,6 +135,7 @@ func (k *K8sVersionClient) Publish(runtimeID string, version *entity.Version) er
 	defer cancel()
 
 	_, err := k.client.Publish(ctx, &req)
+
 	return err
 }
 
@@ -171,6 +175,7 @@ func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionCo
 			if err != nil {
 				return nil, fmt.Errorf("error getting stream configuration from node %q: %w", n.Name, err)
 			}
+
 			nodeKeyValueStore, err := workflowKeyValueStoresConfig.GetNodeKeyValueStore(n.Name)
 			if err != nil {
 				return nil, fmt.Errorf("error translating version in workflow %q: %w", w.Name, err)
@@ -227,6 +232,7 @@ func (k *K8sVersionClient) WatchNodeStatus(ctx context.Context, runtimeID, versi
 
 		for {
 			k.logger.Debug("[VersionService.WatchNodeStatus] waiting for stream.Recv()...")
+
 			msg, err := stream.Recv()
 
 			if stream.Context().Err() == context.Canceled {

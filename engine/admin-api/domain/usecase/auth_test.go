@@ -127,13 +127,13 @@ func TestSignUpWithValidEmailAddress(t *testing.T) {
 
 	verificationCode := "test_verification_code"
 	verificationCodeDurationInMinutes := 1
-	userId := "userA"
+	userID := "userA"
 	domain := "testdomain.com"
-	email := fmt.Sprintf("%s@%s", userId, domain)
+	email := fmt.Sprintf("%s@%s", userID, domain)
 
 	user := &entity.User{
 		Email: email,
-		ID:    userId,
+		ID:    userID,
 	}
 	settings := &entity.Settings{
 		SessionLifetimeInDays: 0,
@@ -169,6 +169,7 @@ func TestSignUpWithInvalidDomain(t *testing.T) {
 	}
 
 	ctx := context.Background()
+
 	s.mocks.userRepo.EXPECT().GetByEmail(user.Email).Return(nil, usecase.ErrUserNotFound)
 	s.mocks.settingRepo.EXPECT().Get(ctx).Return(settings, nil)
 
@@ -312,9 +313,9 @@ func TestVerifyCode(t *testing.T) {
 	s.mocks.verificationCodeRepo.EXPECT().Delete(code).Return(nil)
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).Return(nil)
 
-	userId, err := s.authInteractor.VerifyCode(code)
+	userID, err := s.authInteractor.VerifyCode(code)
 	require.Nil(t, err)
-	require.Equal(t, verificationCode.UID, userId)
+	require.Equal(t, verificationCode.UID, userID)
 }
 
 func TestVerifyNotFoundCode(t *testing.T) {
@@ -382,9 +383,9 @@ func TestVerifyCodeErrDeletingValidationCode(t *testing.T) {
 	s.mocks.verificationCodeRepo.EXPECT().Delete(code).Return(unexpectedErr)
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).Return(nil)
 
-	userId, err := s.authInteractor.VerifyCode(code)
+	userID, err := s.authInteractor.VerifyCode(code)
 	require.NoError(t, err)
-	require.Equal(t, verificationCode.UID, userId)
+	require.Equal(t, verificationCode.UID, userID)
 }
 
 func TestVerifyAPIToken(t *testing.T) {
@@ -408,6 +409,7 @@ func TestVerifyAPIToken(t *testing.T) {
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).DoAndReturn(func(activity entity.UserActivity) error {
 		require.Equal(t, entity.UserActivityTypeLogin, activity.Type)
 		require.Equal(t, user.ID, activity.UserID)
+
 		return nil
 	})
 
@@ -420,6 +422,7 @@ func TestCheckPermissionErr(t *testing.T) {
 	// GIVEN that there is a user with the viewer role
 	s := newAuthSuite(t)
 	defer s.ctrl.Finish()
+
 	ctx := context.Background()
 
 	user := entity.User{
@@ -442,7 +445,6 @@ func TestCheckPermissionErr(t *testing.T) {
 	permissionError := accessControl.CheckPermission(user.ID, usecaseauth.ResSettings, usecaseauth.ActEdit)
 	// THEN there is an error
 	require.Error(t, permissionError)
-	// AND - The user doesn't have permissions to do the action
 }
 
 func TestCheckPermission(t *testing.T) {
@@ -471,13 +473,13 @@ func TestCheckPermission(t *testing.T) {
 	res := accessControl.CheckPermission(user.ID, usecaseauth.ResSettings, usecaseauth.ActEdit)
 	// THEN there is not an error
 	require.NoError(t, res)
-	// AND - The user has permissions to do the action
 }
 
 func TestCheckViewerLogsPermission(t *testing.T) {
 	// GIVEN that there is a user with the admin role
 	s := newAuthSuite(t)
 	defer s.ctrl.Finish()
+
 	ctx := context.Background()
 
 	user := entity.User{
@@ -499,5 +501,4 @@ func TestCheckViewerLogsPermission(t *testing.T) {
 	res := accessControl.CheckPermission(user.ID, usecaseauth.ResLogs, usecaseauth.ActView)
 	// THEN there is not an error
 	require.NoError(t, res)
-	// AND - The user with role viewer has permissions view logs
 }

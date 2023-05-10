@@ -90,10 +90,12 @@ func (i *UserInteractor) UpdateAccessLevel(ctx context.Context, userIDs []string
 
 	updatedUserIDs := make([]string, len(users))
 	updatedUserEmails := make([]string, len(users))
+
 	for i, u := range users {
 		updatedUserIDs[i] = u.ID
 		updatedUserEmails[i] = u.Email
 	}
+
 	i.userActivityInteractor.RegisterUpdateAccessLevels(loggedUserID, updatedUserIDs, updatedUserEmails, newAccessLevel, comment)
 
 	err = i.accessControl.ReloadUserRoles()
@@ -145,10 +147,12 @@ func (i *UserInteractor) RemoveUsers(ctx context.Context, userIDs []string, logg
 
 	deletedUserIDs := make([]string, len(users))
 	deletedUserEmails := make([]string, len(users))
+
 	for i, u := range users {
 		deletedUserIDs[i] = u.ID
 		deletedUserEmails[i] = u.Email
 	}
+
 	i.userActivityInteractor.RegisterRemoveUsers(loggedUserID, deletedUserIDs, deletedUserEmails, comment)
 
 	err = i.sessionRepo.DeleteByUserIDs(deletedUserIDs)

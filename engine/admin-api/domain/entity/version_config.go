@@ -42,7 +42,8 @@ func (v *VersionConfig) GetNodeObjectStoreConfig(workflow, node string) *string 
 func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStreamConfig, error) {
 	w, ok := v.StreamsConfig.Workflows[workflow]
 	if !ok {
-		return nil, fmt.Errorf("workflow %q stream config not found", workflow) //nolint:goerr113
+		//nolint:goerr113 // The error needs to be dynamic
+		return nil, fmt.Errorf("workflow %q stream config not found", workflow)
 	}
 
 	return w, nil

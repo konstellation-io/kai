@@ -2,7 +2,6 @@ package version_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -82,7 +81,7 @@ This is an example:
 	err = generator.Generate(versionName, docFolder.Name())
 	require.Nil(t, err)
 
-	generatedReadme, err := ioutil.ReadFile(path.Join(cfg.Admin.StoragePath, fmt.Sprintf("version/%s/docs/README.md", versionName)))
+	generatedReadme, err := os.ReadFile(path.Join(cfg.Admin.StoragePath, fmt.Sprintf("version/%s/docs/README.md", versionName)))
 	if err != nil {
 		t.Fatal(err)
 	}

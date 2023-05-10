@@ -27,6 +27,7 @@ type MockUserRepoMockRecorder struct {
 func NewMockUserRepo(ctrl *gomock.Controller) *MockUserRepo {
 	mock := &MockUserRepo{ctrl: ctrl}
 	mock.recorder = &MockUserRepoMockRecorder{mock}
+
 	return mock
 }
 
@@ -41,6 +42,7 @@ func (m *MockUserRepo) Create(ctx context.Context, email string, accessLevel ent
 	ret := m.ctrl.Call(m, "Create", ctx, email, accessLevel)
 	ret0, _ := ret[0].(*entity.User)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -56,6 +58,7 @@ func (m *MockUserRepo) GetAll(ctx context.Context, returnDeleted bool) ([]*entit
 	ret := m.ctrl.Call(m, "GetAll", ctx, returnDeleted)
 	ret0, _ := ret[0].([]*entity.User)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -71,6 +74,7 @@ func (m *MockUserRepo) GetByAccessLevel(ctx context.Context, accessLevel entity.
 	ret := m.ctrl.Call(m, "GetByAccessLevel", ctx, accessLevel)
 	ret0, _ := ret[0].([]*entity.User)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -86,6 +90,7 @@ func (m *MockUserRepo) GetByEmail(email string) (*entity.User, error) {
 	ret := m.ctrl.Call(m, "GetByEmail", email)
 	ret0, _ := ret[0].(*entity.User)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -101,6 +106,7 @@ func (m *MockUserRepo) GetByID(userID string) (*entity.User, error) {
 	ret := m.ctrl.Call(m, "GetByID", userID)
 	ret0, _ := ret[0].(*entity.User)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -116,6 +122,7 @@ func (m *MockUserRepo) GetByIDs(keys []string) ([]*entity.User, error) {
 	ret := m.ctrl.Call(m, "GetByIDs", keys)
 	ret0, _ := ret[0].([]*entity.User)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -131,6 +138,7 @@ func (m *MockUserRepo) GetManyByEmail(ctx context.Context, email string) ([]*ent
 	ret := m.ctrl.Call(m, "GetManyByEmail", ctx, email)
 	ret0, _ := ret[0].([]*entity.User)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -146,6 +154,7 @@ func (m *MockUserRepo) MarkAsDeleted(ctx context.Context, userIDs []string) ([]*
 	ret := m.ctrl.Call(m, "MarkAsDeleted", ctx, userIDs)
 	ret0, _ := ret[0].([]*entity.User)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -161,6 +170,7 @@ func (m *MockUserRepo) UpdateAccessLevel(ctx context.Context, userIDs []string, 
 	ret := m.ctrl.Call(m, "UpdateAccessLevel", ctx, userIDs, accessLevel)
 	ret0, _ := ret[0].([]*entity.User)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -175,6 +185,7 @@ func (m *MockUserRepo) UpdateLastActivity(userID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateLastActivity", userID)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

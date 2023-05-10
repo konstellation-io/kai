@@ -46,6 +46,7 @@ func (r *RuntimeRepoMongoDB) createIndexes() {
 
 func (r *RuntimeRepoMongoDB) Create(ctx context.Context, runtime *entity.Runtime) (*entity.Runtime, error) {
 	runtime.CreationDate = time.Now().UTC()
+
 	_, err := r.collection.InsertOne(ctx, runtime)
 	if err != nil {
 		return nil, err
@@ -91,6 +92,7 @@ func (r *RuntimeRepoMongoDB) GetByName(ctx context.Context, name string) (*entit
 
 func (r *RuntimeRepoMongoDB) FindAll(ctx context.Context) ([]*entity.Runtime, error) {
 	var runtimes []*entity.Runtime
+
 	cursor, err := r.collection.Find(ctx, bson.D{})
 	if err != nil {
 		return runtimes, err

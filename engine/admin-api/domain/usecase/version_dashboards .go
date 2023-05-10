@@ -11,6 +11,7 @@ func (i *VersionInteractor) storeDashboards(ctx context.Context, dashboardsFolde
 	i.logger.Infof("Storing dashboards for version %q in runtime %q", version, runtimeID)
 
 	var errors []error = nil
+
 	d, err := os.ReadDir(dashboardsFolder)
 	if err != nil {
 		errors = append([]error{fmt.Errorf("error listing dashboards files: %w", err)}, errors...)
@@ -25,5 +26,6 @@ func (i *VersionInteractor) storeDashboards(ctx context.Context, dashboardsFolde
 			continue
 		}
 	}
+
 	return errors
 }

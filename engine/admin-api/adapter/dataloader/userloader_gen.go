@@ -74,13 +74,16 @@ func (l *UserLoader) LoadThunk(key string) func() (*entity.User, error) {
 	l.mu.Lock()
 	if it, ok := l.cache[key]; ok {
 		l.mu.Unlock()
+
 		return func() (*entity.User, error) {
 			return it, nil
 		}
 	}
+
 	if l.batch == nil {
 		l.batch = &userLoaderBatch{done: make(chan struct{})}
 	}
+
 	batch := l.batch
 	pos := batch.keyIndex(l, key)
 	l.mu.Unlock()
@@ -122,9 +125,11 @@ func (l *UserLoader) LoadAll(keys []string) ([]*entity.User, []error) {
 
 	users := make([]*entity.User, len(keys))
 	errors := make([]error, len(keys))
+
 	for i, thunk := range results {
 		users[i], errors[i] = thunk()
 	}
+
 	return users, errors
 }
 
@@ -136,12 +141,15 @@ func (l *UserLoader) LoadAllThunk(keys []string) func() ([]*entity.User, []error
 	for i, key := range keys {
 		results[i] = l.LoadThunk(key)
 	}
+
 	return func() ([]*entity.User, []error) {
 		users := make([]*entity.User, len(keys))
 		errors := make([]error, len(keys))
+
 		for i, thunk := range results {
 			users[i], errors[i] = thunk()
 		}
+
 		return users, errors
 	}
 }
@@ -151,6 +159,7 @@ func (l *UserLoader) LoadAllThunk(keys []string) func() ([]*entity.User, []error
 // (To forcefully prime the cache, clear the key first with loader.clear(key).prime(key, value).)
 func (l *UserLoader) Prime(key string, value *entity.User) bool {
 	l.mu.Lock()
+
 	var found bool
 	if _, found = l.cache[key]; !found {
 		// make a copy when writing to the cache, its easy to pass a pointer in from a loop var
@@ -159,6 +168,7 @@ func (l *UserLoader) Prime(key string, value *entity.User) bool {
 		l.unsafeSet(key, &cpy)
 	}
 	l.mu.Unlock()
+
 	return !found
 }
 
@@ -173,6 +183,7 @@ func (l *UserLoader) unsafeSet(key string, value *entity.User) {
 	if l.cache == nil {
 		l.cache = map[string]*entity.User{}
 	}
+
 	l.cache[key] = value
 }
 
@@ -187,6 +198,7 @@ func (b *userLoaderBatch) keyIndex(l *UserLoader, key string) int {
 
 	pos := len(b.keys)
 	b.keys = append(b.keys, key)
+
 	if pos == 0 {
 		go b.startTimer(l)
 	}
@@ -195,6 +207,7 @@ func (b *userLoaderBatch) keyIndex(l *UserLoader, key string) int {
 		if !b.closing {
 			b.closing = true
 			l.batch = nil
+
 			go b.end(l)
 		}
 	}

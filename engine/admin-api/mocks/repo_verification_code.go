@@ -27,6 +27,7 @@ type MockVerificationCodeRepoMockRecorder struct {
 func NewMockVerificationCodeRepo(ctrl *gomock.Controller) *MockVerificationCodeRepo {
 	mock := &MockVerificationCodeRepo{ctrl: ctrl}
 	mock.recorder = &MockVerificationCodeRepoMockRecorder{mock}
+
 	return mock
 }
 
@@ -40,6 +41,7 @@ func (m *MockVerificationCodeRepo) Delete(code string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", code)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -55,6 +57,7 @@ func (m *MockVerificationCodeRepo) Get(code string) (*entity.VerificationCode, e
 	ret := m.ctrl.Call(m, "Get", code)
 	ret0, _ := ret[0].(*entity.VerificationCode)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -69,6 +72,7 @@ func (m *MockVerificationCodeRepo) Store(code, uid string, ttl time.Duration) er
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Store", code, uid, ttl)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

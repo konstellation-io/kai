@@ -16,9 +16,10 @@ import (
 
 //go:generate mockgen -source=${GOFILE} -destination=../../../../mocks/${GOFILE} -package=mocks
 
+//nolint:gochecknoglobals // needs to be global
 var krtValidator *validator.Validate
 
-func init() {
+func initialize() {
 	krtValidator = validator.New()
 
 	// register validator for resource names. Ex: name-valid123
@@ -48,6 +49,8 @@ type YamlFieldsValidator struct {
 }
 
 func NewYamlFieldsValidator() *YamlFieldsValidator {
+	initialize()
+
 	return &YamlFieldsValidator{
 		validator: krtValidator,
 	}
@@ -58,10 +61,12 @@ func (k *YamlFieldsValidator) Run(yaml interface{}) []error {
 	return k.getErrorMessages(err)
 }
 
+//nolint:goerr113 // errors need to be dynamically generated
 func (k *YamlFieldsValidator) getErrorMessages(err error) []error {
 	if err == nil {
 		return nil
 	}
+
 	if errs, ok := err.(validator.ValidationErrors); ok {
 		hasResNameErr := false
 
@@ -115,6 +120,7 @@ func (k *YamlFieldsValidator) getErrorMessages(err error) []error {
 
 func ValidateSrcPaths(krtFile *krt.Krt, dstDir string) []error {
 	var errs []error = nil
+
 	for _, workflow := range krtFile.Workflows {
 		for _, node := range workflow.Nodes {
 			nodeFile := path.Join(dstDir, node.Src)
@@ -132,5 +138,6 @@ func fileExists(filename string) bool {
 	if os.IsNotExist(err) {
 		return false
 	}
+
 	return !info.IsDir()
 }

@@ -26,6 +26,7 @@ func NewSessionRepoMongoDB(
 	client *mongo.Client,
 ) *SessionRepoMongoDB {
 	collection := client.Database(cfg.MongoDB.DBName).Collection("sessions")
+
 	return &SessionRepoMongoDB{
 		cfg:        cfg,
 		logger:     logger,
@@ -90,6 +91,7 @@ func (r *SessionRepoMongoDB) DeleteByToken(token string) error {
 
 func (r *SessionRepoMongoDB) GetUserSessions(ctx context.Context, userID string) ([]entity.Session, error) {
 	var sessions []entity.Session
+
 	filter := bson.M{
 		"userId":         userID,
 		"expirationDate": bson.M{"$gt": time.Now()},

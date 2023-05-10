@@ -70,6 +70,7 @@ func (i *MetricsInteractor) GetMetrics(ctx context.Context, loggedUserID, runtim
 	return i.CalculateChartsAndValues(metrics)
 }
 
+//nolint:funlen // the statements are needed for metrics calculation
 func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.ClassificationMetric) (*entity.Metrics, error) {
 	hits := 0 // items classified correctly
 	newLabels := 0
@@ -116,9 +117,11 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 	for k := range categories {
 		allCategories = append(allCategories, k)
 	}
+
 	sort.Strings(allCategories)
 
 	var confusionMatrix []*entity.MetricChartData
+
 	for _, expectedCat := range allCategories {
 		for _, predictedCat := range allCategories {
 			val := 0
@@ -140,6 +143,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 
 	accuracyByCat := make(map[string]float64)
 	sumAccuracies := float64(0)
+
 	for _, cat := range allCategories {
 		if totalByCat[cat] == 0 {
 			accuracyByCat[cat] = 0
@@ -163,6 +167,7 @@ func (i *MetricsInteractor) CalculateChartsAndValues(metrics []entity.Classifica
 	for _, cat := range allCategories {
 		accuracyWeighted += accuracyByCat[cat] * float64(totalByCat[cat])
 	}
+
 	accuracyWeighted = accuracyWeighted / float64(totalNoErrors)
 
 	var seriesAccuracy []*entity.MetricChartData
@@ -222,6 +227,7 @@ func (i *MetricsInteractor) GetSuccessVsFailsChart(metrics []entity.Classificati
 
 	firstMetric := metrics[0].Date
 	lastMetric := firstMetric
+
 	for _, m := range metrics {
 		if m.Date < firstMetric {
 			firstMetric = m.Date
@@ -245,7 +251,9 @@ func (i *MetricsInteractor) GetSuccessVsFailsChart(metrics []entity.Classificati
 	hours := end.Sub(start).Hours()
 
 	var interval int
+
 	var groupTimeFormat string
+
 	switch {
 	case hours <= oneWeek:
 		interval = oneHour
@@ -259,6 +267,7 @@ func (i *MetricsInteractor) GetSuccessVsFailsChart(metrics []entity.Classificati
 	metricsGroups := make(map[int][]entity.ClassificationMetric)
 
 	var numGroups int
+
 	for _, m := range metrics {
 		if m.Error != "" {
 			continue
@@ -269,6 +278,7 @@ func (i *MetricsInteractor) GetSuccessVsFailsChart(metrics []entity.Classificati
 			i.logger.Errorf("invalid metric date = %q: %s\n", m.Date, err.Error())
 			continue
 		}
+
 		group := int(d.Sub(start).Hours()) / interval
 		metricsGroups[group] = append(metricsGroups[group], m)
 
@@ -283,6 +293,7 @@ func (i *MetricsInteractor) GetSuccessVsFailsChart(metrics []entity.Classificati
 
 		if mg, ok := metricsGroups[i]; ok {
 			hits := 0
+
 			for _, m := range mg {
 				if m.TrueValue == m.PredictedValue {
 					hits += 1
@@ -307,6 +318,8 @@ func (i *MetricsInteractor) getMetricTruncatedDate(date string) (time.Time, erro
 	if e != nil {
 		return time.Time{}, fmt.Errorf("invalid metric date %q: %w", date, e)
 	}
+
 	d = d.Truncate(time.Hour)
+
 	return d, nil
 }

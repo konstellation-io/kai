@@ -26,6 +26,7 @@ type MockValidatorMockRecorder struct {
 func NewMockValidator(ctrl *gomock.Controller) *MockValidator {
 	mock := &MockValidator{ctrl: ctrl}
 	mock.recorder = &MockValidatorMockRecorder{mock}
+
 	return mock
 }
 
@@ -39,6 +40,7 @@ func (m *MockValidator) CheckExecutables(krt *krt.Krt) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckExecutables", krt)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -53,6 +55,7 @@ func (m *MockValidator) Run(krt *krt.Krt) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Run", krt)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

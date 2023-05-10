@@ -163,6 +163,7 @@ func (i *VersionInteractor) Create(ctx context.Context, loggedUserID string, run
 	if err != nil {
 		return nil, nil, fmt.Errorf("error creating temp dir for version: %w", err)
 	}
+
 	i.logger.Info("Created temp dir to extract the KRT files at " + tmpDir)
 
 	tmpKrtFile, err := i.copyStreamToTempFile(krtFile)
@@ -171,6 +172,7 @@ func (i *VersionInteractor) Create(ctx context.Context, loggedUserID string, run
 	}
 
 	valuesValidator := validator.NewYamlFieldsValidator()
+
 	krtYml, err := parser.ProcessAndValidateKrt(i.logger, valuesValidator, tmpKrtFile.Name(), tmpDir)
 	if err != nil {
 		return nil, nil, err
@@ -180,6 +182,7 @@ func (i *VersionInteractor) Create(ctx context.Context, loggedUserID string, run
 	if err != nil && !errors.Is(err, ErrVersionNotFound) {
 		return nil, nil, fmt.Errorf("error version repo GetByName: %w", err)
 	}
+
 	if duplicatedVersion != nil {
 		return nil, nil, ErrVersionDuplicated
 	}
@@ -196,6 +199,7 @@ func (i *VersionInteractor) Create(ctx context.Context, loggedUserID string, run
 	if !ok {
 		return nil, nil, fmt.Errorf("error krtVersion input from krt.yml not valid: %s", krtYml.KrtVersion)
 	}
+
 	versionCreated, err := i.versionRepo.Create(loggedUserID, runtimeID, &entity.Version{
 		KrtVersion:  krtVersion,
 		Name:        krtYml.Version,
@@ -230,6 +234,7 @@ func (i *VersionInteractor) completeVersionCreation(
 	notifyStatusCh chan *entity.Version,
 ) {
 	ctx := context.Background()
+
 	defer close(notifyStatusCh)
 
 	defer func() {
@@ -292,6 +297,7 @@ func (i *VersionInteractor) saveKRTDashboards(ctx context.Context, dashboardsFol
 			contentErrors = append(contentErrors, errors.New(errorMessage))
 		}
 	}
+
 	return contentErrors
 }
 
@@ -311,6 +317,7 @@ func (i *VersionInteractor) saveKRTDoc(runtimeID, docFolder string, versionCreat
 	} else {
 		i.logger.Infof("No documentation found inside the krt files")
 	}
+
 	return contentErrors
 }
 
@@ -347,6 +354,7 @@ func (i *VersionInteractor) generateWorkflows(krtYml *krt.Krt) ([]*entity.Workfl
 				if node.ObjectStore.Scope == "" {
 					node.ObjectStore.Scope = krt.ObjectStoreConfigDefaultScope
 				}
+
 				nodeToAppend.ObjectStore = &entity.ObjectStore{
 					Name:  node.ObjectStore.Name,
 					Scope: node.ObjectStore.Scope,
@@ -355,6 +363,7 @@ func (i *VersionInteractor) generateWorkflows(krtYml *krt.Krt) ([]*entity.Workfl
 
 			nodes = append(nodes, nodeToAppend)
 		}
+
 		workflows = append(workflows, &entity.Workflow{
 			ID:         i.idGenerator.NewID(),
 			Name:       w.Name,
@@ -509,6 +518,7 @@ func (i *VersionInteractor) startAndNotify(
 	if err != nil {
 		i.logger.Errorf("[versionInteractor.startAndNotify] error starting version %q: %s", version.Name, err)
 	}
+
 	version.Status = entity.VersionStatusStarted
 	notifyStatusCh <- version
 	i.logger.Infof("[versionInteractor.startAndNotify] version %q started", version.Name)
@@ -526,6 +536,7 @@ func (i *VersionInteractor) stopAndNotify(
 		close(notifyStatusCh)
 		i.logger.Debug("[versionInteractor.stopAndNotify] channel closed")
 	}()
+
 	err := i.versionService.Stop(ctx, runtimeID, version)
 	if err != nil {
 		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", version.Name, err)
@@ -535,6 +546,7 @@ func (i *VersionInteractor) stopAndNotify(
 	if err != nil {
 		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", version.Name, err)
 	}
+
 	version.Status = entity.VersionStatusStopped
 	notifyStatusCh <- version
 	i.logger.Infof("[versionInteractor.stopAndNotify] version %q stopped", version.Name)
@@ -571,6 +583,7 @@ func (i *VersionInteractor) Publish(ctx context.Context, loggedUserID string, ru
 	v.PublicationDate = &now
 	v.PublicationUserID = &loggedUserID
 	v.Status = entity.VersionStatusPublished
+
 	err = i.versionRepo.Update(runtimeID, v)
 	if err != nil {
 		return nil, err
@@ -609,6 +622,7 @@ func (i *VersionInteractor) Unpublish(ctx context.Context, loggedUserID string, 
 	v.PublicationUserID = nil
 	v.PublicationDate = nil
 	v.Status = entity.VersionStatusStarted
+
 	err = i.versionRepo.Update(runtimeID, v)
 	if err != nil {
 		return nil, err
@@ -737,6 +751,7 @@ func (i *VersionInteractor) setStatusError(
 	}
 
 	i.logger.Errorf("The version %q has the following errors: %s", version.Name, strings.Join(errorMessages, "\n"))
+
 	versionWithError, err := i.versionRepo.SetErrors(ctx, runtimeID, version, errorMessages)
 	if err != nil {
 		i.logger.Errorf("error saving version error state: %s", err)

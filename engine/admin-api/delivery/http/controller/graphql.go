@@ -82,5 +82,6 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 func (g *GraphQLController) PlaygroundHandler(c echo.Context) error {
 	h := playground.Handler("GraphQL playground", "/graphql")
 	h.ServeHTTP(c.Response(), c.Request())
+
 	return nil
 }

@@ -26,9 +26,11 @@ func NewReverseProxyWithDynamicURLTarget(targetURL *url.URL) echo.MiddlewareFunc
 			if req.Header.Get(echo.HeaderXRealIP) == "" {
 				req.Header.Set(echo.HeaderXRealIP, c.RealIP())
 			}
+
 			if req.Header.Get(echo.HeaderXForwardedProto) == "" {
 				req.Header.Set(echo.HeaderXForwardedProto, c.Scheme())
 			}
+
 			if c.IsWebSocket() && req.Header.Get(echo.HeaderXForwardedFor) == "" { // For HTTP, it is automatically set by Go HTTP reverse proxy.
 				req.Header.Set(echo.HeaderXForwardedFor, c.RealIP())
 			}
@@ -53,6 +55,7 @@ func proxyHTTP(targetURL *url.URL, c echo.Context) http.Handler {
 		c.Logger().Errorf("remote %s unreachable, could not forward: %v", targetURL.String(), err)
 		c.Error(echo.NewHTTPError(http.StatusServiceUnavailable))
 	}
+
 	return proxy
 }
 
@@ -69,6 +72,7 @@ func proxyRaw(targetURL *url.URL, c echo.Context) http.Handler {
 		if err != nil {
 			he := echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("proxy raw, dial error=%v, url=%s", targetURL, err))
 			c.Error(he)
+
 			return
 		}
 		defer out.Close()
@@ -78,6 +82,7 @@ func proxyRaw(targetURL *url.URL, c echo.Context) http.Handler {
 		if err != nil {
 			he := echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("proxy raw, request header copy error=%v, url=%s", targetURL, err))
 			c.Error(he)
+
 			return
 		}
 
@@ -89,6 +94,7 @@ func proxyRaw(targetURL *url.URL, c echo.Context) http.Handler {
 
 		go cp(out, in)
 		go cp(in, out)
+
 		err = <-errCh
 		if err != nil && err != io.EOF {
 			c.Logger().Errorf("proxy raw, copy body error=%v, url=%s", targetURL, err)

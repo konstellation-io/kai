@@ -27,6 +27,7 @@ type MockSettingRepoMockRecorder struct {
 func NewMockSettingRepo(ctrl *gomock.Controller) *MockSettingRepo {
 	mock := &MockSettingRepo{ctrl: ctrl}
 	mock.recorder = &MockSettingRepoMockRecorder{mock}
+
 	return mock
 }
 
@@ -40,6 +41,7 @@ func (m *MockSettingRepo) Create(arg0 entity.Settings) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 
@@ -55,6 +57,7 @@ func (m *MockSettingRepo) Get(ctx context.Context) (*entity.Settings, error) {
 	ret := m.ctrl.Call(m, "Get", ctx)
 	ret0, _ := ret[0].(*entity.Settings)
 	ret1, _ := ret[1].(error)
+
 	return ret0, ret1
 }
 
@@ -69,6 +72,7 @@ func (m *MockSettingRepo) Update(setting *entity.Settings) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", setting)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

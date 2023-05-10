@@ -25,6 +25,7 @@ type MockLoginLinkTransportMockRecorder struct {
 func NewMockLoginLinkTransport(ctrl *gomock.Controller) *MockLoginLinkTransport {
 	mock := &MockLoginLinkTransport{ctrl: ctrl}
 	mock.recorder = &MockLoginLinkTransportMockRecorder{mock}
+
 	return mock
 }
 
@@ -38,6 +39,7 @@ func (m *MockLoginLinkTransport) Send(recipient, verificationCode string) error 
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Send", recipient, verificationCode)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

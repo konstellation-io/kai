@@ -69,12 +69,14 @@ func (r *VersionRepoMongoDB) Create(userID, runtimeID string, newVersion *entity
 	newVersion.CreationDate = time.Now().UTC()
 	newVersion.CreationAuthor = userID
 	newVersion.Status = entity.VersionStatusCreating
+
 	res, err := collection.InsertOne(context.Background(), newVersion)
 	if err != nil {
 		return nil, err
 	}
 
 	newVersion.ID = res.InsertedID.(string)
+
 	return newVersion, nil
 }
 
@@ -117,35 +119,46 @@ func (r *VersionRepoMongoDB) Update(runtimeID string, version *entity.Version) e
 	return nil
 }
 
+//nolint:dupl
 func (r *VersionRepoMongoDB) GetByRuntime(runtimeID string) ([]*entity.Version, error) {
 	collection := r.client.Database(runtimeID).Collection(versionsCollectionName)
 
 	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
+
 	var versions []*entity.Version
+
 	cur, err := collection.Find(ctx, bson.M{})
+
 	if err != nil {
 		return versions, err
 	}
+
 	defer cur.Close(ctx)
 
 	for cur.Next(ctx) {
 		var v entity.Version
 		err = cur.Decode(&v)
+
 		if err != nil {
 			return versions, err
 		}
+
 		versions = append(versions, &v)
 	}
 
 	return versions, nil
 }
 
+//nolint:dupl
 func (r *VersionRepoMongoDB) GetAll(runtimeID string) ([]*entity.Version, error) {
 	collection := r.client.Database(runtimeID).Collection(versionsCollectionName)
 
 	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
+
 	var versions []*entity.Version
+
 	cur, err := collection.Find(ctx, bson.M{})
+
 	if err != nil {
 		return versions, err
 	}
@@ -153,10 +166,12 @@ func (r *VersionRepoMongoDB) GetAll(runtimeID string) ([]*entity.Version, error)
 
 	for cur.Next(ctx) {
 		var v entity.Version
+
 		err = cur.Decode(&v)
 		if err != nil {
 			return versions, err
 		}
+
 		versions = append(versions, &v)
 	}
 
@@ -193,13 +208,15 @@ func (r *VersionRepoMongoDB) SetStatus(ctx context.Context, runtimeID, versionID
 	return nil
 }
 
-func (r *VersionRepoMongoDB) SetErrors(ctx context.Context, runtimeID string, version *entity.Version, errorMessages []string) (*entity.Version, error) {
+func (r *VersionRepoMongoDB) SetErrors(ctx context.Context, runtimeID string, version *entity.Version,
+	errorMessages []string) (*entity.Version, error) {
 	collection := r.client.Database(runtimeID).Collection(versionsCollectionName)
 
 	version.Status = entity.VersionStatusError
 	version.Errors = errorMessages
 
 	elem := bson.M{"$set": bson.M{"status": version.Status, "errors": version.Errors}}
+
 	result, err := collection.UpdateOne(ctx, bson.M{"_id": version.ID}, elem)
 	if err != nil {
 		return nil, err
@@ -227,6 +244,7 @@ func (r *VersionRepoMongoDB) UploadKRTFile(runtimeID string, version *entity.Ver
 	}
 
 	filename := fmt.Sprintf("%s.krt", version.Name)
+
 	uploadStream, err := bucket.OpenUploadStreamWithID(
 		version.ID,
 		filename,
@@ -240,6 +258,7 @@ func (r *VersionRepoMongoDB) UploadKRTFile(runtimeID string, version *entity.Ver
 	if err != nil {
 		return fmt.Errorf("writing into the KRT upload stream: %w", err)
 	}
+
 	r.logger.Infof("Uploaded %d bytes of %q to GridFS successfully", filename, fileSize)
 
 	return nil

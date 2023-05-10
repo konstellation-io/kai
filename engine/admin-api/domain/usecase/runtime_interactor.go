@@ -105,12 +105,14 @@ func (i *RuntimeInteractor) CreateRuntime(ctx context.Context, loggedUserID, run
 	if err != nil {
 		return nil, err
 	}
+
 	i.logger.Info("Runtime stored in the database with ID=" + createdRuntime.ID)
 
 	err = i.measurementRepo.CreateDatabase(createdRuntime.ID)
 	if err != nil {
 		return nil, err
 	}
+
 	i.logger.Info("Measurement database created for runtime with ID=" + createdRuntime.ID)
 
 	err = i.createDatabaseIndexes(ctx, runtimeID)
