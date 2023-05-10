@@ -195,20 +195,20 @@ func TestCreateNewRuntime_FailsIfRuntimeWithSameIDAlreadyExists(t *testing.T) {
 
 	ctx := context.Background()
 	userID := "user1234"
-	runtimeId := "runtime-id"
+	runtimeID := "runtime-id"
 	newRuntimeName := "runtime-name"
 	newRuntimeDescription := "This is a runtime description"
 
 	existingRuntime := &entity.Runtime{
-		ID:          runtimeId,
+		ID:          runtimeID,
 		Name:        "existing-runtime-name",
 		Description: "existing-runtime-description",
 	}
 
 	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResRuntime, auth.ActEdit).Return(nil)
-	s.mocks.runtimeRepo.EXPECT().GetByID(ctx, runtimeId).Return(existingRuntime, nil)
+	s.mocks.runtimeRepo.EXPECT().GetByID(ctx, runtimeID).Return(existingRuntime, nil)
 
-	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, runtimeId, newRuntimeName, newRuntimeDescription)
+	runtime, err := s.runtimeInteractor.CreateRuntime(ctx, userID, runtimeID, newRuntimeName, newRuntimeDescription)
 
 	require.Error(t, err)
 	require.Nil(t, runtime)

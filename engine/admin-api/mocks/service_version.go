@@ -106,16 +106,16 @@ func (mr *MockVersionServiceMockRecorder) UpdateConfig(runtimeID, version interf
 }
 
 // WatchNodeStatus mocks base method.
-func (m *MockVersionService) WatchNodeStatus(ctx context.Context, runtimeId, versionName string) (<-chan *entity.Node, error) {
+func (m *MockVersionService) WatchNodeStatus(ctx context.Context, runtimeID, versionName string) (<-chan *entity.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WatchNodeStatus", ctx, runtimeId, versionName)
+	ret := m.ctrl.Call(m, "WatchNodeStatus", ctx, runtimeID, versionName)
 	ret0, _ := ret[0].(<-chan *entity.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // WatchNodeStatus indicates an expected call of WatchNodeStatus.
-func (mr *MockVersionServiceMockRecorder) WatchNodeStatus(ctx, runtimeId, versionName interface{}) *gomock.Call {
+func (mr *MockVersionServiceMockRecorder) WatchNodeStatus(ctx, runtimeID, versionName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchNodeStatus", reflect.TypeOf((*MockVersionService)(nil).WatchNodeStatus), ctx, runtimeId, versionName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchNodeStatus", reflect.TypeOf((*MockVersionService)(nil).WatchNodeStatus), ctx, runtimeID, versionName)
 }

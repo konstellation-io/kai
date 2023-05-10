@@ -754,7 +754,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Logs(childComplexity, args["runtimeId"].(string), args["filters"].(entity.LogFilters), args["cursor"].(*string)), true
+		return e.complexity.Query.Logs(childComplexity, args["runtimeID"].(string), args["filters"].(entity.LogFilters), args["cursor"].(*string)), true
 
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
@@ -773,7 +773,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Metrics(childComplexity, args["runtimeId"].(string), args["versionName"].(string), args["startDate"].(string), args["endDate"].(string)), true
+		return e.complexity.Query.Metrics(childComplexity, args["runtimeID"].(string), args["versionName"].(string), args["startDate"].(string), args["endDate"].(string)), true
 
 	case "Query.runtime":
 		if e.complexity.Query.Runtime == nil {
@@ -830,7 +830,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Version(childComplexity, args["name"].(string), args["runtimeId"].(string)), true
+		return e.complexity.Query.Version(childComplexity, args["name"].(string), args["runtimeID"].(string)), true
 
 	case "Query.versions":
 		if e.complexity.Query.Versions == nil {

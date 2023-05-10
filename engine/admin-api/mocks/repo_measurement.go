@@ -34,15 +34,15 @@ func (m *MockMeasurementRepo) EXPECT() *MockMeasurementRepoMockRecorder {
 }
 
 // CreateDatabase mocks base method.
-func (m *MockMeasurementRepo) CreateDatabase(runtimeId string) error {
+func (m *MockMeasurementRepo) CreateDatabase(runtimeID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateDatabase", runtimeId)
+	ret := m.ctrl.Call(m, "CreateDatabase", runtimeID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateDatabase indicates an expected call of CreateDatabase.
-func (mr *MockMeasurementRepoMockRecorder) CreateDatabase(runtimeId interface{}) *gomock.Call {
+func (mr *MockMeasurementRepoMockRecorder) CreateDatabase(runtimeID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDatabase", reflect.TypeOf((*MockMeasurementRepo)(nil).CreateDatabase), runtimeId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDatabase", reflect.TypeOf((*MockMeasurementRepo)(nil).CreateDatabase), runtimeID)
 }

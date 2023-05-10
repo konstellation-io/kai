@@ -29,8 +29,8 @@ func NewNodeLogMongoDBRepo(cfg *config.Config, logger logging.Logger, client *mo
 
 // TODO use the Search filter: https://jira.mongodb.org/browse/NODE-2162
 // you cannot use a $text matcher on a change stream.
-func (n *NodeLogMongoDBRepo) WatchNodeLogs(ctx context.Context, runtimeId, versionName string, filters entity.LogFilters) (<-chan *entity.NodeLog, error) {
-	collection := n.client.Database(runtimeId).Collection(logsCollectionName)
+func (n *NodeLogMongoDBRepo) WatchNodeLogs(ctx context.Context, runtimeID, versionName string, filters entity.LogFilters) (<-chan *entity.NodeLog, error) {
+	collection := n.client.Database(runtimeID).Collection(logsCollectionName)
 	logsCh := make(chan *entity.NodeLog, 1)
 
 	go func() {
@@ -103,10 +103,10 @@ func (n *NodeLogMongoDBRepo) getSearchConditions(versionName string, filters ent
 
 func (n *NodeLogMongoDBRepo) PaginatedSearch(
 	ctx context.Context,
-	runtimeId string,
+	runtimeID string,
 	searchOpts *entity.SearchLogsOptions,
 ) (*entity.SearchLogsResult, error) {
-	collection := n.client.Database(runtimeId).Collection(logsCollectionName)
+	collection := n.client.Database(runtimeID).Collection(logsCollectionName)
 	result := entity.SearchLogsResult{}
 
 	pageSize := new(int64)
@@ -175,8 +175,8 @@ func (n *NodeLogMongoDBRepo) PaginatedSearch(
 	return &result, nil
 }
 
-func (n *NodeLogMongoDBRepo) CreateIndexes(ctx context.Context, runtimeId string) error {
-	collection := n.client.Database(runtimeId).Collection(logsCollectionName)
+func (n *NodeLogMongoDBRepo) CreateIndexes(ctx context.Context, runtimeID string) error {
+	collection := n.client.Database(runtimeID).Collection(logsCollectionName)
 	n.logger.Infof("MongoDB creating indexes for %s collection...", logsCollectionName)
 	_, err := collection.Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{

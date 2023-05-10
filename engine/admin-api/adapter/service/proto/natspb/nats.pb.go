@@ -252,7 +252,7 @@ type CreateStreamsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RuntimeId   string      `protobuf:"bytes,1,opt,name=runtime_id,json=runtimeId,proto3" json:"runtime_id,omitempty"`
+	RuntimeId   string      `protobuf:"bytes,1,opt,name=runtime_id,json=runtimeID,proto3" json:"runtime_id,omitempty"`
 	VersionName string      `protobuf:"bytes,2,opt,name=version_name,json=versionName,proto3" json:"version_name,omitempty"`
 	Workflows   []*Workflow `protobuf:"bytes,3,rep,name=workflows,proto3" json:"workflows,omitempty"`
 }
@@ -315,7 +315,7 @@ type CreateObjectStoresRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RuntimeId   string      `protobuf:"bytes,1,opt,name=runtime_id,json=runtimeId,proto3" json:"runtime_id,omitempty"`
+	RuntimeId   string      `protobuf:"bytes,1,opt,name=runtime_id,json=runtimeID,proto3" json:"runtime_id,omitempty"`
 	VersionName string      `protobuf:"bytes,2,opt,name=version_name,json=versionName,proto3" json:"version_name,omitempty"`
 	Workflows   []*Workflow `protobuf:"bytes,3,rep,name=workflows,proto3" json:"workflows,omitempty"`
 }
