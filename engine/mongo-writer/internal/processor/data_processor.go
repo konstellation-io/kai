@@ -8,11 +8,11 @@ import (
 
 	nc "github.com/nats-io/nats.go"
 
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/compression"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/config"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/logging"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/mongodb"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/nats"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/compression"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/config"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/logging"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/mongodb"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/nats"
 )
 
 var (

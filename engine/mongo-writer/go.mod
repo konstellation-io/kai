@@ -1,11 +1,11 @@
-module github.com/konstellation-io/kre/engine/mongo-writer
+module github.com/konstellation-io/kai/engine/mongo-writer
 
 go 1.20
 
 require (
 	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/konstellation-io/kre/libs/simplelogger v0.0.0-20210609143120-29dc7b6f00c5
+	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20210609143120-29dc7b6f00c5
 	github.com/nats-io/nats.go v1.16.0
 	github.com/stretchr/testify v1.7.1
 	go.mongodb.org/mongo-driver v1.3.5
@@ -36,3 +36,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
+
+replace github.com/konstellation-io/kai/libs/simplelogger => ../../libs/simplelogger

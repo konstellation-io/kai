@@ -2,8 +2,8 @@ package version
 
 import (
 	"fmt"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/otiai10/copy"
 	"io/ioutil"
 	"net/url"

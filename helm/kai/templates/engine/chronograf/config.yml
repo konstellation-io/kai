@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-chronograf
+  labels:
+    {{- include "chronograf.labels" . | nindent 4 }}
+data:
+  kre_conn.src: |-
+    {
+      "id": "10000",
+      "name": "Runtime InfluxDB",
+      "username": "",
+      "password": "",
+      "url": "http://{{ include "kai-influxdb.fullname" . }}:8086",
+      "type": "influx",
+      "insecureSkipVerify": false,
+      "default": true,
+      "telegraf": "telegraf",
+      "organization": "kai"
+    }
+{{- if .Values.kapacitor.enabled }}
+  kre_kapacitor.kap: |-
+    {
+      "id": "10001",
+      "srcID": "10000",
+      "name": "Kapacitor",
+      "url": "http://{{ include "kai-kapacitor.fullname" . }}:9092",
+      "active": true,
+      "organization": "kai"
+    }
+{{- end }}

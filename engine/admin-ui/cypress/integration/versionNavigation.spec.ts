@@ -10,7 +10,7 @@ describe('Version Navigation', () => {
     cy.kstInterceptor('GetMe', {data: GetMeQuery});
     cy.kstInterceptor('GetVersionConfStatus', {data: GetVersionConfStatusQuery});
     cy.kstInterceptor('GetRuntimes', {data: GetRuntimes });
-    cy.visit('http://dev-admin.kre.local:3000/runtimes/runtime-id/versions');
+    cy.visit('http://dev-admin.kai.local:3000/runtimes/runtime-id/versions');
   });
 
   it('should show version on versions list', () => {

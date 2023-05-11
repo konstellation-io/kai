@@ -12,7 +12,7 @@ const app = express();
 
 app.use(
   bodyParser.json(),
-  cors({ origin: 'http://dev-admin.kre.local:3000', credentials: true })
+  cors({ origin: 'http://dev-admin.kai.local:3000', credentials: true })
 );
 
 // # This endpoint is used to test unauthorized response

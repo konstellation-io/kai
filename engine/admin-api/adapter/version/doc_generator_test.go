@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/version"
-	"github.com/konstellation-io/kre/engine/admin-api/mocks"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/version"
+	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/stretchr/testify/require"
 )
 

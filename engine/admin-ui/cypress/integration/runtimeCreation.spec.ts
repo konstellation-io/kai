@@ -7,7 +7,7 @@
       cy.kstInterceptor('GetMe', {data: GetMeQuery});
       cy.kstInterceptor('GetVersionConfStatus', {data: GetVersionConfStatusQuery});
       cy.kstInterceptor('GetRuntimes', {data: GetRuntimes });
-      cy.visit('http://dev-admin.kre.local:3000/new-runtime');
+      cy.visit('http://dev-admin.kai.local:3000/new-runtime');
     });
 
     const runtimeId = GetRuntimes.runtimes[0].id;
@@ -22,6 +22,6 @@
       cy.getByTestId('runtimeCreationInputs').find('textarea').eq(0).type(runtimeDescription);
       cy.contains('SAVE').click()
 
-      cy.url().should('equal', 'http://dev-admin.kre.local:3000/');
+      cy.url().should('equal', 'http://dev-admin.kai.local:3000/');
     });
   });

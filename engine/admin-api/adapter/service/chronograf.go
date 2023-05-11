@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 
-	domainService "github.com/konstellation-io/kre/engine/admin-api/domain/service"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	domainService "github.com/konstellation-io/kai/engine/admin-api/domain/service"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 type Dashboard struct {

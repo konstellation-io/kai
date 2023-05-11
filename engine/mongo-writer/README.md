@@ -40,7 +40,7 @@ Example:
     {
       "tag": "mongo_writer_logs",
       "doc": {
-        "log": "INFO:kre-runner:connecting to NATS at 'kre-nats:4222'",
+        "log": "INFO:kai-runner:connecting to NATS at 'kai-nats:4222'",
         "versionName": "greeter-v1",
         "nodeName": "greeter",
         "nodeId": "zyiwccceec",
@@ -54,7 +54,7 @@ Example:
     {
       "tag": "mongo_writer_logs",
       "doc": {
-        "log": "INFO:kre-runner:the handler script was loaded from '/krt-files/src/greeter/main.py'",
+        "log": "INFO:kai-runner:the handler script was loaded from '/krt-files/src/greeter/main.py'",
         "versionName": "greeter-v1",
         "nodeName": "greeter",
         "nodeId": "zyiwccceec",

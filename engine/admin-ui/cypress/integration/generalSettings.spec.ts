@@ -14,7 +14,7 @@ describe('Settings', () => {
 
   describe('General Settings', () => {
     beforeEach(() => {
-      cy.visit('http://dev-admin.kre.local:3000/');
+      cy.visit('http://dev-admin.kai.local:3000/');
       cy.getByTestId('settings-label').click();
       cy.contains('SETTINGS').click();
     });
@@ -36,7 +36,7 @@ describe('Settings', () => {
     beforeEach(() => {
       cy.kstInterceptor('GetDomains', { data: GetDomainsQuery });
       cy.kstInterceptor('UpdateDomains', { data: UpdateDomainsQuery });
-      cy.visit('http://dev-admin.kre.local:3000/settings/general');
+      cy.visit('http://dev-admin.kai.local:3000/settings/general');
       cy.getByTestId('settings-label').click();
       cy.contains('SECURITY').click();
     });

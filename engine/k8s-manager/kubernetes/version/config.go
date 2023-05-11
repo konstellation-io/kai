@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/konstellation-io/kre/engine/k8s-manager/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/k8s-manager/proto/versionpb"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

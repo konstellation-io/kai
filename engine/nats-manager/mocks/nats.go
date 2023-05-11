@@ -9,7 +9,7 @@ import (
 	regexp "regexp"
 
 	gomock "github.com/golang/mock/gomock"
-	entity "github.com/konstellation-io/kre/engine/nats-manager/internal/entity"
+	entity "github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 )
 
 // MockClient is a mock of Client interface.

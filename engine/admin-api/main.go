@@ -3,15 +3,15 @@ package main
 import (
 	"log"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/auth"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/repository/influx"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/repository/mongodb"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/service"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/version"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/version"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 func main() {

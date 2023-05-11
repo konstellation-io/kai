@@ -1,12 +1,12 @@
 package version
 
 import (
-	"github.com/konstellation-io/kre/engine/k8s-manager/kubernetes/node"
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/engine/k8s-manager/kubernetes/node"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 
 	coreV1 "k8s.io/api/core/v1"
 
-	"github.com/konstellation-io/kre/engine/k8s-manager/entity"
+	"github.com/konstellation-io/kai/engine/k8s-manager/entity"
 )
 
 type StatusResolver struct {

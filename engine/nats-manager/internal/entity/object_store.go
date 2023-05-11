@@ -3,7 +3,7 @@ package entity
 import (
 	"regexp"
 
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/errors"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/errors"
 )
 
 type ObjectStoreScope int

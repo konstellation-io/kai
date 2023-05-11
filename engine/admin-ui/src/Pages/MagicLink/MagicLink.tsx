@@ -15,9 +15,9 @@ const DEFAULT_ERROR = 'Unexpected error. Contact support for more information';
 type TextGetter = { [key in keyof typeof STATES]?: string };
 
 const getTitle: TextGetter = {
-  [STATES.INITIALIZING]: 'Connecting to KRE',
+  [STATES.INITIALIZING]: 'Connecting to KAI',
   [STATES.SUCCESS]: 'You are connected!',
-  [STATES.ERROR]: 'Cannot connect to KRE'
+  [STATES.ERROR]: 'Cannot connect to KAI'
 };
 const getSubtitle: TextGetter = {
   [STATES.INITIALIZING]: 'It will take a moment',

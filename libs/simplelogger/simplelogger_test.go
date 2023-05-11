@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
 func captureOutput(f func()) string {

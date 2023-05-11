@@ -58,7 +58,7 @@ func (f *fluentbitMsgParser) Parse(data []byte) ([]LogMsg, error) {
 		}
 
 		// Extract level and message from log text for texts like:
-		//   INFO:kre-runner:connecting to NATS at 'kre-nats:4222'
+		//   INFO:kai-runner:connecting to NATS at 'kai-nats:4222'
 		if logRegexp.MatchString(message) {
 			r := logRegexp.FindAllStringSubmatch(message, -1)
 			level = r[0][1]

@@ -1,12 +1,12 @@
 package http
 
 import (
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/controller"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/httperrors"
-	kremiddleware "github.com/konstellation-io/kre/engine/admin-api/delivery/http/middleware"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/httperrors"
+	kremiddleware "github.com/konstellation-io/kai/engine/admin-api/delivery/http/middleware"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )

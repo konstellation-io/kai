@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/entity"
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/errors"
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/logging"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/errors"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 )
 
 //go:generate mockgen -source=${GOFILE} -destination=../../mocks/${GOFILE} -package=mocks

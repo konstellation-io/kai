@@ -2,7 +2,7 @@
   "name": "admin-ui",
   "repository": {
     "type": "git",
-    "url": "https://github.com/konstellation-io/kre.git"
+    "url": "https://github.com/konstellation-io/kai.git"
   },
   "version": "0.1.0",
   "private": true,
@@ -101,7 +101,7 @@
     "graphql": "15.3.0"
   },
   "scripts": {
-    "start": "HOST=dev-admin.kre.local react-scripts start",
+    "start": "HOST=dev-admin.kai.local react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "prettier": "prettier --write --single-quote \"src/**/*.ts\"",

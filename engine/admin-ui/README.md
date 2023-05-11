@@ -36,9 +36,9 @@ Configure the `config.json` file located in `admin-ui/public/config` with the AP
 
 Add the next registers to your hosts file if they are not already defined:
 ```
-127.0.0.1 dev-admin.kre.local
-192.168.49.2 admin.kre.local
-192.168.49.2 api.kre.local
+127.0.0.1 dev-admin.kai.local
+192.168.49.2 admin.kai.local
+192.168.49.2 api.kai.local
 ```
 
 Then start the application by running the next command from the `admin-ui` folder:

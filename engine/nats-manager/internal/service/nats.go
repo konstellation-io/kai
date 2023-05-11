@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/logging"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/config"
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/entity"
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/manager"
-	"github.com/konstellation-io/kre/engine/nats-manager/proto/natspb"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/manager"
+	"github.com/konstellation-io/kai/engine/nats-manager/proto/natspb"
 )
 
 // NatsService basic server.

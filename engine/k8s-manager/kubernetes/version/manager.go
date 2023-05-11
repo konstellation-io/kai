@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/konstellation-io/kre/engine/k8s-manager/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/k8s-manager/proto/versionpb"
 
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/konstellation-io/kre/engine/k8s-manager/config"
+	"github.com/konstellation-io/kai/engine/k8s-manager/config"
 )
 
 type Manager struct {

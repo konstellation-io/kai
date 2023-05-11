@@ -11,10 +11,10 @@ resolver:
   filename: adapter/gql/resolver.go
   type: Resolver
 autobind:
-  - github.com/konstellation-io/kre/engine/admin-api/domain/entity
+  - github.com/konstellation-io/kai/engine/admin-api/domain/entity
 models:
   ApiToken:
-    model: github.com/konstellation-io/kre/engine/admin-api/domain/entity.APIToken
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.APIToken
     fields:
       creationDate:
         resolver: true
@@ -22,7 +22,7 @@ models:
         resolver: true
 
   Runtime:
-    model: github.com/konstellation-io/kre/engine/admin-api/domain/entity.Runtime
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.Runtime
     fields:
       creationDate:
         resolver: true
@@ -37,7 +37,7 @@ models:
       entrypointAddress:
         resolver: true
   Version:
-    model: github.com/konstellation-io/kre/engine/admin-api/domain/entity.Version
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.Version
     fields:
       creationDate:
         resolver: true
@@ -50,12 +50,12 @@ models:
       date:
         resolver: true
   VersionNodeStatus:
-    model: github.com/konstellation-io/kre/engine/admin-api/domain/entity.VersionNodeStatus
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.VersionNodeStatus
     fields:
       date:
         resolver: true
   UserActivity:
-    model: github.com/konstellation-io/kre/engine/admin-api/domain/entity.UserActivity
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.UserActivity
     fields:
       date:
         resolver: true

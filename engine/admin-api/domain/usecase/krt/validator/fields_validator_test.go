@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt/validator"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt/validator"
 )
 
 func TestYamlFieldsValidator_Run(t *testing.T) {
