@@ -34,8 +34,7 @@ func (m *MetricsMongoDBRepo) GetMetrics(ctx context.Context, startDate, endDate 
 	var result []entity.ClassificationMetric
 
 	opts := &options.FindOptions{
-		//nolint:govet // ignore warning about bson.D
-		Sort: bson.D{{"_id", 1}},
+		Sort: bson.M{"_id": 1},
 	}
 
 	filter := bson.M{
@@ -72,10 +71,9 @@ func (m *MetricsMongoDBRepo) CreateIndexes(ctx context.Context, runtimeID string
 	collection := m.client.Database(database).Collection(metricsCollectionName)
 	m.logger.Infof("MongoDB creating indexes for %s collection...", metricsCollectionName)
 
-	//nolint:govet // ignore warning about bson.D
 	_, err := collection.Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{
-			Keys: bson.D{{"date", 1}, {"versionName", 1}},
+			Keys: bson.M{"date": 1, "versionName": 1},
 		},
 	})
 	if err != nil {

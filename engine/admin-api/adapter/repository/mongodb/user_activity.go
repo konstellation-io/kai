@@ -85,8 +85,7 @@ func (r *UserActivityRepoMongoDB) Get(
 
 	var activities []*entity.UserActivity
 
-	//nolint:govet // ignore warning about bson.D
-	opts := options.Find().SetSort(bson.D{{"_id", -1}}).SetLimit(limit)
+	opts := options.Find().SetSort(bson.M{"_id": -1}).SetLimit(limit)
 
 	cursor, err := r.collection.Find(ctx, filter, opts)
 	if err != nil {

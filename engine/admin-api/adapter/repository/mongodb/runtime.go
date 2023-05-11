@@ -69,7 +69,7 @@ func (r *RuntimeRepoMongoDB) Get(ctx context.Context) (*entity.Runtime, error) {
 
 func (r *RuntimeRepoMongoDB) GetByID(ctx context.Context, runtimeID string) (*entity.Runtime, error) {
 	runtime := &entity.Runtime{}
-	filter := bson.D{{"_id", runtimeID}} //nolint:govet // ignore warning about bson.D
+	filter := bson.M{"_id": runtimeID}
 
 	err := r.collection.FindOne(ctx, filter).Decode(runtime)
 	if errors.Is(err, mongo.ErrNoDocuments) {
@@ -81,7 +81,7 @@ func (r *RuntimeRepoMongoDB) GetByID(ctx context.Context, runtimeID string) (*en
 
 func (r *RuntimeRepoMongoDB) GetByName(ctx context.Context, name string) (*entity.Runtime, error) {
 	runtime := &entity.Runtime{}
-	filter := bson.D{{"name", name}} //nolint:govet // ignore warning about bson.D
+	filter := bson.M{"name": name}
 
 	err := r.collection.FindOne(ctx, filter).Decode(runtime)
 	if errors.Is(err, mongo.ErrNoDocuments) {
@@ -94,7 +94,7 @@ func (r *RuntimeRepoMongoDB) GetByName(ctx context.Context, name string) (*entit
 func (r *RuntimeRepoMongoDB) FindAll(ctx context.Context) ([]*entity.Runtime, error) {
 	var runtimes []*entity.Runtime
 
-	cursor, err := r.collection.Find(ctx, bson.D{})
+	cursor, err := r.collection.Find(ctx, bson.M{})
 	if err != nil {
 		return runtimes, err
 	}

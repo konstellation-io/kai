@@ -87,18 +87,16 @@ func (n *NodeLogMongoDBRepo) WatchNodeLogs(ctx context.Context, runtimeID, versi
 
 func (n *NodeLogMongoDBRepo) getSearchConditions(versionName string, filters entity.LogFilters) bson.A {
 	conditions := bson.A{
-		bson.D{{"operationType", "insert"}},               //nolint:govet // ignore warning about bson.D
-		bson.D{{"fullDocument.versionName", versionName}}, //nolint:govet // ignore warning about bson.D
+		bson.M{"operationType": "insert"},
+		bson.M{"fullDocument.versionName": versionName},
 	}
 
 	if len(filters.NodeIDs) > 0 {
-		//nolint:govet // ignore warning about bson.D
-		conditions = append(conditions, bson.D{{"fullDocument.nodeId", bson.M{"$in": filters.NodeIDs}}})
+		conditions = append(conditions, bson.M{"fullDocument.nodeId": bson.M{"$in": filters.NodeIDs}})
 	}
 
 	if len(filters.Levels) > 0 {
-		//nolint:govet // ignore warning about bson.D
-		conditions = append(conditions, bson.D{{"fullDocument.level", bson.M{"$in": filters.Levels}}})
+		conditions = append(conditions, bson.M{"fullDocument.level": bson.M{"$in": filters.Levels}})
 	}
 
 	return conditions
@@ -116,7 +114,7 @@ func (n *NodeLogMongoDBRepo) PaginatedSearch(
 	*pageSize = logSearchPageSize
 	opts := &options.FindOptions{
 		Limit: pageSize,
-		Sort:  bson.D{{"_id", -1}}, //nolint:govet // ignore warning about bson.D
+		Sort:  bson.M{"_id": -1},
 	}
 
 	filter := bson.M{
@@ -185,14 +183,13 @@ func (n *NodeLogMongoDBRepo) CreateIndexes(ctx context.Context, runtimeID string
 
 	_, err := collection.Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{
-			Keys: bson.D{{"message", "text"}}, //nolint:govet // ignore warning about bson.D
+			Keys: bson.M{"message": "text"},
 		},
 		{
-			Keys: bson.D{{"date", 1}}, //nolint:govet // ignore warning about bson.D
+			Keys: bson.M{"date": 1},
 		},
 		{
-			//nolint:govet // ignore warning about bson.D
-			Keys: bson.D{{"date", 1}, {"nodeId", 1}, {"versionId", 1}},
+			Keys: bson.M{"date": 1, "nodeId": 1, "versionId": 1},
 		},
 	})
 	if err != nil {

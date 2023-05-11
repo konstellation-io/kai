@@ -84,7 +84,7 @@ func (r *VersionRepoMongoDB) GetByID(runtimeID, versionID string) (*entity.Versi
 	collection := r.client.Database(runtimeID).Collection(versionsCollectionName)
 
 	v := &entity.Version{}
-	filter := bson.D{{"_id", versionID}} //nolint:govet // ignore warning about bson .D
+	filter := bson.M{"_id": versionID}
 
 	err := collection.FindOne(context.Background(), filter).Decode(v)
 	if errors.Is(err, mongo.ErrNoDocuments) {
