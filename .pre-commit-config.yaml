@@ -18,6 +18,6 @@ repos:
   hooks:
     - id: helm-docs
       args:
-        - --chart-search-root=./helm/kre
+        - --chart-search-root=./helm/kai
         - --template-files=CHART.md.gotmpl
         - --output-file=CHART.md
