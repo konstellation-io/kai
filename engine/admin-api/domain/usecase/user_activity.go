@@ -66,7 +66,7 @@ func (i *UserActivityInteractor) Get(
 	return i.userActivityRepo.Get(ctx, userEmail, types, versionIDs, fromDate, toDate, lastID)
 }
 
-// Create add a new UserActivity to the given user
+// Create add a new UserActivity to the given user.
 func (i *UserActivityInteractor) create(
 	userID string,
 	userActivityType entity.UserActivityType,
@@ -221,5 +221,6 @@ func (i *UserActivityInteractor) RegisterUpdateProductPermissions(userID string,
 			{Key: "NEW_PRODUCT_PERMISSIONS", Value: strings.Join(productPermissions, ",")},
 			{Key: "COMMENT", Value: comment},
 		})
+
 	return checkUserActivityError(i.logger, err)
 }

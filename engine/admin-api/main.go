@@ -21,6 +21,7 @@ func main() {
 	logger := logging.NewLogger(cfg.LogLevel)
 
 	db := mongodb.NewMongoDB(cfg, logger)
+
 	mongodbClient := db.Connect()
 	defer db.Disconnect()
 

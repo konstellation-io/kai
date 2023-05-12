@@ -182,6 +182,7 @@ func (r *mutationResolver) UpdateUserProductPermissions(ctx context.Context, inp
 	if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }
 
@@ -192,6 +193,7 @@ func (r *mutationResolver) RevokeUserProductPermissions(ctx context.Context, inp
 	if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }
 

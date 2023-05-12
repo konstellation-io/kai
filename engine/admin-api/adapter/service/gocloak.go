@@ -23,6 +23,7 @@ func NewGocloakManager(cfg *config.Config) (*GocloakManagerClient, error) {
 
 	client := gocloak.NewClient(cfg.Keycloak.URL)
 	ctx := context.Background()
+
 	token, err := client.LoginAdmin(
 		ctx, cfg.Keycloak.AdminUsername,
 		cfg.Keycloak.AdminPassword,
@@ -43,13 +44,7 @@ func NewGocloakManager(cfg *config.Config) (*GocloakManagerClient, error) {
 func (gm *GocloakManagerClient) CreateUser(userData entity.UserGocloakData) error {
 	wrapErr := errors.Wrapper("gocloak create user: %w")
 
-	user := gocloak.User{
-		FirstName: gocloak.StringP(userData.FirstName),
-		LastName:  gocloak.StringP(userData.LastName),
-		Email:     gocloak.StringP(userData.Email),
-		Enabled:   gocloak.BoolP(true),
-		Username:  gocloak.StringP(userData.Username),
-	}
+	user := userDataToGocloak(userData)
 
 	_, err := gm.client.CreateUser(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, user)
 	if err != nil {
@@ -70,12 +65,12 @@ func (gm *GocloakManagerClient) GetUserByID(userID string) (entity.UserGocloakDa
 	return gocloakUserToUserData(user), nil
 }
 
-func (gm *GocloakManagerClient) UpdateUserProductPermissions(userID string, product string, permissions []string) error {
+func (gm *GocloakManagerClient) UpdateUserProductPermissions(userID, product string, permissions []string) error {
 	wrapErr := errors.Wrapper("gocloak update user roles: %w")
 
 	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, userID)
 	if err != nil {
-		wrapErr(err)
+		return wrapErr(err)
 	}
 
 	rolesAttribute, ok := (*user.Attributes)["product_roles"]
@@ -84,9 +79,11 @@ func (gm *GocloakManagerClient) UpdateUserProductPermissions(userID string, prod
 	}
 
 	userProductRoles := rolesAttribute[0]
-
 	userRoles := make(map[string]interface{})
-	json.Unmarshal([]byte(userProductRoles), &userRoles)
+
+	if err = json.Unmarshal([]byte(userProductRoles), &userRoles); err != nil {
+		return wrapErr(err)
+	}
 
 	if len(permissions) == 0 {
 		delete(userRoles, product)

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/suite"
+	testifySuite "github.com/stretchr/testify/suite"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
@@ -17,7 +17,7 @@ const (
 )
 
 type ContextUserManagerSuite struct {
-	suite.Suite
+	testifySuite.Suite
 	mockGokeycloak             *mocks.MockGocloakService
 	mockLogger                 *mocks.MockLogger
 	mockUserActivityInteractor *mocks.MockUserActivityInteracter
@@ -25,7 +25,7 @@ type ContextUserManagerSuite struct {
 }
 
 func TestContextMeasurementTestSuite(t *testing.T) {
-	suite.Run(t, new(ContextUserManagerSuite))
+	testifySuite.Run(t, new(ContextUserManagerSuite))
 }
 
 func (suite *ContextUserManagerSuite) SetupSuite() {
@@ -72,7 +72,13 @@ func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissions() {
 	permissions := []string{"permission1", "permission2"}
 
 	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, permissions).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions, "").Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+		triggerUserID,
+		testUserData.ID,
+		testProduct,
+		permissions,
+		"",
+	).Times(1).Return(nil)
 	suite.mockLogger.EXPECT().Infof(updateUserProductPermissionsLog, testUserData.ID, testProduct, permissions).Times(1)
 
 	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions)
@@ -85,7 +91,13 @@ func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsGivenComme
 	testComment := "test comment"
 
 	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, permissions).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions, testComment).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+		triggerUserID,
+		testUserData.ID,
+		testProduct,
+		permissions,
+		testComment,
+	).Times(1).Return(nil)
 	suite.mockLogger.EXPECT().Infof(updateUserProductPermissionsLog, testUserData.ID, testProduct, permissions).Times(1)
 
 	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions, testComment)
@@ -108,7 +120,13 @@ func (suite *ContextUserManagerSuite) TestRevokeProductPermissions() {
 	testComment := "test comment"
 
 	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(triggerUserID, testUserData.ID, testProduct, []string{}, testComment).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+		triggerUserID,
+		testUserData.ID,
+		testProduct,
+		[]string{},
+		testComment,
+	).Times(1).Return(nil)
 	suite.mockLogger.EXPECT().Infof(revokeUserProductPermissionsLog, testUserData.ID, testProduct).Times(1)
 
 	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUserData.ID, testProduct, testComment)
@@ -119,7 +137,13 @@ func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsGivenComment()
 	testUserData := suite.GetTestUserData()
 
 	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(triggerUserID, testUserData.ID, testProduct, []string{}, "").Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+		triggerUserID,
+		testUserData.ID,
+		testProduct,
+		[]string{},
+		"",
+	).Times(1).Return(nil)
 	suite.mockLogger.EXPECT().Infof(revokeUserProductPermissionsLog, testUserData.ID, testProduct).Times(1)
 
 	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUserData.ID, testProduct)
