@@ -9,7 +9,7 @@
       "name": "Missing words",
       "queries": [
         {
-          "query": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> map(fn: (r) => ({ r with _field: r._value, _value: 1 }))\n  |> group(columns: [\"_field\"])\n  |> aggregateWindow(every: 1m, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n",
+          "query": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> map(fn: (r) => ({ r with _field: r._value, _value: 1 }))\n  |> group(columns: [\"_field\"])\n  |> aggregateWindow(every: 1m, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -21,7 +21,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> map(fn: (r) => ({ r with _field: r._value, _value: 1 }))\n  |> group(columns: [\"_field\"])\n  |> aggregateWindow(every: 1m, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n",
+            "rawText": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> map(fn: (r) => ({ r with _field: r._value, _value: 1 }))\n  |> group(columns: [\"_field\"])\n  |> aggregateWindow(every: 1m, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n",
             "range": null,
             "shifts": null
           },
@@ -136,7 +136,7 @@
       "name": "Missing words by ticket and asset",
       "queries": [
         {
-          "query": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"ticket_id\", \"asset_id\", \"_value\"])\n  |> group(columns: [\"ticket_id\", \"asset_id\"])\n  |> unique()\n  |> reduce(fn: (r, accumulator) => ({ words: if accumulator.words== \"\" then r._value else accumulator.words + \", \" + r._value }), identity: {words: \"\"})\n  |> group()\n  |> sort(columns: [\"ticket_id\", \"asset_id\"], desc: false)",
+          "query": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"ticket_id\", \"asset_id\", \"_value\"])\n  |> group(columns: [\"ticket_id\", \"asset_id\"])\n  |> unique()\n  |> reduce(fn: (r, accumulator) => ({ words: if accumulator.words== \"\" then r._value else accumulator.words + \", \" + r._value }), identity: {words: \"\"})\n  |> group()\n  |> sort(columns: [\"ticket_id\", \"asset_id\"], desc: false)",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -148,7 +148,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"ticket_id\", \"asset_id\", \"_value\"])\n  |> group(columns: [\"ticket_id\", \"asset_id\"])\n  |> unique()\n  |> reduce(fn: (r, accumulator) => ({ words: if accumulator.words== \"\" then r._value else accumulator.words + \", \" + r._value }), identity: {words: \"\"})\n  |> group()\n  |> sort(columns: [\"ticket_id\", \"asset_id\"], desc: false)",
+            "rawText": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"ticket_id\", \"asset_id\", \"_value\"])\n  |> group(columns: [\"ticket_id\", \"asset_id\"])\n  |> unique()\n  |> reduce(fn: (r, accumulator) => ({ words: if accumulator.words== \"\" then r._value else accumulator.words + \", \" + r._value }), identity: {words: \"\"})\n  |> group()\n  |> sort(columns: [\"ticket_id\", \"asset_id\"], desc: false)",
             "range": null,
             "shifts": null
           },
@@ -249,7 +249,7 @@
       "name": "Missing words",
       "queries": [
         {
-          "query": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"_value\"])\n  |> group(columns: [\"_value\"])\n  |> reduce(fn: (r, accumulator) => ({ r with count: 1 + accumulator.count }), identity: {count: 0})\n  |> group()\n  |> sort(columns: [\"count\"], desc: true)",
+          "query": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"_value\"])\n  |> group(columns: [\"_value\"])\n  |> reduce(fn: (r, accumulator) => ({ r with count: 1 + accumulator.count }), identity: {count: 0})\n  |> group()\n  |> sort(columns: [\"count\"], desc: true)",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -261,7 +261,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"_value\"])\n  |> group(columns: [\"_value\"])\n  |> reduce(fn: (r, accumulator) => ({ r with count: 1 + accumulator.count }), identity: {count: 0})\n  |> group()\n  |> sort(columns: [\"count\"], desc: true)",
+            "rawText": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"w2v\" and (r._field == \"missing_word\"))\n  |> keep(columns: [\"_value\"])\n  |> group(columns: [\"_value\"])\n  |> reduce(fn: (r, accumulator) => ({ r with count: 1 + accumulator.count }), identity: {count: 0})\n  |> group()\n  |> sort(columns: [\"count\"], desc: true)",
             "range": null,
             "shifts": null
           },
@@ -357,7 +357,7 @@
       "name": "Suggestions ussage",
       "queries": [
         {
-          "query": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"prediction_result\" and (r._field == \"predicted_value\" or r._field == \"true_value\"))\n  |> drop(columns: [\"_start\", \"_stop\", \"asset_id\", \"ticket_id\", \"tracking_id\", \"version\", \"_measurement\"])\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with _value: if r.predicted_value == r.true_value then \"hit\" else \"miss\" }))\n  |> drop(columns: [\"true_value\", \"predicted_value\"])\n  |> group(columns: [\"_value\"])\n  |> map(fn: (r) => ({ r with count: 1 }))\n  |> aggregateWindow(every: 1m, fn: sum, column: \"count\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_value\"], valueColumn: \"count\")\n",
+          "query": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"prediction_result\" and (r._field == \"predicted_value\" or r._field == \"true_value\"))\n  |> drop(columns: [\"_start\", \"_stop\", \"asset_id\", \"ticket_id\", \"tracking_id\", \"version\", \"_measurement\"])\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with _value: if r.predicted_value == r.true_value then \"hit\" else \"miss\" }))\n  |> drop(columns: [\"true_value\", \"predicted_value\"])\n  |> group(columns: [\"_value\"])\n  |> map(fn: (r) => ({ r with count: 1 }))\n  |> aggregateWindow(every: 1m, fn: sum, column: \"count\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_value\"], valueColumn: \"count\")\n",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -369,7 +369,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"prediction_result\" and (r._field == \"predicted_value\" or r._field == \"true_value\"))\n  |> drop(columns: [\"_start\", \"_stop\", \"asset_id\", \"ticket_id\", \"tracking_id\", \"version\", \"_measurement\"])\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with _value: if r.predicted_value == r.true_value then \"hit\" else \"miss\" }))\n  |> drop(columns: [\"true_value\", \"predicted_value\"])\n  |> group(columns: [\"_value\"])\n  |> map(fn: (r) => ({ r with count: 1 }))\n  |> aggregateWindow(every: 1m, fn: sum, column: \"count\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_value\"], valueColumn: \"count\")\n",
+            "rawText": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"prediction_result\" and (r._field == \"predicted_value\" or r._field == \"true_value\"))\n  |> drop(columns: [\"_start\", \"_stop\", \"asset_id\", \"ticket_id\", \"tracking_id\", \"version\", \"_measurement\"])\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with _value: if r.predicted_value == r.true_value then \"hit\" else \"miss\" }))\n  |> drop(columns: [\"true_value\", \"predicted_value\"])\n  |> group(columns: [\"_value\"])\n  |> map(fn: (r) => ({ r with count: 1 }))\n  |> aggregateWindow(every: 1m, fn: sum, column: \"count\")\n  |> drop(columns: [\"_start\", \"_stop\"])\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_value\"], valueColumn: \"count\")\n",
             "range": null,
             "shifts": null
           },
@@ -474,7 +474,7 @@
       "name": "How many suggestions matched with final actions?",
       "queries": [
         {
-          "query": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"prediction_result\" and (r._field == \"predicted_value\" or r._field == \"true_value\"))\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with _value: if r.predicted_value == r.true_value then \"hit\" else \"miss\", count: 1 }))\n  |> group(columns: [\"_value\"])\n  |> sum(column: \"count\")\n  |> group()\n  |> reduce(fn: (r, accumulator) => ({ perc: if r._value == \"hit\" then r.count else accumulator.perc, total: accumulator.total + r.count }), identity: {perc: 0, total: 0})\n  |> map(fn: (r) => ({ r with _value: float(v: r.perc) / float(v: r.total) * 100.0 }))\n",
+          "query": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"prediction_result\" and (r._field == \"predicted_value\" or r._field == \"true_value\"))\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with _value: if r.predicted_value == r.true_value then \"hit\" else \"miss\", count: 1 }))\n  |> group(columns: [\"_value\"])\n  |> sum(column: \"count\")\n  |> group()\n  |> reduce(fn: (r, accumulator) => ({ perc: if r._value == \"hit\" then r.count else accumulator.perc, total: accumulator.total + r.count }), identity: {perc: 0, total: 0})\n  |> map(fn: (r) => ({ r with _value: float(v: r.perc) / float(v: r.total) * 100.0 }))\n",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -486,7 +486,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"prediction_result\" and (r._field == \"predicted_value\" or r._field == \"true_value\"))\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with _value: if r.predicted_value == r.true_value then \"hit\" else \"miss\", count: 1 }))\n  |> group(columns: [\"_value\"])\n  |> sum(column: \"count\")\n  |> group()\n  |> reduce(fn: (r, accumulator) => ({ perc: if r._value == \"hit\" then r.count else accumulator.perc, total: accumulator.total + r.count }), identity: {perc: 0, total: 0})\n  |> map(fn: (r) => ({ r with _value: float(v: r.perc) / float(v: r.total) * 100.0 }))\n",
+            "rawText": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"prediction_result\" and (r._field == \"predicted_value\" or r._field == \"true_value\"))\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with _value: if r.predicted_value == r.true_value then \"hit\" else \"miss\", count: 1 }))\n  |> group(columns: [\"_value\"])\n  |> sum(column: \"count\")\n  |> group()\n  |> reduce(fn: (r, accumulator) => ({ perc: if r._value == \"hit\" then r.count else accumulator.perc, total: accumulator.total + r.count }), identity: {perc: 0, total: 0})\n  |> map(fn: (r) => ({ r with _value: float(v: r.perc) / float(v: r.total) * 100.0 }))\n",
             "range": null,
             "shifts": null
           },
@@ -584,7 +584,7 @@
       "name": "Unknown task results",
       "queries": [
         {
-          "query": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"asset_id\", \"tracking_id\", \"_measurement\", \"version\"])\n  |> unique()\n  |> drop(columns: [\"ticket_id\"])\n  |> map(fn: (r) => ({ r with _field: r._value }))\n  |> aggregateWindow(every: 1m, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])",
+          "query": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"asset_id\", \"tracking_id\", \"_measurement\", \"version\"])\n  |> unique()\n  |> drop(columns: [\"ticket_id\"])\n  |> map(fn: (r) => ({ r with _field: r._value }))\n  |> aggregateWindow(every: 1m, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -596,7 +596,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"asset_id\", \"tracking_id\", \"_measurement\", \"version\"])\n  |> unique()\n  |> drop(columns: [\"ticket_id\"])\n  |> map(fn: (r) => ({ r with _field: r._value }))\n  |> aggregateWindow(every: 1m, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])",
+            "rawText": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"asset_id\", \"tracking_id\", \"_measurement\", \"version\"])\n  |> unique()\n  |> drop(columns: [\"ticket_id\"])\n  |> map(fn: (r) => ({ r with _field: r._value }))\n  |> aggregateWindow(every: 1m, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])",
             "range": null,
             "shifts": null
           },
@@ -711,7 +711,7 @@
       "name": "Unknown task results by ticket and asset",
       "queries": [
         {
-          "query": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"tracking_id\", \"_measurement\", \"version\", \"_field\"])\n  |> drop(columns: [\"_start\", \"_stop\", \"_time\"])\n  |> group()\n  |> sort(columns: [\"ticket_id\", \"asset_id\"], desc: false)",
+          "query": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"tracking_id\", \"_measurement\", \"version\", \"_field\"])\n  |> drop(columns: [\"_start\", \"_stop\", \"_time\"])\n  |> group()\n  |> sort(columns: [\"ticket_id\", \"asset_id\"], desc: false)",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -723,7 +723,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"tracking_id\", \"_measurement\", \"version\", \"_field\"])\n  |> drop(columns: [\"_start\", \"_stop\", \"_time\"])\n  |> group()\n  |> sort(columns: [\"ticket_id\", \"asset_id\"], desc: false)",
+            "rawText": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"tracking_id\", \"_measurement\", \"version\", \"_field\"])\n  |> drop(columns: [\"_start\", \"_stop\", \"_time\"])\n  |> group()\n  |> sort(columns: [\"ticket_id\", \"asset_id\"], desc: false)",
             "range": null,
             "shifts": null
           },
@@ -824,7 +824,7 @@
       "name": "Unknown task results",
       "queries": [
         {
-          "query": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"asset_id\", \"tracking_id\", \"_measurement\", \"version\", \"_field\"])\n  |> unique()\n  |> drop(columns: [\"ticket_id\"])\n  |> group(columns: [\"_value\"])\n  |> reduce(fn: (r, accumulator) => ({ count: 1 + accumulator.count }), identity: {count: 0})\n  |> group()\n  |> sort(columns: [\"count\"], desc: true)",
+          "query": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"asset_id\", \"tracking_id\", \"_measurement\", \"version\", \"_field\"])\n  |> unique()\n  |> drop(columns: [\"ticket_id\"])\n  |> group(columns: [\"_value\"])\n  |> reduce(fn: (r, accumulator) => ({ count: 1 + accumulator.count }), identity: {count: 0})\n  |> group()\n  |> sort(columns: [\"count\"], desc: true)",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -836,7 +836,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"asset_id\", \"tracking_id\", \"_measurement\", \"version\", \"_field\"])\n  |> unique()\n  |> drop(columns: [\"ticket_id\"])\n  |> group(columns: [\"_value\"])\n  |> reduce(fn: (r, accumulator) => ({ count: 1 + accumulator.count }), identity: {count: 0})\n  |> group()\n  |> sort(columns: [\"count\"], desc: true)",
+            "rawText": "from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"unknown_label\"))\n  |> drop(columns: [\"asset_id\", \"tracking_id\", \"_measurement\", \"version\", \"_field\"])\n  |> unique()\n  |> drop(columns: [\"ticket_id\"])\n  |> group(columns: [\"_value\"])\n  |> reduce(fn: (r, accumulator) => ({ count: 1 + accumulator.count }), identity: {count: 0})\n  |> group()\n  |> sort(columns: [\"count\"], desc: true)",
             "range": null,
             "shifts": null
           },
@@ -932,7 +932,7 @@
       "name": "Ticket activity",
       "queries": [
         {
-          "query": "ok = from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"suggestion\" and (r._field == \"task_result\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"ok\" }))\n\nerror = from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"category_field\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"error\" }))\n\nunion(tables: [ok, error])\n  |> group(columns: [\"_field\"], mode:\"by\")\n  |> aggregateWindow(every: autoInterval, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])",
+          "query": "ok = from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"suggestion\" and (r._field == \"task_result\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"ok\" }))\n\nerror = from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"category_field\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"error\" }))\n\nunion(tables: [ok, error])\n  |> group(columns: [\"_field\"], mode:\"by\")\n  |> aggregateWindow(every: autoInterval, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -944,7 +944,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "ok = from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"suggestion\" and (r._field == \"task_result\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"ok\" }))\n\nerror = from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"category_field\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"error\" }))\n\nunion(tables: [ok, error])\n  |> group(columns: [\"_field\"], mode:\"by\")\n  |> aggregateWindow(every: autoInterval, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])",
+            "rawText": "ok = from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"suggestion\" and (r._field == \"task_result\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"ok\" }))\n\nerror = from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"category_field\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"error\" }))\n\nunion(tables: [ok, error])\n  |> group(columns: [\"_field\"], mode:\"by\")\n  |> aggregateWindow(every: autoInterval, fn: count)\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> drop(columns: [\"_start\", \"_stop\"])",
             "range": null,
             "shifts": null
           },
@@ -1049,7 +1049,7 @@
       "name": "Ticket predictions",
       "queries": [
         {
-          "query": "ok = from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"suggestion\" and (r._field == \"task_result\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"ok\" }))\n\nerror = from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"category_field\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"error\" }))\n\nunion(tables: [ok, error])\n  |> count(column: \"_value\")",
+          "query": "ok = from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"suggestion\" and (r._field == \"task_result\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"ok\" }))\n\nerror = from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"category_field\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"error\" }))\n\nunion(tables: [ok, error])\n  |> count(column: \"_value\")",
           "queryConfig": {
             "database": "",
             "measurement": "",
@@ -1061,7 +1061,7 @@
               "tags": []
             },
             "areTagsAccepted": false,
-            "rawText": "ok = from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"suggestion\" and (r._field == \"task_result\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"ok\" }))\n\nerror = from(bucket: \"kre/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"category_field\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"error\" }))\n\nunion(tables: [ok, error])\n  |> count(column: \"_value\")",
+            "rawText": "ok = from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"suggestion\" and (r._field == \"task_result\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"ok\" }))\n\nerror = from(bucket: \"kai/autogen\")\n  |> range(start: dashboardTime)\n  |> filter(fn: (r) => r._measurement == \"category_error\" and (r._field == \"category_field\"))\n  |> group()\n  |> map(fn: (r) => ({ r with _field: \"error\" }))\n\nunion(tables: [ok, error])\n  |> count(column: \"_value\")",
             "range": null,
             "shifts": null
           },

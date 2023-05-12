@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 type ConfigurationVariablesInput struct {
@@ -102,6 +102,7 @@ func (e AccessLevel) IsValid() bool {
 	case AccessLevelViewer, AccessLevelManager, AccessLevelAdmin:
 		return true
 	}
+
 	return false
 }
 
@@ -119,6 +120,7 @@ func (e *AccessLevel) UnmarshalGQL(v interface{}) error {
 	if !e.IsValid() {
 		return fmt.Errorf("%s is not a valid AccessLevel", str)
 	}
+
 	return nil
 }
 

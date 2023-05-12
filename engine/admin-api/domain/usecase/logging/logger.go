@@ -3,7 +3,7 @@ package logging
 import (
 	"strings"
 
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
 func NewLogger(logLevel string) Logger {

@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	krt "github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt"
+	krt "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
 )
 
 // MockValidator is a mock of Validator interface.
@@ -26,6 +26,7 @@ type MockValidatorMockRecorder struct {
 func NewMockValidator(ctrl *gomock.Controller) *MockValidator {
 	mock := &MockValidator{ctrl: ctrl}
 	mock.recorder = &MockValidatorMockRecorder{mock}
+
 	return mock
 }
 
@@ -39,6 +40,7 @@ func (m *MockValidator) Run(krt *krt.Krt) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Run", krt)
 	ret0, _ := ret[0].(error)
+
 	return ret0
 }
 

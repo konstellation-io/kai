@@ -12,7 +12,7 @@ templates:
     # Valid values are "Error", "Warn", "Info", "Debug". The default is "Error"
     # Use "Debug" to make missing files errors invisible at the default log level(--log-level=INFO)
     missingFileHandler: Warn
-    namespace: kre
+    namespace: kai
     values:
     - "values/{{`{{ .Release.Name }}`}}/values.yaml.gotmpl"
     - "values/{{`{{ .Release.Name }}`}}/values.yaml"
@@ -32,10 +32,10 @@ releases:
     <<: *default
     chart: bedag/raw
     needs:
-    - kre/mongodb-operator
+    - kai/mongodb-operator
 
   - name: "{{ requiredEnv "RELEASE_NAME" }}"
     <<: *default
-    chart: ../../helm/kre
+    chart: ../../helm/kai
     needs:
-    - kre/mongodb-database
+    - kai/mongodb-database

@@ -8,7 +8,7 @@ describe('Users Page', () => {
     cy.kstInterceptor('GetMe', {data: GetMeQuery});
     cy.kstInterceptor('GetVersionConfStatus', {data: GetVersionConfStatusQuery});
     cy.kstInterceptor('GetUsers', { data: { users } });
-    cy.visit('http://dev-admin.kre.local:3000/');
+    cy.visit('http://dev-admin.kai.local:3000/');
     cy.getByTestId('settings-label').click();
     cy.contains('USERS').click();
   });

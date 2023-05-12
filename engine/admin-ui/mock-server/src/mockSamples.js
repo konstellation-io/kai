@@ -194,7 +194,7 @@ function getOptions(User) {
       vars: [
         {
           key: 'USER_EMAILS',
-          value: 'user1@kre.com, user2@kre.com, user3@kre.com'
+          value: 'user1@kai.com, user2@kai.com, user3@kai.com'
         }
       ]
     },
@@ -204,7 +204,7 @@ function getOptions(User) {
       vars: [
         {
           key: 'USER_EMAILS',
-          value: 'user1@kre.com, user2@kre.com, user3@kre.com'
+          value: 'user1@kai.com, user2@kai.com, user3@kai.com'
         },
         { key: 'ACCESS_LEVEL', value: 'MANAGER' }
       ]
@@ -215,7 +215,7 @@ function getOptions(User) {
       vars: [
         {
           key: 'USER_EMAILS',
-          value: 'user1@kre.com, user2@kre.com, user3@kre.com'
+          value: 'user1@kai.com, user2@kai.com, user3@kai.com'
         }
       ]
     },

@@ -12,10 +12,10 @@ import (
 
 	"github.com/docker/distribution/reference"
 	"github.com/go-playground/validator/v10"
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 	"gopkg.in/yaml.v3"
 
-	"github.com/konstellation-io/kre/libs/krt-utils/pkg/krt"
+	"github.com/konstellation-io/kai/libs/krt-utils/pkg/krt"
 )
 
 var (

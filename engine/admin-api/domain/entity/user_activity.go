@@ -27,6 +27,7 @@ func (e UserActivityType) IsValid() bool {
 		UserActivityTypeUpdateProductPermissions:
 		return true
 	}
+
 	return false
 }
 

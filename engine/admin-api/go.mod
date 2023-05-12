@@ -1,4 +1,4 @@
-module github.com/konstellation-io/kre/engine/admin-api
+module github.com/konstellation-io/kai/engine/admin-api
 
 go 1.20
 
@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/websocket v1.5.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/konstellation-io/kre/libs/simplelogger v0.0.0-20200722094846-76578d8251dd
+	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20200722094846-76578d8251dd
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/otiai10/copy v1.2.0
 	github.com/stretchr/testify v1.8.2
@@ -65,3 +65,5 @@ require (
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/konstellation-io/kai/libs/simplelogger => ../../libs/simplelogger

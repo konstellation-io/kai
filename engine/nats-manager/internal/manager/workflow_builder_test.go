@@ -1,7 +1,7 @@
 package manager_test
 
 import (
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/entity"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 )
 
 type WorkflowBuilder struct {

@@ -1,13 +1,13 @@
 package node
 
 import (
-	"github.com/konstellation-io/kre/engine/k8s-manager/entity"
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/engine/k8s-manager/entity"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 
 	coreV1 "k8s.io/api/core/v1"
 )
 
-type NodeStatusResolver struct {
+type NodeStatusResolver struct { //nolint:golint
 	Out        chan<- entity.Node
 	Logger     *simplelogger.SimpleLogger
 	LastStatus map[string]entity.NodeStatus

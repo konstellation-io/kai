@@ -1,8 +1,8 @@
 package node
 
 import (
-	"github.com/konstellation-io/kre/engine/k8s-manager/entity"
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/engine/k8s-manager/entity"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 	coreV1 "k8s.io/api/core/v1"
 )
 
@@ -31,6 +31,7 @@ func GetNodeStatus(logger *simplelogger.SimpleLogger, p *coreV1.Pod) (entity.Nod
 				crashLoopBackOff++
 				continue
 			}
+
 			if cs.State.Waiting.Reason == "ContainerCreating" || cs.State.Waiting.Reason == "PodInitializing" {
 				waiting++
 			}

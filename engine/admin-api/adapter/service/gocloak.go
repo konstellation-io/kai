@@ -6,9 +6,9 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/internal/errors"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
 type GocloakManagerClient struct {

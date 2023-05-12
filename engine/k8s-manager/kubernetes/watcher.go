@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/konstellation-io/kre/engine/k8s-manager/config"
-	"github.com/konstellation-io/kre/engine/k8s-manager/entity"
-	"github.com/konstellation-io/kre/engine/k8s-manager/kubernetes/node"
+	configuration "github.com/konstellation-io/kai/engine/k8s-manager/config"
+	"github.com/konstellation-io/kai/engine/k8s-manager/entity"
+	"github.com/konstellation-io/kai/engine/k8s-manager/kubernetes/node"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -22,12 +22,12 @@ import (
 var ErrWaitForPODsRunningTimeout = errors.New("timeout waiting for running PODs")
 
 type Watcher struct {
-	config    *config.Config
+	config    *configuration.Config
 	logger    *simplelogger.SimpleLogger
 	clientset *kubernetes.Clientset
 }
 
-func NewWatcher(config *config.Config, logger *simplelogger.SimpleLogger, clientset *kubernetes.Clientset) *Watcher {
+func NewWatcher(config *configuration.Config, logger *simplelogger.SimpleLogger, clientset *kubernetes.Clientset) *Watcher {
 	return &Watcher{
 		config,
 		logger,
@@ -38,26 +38,26 @@ func NewWatcher(config *config.Config, logger *simplelogger.SimpleLogger, client
 const timeout = 5 * time.Minute
 
 func (w *Watcher) WaitForRuntimePods(ctx context.Context, ns string) error {
-	mongoChan, err := w.waitForPodRunning(ctx, ns, []string{"kre-app=kre-mongo"}, timeout)
+	mongoChan, err := w.waitForPodRunning(ctx, ns, []string{"kai-app=kai-mongo"}, timeout)
 	if err != nil {
 		return err
 	}
 
-	natsChan, err := w.waitForPodRunning(ctx, ns, []string{"app=kre-nats"}, timeout)
+	natsChan, err := w.waitForPodRunning(ctx, ns, []string{"app=kai-nats"}, timeout)
 	if err != nil {
 		return err
 	}
 
-	kreOperatorChan, err := w.waitForPodRunning(ctx, ns, []string{"name=k8s-runtime-operator"}, timeout)
+	kaiOperatorChan, err := w.waitForPodRunning(ctx, ns, []string{"name=k8s-runtime-operator"}, timeout)
 	if err != nil {
 		return err
 	}
 
 	mongoRunning,
-		kreOperatorRunning,
+		kaiOperatorRunning,
 		natsRunning :=
 		<-mongoChan,
-		<-kreOperatorChan,
+		<-kaiOperatorChan,
 		<-natsChan
 
 	var failedPods []string
@@ -70,7 +70,7 @@ func (w *Watcher) WaitForRuntimePods(ctx context.Context, ns string) error {
 		failedPods = append(failedPods, "NATS")
 	}
 
-	if !kreOperatorRunning {
+	if !kaiOperatorRunning {
 		failedPods = append(failedPods, "K8sRuntimeOperator")
 	}
 
@@ -126,10 +126,10 @@ func (w *Watcher) waitForPodRunning(ctx context.Context, ns string, podLabels []
 	return waitChan, nil
 }
 
-func (w *Watcher) WatchNodeStatus(runtimeId, versionName string, statusCh chan<- entity.Node) chan struct{} {
+func (w *Watcher) WatchNodeStatus(runtimeID, versionName string, statusCh chan<- entity.Node) chan struct{} {
 	w.logger.Debugf("[WatchNodeStatus] watching %q", versionName)
 
-	labelSelector := fmt.Sprintf("runtime-id=%s,version-name=%s,type in (node, entrypoint)", runtimeId, versionName)
+	labelSelector := fmt.Sprintf("runtime-id=%s,version-name=%s,type in (node, entrypoint)", runtimeID, versionName)
 	resolver := node.NodeStatusResolver{
 		Out:        statusCh,
 		Logger:     w.logger,

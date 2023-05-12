@@ -10,8 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/config"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/logging"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/config"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/logging"
 )
 
 var (

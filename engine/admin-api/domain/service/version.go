@@ -5,7 +5,7 @@ package service
 import (
 	"context"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 type VersionService interface {
@@ -14,5 +14,5 @@ type VersionService interface {
 	Unpublish(runtimeID string, version *entity.Version) error
 	Publish(runtimeID string, version *entity.Version) error
 	UpdateConfig(runtimeID string, version *entity.Version) error
-	WatchNodeStatus(ctx context.Context, runtimeId, versionName string) (<-chan *entity.Node, error)
+	WatchNodeStatus(ctx context.Context, runtimeID, versionName string) (<-chan *entity.Node, error)
 }

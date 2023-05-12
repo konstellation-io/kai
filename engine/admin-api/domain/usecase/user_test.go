@@ -7,8 +7,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/mocks"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 )
 
 const (

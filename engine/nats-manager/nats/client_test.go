@@ -4,19 +4,19 @@ package nats_test
 
 import (
 	"context"
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/errors"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/errors"
 	"log"
 	"regexp"
 	"testing"
 
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 	natslib "github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/entity"
-	"github.com/konstellation-io/kre/engine/nats-manager/nats"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
+	"github.com/konstellation-io/kai/engine/nats-manager/nats"
 )
 
 type ClientTestSuite struct {

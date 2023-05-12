@@ -10,8 +10,8 @@ RUN cd cmd && go build -o ../mongo-writer .
 
 FROM alpine:3.10.2
 
-# Create kre user.
-ENV USER=kre
+# Create kai user.
+ENV USER=kai
 ENV UID=10001
 RUN adduser \
     --disabled-password \
@@ -28,11 +28,11 @@ RUN mkdir -p /var/log/app
 WORKDIR /app
 COPY --from=builder /app/mongo-writer .
 COPY config.yml .
-RUN chown -R kre:0 /app \
+RUN chown -R kai:0 /app \
     && chmod -R g+w /app \
-    && chown -R kre:0 /var/log/app \
+    && chown -R kai:0 /var/log/app \
     && chmod -R g+w /var/log/app
 
-USER kre
+USER kai
 
 CMD ["sh","-c","/app/mongo-writer 2>&1 | tee -a /var/log/app/app.log"]

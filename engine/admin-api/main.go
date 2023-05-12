@@ -3,15 +3,17 @@ package main
 import (
 	"log"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/auth"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/repository/influx"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/repository/mongodb"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/service"
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/version"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/version"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 func main() {
@@ -22,12 +24,29 @@ func main() {
 	mongodbClient := db.Connect()
 	defer db.Disconnect()
 
-	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
-	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
-	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
+	userActivityInteractor, runtimeInteractor, userInteractor,
+		versionInteractor, metricsInteractor := initApp(cfg, logger, mongodbClient)
+
+	app := http.NewApp(
+		cfg,
+		logger,
+		runtimeInteractor,
+		userInteractor,
+		userActivityInteractor,
+		versionInteractor,
+		metricsInteractor,
+	)
+	app.Start()
+}
+
+func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) (usecase.UserActivityInteracter,
+	*usecase.RuntimeInteractor, *usecase.UserInteractor, *usecase.VersionInteractor, *usecase.MetricsInteractor) {
 	runtimeRepo := mongodb.NewRuntimeRepoMongoDB(cfg, logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
 	versionMongoRepo := mongodb.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
+	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
+	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
+	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
 
 	versionService, err := service.NewK8sVersionClient(cfg, logger)
 	if err != nil {
@@ -95,15 +114,5 @@ func main() {
 		metricRepo,
 	)
 
-	app := http.NewApp(
-		cfg,
-		logger,
-		runtimeInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
-	)
-
-	app.Start()
+	return userActivityInteractor, runtimeInteractor, userInteractor, versionInteractor, metricsInteractor
 }

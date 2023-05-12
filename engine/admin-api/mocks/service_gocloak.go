@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	entity "github.com/konstellation-io/kre/engine/admin-api/domain/entity"
+	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 // MockGocloakService is a mock of GocloakService interface.

@@ -1,10 +1,10 @@
-module github.com/konstellation-io/kre/engine/k8s-manager
+module github.com/konstellation-io/kai/engine/k8s-manager
 
 go 1.20
 
 require (
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/konstellation-io/kre/libs/simplelogger v0.0.0-20200611081512-198d96c2a13a
+	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20200611081512-198d96c2a13a
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
@@ -56,3 +56,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
+
+replace github.com/konstellation-io/kai/libs/simplelogger => ../../libs/simplelogger

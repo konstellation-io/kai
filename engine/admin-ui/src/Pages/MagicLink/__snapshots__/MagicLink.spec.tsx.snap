@@ -12,7 +12,7 @@ exports[`Render MagicLink without crashing 1`] = `
         class="container"
       >
         <h1>
-          Connecting to KRE
+          Connecting to KAI
         </h1>
         <p
           class="subtitle"

@@ -39,7 +39,7 @@ type Config struct {
 	} `yaml:"smtp"`
 
 	Auth struct {
-		VerificationCodeDurationInMinutes int    `yaml:"verificationCodeDurationInMinutes" envconfig:"KRE_AUTH_VERIFICATION_CODE_DURATION_IN_MINUTES"`
+		VerificationCodeDurationInMinutes int    `yaml:"verificationCodeDurationInMinutes" envconfig:"KRE_AUTH_VERIFICATION_CODE_DURATION_IN_MINUTES"` //nolint:lll // Cannot be split
 		JWTSignSecret                     string `yaml:"jwtSignSecret" envconfig:"KRE_AUTH_JWT_SIGN_SECRET"`
 		APITokenSecret                    string `yaml:"apiTokenSecret" envconfig:"KRE_AUTH_API_TOKEN_SECRET"`
 		SecureCookie                      bool   `yaml:"secureCookie" envconfig:"KRE_AUTH_SECURE_COOKIE"`
@@ -80,11 +80,12 @@ type Config struct {
 	} `yaml:"keycloak"`
 }
 
-var once sync.Once
-var cfg *Config
-
 // NewConfig will read the config.yml file and override values with env vars.
 func NewConfig() *Config {
+	var once sync.Once
+
+	var cfg *Config
+
 	once.Do(func() {
 		f, err := os.Open("config.yml")
 		if err != nil {
@@ -93,6 +94,7 @@ func NewConfig() *Config {
 
 		cfg = &Config{}
 		decoder := yaml.NewDecoder(f)
+
 		err = decoder.Decode(cfg)
 		if err != nil {
 			panic(err)

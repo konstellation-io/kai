@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/service"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
-	"github.com/konstellation-io/kre/engine/admin-api/internal/errors"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
 const (
