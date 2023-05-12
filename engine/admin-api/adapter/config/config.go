@@ -71,6 +71,7 @@ type Config struct {
 		NatsManager string `yaml:"natsManager" envconfig:"KRE_SERVICES_NATS_MANAGER"`
 	} `yaml:"services"`
 
+	// TODO: Get into an agreement with infra
 	Keycloak struct {
 		Realm         string `yaml:"realm" envconfig:"KEYCLOAK_REALM"`
 		MasterRealm   string `yaml:"master_realm" envconfig:"KEYCLOAK_MASTER_REALM"`

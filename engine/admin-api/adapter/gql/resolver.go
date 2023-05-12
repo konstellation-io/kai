@@ -175,6 +175,26 @@ func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, i
 	return r.versionInteractor.UpdateVersionConfig(ctx, loggedUserID, input.RuntimeID, v, cfg)
 }
 
+func (r *mutationResolver) UpdateUserProductPermissions(ctx context.Context, input UpdateUserProductPermissionsInput) (bool, error) {
+	loggedUserID := ctx.Value("userID").(string)
+
+	err := r.userInteractor.UpdateUserProductPermissions(loggedUserID, input.TargetID, input.Product, input.Permissions, *input.Comment)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (r *mutationResolver) RevokeUserProductPermissions(ctx context.Context, input RevokeUserProductPermissionsInput) (bool, error) {
+	loggedUserID := ctx.Value("userID").(string)
+
+	err := r.userInteractor.RevokeUserProductPermissions(loggedUserID, input.TargetID, input.Product, *input.Comment)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func (r *queryResolver) Metrics(ctx context.Context, runtimeID, versionName,
 	startDate, endDate string) (*entity.Metrics, error) {
 	loggedUserID := ctx.Value("userID").(string)
@@ -358,7 +378,7 @@ func (r *Resolver) Runtime() RuntimeResolver { return &runtimeResolver{r} }
 func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
 
 // APIToken returns APITokenResolver implementation.
-func (r *Resolver) APIToken() ApiTokenResolver { return &apiTokenResolver{r} }
+func (r *Resolver) APIToken() APITokenResolver { return &apiTokenResolver{r} }
 
 // UserActivity returns UserActivityResolver implementation.
 func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityResolver{r} }
@@ -367,13 +387,6 @@ func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityRes
 func (r *Resolver) Version() VersionResolver { return &versionResolver{r} }
 
 type mutationResolver struct{ *Resolver }
-
-//nolint:godox // remove this statement when the TODO below is implemented
-func (r *mutationResolver) UpdateAccessLevel(ctx context.Context, input UpdateAccessLevelInput) ([]string, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
 type queryResolver struct{ *Resolver }
 type runtimeResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }

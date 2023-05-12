@@ -11,7 +11,6 @@ const (
 	getUserByIDWrapper                  = "get user by id"
 	updateUserProductPermissionsWrapper = "update user product permissions"
 	revokeUserProductPermissionsWrapper = "revoke user product permissions"
-	revokedPermissionsComment           = "revoked all permissions"
 	updateUserProductPermissionsLog     = "Updated user %q permissions for product %q: %v"
 	revokeUserProductPermissionsLog     = "Revoked user %q permissions for product %q"
 )
@@ -48,7 +47,7 @@ func (ui *UserInteractor) GetUserByID(userID string) (entity.UserGocloakData, er
 	return user, nil
 }
 
-func (ui *UserInteractor) UpdateUserProductPermissions(triggerUserID string, targetUserID string, product string, permissions []string) error {
+func (ui *UserInteractor) UpdateUserProductPermissions(triggerUserID string, targetUserID string, product string, permissions []string, comment ...string) error {
 	wrapErr := errors.Wrapper(updateUserProductPermissionsWrapper + ": %w")
 
 	err := ui.gocloakManager.UpdateUserProductPermissions(targetUserID, product, permissions)
@@ -56,7 +55,11 @@ func (ui *UserInteractor) UpdateUserProductPermissions(triggerUserID string, tar
 		return wrapErr(err)
 	}
 
-	err = ui.userActivityInteractor.RegisterUpdateProductPermissions(triggerUserID, targetUserID, product, permissions, "")
+	var givenComment string
+	if len(comment) > 0 {
+		givenComment = comment[0]
+	}
+	err = ui.userActivityInteractor.RegisterUpdateProductPermissions(triggerUserID, targetUserID, product, permissions, givenComment)
 	if err != nil {
 		return wrapErr(err)
 	}
@@ -66,7 +69,7 @@ func (ui *UserInteractor) UpdateUserProductPermissions(triggerUserID string, tar
 	return nil
 }
 
-func (ui *UserInteractor) RevokeUserProductPermissions(triggerUserID string, targetUserID string, product string) error {
+func (ui *UserInteractor) RevokeUserProductPermissions(triggerUserID string, targetUserID string, product string, comment ...string) error {
 	wrapErr := errors.Wrapper(revokeUserProductPermissionsWrapper + ": %w")
 
 	err := ui.gocloakManager.UpdateUserProductPermissions(targetUserID, product, []string{})
@@ -74,7 +77,11 @@ func (ui *UserInteractor) RevokeUserProductPermissions(triggerUserID string, tar
 		return wrapErr(err)
 	}
 
-	err = ui.userActivityInteractor.RegisterUpdateProductPermissions(triggerUserID, targetUserID, product, []string{}, revokedPermissionsComment)
+	var givenComment string
+	if len(comment) > 0 {
+		givenComment = comment[0]
+	}
+	err = ui.userActivityInteractor.RegisterUpdateProductPermissions(triggerUserID, targetUserID, product, []string{}, givenComment)
 	if err != nil {
 		return wrapErr(err)
 	}
