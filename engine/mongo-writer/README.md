@@ -70,7 +70,7 @@ Example:
 
 ### Connect with the deployed local environment
 
-- Execute `./krectl.sh dev` and `./krectl.sh login --new`
+- Execute `./kaictl.sh dev` and `./kaictl.sh login --new`
 - Get the user/password for the MongoDB.
 - Create a port-forward for the runtime MongoDB instance.
 - Create a port-forward for the runtime NATS instance.

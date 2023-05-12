@@ -33,16 +33,16 @@ MONGO_PASS=123456
 ADMIN_DEV_EMAIL="dev@local.local"
 
 . .kaictl.conf
-. ./scripts/krectl/common_functions.sh
-. ./scripts/krectl/cmd_help.sh
-. ./scripts/krectl/cmd_minikube.sh
-. ./scripts/krectl/cmd_etchost.sh
-. ./scripts/krectl/cmd_dev.sh
-. ./scripts/krectl/cmd_build.sh
-. ./scripts/krectl/cmd_deploy.sh
-. ./scripts/krectl/cmd_login.sh
-. ./scripts/krectl/cmd_delete.sh
-. ./scripts/krectl/cmd_restart.sh
+. ./scripts/kaictl/common_functions.sh
+. ./scripts/kaictl/cmd_help.sh
+. ./scripts/kaictl/cmd_minikube.sh
+. ./scripts/kaictl/cmd_etchost.sh
+. ./scripts/kaictl/cmd_dev.sh
+. ./scripts/kaictl/cmd_build.sh
+. ./scripts/kaictl/cmd_deploy.sh
+. ./scripts/kaictl/cmd_login.sh
+. ./scripts/kaictl/cmd_delete.sh
+. ./scripts/kaictl/cmd_restart.sh
 
 check_requirements
 

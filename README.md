@@ -155,21 +155,21 @@ pre-commit install-hooks
 
 ### Basic usage
 
-This repo contains a tool called `./krectl.sh` to handle common actions you will need during development.
+This repo contains a tool called `./kaictl.sh` to handle common actions you will need during development.
 
-All the configuration needed to run KAI locally can be found in `.krectl.conf` file. Usually you'd be ok with the
+All the configuration needed to run KAI locally can be found in `.kaictl.conf` file. Usually you'd be ok with the
 default values. Check Minikube's parameters if you need to tweak the resources assigned to it.
 
 Run help to get info for each command:
 
 ```
-$> krectl.sh [command] --help
+$> kaictl.sh [command] --help
 
 // Outputs:
 
-  krectl.sh -- a tool to manage KAI environment during development.
+  kaictl.sh -- a tool to manage KAI environment during development.
 
-  syntax: krectl.sh <command> [options]
+  syntax: kaictl.sh <command> [options]
 
     commands:
       dev     creates a complete local environment and auto-login to frontend.
@@ -190,14 +190,14 @@ $> krectl.sh [command] --help
 To install KAI in your local environment:
 
 ```
-$ ./krectl.sh dev
+$ ./kaictl.sh dev
 ```
 
-It will install everything in the namespace specified in your development `.krectl.conf` file.
+It will install everything in the namespace specified in your development `.kaictl.conf` file.
 
 ### Login to local environment
 
-First, remember to edit your `/etc/hosts`, see `./krectl.sh dev` output for more details.
+First, remember to edit your `/etc/hosts`, see `./kaictl.sh dev` output for more details.
 
 **NOTE**: If you have the [hostctl](https://github.com/guumaster/hostctl) tool installed, updating `/etc/hosts` will be
 done automatically too.
