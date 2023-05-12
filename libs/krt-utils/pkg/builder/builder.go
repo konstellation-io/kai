@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 	"github.com/mattn/go-zglob"
 
-	"github.com/konstellation-io/kre/libs/krt-utils/pkg/krt"
-	"github.com/konstellation-io/kre/libs/krt-utils/pkg/validator"
+	"github.com/konstellation-io/kai/libs/krt-utils/pkg/krt"
+	"github.com/konstellation-io/kai/libs/krt-utils/pkg/validator"
 )
 
 type Builder struct {

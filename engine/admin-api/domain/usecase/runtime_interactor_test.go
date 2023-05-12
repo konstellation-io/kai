@@ -6,15 +6,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/mocks"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 )
 
 type runtimeSuite struct {
@@ -35,7 +35,7 @@ type runtimeSuiteMocks struct {
 }
 
 const (
-	k8sNamespace = "kre-test"
+	k8sNamespace = "kai-test"
 )
 
 func newRuntimeSuite(t *testing.T) *runtimeSuite {

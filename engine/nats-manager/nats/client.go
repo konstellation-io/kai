@@ -6,9 +6,9 @@ import (
 
 	"github.com/nats-io/nats.go"
 
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/entity"
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/errors"
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/logging"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/errors"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 )
 
 type NatsClient struct {

@@ -8,12 +8,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/config"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/logging"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/mongodb"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/nats"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/parser"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/processor"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/config"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/logging"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/mongodb"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/nats"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/parser"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/processor"
 )
 
 const showStatsSeconds = 5

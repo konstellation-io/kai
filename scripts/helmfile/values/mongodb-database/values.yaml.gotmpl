@@ -10,7 +10,7 @@ resources:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: {{ .Release.Name }}-kre-password
+    name: {{ .Release.Name }}-kai-password
   type: Opaque
   data:
     password: {{ "123456" | b64enc | quote }}
@@ -56,10 +56,10 @@ resources:
       - name: "readAnyDatabase"
         db: "admin"
 
-    - name: kre
+    - name: kai
       db: admin
       passwordSecretRef:
-        name: {{ .Release.Name }}-kre-password
+        name: {{ .Release.Name }}-kai-password
         key: password
       roles:
       - name: "userAdminAnyDatabase"
@@ -68,8 +68,8 @@ resources:
         db: "admin"
       - name: "dbAdminAnyDatabase"
         db: "admin"
-      scramCredentialsSecretName: {{ .Release.Name }}-kre
-      connectionStringSecretName: {{ .Release.Name}}-kre-connection-string
+      scramCredentialsSecretName: {{ .Release.Name }}-kai
+      connectionStringSecretName: {{ .Release.Name}}-kai-connection-string
 
     statefulSet:
       spec:

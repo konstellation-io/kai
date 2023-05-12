@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 )
 
 func DeleteSessionCookie(c echo.Context, cfg *config.Config) {

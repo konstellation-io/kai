@@ -11,11 +11,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt/validator"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt/validator"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 //nolint:gochecknoglobals // needs to be global to be used in the resolver

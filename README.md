@@ -1,4 +1,4 @@
-- [KRE (Konstellation Runtime Engine)](#kre-konstellation-runtime-engine)
+- [KAI (Konstellation AI)](#kai-konstellation-runtime-engine)
   - [Engine](#engine)
   - [Runtime](#runtime)
   - [Runners](#runners)
@@ -17,9 +17,9 @@
     - [Releases](#Releases)
     - [Fixes](#Fixes)
 
-# KRE (Konstellation Runtime Engine)
+# KAI (Konstellation AI)
 
-Konstellation Runtime Engine is an application that allow to run AI/ML models for inference based on the content of a
+Konstellation AI is an application that allow to run AI/ML models for inference based on the content of a
 `.krt` file.
 
 ## Engine
@@ -40,25 +40,25 @@ Konstellation Runtime Engine is an application that allow to run AI/ML models fo
 ## Runners
 
 Each language has a specialized runner associated with it. They are located at
-the [kre-runners repo](https://github.com/konstellation-io/kre-runners). You must clone that repository in a folder
+the [kai-runners repo](https://github.com/konstellation-io/kai-runners). You must clone that repository in a folder
 named `runners` at the root level inside this repository.
 
 # Helm Chart
 
-Refer to chart's [README](helm/kre/README.md).
+Refer to chart's [README](helm/kai/README.md).
 # Architecture
 
-KRE design is based on a microservice pattern to be run on top of a Kubernetes cluster.
+KAI design is based on a microservice pattern to be run on top of a Kubernetes cluster.
 
 The following diagram shows the main components and how they relate with each other.
 
-![Architecture](.github/images/kre-architecture.jpg)
+![Architecture](.github/images/kai-architecture.jpg)
 
-Below are described the main concepts of KRE.
+Below are described the main concepts of KAI.
 
 ## Engine
 
-Before installing KRE an already existing Kubernetes namespace is required. It will be named `kre` by convention, but
+Before installing KAI an already existing Kubernetes namespace is required. It will be named `kai` by convention, but
 feel free to use whatever you like. The installation process will deploy some components that are responsible of
 managing the full lifecycle of this AI solution.
 
@@ -74,16 +74,16 @@ The Engine is composed of the following components:
 ### KRT
 
 _Konstellation Runtime Transport_ is a compressed file containing the definition of a runtime version, including the
-code that must be executed, and a YAML file called `kre.yaml` describing the desired workflows definitions.
+code that must be executed, and a YAML file called `kai.yaml` describing the desired workflows definitions.
 
-The generic structure of a `kre.yaml` is as follows:
+The generic structure of a `kai.yaml` is as follows:
 
 ```yaml
 version: my-project-v1
 description: This is the new version that solves some problems.
 entrypoint:
   proto: public_input.proto
-  image: konstellation/kre-runtime-entrypoint:latest
+  image: konstellation/kai-runtime-entrypoint:latest
 
 config:
   variables:
@@ -94,19 +94,19 @@ config:
 
 nodes:
   - name: ETL
-    image: konstellation/kre-py:latest
+    image: konstellation/kai-py:latest
     src: src/etl/execute_etl.py
 
   - name: Execute DL Model
-    image: konstellation/kre-py:latest
+    image: konstellation/kai-py:latest
     src: src/execute_model/execute_model.py
 
   - name: Create Output
-    image: konstellation/kre-py:latest
+    image: konstellation/kai-py:latest
     src: src/output/output.py
 
   - name: Client Metrics
-    image: konstellation/kre-py:latest
+    image: konstellation/kai-py:latest
     src: src/client_metrics/client_metrics.py
 
 workflows:
@@ -130,7 +130,7 @@ workflows:
 In order to start development on this project you will need these tools:
 
 - **[gettext](https://www.gnu.org/software/gettext/)**: OS package to fill templates during deployment
-- **[minikube](https://github.com/kubernetes/minikube)**: the local version of Kubernetes to deploy KRE
+- **[minikube](https://github.com/kubernetes/minikube)**: the local version of Kubernetes to deploy KAI
 - **[helm](https://helm.sh/)**: K8s package manager. Make sure you have v3+
 - **[helm-docs](https://github.com/norwoodj/helm-docs)**: Helm doc auto-generation tool
 - **[yq](https://github.com/mikefarah/yq)**: YAML processor. Make sure you have v4+
@@ -155,29 +155,29 @@ pre-commit install-hooks
 
 ### Basic usage
 
-This repo contains a tool called `./krectl.sh` to handle common actions you will need during development.
+This repo contains a tool called `./kaictl.sh` to handle common actions you will need during development.
 
-All the configuration needed to run KRE locally can be found in `.krectl.conf` file. Usually you'd be ok with the
+All the configuration needed to run KAI locally can be found in `.kaictl.conf` file. Usually you'd be ok with the
 default values. Check Minikube's parameters if you need to tweak the resources assigned to it.
 
 Run help to get info for each command:
 
 ```
-$> krectl.sh [command] --help
+$> kaictl.sh [command] --help
 
 // Outputs:
 
-  krectl.sh -- a tool to manage KRE environment during development.
+  kaictl.sh -- a tool to manage KAI environment during development.
 
-  syntax: krectl.sh <command> [options]
+  syntax: kaictl.sh <command> [options]
 
     commands:
       dev     creates a complete local environment and auto-login to frontend.
-      start   starts minikube kre profile.
-      stop    stops minikube kre profile.
+      start   starts minikube kai profile.
+      stop    stops minikube kai profile.
       login   creates a login URL and open your browser automatically on the admin page.
       build   calls docker to build all images inside minikube.
-      deploy  calls helm to create install/upgrade a kre release on minikube.
+      deploy  calls helm to create install/upgrade a kai release on minikube.
       delete  calls kubectl to remove runtimes or versions.
 
     global options:
@@ -187,17 +187,17 @@ $> krectl.sh [command] --help
 
 ### Install local environment
 
-To install KRE in your local environment:
+To install KAI in your local environment:
 
 ```
-$ ./krectl.sh dev
+$ ./kaictl.sh dev
 ```
 
-It will install everything in the namespace specified in your development `.krectl.conf` file.
+It will install everything in the namespace specified in your development `.kaictl.conf` file.
 
 ### Login to local environment
 
-First, remember to edit your `/etc/hosts`, see `./krectl.sh dev` output for more details.
+First, remember to edit your `/etc/hosts`, see `./kaictl.sh dev` output for more details.
 
 **NOTE**: If you have the [hostctl](https://github.com/guumaster/hostctl) tool installed, updating `/etc/hosts` will be
 done automatically too.
@@ -206,7 +206,7 @@ Now you can access the admin UI visiting the login URL that will be opened autom
 script:
 
 ```bash
-$ ./krectl.sh login [--new]
+$ ./kaictl.sh login [--new]
 ```
 
 You will see an output like this:
@@ -216,14 +216,14 @@ You will see an output like this:
 
  Login done. Open your browser at:
 
- 🌎 http://admin.kre.local/signin/c7d024eb-ce35-4328-961a-7d2b79ee8988
+ 🌎 http://admin.kai.local/signin/c7d024eb-ce35-4328-961a-7d2b79ee8988
 
 ✔️  Done.
 ```
 
 # Versioning lifecycle
 
-There are three stages in the development lifecycle of KRE there are three main stages depending on if we are going to
+There are three stages in the development lifecycle of KAI there are three main stages depending on if we are going to
 add a new feature, release a new version with some features or apply a fix to a current release.
 
 ### Alphas
@@ -326,18 +326,18 @@ release will be build and released.
 
 [mongo-writer-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_mongo_writer
 
-[admin-api-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kre/engine/admin-api
+[admin-api-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/engine/admin-api
 
 [admin-api-report-link]: https://goreportcard.com/report/github.com/konstellation-io/kli/engine/admin-api
 
-[k8s-manager-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kre/engine/k8s-manager
+[k8s-manager-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/engine/k8s-manager
 
 [k8s-manager-report-link]: https://goreportcard.com/report/github.com/konstellation-io/kli/engine/k8s-manager
 
-[nats-manager-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kre/engine/nats-manager
+[nats-manager-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/engine/nats-manager
 
 [nats-manager-report-link]: https://goreportcard.com/report/github.com/konstellation-io/kli/engine/nats-manager
 
-[mongo-writer-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kre/engine/nats-manager
+[mongo-writer-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/engine/nats-manager
 
 [mongo-writer-report-link]: https://goreportcard.com/report/github.com/konstellation-io/kli/engine/nats-manager

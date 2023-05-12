@@ -9,10 +9,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/entity"
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/errors"
-	"github.com/konstellation-io/kre/engine/nats-manager/internal/manager"
-	"github.com/konstellation-io/kre/engine/nats-manager/mocks"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/errors"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/manager"
+	"github.com/konstellation-io/kai/engine/nats-manager/mocks"
 )
 
 type streamConfigMatcher struct {

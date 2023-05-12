@@ -3,13 +3,13 @@ package validator_test
 import (
 	"testing"
 
-	vld "github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt/validator"
+	vld "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt/validator"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt"
-	"github.com/konstellation-io/kre/engine/admin-api/mocks"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
+	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 )
 
 func TestKrtValidator_Run(t *testing.T) {

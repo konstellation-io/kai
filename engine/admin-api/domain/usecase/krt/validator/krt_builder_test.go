@@ -1,8 +1,8 @@
 package validator_test
 
 import (
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
 )
 
 type KrtBuilder struct {

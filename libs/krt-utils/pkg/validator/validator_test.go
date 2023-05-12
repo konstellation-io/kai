@@ -9,11 +9,11 @@ import (
 	"testing"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 	"github.com/stretchr/testify/require"
 
-	"github.com/konstellation-io/kre/libs/krt-utils/pkg/krt"
-	"github.com/konstellation-io/kre/libs/krt-utils/pkg/validator"
+	"github.com/konstellation-io/kai/libs/krt-utils/pkg/krt"
+	"github.com/konstellation-io/kai/libs/krt-utils/pkg/validator"
 )
 
 var (
@@ -22,7 +22,7 @@ var (
     description: Version for testing.
     entrypoint:
       proto: public_input.proto
-      image: konstellation/kre-entrypoint:latest
+      image: konstellation/kai-entrypoint:latest
     config:
       variables:
         - SOME_CONFIG_VAR
@@ -30,7 +30,7 @@ var (
         - SOME_FILE
     nodes:
       - name: py-test
-        image: konstellation/kre-py:latest
+        image: konstellation/kai-py:latest
         src: src/py-test/main.py
         gpu: true
     workflows:
@@ -45,7 +45,7 @@ var (
 		Description: "Version for testing.",
 		Entrypoint: krt.Entrypoint{
 			Proto: "public_input.proto",
-			Image: "konstellation/kre-entrypoint:latest",
+			Image: "konstellation/kai-entrypoint:latest",
 		},
 		Config: krt.Config{
 			Variables: []string{
@@ -58,7 +58,7 @@ var (
 		Nodes: []krt.Node{
 			{
 				Name:  "py-test",
-				Image: "konstellation/kre-py:latest",
+				Image: "konstellation/kai-py:latest",
 				Src:   "src/py-test/main.py",
 				GPU:   true,
 			},
@@ -222,7 +222,7 @@ func TestValidator_ValidateInvalidKrt(t *testing.T) {
 	v := validator.New()
 
 	s := strings.ReplaceAll(sampleKrtString, "- py-test", "- unknown-node-name")
-	s = strings.ReplaceAll(s, "konstellation/kre-entrypoint:latest", "konstellation/KRE-entrypoint:latest")
+	s = strings.ReplaceAll(s, "konstellation/kai-entrypoint:latest", "konstellation/KAI-entrypoint:latest")
 
 	r := bytes.NewBufferString(s)
 

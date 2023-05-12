@@ -42,7 +42,7 @@ rules:
     verbs:
       - "*"
   - apiGroups:
-      - kre.konstellation.io
+      - kai.konstellation.io
     resources:
       - "*"
     verbs:

@@ -28,8 +28,8 @@ RUN go build -o k8s-manager .
 # Final image
 FROM alpine:3.10.2
 
-# Create kre user.
-ENV USER=kre
+# Create kai user.
+ENV USER=kai
 ENV UID=10001
 RUN adduser \
     --disabled-password \
@@ -46,11 +46,11 @@ WORKDIR /app
 COPY --from=builder /app/k8s-manager .
 COPY config.yml .
 COPY assets ./assets
-RUN chown -R kre:0 /app \
+RUN chown -R kai:0 /app \
     && chmod -R g+w /app \
-    && chown -R kre:0 /var/log/app \
+    && chown -R kai:0 /var/log/app \
     && chmod -R g+w /var/log/app
 
-USER kre
+USER kai
 
 CMD ["sh","-c","/app/k8s-manager 2>&1 | tee -a /var/log/app/app.log"]

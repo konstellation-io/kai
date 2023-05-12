@@ -76,11 +76,11 @@ golangci-lint run
 
 <!-- JUST BADGES & LINKS -->
 
-[tests-badge]: https://img.shields.io/github/workflow/status/konstellation-io/kre/libs/krt-utils/Test
-[tests-link]: https://github.com/konstellation-io/kre/libs/krt-utils/actions?query=workflow%3ATest
+[tests-badge]: https://img.shields.io/github/workflow/status/konstellation-io/kai/libs/krt-utils/Test
+[tests-link]: https://github.com/konstellation-io/kai/libs/krt-utils/actions?query=workflow%3ATest
 
-[report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kre/libs/krt-utils
-[report-link]: https://goreportcard.com/report/github.com/konstellation-io/kre/libs/krt-utils
+[report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/libs/krt-utils
+[report-link]: https://goreportcard.com/report/github.com/konstellation-io/kai/libs/krt-utils
 
-[license-badge]: https://img.shields.io/github/license/konstellation-io/kre/libs/krt-utils
-[license-link]: https://github.com/konstellation-io/kre/libs/krt-utils/blob/main/LICENSE
+[license-badge]: https://img.shields.io/github/license/konstellation-io/kai/libs/krt-utils
+[license-link]: https://github.com/konstellation-io/kai/libs/krt-utils/blob/main/LICENSE

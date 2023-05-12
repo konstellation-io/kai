@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/konstellation-io/kre/engine/k8s-manager/entity"
-	"github.com/konstellation-io/kre/engine/k8s-manager/kubernetes"
+	"github.com/konstellation-io/kai/engine/k8s-manager/entity"
+	"github.com/konstellation-io/kai/engine/k8s-manager/kubernetes"
 
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 
-	"github.com/konstellation-io/kre/engine/k8s-manager/config"
-	"github.com/konstellation-io/kre/engine/k8s-manager/kubernetes/version"
-	"github.com/konstellation-io/kre/engine/k8s-manager/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/k8s-manager/config"
+	"github.com/konstellation-io/kai/engine/k8s-manager/kubernetes/version"
+	"github.com/konstellation-io/kai/engine/k8s-manager/proto/versionpb"
 )
 
 // VersionService basic server.

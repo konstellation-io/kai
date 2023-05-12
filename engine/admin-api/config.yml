@@ -4,8 +4,8 @@ application:
   versionStatusTimeout: 20m
 admin:
   apiAddress: ":4000"
-  baseURL: "http://api.kre.local"
-  frontendBaseURL: "http://admin.kre.local"
+  baseURL: "http://api.kai.local"
+  frontendBaseURL: "http://admin.kai.local"
   corsEnabled: true
   storagePath: /admin-api-files
 smtp:
@@ -15,11 +15,11 @@ auth:
   jwtSignSecret: "jwt_secret"
   apiTokenSecret: "api_token_secret"
   secureCookie: false
-  cookieDomain: "kre.local"
+  cookieDomain: "kai.local"
 mongodb:
   address: "mongodb://admin:123456@localhost:27017/admin?replicaSet=rs0"
-  dbName: "kre"
-  runtimeDataUser: "kre-runtime-data"
+  dbName: "kai"
+  runtimeDataUser: "kai-runtime-data"
   krtBucket: "krt"
 influxdb:
   address: "http://localhost:8086"

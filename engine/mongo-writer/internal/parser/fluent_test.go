@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/parser"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/parser"
 )
 
 func TestFluentbitMsgParser_Parse(t *testing.T) {

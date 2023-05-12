@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/konstellation-io/kre/engine/k8s-manager/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/k8s-manager/proto/versionpb"
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

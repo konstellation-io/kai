@@ -8,8 +8,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
 
 	"github.com/go-playground/validator/v10"
 )

@@ -3,8 +3,8 @@ package validator
 import (
 	"fmt"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 //go:generate mockgen -source=${GOFILE} -destination=../../../../mocks/validator_${GOFILE} -package=mocks

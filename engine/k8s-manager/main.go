@@ -4,16 +4,16 @@ import (
 	"log"
 	"net"
 
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/konstellation-io/kre/engine/k8s-manager/config"
-	"github.com/konstellation-io/kre/engine/k8s-manager/kubernetes"
-	"github.com/konstellation-io/kre/engine/k8s-manager/kubernetes/version"
-	"github.com/konstellation-io/kre/engine/k8s-manager/proto/versionpb"
-	"github.com/konstellation-io/kre/engine/k8s-manager/service"
+	"github.com/konstellation-io/kai/engine/k8s-manager/config"
+	"github.com/konstellation-io/kai/engine/k8s-manager/kubernetes"
+	"github.com/konstellation-io/kai/engine/k8s-manager/kubernetes/version"
+	"github.com/konstellation-io/kai/engine/k8s-manager/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/k8s-manager/service"
 )
 
 func main() {

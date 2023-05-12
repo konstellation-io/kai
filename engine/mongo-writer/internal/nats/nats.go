@@ -6,8 +6,8 @@ import (
 
 	nc "github.com/nats-io/nats.go"
 
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/config"
-	"github.com/konstellation-io/kre/engine/mongo-writer/internal/logging"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/config"
+	"github.com/konstellation-io/kai/engine/mongo-writer/internal/logging"
 )
 
 type ManagerImpl struct {

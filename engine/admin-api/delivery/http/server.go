@@ -1,12 +1,12 @@
 package http
 
 import (
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/controller"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/httperrors"
-	kremiddleware "github.com/konstellation-io/kre/engine/admin-api/delivery/http/middleware"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/httperrors"
+	kaimiddleware "github.com/konstellation-io/kai/engine/admin-api/delivery/http/middleware"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -100,11 +100,11 @@ func NewApp(
 
 	m := e.Group("/measurements")
 	m.Use(jwtCookieMiddleware)
-	m.Use(kremiddleware.ChronografProxy(cfg.Chronograf.Address))
+	m.Use(kaimiddleware.ChronografProxy(cfg.Chronograf.Address))
 
 	d := e.Group("/database")
 	d.Use(jwtCookieMiddleware)
-	d.Use(kremiddleware.MongoExpressProxy(cfg.MongoDB.MongoExpressAddress))
+	d.Use(kaimiddleware.MongoExpressProxy(cfg.MongoDB.MongoExpressAddress))
 
 	return &App{
 		e,

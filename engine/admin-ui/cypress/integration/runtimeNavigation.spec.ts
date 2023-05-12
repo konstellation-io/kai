@@ -7,7 +7,7 @@
       cy.kstInterceptor('GetMe', {data: GetMeQuery});
       cy.kstInterceptor('GetVersionConfStatus', {data: GetVersionConfStatusQuery});
       cy.kstInterceptor('GetRuntimes', {data: GetRuntimes });
-      cy.visit('http://dev-admin.kre.local:3000/runtimes');
+      cy.visit('http://dev-admin.kai.local:3000/runtimes');
     });
 
     const runtimeName = GetRuntimes.runtimes[0].name;
@@ -28,9 +28,9 @@
     });
 
     it('should navigate to runtimes list from navigation bar', () => {
-      cy.visit('http://dev-admin.kre.local:3000/runtimes/runtime-id/versions')  ;
+      cy.visit('http://dev-admin.kai.local:3000/runtimes/runtime-id/versions')  ;
       cy.getByTestId('navigation-bar').children().first().click();
       cy.getByTestId('runtimesList').should('contain', runtimeName)
-      cy.url().should('eq', 'http://dev-admin.kre.local:3000/');
+      cy.url().should('eq', 'http://dev-admin.kai.local:3000/');
     })
   });

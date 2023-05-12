@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	configuration "github.com/konstellation-io/kre/engine/k8s-manager/config"
-	"github.com/konstellation-io/kre/engine/k8s-manager/entity"
-	"github.com/konstellation-io/kre/engine/k8s-manager/kubernetes/node"
+	configuration "github.com/konstellation-io/kai/engine/k8s-manager/config"
+	"github.com/konstellation-io/kai/engine/k8s-manager/entity"
+	"github.com/konstellation-io/kai/engine/k8s-manager/kubernetes/node"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/konstellation-io/kre/libs/simplelogger"
+	"github.com/konstellation-io/kai/libs/simplelogger"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -38,12 +38,12 @@ func NewWatcher(config *configuration.Config, logger *simplelogger.SimpleLogger,
 const timeout = 5 * time.Minute
 
 func (w *Watcher) WaitForRuntimePods(ctx context.Context, ns string) error {
-	mongoChan, err := w.waitForPodRunning(ctx, ns, []string{"kre-app=kre-mongo"}, timeout)
+	mongoChan, err := w.waitForPodRunning(ctx, ns, []string{"kai-app=kai-mongo"}, timeout)
 	if err != nil {
 		return err
 	}
 
-	natsChan, err := w.waitForPodRunning(ctx, ns, []string{"app=kre-nats"}, timeout)
+	natsChan, err := w.waitForPodRunning(ctx, ns, []string{"app=kai-nats"}, timeout)
 	if err != nil {
 		return err
 	}

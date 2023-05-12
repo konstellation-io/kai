@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	auth "github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
+	auth "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 )
 
 // MockAccessControl is a mock of AccessControl interface.

@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	krt "github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt"
+	krt "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
 )
 
 // MockValidator is a mock of Validator interface.

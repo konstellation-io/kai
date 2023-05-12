@@ -81,7 +81,7 @@ func (x *Config) GetValue() string {
 	return ""
 }
 
-// deprecated: this will be deleted with https://github.com/konstellation-io/kre/issues/152
+// deprecated: this will be deleted with https://github.com/konstellation-io/kai/issues/152
 type Entrypoint struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -262,7 +262,7 @@ type StartRequest struct {
 	MongoDbName    string      `protobuf:"bytes,6,opt,name=mongo_db_name,json=mongoDbName,proto3" json:"mongo_db_name,omitempty"`
 	MongoKrtBucket string      `protobuf:"bytes,7,opt,name=mongo_krt_bucket,json=mongoKrtBucket,proto3" json:"mongo_krt_bucket,omitempty"`
 	InfluxUri      string      `protobuf:"bytes,8,opt,name=influx_uri,json=influxUri,proto3" json:"influx_uri,omitempty"`
-	Entrypoint     *Entrypoint `protobuf:"bytes,9,opt,name=entrypoint,proto3" json:"entrypoint,omitempty"` // deprecated: this will be deleted with https://github.com/konstellation-io/kre/issues/152
+	Entrypoint     *Entrypoint `protobuf:"bytes,9,opt,name=entrypoint,proto3" json:"entrypoint,omitempty"` // deprecated: this will be deleted with https://github.com/konstellation-io/kai/issues/152
 	RuntimeId      string      `protobuf:"bytes,10,opt,name=runtime_id,json=runtimeId,proto3" json:"runtime_id,omitempty"`
 	KeyValueStore  string      `protobuf:"bytes,11,opt,name=key_value_store,json=keyValueStore,proto3" json:"key_value_store,omitempty"`
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/stretchr/testify/require"
 
-	"github.com/konstellation-io/kre/libs/krt-utils/pkg/validator"
+	"github.com/konstellation-io/kai/libs/krt-utils/pkg/validator"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
     description: Version for testing.
     entrypoint:
       proto: public_input.proto
-      image: konstellation/kre-entrypoint:latest
+      image: konstellation/kai-entrypoint:latest
     config:
       variables:
         - SOME_CONFIG_VAR
@@ -29,7 +29,7 @@ var (
         - SOME_FILE
     nodes:
       - name: py-test
-        image: konstellation/kre-py:latest
+        image: konstellation/kai-py:latest
         src: src/py-test/main.py
         gpu: true
     workflows:
