@@ -32,7 +32,7 @@ func NewCasbinAccessControl(logger logging.Logger, modelPath, policyPath string)
 
 func (a *CasbinAccessControl) CheckPermission(
 	user *token.UserRoles,
-	resource string,
+	product string,
 	action auth.AccessControlAction,
 ) error {
 	if !action.IsValid() {
@@ -47,8 +47,8 @@ func (a *CasbinAccessControl) CheckPermission(
 		}
 
 		a.logger.Infof(
-			"Checking permission userID[%s] realmRole[%s] action[%s] resource[%s] allowed[%t]",
-			user.ID, realmRole, action, resource, allowed,
+			"Checking permission userID[%s] realmRole[%s] action[%s] product[%s] allowed[%t]",
+			user.ID, realmRole, action, product, allowed,
 		)
 
 		if allowed {
@@ -57,7 +57,7 @@ func (a *CasbinAccessControl) CheckPermission(
 	}
 
 	//nolint:goerr113 // errors need to be wrapped
-	return fmt.Errorf("you are not allowed to %s %s", action, resource)
+	return fmt.Errorf("you are not allowed to %s %s", action, product)
 }
 
 func hasGrantsForResource(

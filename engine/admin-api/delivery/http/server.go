@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
-	kaimiddleware "github.com/konstellation-io/kre/engine/admin-api/delivery/http/middleware"
+	kaimiddleware "github.com/konstellation-io/kai/engine/admin-api/delivery/http/middleware"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/labstack/echo"
@@ -61,9 +61,11 @@ func NewApp(
 	r.GET("/playground", gqlController.PlaygroundHandler)
 
 	m := e.Group("/measurements")
+	m.Use(jwtAuthMiddleware)
 	m.Use(kaimiddleware.ChronografProxy(cfg.Chronograf.Address))
 
 	d := e.Group("/database")
+	d.Use(jwtAuthMiddleware)
 	d.Use(kaimiddleware.MongoExpressProxy(cfg.MongoDB.MongoExpressAddress))
 
 	return &App{
