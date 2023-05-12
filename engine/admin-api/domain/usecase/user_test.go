@@ -73,6 +73,7 @@ func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissions() {
 
 	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, permissions).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions, "").Times(1).Return(nil)
+	suite.mockLogger.EXPECT().Infof(updateUserProductPermissionsLog, testUserData.ID, testProduct, permissions).Times(1)
 
 	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions)
 	suite.NoError(err)
@@ -94,6 +95,7 @@ func (suite *ContextUserManagerSuite) TestRevokeProductPermissions() {
 
 	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(triggerUserID, testUserData.ID, testProduct, []string{}, revokedPermissionsComment).Times(1).Return(nil)
+	suite.mockLogger.EXPECT().Infof(revokeUserProductPermissionsLog, testUserData.ID, testProduct).Times(1)
 
 	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUserData.ID, testProduct)
 	suite.NoError(err)

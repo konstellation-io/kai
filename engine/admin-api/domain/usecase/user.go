@@ -12,16 +12,17 @@ const (
 	updateUserProductPermissionsWrapper = "update user product permissions"
 	revokeUserProductPermissionsWrapper = "revoke user product permissions"
 	revokedPermissionsComment           = "revoked all permissions"
+	updateUserProductPermissionsLog     = "Updated user %q permissions for product %q: %v"
+	revokeUserProductPermissionsLog     = "Revoked user %q permissions for product %q"
 )
 
-// UserInteractor contains app logic to handle User entities
+// UserInteractor talks to the gocloak service, thus providing user realted operations
 type UserInteractor struct {
 	logger                 logging.Logger
 	userActivityInteractor UserActivityInteracter
 	gocloakManager         service.GocloakService
 }
 
-// TODO: use user activity interactor, use logger
 // NewUserInteractor creates a new UserInteractor
 func NewUserInteractor(
 	logger logging.Logger,
@@ -60,6 +61,8 @@ func (ui *UserInteractor) UpdateUserProductPermissions(triggerUserID string, tar
 		return wrapErr(err)
 	}
 
+	ui.logger.Infof(updateUserProductPermissionsLog, targetUserID, product, permissions)
+
 	return nil
 }
 
@@ -75,6 +78,8 @@ func (ui *UserInteractor) RevokeUserProductPermissions(triggerUserID string, tar
 	if err != nil {
 		return wrapErr(err)
 	}
+
+	ui.logger.Infof(revokeUserProductPermissionsLog, targetUserID, product)
 
 	return nil
 }
