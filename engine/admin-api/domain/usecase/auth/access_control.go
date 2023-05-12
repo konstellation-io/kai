@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
+import "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 
 //go:generate mockgen -source=${GOFILE} -destination=../../../mocks/auth_${GOFILE} -package=mocks
 
@@ -63,5 +63,5 @@ func (e AccessControlAction) String() string {
 
 //nolint:godox // Remove this nolint statement after the TODO is done.
 type AccessControl interface { // TODO: move to middleware.
-	CheckPermission(user *token.UserRoles, product string, action AccessControlAction) error
+	CheckPermission(user *entity.User, product string, action AccessControlAction) error
 }

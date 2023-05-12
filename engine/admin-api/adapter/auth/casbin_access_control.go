@@ -5,7 +5,7 @@ import (
 
 	"github.com/casbin/casbin/v2"
 
-	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
@@ -31,7 +31,7 @@ func NewCasbinAccessControl(logger logging.Logger, modelPath, policyPath string)
 }
 
 func (a *CasbinAccessControl) CheckPermission(
-	user *token.UserRoles,
+	user *entity.User,
 	product string,
 	action auth.AccessControlAction,
 ) error {
@@ -39,8 +39,8 @@ func (a *CasbinAccessControl) CheckPermission(
 		return invalidAccessControlActionError
 	}
 
-	for _, realmRole := range user.RealmAccess.Roles {
-		allowed, err := a.enforcer.Enforce(realmRole, user.ProductRoles, action.String())
+	for _, realmRole := range user.Roles {
+		allowed, err := a.enforcer.Enforce(realmRole, user.ProductGrants, action.String())
 		if err != nil {
 			a.logger.Errorf("error checking permission: %s", err)
 			return err

@@ -3,7 +3,8 @@ package token_test
 import (
 	"testing"
 
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
@@ -12,14 +13,16 @@ import (
 
 var tokenKey = []byte("")
 
-func newTokenWithProductRoles(userRoles *token.UserRoles) (string, error) {
+func newTokenWithProductRoles(userRoles *entity.User) (string, error) {
 	if userRoles == nil {
 		return jwt.NewWithClaims(jwt.SigningMethodHS256, nil).SignedString(tokenKey)
 	}
 
 	claims := token.CustomClaims{
-		ProductRoles: userRoles.ProductRoles,
-		RealmAccess:  userRoles.RealmAccess,
+		ProductGrants: userRoles.ProductGrants,
+		RealmAccess: token.RealmAccess{
+			Roles: userRoles.Roles,
+		},
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject: userRoles.ID,
 		},
@@ -29,16 +32,14 @@ func newTokenWithProductRoles(userRoles *token.UserRoles) (string, error) {
 }
 
 func Test_CustomClaims(t *testing.T) {
-	expectedUserRoles := &token.UserRoles{
+	expectedUserRoles := &entity.User{
 		ID: "test-user",
-		ProductRoles: token.ProductRoles{
+		ProductGrants: entity.ProductGrants{
 			"test-product": {
 				"ADMIN",
 			},
 		},
-		RealmAccess: token.RealmAccess{
-			Roles: []string{"VIEWER"},
-		},
+		Roles: []string{"VIEWER"},
 	}
 
 	accessToken, err := newTokenWithProductRoles(expectedUserRoles)

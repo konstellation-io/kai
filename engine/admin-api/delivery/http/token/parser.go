@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 type Config struct {
@@ -20,7 +21,7 @@ func NewParser() *Parser {
 	}
 }
 
-func (p *Parser) GetUserRoles(accessToken string) (*UserRoles, error) {
+func (p *Parser) GetUserRoles(accessToken string) (*entity.User, error) {
 	claims := &CustomClaims{}
 
 	_, _, err := p.parser.ParseUnverified(accessToken, claims)
@@ -28,9 +29,9 @@ func (p *Parser) GetUserRoles(accessToken string) (*UserRoles, error) {
 		return nil, fmt.Errorf("error parsing token: %w", err)
 	}
 
-	return &UserRoles{
-		ID:           claims.Subject,
-		ProductRoles: claims.ProductRoles,
-		RealmAccess:  claims.RealmAccess,
+	return &entity.User{
+		ID:            claims.Subject,
+		ProductGrants: claims.ProductGrants,
+		Roles:         claims.RealmAccess.Roles,
 	}, nil
 }

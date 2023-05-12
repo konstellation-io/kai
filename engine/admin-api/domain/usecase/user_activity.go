@@ -8,18 +8,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/repository"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 type UserActivityInteracter interface {
-	Get(ctx context.Context, user *token.UserRoles, userEmail *string, types []entity.UserActivityType,
+	Get(ctx context.Context, user *entity.User, userEmail *string, types []entity.UserActivityType,
 		versionIds []string, fromDate *string, toDate *string, lastID *string) ([]*entity.UserActivity, error)
 	RegisterLogin(userID string) error
 	RegisterLogout(userID string) error
@@ -62,7 +60,7 @@ func NewUserActivityInteractor(
 // Get return a list of UserActivities.
 func (i *UserActivityInteractor) Get(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	userEmail *string,
 	types []entity.UserActivityType,
 	versionIds []string,

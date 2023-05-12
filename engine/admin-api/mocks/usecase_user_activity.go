@@ -9,8 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	token "github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
-	entity "github.com/konstellation-io/kre/engine/admin-api/domain/entity"
+	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 // MockUserActivityInteracter is a mock of UserActivityInteracter interface.
@@ -37,7 +36,7 @@ func (m *MockUserActivityInteracter) EXPECT() *MockUserActivityInteracterMockRec
 }
 
 // Get mocks base method.
-func (m *MockUserActivityInteracter) Get(ctx context.Context, user *token.UserRoles, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate, toDate, lastID *string) ([]*entity.UserActivity, error) {
+func (m *MockUserActivityInteracter) Get(ctx context.Context, user *entity.User, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate, toDate, lastID *string) ([]*entity.UserActivity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", ctx, user, userEmail, types, versionIds, fromDate, toDate, lastID)
 	ret0, _ := ret[0].([]*entity.UserActivity)

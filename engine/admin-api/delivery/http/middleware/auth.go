@@ -3,10 +3,10 @@ package middleware
 import (
 	"strings"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/httperrors"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/httperrors"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/labstack/echo"
 )
 

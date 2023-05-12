@@ -50,7 +50,7 @@ func NewApp(
 
 	tokenParser := token.NewParser()
 
-	jwtAuthMiddleware := kremiddleware.NewJwtAuthMiddleware(cfg, logger, tokenParser)
+	jwtAuthMiddleware := kaimiddleware.NewJwtAuthMiddleware(cfg, logger, tokenParser)
 	e.GET("/", func(c echo.Context) error {
 		return nil
 	}, jwtAuthMiddleware)

@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
@@ -44,7 +43,7 @@ func NewMetricsInteractor(
 
 func (i *MetricsInteractor) GetMetrics(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID,
 	versionName,
 	startDate,

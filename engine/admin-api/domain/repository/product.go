@@ -5,7 +5,7 @@ package repository
 import (
 	"context"
 
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 type ProductRepo interface {

@@ -10,17 +10,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/repository"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/service"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt/parser"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt/validator"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/version"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt/parser"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt/validator"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 )
 
 var (
@@ -91,14 +90,14 @@ func NewVersionInteractor(
 	}
 }
 
-func (i *VersionInteractor) filterConfigVars(user *token.UserRoles, productID string, vers *entity.Version) {
+func (i *VersionInteractor) filterConfigVars(user *entity.User, productID string, vers *entity.Version) {
 	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewVersion); err != nil {
 		vers.Config.Vars = nil
 	}
 }
 
 // GetByName returns a Version by its unique name.
-func (i *VersionInteractor) GetByName(ctx context.Context, user *token.UserRoles, productID, name string) (*entity.Version, error) {
+func (i *VersionInteractor) GetByName(ctx context.Context, user *entity.User, productID, name string) (*entity.Version, error) {
 	v, err := i.versionRepo.GetByName(ctx, productID, name)
 	if err != nil {
 		return nil, err
@@ -114,7 +113,7 @@ func (i *VersionInteractor) GetByID(productID, versionID string) (*entity.Versio
 }
 
 // GetByProduct returns all Versions of the given Runtime.
-func (i *VersionInteractor) GetByProduct(ctx context.Context, user *token.UserRoles, productID string) ([]*entity.Version, error) {
+func (i *VersionInteractor) GetByProduct(ctx context.Context, user *entity.User, productID string) ([]*entity.Version, error) {
 	versions, err := i.versionRepo.GetByProduct(ctx, productID)
 	if err != nil {
 		return nil, err
@@ -147,7 +146,7 @@ func (i *VersionInteractor) copyStreamToTempFile(krtFile io.Reader) (*os.File, e
 // Create creates a Version on the DB based on the content of a KRT file.
 func (i *VersionInteractor) Create(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID string,
 	krtFile io.Reader,
 ) (*entity.Version, chan *entity.Version, error) {
@@ -404,7 +403,7 @@ func (i *VersionInteractor) generateWorkflows(krtYml *krt.Krt) ([]*entity.Workfl
 // Start create the resources of the given Version.
 func (i *VersionInteractor) Start(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID string,
 	versionName string,
 	comment string,
@@ -469,7 +468,7 @@ func (i *VersionInteractor) Start(
 // Stop removes the resources of the given Version.
 func (i *VersionInteractor) Stop(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID string,
 	versionName string,
 	comment string,
@@ -580,7 +579,7 @@ func (i *VersionInteractor) stopAndNotify(
 // Publish set a Version as published on DB and K8s.
 func (i *VersionInteractor) Publish(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID,
 	versionName,
 	comment string,
@@ -631,7 +630,7 @@ func (i *VersionInteractor) Publish(
 // Unpublish set a Version as not published on DB and K8s.
 func (i *VersionInteractor) Unpublish(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID,
 	versionName,
 	comment string,
@@ -675,7 +674,7 @@ func (i *VersionInteractor) Unpublish(
 
 func (i *VersionInteractor) UpdateVersionConfig(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID string,
 	vrs *entity.Version,
 	cfg []*entity.ConfigurationVariable,
@@ -718,7 +717,7 @@ func (i *VersionInteractor) UpdateVersionConfig(
 
 func (i *VersionInteractor) WatchNodeStatus(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID,
 	versionName string,
 ) (<-chan *entity.Node, error) {
@@ -736,7 +735,7 @@ func (i *VersionInteractor) WatchNodeStatus(
 
 func (i *VersionInteractor) WatchNodeLogs(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID,
 	versionName string,
 	filters entity.LogFilters,
@@ -750,7 +749,7 @@ func (i *VersionInteractor) WatchNodeLogs(
 
 func (i *VersionInteractor) SearchLogs(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID string,
 	filters entity.LogFilters,
 	cursor *string,

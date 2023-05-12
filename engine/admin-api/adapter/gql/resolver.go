@@ -11,12 +11,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/krt/validator"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt/validator"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 //nolint:gochecknoglobals // needs to be global to be used in the resolver
@@ -63,7 +62,7 @@ func NewGraphQLResolver(
 }
 
 func (r *mutationResolver) CreateProduct(ctx context.Context, input CreateProductInput) (*entity.Product, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 
 	r.logger.Debug("Creating product with id " + input.ID)
 
@@ -77,7 +76,7 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, input CreateProduc
 }
 
 func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersionInput) (*entity.Version, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 
 	version, notifyCh, err := r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
 	if err != nil {
@@ -101,7 +100,7 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 }
 
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 
 	v, notifyCh, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
 	if err != nil {
@@ -115,7 +114,7 @@ func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionI
 }
 
 func (r *mutationResolver) StopVersion(ctx context.Context, input StopVersionInput) (*entity.Version, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 
 	v, notifyCh, err := r.versionInteractor.Stop(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
 	if err != nil {
@@ -147,17 +146,17 @@ func (r *mutationResolver) notifyVersionStatus(notifyCh chan *entity.Version) {
 }
 
 func (r *mutationResolver) UnpublishVersion(ctx context.Context, input UnpublishVersionInput) (*entity.Version, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.versionInteractor.Unpublish(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
 }
 
 func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVersionInput) (*entity.Version, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.versionInteractor.Publish(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
 }
 
 func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, input UpdateConfigurationInput) (*entity.Version, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 
 	v, err := r.versionInteractor.GetByName(ctx, loggedUser, input.ProductID, input.VersionName)
 	if err != nil {
@@ -177,27 +176,27 @@ func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, i
 }
 
 func (r *queryResolver) Metrics(ctx context.Context, productID, versionName, startDate, endDate string) (*entity.Metrics, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.metricsInteractor.GetMetrics(ctx, loggedUser, productID, versionName, startDate, endDate)
 }
 
 func (r *queryResolver) Product(ctx context.Context, id string) (*entity.Product, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.productInteractor.GetByID(ctx, loggedUser, id)
 }
 
 func (r *queryResolver) Products(ctx context.Context) ([]*entity.Product, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.productInteractor.FindAll(ctx, loggedUser)
 }
 
 func (r *queryResolver) Version(ctx context.Context, name, productID string) (*entity.Version, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.versionInteractor.GetByName(ctx, loggedUser, productID, name)
 }
 
 func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*entity.Version, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.versionInteractor.GetByProduct(ctx, loggedUser, productID)
 }
 
@@ -210,7 +209,7 @@ func (r *queryResolver) UserActivityList(
 	toDate *string,
 	lastID *string,
 ) ([]*entity.UserActivity, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.userActivityInteractor.Get(ctx, loggedUser, userEmail, types, versionIds, fromDate, toDate, lastID)
 }
 
@@ -220,7 +219,7 @@ func (r *queryResolver) Logs(
 	filters entity.LogFilters,
 	cursor *string,
 ) (*LogPage, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 
 	searchResult, err := r.versionInteractor.SearchLogs(ctx, loggedUser, productID, filters, cursor)
 	if err != nil {
@@ -287,13 +286,13 @@ func (r *subscriptionResolver) WatchVersion(ctx context.Context) (<-chan *entity
 
 func (r *subscriptionResolver) WatchNodeStatus(ctx context.Context,
 	versionName, productID string) (<-chan *entity.Node, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.versionInteractor.WatchNodeStatus(ctx, loggedUser, productID, versionName)
 }
 
 func (r *subscriptionResolver) WatchNodeLogs(ctx context.Context, productID, versionName string,
 	filters entity.LogFilters) (<-chan *entity.NodeLog, error) {
-	loggedUser := ctx.Value("user").(*token.UserRoles)
+	loggedUser := ctx.Value("user").(*entity.User)
 	return r.versionInteractor.WatchNodeLogs(ctx, loggedUser, productID, versionName, filters)
 }
 

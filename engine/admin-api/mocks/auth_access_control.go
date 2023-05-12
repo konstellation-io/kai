@@ -8,8 +8,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	token "github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
-	auth "github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
+	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	auth "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 )
 
 // MockAccessControl is a mock of AccessControl interface.
@@ -36,7 +36,7 @@ func (m *MockAccessControl) EXPECT() *MockAccessControlMockRecorder {
 }
 
 // CheckPermission mocks base method.
-func (m *MockAccessControl) CheckPermission(user *token.UserRoles, product string, action auth.AccessControlAction) error {
+func (m *MockAccessControl) CheckPermission(user *entity.User, product string, action auth.AccessControlAction) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckPermission", user, product, action)
 	ret0, _ := ret[0].(error)

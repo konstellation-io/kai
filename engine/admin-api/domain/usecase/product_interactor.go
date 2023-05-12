@@ -5,12 +5,11 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/repository"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 var (
@@ -61,7 +60,7 @@ func NewProductInteractor(
 // CreateProduct adds a new Product.
 func (i *ProductInteractor) CreateProduct(
 	ctx context.Context,
-	user *token.UserRoles,
+	user *entity.User,
 	productID,
 	name,
 	description string,
@@ -141,7 +140,7 @@ func (i *ProductInteractor) createDatabaseIndexes(ctx context.Context, productID
 }
 
 // Get return product by ID.
-func (i *ProductInteractor) Get(ctx context.Context, user *token.UserRoles, productID string) (*entity.Product, error) {
+func (i *ProductInteractor) Get(ctx context.Context, user *entity.User, productID string) (*entity.Product, error) {
 	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewProduct); err != nil {
 		return nil, err
 	}
@@ -150,7 +149,7 @@ func (i *ProductInteractor) Get(ctx context.Context, user *token.UserRoles, prod
 }
 
 // GetByID return a Product by its ID.
-func (i *ProductInteractor) GetByID(ctx context.Context, user *token.UserRoles, productID string) (*entity.Product, error) {
+func (i *ProductInteractor) GetByID(ctx context.Context, user *entity.User, productID string) (*entity.Product, error) {
 	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewProduct); err != nil {
 		return nil, err
 	}
@@ -159,10 +158,10 @@ func (i *ProductInteractor) GetByID(ctx context.Context, user *token.UserRoles, 
 }
 
 // FindAll returns a list of all Runtimes.
-func (i *ProductInteractor) FindAll(ctx context.Context, user *token.UserRoles) ([]*entity.Product, error) {
-	visibleProducts := make([]string, 0, len(user.ProductRoles))
+func (i *ProductInteractor) FindAll(ctx context.Context, user *entity.User) ([]*entity.Product, error) {
+	visibleProducts := make([]string, 0, len(user.ProductGrants))
 
-	for prod := range user.ProductRoles {
+	for prod := range user.ProductGrants {
 		if err := i.accessControl.CheckPermission(user, prod, auth.ActViewProduct); err == nil {
 			visibleProducts = append(visibleProducts, prod)
 		}

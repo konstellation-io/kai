@@ -9,12 +9,11 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
-	"github.com/konstellation-io/kre/engine/admin-api/mocks"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 )
 
 type versionSuiteMocks struct {
@@ -92,7 +91,7 @@ func (s *VersionInteractorSuite) TearDownSuite() {
 }
 
 func (s *VersionInteractorSuite) TestCreateNewVersion() {
-	loggedUser := &token.UserRoles{
+	loggedUser := &entity.User{
 		ID: "test-user",
 	}
 
@@ -144,7 +143,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplic
 	userID := "user1"
 	productID := "run-1"
 
-	loggedUser := &token.UserRoles{
+	loggedUser := &entity.User{
 		ID: "test-user",
 	}
 
@@ -183,7 +182,7 @@ func (s *VersionInteractorSuite) TestGetByName() {
 	productID := "product-1"
 	versionName := "version-name"
 
-	loggedUser := &token.UserRoles{
+	loggedUser := &entity.User{
 		ID: "test-user",
 	}
 

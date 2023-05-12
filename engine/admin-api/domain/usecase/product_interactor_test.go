@@ -6,16 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/konstellation-io/kre/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kre/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kre/engine/admin-api/domain/usecase/auth"
-
 	"github.com/golang/mock/gomock"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/stretchr/testify/require"
-
-	"github.com/konstellation-io/kre/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kre/engine/admin-api/mocks"
 )
 
 type productSuite struct {
@@ -100,7 +97,7 @@ func TestGet(t *testing.T) {
 		ID: productID,
 	}
 
-	user := &token.UserRoles{
+	user := &entity.User{
 		ID: "user1234",
 	}
 
@@ -119,7 +116,7 @@ func TestCreateNewProduct(t *testing.T) {
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &token.UserRoles{ID: "user1234"}
+	user := &entity.User{ID: "user1234"}
 	productID := "product-id"
 	productName := "product-name"
 	productDescription := "This is a product description"
@@ -151,7 +148,7 @@ func TestCreateNewProduct_FailsIfUserHasNotPermission(t *testing.T) {
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &token.UserRoles{ID: "user1234"}
+	user := &entity.User{ID: "user1234"}
 	productID := "product-id"
 	productName := "product-name"
 	productDescription := "This is a product description"
@@ -171,7 +168,7 @@ func TestCreateNewProduct_FailsIfProductHasAnInvalidField(t *testing.T) {
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &token.UserRoles{ID: "user1234"}
+	user := &entity.User{ID: "user1234"}
 	productID := "product-id"
 	// the product name is bigger thant the max length (it should be lte=40)
 	productName := "lore ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labores"
@@ -191,7 +188,7 @@ func TestCreateNewProduct_FailsIfProductWithSameIDAlreadyExists(t *testing.T) {
 
 	ctx := context.Background()
 
-	user := &token.UserRoles{
+	user := &entity.User{
 		ID: "user1234",
 	}
 
@@ -219,7 +216,7 @@ func TestCreateNewProduct_FailsIfProductWithSameNameAlreadyExists(t *testing.T) 
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &token.UserRoles{ID: "user1234"}
+	user := &entity.User{ID: "user1234"}
 
 	productName := "product-name"
 	productID := "new-product-id"
@@ -246,7 +243,7 @@ func TestCreateNewProduct_FailsIfCreateProductFails(t *testing.T) {
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &token.UserRoles{ID: "user1234"}
+	user := &entity.User{ID: "user1234"}
 	productName := "product-name"
 	productID := "new-product-id"
 	productDescription := "This is a product description"
@@ -276,7 +273,7 @@ func TestGetByID(t *testing.T) {
 
 	ctx := context.Background()
 
-	user := &token.UserRoles{ID: "user1234"}
+	user := &entity.User{ID: "user1234"}
 	productID := "product-id"
 	productName := "product-name"
 
@@ -305,9 +302,9 @@ func TestFindAll(t *testing.T) {
 	productID := "product-id"
 	productName := "product-name"
 
-	user := &token.UserRoles{
+	user := &entity.User{
 		ID: "user1234",
-		ProductRoles: map[string][]string{
+		ProductGrants: map[string][]string{
 			productID: {
 				auth.ActViewProduct.String(),
 			},
