@@ -32,7 +32,7 @@ func newTokenWithProductRoles(userRoles *entity.User) (string, error) {
 }
 
 func Test_CustomClaims(t *testing.T) {
-	expectedUserRoles := &entity.User{
+	expectedUser := &entity.User{
 		ID: "test-user",
 		ProductGrants: entity.ProductGrants{
 			"test-product": {
@@ -42,14 +42,14 @@ func Test_CustomClaims(t *testing.T) {
 		Roles: []string{"VIEWER"},
 	}
 
-	accessToken, err := newTokenWithProductRoles(expectedUserRoles)
+	accessToken, err := newTokenWithProductRoles(expectedUser)
 	require.NoError(t, err)
 
 	tokenParser := token.NewParser()
 
-	userRoles, err := tokenParser.GetUserRoles(accessToken)
+	userRoles, err := tokenParser.GetUser(accessToken)
 	require.NoError(t, err)
-	assert.Equal(t, expectedUserRoles, userRoles)
+	assert.Equal(t, expectedUser, userRoles)
 }
 
 func Test_CustomClaims_FailsIfTokenIsNotValid(t *testing.T) {
@@ -57,7 +57,7 @@ func Test_CustomClaims_FailsIfTokenIsNotValid(t *testing.T) {
 
 	tokenParser := token.NewParser()
 
-	productRoles, err := tokenParser.GetUserRoles(accessToken)
+	productRoles, err := tokenParser.GetUser(accessToken)
 	assert.ErrorIs(t, err, jwt.ErrTokenMalformed)
 	assert.Nil(t, productRoles)
 }
@@ -68,6 +68,6 @@ func Test_CustomClaims_ReturnNilIfNoAccessClaims(t *testing.T) {
 
 	tokenParser := token.NewParser()
 
-	_, err = tokenParser.GetUserRoles(accessToken)
+	_, err = tokenParser.GetUser(accessToken)
 	assert.NoError(t, err)
 }

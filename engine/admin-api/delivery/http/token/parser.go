@@ -21,7 +21,7 @@ func NewParser() *Parser {
 	}
 }
 
-func (p *Parser) GetUserRoles(accessToken string) (*entity.User, error) {
+func (p *Parser) GetUser(accessToken string) (*entity.User, error) {
 	claims := &CustomClaims{}
 
 	_, _, err := p.parser.ParseUnverified(accessToken, claims)

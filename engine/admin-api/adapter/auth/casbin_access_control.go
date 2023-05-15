@@ -10,24 +10,36 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
+type Config struct {
+	AdminRole string
+}
+
 type CasbinAccessControl struct {
+	cfg      Config
 	logger   logging.Logger
 	enforcer *casbin.Enforcer
 }
 
-func NewCasbinAccessControl(logger logging.Logger, modelPath, policyPath string) (*CasbinAccessControl, error) {
+func NewCasbinAccessControl(cfg Config, logger logging.Logger, modelPath, policyPath string) (*CasbinAccessControl, error) {
 	enforcer, err := casbin.NewEnforcer(modelPath, policyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	enforcer.AddFunction("isAdmin", isAdminFunc)
-	enforcer.AddFunction("hasGrantForResource", hasGrantsForResourceFunc)
-
-	return &CasbinAccessControl{
+	accessController := &CasbinAccessControl{
+		cfg,
 		logger,
 		enforcer,
-	}, nil
+	}
+
+	accessController.addCustomFunctions()
+
+	return accessController, nil
+}
+
+func (a *CasbinAccessControl) addCustomFunctions() {
+	a.enforcer.AddFunction("isAdmin", a.isAdminFunc)
+	a.enforcer.AddFunction("hasGrantForResource", a.hasGrantsForResourceFunc)
 }
 
 func (a *CasbinAccessControl) CheckPermission(
@@ -40,7 +52,7 @@ func (a *CasbinAccessControl) CheckPermission(
 	}
 
 	for _, realmRole := range user.Roles {
-		allowed, err := a.enforcer.Enforce(realmRole, user.ProductGrants, action.String())
+		allowed, err := a.enforcer.Enforce(realmRole, user.ProductGrants, product, action.String())
 		if err != nil {
 			a.logger.Errorf("error checking permission: %s", err)
 			return err
@@ -60,12 +72,12 @@ func (a *CasbinAccessControl) CheckPermission(
 	return fmt.Errorf("you are not allowed to %s %s", action, product)
 }
 
-func hasGrantsForResource(
-	grants map[string][]string,
-	resource,
+func (a *CasbinAccessControl) hasGrantsForResource(
+	grants entity.ProductGrants,
+	product,
 	act string,
 ) bool {
-	resGrants, ok := grants[resource]
+	resGrants, ok := grants[product]
 	if !ok {
 		return false
 	}
@@ -79,20 +91,16 @@ func hasGrantsForResource(
 	return false
 }
 
-func hasGrantsForResourceFunc(args ...interface{}) (interface{}, error) {
-	grants := args[0].(map[string][]string)
+func (a *CasbinAccessControl) hasGrantsForResourceFunc(args ...interface{}) (interface{}, error) {
+	grants := args[0].(entity.ProductGrants)
 	resource := args[1].(string)
 	act := args[2].(string)
 
-	return hasGrantsForResource(grants, resource, act), nil
+	return a.hasGrantsForResource(grants, resource, act), nil
 }
 
-func isAdmin(role string) bool {
-	return role == "ADMIN"
-}
-
-func isAdminFunc(args ...interface{}) (interface{}, error) {
+func (a *CasbinAccessControl) isAdminFunc(args ...interface{}) (interface{}, error) {
 	role := args[0].(string)
 
-	return isAdmin(role), nil
+	return role == a.cfg.AdminRole, nil
 }

@@ -24,7 +24,7 @@ func NewJwtAuthMiddleware(_ *config.Config, logger logging.Logger, tokenParser *
 			authHeader := c.Request().Header.Get("Authorization")
 			plainToken := extractToken(authHeader)
 
-			user, err := tokenParser.GetUserRoles(plainToken)
+			user, err := tokenParser.GetUser(plainToken)
 			if err != nil {
 				logger.Error("No token found in context")
 
