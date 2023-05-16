@@ -19,7 +19,7 @@ var (
 	casbinPolicy = path.Join("..", "..", "casbin_rbac_policy.csv")
 )
 
-func TestCheckPermission_Is(t *testing.T) {
+func TestCheckPermission(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
@@ -101,4 +101,34 @@ func TestCheckPermission_Is(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCheckPermission_InvalidAct(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	logger := mocks.NewMockLogger(ctrl)
+	mocks.AddLoggerExpects(logger)
+
+	authCfg := auth.Config{
+		AdminRole: "ADMIN",
+	}
+	authorizer, err := auth.NewCasbinAccessControl(authCfg, logger, casbinModel, casbinPolicy)
+	require.NoError(t, err)
+
+	user := testhelpers.NewUserBuilder().Build()
+	product := "product-01"
+
+	err = authorizer.CheckPermission(user, product, "invalid act")
+	assert.ErrorIs(t, auth.InvalidAccessControlActionError, err)
+}
+
+func TestNewCasbinAccessControl_ErrorInitEnforcer(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	logger := mocks.NewMockLogger(ctrl)
+	mocks.AddLoggerExpects(logger)
+
+	authCfg := auth.Config{
+		AdminRole: "ADMIN",
+	}
+	_, err := auth.NewCasbinAccessControl(authCfg, logger, "this is a invalid model", casbinPolicy)
+	require.Error(t, err)
 }

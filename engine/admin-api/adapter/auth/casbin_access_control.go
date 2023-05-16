@@ -48,7 +48,7 @@ func (a *CasbinAccessControl) CheckPermission(
 	action auth.AccessControlAction,
 ) error {
 	if !action.IsValid() {
-		return invalidAccessControlActionError
+		return InvalidAccessControlActionError
 	}
 
 	for _, realmRole := range user.Roles {
