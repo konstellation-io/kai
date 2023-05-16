@@ -1,6 +1,7 @@
 package token_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
@@ -35,15 +36,17 @@ func Test_CustomClaims(t *testing.T) {
 	expectedUser := &entity.User{
 		ID: "test-user",
 		ProductGrants: entity.ProductGrants{
-			"test-product": {
-				"ADMIN",
+			"test": {
+				"view_product",
 			},
 		},
-		Roles: []string{"VIEWER"},
+		Roles: []string{"USER"},
 	}
 
 	accessToken, err := newTokenWithProductRoles(expectedUser)
 	require.NoError(t, err)
+
+	fmt.Println(accessToken)
 
 	tokenParser := token.NewParser()
 

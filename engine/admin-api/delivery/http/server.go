@@ -54,6 +54,7 @@ func NewApp(
 	e.GET("/", func(c echo.Context) error {
 		return nil
 	}, jwtAuthMiddleware)
+	e.GET("/playground", gqlController.PlaygroundHandler)
 
 	r := e.Group("/graphql")
 	r.Use(jwtAuthMiddleware)

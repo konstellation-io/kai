@@ -6,4 +6,13 @@ type User struct {
 	ProductGrants ProductGrants
 }
 
+func (u User) IsAdmin() bool {
+	for _, role := range u.Roles {
+		if role == "ADMIN" {
+			return true
+		}
+	}
+	return false
+}
+
 type ProductGrants map[string][]string
