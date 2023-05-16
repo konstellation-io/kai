@@ -18,7 +18,7 @@ const (
 
 func (e UserActivityType) IsValid() bool {
 	switch e {
-	case UserActivityTypeCreateRuntime,
+	case UserActivityTypeCreateProduct,
 		UserActivityTypeCreateVersion,
 		UserActivityTypePublishVersion,
 		UserActivityTypeUnpublishVersion,

@@ -20,7 +20,7 @@ type GraphQLController struct {
 	cfg                    *config.Config
 	logger                 logging.Logger
 	runtimeInteractor      *usecase.RuntimeInteractor
-	userInteractor         *usecase.UserInteractor
+	userInteractor         usecase.UserInteractorUsecase
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *usecase.VersionInteractor
 	metricsInteractor      *usecase.MetricsInteractor
@@ -30,7 +30,7 @@ func NewGraphQLController(
 	cfg *config.Config,
 	logger logging.Logger,
 	runtimeInteractor *usecase.RuntimeInteractor,
-	userInteractor *usecase.UserInteractor,
+	userInteractor usecase.UserInteractorUsecase,
 	userActivityInteractor usecase.UserActivityInteracter,
 	versionInteractor *usecase.VersionInteractor,
 	metricsInteractor *usecase.MetricsInteractor,

@@ -21,7 +21,7 @@ type ContextUserManagerSuite struct {
 	mockGokeycloak             *mocks.MockGocloakService
 	mockLogger                 *mocks.MockLogger
 	mockUserActivityInteractor *mocks.MockUserActivityInteracter
-	userManager                *UserInteractor
+	userManager                UserInteractorUsecase
 }
 
 func TestContextMeasurementTestSuite(t *testing.T) {
@@ -57,7 +57,7 @@ func (suite *ContextUserManagerSuite) TestGetUserByID() {
 	suite.Equal(testUserData, userData)
 }
 
-func (suite *ContextUserManagerSuite) TestGetUserByIDError() {
+func (suite *ContextUserManagerSuite) TestGetUserByIDErrorInGocloak() {
 	testUserData := suite.GetTestUserData()
 
 	suite.mockGokeycloak.EXPECT().GetUserByID(testUserData.ID).Times(1).Return(entity.UserGocloakData{}, fmt.Errorf("error"))
@@ -104,11 +104,29 @@ func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsGivenComme
 	suite.NoError(err)
 }
 
-func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsError() {
+func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsErrorInGocloak() {
 	testUserData := suite.GetTestUserData()
 	permissions := []string{"permission1", "permission2"}
 
 	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, permissions).Times(1).Return(fmt.Errorf("error"))
+
+	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions)
+	suite.Error(err)
+	suite.ErrorContains(err, updateUserProductPermissionsWrapper)
+}
+
+func (suite *ContextUserManagerSuite) TestUpdateUserPermissionsErrorInUserActivity() {
+	testUserData := suite.GetTestUserData()
+	permissions := []string{"permission1", "permission2"}
+
+	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, permissions).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+		triggerUserID,
+		testUserData.ID,
+		testProduct,
+		permissions,
+		"",
+	).Times(1).Return(fmt.Errorf("error"))
 
 	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions)
 	suite.Error(err)
@@ -150,10 +168,27 @@ func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsGivenComment()
 	suite.NoError(err)
 }
 
-func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsError() {
+func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsErrorInGocloak() {
 	testUserData := suite.GetTestUserData()
 
 	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(fmt.Errorf("error"))
+
+	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUserData.ID, testProduct)
+	suite.Error(err)
+	suite.ErrorContains(err, revokeUserProductPermissionsWrapper)
+}
+
+func (suite *ContextUserManagerSuite) TestRevokeUserPermissionsErrorInUserActivity() {
+	testUserData := suite.GetTestUserData()
+
+	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+		triggerUserID,
+		testUserData.ID,
+		testProduct,
+		[]string{},
+		"",
+	).Times(1).Return(fmt.Errorf("error"))
 
 	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUserData.ID, testProduct)
 	suite.Error(err)

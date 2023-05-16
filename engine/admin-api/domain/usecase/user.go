@@ -15,7 +15,12 @@ const (
 	revokeUserProductPermissionsLog     = "Revoked user %q permissions for product %q"
 )
 
-// UserInteractor talks to the gocloak service, thus providing user realted operations.
+type UserInteractorUsecase interface {
+	GetUserByID(userID string) (entity.UserGocloakData, error)
+	UpdateUserProductPermissions(triggerUserID, targetUserID, product string, permissions []string, comment ...string) error
+	RevokeUserProductPermissions(triggerUserID, targetUserID, product string, comment ...string) error
+}
+
 type UserInteractor struct {
 	logger                 logging.Logger
 	userActivityInteractor UserActivityInteracter
@@ -23,12 +28,13 @@ type UserInteractor struct {
 }
 
 // NewUserInteractor creates a new UserInteractor.
+//
+// UserInteractor is the usecase to manage users.
 func NewUserInteractor(
 	logger logging.Logger,
 	userActivityInteractor UserActivityInteracter,
 	gocloakManager service.GocloakService,
-
-) *UserInteractor {
+) UserInteractorUsecase {
 	return &UserInteractor{
 		logger,
 		userActivityInteractor,

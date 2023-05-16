@@ -100,10 +100,10 @@ func (i *UserActivityInteractor) RegisterCreateRuntime(
 ) error {
 	err := i.create(
 		userID,
-		entity.UserActivityTypeCreateRuntime,
+		entity.UserActivityTypeCreateProduct,
 		[]*entity.UserActivityVar{
 			{
-				Key:   "RUNTIME_ID",
+				Key:   "PRODUCT_ID",
 				Value: runtime.ID,
 			},
 			{

@@ -17,7 +17,7 @@ import (
 func NewHTTPHandler(
 	logger logging.Logger,
 	runtimeInteractor *usecase.RuntimeInteractor,
-	userInteractor *usecase.UserInteractor,
+	userInteractor usecase.UserInteractorUsecase,
 	userActivityInteractor usecase.UserActivityInteracter,
 	versionInteractor *usecase.VersionInteractor,
 	metricsInteractor *usecase.MetricsInteractor,
