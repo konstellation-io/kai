@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/99designs/gqlgen v0.17.27
-	github.com/bxcodec/faker/v3 v3.8.1
 	github.com/casbin/casbin/v2 v2.8.6
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-playground/validator v9.31.0+incompatible
