@@ -25,22 +25,6 @@ type Config struct {
 		CORSEnabled     bool   `yaml:"corsEnabled" envconfig:"KRE_ADMIN_CORS_ENABLED"`
 		StoragePath     string `yaml:"storagePath" envconfig:"KRE_ADMIN_STORAGE_PATH"`
 	} `yaml:"admin"`
-	SMTP struct {
-		Enabled    bool   `yaml:"enabled" envconfig:"KRE_SMTP_ENABLED"`
-		Sender     string `yaml:"sender" envconfig:"KRE_SMTP_SENDER"`
-		SenderName string `yaml:"senderName" envconfig:"KRE_SMTP_SENDER_NAME"`
-		User       string `yaml:"user" envconfig:"KRE_SMTP_USER"`
-		Pass       string `yaml:"pass" envconfig:"KRE_SMTP_PASS"`
-		Host       string `yaml:"host" envconfig:"KRE_SMTP_HOST"`
-		Port       int    `yaml:"port" envconfig:"KRE_SMTP_PORT"`
-	} `yaml:"smtp"`
-	Auth struct {
-		VerificationCodeDurationInMinutes int    `yaml:"verificationCodeDurationInMinutes" envconfig:"KRE_AUTH_VERIFICATION_CODE_DURATION_IN_MINUTES"` //nolint:lll // Cannot be split
-		JWTSignSecret                     string `yaml:"jwtSignSecret" envconfig:"KRE_AUTH_JWT_SIGN_SECRET"`
-		APITokenSecret                    string `yaml:"apiTokenSecret" envconfig:"KRE_AUTH_API_TOKEN_SECRET"`
-		SecureCookie                      bool   `yaml:"secureCookie" envconfig:"KRE_AUTH_SECURE_COOKIE"`
-		CookieDomain                      string `yaml:"cookieDomain" envconfig:"KRE_AUTH_COOKIE_DOMAIN"`
-	} `yaml:"auth"`
 	MongoDB struct {
 		Address             string `yaml:"address" envconfig:"KRE_MONGODB_URI"`
 		DBName              string `yaml:"dbName"`

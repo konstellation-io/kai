@@ -1,5 +1,6 @@
 ### HTTP Get Products
 < {%
+  request.variables.set("user_access_token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9kdWN0X3JvbGVzIjp7InRlc3QiOlsidmlld19wcm9kdWN0Il19LCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiVVNFUiJdfSwic3ViIjoidGVzdC11c2VyIn0.RfsSoMIztpZrFVp86H4f5uLkSV8ni1Gc_aNJwuKDEUA")
   request.variables.set("admin_access_token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9kdWN0X3JvbGVzIjp7InRlc3QtcHJvZHVjdCI6WyJBRE1JTiJdfSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIkFETUlOIl19LCJzdWIiOiJ0ZXN0LXVzZXIifQ.DBjQjyRgi2RiVOhxoGXhYfq3rA-r65f8mpPPPRdqMD0")
 %}
 GRAPHQL http://localhost:8080/graphql
@@ -36,8 +37,8 @@ Authorization: Bearer {{admin_access_token}}
 
 mutation {
   createProduct(input: {
-    id: "demo",
-    name: "demo",
+    id: "demo2",
+    name: "demo2",
     description: "description",
   }) {
     id
