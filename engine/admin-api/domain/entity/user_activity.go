@@ -7,7 +7,7 @@ import (
 type UserActivityType string
 
 const (
-	UserActivityTypeCreateRuntime            UserActivityType = "CREATE_RUNTIME"
+	UserActivityTypeCreateProduct            UserActivityType = "CREATE_PRODUCT"
 	UserActivityTypeCreateVersion            UserActivityType = "CREATE_VERSION"
 	UserActivityTypePublishVersion           UserActivityType = "PUBLISH_VERSION"
 	UserActivityTypeUnpublishVersion         UserActivityType = "UNPUBLISH_VERSION"
