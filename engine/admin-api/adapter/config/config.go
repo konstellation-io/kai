@@ -71,8 +71,9 @@ type Config struct {
 		NatsManager string `yaml:"natsManager" envconfig:"KRE_SERVICES_NATS_MANAGER"`
 	} `yaml:"services"`
 
-	// nolint:godox // this is a TODO to be removed
 	// TODO: Get into an agreement with infra
+	//
+	//nolint:godox // this is a TODO to be removed
 	Keycloak struct {
 		Realm         string `yaml:"realm" envconfig:"KEYCLOAK_REALM"`
 		MasterRealm   string `yaml:"master_realm" envconfig:"KEYCLOAK_MASTER_REALM"`

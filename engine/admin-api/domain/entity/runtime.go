@@ -11,9 +11,9 @@ var (
 	validate = validator.New()
 )
 
-// nolint:godox // this is a TODO to be removed
+// TODO: rename this entity to "Product".
 //
-// TODO rename this entity to "Product"
+//nolint:godox // this is a TODO to be removed
 type Runtime struct {
 	ID               string    `bson:"_id" validate:"required"`
 	Name             string    `bson:"name" validate:"required,lte=40"`
