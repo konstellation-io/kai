@@ -3,9 +3,9 @@ module github.com/konstellation-io/kai/engine/nats-manager
 go 1.20
 
 require (
-	github.com/golang/mock v1.1.1
+	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20220809083101-1daebaa1f8f2
+	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459
 	github.com/nats-io/nats.go v1.24.0
 	github.com/stretchr/testify v1.8.2
 	github.com/testcontainers/testcontainers-go v0.19.0
@@ -28,6 +28,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/klauspost/compress v1.15.10 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/moby/patternmatcher v0.5.0 // indirect
 	github.com/moby/sys/sequential v0.5.0 // indirect
@@ -49,6 +50,3 @@ require (
 	google.golang.org/genproto v0.0.0-20220617124728-180714bec0ad // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/konstellation-io/kai/libs/simplelogger => ../../libs/simplelogger
-
