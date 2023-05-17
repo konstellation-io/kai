@@ -19,7 +19,7 @@ var (
 	casbinPolicy = path.Join("..", "..", "casbin_rbac_policy.csv")
 )
 
-func TestCheckPermission(t *testing.T) {
+func TestCheckProductGrants(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
@@ -93,7 +93,7 @@ func TestCheckPermission(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := authorizer.CheckPermission(tc.user, tc.product, tc.act)
+			err := authorizer.CheckProductGrants(tc.user, tc.product, tc.act)
 			if tc.hasError {
 				assert.Error(t, err)
 			} else {
@@ -103,7 +103,47 @@ func TestCheckPermission(t *testing.T) {
 	}
 }
 
-func TestCheckPermission_InvalidAct(t *testing.T) {
+func TestIsadmin(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	logger := mocks.NewMockLogger(ctrl)
+	mocks.AddLoggerExpects(logger)
+
+	adminRole := "ADMIN"
+
+	authCfg := auth.Config{
+		AdminRole: adminRole,
+	}
+
+	authorizer, err := auth.NewCasbinAccessControl(authCfg, logger, casbinModel, casbinPolicy)
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name    string
+		user    *entity.User
+		isAdmin bool
+	}{
+		{
+			name:    "user with cfg admin role in its roles is admin",
+			user:    testhelpers.NewUserBuilder().WithRoles([]string{adminRole}).Build(),
+			isAdmin: true,
+		},
+		{
+			name:    "user without cfg admin role in its roles is not admin",
+			user:    testhelpers.NewUserBuilder().WithRoles([]string{"user", "maintainer"}).Build(),
+			isAdmin: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			isAdmin := authorizer.IsAdmin(tc.user)
+			assert.Equal(t, tc.isAdmin, isAdmin)
+		})
+	}
+
+}
+
+func TestCheckProductGrants_InvalidAct(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
@@ -117,7 +157,7 @@ func TestCheckPermission_InvalidAct(t *testing.T) {
 	user := testhelpers.NewUserBuilder().Build()
 	product := "product-01"
 
-	err = authorizer.CheckPermission(user, product, "invalid act")
+	err = authorizer.CheckProductGrants(user, product, "invalid act")
 	assert.ErrorIs(t, auth.InvalidAccessControlActionError, err)
 }
 

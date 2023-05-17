@@ -6,6 +6,8 @@ import "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 
 type AccessControlAction string
 
+const DefaultAdminRole = "ADMIN"
+
 const ActViewProduct AccessControlAction = "view_product"
 const ActCreateProduct AccessControlAction = "create_product"
 
@@ -18,14 +20,12 @@ const ActEditVersion AccessControlAction = "edit_version"
 const ActViewVersion AccessControlAction = "view_version"
 
 const ActViewMetrics AccessControlAction = "view_metrics"
-const ActViewUserActivities AccessControlAction = "view_user_activities"
 
-const ActView AccessControlAction = "view"
-const ActEdit AccessControlAction = "edit"
+const ActViewUserActivities AccessControlAction = "view_user_activities"
 
 func (e AccessControlAction) IsValid() bool {
 	switch e {
-	case ActView, ActEdit, ActCreateProduct, ActStartVersion, ActStopVersion,
+	case ActCreateProduct, ActStartVersion, ActStopVersion,
 		ActPublishVersion, ActUnpublishVersion, ActEditVersion, ActViewMetrics,
 		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion:
 		return true
@@ -38,7 +38,8 @@ func (e AccessControlAction) String() string {
 	return string(e)
 }
 
-//nolint:godox // Remove this nolint statement after the TODO is done.
-type AccessControl interface { // TODO: move to middleware.
-	CheckPermission(user *entity.User, product string, action AccessControlAction) error
+type AccessControl interface {
+	CheckProductGrants(user *entity.User, product string, action AccessControlAction) error
+	CheckGrants(user *entity.User, action AccessControlAction) error
+	IsAdmin(user *entity.User) bool
 }

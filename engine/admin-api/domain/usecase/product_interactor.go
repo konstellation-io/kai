@@ -65,7 +65,7 @@ func (i *ProductInteractor) CreateProduct(
 	name,
 	description string,
 ) (*entity.Product, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActCreateProduct); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActCreateProduct); err != nil {
 		return nil, err
 	}
 
@@ -141,7 +141,7 @@ func (i *ProductInteractor) createDatabaseIndexes(ctx context.Context, productID
 
 // Get return product by ID.
 func (i *ProductInteractor) Get(ctx context.Context, user *entity.User, productID string) (*entity.Product, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewProduct); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct); err != nil {
 		return nil, err
 	}
 
@@ -150,7 +150,7 @@ func (i *ProductInteractor) Get(ctx context.Context, user *entity.User, productI
 
 // GetByID return a Product by its ID.
 func (i *ProductInteractor) GetByID(ctx context.Context, user *entity.User, productID string) (*entity.Product, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewProduct); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct); err != nil {
 		return nil, err
 	}
 
@@ -159,14 +159,14 @@ func (i *ProductInteractor) GetByID(ctx context.Context, user *entity.User, prod
 
 // FindAll returns a list of all Runtimes.
 func (i *ProductInteractor) FindAll(ctx context.Context, user *entity.User) ([]*entity.Product, error) {
-	if user.IsAdmin() {
+	if i.accessControl.IsAdmin(user) {
 		return i.productRepo.FindAll(ctx)
 	}
 
 	visibleProducts := make([]string, 0, len(user.ProductGrants))
 
 	for prod := range user.ProductGrants {
-		if err := i.accessControl.CheckPermission(user, prod, auth.ActViewProduct); err == nil {
+		if err := i.accessControl.CheckProductGrants(user, prod, auth.ActViewProduct); err == nil {
 			visibleProducts = append(visibleProducts, prod)
 		}
 	}

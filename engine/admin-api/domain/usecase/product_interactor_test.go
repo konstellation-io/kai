@@ -12,6 +12,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
+	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 	"github.com/stretchr/testify/require"
 )
 
@@ -97,13 +98,11 @@ func TestGet(t *testing.T) {
 		ID: productID,
 	}
 
-	user := &entity.User{
-		ID: "user1234",
-	}
+	user := testhelpers.NewUserBuilder().Build()
 
 	ctx := context.Background()
 
-	s.mocks.accessControl.EXPECT().CheckPermission(user, productID, auth.ActViewProduct)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct)
 	s.mocks.productRepo.EXPECT().Get(ctx).Return(expectedProduct, nil)
 
 	product, err := s.productInteractor.Get(ctx, user, productID)
@@ -116,7 +115,8 @@ func TestCreateNewProduct(t *testing.T) {
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &entity.User{ID: "user1234"}
+
+	user := testhelpers.NewUserBuilder().Build()
 	productID := "product-id"
 	productName := "product-name"
 	productDescription := "This is a product description"
@@ -128,7 +128,7 @@ func TestCreateNewProduct(t *testing.T) {
 		Owner:        user.ID,
 	}
 
-	s.mocks.accessControl.EXPECT().CheckPermission(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
@@ -148,14 +148,15 @@ func TestCreateNewProduct_FailsIfUserHasNotPermission(t *testing.T) {
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &entity.User{ID: "user1234"}
+
+	user := testhelpers.NewUserBuilder().Build()
 	productID := "product-id"
 	productName := "product-name"
 	productDescription := "This is a product description"
 
 	permissionError := errors.New("permission error")
 
-	s.mocks.accessControl.EXPECT().CheckPermission(user, productID, auth.ActCreateProduct).Return(permissionError)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(permissionError)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 
@@ -168,13 +169,14 @@ func TestCreateNewProduct_FailsIfProductHasAnInvalidField(t *testing.T) {
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &entity.User{ID: "user1234"}
+
+	user := testhelpers.NewUserBuilder().Build()
 	productID := "product-id"
 	// the product name is bigger thant the max length (it should be lte=40)
 	productName := "lore ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labores"
 	productDescription := "This is a product description"
 
-	s.mocks.accessControl.EXPECT().CheckPermission(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 
@@ -188,9 +190,7 @@ func TestCreateNewProduct_FailsIfProductWithSameIDAlreadyExists(t *testing.T) {
 
 	ctx := context.Background()
 
-	user := &entity.User{
-		ID: "user1234",
-	}
+	user := testhelpers.NewUserBuilder().Build()
 
 	productID := "product-id"
 	productName := "product-name"
@@ -202,7 +202,7 @@ func TestCreateNewProduct_FailsIfProductWithSameIDAlreadyExists(t *testing.T) {
 		Description: "existing-product-description",
 	}
 
-	s.mocks.accessControl.EXPECT().CheckPermission(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(existingProduct, nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
@@ -216,7 +216,7 @@ func TestCreateNewProduct_FailsIfProductWithSameNameAlreadyExists(t *testing.T) 
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &entity.User{ID: "user1234"}
+	user := testhelpers.NewUserBuilder().Build()
 
 	productName := "product-name"
 	productID := "new-product-id"
@@ -228,7 +228,7 @@ func TestCreateNewProduct_FailsIfProductWithSameNameAlreadyExists(t *testing.T) 
 		Description: "existing-product-description",
 	}
 
-	s.mocks.accessControl.EXPECT().CheckPermission(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(existingProduct, nil)
 
@@ -243,7 +243,8 @@ func TestCreateNewProduct_FailsIfCreateProductFails(t *testing.T) {
 	defer s.ctrl.Finish()
 
 	ctx := context.Background()
-	user := &entity.User{ID: "user1234"}
+
+	user := testhelpers.NewUserBuilder().Build()
 	productName := "product-name"
 	productID := "new-product-id"
 	productDescription := "This is a product description"
@@ -256,7 +257,7 @@ func TestCreateNewProduct_FailsIfCreateProductFails(t *testing.T) {
 		CreationDate: time.Time{},
 	}
 
-	s.mocks.accessControl.EXPECT().CheckPermission(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().Create(ctx, newProduct).Return(nil, errors.New("create product error"))
@@ -273,7 +274,7 @@ func TestGetByID(t *testing.T) {
 
 	ctx := context.Background()
 
-	user := &entity.User{ID: "user1234"}
+	user := testhelpers.NewUserBuilder().Build()
 	productID := "product-id"
 	productName := "product-name"
 
@@ -284,7 +285,7 @@ func TestGetByID(t *testing.T) {
 		CreationDate: time.Time{},
 	}
 
-	s.mocks.accessControl.EXPECT().CheckPermission(user, productID, auth.ActViewProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(expected, nil)
 
 	actual, err := s.productInteractor.GetByID(ctx, user, productID)
@@ -302,14 +303,14 @@ func TestFindAll(t *testing.T) {
 	productID := "product-id"
 	productName := "product-name"
 
-	user := &entity.User{
-		ID: "user1234",
-		ProductGrants: map[string][]string{
-			productID: {
-				auth.ActViewProduct.String(),
+	user := testhelpers.NewUserBuilder().
+		WithProductGrants(
+			map[string][]string{
+				productID: {
+					auth.ActViewProduct.String(),
+				},
 			},
-		},
-	}
+		).Build()
 
 	expected := []*entity.Product{
 		{
@@ -320,8 +321,38 @@ func TestFindAll(t *testing.T) {
 		},
 	}
 
-	s.mocks.accessControl.EXPECT().CheckPermission(user, productID, auth.ActViewProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().IsAdmin(user).Return(false)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().FindByIDs(ctx, []string{productID}).Return(expected, nil)
+
+	actual, err := s.productInteractor.FindAll(ctx, user)
+
+	require.Nil(t, err)
+	require.Equal(t, expected, actual)
+}
+
+func TestFindAll_AdminUser(t *testing.T) {
+	s := newProductSuite(t)
+	defer s.ctrl.Finish()
+
+	ctx := context.Background()
+
+	productID := "product-id"
+	productName := "product-name"
+
+	user := testhelpers.NewUserBuilder().WithRoles([]string{auth.DefaultAdminRole}).Build()
+
+	expected := []*entity.Product{
+		{
+			ID:           productID,
+			Name:         productName,
+			Description:  "Product description...",
+			CreationDate: time.Time{},
+		},
+	}
+
+	s.mocks.accessControl.EXPECT().IsAdmin(user).Return(true)
+	s.mocks.productRepo.EXPECT().FindAll(ctx).Return(expected, nil)
 
 	actual, err := s.productInteractor.FindAll(ctx, user)
 

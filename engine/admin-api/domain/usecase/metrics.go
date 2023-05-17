@@ -49,7 +49,7 @@ func (i *MetricsInteractor) GetMetrics(
 	startDate,
 	endDate string,
 ) (*entity.Metrics, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewMetrics); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewMetrics); err != nil {
 		return nil, err
 	}
 

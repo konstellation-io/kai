@@ -42,7 +42,7 @@ func (a *CasbinAccessControl) addCustomFunctions() {
 	a.enforcer.AddFunction("hasGrantForResource", a.hasGrantsForResourceFunc)
 }
 
-func (a *CasbinAccessControl) CheckPermission(
+func (a *CasbinAccessControl) CheckProductGrants(
 	user *entity.User,
 	product string,
 	action auth.AccessControlAction,
@@ -72,6 +72,13 @@ func (a *CasbinAccessControl) CheckPermission(
 	return fmt.Errorf("you are not allowed to %s %s", action, product)
 }
 
+func (a *CasbinAccessControl) CheckGrants(
+	user *entity.User,
+	action auth.AccessControlAction,
+) error {
+	return a.CheckProductGrants(user, "", action)
+}
+
 func (a *CasbinAccessControl) hasGrantsForResource(
 	grants entity.ProductGrants,
 	product,
@@ -84,6 +91,16 @@ func (a *CasbinAccessControl) hasGrantsForResource(
 
 	for _, grant := range resGrants {
 		if grant == act {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (a *CasbinAccessControl) IsAdmin(user *entity.User) bool {
+	for _, role := range user.Roles {
+		if role == a.cfg.AdminRole {
 			return true
 		}
 	}

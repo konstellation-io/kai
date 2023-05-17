@@ -91,7 +91,7 @@ func NewVersionInteractor(
 }
 
 func (i *VersionInteractor) filterConfigVars(user *entity.User, productID string, vers *entity.Version) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewVersion); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewVersion); err != nil {
 		vers.Config.Vars = nil
 	}
 }
@@ -150,7 +150,7 @@ func (i *VersionInteractor) Create(
 	productID string,
 	krtFile io.Reader,
 ) (*entity.Version, chan *entity.Version, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActCreateVersion); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActCreateVersion); err != nil {
 		return nil, nil, err
 	}
 
@@ -408,7 +408,7 @@ func (i *VersionInteractor) Start(
 	versionName string,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActStartVersion); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
 		return nil, nil, err
 	}
 
@@ -473,7 +473,7 @@ func (i *VersionInteractor) Stop(
 	versionName string,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActStopVersion); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
 		return nil, nil, err
 	}
 
@@ -584,7 +584,7 @@ func (i *VersionInteractor) Publish(
 	versionName,
 	comment string,
 ) (*entity.Version, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActPublishVersion); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActPublishVersion); err != nil {
 		return nil, err
 	}
 
@@ -635,7 +635,7 @@ func (i *VersionInteractor) Unpublish(
 	versionName,
 	comment string,
 ) (*entity.Version, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActUnpublishVersion); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActUnpublishVersion); err != nil {
 		return nil, err
 	}
 
@@ -679,7 +679,7 @@ func (i *VersionInteractor) UpdateVersionConfig(
 	vrs *entity.Version,
 	cfg []*entity.ConfigurationVariable,
 ) (*entity.Version, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActEditVersion); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActEditVersion); err != nil {
 		return nil, err
 	}
 
@@ -721,7 +721,7 @@ func (i *VersionInteractor) WatchNodeStatus(
 	productID,
 	versionName string,
 ) (<-chan *entity.Node, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewProduct); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct); err != nil {
 		return nil, err
 	}
 
@@ -740,7 +740,7 @@ func (i *VersionInteractor) WatchNodeLogs(
 	versionName string,
 	filters entity.LogFilters,
 ) (<-chan *entity.NodeLog, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewVersion); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewVersion); err != nil {
 		return nil, err
 	}
 
@@ -754,7 +754,7 @@ func (i *VersionInteractor) SearchLogs(
 	filters entity.LogFilters,
 	cursor *string,
 ) (*entity.SearchLogsResult, error) {
-	if err := i.accessControl.CheckPermission(user, productID, auth.ActViewVersion); err != nil {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewVersion); err != nil {
 		return nil, err
 	}
 
