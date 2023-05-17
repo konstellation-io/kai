@@ -175,26 +175,26 @@ func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, i
 	return r.versionInteractor.UpdateVersionConfig(ctx, loggedUserID, input.RuntimeID, v, cfg)
 }
 
-func (r *mutationResolver) UpdateUserProductPermissions(ctx context.Context, input UpdateUserProductPermissionsInput) (bool, error) {
+func (r *mutationResolver) UpdateUserProductPermissions(ctx context.Context, input UpdateUserProductPermissionsInput) (*entity.User, error) {
 	loggedUserID := ctx.Value("userID").(string)
 
 	err := r.userInteractor.UpdateUserProductPermissions(loggedUserID, input.TargetID, input.Product, input.Permissions, *input.Comment)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return true, nil
+	return r.userInteractor.GetUserByID(input.TargetID)
 }
 
-func (r *mutationResolver) RevokeUserProductPermissions(ctx context.Context, input RevokeUserProductPermissionsInput) (bool, error) {
+func (r *mutationResolver) RevokeUserProductPermissions(ctx context.Context, input RevokeUserProductPermissionsInput) (*entity.User, error) {
 	loggedUserID := ctx.Value("userID").(string)
 
 	err := r.userInteractor.RevokeUserProductPermissions(loggedUserID, input.TargetID, input.Product, *input.Comment)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return true, nil
+	return r.userInteractor.GetUserByID(input.TargetID)
 }
 
 func (r *queryResolver) Metrics(ctx context.Context, runtimeID, versionName,

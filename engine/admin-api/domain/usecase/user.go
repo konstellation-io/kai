@@ -36,12 +36,12 @@ func NewUserInteractor(
 	}
 }
 
-func (ui *UserInteractor) GetUserByID(userID string) (entity.UserGocloakData, error) {
+func (ui *UserInteractor) GetUserByID(userID string) (*entity.User, error) {
 	wrapErr := errors.Wrapper(getUserByIDWrapper + ": %w")
 
 	user, err := ui.gocloakManager.GetUserByID(userID)
 	if err != nil {
-		return entity.UserGocloakData{}, wrapErr(err)
+		return nil, wrapErr(err)
 	}
 
 	return user, nil

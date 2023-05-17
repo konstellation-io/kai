@@ -1,6 +1,6 @@
 package entity
 
-type UserGocloakData struct {
+type User struct {
 	ID        string
 	FirstName string
 	LastName  string

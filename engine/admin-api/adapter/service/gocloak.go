@@ -41,28 +41,15 @@ func NewGocloakManager(cfg *config.Config) (*GocloakManagerClient, error) {
 	}, nil
 }
 
-func (gm *GocloakManagerClient) CreateUser(userData entity.UserGocloakData) error {
-	wrapErr := errors.Wrapper("gocloak create user: %w")
-
-	user := userDataToGocloak(userData)
-
-	_, err := gm.client.CreateUser(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, user)
-	if err != nil {
-		return wrapErr(err)
-	}
-
-	return nil
-}
-
-func (gm *GocloakManagerClient) GetUserByID(userID string) (entity.UserGocloakData, error) {
+func (gm *GocloakManagerClient) GetUserByID(userID string) (*entity.User, error) {
 	wrapErr := errors.Wrapper("gocloak get user by id: %w")
 
 	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, userID)
 	if err != nil {
-		return entity.UserGocloakData{}, wrapErr(err)
+		return nil, wrapErr(err)
 	}
 
-	return gocloakUserToUserData(user), nil
+	return gocloakUserToUser(user), nil
 }
 
 func (gm *GocloakManagerClient) UpdateUserProductPermissions(userID, product string, permissions []string) error {
@@ -108,24 +95,13 @@ func (gm *GocloakManagerClient) UpdateUserProductPermissions(userID, product str
 	return nil
 }
 
-func gocloakUserToUserData(user *gocloak.User) entity.UserGocloakData {
-	return entity.UserGocloakData{
+func gocloakUserToUser(user *gocloak.User) *entity.User {
+	return &entity.User{
 		ID:        *user.ID,
 		FirstName: *user.FirstName,
 		LastName:  *user.LastName,
 		Email:     *user.Email,
 		Username:  *user.Username,
 		Enabled:   *user.Enabled,
-	}
-}
-
-func userDataToGocloak(userData entity.UserGocloakData) gocloak.User {
-	return gocloak.User{
-		ID:        gocloak.StringP(userData.ID),
-		Username:  gocloak.StringP(userData.Username),
-		Email:     gocloak.StringP(userData.Email),
-		FirstName: gocloak.StringP(userData.FirstName),
-		LastName:  gocloak.StringP(userData.LastName),
-		Enabled:   gocloak.BoolP(userData.Enabled),
 	}
 }

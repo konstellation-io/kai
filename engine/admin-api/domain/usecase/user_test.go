@@ -36,8 +36,8 @@ func (suite *ContextUserManagerSuite) SetupSuite() {
 	suite.userManager = NewUserInteractor(suite.mockLogger, suite.mockUserActivityInteractor, suite.mockGokeycloak)
 }
 
-func (suite *ContextUserManagerSuite) GetTestUserData() entity.UserGocloakData {
-	return entity.UserGocloakData{
+func (suite *ContextUserManagerSuite) GetTestUserData() entity.User {
+	return entity.User{
 		ID:        "test-id",
 		Username:  "test",
 		Email:     "test@email.com",
@@ -60,7 +60,7 @@ func (suite *ContextUserManagerSuite) TestGetUserByID() {
 func (suite *ContextUserManagerSuite) TestGetUserByIDErrorInGocloak() {
 	testUserData := suite.GetTestUserData()
 
-	suite.mockGokeycloak.EXPECT().GetUserByID(testUserData.ID).Times(1).Return(entity.UserGocloakData{}, fmt.Errorf("error"))
+	suite.mockGokeycloak.EXPECT().GetUserByID(testUserData.ID).Times(1).Return(entity.User{}, fmt.Errorf("error"))
 
 	_, err := suite.userManager.GetUserByID(testUserData.ID)
 	suite.Error(err)

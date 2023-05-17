@@ -30,8 +30,17 @@ type Mutation {
   publishVersion(input: PublishVersionInput!): Version!
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateVersionUserConfiguration(input: UpdateConfigurationInput!): Version!
-  updateUserProductPermissions(input: UpdateUserProductPermissionsInput!): Boolean!
-  revokeUserProductPermissions(input: RevokeUserProductPermissionsInput!): Boolean!
+  updateUserProductPermissions(input: UpdateUserProductPermissionsInput!): User!
+  revokeUserProductPermissions(input: RevokeUserProductPermissionsInput!): User!
+}
+
+type User {
+	id: ID!
+	firstName: String!
+	lastName: String!
+	email: String!
+	enabled: Boolean!
+	username: String!
 }
 
 type Subscription {
