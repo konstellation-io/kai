@@ -24,10 +24,10 @@ var ErrWaitForPODsRunningTimeout = errors.New("timeout waiting for running PODs"
 type Watcher struct {
 	config    *configuration.Config
 	logger    *simplelogger.SimpleLogger
-	clientset *kubernetes.Clientset
+	clientset kubernetes.Interface
 }
 
-func NewWatcher(config *configuration.Config, logger *simplelogger.SimpleLogger, clientset *kubernetes.Clientset) *Watcher {
+func NewWatcher(config *configuration.Config, logger *simplelogger.SimpleLogger, clientset kubernetes.Interface) *Watcher {
 	return &Watcher{
 		config,
 		logger,
