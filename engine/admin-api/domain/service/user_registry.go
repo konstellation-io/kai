@@ -6,7 +6,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-type GocloakService interface {
+type UserRegistry interface {
 	GetUserByID(userID string) (*entity.User, error)
 	UpdateUserProductPermissions(userID string, product string, permissions []string) error
 }

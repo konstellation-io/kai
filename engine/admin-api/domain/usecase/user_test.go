@@ -18,7 +18,7 @@ const (
 
 type ContextUserManagerSuite struct {
 	testifySuite.Suite
-	mockGokeycloak             *mocks.MockGocloakService
+	mockUserRegistry           *mocks.MockGocloakService
 	mockLogger                 *mocks.MockLogger
 	mockUserActivityInteractor *mocks.MockUserActivityInteracter
 	userManager                *UserInteractor
@@ -30,13 +30,13 @@ func TestContextMeasurementTestSuite(t *testing.T) {
 
 func (suite *ContextUserManagerSuite) SetupSuite() {
 	mockController := gomock.NewController(suite.T())
-	suite.mockGokeycloak = mocks.NewMockGocloakService(mockController)
+	suite.mockUserRegistry = mocks.NewMockGocloakService(mockController)
 	suite.mockLogger = mocks.NewMockLogger(mockController)
 	suite.mockUserActivityInteractor = mocks.NewMockUserActivityInteracter(mockController)
-	suite.userManager = NewUserInteractor(suite.mockLogger, suite.mockUserActivityInteractor, suite.mockGokeycloak)
+	suite.userManager = NewUserInteractor(suite.mockLogger, suite.mockUserActivityInteractor, suite.mockUserRegistry)
 }
 
-func (suite *ContextUserManagerSuite) GetTestUserData() entity.User {
+func (suite *ContextUserManagerSuite) GetTestUser() entity.User {
 	return entity.User{
 		ID:        "test-id",
 		Username:  "test",
@@ -48,149 +48,149 @@ func (suite *ContextUserManagerSuite) GetTestUserData() entity.User {
 }
 
 func (suite *ContextUserManagerSuite) TestGetUserByID() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 
-	suite.mockGokeycloak.EXPECT().GetUserByID(testUserData.ID).Times(1).Return(testUserData, nil)
+	suite.mockUserRegistry.EXPECT().GetUserByID(testUser.ID).Times(1).Return(&testUser, nil)
 
-	userData, err := suite.userManager.GetUserByID(testUserData.ID)
+	user, err := suite.userManager.GetUserByID(testUser.ID)
 	suite.NoError(err)
-	suite.Equal(testUserData, userData)
+	suite.Equal(testUser, *user)
 }
 
 func (suite *ContextUserManagerSuite) TestGetUserByIDErrorInGocloak() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 
-	suite.mockGokeycloak.EXPECT().GetUserByID(testUserData.ID).Times(1).Return(entity.User{}, fmt.Errorf("error"))
+	suite.mockUserRegistry.EXPECT().GetUserByID(testUser.ID).Times(1).Return(nil, fmt.Errorf("error"))
 
-	_, err := suite.userManager.GetUserByID(testUserData.ID)
+	_, err := suite.userManager.GetUserByID(testUser.ID)
 	suite.Error(err)
 	suite.ErrorContains(err, getUserByIDWrapper)
 }
 
 func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissions() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 	permissions := []string{"permission1", "permission2"}
 
-	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, permissions).Times(1).Return(nil)
+	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, permissions).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
 		triggerUserID,
-		testUserData.ID,
+		testUser.ID,
 		testProduct,
 		permissions,
 		"",
 	).Times(1).Return(nil)
-	suite.mockLogger.EXPECT().Infof(updateUserProductPermissionsLog, testUserData.ID, testProduct, permissions).Times(1)
+	suite.mockLogger.EXPECT().Infof(updateUserProductPermissionsLog, testUser.ID, testProduct, permissions).Times(1)
 
-	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions)
+	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions)
 	suite.NoError(err)
 }
 
 func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsGivenComment() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 	permissions := []string{"permission1", "permission2"}
 	testComment := "test comment"
 
-	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, permissions).Times(1).Return(nil)
+	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, permissions).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
 		triggerUserID,
-		testUserData.ID,
+		testUser.ID,
 		testProduct,
 		permissions,
 		testComment,
 	).Times(1).Return(nil)
-	suite.mockLogger.EXPECT().Infof(updateUserProductPermissionsLog, testUserData.ID, testProduct, permissions).Times(1)
+	suite.mockLogger.EXPECT().Infof(updateUserProductPermissionsLog, testUser.ID, testProduct, permissions).Times(1)
 
-	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions, testComment)
+	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions, testComment)
 	suite.NoError(err)
 }
 
 func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsErrorInGocloak() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 	permissions := []string{"permission1", "permission2"}
 
-	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, permissions).Times(1).Return(fmt.Errorf("error"))
+	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, permissions).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions)
+	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions)
 	suite.Error(err)
 	suite.ErrorContains(err, updateUserProductPermissionsWrapper)
 }
 
 func (suite *ContextUserManagerSuite) TestUpdateUserPermissionsErrorInUserActivity() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 	permissions := []string{"permission1", "permission2"}
 
-	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, permissions).Times(1).Return(nil)
+	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, permissions).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
 		triggerUserID,
-		testUserData.ID,
+		testUser.ID,
 		testProduct,
 		permissions,
 		"",
 	).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUserData.ID, testProduct, permissions)
+	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions)
 	suite.Error(err)
 	suite.ErrorContains(err, updateUserProductPermissionsWrapper)
 }
 
 func (suite *ContextUserManagerSuite) TestRevokeProductPermissions() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 	testComment := "test comment"
 
-	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(nil)
+	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, []string{}).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
 		triggerUserID,
-		testUserData.ID,
+		testUser.ID,
 		testProduct,
 		[]string{},
 		testComment,
 	).Times(1).Return(nil)
-	suite.mockLogger.EXPECT().Infof(revokeUserProductPermissionsLog, testUserData.ID, testProduct).Times(1)
+	suite.mockLogger.EXPECT().Infof(revokeUserProductPermissionsLog, testUser.ID, testProduct).Times(1)
 
-	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUserData.ID, testProduct, testComment)
+	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct, testComment)
 	suite.NoError(err)
 }
 
 func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsGivenComment() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 
-	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(nil)
+	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, []string{}).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
 		triggerUserID,
-		testUserData.ID,
+		testUser.ID,
 		testProduct,
 		[]string{},
 		"",
 	).Times(1).Return(nil)
-	suite.mockLogger.EXPECT().Infof(revokeUserProductPermissionsLog, testUserData.ID, testProduct).Times(1)
+	suite.mockLogger.EXPECT().Infof(revokeUserProductPermissionsLog, testUser.ID, testProduct).Times(1)
 
-	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUserData.ID, testProduct)
+	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct)
 	suite.NoError(err)
 }
 
 func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsErrorInGocloak() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 
-	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(fmt.Errorf("error"))
+	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, []string{}).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUserData.ID, testProduct)
+	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct)
 	suite.Error(err)
 	suite.ErrorContains(err, revokeUserProductPermissionsWrapper)
 }
 
 func (suite *ContextUserManagerSuite) TestRevokeUserPermissionsErrorInUserActivity() {
-	testUserData := suite.GetTestUserData()
+	testUser := suite.GetTestUser()
 
-	suite.mockGokeycloak.EXPECT().UpdateUserProductPermissions(testUserData.ID, testProduct, []string{}).Times(1).Return(nil)
+	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, []string{}).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
 		triggerUserID,
-		testUserData.ID,
+		testUser.ID,
 		testProduct,
 		[]string{},
 		"",
 	).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUserData.ID, testProduct)
+	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct)
 	suite.Error(err)
 	suite.ErrorContains(err, revokeUserProductPermissionsWrapper)
 }

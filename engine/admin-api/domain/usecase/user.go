@@ -18,7 +18,7 @@ const (
 type UserInteractor struct {
 	logger                 logging.Logger
 	userActivityInteractor UserActivityInteracter
-	gocloakManager         service.GocloakService
+	userRegistry           service.UserRegistry
 }
 
 // NewUserInteractor creates a new UserInteractor.
@@ -27,7 +27,7 @@ type UserInteractor struct {
 func NewUserInteractor(
 	logger logging.Logger,
 	userActivityInteractor UserActivityInteracter,
-	gocloakManager service.GocloakService,
+	gocloakManager service.UserRegistry,
 ) *UserInteractor {
 	return &UserInteractor{
 		logger,
@@ -39,7 +39,7 @@ func NewUserInteractor(
 func (ui *UserInteractor) GetUserByID(userID string) (*entity.User, error) {
 	wrapErr := errors.Wrapper(getUserByIDWrapper + ": %w")
 
-	user, err := ui.gocloakManager.GetUserByID(userID)
+	user, err := ui.userRegistry.GetUserByID(userID)
 	if err != nil {
 		return nil, wrapErr(err)
 	}
@@ -56,7 +56,7 @@ func (ui *UserInteractor) UpdateUserProductPermissions(
 ) error {
 	wrapErr := errors.Wrapper(updateUserProductPermissionsWrapper + ": %w")
 
-	err := ui.gocloakManager.UpdateUserProductPermissions(targetUserID, product, permissions)
+	err := ui.userRegistry.UpdateUserProductPermissions(targetUserID, product, permissions)
 	if err != nil {
 		return wrapErr(err)
 	}
@@ -89,7 +89,7 @@ func (ui *UserInteractor) RevokeUserProductPermissions(triggerUserID,
 ) error {
 	wrapErr := errors.Wrapper(revokeUserProductPermissionsWrapper + ": %w")
 
-	err := ui.gocloakManager.UpdateUserProductPermissions(targetUserID, product, []string{})
+	err := ui.userRegistry.UpdateUserProductPermissions(targetUserID, product, []string{})
 	if err != nil {
 		return wrapErr(err)
 	}
