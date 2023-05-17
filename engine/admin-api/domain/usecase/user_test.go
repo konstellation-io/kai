@@ -21,7 +21,7 @@ type ContextUserManagerSuite struct {
 	mockGokeycloak             *mocks.MockGocloakService
 	mockLogger                 *mocks.MockLogger
 	mockUserActivityInteractor *mocks.MockUserActivityInteracter
-	userManager                UserInteractorUsecase
+	userManager                *UserInteractor
 }
 
 func TestContextMeasurementTestSuite(t *testing.T) {

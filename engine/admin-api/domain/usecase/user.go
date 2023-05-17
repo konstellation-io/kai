@@ -15,12 +15,6 @@ const (
 	revokeUserProductPermissionsLog     = "Revoked user %q permissions for product %q"
 )
 
-type UserInteractorUsecase interface {
-	GetUserByID(userID string) (entity.UserGocloakData, error)
-	UpdateUserProductPermissions(triggerUserID, targetUserID, product string, permissions []string, comment ...string) error
-	RevokeUserProductPermissions(triggerUserID, targetUserID, product string, comment ...string) error
-}
-
 type UserInteractor struct {
 	logger                 logging.Logger
 	userActivityInteractor UserActivityInteracter
@@ -34,7 +28,7 @@ func NewUserInteractor(
 	logger logging.Logger,
 	userActivityInteractor UserActivityInteracter,
 	gocloakManager service.GocloakService,
-) UserInteractorUsecase {
+) *UserInteractor {
 	return &UserInteractor{
 		logger,
 		userActivityInteractor,

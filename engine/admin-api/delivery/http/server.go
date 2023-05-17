@@ -29,7 +29,7 @@ func NewApp(
 	cfg *config.Config,
 	logger logging.Logger,
 	runtimeInteractor *usecase.RuntimeInteractor,
-	userInteractor usecase.UserInteractorUsecase,
+	userInteractor *usecase.UserInteractor,
 	userActivityInteractor usecase.UserActivityInteracter,
 	versionInteractor *usecase.VersionInteractor,
 	metricsInteractor *usecase.MetricsInteractor,
