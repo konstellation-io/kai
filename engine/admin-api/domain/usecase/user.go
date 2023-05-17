@@ -82,7 +82,8 @@ func (ui *UserInteractor) UpdateUserProductPermissions(
 	return nil
 }
 
-func (ui *UserInteractor) RevokeUserProductPermissions(triggerUserID,
+func (ui *UserInteractor) RevokeUserProductPermissions(
+	triggerUserID,
 	targetUserID,
 	product string,
 	comment ...string,

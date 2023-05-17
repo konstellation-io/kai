@@ -175,10 +175,19 @@ func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, i
 	return r.versionInteractor.UpdateVersionConfig(ctx, loggedUserID, input.RuntimeID, v, cfg)
 }
 
-func (r *mutationResolver) UpdateUserProductPermissions(ctx context.Context, input UpdateUserProductPermissionsInput) (*entity.User, error) {
+func (r *mutationResolver) UpdateUserProductPermissions(
+	ctx context.Context,
+	input UpdateUserProductPermissionsInput,
+) (*entity.User, error) {
 	loggedUserID := ctx.Value("userID").(string)
 
-	err := r.userInteractor.UpdateUserProductPermissions(loggedUserID, input.TargetID, input.Product, input.Permissions, *input.Comment)
+	err := r.userInteractor.UpdateUserProductPermissions(
+		loggedUserID,
+		input.TargetID,
+		input.Product,
+		input.Permissions,
+		*input.Comment,
+	)
 	if err != nil {
 		return nil, err
 	}

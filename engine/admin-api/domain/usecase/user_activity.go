@@ -115,7 +115,8 @@ func (i *UserActivityInteractor) RegisterCreateRuntime(
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterCreateAction(userID,
+func (i *UserActivityInteractor) RegisterCreateAction(
+	userID,
 	runtimeID string,
 	version *entity.Version,
 ) error {
@@ -131,7 +132,8 @@ func (i *UserActivityInteractor) RegisterCreateAction(userID,
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterStartAction(userID,
+func (i *UserActivityInteractor) RegisterStartAction(
+	userID,
 	runtimeID string,
 	version *entity.Version,
 	comment string,
@@ -149,7 +151,8 @@ func (i *UserActivityInteractor) RegisterStartAction(userID,
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterStopAction(userID,
+func (i *UserActivityInteractor) RegisterStopAction(
+	userID,
 	runtimeID string,
 	version *entity.Version,
 	comment string,
@@ -167,7 +170,8 @@ func (i *UserActivityInteractor) RegisterStopAction(userID,
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterPublishAction(userID,
+func (i *UserActivityInteractor) RegisterPublishAction(
+	userID,
 	runtimeID string,
 	version *entity.Version,
 	prev *entity.Version,
@@ -188,7 +192,8 @@ func (i *UserActivityInteractor) RegisterPublishAction(userID,
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterUnpublishAction(userID,
+func (i *UserActivityInteractor) RegisterUnpublishAction(
+	userID,
 	runtimeID string,
 	version *entity.Version,
 	comment string,
@@ -206,7 +211,8 @@ func (i *UserActivityInteractor) RegisterUnpublishAction(userID,
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterUpdateProductPermissions(userID string,
+func (i *UserActivityInteractor) RegisterUpdateProductPermissions(
+	userID string,
 	targetUserID string,
 	product string,
 	productPermissions []string,
