@@ -18,7 +18,7 @@ const (
 
 type ContextUserManagerSuite struct {
 	testifySuite.Suite
-	mockUserRegistry           *mocks.MockGocloakService
+	mockUserRegistry           *mocks.MockUserRegistry
 	mockLogger                 *mocks.MockLogger
 	mockUserActivityInteractor *mocks.MockUserActivityInteracter
 	userManager                *UserInteractor
@@ -30,7 +30,7 @@ func TestContextMeasurementTestSuite(t *testing.T) {
 
 func (suite *ContextUserManagerSuite) SetupSuite() {
 	mockController := gomock.NewController(suite.T())
-	suite.mockUserRegistry = mocks.NewMockGocloakService(mockController)
+	suite.mockUserRegistry = mocks.NewMockUserRegistry(mockController)
 	suite.mockLogger = mocks.NewMockLogger(mockController)
 	suite.mockUserActivityInteractor = mocks.NewMockUserActivityInteracter(mockController)
 	suite.userManager = NewUserInteractor(suite.mockLogger, suite.mockUserActivityInteractor, suite.mockUserRegistry)
@@ -57,7 +57,7 @@ func (suite *ContextUserManagerSuite) TestGetUserByID() {
 	suite.Equal(testUser, *user)
 }
 
-func (suite *ContextUserManagerSuite) TestGetUserByIDErrorInGocloak() {
+func (suite *ContextUserManagerSuite) TestGetUserByIDErrorInUserRegistry() {
 	testUser := suite.GetTestUser()
 
 	suite.mockUserRegistry.EXPECT().GetUserByID(testUser.ID).Times(1).Return(nil, fmt.Errorf("error"))
@@ -79,7 +79,7 @@ func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissions() {
 		permissions,
 		"",
 	).Times(1).Return(nil)
-	suite.mockLogger.EXPECT().Infof(updateUserProductPermissionsLog, testUser.ID, testProduct, permissions).Times(1)
+	mocks.AddLoggerExpects(suite.mockLogger)
 
 	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions)
 	suite.NoError(err)
@@ -98,13 +98,13 @@ func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsGivenComme
 		permissions,
 		testComment,
 	).Times(1).Return(nil)
-	suite.mockLogger.EXPECT().Infof(updateUserProductPermissionsLog, testUser.ID, testProduct, permissions).Times(1)
+	mocks.AddLoggerExpects(suite.mockLogger)
 
 	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions, testComment)
 	suite.NoError(err)
 }
 
-func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsErrorInGocloak() {
+func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsErrorInUserRegistry() {
 	testUser := suite.GetTestUser()
 	permissions := []string{"permission1", "permission2"}
 
@@ -145,7 +145,7 @@ func (suite *ContextUserManagerSuite) TestRevokeProductPermissions() {
 		[]string{},
 		testComment,
 	).Times(1).Return(nil)
-	suite.mockLogger.EXPECT().Infof(revokeUserProductPermissionsLog, testUser.ID, testProduct).Times(1)
+	mocks.AddLoggerExpects(suite.mockLogger)
 
 	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct, testComment)
 	suite.NoError(err)
@@ -162,13 +162,13 @@ func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsGivenComment()
 		[]string{},
 		"",
 	).Times(1).Return(nil)
-	suite.mockLogger.EXPECT().Infof(revokeUserProductPermissionsLog, testUser.ID, testProduct).Times(1)
+	mocks.AddLoggerExpects(suite.mockLogger)
 
 	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct)
 	suite.NoError(err)
 }
 
-func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsErrorInGocloak() {
+func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsErrorInUserRegistry() {
 	testUser := suite.GetTestUser()
 
 	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, []string{}).Times(1).Return(fmt.Errorf("error"))
