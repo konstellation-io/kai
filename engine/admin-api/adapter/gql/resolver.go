@@ -195,7 +195,10 @@ func (r *mutationResolver) UpdateUserProductPermissions(
 	return r.userInteractor.GetUserByID(input.TargetID)
 }
 
-func (r *mutationResolver) RevokeUserProductPermissions(ctx context.Context, input RevokeUserProductPermissionsInput) (*entity.User, error) {
+func (r *mutationResolver) RevokeUserProductPermissions(
+	ctx context.Context,
+	input RevokeUserProductPermissionsInput,
+) (*entity.User, error) {
 	loggedUserID := ctx.Value("userID").(string)
 
 	err := r.userInteractor.RevokeUserProductPermissions(loggedUserID, input.TargetID, input.Product, *input.Comment)
