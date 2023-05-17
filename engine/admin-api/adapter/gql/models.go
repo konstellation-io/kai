@@ -34,7 +34,7 @@ type PublishVersionInput struct {
 	RuntimeID   string `json:"runtimeId"`
 }
 
-type RevokeUserProductPermissionsInput struct {
+type RevokeUserProductGrantsInput struct {
 	TargetID string  `json:"targetID"`
 	Product  string  `json:"product"`
 	Comment  *string `json:"comment,omitempty"`
@@ -74,11 +74,11 @@ type UpdateConfigurationInput struct {
 	ConfigurationVariables []*ConfigurationVariablesInput `json:"configurationVariables"`
 }
 
-type UpdateUserProductPermissionsInput struct {
-	TargetID    string   `json:"targetID"`
-	Product     string   `json:"product"`
-	Permissions []string `json:"permissions"`
-	Comment     *string  `json:"comment,omitempty"`
+type UpdateUserProductGrantsInput struct {
+	TargetID string   `json:"targetID"`
+	Product  string   `json:"product"`
+	Grants   []string `json:"grants"`
+	Comment  *string  `json:"comment,omitempty"`
 }
 
 type UsersInput struct {

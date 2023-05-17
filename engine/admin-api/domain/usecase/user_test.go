@@ -67,78 +67,78 @@ func (suite *ContextUserManagerSuite) TestGetUserByIDErrorInUserRegistry() {
 	suite.ErrorContains(err, getUserByIDWrapper)
 }
 
-func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissions() {
+func (suite *ContextUserManagerSuite) TestUpdateUserProductGrants() {
 	testUser := suite.GetTestUser()
-	permissions := []string{"permission1", "permission2"}
+	grants := []string{"grant1", "grant2"}
 
-	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, permissions).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(testUser.ID, testProduct, grants).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		triggerUserID,
 		testUser.ID,
 		testProduct,
-		permissions,
+		grants,
 		"",
 	).Times(1).Return(nil)
 	mocks.AddLoggerExpects(suite.mockLogger)
 
-	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions)
+	err := suite.userManager.UpdateUserProductGrants(triggerUserID, testUser.ID, testProduct, grants)
 	suite.NoError(err)
 }
 
-func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsGivenComment() {
+func (suite *ContextUserManagerSuite) TestUpdateUserProductGrantsGivenComment() {
 	testUser := suite.GetTestUser()
-	permissions := []string{"permission1", "permission2"}
+	grants := []string{"grant1", "grant2"}
 	testComment := "test comment"
 
-	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, permissions).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(testUser.ID, testProduct, grants).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		triggerUserID,
 		testUser.ID,
 		testProduct,
-		permissions,
+		grants,
 		testComment,
 	).Times(1).Return(nil)
 	mocks.AddLoggerExpects(suite.mockLogger)
 
-	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions, testComment)
+	err := suite.userManager.UpdateUserProductGrants(triggerUserID, testUser.ID, testProduct, grants, testComment)
 	suite.NoError(err)
 }
 
-func (suite *ContextUserManagerSuite) TestUpdateUserProductPermissionsErrorInUserRegistry() {
+func (suite *ContextUserManagerSuite) TestUpdateUserProductGrantsErrorInUserRegistry() {
 	testUser := suite.GetTestUser()
-	permissions := []string{"permission1", "permission2"}
+	grants := []string{"grant1", "grant2"}
 
-	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, permissions).Times(1).Return(fmt.Errorf("error"))
+	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(testUser.ID, testProduct, grants).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions)
+	err := suite.userManager.UpdateUserProductGrants(triggerUserID, testUser.ID, testProduct, grants)
 	suite.Error(err)
-	suite.ErrorContains(err, updateUserProductPermissionsWrapper)
+	suite.ErrorContains(err, updateUserProductGrantsWrapper)
 }
 
-func (suite *ContextUserManagerSuite) TestUpdateUserPermissionsErrorInUserActivity() {
+func (suite *ContextUserManagerSuite) TestUpdateUserGrantsErrorInUserActivity() {
 	testUser := suite.GetTestUser()
-	permissions := []string{"permission1", "permission2"}
+	grants := []string{"grant1", "grant2"}
 
-	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, permissions).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(testUser.ID, testProduct, grants).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		triggerUserID,
 		testUser.ID,
 		testProduct,
-		permissions,
+		grants,
 		"",
 	).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.UpdateUserProductPermissions(triggerUserID, testUser.ID, testProduct, permissions)
+	err := suite.userManager.UpdateUserProductGrants(triggerUserID, testUser.ID, testProduct, grants)
 	suite.Error(err)
-	suite.ErrorContains(err, updateUserProductPermissionsWrapper)
+	suite.ErrorContains(err, updateUserProductGrantsWrapper)
 }
 
-func (suite *ContextUserManagerSuite) TestRevokeProductPermissions() {
+func (suite *ContextUserManagerSuite) TestRevokeProductGrants() {
 	testUser := suite.GetTestUser()
 	testComment := "test comment"
 
-	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, []string{}).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(testUser.ID, testProduct, []string{}).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		triggerUserID,
 		testUser.ID,
 		testProduct,
@@ -147,15 +147,15 @@ func (suite *ContextUserManagerSuite) TestRevokeProductPermissions() {
 	).Times(1).Return(nil)
 	mocks.AddLoggerExpects(suite.mockLogger)
 
-	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct, testComment)
+	err := suite.userManager.RevokeUserProductGrants(triggerUserID, testUser.ID, testProduct, testComment)
 	suite.NoError(err)
 }
 
-func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsGivenComment() {
+func (suite *ContextUserManagerSuite) TestRevokeProductGrantsGivenComment() {
 	testUser := suite.GetTestUser()
 
-	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, []string{}).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(testUser.ID, testProduct, []string{}).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		triggerUserID,
 		testUser.ID,
 		testProduct,
@@ -164,25 +164,25 @@ func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsGivenComment()
 	).Times(1).Return(nil)
 	mocks.AddLoggerExpects(suite.mockLogger)
 
-	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct)
+	err := suite.userManager.RevokeUserProductGrants(triggerUserID, testUser.ID, testProduct)
 	suite.NoError(err)
 }
 
-func (suite *ContextUserManagerSuite) TestRevokeProductPermissionsErrorInUserRegistry() {
+func (suite *ContextUserManagerSuite) TestRevokeProductGrantsErrorInUserRegistry() {
 	testUser := suite.GetTestUser()
 
-	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, []string{}).Times(1).Return(fmt.Errorf("error"))
+	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(testUser.ID, testProduct, []string{}).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct)
+	err := suite.userManager.RevokeUserProductGrants(triggerUserID, testUser.ID, testProduct)
 	suite.Error(err)
-	suite.ErrorContains(err, revokeUserProductPermissionsWrapper)
+	suite.ErrorContains(err, revokeUserProductGrantsWrapper)
 }
 
-func (suite *ContextUserManagerSuite) TestRevokeUserPermissionsErrorInUserActivity() {
+func (suite *ContextUserManagerSuite) TestRevokeUserGrantsErrorInUserActivity() {
 	testUser := suite.GetTestUser()
 
-	suite.mockUserRegistry.EXPECT().UpdateUserProductPermissions(testUser.ID, testProduct, []string{}).Times(1).Return(nil)
-	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductPermissions(
+	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(testUser.ID, testProduct, []string{}).Times(1).Return(nil)
+	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		triggerUserID,
 		testUser.ID,
 		testProduct,
@@ -190,7 +190,7 @@ func (suite *ContextUserManagerSuite) TestRevokeUserPermissionsErrorInUserActivi
 		"",
 	).Times(1).Return(fmt.Errorf("error"))
 
-	err := suite.userManager.RevokeUserProductPermissions(triggerUserID, testUser.ID, testProduct)
+	err := suite.userManager.RevokeUserProductGrants(triggerUserID, testUser.ID, testProduct)
 	suite.Error(err)
-	suite.ErrorContains(err, revokeUserProductPermissionsWrapper)
+	suite.ErrorContains(err, revokeUserProductGrantsWrapper)
 }

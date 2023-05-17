@@ -91,7 +91,7 @@ func NewVersionInteractor(
 }
 
 func (i *VersionInteractor) filterConfigVars(loggedUserID string, vers *entity.Version) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		vers.Config.Vars = nil
 	}
 }
@@ -147,7 +147,7 @@ func (i *VersionInteractor) copyStreamToTempFile(krtFile io.Reader) (*os.File, e
 // Create creates a Version on the DB based on the content of a KRT file.
 func (i *VersionInteractor) Create(ctx context.Context,
 	loggedUserID, runtimeID string, krtFile io.Reader) (*entity.Version, chan *entity.Version, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		return nil, nil, err
 	}
 
@@ -396,7 +396,7 @@ func (i *VersionInteractor) Start(
 	versionName string,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		return nil, nil, err
 	}
 
@@ -461,7 +461,7 @@ func (i *VersionInteractor) Stop(
 	versionName string,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		return nil, nil, err
 	}
 
@@ -567,7 +567,7 @@ func (i *VersionInteractor) stopAndNotify(
 // Publish set a Version as published on DB and K8s.
 func (i *VersionInteractor) Publish(ctx context.Context, loggedUserID, runtimeID,
 	versionName, comment string) (*entity.Version, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		return nil, err
 	}
 
@@ -613,7 +613,7 @@ func (i *VersionInteractor) Publish(ctx context.Context, loggedUserID, runtimeID
 // Unpublish set a Version as not published on DB and K8s.
 func (i *VersionInteractor) Unpublish(ctx context.Context, loggedUserID, runtimeID,
 	versionName, comment string) (*entity.Version, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		return nil, err
 	}
 
@@ -652,7 +652,7 @@ func (i *VersionInteractor) Unpublish(ctx context.Context, loggedUserID, runtime
 
 func (i *VersionInteractor) UpdateVersionConfig(ctx context.Context, loggedUserID, runtimeID string,
 	vrs *entity.Version, conf []*entity.ConfigurationVariable) (*entity.Version, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResVersion, auth.ActEdit); err != nil {
 		return nil, err
 	}
 
@@ -690,7 +690,7 @@ func (i *VersionInteractor) UpdateVersionConfig(ctx context.Context, loggedUserI
 
 func (i *VersionInteractor) WatchNodeStatus(ctx context.Context, loggedUserID,
 	runtimeID, versionName string) (<-chan *entity.Node, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResVersion, auth.ActView); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResVersion, auth.ActView); err != nil {
 		return nil, err
 	}
 
@@ -707,7 +707,7 @@ func (i *VersionInteractor) WatchNodeLogs(
 	loggedUserID, runtimeID, versionName string,
 	filters entity.LogFilters,
 ) (<-chan *entity.NodeLog, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResLogs, auth.ActView); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResLogs, auth.ActView); err != nil {
 		return nil, err
 	}
 
@@ -721,7 +721,7 @@ func (i *VersionInteractor) SearchLogs(
 	filters entity.LogFilters,
 	cursor *string,
 ) (*entity.SearchLogsResult, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResLogs, auth.ActView); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResLogs, auth.ActView); err != nil {
 		return nil, err
 	}
 

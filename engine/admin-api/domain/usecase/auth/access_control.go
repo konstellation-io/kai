@@ -45,5 +45,5 @@ func (e AccessControlAction) String() string {
 
 //nolint:godox // Remove this nolint statement after the TODO is done.
 type AccessControl interface { // TODO: move to middleware.
-	CheckPermission(userID string, resource AccessControlResource, action AccessControlAction) error
+	CheckGrant(userID string, resource AccessControlResource, action AccessControlAction) error
 }

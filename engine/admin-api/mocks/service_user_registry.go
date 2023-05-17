@@ -49,16 +49,16 @@ func (mr *MockUserRegistryMockRecorder) GetUserByID(userID interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockUserRegistry)(nil).GetUserByID), userID)
 }
 
-// UpdateUserProductPermissions mocks base method.
-func (m *MockUserRegistry) UpdateUserProductPermissions(userID, product string, permissions []string) error {
+// UpdateUserProductGrants mocks base method.
+func (m *MockUserRegistry) UpdateUserProductGrants(userID, product string, grants []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUserProductPermissions", userID, product, permissions)
+	ret := m.ctrl.Call(m, "UpdateUserProductGrants", userID, product, grants)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UpdateUserProductPermissions indicates an expected call of UpdateUserProductPermissions.
-func (mr *MockUserRegistryMockRecorder) UpdateUserProductPermissions(userID, product, permissions interface{}) *gomock.Call {
+// UpdateUserProductGrants indicates an expected call of UpdateUserProductGrants.
+func (mr *MockUserRegistryMockRecorder) UpdateUserProductGrants(userID, product, grants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProductPermissions", reflect.TypeOf((*MockUserRegistry)(nil).UpdateUserProductPermissions), userID, product, permissions)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).UpdateUserProductGrants), userID, product, grants)
 }

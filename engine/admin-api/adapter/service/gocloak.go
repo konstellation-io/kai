@@ -52,7 +52,7 @@ func (gm *GocloakManagerClient) GetUserByID(userID string) (*entity.User, error)
 	return gocloakUserToUser(user), nil
 }
 
-func (gm *GocloakManagerClient) UpdateUserProductPermissions(userID, product string, permissions []string) error {
+func (gm *GocloakManagerClient) UpdateUserProductGrants(userID, product string, grants []string) error {
 	wrapErr := errors.Wrapper("gocloak update user roles: %w")
 
 	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, userID)
@@ -72,10 +72,10 @@ func (gm *GocloakManagerClient) UpdateUserProductPermissions(userID, product str
 		return wrapErr(err)
 	}
 
-	if len(permissions) == 0 {
+	if len(grants) == 0 {
 		delete(userRoles, product)
 	} else {
-		userRoles[product] = permissions
+		userRoles[product] = grants
 	}
 
 	marshalledRoles, err := json.Marshal(userRoles)

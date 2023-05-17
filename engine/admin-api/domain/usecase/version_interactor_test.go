@@ -117,7 +117,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 	file, err := os.Open("../../test_assets/classificator-v1.krt")
 	s.Require().NoError(err)
 
-	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResVersion, auth.ActEdit)
+	s.mocks.accessControl.EXPECT().CheckGrant(userID, auth.ResVersion, auth.ActEdit)
 	s.mocks.idGenerator.EXPECT().NewID().Return("fakepass").Times(6)
 	s.mocks.runtimeRepo.EXPECT().GetByID(s.ctx, runtimeID).Return(runtime, nil)
 	s.mocks.versionRepo.EXPECT().GetByRuntime(runtimeID).Return([]*entity.Version{version}, nil)
@@ -163,7 +163,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplic
 	file, err := os.Open("../../test_assets/classificator-v1.krt")
 	s.Require().NoError(err)
 
-	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResVersion, auth.ActEdit)
+	s.mocks.accessControl.EXPECT().CheckGrant(userID, auth.ResVersion, auth.ActEdit)
 	s.mocks.runtimeRepo.EXPECT().GetByID(s.ctx, runtimeID).Return(runtime, nil)
 	s.mocks.versionRepo.EXPECT().GetByRuntime(runtimeID).Return([]*entity.Version{version}, nil)
 	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, runtimeID, versionName).Return(version, nil)
@@ -191,7 +191,7 @@ func (s *VersionInteractorSuite) TestGetByName() {
 		Workflows:         nil,
 	}
 
-	s.mocks.accessControl.EXPECT().CheckPermission(userID, auth.ResVersion, auth.ActEdit).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckGrant(userID, auth.ResVersion, auth.ActEdit).Return(nil)
 	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, runtimeID, versionName).Return(expected, nil)
 
 	actual, err := s.versionInteractor.GetByName(s.ctx, userID, runtimeID, versionName)

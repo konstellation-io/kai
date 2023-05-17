@@ -25,7 +25,7 @@ type UserActivityInteracter interface {
 	RegisterStopAction(userID, runtimeID string, version *entity.Version, comment string) error
 	RegisterPublishAction(userID, runtimeID string, version *entity.Version, prev *entity.Version, comment string) error
 	RegisterUnpublishAction(userID, runtimeID string, version *entity.Version, comment string) error
-	RegisterUpdateProductPermissions(userID string, targetUserID string, product string, productPermissions []string, comment string) error
+	RegisterUpdateProductGrants(userID string, targetUserID string, product string, productGrants []string, comment string) error
 }
 
 // UserActivityInteractor  contains app logic about UserActivity entities.
@@ -59,7 +59,7 @@ func (i *UserActivityInteractor) Get(
 	toDate *string,
 	lastID *string,
 ) ([]*entity.UserActivity, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResAudit, auth.ActView); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResAudit, auth.ActView); err != nil {
 		return nil, err
 	}
 
@@ -211,20 +211,20 @@ func (i *UserActivityInteractor) RegisterUnpublishAction(
 	return checkUserActivityError(i.logger, err)
 }
 
-func (i *UserActivityInteractor) RegisterUpdateProductPermissions(
+func (i *UserActivityInteractor) RegisterUpdateProductGrants(
 	userID string,
 	targetUserID string,
 	product string,
-	productPermissions []string,
+	productGrants []string,
 	comment string,
 ) error {
 	err := i.create(
 		userID,
-		entity.UserActivityTypeUpdateProductPermissions,
+		entity.UserActivityTypeUpdateProductGrants,
 		[]*entity.UserActivityVar{
 			{Key: "TARGET_USER_ID", Value: targetUserID},
 			{Key: "PRODUCT", Value: product},
-			{Key: "NEW_PRODUCT_PERMISSIONS", Value: strings.Join(productPermissions, ",")},
+			{Key: "NEW_PRODUCT_GRANTS", Value: strings.Join(productGrants, ",")},
 			{Key: "COMMENT", Value: comment},
 		})
 

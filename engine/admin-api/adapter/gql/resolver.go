@@ -175,17 +175,17 @@ func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, i
 	return r.versionInteractor.UpdateVersionConfig(ctx, loggedUserID, input.RuntimeID, v, cfg)
 }
 
-func (r *mutationResolver) UpdateUserProductPermissions(
+func (r *mutationResolver) UpdateUserProductGrants(
 	ctx context.Context,
-	input UpdateUserProductPermissionsInput,
+	input UpdateUserProductGrantsInput,
 ) (*entity.User, error) {
 	loggedUserID := ctx.Value("userID").(string)
 
-	err := r.userInteractor.UpdateUserProductPermissions(
+	err := r.userInteractor.UpdateUserProductGrants(
 		loggedUserID,
 		input.TargetID,
 		input.Product,
-		input.Permissions,
+		input.Grants,
 		*input.Comment,
 	)
 	if err != nil {
@@ -195,13 +195,13 @@ func (r *mutationResolver) UpdateUserProductPermissions(
 	return r.userInteractor.GetUserByID(input.TargetID)
 }
 
-func (r *mutationResolver) RevokeUserProductPermissions(
+func (r *mutationResolver) RevokeUserProductGrants(
 	ctx context.Context,
-	input RevokeUserProductPermissionsInput,
+	input RevokeUserProductGrantsInput,
 ) (*entity.User, error) {
 	loggedUserID := ctx.Value("userID").(string)
 
-	err := r.userInteractor.RevokeUserProductPermissions(loggedUserID, input.TargetID, input.Product, *input.Comment)
+	err := r.userInteractor.RevokeUserProductGrants(loggedUserID, input.TargetID, input.Product, *input.Comment)
 	if err != nil {
 		return nil, err
 	}

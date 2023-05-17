@@ -30,8 +30,8 @@ type Mutation {
   publishVersion(input: PublishVersionInput!): Version!
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateVersionUserConfiguration(input: UpdateConfigurationInput!): Version!
-  updateUserProductPermissions(input: UpdateUserProductPermissionsInput!): User!
-  revokeUserProductPermissions(input: RevokeUserProductPermissionsInput!): User!
+  updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
+  revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
 }
 
 type User {
@@ -93,14 +93,14 @@ input UsersInput {
   comment: String!
 }
 
-input UpdateUserProductPermissionsInput {
+input UpdateUserProductGrantsInput {
   targetID: ID!
   product: String!
-  permissions: [String!]!
+  grants: [String!]!
   comment: String
 }
 
-input RevokeUserProductPermissionsInput {
+input RevokeUserProductGrantsInput {
   targetID: ID!
   product: String!
   comment: String

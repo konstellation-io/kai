@@ -8,5 +8,5 @@ import (
 
 type UserRegistry interface {
 	GetUserByID(userID string) (*entity.User, error)
-	UpdateUserProductPermissions(userID string, product string, permissions []string) error
+	UpdateUserProductGrants(userID string, product string, grants []string) error
 }

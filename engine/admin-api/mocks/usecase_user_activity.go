@@ -27,7 +27,6 @@ type MockUserActivityInteracterMockRecorder struct {
 func NewMockUserActivityInteracter(ctrl *gomock.Controller) *MockUserActivityInteracter {
 	mock := &MockUserActivityInteracter{ctrl: ctrl}
 	mock.recorder = &MockUserActivityInteracterMockRecorder{mock}
-
 	return mock
 }
 
@@ -37,19 +36,18 @@ func (m *MockUserActivityInteracter) EXPECT() *MockUserActivityInteracterMockRec
 }
 
 // Get mocks base method.
-func (m *MockUserActivityInteracter) Get(ctx context.Context, loggedUserID string, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate, toDate, lastID *string) ([]*entity.UserActivity, error) {
+func (m *MockUserActivityInteracter) Get(ctx context.Context, loggedUserID string, userEmail *string, types []entity.UserActivityType, versionIDs []string, fromDate, toDate, lastID *string) ([]*entity.UserActivity, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", ctx, loggedUserID, userEmail, types, versionIds, fromDate, toDate, lastID)
+	ret := m.ctrl.Call(m, "Get", ctx, loggedUserID, userEmail, types, versionIDs, fromDate, toDate, lastID)
 	ret0, _ := ret[0].([]*entity.UserActivity)
 	ret1, _ := ret[1].(error)
-
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockUserActivityInteracterMockRecorder) Get(ctx, loggedUserID, userEmail, types, versionIds, fromDate, toDate, lastID interface{}) *gomock.Call {
+func (mr *MockUserActivityInteracterMockRecorder) Get(ctx, loggedUserID, userEmail, types, versionIDs, fromDate, toDate, lastID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockUserActivityInteracter)(nil).Get), ctx, loggedUserID, userEmail, types, versionIds, fromDate, toDate, lastID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockUserActivityInteracter)(nil).Get), ctx, loggedUserID, userEmail, types, versionIDs, fromDate, toDate, lastID)
 }
 
 // RegisterCreateAction mocks base method.
@@ -57,7 +55,6 @@ func (m *MockUserActivityInteracter) RegisterCreateAction(userID, runtimeID stri
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterCreateAction", userID, runtimeID, version)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
@@ -72,7 +69,6 @@ func (m *MockUserActivityInteracter) RegisterCreateRuntime(userID string, runtim
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterCreateRuntime", userID, runtime)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
@@ -87,7 +83,6 @@ func (m *MockUserActivityInteracter) RegisterPublishAction(userID, runtimeID str
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterPublishAction", userID, runtimeID, version, prev, comment)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
@@ -102,7 +97,6 @@ func (m *MockUserActivityInteracter) RegisterStartAction(userID, runtimeID strin
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterStartAction", userID, runtimeID, version, comment)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
@@ -117,7 +111,6 @@ func (m *MockUserActivityInteracter) RegisterStopAction(userID, runtimeID string
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterStopAction", userID, runtimeID, version, comment)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
@@ -132,7 +125,6 @@ func (m *MockUserActivityInteracter) RegisterUnpublishAction(userID, runtimeID s
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterUnpublishAction", userID, runtimeID, version, comment)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
@@ -142,17 +134,16 @@ func (mr *MockUserActivityInteracterMockRecorder) RegisterUnpublishAction(userID
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUnpublishAction", reflect.TypeOf((*MockUserActivityInteracter)(nil).RegisterUnpublishAction), userID, runtimeID, version, comment)
 }
 
-// RegisterUpdateProductPermissions mocks base method.
-func (m *MockUserActivityInteracter) RegisterUpdateProductPermissions(userID, targetUserID, product string, productPermissions []string, comment string) error {
+// RegisterUpdateProductGrants mocks base method.
+func (m *MockUserActivityInteracter) RegisterUpdateProductGrants(userID, targetUserID, product string, productGrants []string, comment string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterUpdateProductPermissions", userID, targetUserID, product, productPermissions, comment)
+	ret := m.ctrl.Call(m, "RegisterUpdateProductGrants", userID, targetUserID, product, productGrants, comment)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
-// RegisterUpdateProductPermissions indicates an expected call of RegisterUpdateProductPermissions.
-func (mr *MockUserActivityInteracterMockRecorder) RegisterUpdateProductPermissions(userID, targetUserID, product, productPermissions, comment interface{}) *gomock.Call {
+// RegisterUpdateProductGrants indicates an expected call of RegisterUpdateProductGrants.
+func (mr *MockUserActivityInteracterMockRecorder) RegisterUpdateProductGrants(userID, targetUserID, product, productGrants, comment interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUpdateProductPermissions", reflect.TypeOf((*MockUserActivityInteracter)(nil).RegisterUpdateProductPermissions), userID, targetUserID, product, productPermissions, comment)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUpdateProductGrants", reflect.TypeOf((*MockUserActivityInteracter)(nil).RegisterUpdateProductGrants), userID, targetUserID, product, productGrants, comment)
 }

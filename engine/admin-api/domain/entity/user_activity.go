@@ -7,13 +7,13 @@ import (
 type UserActivityType string
 
 const (
-	UserActivityTypeCreateProduct            UserActivityType = "CREATE_PRODUCT"
-	UserActivityTypeCreateVersion            UserActivityType = "CREATE_VERSION"
-	UserActivityTypePublishVersion           UserActivityType = "PUBLISH_VERSION"
-	UserActivityTypeUnpublishVersion         UserActivityType = "UNPUBLISH_VERSION"
-	UserActivityTypeStartVersion             UserActivityType = "START_VERSION"
-	UserActivityTypeStopVersion              UserActivityType = "STOP_VERSION"
-	UserActivityTypeUpdateProductPermissions UserActivityType = "UPDATE_ACCESS_LEVELS"
+	UserActivityTypeCreateProduct       UserActivityType = "CREATE_PRODUCT"
+	UserActivityTypeCreateVersion       UserActivityType = "CREATE_VERSION"
+	UserActivityTypePublishVersion      UserActivityType = "PUBLISH_VERSION"
+	UserActivityTypeUnpublishVersion    UserActivityType = "UNPUBLISH_VERSION"
+	UserActivityTypeStartVersion        UserActivityType = "START_VERSION"
+	UserActivityTypeStopVersion         UserActivityType = "STOP_VERSION"
+	UserActivityTypeUpdateProductGrants UserActivityType = "UPDATE_PRODUCT_GRANTS"
 )
 
 func (e UserActivityType) IsValid() bool {
@@ -24,7 +24,7 @@ func (e UserActivityType) IsValid() bool {
 		UserActivityTypeUnpublishVersion,
 		UserActivityTypeStartVersion,
 		UserActivityTypeStopVersion,
-		UserActivityTypeUpdateProductPermissions:
+		UserActivityTypeUpdateProductGrants:
 		return true
 	}
 

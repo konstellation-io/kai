@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	getUserByIDWrapper                  = "get user by id"
-	updateUserProductPermissionsWrapper = "update user product permissions"
-	revokeUserProductPermissionsWrapper = "revoke user product permissions"
-	updateUserProductPermissionsLog     = "Updated user %q permissions for product %q: %v"
-	revokeUserProductPermissionsLog     = "Revoked user %q permissions for product %q"
+	getUserByIDWrapper             = "get user by id"
+	updateUserProductGrantsWrapper = "update user product grants"
+	revokeUserProductGrantsWrapper = "revoke user product grants"
+	updateUserProductGrantsLog     = "Updated user %q grants for product %q: %v"
+	revokeUserProductGrantsLog     = "Revoked user %q grants for product %q"
 )
 
 type UserInteractor struct {
@@ -47,16 +47,16 @@ func (ui *UserInteractor) GetUserByID(userID string) (*entity.User, error) {
 	return user, nil
 }
 
-func (ui *UserInteractor) UpdateUserProductPermissions(
+func (ui *UserInteractor) UpdateUserProductGrants(
 	triggerUserID,
 	targetUserID,
 	product string,
-	permissions []string,
+	grants []string,
 	comment ...string,
 ) error {
-	wrapErr := errors.Wrapper(updateUserProductPermissionsWrapper + ": %w")
+	wrapErr := errors.Wrapper(updateUserProductGrantsWrapper + ": %w")
 
-	err := ui.userRegistry.UpdateUserProductPermissions(targetUserID, product, permissions)
+	err := ui.userRegistry.UpdateUserProductGrants(targetUserID, product, grants)
 	if err != nil {
 		return wrapErr(err)
 	}
@@ -66,31 +66,31 @@ func (ui *UserInteractor) UpdateUserProductPermissions(
 		givenComment = comment[0]
 	}
 
-	err = ui.userActivityInteractor.RegisterUpdateProductPermissions(
+	err = ui.userActivityInteractor.RegisterUpdateProductGrants(
 		triggerUserID,
 		targetUserID,
 		product,
-		permissions,
+		grants,
 		givenComment,
 	)
 	if err != nil {
 		return wrapErr(err)
 	}
 
-	ui.logger.Infof(updateUserProductPermissionsLog, targetUserID, product, permissions)
+	ui.logger.Infof(updateUserProductGrantsLog, targetUserID, product, grants)
 
 	return nil
 }
 
-func (ui *UserInteractor) RevokeUserProductPermissions(
+func (ui *UserInteractor) RevokeUserProductGrants(
 	triggerUserID,
 	targetUserID,
 	product string,
 	comment ...string,
 ) error {
-	wrapErr := errors.Wrapper(revokeUserProductPermissionsWrapper + ": %w")
+	wrapErr := errors.Wrapper(revokeUserProductGrantsWrapper + ": %w")
 
-	err := ui.userRegistry.UpdateUserProductPermissions(targetUserID, product, []string{})
+	err := ui.userRegistry.UpdateUserProductGrants(targetUserID, product, []string{})
 	if err != nil {
 		return wrapErr(err)
 	}
@@ -100,7 +100,7 @@ func (ui *UserInteractor) RevokeUserProductPermissions(
 		givenComment = comment[0]
 	}
 
-	err = ui.userActivityInteractor.RegisterUpdateProductPermissions(
+	err = ui.userActivityInteractor.RegisterUpdateProductGrants(
 		triggerUserID,
 		targetUserID,
 		product,
@@ -111,7 +111,7 @@ func (ui *UserInteractor) RevokeUserProductPermissions(
 		return wrapErr(err)
 	}
 
-	ui.logger.Infof(revokeUserProductPermissionsLog, targetUserID, product)
+	ui.logger.Infof(revokeUserProductGrantsLog, targetUserID, product)
 
 	return nil
 }

@@ -104,11 +104,11 @@ type ComplexityRoot struct {
 		CreateRuntime                  func(childComplexity int, input CreateRuntimeInput) int
 		CreateVersion                  func(childComplexity int, input CreateVersionInput) int
 		PublishVersion                 func(childComplexity int, input PublishVersionInput) int
-		RevokeUserProductPermissions   func(childComplexity int, input RevokeUserProductPermissionsInput) int
+		RevokeUserProductGrants        func(childComplexity int, input RevokeUserProductGrantsInput) int
 		StartVersion                   func(childComplexity int, input StartVersionInput) int
 		StopVersion                    func(childComplexity int, input StopVersionInput) int
 		UnpublishVersion               func(childComplexity int, input UnpublishVersionInput) int
-		UpdateUserProductPermissions   func(childComplexity int, input UpdateUserProductPermissionsInput) int
+		UpdateUserProductGrants        func(childComplexity int, input UpdateUserProductGrantsInput) int
 		UpdateVersionUserConfiguration func(childComplexity int, input UpdateConfigurationInput) int
 	}
 
@@ -228,8 +228,8 @@ type MutationResolver interface {
 	PublishVersion(ctx context.Context, input PublishVersionInput) (*entity.Version, error)
 	UnpublishVersion(ctx context.Context, input UnpublishVersionInput) (*entity.Version, error)
 	UpdateVersionUserConfiguration(ctx context.Context, input UpdateConfigurationInput) (*entity.Version, error)
-	UpdateUserProductPermissions(ctx context.Context, input UpdateUserProductPermissionsInput) (*entity.User, error)
-	RevokeUserProductPermissions(ctx context.Context, input RevokeUserProductPermissionsInput) (*entity.User, error)
+	UpdateUserProductGrants(ctx context.Context, input UpdateUserProductGrantsInput) (*entity.User, error)
+	RevokeUserProductGrants(ctx context.Context, input RevokeUserProductGrantsInput) (*entity.User, error)
 }
 type QueryResolver interface {
 	Runtime(ctx context.Context, id string) (*entity.Runtime, error)
@@ -497,17 +497,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.PublishVersion(childComplexity, args["input"].(PublishVersionInput)), true
 
-	case "Mutation.revokeUserProductPermissions":
-		if e.complexity.Mutation.RevokeUserProductPermissions == nil {
+	case "Mutation.revokeUserProductGrants":
+		if e.complexity.Mutation.RevokeUserProductGrants == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_revokeUserProductPermissions_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_revokeUserProductGrants_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RevokeUserProductPermissions(childComplexity, args["input"].(RevokeUserProductPermissionsInput)), true
+		return e.complexity.Mutation.RevokeUserProductGrants(childComplexity, args["input"].(RevokeUserProductGrantsInput)), true
 
 	case "Mutation.startVersion":
 		if e.complexity.Mutation.StartVersion == nil {
@@ -545,17 +545,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UnpublishVersion(childComplexity, args["input"].(UnpublishVersionInput)), true
 
-	case "Mutation.updateUserProductPermissions":
-		if e.complexity.Mutation.UpdateUserProductPermissions == nil {
+	case "Mutation.updateUserProductGrants":
+		if e.complexity.Mutation.UpdateUserProductGrants == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_updateUserProductPermissions_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_updateUserProductGrants_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUserProductPermissions(childComplexity, args["input"].(UpdateUserProductPermissionsInput)), true
+		return e.complexity.Mutation.UpdateUserProductGrants(childComplexity, args["input"].(UpdateUserProductGrantsInput)), true
 
 	case "Mutation.updateVersionUserConfiguration":
 		if e.complexity.Mutation.UpdateVersionUserConfiguration == nil {
@@ -1091,13 +1091,13 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateVersionInput,
 		ec.unmarshalInputLogFilters,
 		ec.unmarshalInputPublishVersionInput,
-		ec.unmarshalInputRevokeUserProductPermissionsInput,
+		ec.unmarshalInputRevokeUserProductGrantsInput,
 		ec.unmarshalInputSettingsInput,
 		ec.unmarshalInputStartVersionInput,
 		ec.unmarshalInputStopVersionInput,
 		ec.unmarshalInputUnpublishVersionInput,
 		ec.unmarshalInputUpdateConfigurationInput,
-		ec.unmarshalInputUpdateUserProductPermissionsInput,
+		ec.unmarshalInputUpdateUserProductGrantsInput,
 		ec.unmarshalInputUsersInput,
 	)
 	first := true
@@ -1208,8 +1208,8 @@ type Mutation {
   publishVersion(input: PublishVersionInput!): Version!
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateVersionUserConfiguration(input: UpdateConfigurationInput!): Version!
-  updateUserProductPermissions(input: UpdateUserProductPermissionsInput!): User!
-  revokeUserProductPermissions(input: RevokeUserProductPermissionsInput!): User!
+  updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
+  revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
 }
 
 type User {
@@ -1271,14 +1271,14 @@ input UsersInput {
   comment: String!
 }
 
-input UpdateUserProductPermissionsInput {
+input UpdateUserProductGrantsInput {
   targetID: ID!
   product: String!
-  permissions: [String!]!
+  grants: [String!]!
   comment: String
 }
 
-input RevokeUserProductPermissionsInput {
+input RevokeUserProductGrantsInput {
   targetID: ID!
   product: String!
   comment: String
@@ -1543,13 +1543,13 @@ func (ec *executionContext) field_Mutation_publishVersion_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_revokeUserProductPermissions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_revokeUserProductGrants_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 RevokeUserProductPermissionsInput
+	var arg0 RevokeUserProductGrantsInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNRevokeUserProductPermissionsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRevokeUserProductPermissionsInput(ctx, tmp)
+		arg0, err = ec.unmarshalNRevokeUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRevokeUserProductGrantsInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1603,13 +1603,13 @@ func (ec *executionContext) field_Mutation_unpublishVersion_args(ctx context.Con
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updateUserProductPermissions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateUserProductGrants_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 UpdateUserProductPermissionsInput
+	var arg0 UpdateUserProductGrantsInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateUserProductPermissionsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateUserProductPermissionsInput(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateUserProductGrantsInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3731,8 +3731,8 @@ func (ec *executionContext) fieldContext_Mutation_updateVersionUserConfiguration
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_updateUserProductPermissions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateUserProductPermissions(ctx, field)
+func (ec *executionContext) _Mutation_updateUserProductGrants(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateUserProductGrants(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3745,7 +3745,7 @@ func (ec *executionContext) _Mutation_updateUserProductPermissions(ctx context.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUserProductPermissions(rctx, fc.Args["input"].(UpdateUserProductPermissionsInput))
+		return ec.resolvers.Mutation().UpdateUserProductGrants(rctx, fc.Args["input"].(UpdateUserProductGrantsInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3762,7 +3762,7 @@ func (ec *executionContext) _Mutation_updateUserProductPermissions(ctx context.C
 	return ec.marshalNUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_updateUserProductPermissions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_updateUserProductGrants(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -3793,15 +3793,15 @@ func (ec *executionContext) fieldContext_Mutation_updateUserProductPermissions(c
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateUserProductPermissions_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updateUserProductGrants_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_revokeUserProductPermissions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_revokeUserProductPermissions(ctx, field)
+func (ec *executionContext) _Mutation_revokeUserProductGrants(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_revokeUserProductGrants(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3814,7 +3814,7 @@ func (ec *executionContext) _Mutation_revokeUserProductPermissions(ctx context.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RevokeUserProductPermissions(rctx, fc.Args["input"].(RevokeUserProductPermissionsInput))
+		return ec.resolvers.Mutation().RevokeUserProductGrants(rctx, fc.Args["input"].(RevokeUserProductGrantsInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3831,7 +3831,7 @@ func (ec *executionContext) _Mutation_revokeUserProductPermissions(ctx context.C
 	return ec.marshalNUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_revokeUserProductPermissions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_revokeUserProductGrants(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -3862,7 +3862,7 @@ func (ec *executionContext) fieldContext_Mutation_revokeUserProductPermissions(c
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_revokeUserProductPermissions_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_revokeUserProductGrants_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -9299,8 +9299,8 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputRevokeUserProductPermissionsInput(ctx context.Context, obj interface{}) (RevokeUserProductPermissionsInput, error) {
-	var it RevokeUserProductPermissionsInput
+func (ec *executionContext) unmarshalInputRevokeUserProductGrantsInput(ctx context.Context, obj interface{}) (RevokeUserProductGrantsInput, error) {
+	var it RevokeUserProductGrantsInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -9555,14 +9555,14 @@ func (ec *executionContext) unmarshalInputUpdateConfigurationInput(ctx context.C
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateUserProductPermissionsInput(ctx context.Context, obj interface{}) (UpdateUserProductPermissionsInput, error) {
-	var it UpdateUserProductPermissionsInput
+func (ec *executionContext) unmarshalInputUpdateUserProductGrantsInput(ctx context.Context, obj interface{}) (UpdateUserProductGrantsInput, error) {
+	var it UpdateUserProductGrantsInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"targetID", "product", "permissions", "comment"}
+	fieldsInOrder := [...]string{"targetID", "product", "grants", "comment"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -9585,11 +9585,11 @@ func (ec *executionContext) unmarshalInputUpdateUserProductPermissionsInput(ctx 
 			if err != nil {
 				return it, err
 			}
-		case "permissions":
+		case "grants":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permissions"))
-			it.Permissions, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("grants"))
+			it.Grants, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10103,19 +10103,19 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updateUserProductPermissions":
+		case "updateUserProductGrants":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateUserProductPermissions(ctx, field)
+				return ec._Mutation_updateUserProductGrants(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "revokeUserProductPermissions":
+		case "revokeUserProductGrants":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_revokeUserProductPermissions(ctx, field)
+				return ec._Mutation_revokeUserProductGrants(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -11872,8 +11872,8 @@ func (ec *executionContext) unmarshalNPublishVersionInput2githubᚗcomᚋkonstel
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRevokeUserProductPermissionsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRevokeUserProductPermissionsInput(ctx context.Context, v interface{}) (RevokeUserProductPermissionsInput, error) {
-	res, err := ec.unmarshalInputRevokeUserProductPermissionsInput(ctx, v)
+func (ec *executionContext) unmarshalNRevokeUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRevokeUserProductGrantsInput(ctx context.Context, v interface{}) (RevokeUserProductGrantsInput, error) {
+	res, err := ec.unmarshalInputRevokeUserProductGrantsInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -12002,8 +12002,8 @@ func (ec *executionContext) unmarshalNUpdateConfigurationInput2githubᚗcomᚋko
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateUserProductPermissionsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateUserProductPermissionsInput(ctx context.Context, v interface{}) (UpdateUserProductPermissionsInput, error) {
-	res, err := ec.unmarshalInputUpdateUserProductPermissionsInput(ctx, v)
+func (ec *executionContext) unmarshalNUpdateUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateUserProductGrantsInput(ctx context.Context, v interface{}) (UpdateUserProductGrantsInput, error) {
+	res, err := ec.unmarshalInputUpdateUserProductGrantsInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
