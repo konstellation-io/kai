@@ -41,7 +41,7 @@ func TestCheckProductGrants(t *testing.T) {
 		hasError bool
 	}{
 		{
-			name:    "user with permissions to view product-01 can view product-01",
+			name:    "user with grants to view product-01 can view product-01",
 			product: product01,
 			user: testhelpers.NewUserBuilder().
 				WithProductGrants(
@@ -54,14 +54,14 @@ func TestCheckProductGrants(t *testing.T) {
 			hasError: false,
 		},
 		{
-			name:     "user without permissions to view product-01 cannot view product-01",
+			name:     "user without grants to view product-01 cannot view product-01",
 			product:  product01,
 			user:     testhelpers.NewUserBuilder().Build(),
 			act:      auth2.ActViewProduct,
 			hasError: true,
 		},
 		{
-			name:    "user with permission to view product-01 but no product-02 cannot view product-02",
+			name:    "user with grant to view product-01 but no product-02 cannot view product-02",
 			product: product02,
 			user: testhelpers.NewUserBuilder().WithProductGrants(
 				entity.ProductGrants{
@@ -72,7 +72,7 @@ func TestCheckProductGrants(t *testing.T) {
 			hasError: true,
 		},
 		{
-			name:    "user with permission to view product-01 cannot create product-01",
+			name:    "user with grant to view product-01 cannot create product-01",
 			product: product01,
 			user: testhelpers.NewUserBuilder().WithProductGrants(
 				entity.ProductGrants{

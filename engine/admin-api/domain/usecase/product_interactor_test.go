@@ -154,13 +154,13 @@ func TestCreateNewProduct_FailsIfUserHasNotPermission(t *testing.T) {
 	productName := "product-name"
 	productDescription := "This is a product description"
 
-	permissionError := errors.New("permission error")
+	grantError := errors.New("grant error")
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(permissionError)
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(grantError)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 
-	require.Error(t, permissionError, err)
+	require.Error(t, grantError, err)
 	require.Nil(t, product)
 }
 

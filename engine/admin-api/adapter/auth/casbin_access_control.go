@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/casbin/casbin/v2"
@@ -39,7 +40,7 @@ func NewCasbinAccessControl(cfg Config, logger logging.Logger, modelPath, policy
 
 func (a *CasbinAccessControl) addCustomFunctions() {
 	a.enforcer.AddFunction("isAdmin", a.isAdminFunc)
-	a.enforcer.AddFunction("hasGrantForResource", a.hasGrantsForResourceFunc)
+	a.enforcer.AddFunction("hasGrantsForResource", a.hasGrantsForResourceFunc)
 }
 
 func (a *CasbinAccessControl) CheckProductGrants(
@@ -54,12 +55,12 @@ func (a *CasbinAccessControl) CheckProductGrants(
 	for _, realmRole := range user.Roles {
 		allowed, err := a.enforcer.Enforce(realmRole, user.ProductGrants, product, action.String())
 		if err != nil {
-			a.logger.Errorf("error checking permission: %s", err)
+			a.logger.Errorf("error checking grants: %s", err)
 			return err
 		}
 
 		a.logger.Infof(
-			"Checking permission userID[%s] realmRole[%s] action[%s] product[%s] allowed[%t]",
+			"Checking grants userID[%s] role[%s] action[%s] product[%s] allowed[%t]",
 			user.ID, realmRole, action, product, allowed,
 		)
 
@@ -69,7 +70,7 @@ func (a *CasbinAccessControl) CheckProductGrants(
 	}
 
 	//nolint:goerr113 // errors need to be wrapped
-	return fmt.Errorf("you are not allowed to %s %s", action, product)
+	return fmt.Errorf("you are not allowed to %q %q", action, product)
 }
 
 func (a *CasbinAccessControl) CheckGrants(
@@ -108,7 +109,16 @@ func (a *CasbinAccessControl) IsAdmin(user *entity.User) bool {
 	return false
 }
 
+var ErrInvalidNumberOfArguments = errors.New("invalid number of arguments (expected %d)")
+
+func errInvalidNumberOfArguments(expected, actual int) error {
+	return fmt.Errorf("invalid number of arguments (expects %d - has %d)", expected, actual)
+}
+
 func (a *CasbinAccessControl) hasGrantsForResourceFunc(args ...interface{}) (interface{}, error) {
+	if len(args) != 2 {
+		return false, errInvalidNumberOfArguments(2, len(args))
+	}
 	grants := args[0].(entity.ProductGrants)
 	resource := args[1].(string)
 	act := args[2].(string)
