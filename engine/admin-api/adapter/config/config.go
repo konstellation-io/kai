@@ -73,7 +73,7 @@ type Config struct {
 
 	// TODO: Get into an agreement with infra
 	//
-	//nolint:godox // this is a TODO to be removed
+	//nolint:godox // this is a task to be done
 	Keycloak struct {
 		Realm         string `yaml:"realm" envconfig:"KEYCLOAK_REALM"`
 		MasterRealm   string `yaml:"master_realm" envconfig:"KEYCLOAK_MASTER_REALM"`

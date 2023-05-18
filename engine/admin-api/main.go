@@ -40,9 +40,6 @@ func main() {
 	app.Start()
 }
 
-// TODO: Change these to be interfaces
-//
-//nolint:godox // this is a TODO to be removed
 func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) (usecase.UserActivityInteracter,
 	*usecase.RuntimeInteractor, *usecase.UserInteractor, *usecase.VersionInteractor, *usecase.MetricsInteractor) {
 	runtimeRepo := mongodb.NewRuntimeRepoMongoDB(cfg, logger, mongodbClient)
