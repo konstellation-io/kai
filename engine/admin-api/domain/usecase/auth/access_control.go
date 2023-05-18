@@ -22,10 +22,11 @@ const ActViewVersion AccessControlAction = "view_version"
 const ActViewMetrics AccessControlAction = "view_metrics"
 
 const ActViewUserActivities AccessControlAction = "view_user_activities"
+const ActUpdateUserGrants AccessControlAction = "update_user_grants"
 
 func (e AccessControlAction) IsValid() bool {
 	switch e {
-	case ActCreateProduct, ActStartVersion, ActStopVersion,
+	case ActCreateProduct, ActStartVersion, ActStopVersion, ActUpdateUserGrants,
 		ActPublishVersion, ActUnpublishVersion, ActEditVersion, ActViewMetrics,
 		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion:
 		return true

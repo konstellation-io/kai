@@ -140,7 +140,6 @@ func TestIsadmin(t *testing.T) {
 			assert.Equal(t, tc.isAdmin, isAdmin)
 		})
 	}
-
 }
 
 func TestCheckProductGrants_InvalidAct(t *testing.T) {

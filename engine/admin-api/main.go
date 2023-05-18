@@ -24,7 +24,6 @@ func main() {
 	db := mongodb.NewMongoDB(cfg, logger)
 
 	mongodbClient := db.Connect()
-
 	defer db.Disconnect()
 
 	userActivityInteractor, productInteractor, userInteractor,
@@ -77,8 +76,13 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 		log.Fatal(err)
 	}
 
-	idGenerator := version.NewIDGenerator()
+	gocloakService, err := service.NewGocloakManager(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	docGenerator := version.NewHTTPStaticDocGenerator(cfg, logger)
+	idGenerator := version.NewIDGenerator()
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
@@ -96,8 +100,9 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 
 	userInteractor := usecase.NewUserInteractor(
 		logger,
-		userActivityInteractor,
 		accessControl,
+		userActivityInteractor,
+		gocloakService,
 	)
 
 	chronografDashboard := service.CreateDashboardService(cfg, logger)

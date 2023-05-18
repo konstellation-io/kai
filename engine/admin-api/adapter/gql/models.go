@@ -3,20 +3,9 @@
 package gql
 
 import (
-	"fmt"
-	"io"
-	"strconv"
-
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
-
-type APIToken struct {
-	ID           string  `json:"id"`
-	Name         string  `json:"name"`
-	CreationDate string  `json:"creationDate"`
-	LastActivity *string `json:"lastActivity,omitempty"`
-}
 
 type ConfigurationVariablesInput struct {
 	Key   string `json:"key"`
@@ -43,6 +32,12 @@ type PublishVersionInput struct {
 	VersionName string `json:"versionName"`
 	Comment     string `json:"comment"`
 	ProductID   string `json:"productID"`
+}
+
+type RevokeUserProductGrantsInput struct {
+	TargetID string  `json:"targetID"`
+	Product  string  `json:"product"`
+	Comment  *string `json:"comment,omitempty"`
 }
 
 type Settings struct {
@@ -73,62 +68,15 @@ type UnpublishVersionInput struct {
 	ProductID   string `json:"productID"`
 }
 
-type UpdateAccessLevelInput struct {
-	UserIds     []string    `json:"userIds"`
-	AccessLevel AccessLevel `json:"accessLevel"`
-	Comment     string      `json:"comment"`
-}
-
 type UpdateConfigurationInput struct {
 	VersionName            string                         `json:"versionName"`
 	ProductID              string                         `json:"productID"`
 	ConfigurationVariables []*ConfigurationVariablesInput `json:"configurationVariables"`
 }
 
-type UsersInput struct {
-	UserIds []string `json:"userIds"`
-	Comment string   `json:"comment"`
-}
-
-type AccessLevel string
-
-const (
-	AccessLevelViewer  AccessLevel = "VIEWER"
-	AccessLevelManager AccessLevel = "MANAGER"
-	AccessLevelAdmin   AccessLevel = "ADMIN"
-)
-
-var AllAccessLevel = []AccessLevel{
-	AccessLevelViewer,
-	AccessLevelManager,
-	AccessLevelAdmin,
-}
-
-func (e AccessLevel) IsValid() bool {
-	switch e {
-	case AccessLevelViewer, AccessLevelManager, AccessLevelAdmin:
-		return true
-	}
-	return false
-}
-
-func (e AccessLevel) String() string {
-	return string(e)
-}
-
-func (e *AccessLevel) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = AccessLevel(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid AccessLevel", str)
-	}
-	return nil
-}
-
-func (e AccessLevel) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+type UpdateUserProductGrantsInput struct {
+	TargetID string   `json:"targetID"`
+	Product  string   `json:"product"`
+	Grants   []string `json:"grants"`
+	Comment  *string  `json:"comment,omitempty"`
 }

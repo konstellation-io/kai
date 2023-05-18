@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/casbin/casbin/v2"
@@ -109,16 +108,11 @@ func (a *CasbinAccessControl) IsAdmin(user *entity.User) bool {
 	return false
 }
 
-var ErrInvalidNumberOfArguments = errors.New("invalid number of arguments (expected %d)")
-
-func errInvalidNumberOfArguments(expected, actual int) error {
-	return fmt.Errorf("invalid number of arguments (expects %d - has %d)", expected, actual)
-}
-
 func (a *CasbinAccessControl) hasGrantsForResourceFunc(args ...interface{}) (interface{}, error) {
-	if len(args) != 2 {
-		return false, errInvalidNumberOfArguments(2, len(args))
+	if len(args) != 3 {
+		return false, ErrInvalidNumberOfArguments
 	}
+
 	grants := args[0].(entity.ProductGrants)
 	resource := args[1].(string)
 	act := args[2].(string)
@@ -127,6 +121,10 @@ func (a *CasbinAccessControl) hasGrantsForResourceFunc(args ...interface{}) (int
 }
 
 func (a *CasbinAccessControl) isAdminFunc(args ...interface{}) (interface{}, error) {
+	if len(args) != 1 {
+		return nil, ErrInvalidNumberOfArguments
+	}
+
 	role := args[0].(string)
 
 	return role == a.cfg.AdminRole, nil

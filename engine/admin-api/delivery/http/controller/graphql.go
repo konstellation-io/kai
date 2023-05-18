@@ -73,7 +73,6 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 
 	//nolint:staticcheck // legacy code
 	ctx := context.WithValue(r.Context(), UserIDContextKey, user.ID)
-	ctx = context.WithValue(ctx, UserContextKey, user)
 
 	h.ServeHTTP(c.Response(), r.WithContext(ctx))
 

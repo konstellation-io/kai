@@ -16,3 +16,5 @@ p, USER, view_metrics
 p, USER, view_user_activities
 
 p, USER, execute
+
+p, ADMIN, update_user_grants

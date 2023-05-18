@@ -175,6 +175,40 @@ func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, i
 	return r.versionInteractor.UpdateVersionConfig(ctx, loggedUser, input.ProductID, v, cfg)
 }
 
+func (r *mutationResolver) UpdateUserProductGrants(
+	ctx context.Context,
+	input UpdateUserProductGrantsInput,
+) (*entity.User, error) {
+	user := ctx.Value("user").(*entity.User)
+
+	err := r.userInteractor.UpdateUserProductGrants(
+		user,
+		input.TargetID,
+		input.Product,
+		input.Grants,
+		*input.Comment,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.User{ID: input.TargetID}, nil
+}
+
+func (r *mutationResolver) RevokeUserProductGrants(
+	ctx context.Context,
+	input RevokeUserProductGrantsInput,
+) (*entity.User, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+
+	err := r.userInteractor.RevokeUserProductGrants(loggedUser, input.TargetID, input.Product, *input.Comment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.User{ID: input.TargetID}, nil
+}
+
 func (r *queryResolver) Metrics(ctx context.Context, productID, versionName, startDate, endDate string) (*entity.Metrics, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 	return r.metricsInteractor.GetMetrics(ctx, loggedUser, productID, versionName, startDate, endDate)
@@ -349,13 +383,6 @@ func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityRes
 func (r *Resolver) Version() VersionResolver { return &versionResolver{r} }
 
 type mutationResolver struct{ *Resolver }
-
-//nolint:godox // remove this statement when the TODO below is implemented
-func (r *mutationResolver) UpdateAccessLevel(ctx context.Context, input UpdateAccessLevelInput) ([]string, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
 type queryResolver struct{ *Resolver }
 type productResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }

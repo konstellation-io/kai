@@ -49,13 +49,6 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	ApiToken struct {
-		CreationDate func(childComplexity int) int
-		ID           func(childComplexity int) int
-		LastActivity func(childComplexity int) int
-		Name         func(childComplexity int) int
-	}
-
 	ConfigurationVariable struct {
 		Key   func(childComplexity int) int
 		Type  func(childComplexity int) int
@@ -103,10 +96,11 @@ type ComplexityRoot struct {
 		CreateProduct                  func(childComplexity int, input CreateProductInput) int
 		CreateVersion                  func(childComplexity int, input CreateVersionInput) int
 		PublishVersion                 func(childComplexity int, input PublishVersionInput) int
+		RevokeUserProductGrants        func(childComplexity int, input RevokeUserProductGrantsInput) int
 		StartVersion                   func(childComplexity int, input StartVersionInput) int
 		StopVersion                    func(childComplexity int, input StopVersionInput) int
 		UnpublishVersion               func(childComplexity int, input UnpublishVersionInput) int
-		UpdateAccessLevel              func(childComplexity int, input UpdateAccessLevelInput) int
+		UpdateUserProductGrants        func(childComplexity int, input UpdateUserProductGrantsInput) int
 		UpdateVersionUserConfiguration func(childComplexity int, input UpdateConfigurationInput) int
 	}
 
@@ -162,6 +156,10 @@ type ComplexityRoot struct {
 		WatchVersion    func(childComplexity int) int
 	}
 
+	User struct {
+		ID func(childComplexity int) int
+	}
+
 	UserActivity struct {
 		Date func(childComplexity int) int
 		ID   func(childComplexity int) int
@@ -213,7 +211,8 @@ type MutationResolver interface {
 	PublishVersion(ctx context.Context, input PublishVersionInput) (*entity.Version, error)
 	UnpublishVersion(ctx context.Context, input UnpublishVersionInput) (*entity.Version, error)
 	UpdateVersionUserConfiguration(ctx context.Context, input UpdateConfigurationInput) (*entity.Version, error)
-	UpdateAccessLevel(ctx context.Context, input UpdateAccessLevelInput) ([]string, error)
+	UpdateUserProductGrants(ctx context.Context, input UpdateUserProductGrantsInput) (*entity.User, error)
+	RevokeUserProductGrants(ctx context.Context, input RevokeUserProductGrantsInput) (*entity.User, error)
 }
 type ProductResolver interface {
 	CreationDate(ctx context.Context, obj *entity.Product) (string, error)
@@ -262,34 +261,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "ApiToken.creationDate":
-		if e.complexity.ApiToken.CreationDate == nil {
-			break
-		}
-
-		return e.complexity.ApiToken.CreationDate(childComplexity), true
-
-	case "ApiToken.id":
-		if e.complexity.ApiToken.ID == nil {
-			break
-		}
-
-		return e.complexity.ApiToken.ID(childComplexity), true
-
-	case "ApiToken.lastActivity":
-		if e.complexity.ApiToken.LastActivity == nil {
-			break
-		}
-
-		return e.complexity.ApiToken.LastActivity(childComplexity), true
-
-	case "ApiToken.name":
-		if e.complexity.ApiToken.Name == nil {
-			break
-		}
-
-		return e.complexity.ApiToken.Name(childComplexity), true
 
 	case "ConfigurationVariable.key":
 		if e.complexity.ConfigurationVariable.Key == nil {
@@ -481,6 +452,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.PublishVersion(childComplexity, args["input"].(PublishVersionInput)), true
 
+	case "Mutation.revokeUserProductGrants":
+		if e.complexity.Mutation.RevokeUserProductGrants == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_revokeUserProductGrants_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RevokeUserProductGrants(childComplexity, args["input"].(RevokeUserProductGrantsInput)), true
+
 	case "Mutation.startVersion":
 		if e.complexity.Mutation.StartVersion == nil {
 			break
@@ -517,17 +500,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UnpublishVersion(childComplexity, args["input"].(UnpublishVersionInput)), true
 
-	case "Mutation.updateAccessLevel":
-		if e.complexity.Mutation.UpdateAccessLevel == nil {
+	case "Mutation.updateUserProductGrants":
+		if e.complexity.Mutation.UpdateUserProductGrants == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_updateAccessLevel_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_updateUserProductGrants_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateAccessLevel(childComplexity, args["input"].(UpdateAccessLevelInput)), true
+		return e.complexity.Mutation.UpdateUserProductGrants(childComplexity, args["input"].(UpdateUserProductGrantsInput)), true
 
 	case "Mutation.updateVersionUserConfiguration":
 		if e.complexity.Mutation.UpdateVersionUserConfiguration == nil {
@@ -819,6 +802,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.WatchVersion(childComplexity), true
 
+	case "User.id":
+		if e.complexity.User.ID == nil {
+			break
+		}
+
+		return e.complexity.User.ID(childComplexity), true
+
 	case "UserActivity.date":
 		if e.complexity.UserActivity.Date == nil {
 			break
@@ -1021,13 +1011,13 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateVersionInput,
 		ec.unmarshalInputLogFilters,
 		ec.unmarshalInputPublishVersionInput,
+		ec.unmarshalInputRevokeUserProductGrantsInput,
 		ec.unmarshalInputSettingsInput,
 		ec.unmarshalInputStartVersionInput,
 		ec.unmarshalInputStopVersionInput,
 		ec.unmarshalInputUnpublishVersionInput,
-		ec.unmarshalInputUpdateAccessLevelInput,
 		ec.unmarshalInputUpdateConfigurationInput,
-		ec.unmarshalInputUsersInput,
+		ec.unmarshalInputUpdateUserProductGrantsInput,
 	)
 	first := true
 
@@ -1137,7 +1127,12 @@ type Mutation {
   publishVersion(input: PublishVersionInput!): Version!
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateVersionUserConfiguration(input: UpdateConfigurationInput!): Version!
-  updateAccessLevel(input: UpdateAccessLevelInput!): [String!]! # TODO: refactor
+  updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
+  revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
+}
+
+type User {
+	id: ID!
 }
 
 type Subscription {
@@ -1185,33 +1180,22 @@ input UnpublishVersionInput {
   productID: ID!
 }
 
-input UsersInput {
-  userIds: [ID!]!
-  comment: String!
+input UpdateUserProductGrantsInput {
+  targetID: ID!
+  product: String!
+  grants: [String!]!
+  comment: String
 }
 
-input UpdateAccessLevelInput {
-  userIds: [ID!]!
-  accessLevel: AccessLevel!
-  comment: String!
+input RevokeUserProductGrantsInput {
+  targetID: ID!
+  product: String!
+  comment: String
 }
 
 input SettingsInput {
   authAllowedDomains: [String!]
   sessionLifetimeInDays: Int
-}
-
-enum AccessLevel {
-  VIEWER
-  MANAGER
-  ADMIN
-}
-
-type ApiToken {
-  id: ID!
-  name: String!
-  creationDate: String!
-  lastActivity: String
 }
 
 type ConfigurationVariable {
@@ -1338,10 +1322,7 @@ enum UserActivityType {
   UPDATE_VERSION_CONFIGURATION
   CREATE_USER
   REMOVE_USERS
-  UPDATE_ACCESS_LEVELS
-  REVOKE_SESSIONS
-  GENERATE_API_TOKEN
-  DELETE_API_TOKEN
+  UPDATE_PRODUCT_GRANTS
 }
 
 input LogFilters {
@@ -1461,6 +1442,21 @@ func (ec *executionContext) field_Mutation_publishVersion_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_revokeUserProductGrants_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 RevokeUserProductGrantsInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRevokeUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRevokeUserProductGrantsInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_startVersion_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1506,13 +1502,13 @@ func (ec *executionContext) field_Mutation_unpublishVersion_args(ctx context.Con
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updateAccessLevel_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateUserProductGrants_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 UpdateAccessLevelInput
+	var arg0 UpdateUserProductGrantsInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateAccessLevelInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateAccessLevelInput(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateUserProductGrantsInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1834,179 +1830,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
-
-func (ec *executionContext) _ApiToken_id(ctx context.Context, field graphql.CollectedField, obj *APIToken) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ApiToken_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ApiToken_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ApiToken",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ApiToken_name(ctx context.Context, field graphql.CollectedField, obj *APIToken) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ApiToken_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ApiToken_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ApiToken",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ApiToken_creationDate(ctx context.Context, field graphql.CollectedField, obj *APIToken) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ApiToken_creationDate(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreationDate, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ApiToken_creationDate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ApiToken",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ApiToken_lastActivity(ctx context.Context, field graphql.CollectedField, obj *APIToken) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ApiToken_lastActivity(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.LastActivity, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ApiToken_lastActivity(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ApiToken",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _ConfigurationVariable_key(ctx context.Context, field graphql.CollectedField, obj *entity.ConfigurationVariable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ConfigurationVariable_key(ctx, field)
@@ -3634,8 +3457,8 @@ func (ec *executionContext) fieldContext_Mutation_updateVersionUserConfiguration
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_updateAccessLevel(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateAccessLevel(ctx, field)
+func (ec *executionContext) _Mutation_updateUserProductGrants(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateUserProductGrants(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3648,7 +3471,7 @@ func (ec *executionContext) _Mutation_updateAccessLevel(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateAccessLevel(rctx, fc.Args["input"].(UpdateAccessLevelInput))
+		return ec.resolvers.Mutation().UpdateUserProductGrants(rctx, fc.Args["input"].(UpdateUserProductGrantsInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3660,19 +3483,23 @@ func (ec *executionContext) _Mutation_updateAccessLevel(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.(*entity.User)
 	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_updateAccessLevel(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_updateUserProductGrants(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	defer func() {
@@ -3682,7 +3509,66 @@ func (ec *executionContext) fieldContext_Mutation_updateAccessLevel(ctx context.
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateAccessLevel_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updateUserProductGrants_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_revokeUserProductGrants(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_revokeUserProductGrants(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RevokeUserProductGrants(rctx, fc.Args["input"].(RevokeUserProductGrantsInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*entity.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_revokeUserProductGrants(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_revokeUserProductGrants_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -5624,6 +5510,50 @@ func (ec *executionContext) fieldContext_Subscription_watchVersion(ctx context.C
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *entity.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8855,6 +8785,50 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRevokeUserProductGrantsInput(ctx context.Context, obj interface{}) (RevokeUserProductGrantsInput, error) {
+	var it RevokeUserProductGrantsInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"targetID", "product", "comment"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "targetID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetID"))
+			it.TargetID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "product":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product"))
+			it.Product, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "comment":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comment"))
+			it.Comment, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSettingsInput(ctx context.Context, obj interface{}) (SettingsInput, error) {
 	var it SettingsInput
 	asMap := map[string]interface{}{}
@@ -9023,50 +8997,6 @@ func (ec *executionContext) unmarshalInputUnpublishVersionInput(ctx context.Cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateAccessLevelInput(ctx context.Context, obj interface{}) (UpdateAccessLevelInput, error) {
-	var it UpdateAccessLevelInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"userIds", "accessLevel", "comment"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "userIds":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userIds"))
-			it.UserIds, err = ec.unmarshalNID2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "accessLevel":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accessLevel"))
-			it.AccessLevel, err = ec.unmarshalNAccessLevel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐAccessLevel(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "comment":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comment"))
-			it.Comment, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputUpdateConfigurationInput(ctx context.Context, obj interface{}) (UpdateConfigurationInput, error) {
 	var it UpdateConfigurationInput
 	asMap := map[string]interface{}{}
@@ -9111,25 +9041,41 @@ func (ec *executionContext) unmarshalInputUpdateConfigurationInput(ctx context.C
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUsersInput(ctx context.Context, obj interface{}) (UsersInput, error) {
-	var it UsersInput
+func (ec *executionContext) unmarshalInputUpdateUserProductGrantsInput(ctx context.Context, obj interface{}) (UpdateUserProductGrantsInput, error) {
+	var it UpdateUserProductGrantsInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userIds", "comment"}
+	fieldsInOrder := [...]string{"targetID", "product", "grants", "comment"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userIds":
+		case "targetID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userIds"))
-			it.UserIds, err = ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetID"))
+			it.TargetID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "product":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product"))
+			it.Product, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "grants":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("grants"))
+			it.Grants, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9137,7 +9083,7 @@ func (ec *executionContext) unmarshalInputUsersInput(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comment"))
-			it.Comment, err = ec.unmarshalNString2string(ctx, v)
+			it.Comment, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9154,52 +9100,6 @@ func (ec *executionContext) unmarshalInputUsersInput(ctx context.Context, obj in
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
-
-var apiTokenImplementors = []string{"ApiToken"}
-
-func (ec *executionContext) _ApiToken(ctx context.Context, sel ast.SelectionSet, obj *APIToken) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, apiTokenImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ApiToken")
-		case "id":
-
-			out.Values[i] = ec._ApiToken_id(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "name":
-
-			out.Values[i] = ec._ApiToken_name(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "creationDate":
-
-			out.Values[i] = ec._ApiToken_creationDate(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "lastActivity":
-
-			out.Values[i] = ec._ApiToken_lastActivity(ctx, field, obj)
-
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
 
 var configurationVariableImplementors = []string{"ConfigurationVariable"}
 
@@ -9581,10 +9481,19 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updateAccessLevel":
+		case "updateUserProductGrants":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateAccessLevel(ctx, field)
+				return ec._Mutation_updateUserProductGrants(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "revokeUserProductGrants":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_revokeUserProductGrants(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -10135,6 +10044,34 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
+}
+
+var userImplementors = []string{"User"}
+
+func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *entity.User) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("User")
+		case "id":
+
+			out.Values[i] = ec._User_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
 }
 
 var userActivityImplementors = []string{"UserActivity"}
@@ -10812,16 +10749,6 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAccessLevel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐAccessLevel(ctx context.Context, v interface{}) (AccessLevel, error) {
-	var res AccessLevel
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNAccessLevel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐAccessLevel(ctx context.Context, sel ast.SelectionSet, v AccessLevel) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -10952,38 +10879,6 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
-	}
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
@@ -11346,6 +11241,11 @@ func (ec *executionContext) unmarshalNPublishVersionInput2githubᚗcomᚋkonstel
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNRevokeUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRevokeUserProductGrantsInput(ctx context.Context, v interface{}) (RevokeUserProductGrantsInput, error) {
+	res, err := ec.unmarshalInputRevokeUserProductGrantsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNStartVersionInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐStartVersionInput(ctx context.Context, v interface{}) (StartVersionInput, error) {
 	res, err := ec.unmarshalInputStartVersionInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -11408,13 +11308,13 @@ func (ec *executionContext) unmarshalNUnpublishVersionInput2githubᚗcomᚋkonst
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateAccessLevelInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateAccessLevelInput(ctx context.Context, v interface{}) (UpdateAccessLevelInput, error) {
-	res, err := ec.unmarshalInputUpdateAccessLevelInput(ctx, v)
+func (ec *executionContext) unmarshalNUpdateConfigurationInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateConfigurationInput(ctx context.Context, v interface{}) (UpdateConfigurationInput, error) {
+	res, err := ec.unmarshalInputUpdateConfigurationInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateConfigurationInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateConfigurationInput(ctx context.Context, v interface{}) (UpdateConfigurationInput, error) {
-	res, err := ec.unmarshalInputUpdateConfigurationInput(ctx, v)
+func (ec *executionContext) unmarshalNUpdateUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐUpdateUserProductGrantsInput(ctx context.Context, v interface{}) (UpdateUserProductGrantsInput, error) {
+	res, err := ec.unmarshalInputUpdateUserProductGrantsInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -11431,6 +11331,20 @@ func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋg
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNUser2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx context.Context, sel ast.SelectionSet, v entity.User) graphql.Marshaler {
+	return ec._User(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx context.Context, sel ast.SelectionSet, v *entity.User) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNUserActivity2ᚕᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUserActivityᚄ(ctx context.Context, sel ast.SelectionSet, v []*entity.UserActivity) graphql.Marshaler {

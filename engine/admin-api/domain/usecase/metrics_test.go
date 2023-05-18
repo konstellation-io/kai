@@ -27,7 +27,7 @@ func newMetricsSuite(t *testing.T) *metricsSuite {
 	ctrl := gomock.NewController(t)
 
 	logger := mocks.NewMockLogger(ctrl)
-	runtimeRepo := mocks.NewMockProductRepo(ctrl)
+	productRepo := mocks.NewMockProductRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
 	metricRepo := mocks.NewMockMetricRepo(ctrl)
 
@@ -35,7 +35,7 @@ func newMetricsSuite(t *testing.T) *metricsSuite {
 
 	metricsInteractor := usecase.NewMetricsInteractor(
 		logger,
-		runtimeRepo,
+		productRepo,
 		accessControl,
 		metricRepo,
 	)
@@ -45,7 +45,7 @@ func newMetricsSuite(t *testing.T) *metricsSuite {
 		metricsInteractor: metricsInteractor,
 		mocks: metricsSuiteMocks{
 			logger:      logger,
-			productRepo: runtimeRepo,
+			productRepo: productRepo,
 		},
 	}
 }

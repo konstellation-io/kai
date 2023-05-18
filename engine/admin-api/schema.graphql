@@ -30,7 +30,12 @@ type Mutation {
   publishVersion(input: PublishVersionInput!): Version!
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateVersionUserConfiguration(input: UpdateConfigurationInput!): Version!
-  updateAccessLevel(input: UpdateAccessLevelInput!): [String!]! # TODO: refactor
+  updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
+  revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
+}
+
+type User {
+	id: ID!
 }
 
 type Subscription {
@@ -78,33 +83,22 @@ input UnpublishVersionInput {
   productID: ID!
 }
 
-input UsersInput {
-  userIds: [ID!]!
-  comment: String!
+input UpdateUserProductGrantsInput {
+  targetID: ID!
+  product: String!
+  grants: [String!]!
+  comment: String
 }
 
-input UpdateAccessLevelInput {
-  userIds: [ID!]!
-  accessLevel: AccessLevel!
-  comment: String!
+input RevokeUserProductGrantsInput {
+  targetID: ID!
+  product: String!
+  comment: String
 }
 
 input SettingsInput {
   authAllowedDomains: [String!]
   sessionLifetimeInDays: Int
-}
-
-enum AccessLevel {
-  VIEWER
-  MANAGER
-  ADMIN
-}
-
-type ApiToken {
-  id: ID!
-  name: String!
-  creationDate: String!
-  lastActivity: String
 }
 
 type ConfigurationVariable {
@@ -231,10 +225,7 @@ enum UserActivityType {
   UPDATE_VERSION_CONFIGURATION
   CREATE_USER
   REMOVE_USERS
-  UPDATE_ACCESS_LEVELS
-  REVOKE_SESSIONS
-  GENERATE_API_TOKEN
-  DELETE_API_TOKEN
+  UPDATE_PRODUCT_GRANTS
 }
 
 input LogFilters {

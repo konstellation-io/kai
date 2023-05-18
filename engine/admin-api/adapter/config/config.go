@@ -15,9 +15,11 @@ type Config struct {
 	DevelopmentMode bool   `yaml:"developmentMode" envconfig:"KRE_DEVELOPMENT_MODE"`
 	ReleaseName     string `yaml:"releaseName" envconfig:"KRE_RELEASE_NAME"`
 	BaseDomainName  string `yaml:"baseDomainName" envconfig:"KRE_BASE_DOMAIN_NAME"`
-	Application     struct {
+
+	Application struct {
 		VersionStatusTimeout time.Duration `yaml:"versionStatusTimeout"`
 	} `yaml:"application"`
+
 	Admin struct {
 		APIAddress      string `yaml:"apiAddress" envconfig:"KRE_ADMIN_API_ADDRESS"`
 		BaseURL         string `yaml:"baseURL" envconfig:"KRE_ADMIN_API_BASE_URL"`
@@ -32,9 +34,11 @@ type Config struct {
 		KRTBucket           string `yaml:"krtBucket"`
 		MongoExpressAddress string `yaml:"mongoExpressAddress" envconfig:"KRE_MONGODB_MONGOEXPRESS_ADDRESS"`
 	} `yaml:"mongodb"`
+
 	InfluxDB struct {
 		Address string `yaml:"address" envconfig:"KRE_INFLUXDB_ADDRESS"`
 	} `yaml:"influxdb"`
+
 	Chronograf struct {
 		Address string `yaml:"address" envconfig:"KRE_CHRONOGRAF_ADDRESS"`
 	} `yaml:"chronograf"`
@@ -42,10 +46,22 @@ type Config struct {
 	K8s struct {
 		Namespace string `yaml:"namespace" envconfig:"POD_NAMESPACE"`
 	} `yaml:"k8s"`
+
 	Services struct {
 		K8sManager  string `yaml:"k8sManager" envconfig:"KRE_SERVICES_K8S_MANAGER"`
 		NatsManager string `yaml:"natsManager" envconfig:"KRE_SERVICES_NATS_MANAGER"`
 	} `yaml:"services"`
+
+	// TODO: Get into an agreement with infra
+	//
+	//nolint:godox // this is a task to be done
+	Keycloak struct {
+		Realm         string `yaml:"realm" envconfig:"KEYCLOAK_REALM"`
+		MasterRealm   string `yaml:"master_realm" envconfig:"KEYCLOAK_MASTER_REALM"`
+		URL           string `yaml:"base_url" envconfig:"KEYCLOAK_BASE_URL"`
+		AdminUsername string `yaml:"admin_username" envconfig:"KEYCLOAK_ADMIN_USERNAME"`
+		AdminPassword string `yaml:"admin_password" envconfig:"KEYCLOAK_ADMIN_PASSWORD"`
+	} `yaml:"keycloak"`
 }
 
 // NewConfig will read the config.yml file and override values with env vars.

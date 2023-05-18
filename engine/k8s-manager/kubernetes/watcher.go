@@ -48,16 +48,16 @@ func (w *Watcher) WaitForRuntimePods(ctx context.Context, ns string) error {
 		return err
 	}
 
-	kreOperatorChan, err := w.waitForPodRunning(ctx, ns, []string{"name=k8s-runtime-operator"}, timeout)
+	kaiOperatorChan, err := w.waitForPodRunning(ctx, ns, []string{"name=k8s-runtime-operator"}, timeout)
 	if err != nil {
 		return err
 	}
 
 	mongoRunning,
-		kreOperatorRunning,
+		kaiOperatorRunning,
 		natsRunning :=
 		<-mongoChan,
-		<-kreOperatorChan,
+		<-kaiOperatorChan,
 		<-natsChan
 
 	var failedPods []string
@@ -70,7 +70,7 @@ func (w *Watcher) WaitForRuntimePods(ctx context.Context, ns string) error {
 		failedPods = append(failedPods, "NATS")
 	}
 
-	if !kreOperatorRunning {
+	if !kaiOperatorRunning {
 		failedPods = append(failedPods, "K8sRuntimeOperator")
 	}
 
