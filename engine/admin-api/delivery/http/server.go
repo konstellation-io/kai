@@ -49,12 +49,7 @@ func NewApp(
 	}
 
 	tokenParser := token.NewParser()
-
 	jwtAuthMiddleware := kaimiddleware.NewJwtAuthMiddleware(cfg, logger, tokenParser)
-	e.GET("/", func(c echo.Context) error {
-		return nil
-	}, jwtAuthMiddleware)
-	e.GET("/playground", gqlController.PlaygroundHandler)
 
 	r := e.Group("/graphql")
 	r.Use(jwtAuthMiddleware)

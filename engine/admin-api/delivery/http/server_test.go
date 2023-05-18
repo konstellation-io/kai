@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestServerCall(t *testing.T) {
+func TestServerCall_GraphqlFailsIfUnauthorized(t *testing.T) {
 	cfg := &config.Config{}
 	cfg.Admin.APIAddress = ":4000"
 	ctrl := gomock.NewController(t)
@@ -30,12 +30,12 @@ func TestServerCall(t *testing.T) {
 
 	go app.Start()
 
-	url := fmt.Sprintf("http://localhost%s", cfg.Admin.APIAddress)
+	url := fmt.Sprintf("http://localhost%s/graphql", cfg.Admin.APIAddress)
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, http.NoBody)
 	require.NoError(t, err)
 
-	req.Header.Add("Authorization", "Bearer Token")
+	req.Header.Add("Authorization", "Bearer invalid-token")
 
 	res, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
