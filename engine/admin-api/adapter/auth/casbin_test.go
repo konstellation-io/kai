@@ -24,10 +24,7 @@ func TestCheckProductGrants(t *testing.T) {
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
 
-	authCfg := auth.Config{
-		AdminRole: "ADMIN",
-	}
-	authorizer, err := auth.NewCasbinAccessControl(authCfg, logger, casbinModel, casbinPolicy)
+	authorizer, err := auth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
 	require.NoError(t, err)
 
 	product01 := "product-01"
@@ -85,7 +82,7 @@ func TestCheckProductGrants(t *testing.T) {
 		{
 			name:     "admin user can do anything without specifying product grants",
 			product:  product01,
-			user:     testhelpers.NewUserBuilder().WithRoles([]string{authCfg.AdminRole}).Build(),
+			user:     testhelpers.NewUserBuilder().WithRoles([]string{auth2.DefaultAdminRole}).Build(),
 			act:      auth2.AccessControlAction(auth2.ActCreateProduct.String()),
 			hasError: false,
 		},
@@ -108,13 +105,7 @@ func TestIsadmin(t *testing.T) {
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
 
-	adminRole := "ADMIN"
-
-	authCfg := auth.Config{
-		AdminRole: adminRole,
-	}
-
-	authorizer, err := auth.NewCasbinAccessControl(authCfg, logger, casbinModel, casbinPolicy)
+	authorizer, err := auth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
 	require.NoError(t, err)
 
 	testCases := []struct {
@@ -124,7 +115,7 @@ func TestIsadmin(t *testing.T) {
 	}{
 		{
 			name:    "user with cfg admin role in its roles is admin",
-			user:    testhelpers.NewUserBuilder().WithRoles([]string{adminRole}).Build(),
+			user:    testhelpers.NewUserBuilder().WithRoles([]string{auth2.DefaultAdminRole}).Build(),
 			isAdmin: true,
 		},
 		{
@@ -142,15 +133,47 @@ func TestIsadmin(t *testing.T) {
 	}
 }
 
+func TestIsadmin_WithOptAdminRole(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	logger := mocks.NewMockLogger(ctrl)
+	mocks.AddLoggerExpects(logger)
+
+	customAdminRole := "admin"
+
+	authorizer, err := auth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy, auth.WithAdminRole(customAdminRole))
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name    string
+		user    *entity.User
+		isAdmin bool
+	}{
+		{
+			name:    "user with cfg admin role in its roles is admin",
+			user:    testhelpers.NewUserBuilder().WithRoles([]string{customAdminRole}).Build(),
+			isAdmin: true,
+		},
+		{
+			name:    "user without cfg admin role in its roles is not admin",
+			user:    testhelpers.NewUserBuilder().WithRoles([]string{"user", auth2.DefaultAdminRole}).Build(),
+			isAdmin: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			isAdmin := authorizer.IsAdmin(tc.user)
+			assert.Equal(t, tc.isAdmin, isAdmin)
+		})
+	}
+}
+
 func TestCheckProductGrants_InvalidAct(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
 
-	authCfg := auth.Config{
-		AdminRole: "ADMIN",
-	}
-	authorizer, err := auth.NewCasbinAccessControl(authCfg, logger, casbinModel, casbinPolicy)
+	authorizer, err := auth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
 	require.NoError(t, err)
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -165,9 +188,6 @@ func TestNewCasbinAccessControl_ErrorInitEnforcer(t *testing.T) {
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
 
-	authCfg := auth.Config{
-		AdminRole: "ADMIN",
-	}
-	_, err := auth.NewCasbinAccessControl(authCfg, logger, "this is a invalid model", casbinPolicy)
+	_, err := auth.NewCasbinAccessControl(logger, "this is a invalid model", casbinPolicy)
 	require.Error(t, err)
 }

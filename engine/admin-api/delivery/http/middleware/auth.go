@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-func extractToken(authHeader string) string {
+func extractTokenFromAuthHeader(authHeader string) string {
 	if len(strings.Split(authHeader, " ")) == 2 {
 		return strings.Split(authHeader, " ")[1]
 	}
@@ -22,7 +22,7 @@ func NewJwtAuthMiddleware(_ *config.Config, logger logging.Logger, tokenParser *
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			authHeader := c.Request().Header.Get("Authorization")
-			plainToken := extractToken(authHeader)
+			plainToken := extractTokenFromAuthHeader(authHeader)
 
 			user, err := tokenParser.GetUser(plainToken)
 			if err != nil {

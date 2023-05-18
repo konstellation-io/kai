@@ -10,26 +10,51 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
-type Config struct {
-	AdminRole string
+type OptFunc func(*Opts)
+
+type Opts struct {
+	adminRole string
+}
+
+func defaultOpts() Opts {
+	return Opts{
+		adminRole: auth.DefaultAdminRole,
+	}
+}
+
+func WithAdminRole(adminRole string) OptFunc {
+	return func(opts *Opts) {
+		opts.adminRole = adminRole
+	}
 }
 
 type CasbinAccessControl struct {
-	cfg      Config
+	cfg      Opts
 	logger   logging.Logger
 	enforcer *casbin.Enforcer
 }
 
-func NewCasbinAccessControl(cfg Config, logger logging.Logger, modelPath, policyPath string) (*CasbinAccessControl, error) {
+func NewCasbinAccessControl(
+	logger logging.Logger,
+	modelPath,
+	policyPath string,
+	opts ...OptFunc,
+) (*CasbinAccessControl, error) {
+	o := defaultOpts()
+
+	for _, fn := range opts {
+		fn(&o)
+	}
+
 	enforcer, err := casbin.NewEnforcer(modelPath, policyPath)
 	if err != nil {
 		return nil, err
 	}
 
 	accessController := &CasbinAccessControl{
-		cfg,
-		logger,
-		enforcer,
+		cfg:      o,
+		logger:   logger,
+		enforcer: enforcer,
 	}
 
 	accessController.addCustomFunctions()
@@ -69,7 +94,7 @@ func (a *CasbinAccessControl) CheckProductGrants(
 	}
 
 	//nolint:goerr113 // errors need to be wrapped
-	return fmt.Errorf("you are not allowed to %q %q", action, product)
+	return fmt.Errorf("you are not allowed to %q in product %q", action, product)
 }
 
 func (a *CasbinAccessControl) CheckGrants(
@@ -100,7 +125,7 @@ func (a *CasbinAccessControl) hasGrantsForResource(
 
 func (a *CasbinAccessControl) IsAdmin(user *entity.User) bool {
 	for _, role := range user.Roles {
-		if role == a.cfg.AdminRole {
+		if role == a.cfg.adminRole {
 			return true
 		}
 	}
@@ -127,5 +152,5 @@ func (a *CasbinAccessControl) isAdminFunc(args ...interface{}) (interface{}, err
 
 	role := args[0].(string)
 
-	return role == a.cfg.AdminRole, nil
+	return role == a.cfg.adminRole, nil
 }

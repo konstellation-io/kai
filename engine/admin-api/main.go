@@ -67,11 +67,7 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 		log.Fatal(err)
 	}
 
-	authCfg := auth.Config{
-		AdminRole: "ADMIN",
-	}
-
-	accessControl, err := auth.NewCasbinAccessControl(authCfg, logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
+	accessControl, err := auth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
