@@ -4,12 +4,12 @@ go 1.20
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
-	github.com/docker/distribution v2.8.0+incompatible
+	github.com/docker/distribution v2.8.1+incompatible
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20201224090044-7d2e9c2cfd32
 	github.com/mattn/go-zglob v0.0.3
-	github.com/stretchr/testify v1.7.1
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	github.com/stretchr/testify v1.8.2
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -19,9 +19,10 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20220919173607-35f4265a4bc0 // indirect
-	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
-	golang.org/x/text v0.3.8 // indirect
+	github.com/rogpeppe/go-internal v1.8.1 // indirect
+	golang.org/x/crypto v0.7.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 )
 
 replace github.com/konstellation-io/kai/libs/simplelogger => ../simplelogger
