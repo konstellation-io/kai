@@ -43,7 +43,7 @@ func NewMetricsInteractor(
 
 func (i *MetricsInteractor) GetMetrics(ctx context.Context,
 	loggedUserID, runtimeID, versionName, startDate, endDate string) (*entity.Metrics, error) {
-	if err := i.accessControl.CheckPermission(loggedUserID, auth.ResMetrics, auth.ActView); err != nil {
+	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResMetrics, auth.ActView); err != nil {
 		return nil, err
 	}
 

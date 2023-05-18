@@ -29,7 +29,7 @@ func NewCasbinAccessControl(logger logging.Logger, modelPath, policyPath string)
 }
 
 // change input params to ones obtained from jwt token.
-func (a *CasbinAccessControl) CheckPermission(userID string, resource auth.AccessControlResource, action auth.AccessControlAction) error {
+func (a *CasbinAccessControl) CheckGrant(userID string, resource auth.AccessControlResource, action auth.AccessControlAction) error {
 	if !resource.IsValid() {
 		return invalidAccessControlResourceError
 	}
@@ -40,11 +40,11 @@ func (a *CasbinAccessControl) CheckPermission(userID string, resource auth.Acces
 
 	allowed, err := a.enforcer.Enforce(userID, resource.String(), action.String())
 	if err != nil {
-		a.logger.Errorf("error checking permission: %s", err)
+		a.logger.Errorf("error checking grant: %s", err)
 		return err
 	}
 
-	a.logger.Infof("Checking permission userID[%s] resource[%s] action[%s] allowed[%t]", userID, resource, action, allowed)
+	a.logger.Infof("Checking grant userID[%s] resource[%s] action[%s] allowed[%t]", userID, resource, action, allowed)
 
 	if !allowed {
 		//nolint:goerr113 // errors need to be wrapped

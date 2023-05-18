@@ -23,7 +23,6 @@ func main() {
 	db := mongodb.NewMongoDB(cfg, logger)
 
 	mongodbClient := db.Connect()
-
 	defer db.Disconnect()
 
 	userActivityInteractor, runtimeInteractor, userInteractor,
@@ -46,9 +45,9 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 	runtimeRepo := mongodb.NewRuntimeRepoMongoDB(cfg, logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
 	versionMongoRepo := mongodb.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
-	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
-	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
+	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
+	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
 
 	versionService, err := service.NewK8sVersionClient(cfg, logger)
 	if err != nil {
@@ -60,13 +59,18 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 		log.Fatal(err)
 	}
 
+	gocloakService, err := service.NewGocloakManager(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	accessControl, err := auth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	idGenerator := version.NewIDGenerator()
 	docGenerator := version.NewHTTPStaticDocGenerator(cfg, logger)
+	idGenerator := version.NewIDGenerator()
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
@@ -85,7 +89,7 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 	userInteractor := usecase.NewUserInteractor(
 		logger,
 		userActivityInteractor,
-		accessControl,
+		gocloakService,
 	)
 
 	chronografDashboard := service.CreateDashboardService(cfg, logger)

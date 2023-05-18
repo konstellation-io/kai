@@ -30,7 +30,17 @@ type Mutation {
   publishVersion(input: PublishVersionInput!): Version!
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateVersionUserConfiguration(input: UpdateConfigurationInput!): Version!
-  updateAccessLevel(input: UpdateAccessLevelInput!): [String!]! # TODO: refactor
+  updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
+  revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
+}
+
+type User {
+	id: ID!
+	firstName: String!
+	lastName: String!
+	email: String!
+	enabled: Boolean!
+	username: String!
 }
 
 type Subscription {
@@ -83,10 +93,17 @@ input UsersInput {
   comment: String!
 }
 
-input UpdateAccessLevelInput {
-  userIds: [ID!]!
-  accessLevel: AccessLevel!
-  comment: String!
+input UpdateUserProductGrantsInput {
+  targetID: ID!
+  product: String!
+  grants: [String!]!
+  comment: String
+}
+
+input RevokeUserProductGrantsInput {
+  targetID: ID!
+  product: String!
+  comment: String
 }
 
 input SettingsInput {
@@ -94,13 +111,7 @@ input SettingsInput {
   sessionLifetimeInDays: Int
 }
 
-enum AccessLevel {
-  VIEWER
-  MANAGER
-  ADMIN
-}
-
-type ApiToken {
+type APIToken {
   id: ID!
   name: String!
   creationDate: String!
