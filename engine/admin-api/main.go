@@ -82,17 +82,18 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
-	productInteractor := usecase.NewProductInteractor(
-		cfg,
-		logger,
-		productRepo,
-		measurementRepo,
-		versionMongoRepo,
-		metricRepo,
-		nodeLogRepo,
-		userActivityInteractor,
-		accessControl,
-	)
+	ps := usecase.ProductInteractorSetup{
+		Cfg:             cfg,
+		Logger:          logger,
+		ProductRepo:     productRepo,
+		MeasurementRepo: measurementRepo,
+		VersionRepo:     versionMongoRepo,
+		MetricRepo:      metricRepo,
+		NodeLogRepo:     nodeLogRepo,
+		UserActivity:    userActivityInteractor,
+		AccessControl:   accessControl,
+	}
+	productInteractor := usecase.NewProductInteractor(&ps)
 
 	userInteractor := usecase.NewUserInteractor(
 		logger,

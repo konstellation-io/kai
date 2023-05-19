@@ -13,7 +13,6 @@ import (
 )
 
 var (
-	// ErrProductNotFound error.
 	ErrProductNotFound       = errors.New("error product not found")
 	ErrProductDuplicated     = errors.New("there is already a product with the same id")
 	ErrProductDuplicatedName = errors.New("there is already a product with the same name")
@@ -32,28 +31,30 @@ type ProductInteractor struct {
 	accessControl   auth.AccessControl
 }
 
+type ProductInteractorSetup struct {
+	Cfg             *config.Config
+	Logger          logging.Logger
+	ProductRepo     repository.ProductRepo
+	MeasurementRepo repository.MeasurementRepo
+	VersionRepo     repository.VersionRepo
+	MetricRepo      repository.MetricRepo
+	NodeLogRepo     repository.NodeLogRepository
+	UserActivity    UserActivityInteracter
+	AccessControl   auth.AccessControl
+}
+
 // NewProductInteractor creates a new ProductInteractor.
-func NewProductInteractor(
-	cfg *config.Config,
-	logger logging.Logger,
-	productRepo repository.ProductRepo,
-	measurementRepo repository.MeasurementRepo,
-	versionRepo repository.VersionRepo,
-	metricRepo repository.MetricRepo,
-	nodeLogRepo repository.NodeLogRepository,
-	userActivity UserActivityInteracter,
-	accessControl auth.AccessControl,
-) *ProductInteractor {
+func NewProductInteractor(ps *ProductInteractorSetup) *ProductInteractor {
 	return &ProductInteractor{
-		cfg,
-		logger,
-		productRepo,
-		measurementRepo,
-		versionRepo,
-		metricRepo,
-		nodeLogRepo,
-		userActivity,
-		accessControl,
+		ps.Cfg,
+		ps.Logger,
+		ps.ProductRepo,
+		ps.MeasurementRepo,
+		ps.VersionRepo,
+		ps.MetricRepo,
+		ps.NodeLogRepo,
+		ps.UserActivity,
+		ps.AccessControl,
 	}
 }
 
