@@ -31,7 +31,7 @@ type ProductInteractor struct {
 	accessControl   auth.AccessControl
 }
 
-type ProductInteractorSetup struct {
+type ProductInteractorOpts struct {
 	Cfg             *config.Config
 	Logger          logging.Logger
 	ProductRepo     repository.ProductRepo
@@ -44,7 +44,7 @@ type ProductInteractorSetup struct {
 }
 
 // NewProductInteractor creates a new ProductInteractor.
-func NewProductInteractor(ps *ProductInteractorSetup) *ProductInteractor {
+func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 	return &ProductInteractor{
 		ps.Cfg,
 		ps.Logger,

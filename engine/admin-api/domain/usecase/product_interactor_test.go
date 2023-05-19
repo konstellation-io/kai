@@ -61,7 +61,7 @@ func newProductSuite(t *testing.T) *productSuite {
 
 	cfg.K8s.Namespace = k8sNamespace
 
-	ps := usecase.ProductInteractorSetup{
+	ps := usecase.ProductInteractorOpts{
 		Cfg:             cfg,
 		Logger:          logger,
 		ProductRepo:     productRepo,
