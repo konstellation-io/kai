@@ -6,34 +6,48 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
-type GocloakManagerClient struct {
+type KeycloakConfig struct {
+	URL           string
+	Realm         string
+	MasterRealm   string
+	AdminUsername string
+	AdminPassword string
+}
+
+type GocloakService struct {
 	client *gocloak.GoCloak
 	token  *gocloak.JWT
 	ctx    context.Context
-	cfg    *config.Config
+	cfg    *KeycloakConfig
 }
 
-func NewGocloakManager(cfg *config.Config) (*GocloakManagerClient, error) {
-	wrapErr := errors.Wrapper("new gocloak manager: %w")
+func WithClient(keycloakURL string) *gocloak.GoCloak {
+	client := gocloak.NewClient(keycloakURL)
+	return client
+}
 
-	client := gocloak.NewClient(cfg.Keycloak.URL)
+func NewGocloakService(
+	client *gocloak.GoCloak,
+	cfg *KeycloakConfig,
+) (*GocloakService, error) {
+	wrapErr := errors.Wrapper("new gocloak service: %w")
+
 	ctx := context.Background()
-
 	token, err := client.LoginAdmin(
-		ctx, cfg.Keycloak.AdminUsername,
-		cfg.Keycloak.AdminPassword,
-		cfg.Keycloak.MasterRealm,
+		ctx,
+		cfg.AdminUsername,
+		cfg.AdminPassword,
+		cfg.MasterRealm,
 	)
 	if err != nil {
 		return nil, wrapErr(err)
 	}
 
-	return &GocloakManagerClient{
+	return &GocloakService{
 		client: client,
 		token:  token,
 		ctx:    ctx,
@@ -41,10 +55,10 @@ func NewGocloakManager(cfg *config.Config) (*GocloakManagerClient, error) {
 	}, nil
 }
 
-func (gm *GocloakManagerClient) GetUserByID(userID string) (*entity.User, error) {
+func (gm *GocloakService) GetUserByID(userID string) (*entity.User, error) {
 	wrapErr := errors.Wrapper("gocloak get user by id: %w")
 
-	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, userID)
+	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Realm, userID)
 	if err != nil {
 		return nil, wrapErr(err)
 	}
@@ -52,33 +66,39 @@ func (gm *GocloakManagerClient) GetUserByID(userID string) (*entity.User, error)
 	return gocloakUserToUser(user), nil
 }
 
-func (gm *GocloakManagerClient) UpdateUserProductGrants(userID, product string, grants []string) error {
+func (gm *GocloakService) UpdateUserProductGrants(userID, product string, grants []string) error {
 	wrapErr := errors.Wrapper("gocloak update user roles: %w")
 
-	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, userID)
+	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Realm, userID)
 	if err != nil {
 		return wrapErr(err)
 	}
 
+	if user.Attributes == nil {
+		user.Attributes = &map[string][]string{}
+	}
 	rolesAttribute, ok := (*user.Attributes)["product_roles"]
 	if !ok {
-		rolesAttribute = make([]string, 0, 1)
+		rolesAttribute = make([]string, 1)
 	}
 
-	userProductRoles := rolesAttribute[0]
-	userRoles := make(map[string]interface{})
+	userProductGrants := rolesAttribute[0]
+	userGrantsByProduct := make(map[string]interface{})
 
-	if err = json.Unmarshal([]byte(userProductRoles), &userRoles); err != nil {
+	if userProductGrants == "" {
+		userProductGrants = "{}"
+	}
+	if err = json.Unmarshal([]byte(userProductGrants), &userGrantsByProduct); err != nil {
 		return wrapErr(err)
 	}
 
 	if len(grants) == 0 {
-		delete(userRoles, product)
+		delete(userGrantsByProduct, product)
 	} else {
-		userRoles[product] = grants
+		userGrantsByProduct[product] = grants
 	}
 
-	marshalledRoles, err := json.Marshal(userRoles)
+	marshalledRoles, err := json.Marshal(userGrantsByProduct)
 	if err != nil {
 		return wrapErr(err)
 	}
@@ -87,7 +107,7 @@ func (gm *GocloakManagerClient) UpdateUserProductGrants(userID, product string, 
 
 	(*user.Attributes)["product_roles"] = rolesAttribute
 
-	err = gm.client.UpdateUser(gm.ctx, gm.token.AccessToken, gm.cfg.Keycloak.Realm, *user)
+	err = gm.client.UpdateUser(gm.ctx, gm.token.AccessToken, gm.cfg.Realm, *user)
 	if err != nil {
 		return wrapErr(err)
 	}
