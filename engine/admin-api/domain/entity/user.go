@@ -1,10 +1,9 @@
 package entity
 
 type User struct {
-	ID        string
-	FirstName string
-	LastName  string
-	Email     string
-	Enabled   bool
-	Username  string
+	ID            string
+	Roles         []string
+	ProductGrants ProductGrants
 }
+
+type ProductGrants map[string][]string

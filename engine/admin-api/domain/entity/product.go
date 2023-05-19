@@ -11,10 +11,7 @@ var (
 	validate = validator.New()
 )
 
-// TODO: rename this entity to "Product".
-//
-//nolint:godox // this is a task to be done
-type Runtime struct {
+type Product struct {
 	ID               string    `bson:"_id" validate:"required"`
 	Name             string    `bson:"name" validate:"required,lte=40"`
 	Description      string    `bson:"description" validate:"required,lte=500"`
@@ -23,6 +20,6 @@ type Runtime struct {
 	PublishedVersion string    `bson:"publishedVersion"`
 }
 
-func (r *Runtime) Validate() error {
+func (r *Product) Validate() error {
 	return validate.Struct(r)
 }

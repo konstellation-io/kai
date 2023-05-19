@@ -12,6 +12,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/version"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
@@ -25,29 +26,36 @@ func main() {
 	mongodbClient := db.Connect()
 	defer db.Disconnect()
 
-	userActivityInteractor, runtimeInteractor, userInteractor,
+	userActivityInteractor, productInteractor, userInteractor,
 		versionInteractor, metricsInteractor := initApp(cfg, logger, mongodbClient)
 
-	app := http.NewApp(
+	graphqlController := controller.NewGraphQLController(
 		cfg,
 		logger,
-		runtimeInteractor,
+		productInteractor,
 		userInteractor,
 		userActivityInteractor,
 		versionInteractor,
 		metricsInteractor,
 	)
+
+	app := http.NewApp(
+		cfg,
+		logger,
+		graphqlController,
+	)
+
 	app.Start()
 }
 
 func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) (usecase.UserActivityInteracter,
-	*usecase.RuntimeInteractor, *usecase.UserInteractor, *usecase.VersionInteractor, *usecase.MetricsInteractor) {
-	runtimeRepo := mongodb.NewRuntimeRepoMongoDB(cfg, logger, mongodbClient)
+	*usecase.ProductInteractor, *usecase.UserInteractor, *usecase.VersionInteractor, *usecase.MetricsInteractor) {
+	productRepo := mongodb.NewProductRepoMongoDB(cfg, logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
 	versionMongoRepo := mongodb.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
-	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
-	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
+	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
+	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
 
 	versionService, err := service.NewK8sVersionClient(cfg, logger)
 	if err != nil {
@@ -59,12 +67,12 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 		log.Fatal(err)
 	}
 
-	gocloakService, err := service.NewGocloakManager(cfg)
+	accessControl, err := auth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	accessControl, err := auth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
+	gocloakService, err := service.NewGocloakManager(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,20 +82,22 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
-	runtimeInteractor := usecase.NewRuntimeInteractor(
-		cfg,
-		logger,
-		runtimeRepo,
-		measurementRepo,
-		versionMongoRepo,
-		metricRepo,
-		nodeLogRepo,
-		userActivityInteractor,
-		accessControl,
-	)
+	ps := usecase.ProductInteractorOpts{
+		Cfg:             cfg,
+		Logger:          logger,
+		ProductRepo:     productRepo,
+		MeasurementRepo: measurementRepo,
+		VersionRepo:     versionMongoRepo,
+		MetricRepo:      metricRepo,
+		NodeLogRepo:     nodeLogRepo,
+		UserActivity:    userActivityInteractor,
+		AccessControl:   accessControl,
+	}
+	productInteractor := usecase.NewProductInteractor(&ps)
 
 	userInteractor := usecase.NewUserInteractor(
 		logger,
+		accessControl,
 		userActivityInteractor,
 		gocloakService,
 	)
@@ -97,7 +107,7 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 		cfg,
 		logger,
 		versionMongoRepo,
-		runtimeRepo,
+		productRepo,
 		versionService,
 		natsManagerService,
 		userActivityInteractor,
@@ -110,10 +120,10 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 
 	metricsInteractor := usecase.NewMetricsInteractor(
 		logger,
-		runtimeRepo,
+		productRepo,
 		accessControl,
 		metricRepo,
 	)
 
-	return userActivityInteractor, runtimeInteractor, userInteractor, versionInteractor, metricsInteractor
+	return userActivityInteractor, productInteractor, userInteractor, versionInteractor, metricsInteractor
 }

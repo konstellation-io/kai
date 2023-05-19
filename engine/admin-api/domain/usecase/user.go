@@ -3,12 +3,12 @@ package usecase
 import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
 const (
-	getUserByIDWrapper             = "get user by id"
 	updateUserProductGrantsWrapper = "update user product grants"
 	revokeUserProductGrantsWrapper = "revoke user product grants"
 	updateUserProductGrantsLog     = "Updated user %q grants for product %q: %v"
@@ -17,6 +17,7 @@ const (
 
 type UserInteractor struct {
 	logger                 logging.Logger
+	accessControl          auth.AccessControl
 	userActivityInteractor UserActivityInteracter
 	userRegistry           service.UserRegistry
 }
@@ -26,35 +27,29 @@ type UserInteractor struct {
 // UserInteractor is the usecase to manage users.
 func NewUserInteractor(
 	logger logging.Logger,
+	accessControl auth.AccessControl,
 	userActivityInteractor UserActivityInteracter,
 	gocloakManager service.UserRegistry,
 ) *UserInteractor {
 	return &UserInteractor{
 		logger,
+		accessControl,
 		userActivityInteractor,
 		gocloakManager,
 	}
 }
 
-func (ui *UserInteractor) GetUserByID(userID string) (*entity.User, error) {
-	wrapErr := errors.Wrapper(getUserByIDWrapper + ": %w")
-
-	user, err := ui.userRegistry.GetUserByID(userID)
-	if err != nil {
-		return nil, wrapErr(err)
-	}
-
-	return user, nil
-}
-
 func (ui *UserInteractor) UpdateUserProductGrants(
-	triggerUserID,
+	user *entity.User,
 	targetUserID,
 	product string,
 	grants []string,
 	comment ...string,
 ) error {
 	wrapErr := errors.Wrapper(updateUserProductGrantsWrapper + ": %w")
+	if err := ui.accessControl.CheckGrants(user, auth.ActUpdateUserGrants); err != nil {
+		return wrapErr(err)
+	}
 
 	err := ui.userRegistry.UpdateUserProductGrants(targetUserID, product, grants)
 	if err != nil {
@@ -67,7 +62,7 @@ func (ui *UserInteractor) UpdateUserProductGrants(
 	}
 
 	err = ui.userActivityInteractor.RegisterUpdateProductGrants(
-		triggerUserID,
+		user.ID,
 		targetUserID,
 		product,
 		grants,
@@ -83,12 +78,16 @@ func (ui *UserInteractor) UpdateUserProductGrants(
 }
 
 func (ui *UserInteractor) RevokeUserProductGrants(
-	triggerUserID,
+	user *entity.User,
 	targetUserID,
 	product string,
 	comment ...string,
 ) error {
 	wrapErr := errors.Wrapper(revokeUserProductGrantsWrapper + ": %w")
+
+	if err := ui.accessControl.CheckGrants(user, auth.ActUpdateUserGrants); err != nil {
+		return wrapErr(err)
+	}
 
 	err := ui.userRegistry.UpdateUserProductGrants(targetUserID, product, []string{})
 	if err != nil {
@@ -101,7 +100,7 @@ func (ui *UserInteractor) RevokeUserProductGrants(
 	}
 
 	err = ui.userActivityInteractor.RegisterUpdateProductGrants(
-		triggerUserID,
+		user.ID,
 		targetUserID,
 		product,
 		[]string{},

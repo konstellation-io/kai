@@ -8,7 +8,6 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 // MockUserRegistry is a mock of UserRegistry interface.
@@ -32,21 +31,6 @@ func NewMockUserRegistry(ctrl *gomock.Controller) *MockUserRegistry {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockUserRegistry) EXPECT() *MockUserRegistryMockRecorder {
 	return m.recorder
-}
-
-// GetUserByID mocks base method.
-func (m *MockUserRegistry) GetUserByID(userID string) (*entity.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByID", userID)
-	ret0, _ := ret[0].(*entity.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUserByID indicates an expected call of GetUserByID.
-func (mr *MockUserRegistryMockRecorder) GetUserByID(userID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockUserRegistry)(nil).GetUserByID), userID)
 }
 
 // UpdateUserProductGrants mocks base method.
