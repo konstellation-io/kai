@@ -34,5 +34,6 @@ func (tb *TokenBuilder) Build() string {
 		},
 	}
 	t, _ := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(defaultTokenKey))
+
 	return t
 }
