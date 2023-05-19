@@ -31,7 +31,7 @@ func initialize() {
 
 type Resolver struct {
 	logger                 logging.Logger
-	runtimeInteractor      *usecase.RuntimeInteractor
+	productInteractor      *usecase.ProductInteractor
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *usecase.VersionInteractor
@@ -41,7 +41,7 @@ type Resolver struct {
 
 func NewGraphQLResolver(
 	logger logging.Logger,
-	runtimeInteractor *usecase.RuntimeInteractor,
+	productInteractor *usecase.ProductInteractor,
 	userInteractor *usecase.UserInteractor,
 	userActivityInteractor usecase.UserActivityInteracter,
 	versionInteractor *usecase.VersionInteractor,
@@ -52,7 +52,7 @@ func NewGraphQLResolver(
 
 	return &Resolver{
 		logger,
-		runtimeInteractor,
+		productInteractor,
 		userInteractor,
 		userActivityInteractor,
 		versionInteractor,
@@ -61,24 +61,24 @@ func NewGraphQLResolver(
 	}
 }
 
-func (r *mutationResolver) CreateRuntime(ctx context.Context, input CreateRuntimeInput) (*entity.Runtime, error) {
-	loggedUserID := ctx.Value("userID").(string)
+func (r *mutationResolver) CreateProduct(ctx context.Context, input CreateProductInput) (*entity.Product, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
 
-	r.logger.Debug("Creating runtime with id " + input.ID)
+	r.logger.Debug("Creating product with id " + input.ID)
 
-	runtime, err := r.runtimeInteractor.CreateRuntime(ctx, loggedUserID, input.ID, input.Name, input.Description)
+	product, err := r.productInteractor.CreateProduct(ctx, loggedUser, input.ID, input.Name, input.Description)
 	if err != nil {
-		r.logger.Error("Error creating runtime: " + err.Error())
+		r.logger.Error("Error creating product: " + err.Error())
 		return nil, err
 	}
 
-	return runtime, nil
+	return product, nil
 }
 
 func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersionInput) (*entity.Version, error) {
-	loggedUserID := ctx.Value("userID").(string)
+	loggedUser := ctx.Value("user").(*entity.User)
 
-	version, notifyCh, err := r.versionInteractor.Create(ctx, loggedUserID, input.RuntimeID, input.File.File)
+	version, notifyCh, err := r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
 	if err != nil {
 		if errs, ok := err.(validator.ValidationError); ok {
 			extensions := make(map[string]interface{})
@@ -100,9 +100,9 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 }
 
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
-	loggedUserID := ctx.Value("userID").(string)
+	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, notifyCh, err := r.versionInteractor.Start(ctx, loggedUserID, input.RuntimeID, input.VersionName, input.Comment)
+	v, notifyCh, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
 	if err != nil {
 		r.logger.Errorf("[mutationResolver.StartVersion] errors starting version: %s", err)
 		return nil, err
@@ -114,9 +114,9 @@ func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionI
 }
 
 func (r *mutationResolver) StopVersion(ctx context.Context, input StopVersionInput) (*entity.Version, error) {
-	loggedUserID := ctx.Value("userID").(string)
+	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, notifyCh, err := r.versionInteractor.Stop(ctx, loggedUserID, input.RuntimeID, input.VersionName, input.Comment)
+	v, notifyCh, err := r.versionInteractor.Stop(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
 	if err != nil {
 		return nil, err
 	}
@@ -146,19 +146,19 @@ func (r *mutationResolver) notifyVersionStatus(notifyCh chan *entity.Version) {
 }
 
 func (r *mutationResolver) UnpublishVersion(ctx context.Context, input UnpublishVersionInput) (*entity.Version, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.versionInteractor.Unpublish(ctx, loggedUserID, input.RuntimeID, input.VersionName, input.Comment)
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.versionInteractor.Unpublish(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
 }
 
 func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVersionInput) (*entity.Version, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.versionInteractor.Publish(ctx, loggedUserID, input.RuntimeID, input.VersionName, input.Comment)
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.versionInteractor.Publish(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
 }
 
 func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, input UpdateConfigurationInput) (*entity.Version, error) {
-	loggedUserID := ctx.Value("userID").(string)
+	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, err := r.versionInteractor.GetByName(ctx, loggedUserID, input.RuntimeID, input.VersionName)
+	v, err := r.versionInteractor.GetByName(ctx, loggedUser, input.ProductID, input.VersionName)
 	if err != nil {
 		return nil, err
 	}
@@ -172,17 +172,17 @@ func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, i
 		}
 	}
 
-	return r.versionInteractor.UpdateVersionConfig(ctx, loggedUserID, input.RuntimeID, v, cfg)
+	return r.versionInteractor.UpdateVersionConfig(ctx, loggedUser, input.ProductID, v, cfg)
 }
 
 func (r *mutationResolver) UpdateUserProductGrants(
 	ctx context.Context,
 	input UpdateUserProductGrantsInput,
 ) (*entity.User, error) {
-	loggedUserID := ctx.Value("userID").(string)
+	user := ctx.Value("user").(*entity.User)
 
 	err := r.userInteractor.UpdateUserProductGrants(
-		loggedUserID,
+		user,
 		input.TargetID,
 		input.Product,
 		input.Grants,
@@ -192,47 +192,46 @@ func (r *mutationResolver) UpdateUserProductGrants(
 		return nil, err
 	}
 
-	return r.userInteractor.GetUserByID(input.TargetID)
+	return &entity.User{ID: input.TargetID}, nil
 }
 
 func (r *mutationResolver) RevokeUserProductGrants(
 	ctx context.Context,
 	input RevokeUserProductGrantsInput,
 ) (*entity.User, error) {
-	loggedUserID := ctx.Value("userID").(string)
+	loggedUser := ctx.Value("user").(*entity.User)
 
-	err := r.userInteractor.RevokeUserProductGrants(loggedUserID, input.TargetID, input.Product, *input.Comment)
+	err := r.userInteractor.RevokeUserProductGrants(loggedUser, input.TargetID, input.Product, *input.Comment)
 	if err != nil {
 		return nil, err
 	}
 
-	return r.userInteractor.GetUserByID(input.TargetID)
+	return &entity.User{ID: input.TargetID}, nil
 }
 
-func (r *queryResolver) Metrics(ctx context.Context, runtimeID, versionName,
-	startDate, endDate string) (*entity.Metrics, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.metricsInteractor.GetMetrics(ctx, loggedUserID, runtimeID, versionName, startDate, endDate)
+func (r *queryResolver) Metrics(ctx context.Context, productID, versionName, startDate, endDate string) (*entity.Metrics, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.metricsInteractor.GetMetrics(ctx, loggedUser, productID, versionName, startDate, endDate)
 }
 
-func (r *queryResolver) Runtime(ctx context.Context, id string) (*entity.Runtime, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.runtimeInteractor.GetByID(ctx, loggedUserID, id)
+func (r *queryResolver) Product(ctx context.Context, id string) (*entity.Product, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.productInteractor.GetByID(ctx, loggedUser, id)
 }
 
-func (r *queryResolver) Runtimes(ctx context.Context) ([]*entity.Runtime, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.runtimeInteractor.FindAll(ctx, loggedUserID)
+func (r *queryResolver) Products(ctx context.Context) ([]*entity.Product, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.productInteractor.FindAll(ctx, loggedUser)
 }
 
-func (r *queryResolver) Version(ctx context.Context, name, runtimeID string) (*entity.Version, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.versionInteractor.GetByName(ctx, loggedUserID, runtimeID, name)
+func (r *queryResolver) Version(ctx context.Context, name, productID string) (*entity.Version, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.versionInteractor.GetByName(ctx, loggedUser, productID, name)
 }
 
-func (r *queryResolver) Versions(ctx context.Context, runtimeID string) ([]*entity.Version, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.versionInteractor.GetByRuntime(loggedUserID, runtimeID)
+func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*entity.Version, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.versionInteractor.GetByProduct(ctx, loggedUser, productID)
 }
 
 func (r *queryResolver) UserActivityList(
@@ -244,19 +243,19 @@ func (r *queryResolver) UserActivityList(
 	toDate *string,
 	lastID *string,
 ) ([]*entity.UserActivity, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.userActivityInteractor.Get(ctx, loggedUserID, userEmail, types, versionIds, fromDate, toDate, lastID)
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.userActivityInteractor.Get(ctx, loggedUser, userEmail, types, versionIds, fromDate, toDate, lastID)
 }
 
 func (r *queryResolver) Logs(
 	ctx context.Context,
-	runtimeID string,
+	productID string,
 	filters entity.LogFilters,
 	cursor *string,
 ) (*LogPage, error) {
-	loggedUserID := ctx.Value("userID").(string)
+	loggedUser := ctx.Value("user").(*entity.User)
 
-	searchResult, err := r.versionInteractor.SearchLogs(ctx, loggedUserID, runtimeID, filters, cursor)
+	searchResult, err := r.versionInteractor.SearchLogs(ctx, loggedUser, productID, filters, cursor)
 	if err != nil {
 		return nil, err
 	}
@@ -272,15 +271,15 @@ func (r *queryResolver) Logs(
 	}, nil
 }
 
-func (r *runtimeResolver) CreationAuthor(_ context.Context, runtime *entity.Runtime) (string, error) {
-	return runtime.Owner, nil
+func (r *productResolver) CreationAuthor(_ context.Context, product *entity.Product) (string, error) {
+	return product.Owner, nil
 }
 
-func (r *runtimeResolver) CreationDate(_ context.Context, obj *entity.Runtime) (string, error) {
+func (r *productResolver) CreationDate(_ context.Context, obj *entity.Product) (string, error) {
 	return obj.CreationDate.Format(time.RFC3339), nil
 }
 
-func (r *runtimeResolver) PublishedVersion(_ context.Context, obj *entity.Runtime) (*entity.Version, error) {
+func (r *productResolver) PublishedVersion(_ context.Context, obj *entity.Product) (*entity.Version, error) {
 	if obj.PublishedVersion != "" {
 		return r.versionInteractor.GetByID(obj.ID, obj.PublishedVersion)
 	}
@@ -288,15 +287,15 @@ func (r *runtimeResolver) PublishedVersion(_ context.Context, obj *entity.Runtim
 	return nil, nil
 }
 
-func (r *runtimeResolver) MeasurementsURL(_ context.Context, _ *entity.Runtime) (string, error) {
+func (r *productResolver) MeasurementsURL(_ context.Context, _ *entity.Product) (string, error) {
 	return fmt.Sprintf("%s/measurements/%s", r.cfg.Admin.BaseURL, r.cfg.K8s.Namespace), nil
 }
 
-func (r *runtimeResolver) DatabaseURL(_ context.Context, _ *entity.Runtime) (string, error) {
+func (r *productResolver) DatabaseURL(_ context.Context, _ *entity.Product) (string, error) {
 	return fmt.Sprintf("%s/database/%s", r.cfg.Admin.BaseURL, r.cfg.K8s.Namespace), nil
 }
 
-func (r *runtimeResolver) EntrypointAddress(_ context.Context, _ *entity.Runtime) (string, error) {
+func (r *productResolver) EntrypointAddress(_ context.Context, _ *entity.Product) (string, error) {
 	return fmt.Sprintf("entrypoint.%s", r.cfg.BaseDomainName), nil
 }
 
@@ -320,15 +319,15 @@ func (r *subscriptionResolver) WatchVersion(ctx context.Context) (<-chan *entity
 }
 
 func (r *subscriptionResolver) WatchNodeStatus(ctx context.Context,
-	versionName, runtimeID string) (<-chan *entity.Node, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.versionInteractor.WatchNodeStatus(ctx, loggedUserID, runtimeID, versionName)
+	versionName, productID string) (<-chan *entity.Node, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.versionInteractor.WatchNodeStatus(ctx, loggedUser, productID, versionName)
 }
 
-func (r *subscriptionResolver) WatchNodeLogs(ctx context.Context, runtimeID, versionName string,
+func (r *subscriptionResolver) WatchNodeLogs(ctx context.Context, productID, versionName string,
 	filters entity.LogFilters) (<-chan *entity.NodeLog, error) {
-	loggedUserID := ctx.Value("userID").(string)
-	return r.versionInteractor.WatchNodeLogs(ctx, loggedUserID, runtimeID, versionName, filters)
+	loggedUser := ctx.Value("user").(*entity.User)
+	return r.versionInteractor.WatchNodeLogs(ctx, loggedUser, productID, versionName, filters)
 }
 
 func (r *userActivityResolver) Date(_ context.Context, obj *entity.UserActivity) (string, error) {
@@ -337,20 +336,6 @@ func (r *userActivityResolver) Date(_ context.Context, obj *entity.UserActivity)
 
 func (r *userActivityResolver) User(_ context.Context, obj *entity.UserActivity) (string, error) {
 	return obj.UserID, nil
-}
-
-func (a apiTokenResolver) CreationDate(_ context.Context, obj *entity.APIToken) (string, error) {
-	return obj.CreationDate.Format(time.RFC3339), nil
-}
-
-func (a apiTokenResolver) LastActivity(_ context.Context, obj *entity.APIToken) (*string, error) {
-	if obj.LastActivity == nil {
-		return nil, nil
-	}
-
-	date := obj.LastActivity.Format(time.RFC3339)
-
-	return &date, nil
 }
 
 func (r *versionResolver) CreationDate(_ context.Context, obj *entity.Version) (string, error) {
@@ -385,14 +370,11 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-// Runtime returns RuntimeResolver implementation.
-func (r *Resolver) Runtime() RuntimeResolver { return &runtimeResolver{r} }
+// Product returns ProductResolver implementation.
+func (r *Resolver) Product() ProductResolver { return &productResolver{r} }
 
 // Subscription returns SubscriptionResolver implementation.
 func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
-
-// APIToken returns APITokenResolver implementation.
-func (r *Resolver) APIToken() APITokenResolver { return &apiTokenResolver{r} }
 
 // UserActivity returns UserActivityResolver implementation.
 func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityResolver{r} }
@@ -402,8 +384,7 @@ func (r *Resolver) Version() VersionResolver { return &versionResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-type runtimeResolver struct{ *Resolver }
+type productResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userActivityResolver struct{ *Resolver }
-type apiTokenResolver struct{ *Resolver }
 type versionResolver struct{ *Resolver }

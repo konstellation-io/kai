@@ -4,22 +4,30 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/gql"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
+//go:generate mockgen -source=${GOFILE} -destination=../../../mocks/controller_${GOFILE} -package=mocks
+
 const UserIDContextKey = "userID"
+const UserContextKey = "user"
+
+type GraphQL interface {
+	GraphQLHandler(c echo.Context) error
+	PlaygroundHandler(c echo.Context) error
+}
 
 type GraphQLController struct {
 	cfg                    *config.Config
 	logger                 logging.Logger
-	runtimeInteractor      *usecase.RuntimeInteractor
+	runtimeInteractor      *usecase.ProductInteractor
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *usecase.VersionInteractor
@@ -29,7 +37,7 @@ type GraphQLController struct {
 func NewGraphQLController(
 	cfg *config.Config,
 	logger logging.Logger,
-	runtimeInteractor *usecase.RuntimeInteractor,
+	runtimeInteractor *usecase.ProductInteractor,
 	userInteractor *usecase.UserInteractor,
 	userActivityInteractor usecase.UserActivityInteracter,
 	versionInteractor *usecase.VersionInteractor,
@@ -47,11 +55,9 @@ func NewGraphQLController(
 }
 
 func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["sub"].(string)
+	user := c.Get("user").(*entity.User)
 
-	g.logger.Info("Request from user " + userID)
+	g.logger.Info("Request from user " + user.ID)
 
 	h := gql.NewHTTPHandler(
 		g.logger,
@@ -66,7 +72,7 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 	r := c.Request()
 
 	//nolint:staticcheck // legacy code
-	ctx := context.WithValue(r.Context(), UserIDContextKey, userID)
+	ctx := context.WithValue(r.Context(), UserIDContextKey, user.ID)
 
 	h.ServeHTTP(c.Response(), r.WithContext(ctx))
 

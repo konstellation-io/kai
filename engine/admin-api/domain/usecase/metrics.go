@@ -22,28 +22,34 @@ const oneWeek = 7 * oneDay
 
 type MetricsInteractor struct {
 	logger        logging.Logger
-	runtimeRepo   repository.RuntimeRepo
+	productRepo   repository.ProductRepo
 	accessControl auth.AccessControl
 	metricRepo    repository.MetricRepo
 }
 
 func NewMetricsInteractor(
 	logger logging.Logger,
-	runtimeRepo repository.RuntimeRepo,
+	productRepo repository.ProductRepo,
 	accessControl auth.AccessControl,
 	metricRepo repository.MetricRepo,
 ) *MetricsInteractor {
 	return &MetricsInteractor{
 		logger,
-		runtimeRepo,
+		productRepo,
 		accessControl,
 		metricRepo,
 	}
 }
 
-func (i *MetricsInteractor) GetMetrics(ctx context.Context,
-	loggedUserID, runtimeID, versionName, startDate, endDate string) (*entity.Metrics, error) {
-	if err := i.accessControl.CheckGrant(loggedUserID, auth.ResMetrics, auth.ActView); err != nil {
+func (i *MetricsInteractor) GetMetrics(
+	ctx context.Context,
+	user *entity.User,
+	productID,
+	versionName,
+	startDate,
+	endDate string,
+) (*entity.Metrics, error) {
+	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewMetrics); err != nil {
 		return nil, err
 	}
 
@@ -59,7 +65,7 @@ func (i *MetricsInteractor) GetMetrics(ctx context.Context,
 		return result, fmt.Errorf("invalid end date: %w", err)
 	}
 
-	metrics, err := i.metricRepo.GetMetrics(ctx, parsedStartDate, parsedEndDate, runtimeID, versionName)
+	metrics, err := i.metricRepo.GetMetrics(ctx, parsedStartDate, parsedEndDate, productID, versionName)
 	if err != nil {
 		return result, fmt.Errorf("error getting metrics: %w", err)
 	}

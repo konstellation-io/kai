@@ -117,11 +117,6 @@ func (gm *GocloakService) UpdateUserProductGrants(userID, product string, grants
 
 func gocloakUserToUser(user *gocloak.User) *entity.User {
 	return &entity.User{
-		ID:        *user.ID,
-		FirstName: *user.FirstName,
-		LastName:  *user.LastName,
-		Email:     *user.Email,
-		Username:  *user.Username,
-		Enabled:   *user.Enabled,
+		ID: *user.ID,
 	}
 }

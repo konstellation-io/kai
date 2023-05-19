@@ -1,10 +1,10 @@
 scalar Upload
 
 type Query {
-  runtime(id: ID!): Runtime!
-  runtimes: [Runtime!]!
-  version(name: String!, runtimeId: ID!): Version!
-  versions(runtimeId: ID!): [Version!]!
+  product(id: ID!): Product!
+  products: [Product!]!
+  version(name: String!, productID: ID!): Version!
+  versions(productID: ID!): [Version!]!
   userActivityList(
     userEmail: String
     types: [UserActivityType!]
@@ -13,9 +13,9 @@ type Query {
     toDate: String
     lastId: String
   ): [UserActivity!]!
-  logs(runtimeId: ID!, filters: LogFilters!, cursor: String): LogPage!
+  logs(productID: ID!, filters: LogFilters!, cursor: String): LogPage!
   metrics(
-    runtimeId: ID!
+    productID: ID!
     versionName: String!
     startDate: String!
     endDate: String!
@@ -23,7 +23,7 @@ type Query {
 }
 
 type Mutation {
-  createRuntime(input: CreateRuntimeInput!): Runtime!
+  createProduct(input: CreateProductInput!): Product!
   createVersion(input: CreateVersionInput!): Version!
   startVersion(input: StartVersionInput!): Version!
   stopVersion(input: StopVersionInput!): Version!
@@ -36,24 +36,19 @@ type Mutation {
 
 type User {
 	id: ID!
-	firstName: String!
-	lastName: String!
-	email: String!
-	enabled: Boolean!
-	username: String!
 }
 
 type Subscription {
   watchNodeLogs(
-    runtimeId: ID!
+    productID: ID!
     versionName: String!
     filters: LogFilters!
   ): NodeLog!
-  watchNodeStatus(versionName: String!, runtimeId: ID!): Node!
+  watchNodeStatus(versionName: String!, productID: ID!): Node!
   watchVersion: Version!
 }
 
-input CreateRuntimeInput {
+input CreateProductInput {
   id: String!
   name: String!
   description: String!
@@ -61,36 +56,31 @@ input CreateRuntimeInput {
 
 input CreateVersionInput {
   file: Upload!
-  runtimeId: ID!
+  productID: ID!
 }
 
 input StartVersionInput {
   versionName: String!
   comment: String!
-  runtimeId: ID!
+  productID: ID!
 }
 
 input StopVersionInput {
   versionName: String!
   comment: String!
-  runtimeId: ID!
+  productID: ID!
 }
 
 input PublishVersionInput {
   versionName: String!
   comment: String!
-  runtimeId: ID!
+  productID: ID!
 }
 
 input UnpublishVersionInput {
   versionName: String!
   comment: String!
-  runtimeId: ID!
-}
-
-input UsersInput {
-  userIds: [ID!]!
-  comment: String!
+  productID: ID!
 }
 
 input UpdateUserProductGrantsInput {
@@ -111,13 +101,6 @@ input SettingsInput {
   sessionLifetimeInDays: Int
 }
 
-type APIToken {
-  id: ID!
-  name: String!
-  creationDate: String!
-  lastActivity: String
-}
-
 type ConfigurationVariable {
   key: String!
   value: String!
@@ -136,11 +119,11 @@ input ConfigurationVariablesInput {
 
 input UpdateConfigurationInput {
   versionName: String!
-  runtimeId: ID!
+  productID: ID!
   configurationVariables: [ConfigurationVariablesInput!]!
 }
 
-type Runtime {
+type Product {
   id: ID!
   name: String!
   description: String!
@@ -242,10 +225,7 @@ enum UserActivityType {
   UPDATE_VERSION_CONFIGURATION
   CREATE_USER
   REMOVE_USERS
-  UPDATE_ACCESS_LEVELS
-  REVOKE_SESSIONS
-  GENERATE_API_TOKEN
-  DELETE_API_TOKEN
+  UPDATE_PRODUCT_GRANTS
 }
 
 input LogFilters {
