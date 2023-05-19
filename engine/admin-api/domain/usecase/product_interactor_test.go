@@ -61,17 +61,18 @@ func newProductSuite(t *testing.T) *productSuite {
 
 	cfg.K8s.Namespace = k8sNamespace
 
-	productInteractor := usecase.NewProductInteractor(
-		cfg,
-		logger,
-		productRepo,
-		measurementRepo,
-		versionRepo,
-		metricRepo,
-		nodeLogRepo,
-		userActivity,
-		accessControl,
-	)
+	ps := usecase.ProductInteractorSetup{
+		Cfg:             cfg,
+		Logger:          logger,
+		ProductRepo:     productRepo,
+		MeasurementRepo: measurementRepo,
+		VersionRepo:     versionRepo,
+		MetricRepo:      metricRepo,
+		NodeLogRepo:     nodeLogRepo,
+		UserActivity:    userActivity,
+		AccessControl:   accessControl,
+	}
+	productInteractor := usecase.NewProductInteractor(&ps)
 
 	return &productSuite{
 		ctrl:              ctrl,
