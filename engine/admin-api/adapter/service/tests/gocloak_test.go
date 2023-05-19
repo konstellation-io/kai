@@ -132,3 +132,7 @@ func (s *GocloakTestSuite) TestUpdateUserProductGrants() {
 
 	s.Equal(expectedResult, obtainedResult)
 }
+
+// TODO: test for revoke grants
+// Tests for failing scenarios
+// Think about how to maintain keycloak and users clean after each test
