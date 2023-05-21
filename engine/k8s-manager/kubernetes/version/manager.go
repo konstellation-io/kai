@@ -30,8 +30,8 @@ const (
 
 var ErrWaitingForVersionPODSTimeout = errors.New("[WaitForVersionPods] timeout waiting for version pods")
 
-func (m *Manager) getVersionServiceName(runtimeID, versionName string) string {
-	return fmt.Sprintf("%s-%s-entrypoint", runtimeID, versionName)
+func (m *Manager) getVersionServiceName(productID, versionName string) string {
+	return fmt.Sprintf("%s-%s-entrypoint", productID, versionName)
 }
 
 func New(cfg *config.Config,
@@ -49,12 +49,12 @@ func New(cfg *config.Config,
 func (m *Manager) Start(ctx context.Context, req *versionpb.StartRequest) error {
 	m.logger.Infof("Starting version %q", req.VersionName)
 
-	err := m.createVersionKRTConf(ctx, req.RuntimeId, req.VersionName, m.config.Kubernetes.Namespace, req.Config)
+	err := m.createVersionKRTConf(ctx, req.ProductId, req.VersionName, m.config.Kubernetes.Namespace, req.Config)
 	if err != nil {
 		return err
 	}
 
-	err = m.createVersionConfFiles(ctx, req.RuntimeId, req.VersionName, m.config.Kubernetes.Namespace, req.Workflows)
+	err = m.createVersionConfFiles(ctx, req.ProductId, req.VersionName, m.config.Kubernetes.Namespace, req.Workflows)
 	if err != nil {
 		return err
 	}
@@ -64,13 +64,14 @@ func (m *Manager) Start(ctx context.Context, req *versionpb.StartRequest) error 
 		return err
 	}
 
+	// Creates entrypoint deployment
 	err = m.createEntrypoint(ctx, req)
 	if err != nil {
 		return err
 	}
 
-	serviceName := m.getVersionServiceName(req.RuntimeId, req.VersionName)
-	_, err = m.createEntrypointService(ctx, req.RuntimeId, req.VersionName, serviceName, m.config.Kubernetes.Namespace)
+	serviceName := m.getVersionServiceName(req.ProductId, req.VersionName)
+	_, err = m.createEntrypointService(ctx, req.ProductId, req.VersionName, serviceName, m.config.Kubernetes.Namespace)
 
 	if err != nil {
 		return err
@@ -81,32 +82,32 @@ func (m *Manager) Start(ctx context.Context, req *versionpb.StartRequest) error 
 
 // Stop calls kubernetes remove all version resources.
 func (m *Manager) Stop(ctx context.Context, req *versionpb.VersionInfo) error {
-	m.logger.Infof("Stop version %s on runtime %s", req.Name, req.RuntimeId)
+	m.logger.Infof("Stop version %s on product %s", req.Name, req.ProductId)
 
-	err := m.deleteConfigMapsSync(ctx, req.RuntimeId, req.Name, m.config.Kubernetes.Namespace)
+	err := m.deleteConfigMapsSync(ctx, req.ProductId, req.Name, m.config.Kubernetes.Namespace)
 	if err != nil {
 		return err
 	}
 
-	serviceName := m.getVersionServiceName(req.RuntimeId, req.Name)
+	serviceName := m.getVersionServiceName(req.ProductId, req.Name)
 
 	err = m.deleteEntrypointService(ctx, serviceName)
 	if err != nil {
 		return err
 	}
 
-	return m.deleteDeploymentsSync(ctx, req.RuntimeId, req.Name, m.config.Kubernetes.Namespace)
+	return m.deleteDeploymentsSync(ctx, req.ProductId, req.Name, m.config.Kubernetes.Namespace)
 }
 
 // Publish calls kubernetes to change the name of the entrypoint service.
 // The service-name will be changed to `active-entrypoint`.
 func (m *Manager) Publish(ctx context.Context, req *versionpb.VersionInfo) error {
-	m.logger.Infof("Publish version %q on runtime %q", req.Name, req.RuntimeId)
+	m.logger.Infof("Publish version %q on product %q", req.Name, req.ProductId)
 
-	activeServiceName := fmt.Sprintf("%s-%s", req.RuntimeId, activeEntrypointSuffix)
-	ingressName := m.getIngressName(req.RuntimeId)
+	activeServiceName := fmt.Sprintf("%s-%s", req.ProductId, activeEntrypointSuffix)
+	ingressName := m.getIngressName(req.ProductId)
 
-	err := m.ensureIngressCreated(ctx, ingressName, req.RuntimeId, activeServiceName)
+	err := m.ensureIngressCreated(ctx, ingressName, req.ProductId, activeServiceName)
 	if err != nil {
 		return err
 	}
@@ -119,24 +120,24 @@ func (m *Manager) Publish(ctx context.Context, req *versionpb.VersionInfo) error
 	// if there is an `active-entrypoint` create a normal service for that entrypoint
 	if activeService != nil {
 		activeVersionName := activeService.Labels[versionNameLabel]
-		activeServiceName := m.getVersionServiceName(req.RuntimeId, activeVersionName)
+		activeServiceName := m.getVersionServiceName(req.ProductId, activeVersionName)
 
 		m.logger.Debugf("There is an active entrypoint service with version name %s", activeVersionName)
 
-		_, err = m.createEntrypointService(ctx, req.RuntimeId, activeVersionName, activeServiceName, m.config.Kubernetes.Namespace)
+		_, err = m.createEntrypointService(ctx, req.ProductId, activeVersionName, activeServiceName, m.config.Kubernetes.Namespace)
 		if err != nil {
 			return err
 		}
 	}
 
-	serviceName := m.getVersionServiceName(req.RuntimeId, req.Name)
+	serviceName := m.getVersionServiceName(req.ProductId, req.Name)
 
 	err = m.deleteEntrypointService(ctx, serviceName)
 	if err != nil {
 		return err
 	}
 
-	_, err = m.createActiveEntrypointService(ctx, req.RuntimeId, req.Name, m.config.Kubernetes.Namespace)
+	_, err = m.createActiveEntrypointService(ctx, req.ProductId, req.Name, m.config.Kubernetes.Namespace)
 	if err != nil {
 		return err
 	}
@@ -147,23 +148,23 @@ func (m *Manager) Publish(ctx context.Context, req *versionpb.VersionInfo) error
 // Unpublish calls kubernetes to change the name of the entrypoint service.
 // The service-name will be changed to `VERSIONNAME-entrypoint`.
 func (m *Manager) Unpublish(ctx context.Context, req *versionpb.VersionInfo) error {
-	m.logger.Infof("Deactivating version %q on runtime %q", req.Name, req.RuntimeId)
+	m.logger.Infof("Deactivating version %q on product %q", req.Name, req.ProductId)
 
-	ingressName := m.getIngressName(req.RuntimeId)
+	ingressName := m.getIngressName(req.ProductId)
 	err := m.deleteIngress(ctx, ingressName)
 
 	if err != nil {
 		return err
 	}
 
-	err = m.deleteActiveEntrypointService(ctx, req.RuntimeId)
+	err = m.deleteActiveEntrypointService(ctx, req.ProductId)
 	if err != nil {
 		return err
 	}
 
-	serviceName := m.getVersionServiceName(req.RuntimeId, req.Name)
+	serviceName := m.getVersionServiceName(req.ProductId, req.Name)
 
-	_, err = m.createEntrypointService(ctx, req.RuntimeId, req.Name, serviceName, m.config.Kubernetes.Namespace)
+	_, err = m.createEntrypointService(ctx, req.ProductId, req.Name, serviceName, m.config.Kubernetes.Namespace)
 	if err != nil {
 		return err
 	}
@@ -177,21 +178,21 @@ func (m *Manager) UpdateConfig(ctx context.Context, req *versionpb.UpdateConfigR
 	versionName := req.VersionName
 	ns := m.config.Kubernetes.Namespace
 
-	err := m.deleteVersionKRTConf(ctx, req.RuntimeId, versionName, ns)
+	err := m.deleteVersionKRTConf(ctx, req.ProductId, versionName, ns)
 	if err != nil {
 		return err
 	}
 
-	err = m.createVersionKRTConf(ctx, req.RuntimeId, versionName, ns, req.Config)
+	err = m.createVersionKRTConf(ctx, req.ProductId, versionName, ns, req.Config)
 	if err != nil {
 		return err
 	}
 
-	return m.restartPodsSync(ctx, req.RuntimeId, versionName, ns)
+	return m.restartPodsSync(ctx, req.ProductId, versionName, ns)
 }
 
-func (m *Manager) WaitForVersionPods(ctx context.Context, runtimeID, versionName, ns string, versionWorkflows []*versionpb.Workflow) error {
-	m.logger.Debugf("[WaitForVersionPods] watching ns %q for version %q and runtime %q", ns, versionName, runtimeID)
+func (m *Manager) WaitForVersionPods(ctx context.Context, productID, versionName, ns string, versionWorkflows []*versionpb.Workflow) error {
+	m.logger.Debugf("[WaitForVersionPods] watching ns %q for version %q and product %q", ns, versionName, productID)
 
 	nodes := []string{"entrypoint"}
 
@@ -201,7 +202,7 @@ func (m *Manager) WaitForVersionPods(ctx context.Context, runtimeID, versionName
 		}
 	}
 
-	labelSelector := fmt.Sprintf("runtime-id=%s,version-name=%s,type in (node, entrypoint)", runtimeID, versionName)
+	labelSelector := fmt.Sprintf("product-id=%s,version-name=%s,type in (node, entrypoint)", productID, versionName)
 	waitCh := make(chan struct{}, 1)
 	resolver := NewStatusResolver(m.logger, nodes, waitCh)
 
@@ -222,7 +223,7 @@ func (m *Manager) WaitForVersionPods(ctx context.Context, runtimeID, versionName
 			return ErrWaitingForVersionPODSTimeout
 
 		case <-waitCh:
-			m.logger.Debugf("[WaitForVersionPods] all version pods for '%s-%s' are running", runtimeID, versionName)
+			m.logger.Debugf("[WaitForVersionPods] all version pods for '%s-%s' are running", productID, versionName)
 			return nil
 		}
 	}
