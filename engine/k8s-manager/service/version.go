@@ -49,13 +49,13 @@ func (v *VersionService) Start(ctx context.Context, req *versionpb.StartRequest)
 		return nil, err
 	}
 
-	err = v.manager.WaitForVersionPods(ctx, req.RuntimeId, req.VersionName, v.config.Kubernetes.Namespace, req.Workflows)
+	err = v.manager.WaitForVersionPods(ctx, req.ProductId, req.VersionName, v.config.Kubernetes.Namespace, req.Workflows)
 	if err != nil {
 		return nil, err
 	}
 
 	return &versionpb.Response{
-		Message: fmt.Sprintf("Version %q on runtime %s started", req.VersionName, req.RuntimeId),
+		Message: fmt.Sprintf("Version %q on product %s started", req.VersionName, req.ProductId),
 	}, nil
 }
 
@@ -118,10 +118,10 @@ func (v *VersionService) Unpublish(ctx context.Context, req *versionpb.VersionIn
 func (v *VersionService) WatchNodeStatus(req *versionpb.NodeStatusRequest, stream versionpb.VersionService_WatchNodeStatusServer) error {
 	v.logger.Info("[MonitoringService.WatchNodeStatus] starting watcher...")
 
-	runtimeID := req.GetRuntimeId()
+	productID := req.GetProductId()
 	versionName := req.GetVersionName()
 	nodeCh := make(chan entity.Node, 1)
-	stopCh := v.watcher.WatchNodeStatus(runtimeID, versionName, nodeCh)
+	stopCh := v.watcher.WatchNodeStatus(productID, versionName, nodeCh)
 
 	defer close(stopCh) // The k8s informer opened in WatchNodeStatus will be stopped when stopCh is closed.
 

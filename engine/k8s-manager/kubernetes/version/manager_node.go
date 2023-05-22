@@ -65,7 +65,7 @@ func (m *Manager) generateWorkflowConfig(req *versionpb.StartRequest,
 	m.logger.Infof("Generating workflow %q config", workflow.Name)
 
 	wconf := WorkflowConfig{}
-	runtimeID := req.RuntimeId
+	productID := req.ProductId
 
 	for idx, n := range workflow.Nodes {
 		wconf[n.Id] = NodeConfig{
@@ -74,7 +74,7 @@ func (m *Manager) generateWorkflowConfig(req *versionpb.StartRequest,
 			"KRT_NODE_ID":                       n.GetId(),
 			"KRT_NODE_NAME":                     n.GetName(),
 			"KRT_HANDLER_PATH":                  n.Src,
-			"KRT_NATS_MONGO_WRITER":             natsDataSubjectPrefix + runtimeID,
+			"KRT_NATS_MONGO_WRITER":             natsDataSubjectPrefix + productID,
 			"KRT_NATS_STREAM":                   workflow.Stream,
 			"KRT_IS_EXITPOINT":                  m.isExitpoint(n.GetName(), workflow.Exitpoint),
 			"KRT_NATS_OUTPUT":                   n.Subject,
@@ -133,10 +133,10 @@ func (m *Manager) getNodeEnvVars(req *versionpb.StartRequest, cfg NodeConfig) []
 	return append(m.getCommonEnvVars(req), envVars...)
 }
 
-func (m *Manager) getNodeLabels(runtimeID, versionName string, node *versionpb.Workflow_Node) map[string]string {
+func (m *Manager) getNodeLabels(productID, versionName string, node *versionpb.Workflow_Node) map[string]string {
 	return map[string]string{
 		"type":         "node",
-		"runtime-id":   runtimeID,
+		"product-id":   productID,
 		"version-name": versionName,
 		"node-name":    node.Name,
 		"node-id":      node.Id,
@@ -166,11 +166,11 @@ func (m *Manager) createNodeDeployment(
 	config NodeConfig,
 ) error {
 	versionName := req.VersionName
-	runtimeID := req.RuntimeId
+	productID := req.ProductId
 	ns := m.config.Kubernetes.Namespace
-	name := fmt.Sprintf("%s-%s-%s-%s", req.RuntimeId, versionName, workflowName, node.Name)
+	name := fmt.Sprintf("%s-%s-%s-%s", req.ProductId, versionName, workflowName, node.Name)
 	envVars := m.getNodeEnvVars(req, config)
-	labels := m.getNodeLabels(runtimeID, versionName, node)
+	labels := m.getNodeLabels(productID, versionName, node)
 
 	m.logger.Infof("Creating node deployment with name %q, image %q and \"%d\" replicas",
 		name,
@@ -211,7 +211,7 @@ func (m *Manager) createNodeDeployment(
 									{
 										ConfigMapRef: &apiv1.ConfigMapEnvSource{
 											LocalObjectReference: apiv1.LocalObjectReference{
-												Name: m.getVersionKRTConfName(runtimeID, versionName),
+												Name: m.getVersionKRTConfName(productID, versionName),
 											},
 										},
 									},
@@ -224,7 +224,7 @@ func (m *Manager) createNodeDeployment(
 							},
 							m.getFluentBitContainer(envVars),
 						},
-						Volumes: m.getCommonVolumes(runtimeID, versionName),
+						Volumes: m.getCommonVolumes(productID, versionName),
 					},
 				},
 			},
@@ -262,7 +262,7 @@ func (m *Manager) getNodeTolerations(isGPUEnabled bool) []apiv1.Toleration {
 	}
 }
 
-func (m *Manager) restartPodsSync(ctx context.Context, runtimeID, versionName, ns string) error {
+func (m *Manager) restartPodsSync(ctx context.Context, productID, versionName, ns string) error {
 	gracePeriodZero := int64(0)
 	deletePolicy := metav1.DeletePropagationForeground
 	deleteOptions := metav1.DeleteOptions{
@@ -271,7 +271,7 @@ func (m *Manager) restartPodsSync(ctx context.Context, runtimeID, versionName, n
 	}
 
 	listOptions := metav1.ListOptions{
-		LabelSelector: m.getVersionNameLabelSelector(runtimeID, versionName),
+		LabelSelector: m.getVersionNameLabelSelector(productID, versionName),
 		TypeMeta: metav1.TypeMeta{
 			Kind: "Pod",
 		},
@@ -333,15 +333,15 @@ func (m *Manager) restartPodsSync(ctx context.Context, runtimeID, versionName, n
 	}
 }
 
-func (m *Manager) getVersionNameLabelSelector(runtimeID, versionName string) string {
-	return fmt.Sprintf("runtime-id=%s,version-name=%s", runtimeID, versionName)
+func (m *Manager) getVersionNameLabelSelector(productID, versionName string) string {
+	return fmt.Sprintf("product-id=%s,version-name=%s", productID, versionName)
 }
 
-func (m *Manager) deleteDeploymentsSync(ctx context.Context, runtimeID, versionName, ns string) error {
+func (m *Manager) deleteDeploymentsSync(ctx context.Context, productID, versionName, ns string) error {
 	deployments := m.clientset.AppsV1().Deployments(ns)
 
 	listOptions := metav1.ListOptions{
-		LabelSelector: m.getVersionNameLabelSelector(runtimeID, versionName),
+		LabelSelector: m.getVersionNameLabelSelector(productID, versionName),
 		TypeMeta: metav1.TypeMeta{
 			Kind: "Deployment",
 		},
@@ -377,7 +377,7 @@ func (m *Manager) deleteDeploymentsSync(ctx context.Context, runtimeID, versionN
 		}
 	}
 
-	m.deleteDeploymentPODs(ctx, ns, deleteOptions, runtimeID, versionName)
+	m.deleteDeploymentPODs(ctx, ns, deleteOptions, productID, versionName)
 
 	w, err := deployments.Watch(ctx, listOptions)
 	if err != nil {
@@ -391,12 +391,12 @@ func (m *Manager) deleteDeploymentsSync(ctx context.Context, runtimeID, versionN
 // the "Deleted" event of a deployment is not received until their PODs are deleted.
 func (m *Manager) deleteDeploymentPODs(ctx context.Context, ns string,
 	deleteOptions metav1.DeleteOptions, //nolint:gocritic
-	runtimeID, versionName string) {
+	productID, versionName string) {
 	pods := m.clientset.CoreV1().Pods(ns)
 	deletePodsPolicy := metav1.DeletePropagationBackground
 	deleteOptions.PropagationPolicy = &deletePodsPolicy
 	podList, _ := pods.List(ctx, metav1.ListOptions{
-		LabelSelector: m.getVersionNameLabelSelector(runtimeID, versionName),
+		LabelSelector: m.getVersionNameLabelSelector(productID, versionName),
 		TypeMeta: metav1.TypeMeta{
 			Kind: "Pod",
 		},
@@ -409,9 +409,9 @@ func (m *Manager) deleteDeploymentPODs(ctx context.Context, ns string,
 	}
 }
 
-func (m *Manager) deleteConfigMapsSync(ctx context.Context, runtimeID, versionName, ns string) error {
+func (m *Manager) deleteConfigMapsSync(ctx context.Context, productID, versionName, ns string) error {
 	listOptions := metav1.ListOptions{
-		LabelSelector: m.getVersionNameLabelSelector(runtimeID, versionName),
+		LabelSelector: m.getVersionNameLabelSelector(productID, versionName),
 		TypeMeta: metav1.TypeMeta{
 			Kind: "ConfigMap",
 		},
