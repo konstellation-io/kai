@@ -7,8 +7,8 @@ on:
       - develop
   pull_request:
     paths:
-      - "engine/nats-manager/**/*"
-      - ".github/workflows/test-nats-manager.yaml"
+      - 'engine/nats-manager/**/*'
+      - '.github/workflows/test-nats-manager.yaml'
   workflow_dispatch:
 
 jobs:
@@ -29,7 +29,10 @@ jobs:
           working-directory: ./engine/nats-manager
           args: --timeout=5m
       - name: Run unit tests
-        run: go test ./... -cover -v -coverprofile=coverage.out
+        run: go test ./... -cover -v -coverprofile=coverage.out --tags=unit
+        working-directory: ./engine/nats-manager
+      - name: Run integration tests
+        run: go test ./... -cover -v -coverprofile=coverage.out --tags=integration
         working-directory: ./engine/nats-manager
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
@@ -44,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Download code coverage results
         uses: actions/download-artifact@v3
         with:
@@ -55,5 +58,5 @@ jobs:
         with:
           projectBaseDir: engine/nats-manager
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_NATS_MANAGER }}
