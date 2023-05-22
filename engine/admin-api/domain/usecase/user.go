@@ -29,13 +29,13 @@ func NewUserInteractor(
 	logger logging.Logger,
 	accessControl auth.AccessControl,
 	userActivityInteractor UserActivityInteracter,
-	gocloakManager service.UserRegistry,
+	userRegistry service.UserRegistry,
 ) *UserInteractor {
 	return &UserInteractor{
 		logger,
 		accessControl,
 		userActivityInteractor,
-		gocloakManager,
+		userRegistry,
 	}
 }
 

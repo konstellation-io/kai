@@ -88,7 +88,7 @@ func initApp(
 		AdminPassword: cfg.Keycloak.AdminPassword,
 	}
 
-	gocloakService, err := service.NewGocloakService(service.WithClient(cfg.Keycloak.URL), &keycloakCfg)
+	gocloakUserRegistry, err := service.NewGocloakUserRegistry(service.WithClient(cfg.Keycloak.URL), &keycloakCfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func initApp(
 		logger,
 		accessControl,
 		userActivityInteractor,
-		gocloakService,
+		gocloakUserRegistry,
 	)
 
 	chronografDashboard := service.CreateDashboardService(cfg, logger)
