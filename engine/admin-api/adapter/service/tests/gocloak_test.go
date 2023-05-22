@@ -93,6 +93,18 @@ func (s *GocloakTestSuite) TearDownSuite() {
 	s.Require().NoError(err)
 }
 
+func (s *GocloakTestSuite) TearDownTest() {
+	testUser := s.getTestUser()
+	testUser.Attributes = &map[string][]string{}
+	err := s.gocloakClient.UpdateUser(
+		context.Background(),
+		s.gocloakToken.AccessToken,
+		s.cfg.Realm,
+		*testUser,
+	)
+	s.Require().NoError(err)
+}
+
 func (s *GocloakTestSuite) getTestUser() *gocloak.User {
 	users, err := s.gocloakClient.GetUsers(
 		context.Background(),
@@ -105,10 +117,12 @@ func (s *GocloakTestSuite) getTestUser() *gocloak.User {
 	return users[0]
 }
 
-func (s *GocloakTestSuite) TestUpdateUserProductGrants() {
+func (s *GocloakTestSuite) TestUpdateUserProductGrantsNoPreviousExisting() {
+	// GIVEN a user with no previous existing grants and a product
 	user := s.getTestUser()
 	product := "test-product"
 
+	// WHEN updating grants for a product for the first time
 	err := s.gocloakService.UpdateUserProductGrants(
 		*user.ID,
 		product,
@@ -116,6 +130,7 @@ func (s *GocloakTestSuite) TestUpdateUserProductGrants() {
 	)
 	s.Require().NoError(err)
 
+	// THEN grants for the product are added
 	updatedUser := s.getTestUser()
 	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
 
@@ -129,6 +144,123 @@ func (s *GocloakTestSuite) TestUpdateUserProductGrants() {
 	expectedResult := map[string]interface{}{
 		product: []interface{}{"grant1", "grant2"},
 	}
+
+	s.Equal(expectedResult, obtainedResult)
+}
+
+func (s *GocloakTestSuite) TestUpdateUserProductGrantsWithPreviousExisting() {
+	// GIVEN a user with no previous existing grants and a product
+	user := s.getTestUser()
+	product := "test-product"
+
+	// GIVEN previous existing grants
+	err := s.gocloakService.UpdateUserProductGrants(
+		*user.ID,
+		product,
+		[]string{"grant1", "grant2"},
+	)
+	s.Require().NoError(err)
+
+	// WHEN updating grants for a product already existing
+	err = s.gocloakService.UpdateUserProductGrants(
+		*user.ID,
+		product,
+		[]string{"grant3"},
+	)
+	s.Require().NoError(err)
+
+	// THEN grants for the product are updated
+	updatedUser := s.getTestUser()
+	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
+
+	s.Require().NotNil(marshalledAttributes)
+	s.Require().Len(marshalledAttributes, 1)
+
+	obtainedResult := make(map[string]interface{})
+	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
+	s.Require().NoError(err)
+
+	expectedResult := map[string]interface{}{
+		product: []interface{}{"grant3"},
+	}
+
+	s.Equal(expectedResult, obtainedResult)
+}
+
+func (s *GocloakTestSuite) TestUpdateUserProductGrantsForOtherProduct() {
+	// GIVEN a user with no previous existing grants and two products
+	user := s.getTestUser()
+	product := "test-product"
+	product2 := "test-product-2"
+
+	// GIVEN previous existing grants
+	err := s.gocloakService.UpdateUserProductGrants(
+		*user.ID,
+		product,
+		[]string{"grant1", "grant2"},
+	)
+	s.Require().NoError(err)
+
+	// WHEN adding grants for other product
+	err = s.gocloakService.UpdateUserProductGrants(
+		*user.ID,
+		product2,
+		[]string{"grant3", "grant4"},
+	)
+	s.Require().NoError(err)
+
+	// THEN grants for the other product are added
+	updatedUser := s.getTestUser()
+	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
+
+	s.Require().NotNil(marshalledAttributes)
+	s.Require().Len(marshalledAttributes, 1)
+
+	obtainedResult := make(map[string]interface{})
+	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
+	s.Require().NoError(err)
+
+	expectedResult := map[string]interface{}{
+		product:  []interface{}{"grant1", "grant2"},
+		product2: []interface{}{"grant3", "grant4"},
+	}
+
+	s.Equal(expectedResult, obtainedResult)
+}
+
+func (s *GocloakTestSuite) TestRevokeUserProductGrants() {
+	// GIVEN a user with no previous existing grants and a product
+	user := s.getTestUser()
+	product := "test-product"
+
+	// GIVEN previous existing grants
+	err := s.gocloakService.UpdateUserProductGrants(
+		*user.ID,
+		product,
+		[]string{"grant1", "grant2"},
+	)
+	s.Require().NoError(err)
+
+	// WHEN revoking grants
+	err = s.gocloakService.UpdateUserProductGrants(
+		*user.ID,
+		product,
+		[]string{},
+	)
+	s.Require().NoError(err)
+
+	// THEN grants are revoked
+	updatedUser := s.getTestUser()
+	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
+
+	s.Require().NotNil(marshalledAttributes)
+	s.Require().Len(marshalledAttributes, 1)
+
+	obtainedResult := make(map[string]interface{})
+	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
+	s.Require().NoError(err)
+
+	expectedResult := map[string]interface{}{}
 
 	s.Equal(expectedResult, obtainedResult)
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 
-	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
@@ -53,17 +52,6 @@ func NewGocloakService(
 		ctx:    ctx,
 		cfg:    cfg,
 	}, nil
-}
-
-func (gm *GocloakService) GetUserByID(userID string) (*entity.User, error) {
-	wrapErr := errors.Wrapper("gocloak get user by id: %w")
-
-	user, err := gm.client.GetUserByID(gm.ctx, gm.token.AccessToken, gm.cfg.Realm, userID)
-	if err != nil {
-		return nil, wrapErr(err)
-	}
-
-	return gocloakUserToUser(user), nil
 }
 
 func (gm *GocloakService) UpdateUserProductGrants(userID, product string, grants []string) error {
@@ -113,10 +101,4 @@ func (gm *GocloakService) UpdateUserProductGrants(userID, product string, grants
 	}
 
 	return nil
-}
-
-func gocloakUserToUser(user *gocloak.User) *entity.User {
-	return &entity.User{
-		ID: *user.ID,
-	}
 }
