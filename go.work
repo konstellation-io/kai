@@ -1,10 +1,10 @@
 go 1.20
 
 use (
-	libs/krt-utils
-	libs/simplelogger
 	engine/admin-api
 	engine/k8s-manager
 	engine/mongo-writer
 	engine/nats-manager
+	libs/krt-utils
+	libs/simplelogger
 )
