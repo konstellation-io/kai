@@ -36,6 +36,7 @@ func NewGocloakService(
 	wrapErr := errors.Wrapper("new gocloak service: %w")
 
 	ctx := context.Background()
+
 	token, err := client.LoginAdmin(
 		ctx,
 		cfg.AdminUsername,
@@ -65,6 +66,7 @@ func (gm *GocloakService) UpdateUserProductGrants(userID, product string, grants
 	if user.Attributes == nil {
 		user.Attributes = &map[string][]string{}
 	}
+
 	rolesAttribute, ok := (*user.Attributes)["product_roles"]
 	if !ok {
 		rolesAttribute = make([]string, 1)
@@ -76,6 +78,7 @@ func (gm *GocloakService) UpdateUserProductGrants(userID, product string, grants
 	if userProductGrants == "" {
 		userProductGrants = "{}"
 	}
+
 	if err = json.Unmarshal([]byte(userProductGrants), &userGrantsByProduct); err != nil {
 		return wrapErr(err)
 	}

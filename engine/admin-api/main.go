@@ -88,6 +88,7 @@ func initApp(
 		AdminUsername: cfg.Keycloak.AdminUsername,
 		AdminPassword: cfg.Keycloak.AdminPassword,
 	}
+
 	gocloakService, err := service.NewGocloakService(service.WithClient(keycloakCfg.URL), &keycloakCfg)
 	if err != nil {
 		log.Fatal(err)

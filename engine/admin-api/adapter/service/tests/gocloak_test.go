@@ -29,8 +29,10 @@ func TestGocloakTestSuite(t *testing.T) {
 
 func (s *GocloakTestSuite) SetupSuite() {
 	ctx := context.Background()
+
 	absFilePath, err := filepath.Abs("./testdata")
 	s.Require().NoError(err)
+
 	req := testcontainers.ContainerRequest{
 		Image: "quay.io/keycloak/keycloak:latest",
 		Cmd: []string{
@@ -264,7 +266,3 @@ func (s *GocloakTestSuite) TestRevokeUserProductGrants() {
 
 	s.Equal(expectedResult, obtainedResult)
 }
-
-// TODO: test for revoke grants
-// Tests for failing scenarios
-// Think about how to maintain keycloak and users clean after each test
