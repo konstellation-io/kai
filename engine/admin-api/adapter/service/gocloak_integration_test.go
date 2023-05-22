@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package service_test
+package service
 
 import (
 	"context"
@@ -13,15 +13,13 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
-
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
 )
 
 type GocloakTestSuite struct {
 	suite.Suite
 	keycloakContainer testcontainers.Container
-	cfg               *service.KeycloakConfig
-	gocloakService    *service.GocloakService
+	cfg               *KeycloakConfig
+	gocloakService    *GocloakService
 	gocloakClient     *gocloak.GoCloak
 	gocloakToken      *gocloak.JWT
 }
@@ -67,7 +65,7 @@ func (s *GocloakTestSuite) SetupSuite() {
 	keycloakEndpoint, err := keycloakContainer.Endpoint(ctx, "http")
 	s.Require().NoError(err)
 
-	s.cfg = &service.KeycloakConfig{
+	s.cfg = &KeycloakConfig{
 		Realm:         "example",
 		MasterRealm:   "master",
 		URL:           keycloakEndpoint,
@@ -75,8 +73,8 @@ func (s *GocloakTestSuite) SetupSuite() {
 		AdminPassword: "admin",
 	}
 
-	gocloakClient := service.WithClient(s.cfg.URL)
-	gocloakService, err := service.NewGocloakService(gocloakClient, s.cfg)
+	gocloakClient := WithClient(s.cfg.URL)
+	gocloakService, err := NewGocloakService(gocloakClient, s.cfg)
 	s.Require().NoError(err)
 
 	token, err := gocloakClient.LoginAdmin(
