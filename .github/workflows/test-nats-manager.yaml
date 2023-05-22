@@ -29,16 +29,18 @@ jobs:
           working-directory: ./engine/nats-manager
           args: --timeout=5m
       - name: Run unit tests
-        run: go test ./... -cover -v -coverprofile=coverage.out --tags=unit
+        run: go test ./... -cover -v -coverprofile=coverage-unit.out --tags=unit
         working-directory: ./engine/nats-manager
       - name: Run integration tests
-        run: go test ./... -cover -v -coverprofile=coverage.out --tags=integration
+        run: go test ./... -cover -v -coverprofile=coverage-integration.out --tags=integration
         working-directory: ./engine/nats-manager
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: engine/nats-manager/coverage.out
+          path: |
+            engine/nats-manager/coverage-unit.out
+            engine/nats-manager/coverage-integration.out
 
   sonarcloud:
     name: SonarCloud
