@@ -1,11 +1,7 @@
 package kubernetes
 
 import (
-	"context"
-	"errors"
 	"fmt"
-	"strings"
-	"time"
 
 	configuration "github.com/konstellation-io/kai/engine/k8s-manager/config"
 	"github.com/konstellation-io/kai/engine/k8s-manager/entity"
@@ -14,12 +10,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/konstellation-io/kai/libs/simplelogger"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
-
-var ErrWaitForPODsRunningTimeout = errors.New("timeout waiting for running PODs")
 
 type Watcher struct {
 	config    *configuration.Config
@@ -35,101 +28,10 @@ func NewWatcher(config *configuration.Config, logger *simplelogger.SimpleLogger,
 	}
 }
 
-const timeout = 5 * time.Minute
-
-func (w *Watcher) WaitForRuntimePods(ctx context.Context, ns string) error {
-	mongoChan, err := w.waitForPodRunning(ctx, ns, []string{"kai-app=kai-mongo"}, timeout)
-	if err != nil {
-		return err
-	}
-
-	natsChan, err := w.waitForPodRunning(ctx, ns, []string{"app=kai-nats"}, timeout)
-	if err != nil {
-		return err
-	}
-
-	kaiOperatorChan, err := w.waitForPodRunning(ctx, ns, []string{"name=k8s-runtime-operator"}, timeout)
-	if err != nil {
-		return err
-	}
-
-	mongoRunning,
-		kaiOperatorRunning,
-		natsRunning :=
-		<-mongoChan,
-		<-kaiOperatorChan,
-		<-natsChan
-
-	var failedPods []string
-
-	if !mongoRunning {
-		failedPods = append(failedPods, "MongoDB")
-	}
-
-	if !natsRunning {
-		failedPods = append(failedPods, "NATS")
-	}
-
-	if !kaiOperatorRunning {
-		failedPods = append(failedPods, "K8sRuntimeOperator")
-	}
-
-	if len(failedPods) > 0 {
-		return fmt.Errorf("%w: elapsed time %s missing PODs %q in Namespace %q",
-			ErrWaitForPODsRunningTimeout, timeout, failedPods, ns)
-	}
-
-	return nil
-}
-
-func (w *Watcher) waitForPodRunning(ctx context.Context, ns string, podLabels []string, timeToWait time.Duration) (chan bool, error) {
-	waitChan := make(chan bool)
-
-	labelSelector := strings.Join(podLabels, ",")
-	w.logger.Debugf("Creating watcher for POD with labels: %s\n", labelSelector)
-
-	watch, err := w.clientset.CoreV1().Pods(ns).Watch(ctx, metav1.ListOptions{
-		LabelSelector: labelSelector,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to set up watch for pod: %w", err)
-	}
-
-	go func() {
-		events := watch.ResultChan()
-
-		startTime := time.Now()
-
-		for {
-			select {
-			case event := <-events:
-				pod := event.Object.(*v1.Pod)
-
-				if pod.Status.Phase == v1.PodRunning {
-					w.logger.Debugf("The POD with labels %q is running\n", labelSelector)
-					watch.Stop()
-					waitChan <- true
-					close(waitChan)
-
-					return
-				}
-			case <-time.After(timeToWait - time.Since(startTime)):
-				watch.Stop()
-				waitChan <- false
-				close(waitChan)
-
-				return
-			}
-		}
-	}()
-
-	return waitChan, nil
-}
-
-func (w *Watcher) WatchNodeStatus(runtimeID, versionName string, statusCh chan<- entity.Node) chan struct{} {
+func (w *Watcher) WatchNodeStatus(productID, versionName string, statusCh chan<- entity.Node) chan struct{} {
 	w.logger.Debugf("[WatchNodeStatus] watching %q", versionName)
 
-	labelSelector := fmt.Sprintf("runtime-id=%s,version-name=%s,type in (node, entrypoint)", runtimeID, versionName)
+	labelSelector := fmt.Sprintf("product-id=%s,version-name=%s,type in (node, entrypoint)", productID, versionName)
 	resolver := node.NodeStatusResolver{
 		Out:        statusCh,
 		Logger:     w.logger,

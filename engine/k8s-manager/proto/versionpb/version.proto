@@ -52,20 +52,20 @@ message StartRequest {
   string mongo_krt_bucket = 7;
   string influx_uri = 8;
   Entrypoint entrypoint = 9; // deprecated: this will be deleted with https://github.com/konstellation-io/kai/issues/152
-  string runtime_id = 10;
+  string product_id = 10;
   string key_value_store = 11;
 }
 
 message VersionInfo {
   string name = 1;
-  string runtime_id = 2;
+  string product_id = 2;
   repeated string workflows = 3;
 }
 
 message UpdateConfigRequest {
   string version_name = 1;
   repeated Config config = 2;
-  string runtime_id = 3;
+  string product_id = 3;
 }
 
 message Response {
@@ -73,12 +73,12 @@ message Response {
 }
 
 message NodeStatusRequest {
-  string versionName = 1;
-  string runtimeId = 2;
+  string version_name = 1;
+  string product_id = 2;
 }
 
 message NodeStatusResponse {
-  string nodeId = 1;
+  string node_id = 1;
   string status = 2;
   string name = 3;
 }
