@@ -29,13 +29,13 @@ jobs:
           working-directory: ./engine/mongo-writer
           args: --timeout=5m
       - name: Run unit tests
-        run: go test ./... -cover -v -coverprofile=coverage.out --tags=unit
+        run: go test ./... -cover -v -coverprofile=coverage-unit.out --tags=unit
         working-directory: ./engine/mongo-writer
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: engine/mongo-writer/coverage.out
+          path: engine/mongo-writer/coverage-unit.out
 
   sonarcloud:
     name: SonarCloud
