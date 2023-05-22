@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 package service
 
@@ -68,12 +67,11 @@ func (s *GocloakTestSuite) SetupSuite() {
 	s.cfg = &KeycloakConfig{
 		Realm:         "example",
 		MasterRealm:   "master",
-		URL:           keycloakEndpoint,
 		AdminUsername: "admin",
 		AdminPassword: "admin",
 	}
 
-	gocloakClient := WithClient(s.cfg.URL)
+	gocloakClient := WithClient(keycloakEndpoint)
 	gocloakService, err := NewGocloakService(gocloakClient, s.cfg)
 	s.Require().NoError(err)
 

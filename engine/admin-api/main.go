@@ -82,14 +82,13 @@ func initApp(
 	}
 
 	keycloakCfg := service.KeycloakConfig{
-		URL:           cfg.Keycloak.URL,
 		Realm:         cfg.Keycloak.Realm,
 		MasterRealm:   cfg.Keycloak.MasterRealm,
 		AdminUsername: cfg.Keycloak.AdminUsername,
 		AdminPassword: cfg.Keycloak.AdminPassword,
 	}
 
-	gocloakService, err := service.NewGocloakService(service.WithClient(keycloakCfg.URL), &keycloakCfg)
+	gocloakService, err := service.NewGocloakService(service.WithClient(cfg.Keycloak.URL), &keycloakCfg)
 	if err != nil {
 		log.Fatal(err)
 	}

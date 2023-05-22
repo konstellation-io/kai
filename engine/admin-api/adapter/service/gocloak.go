@@ -10,7 +10,6 @@ import (
 )
 
 type KeycloakConfig struct {
-	URL           string
 	Realm         string
 	MasterRealm   string
 	AdminUsername string
