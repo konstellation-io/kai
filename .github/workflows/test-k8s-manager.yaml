@@ -7,8 +7,8 @@ on:
       - develop
   pull_request:
     paths:
-      - "engine/k8s-manager/**/*"
-      - ".github/workflows/test-k8s-manager.yaml"
+      - 'engine/k8s-manager/**/*'
+      - '.github/workflows/test-k8s-manager.yaml'
   workflow_dispatch:
 
 jobs:
@@ -29,13 +29,13 @@ jobs:
           working-directory: ./engine/k8s-manager
           args: --timeout=5m
       - name: Run unit tests
-        run: go test ./... -cover -v -coverprofile=coverage.out
+        run: go test ./... -cover -v -coverprofile=coverage-unit.out --tags=unit
         working-directory: ./engine/k8s-manager
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: engine/k8s-manager/coverage.out
+          path: engine/k8s-manager/coverage-unit.out
 
   sonarcloud:
     name: SonarCloud
@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Download code coverage results
         uses: actions/download-artifact@v3
         with:
@@ -55,5 +55,5 @@ jobs:
         with:
           projectBaseDir: engine/k8s-manager
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_K8S_MANAGER }}
