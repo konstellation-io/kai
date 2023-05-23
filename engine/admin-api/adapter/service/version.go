@@ -41,7 +41,7 @@ func NewK8sVersionClient(cfg *config.Config, logger logging.Logger) (*K8sVersion
 // Start creates the version resources in k8s.
 func (k *K8sVersionClient) Start(
 	ctx context.Context,
-	runtimeID string,
+	productID string,
 	version *entity.Version,
 	versionConfig *entity.VersionConfig,
 ) error {
@@ -53,7 +53,7 @@ func (k *K8sVersionClient) Start(
 	}
 
 	req := versionpb.StartRequest{
-		RuntimeId:      runtimeID,
+		ProductId:      productID,
 		VersionId:      version.ID,
 		VersionName:    version.Name,
 		Config:         configVars,
@@ -74,7 +74,7 @@ func (k *K8sVersionClient) Start(
 	return err
 }
 
-func (k *K8sVersionClient) Stop(ctx context.Context, runtimeID string, version *entity.Version) error {
+func (k *K8sVersionClient) Stop(ctx context.Context, productID string, version *entity.Version) error {
 	workflowEntrypoints := make([]string, 0)
 
 	for _, w := range version.Workflows {
@@ -83,7 +83,7 @@ func (k *K8sVersionClient) Stop(ctx context.Context, runtimeID string, version *
 
 	req := versionpb.VersionInfo{
 		Name:      version.Name,
-		RuntimeId: runtimeID,
+		ProductId: productID,
 		Workflows: workflowEntrypoints,
 	}
 
@@ -95,11 +95,11 @@ func (k *K8sVersionClient) Stop(ctx context.Context, runtimeID string, version *
 	return nil
 }
 
-func (k *K8sVersionClient) UpdateConfig(runtimeID string, version *entity.Version) error {
+func (k *K8sVersionClient) UpdateConfig(productID string, version *entity.Version) error {
 	configVars := versionToConfig(version)
 
 	req := versionpb.UpdateConfigRequest{
-		RuntimeId:   runtimeID,
+		ProductId:   productID,
 		VersionName: version.Name,
 		Config:      configVars,
 	}
@@ -112,10 +112,10 @@ func (k *K8sVersionClient) UpdateConfig(runtimeID string, version *entity.Versio
 	return err
 }
 
-func (k *K8sVersionClient) Unpublish(runtimeID string, version *entity.Version) error {
+func (k *K8sVersionClient) Unpublish(productID string, version *entity.Version) error {
 	req := versionpb.VersionInfo{
 		Name:      version.Name,
-		RuntimeId: runtimeID,
+		ProductId: productID,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
@@ -126,10 +126,10 @@ func (k *K8sVersionClient) Unpublish(runtimeID string, version *entity.Version) 
 	return err
 }
 
-func (k *K8sVersionClient) Publish(runtimeID string, version *entity.Version) error {
+func (k *K8sVersionClient) Publish(productID string, version *entity.Version) error {
 	req := versionpb.VersionInfo{
 		Name:      version.Name,
-		RuntimeId: runtimeID,
+		ProductId: productID,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
@@ -217,10 +217,10 @@ func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionCo
 	return wf, nil
 }
 
-func (k *K8sVersionClient) WatchNodeStatus(ctx context.Context, runtimeID, versionName string) (<-chan *entity.Node, error) {
+func (k *K8sVersionClient) WatchNodeStatus(ctx context.Context, productID, versionName string) (<-chan *entity.Node, error) {
 	stream, err := k.client.WatchNodeStatus(ctx, &versionpb.NodeStatusRequest{
 		VersionName: versionName,
-		RuntimeId:   runtimeID,
+		ProductId:   productID,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("version status opening stream: %w", err)

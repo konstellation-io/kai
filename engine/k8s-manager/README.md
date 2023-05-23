@@ -20,11 +20,7 @@ To generate the code from the `.proto` file run the following command.
 ./scripts/generate_proto.sh
 ```
 
-We expose the following services in the gRPC server:
-
-- **RuntimeService**: This service manage the runtime lifecycle and expose two functions:
-  - Create: to create a new runtime
-  - RuntimeStatus: to get the status of a runtime, in order to return to the front when is ready.
+We expose the following service in the gRPC server:
 
 - **VersionService**: Is intended to control the versions lifecycle with the following functions.
   - Start
@@ -36,16 +32,3 @@ We expose the following services in the gRPC server:
 ### Kubernetes
 
 This server uses the official kubernetes sdk `client-go` to interact with the cluster.
-
-We create these resources:
-
-- **Namespace**: Each `Runtime` is deployed in its own namespace with a matching name.
-
-- **RBAC**: The Kubernetes objects `Role`, `ServiceAccount` and `RoleBinding` to allow the K8s Runtime Operator to
-  create the required objects within the namespace.
-
-- **K8s Runtime Operator**: This is the Kubernetes operator that extend the Custom Resource Definition to create the
-  Runtime resource.
-
-- **Runtime**: This custom resource is the base infrastructure needed to later run a `RuntimeVersion` created with
-  a `.krt` file.
