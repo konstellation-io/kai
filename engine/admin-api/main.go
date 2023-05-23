@@ -48,8 +48,17 @@ func main() {
 	app.Start()
 }
 
-func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) (usecase.UserActivityInteracter,
-	*usecase.ProductInteractor, *usecase.UserInteractor, *usecase.VersionInteractor, *usecase.MetricsInteractor) {
+func initApp(
+	cfg *config.Config,
+	logger logging.Logger,
+	mongodbClient *mongo.Client,
+) (
+	usecase.UserActivityInteracter,
+	*usecase.ProductInteractor,
+	*usecase.UserInteractor,
+	*usecase.VersionInteractor,
+	*usecase.MetricsInteractor,
+) {
 	productRepo := mongodb.NewProductRepoMongoDB(cfg, logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
 	versionMongoRepo := mongodb.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
@@ -72,7 +81,14 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 		log.Fatal(err)
 	}
 
-	gocloakService, err := service.NewGocloakManager(cfg)
+	keycloakCfg := service.KeycloakConfig{
+		Realm:         cfg.Keycloak.Realm,
+		MasterRealm:   cfg.Keycloak.MasterRealm,
+		AdminUsername: cfg.Keycloak.AdminUsername,
+		AdminPassword: cfg.Keycloak.AdminPassword,
+	}
+
+	gocloakUserRegistry, err := service.NewGocloakUserRegistry(service.WithClient(cfg.Keycloak.URL), &keycloakCfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -99,7 +115,7 @@ func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Cli
 		logger,
 		accessControl,
 		userActivityInteractor,
-		gocloakService,
+		gocloakUserRegistry,
 	)
 
 	chronografDashboard := service.CreateDashboardService(cfg, logger)

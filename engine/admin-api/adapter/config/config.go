@@ -52,16 +52,18 @@ type Config struct {
 		NatsManager string `yaml:"natsManager" envconfig:"KRE_SERVICES_NATS_MANAGER"`
 	} `yaml:"services"`
 
-	// TODO: Get into an agreement with infra
-	//
-	//nolint:godox // this is a task to be done
-	Keycloak struct {
-		Realm         string `yaml:"realm" envconfig:"KEYCLOAK_REALM"`
-		MasterRealm   string `yaml:"master_realm" envconfig:"KEYCLOAK_MASTER_REALM"`
-		URL           string `yaml:"base_url" envconfig:"KEYCLOAK_BASE_URL"`
-		AdminUsername string `yaml:"admin_username" envconfig:"KEYCLOAK_ADMIN_USERNAME"`
-		AdminPassword string `yaml:"admin_password" envconfig:"KEYCLOAK_ADMIN_PASSWORD"`
-	} `yaml:"keycloak"`
+	Keycloak KeycloakConfig `yaml:"keycloak"`
+}
+
+// TODO: Get into an agreement with infra
+//
+//nolint:godox // this is a task to be done
+type KeycloakConfig struct {
+	URL           string `yaml:"base_url" envconfig:"KEYCLOAK_BASE_URL"`
+	Realm         string `yaml:"realm" envconfig:"KEYCLOAK_REALM"`
+	MasterRealm   string `yaml:"master_realm" envconfig:"KEYCLOAK_MASTER_REALM"`
+	AdminUsername string `yaml:"admin_username" envconfig:"KEYCLOAK_ADMIN_USERNAME"`
+	AdminPassword string `yaml:"admin_password" envconfig:"KEYCLOAK_ADMIN_PASSWORD"`
 }
 
 // NewConfig will read the config.yml file and override values with env vars.
