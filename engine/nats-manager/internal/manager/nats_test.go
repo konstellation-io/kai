@@ -1,3 +1,5 @@
+//go:build unit
+
 package manager_test
 
 import (
