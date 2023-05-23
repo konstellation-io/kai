@@ -12,7 +12,6 @@ import (
 func (m *Manager) getCommonEnvVars(req *versionpb.StartRequest) []apiv1.EnvVar {
 	return []apiv1.EnvVar{
 		{Name: "KRT_INFLUX_URI", Value: req.GetInfluxUri()},
-		{Name: "KRT_RUNTIME_ID", Value: req.GetRuntimeId()},
 		{Name: "KRT_VERSION_ID", Value: req.GetVersionId()},
 		{Name: "KRT_VERSION", Value: req.GetVersionName()},
 		{Name: "KRT_MONGO_URI", Value: req.GetMongoUri()},
@@ -20,18 +19,18 @@ func (m *Manager) getCommonEnvVars(req *versionpb.StartRequest) []apiv1.EnvVar {
 		{Name: "KRT_MONGO_BUCKET", Value: req.GetMongoKrtBucket()},
 		{Name: "KRT_BASE_PATH", Value: basePathKRT},
 		{Name: "KRT_NATS_SERVER", Value: m.config.NatsStreaming.URL},
-		{Name: "KRT_RUNTIME_ID", Value: req.GetRuntimeId()},
+		{Name: "KRT_PRODUCT_ID", Value: req.GetProductId()},
 	}
 }
 
-func (m *Manager) getVersionKRTConfName(runtimeID, versionName string) string {
-	return fmt.Sprintf("%s-%s-krt-conf", runtimeID, versionName)
+func (m *Manager) getVersionKRTConfName(productID, versionName string) string {
+	return fmt.Sprintf("%s-%s-krt-conf", productID, versionName)
 }
 
 // createVersionKRTConf creates a config-map in k8s with all config values defined in the krt.yml.
 // This config-map will be regenerated when the values are changed in manager.UpdateConfig and the
 // version PODs will be restarted in order to get the new config values.
-func (m *Manager) createVersionKRTConf(ctx context.Context, runtimeID, versionName, ns string, krtConfigs []*versionpb.Config) error {
+func (m *Manager) createVersionKRTConf(ctx context.Context, productID, versionName, ns string, krtConfigs []*versionpb.Config) error {
 	m.logger.Info("Creating version krt configurations...")
 
 	values := map[string]string{}
@@ -41,11 +40,11 @@ func (m *Manager) createVersionKRTConf(ctx context.Context, runtimeID, versionNa
 
 	_, err := m.clientset.CoreV1().ConfigMaps(ns).Create(ctx, &apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: m.getVersionKRTConfName(runtimeID, versionName),
+			Name: m.getVersionKRTConfName(productID, versionName),
 			Labels: map[string]string{
 				"type":         "version",
 				"version-name": versionName,
-				"runtime-id":   runtimeID,
+				"product-id":   productID,
 			},
 		},
 		Data: values,
@@ -54,11 +53,11 @@ func (m *Manager) createVersionKRTConf(ctx context.Context, runtimeID, versionNa
 	return err
 }
 
-func (m *Manager) deleteVersionKRTConf(ctx context.Context, runtimeID, versionName, ns string) error {
-	return m.clientset.CoreV1().ConfigMaps(ns).Delete(ctx, m.getVersionKRTConfName(runtimeID, versionName), metav1.DeleteOptions{})
+func (m *Manager) deleteVersionKRTConf(ctx context.Context, productID, versionName, ns string) error {
+	return m.clientset.CoreV1().ConfigMaps(ns).Delete(ctx, m.getVersionKRTConfName(productID, versionName), metav1.DeleteOptions{})
 }
 
-func (m *Manager) createVersionConfFiles(ctx context.Context, runtimeID, versionName, ns string, workflows []*versionpb.Workflow) error {
+func (m *Manager) createVersionConfFiles(ctx context.Context, productID, versionName, ns string, workflows []*versionpb.Workflow) error {
 	m.logger.Info("Creating version config files...")
 
 	natsSubjectJSON, err := m.generateSubjects(workflows)
@@ -68,11 +67,11 @@ func (m *Manager) createVersionConfFiles(ctx context.Context, runtimeID, version
 
 	_, err = m.clientset.CoreV1().ConfigMaps(ns).Create(ctx, &apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%s-%s-conf-files", runtimeID, versionName),
+			Name: fmt.Sprintf("%s-%s-conf-files", productID, versionName),
 			Labels: map[string]string{
 				"type":         "version",
 				"version-name": versionName,
-				"runtime-id":   runtimeID,
+				"product-id":   productID,
 			},
 		},
 		Data: map[string]string{
@@ -142,7 +141,7 @@ func (m *Manager) createVersionConfFiles(ctx context.Context, runtimeID, version
     Match *
     Host  %s
     Port  %s
-`, runtimeID, m.config.NatsStreaming.Host, m.config.NatsStreaming.Port),
+`, productID, m.config.NatsStreaming.Host, m.config.NatsStreaming.Port),
 		},
 	}, metav1.CreateOptions{})
 

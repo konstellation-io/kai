@@ -16,7 +16,7 @@ const (
 	kindIngress = "Ingress"
 )
 
-func (m *Manager) ensureIngressCreated(ctx context.Context, name, runtimeID, activeServiceName string) error {
+func (m *Manager) ensureIngressCreated(ctx context.Context, name, productID, activeServiceName string) error {
 	m.logger.Infof("Creating ingress %s", name)
 	ingressExists, err := m.checkIngressExists(ctx, name)
 
@@ -28,7 +28,7 @@ func (m *Manager) ensureIngressCreated(ctx context.Context, name, runtimeID, act
 		return nil
 	}
 
-	ingress, err := m.getIngressDefinition(runtimeID, name, activeServiceName)
+	ingress, err := m.getIngressDefinition(productID, name, activeServiceName)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (m *Manager) checkIngressExists(ctx context.Context, name string) (bool, er
 	return true, nil
 }
 
-func (m *Manager) getIngressDefinition(runtimeID, name, activeServiceName string) (*v1.Ingress, error) {
+func (m *Manager) getIngressDefinition(productID, name, activeServiceName string) (*v1.Ingress, error) {
 	annotations, err := m.getIngressAnnotations()
 
 	if err != nil {
@@ -74,9 +74,9 @@ func (m *Manager) getIngressDefinition(runtimeID, name, activeServiceName string
 	}
 
 	labels := map[string]string{
-		"runtime-id": runtimeID,
+		"product-id": productID,
 	}
-	entrypointHost := fmt.Sprintf("%s-entrypoint.%s", runtimeID, m.config.BaseDomainName)
+	entrypointHost := fmt.Sprintf("%s-entrypoint.%s", productID, m.config.BaseDomainName)
 	ingress := &v1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: apiVersion,
@@ -155,6 +155,6 @@ func (m *Manager) getTLSCertSecretName(entrypointHost string) string {
 	return fmt.Sprintf("%s-tls", entrypointHost)
 }
 
-func (m *Manager) getIngressName(runtimeID string) string {
-	return fmt.Sprintf("%s-%s-entrypoint", m.config.ReleaseName, runtimeID)
+func (m *Manager) getIngressName(productID string) string {
+	return fmt.Sprintf("%s-%s-entrypoint", m.config.ReleaseName, productID)
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/konstellation-io/kai/engine/k8s-manager/config"
 )
 
-func NewClientset(cfg *config.Config) *kubernetes.Clientset {
+func NewClientset(cfg *config.Config) kubernetes.Interface {
 	kubeConfig := newKubernetesConfig(cfg)
 
 	// create the clientset

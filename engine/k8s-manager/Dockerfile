@@ -45,7 +45,6 @@ RUN mkdir -p /var/log/app
 WORKDIR /app
 COPY --from=builder /app/k8s-manager .
 COPY config.yml .
-COPY assets ./assets
 RUN chown -R kai:0 /app \
     && chmod -R g+w /app \
     && chown -R kai:0 /var/log/app \
