@@ -67,7 +67,7 @@ func (m *Manager) generateWorkflowConfig(req *versionpb.StartRequest,
 	wconf := WorkflowConfig{}
 	productID := req.ProductId
 
-	for idx, n := range workflow.Nodes {
+	for _, n := range workflow.Nodes {
 		wconf[n.Id] = NodeConfig{
 			"KRT_WORKFLOW_ID":                   workflow.GetId(),
 			"KRT_WORKFLOW_NAME":                 workflow.GetName(),
@@ -90,12 +90,6 @@ func (m *Manager) generateWorkflowConfig(req *versionpb.StartRequest,
 
 		if n.ObjectStore != nil {
 			wconf[n.Id]["KRT_NATS_OBJECT_STORE"] = *n.ObjectStore
-		}
-
-		// retrocompatibility konstellation-exitpoint config
-		if n.Name == "konstellation-exitpoint" {
-			nodeConfig := wconf[n.Id]
-			nodeConfig["KRT_LAST_NODE_NAME"] = workflow.Nodes[idx-1].Name
 		}
 	}
 
