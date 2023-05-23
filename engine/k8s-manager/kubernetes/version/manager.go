@@ -20,7 +20,7 @@ import (
 type Manager struct {
 	config    *config.Config
 	logger    *simplelogger.SimpleLogger
-	clientset *kubernetes.Clientset
+	clientset kubernetes.Interface
 }
 
 const (
@@ -36,7 +36,7 @@ func (m *Manager) getVersionServiceName(productID, versionName string) string {
 
 func New(cfg *config.Config,
 	logger *simplelogger.SimpleLogger,
-	clientset *kubernetes.Clientset,
+	clientset kubernetes.Interface,
 ) *Manager {
 	return &Manager{
 		cfg,
