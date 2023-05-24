@@ -32,10 +32,6 @@ type Config struct {
 	} `yaml:"server"`
 
 	Kubernetes struct {
-		K8sRuntimeOperator struct {
-			Version string `yaml:"version" envconfig:"KRE_KUBERNETES_OPERATOR_VERSION"`
-		} `yaml:"k8sRuntimeOperator"`
-
 		IsInsideCluster bool
 
 		Namespace string `envconfig:"POD_NAMESPACE"`

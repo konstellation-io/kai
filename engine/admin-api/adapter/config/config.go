@@ -15,9 +15,11 @@ type Config struct {
 	DevelopmentMode bool   `yaml:"developmentMode" envconfig:"KRE_DEVELOPMENT_MODE"`
 	ReleaseName     string `yaml:"releaseName" envconfig:"KRE_RELEASE_NAME"`
 	BaseDomainName  string `yaml:"baseDomainName" envconfig:"KRE_BASE_DOMAIN_NAME"`
-	Application     struct {
+
+	Application struct {
 		VersionStatusTimeout time.Duration `yaml:"versionStatusTimeout"`
 	} `yaml:"application"`
+
 	Admin struct {
 		APIAddress      string `yaml:"apiAddress" envconfig:"KRE_ADMIN_API_ADDRESS"`
 		BaseURL         string `yaml:"baseURL" envconfig:"KRE_ADMIN_API_BASE_URL"`
@@ -25,22 +27,6 @@ type Config struct {
 		CORSEnabled     bool   `yaml:"corsEnabled" envconfig:"KRE_ADMIN_CORS_ENABLED"`
 		StoragePath     string `yaml:"storagePath" envconfig:"KRE_ADMIN_STORAGE_PATH"`
 	} `yaml:"admin"`
-	SMTP struct {
-		Enabled    bool   `yaml:"enabled" envconfig:"KRE_SMTP_ENABLED"`
-		Sender     string `yaml:"sender" envconfig:"KRE_SMTP_SENDER"`
-		SenderName string `yaml:"senderName" envconfig:"KRE_SMTP_SENDER_NAME"`
-		User       string `yaml:"user" envconfig:"KRE_SMTP_USER"`
-		Pass       string `yaml:"pass" envconfig:"KRE_SMTP_PASS"`
-		Host       string `yaml:"host" envconfig:"KRE_SMTP_HOST"`
-		Port       int    `yaml:"port" envconfig:"KRE_SMTP_PORT"`
-	} `yaml:"smtp"`
-	Auth struct {
-		VerificationCodeDurationInMinutes int    `yaml:"verificationCodeDurationInMinutes" envconfig:"KRE_AUTH_VERIFICATION_CODE_DURATION_IN_MINUTES"` //nolint:lll // Cannot be split
-		JWTSignSecret                     string `yaml:"jwtSignSecret" envconfig:"KRE_AUTH_JWT_SIGN_SECRET"`
-		APITokenSecret                    string `yaml:"apiTokenSecret" envconfig:"KRE_AUTH_API_TOKEN_SECRET"`
-		SecureCookie                      bool   `yaml:"secureCookie" envconfig:"KRE_AUTH_SECURE_COOKIE"`
-		CookieDomain                      string `yaml:"cookieDomain" envconfig:"KRE_AUTH_COOKIE_DOMAIN"`
-	} `yaml:"auth"`
 	MongoDB struct {
 		Address             string `yaml:"address" envconfig:"KRE_MONGODB_URI"`
 		DBName              string `yaml:"dbName"`
@@ -48,9 +34,11 @@ type Config struct {
 		KRTBucket           string `yaml:"krtBucket"`
 		MongoExpressAddress string `yaml:"mongoExpressAddress" envconfig:"KRE_MONGODB_MONGOEXPRESS_ADDRESS"`
 	} `yaml:"mongodb"`
+
 	InfluxDB struct {
 		Address string `yaml:"address" envconfig:"KRE_INFLUXDB_ADDRESS"`
 	} `yaml:"influxdb"`
+
 	Chronograf struct {
 		Address string `yaml:"address" envconfig:"KRE_CHRONOGRAF_ADDRESS"`
 	} `yaml:"chronograf"`
@@ -58,10 +46,24 @@ type Config struct {
 	K8s struct {
 		Namespace string `yaml:"namespace" envconfig:"POD_NAMESPACE"`
 	} `yaml:"k8s"`
+
 	Services struct {
 		K8sManager  string `yaml:"k8sManager" envconfig:"KRE_SERVICES_K8S_MANAGER"`
 		NatsManager string `yaml:"natsManager" envconfig:"KRE_SERVICES_NATS_MANAGER"`
 	} `yaml:"services"`
+
+	Keycloak KeycloakConfig `yaml:"keycloak"`
+}
+
+// TODO: Get into an agreement with infra
+//
+//nolint:godox // this is a task to be done
+type KeycloakConfig struct {
+	URL           string `yaml:"base_url" envconfig:"KEYCLOAK_BASE_URL"`
+	Realm         string `yaml:"realm" envconfig:"KEYCLOAK_REALM"`
+	MasterRealm   string `yaml:"master_realm" envconfig:"KEYCLOAK_MASTER_REALM"`
+	AdminUsername string `yaml:"admin_username" envconfig:"KEYCLOAK_ADMIN_USERNAME"`
+	AdminPassword string `yaml:"admin_password" envconfig:"KEYCLOAK_ADMIN_PASSWORD"`
 }
 
 // NewConfig will read the config.yml file and override values with env vars.
