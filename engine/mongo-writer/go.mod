@@ -13,7 +13,6 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.34.28 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
