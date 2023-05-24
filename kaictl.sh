@@ -32,7 +32,7 @@ MONGO_PASS=123456
 # DEV Admin User
 ADMIN_DEV_EMAIL="dev@local.local"
 
-. .kaictl.conf
+. ./.kaictl.conf
 . ./scripts/kaictl/common_functions.sh
 . ./scripts/kaictl/cmd_help.sh
 . ./scripts/kaictl/cmd_minikube.sh

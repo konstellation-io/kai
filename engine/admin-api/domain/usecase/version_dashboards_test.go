@@ -1,3 +1,5 @@
+//go:build unit
+
 package usecase
 
 import (
@@ -29,7 +31,7 @@ func newVersionDashboardsSuite(t *testing.T) *versionDashboardsSuite {
 	logger := mocks.NewMockLogger(ctrl)
 	dashboardService := mocks.NewMockDashboardService(ctrl)
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
-	runtimeRepo := mocks.NewMockRuntimeRepo(ctrl)
+	runtimeRepo := mocks.NewMockProductRepo(ctrl)
 	versionService := mocks.NewMockVersionService(ctrl)
 	natsManagerService := mocks.NewMockNatsManagerService(ctrl)
 	userActivityInteractor := mocks.NewMockUserActivityInteracter(ctrl)

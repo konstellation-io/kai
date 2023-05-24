@@ -3,9 +3,8 @@ package http
 import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
-	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/httperrors"
 	kaimiddleware "github.com/konstellation-io/kai/engine/admin-api/delivery/http/middleware"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -23,16 +22,10 @@ const logFormat = "${time_rfc3339} INFO remote_ip=${remote_ip}, method=${method}
 	", user_agent=${user_agent}, error=${error}\n"
 
 // NewApp creates a new App instance.
-//
-
 func NewApp(
 	cfg *config.Config,
 	logger logging.Logger,
-	runtimeInteractor *usecase.RuntimeInteractor,
-	userInteractor *usecase.UserInteractor,
-	userActivityInteractor usecase.UserActivityInteracter,
-	versionInteractor *usecase.VersionInteractor,
-	metricsInteractor *usecase.MetricsInteractor,
+	gqlController controller.GraphQL,
 ) *App {
 	e := echo.New()
 	e.HideBanner = true
@@ -55,55 +48,20 @@ func NewApp(
 		}))
 	}
 
-	graphQLController := controller.NewGraphQLController(
-		cfg,
-		logger,
-		runtimeInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
-	)
-
-	middlewareErrorHandler := func(err error) error {
-		logger.Errorf("Error looking for jwt token: %s", err)
-		return httperrors.HTTPErrUnauthorized
-	}
-
-	skipIfHeaderPresent := func(existCondition bool) func(c echo.Context) bool {
-		return func(c echo.Context) bool {
-			auth := c.Request().Header.Get(echo.HeaderAuthorization)
-			authExists := auth != ""
-
-			return authExists == existCondition
-		}
-	}
-
-	jwtCookieMiddleware := middleware.JWTWithConfig(middleware.JWTConfig{
-		Skipper:      skipIfHeaderPresent(true),
-		SigningKey:   []byte(cfg.Auth.JWTSignSecret),
-		TokenLookup:  "cookie:token",
-		ErrorHandler: middlewareErrorHandler,
-	})
-
-	jwtHeaderMiddleware := middleware.JWTWithConfig(middleware.JWTConfig{
-		Skipper:      skipIfHeaderPresent(false),
-		SigningKey:   []byte(cfg.Auth.JWTSignSecret),
-		ErrorHandler: middlewareErrorHandler,
-	})
+	tokenParser := token.NewParser()
+	jwtAuthMiddleware := kaimiddleware.NewJwtAuthMiddleware(cfg, logger, tokenParser)
 
 	r := e.Group("/graphql")
-	r.Use(jwtCookieMiddleware)
-	r.Use(jwtHeaderMiddleware)
-	r.Any("", graphQLController.GraphQLHandler)
-	r.GET("/playground", graphQLController.PlaygroundHandler)
+	r.Use(jwtAuthMiddleware)
+	r.Any("", gqlController.GraphQLHandler)
+	r.GET("/playground", gqlController.PlaygroundHandler)
 
 	m := e.Group("/measurements")
-	m.Use(jwtCookieMiddleware)
+	m.Use(jwtAuthMiddleware)
 	m.Use(kaimiddleware.ChronografProxy(cfg.Chronograf.Address))
 
 	d := e.Group("/database")
-	d.Use(jwtCookieMiddleware)
+	d.Use(jwtAuthMiddleware)
 	d.Use(kaimiddleware.MongoExpressProxy(cfg.MongoDB.MongoExpressAddress))
 
 	return &App{

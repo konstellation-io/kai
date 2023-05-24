@@ -1,3 +1,5 @@
+//go:build unit
+
 package processor_test
 
 import (

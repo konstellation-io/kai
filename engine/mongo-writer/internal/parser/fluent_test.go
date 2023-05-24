@@ -1,3 +1,5 @@
+//go:build unit
+
 package parser_test
 
 import (
