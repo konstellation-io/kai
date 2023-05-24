@@ -1,4 +1,4 @@
-{{- $protocol := ternary  "https" "http" .Values.adminUI.tls.enabled -}}
+{{- $protocol := ternary  "https" "http" .Values.adminApi.tls.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
