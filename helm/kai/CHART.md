@@ -35,9 +35,8 @@
 | chronograf.persistence.size | string | `"2Gi"` | Storage size |
 | chronograf.persistence.storageClass | string | `"standard"` | Storage class name |
 | chronograf.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
-| config.admin.apiHost | string | `"api.kai.local"` | Api Hostname for Admin UI and Admin API |
+| config.admin.apiHost | string | `"api.kai.local"` | Api Hostname for Admin API |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
-| config.admin.frontendBaseURL | string | `"http://admin.kai.local"` | Frontend Base URL for Admin API |
 | config.admin.userEmail | string | `"dev@local.local"` | Email address for sending notifications |
 | config.auth.apiTokenSecret | string | `"api_token_secret"` | API token secret |
 | config.auth.cookieDomain | string | `"kai.local"` | Admin API secure cookie domain |

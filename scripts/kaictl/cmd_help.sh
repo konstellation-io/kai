@@ -50,10 +50,9 @@ show_root_help() {
    echo "$(help_global_header "")
 
     commands:
-      dev     creates a complete local environment and auto-login to frontend.
+      dev     creates a complete local environment.
       start   starts minikube kai profile.
       stop    stops minikube kai profile.
-      login   creates a login URL and open your browser automatically on the admin page.
       build   calls docker to build all images inside minikube.
       deploy  calls helm to create install/upgrade a kai release on minikube.
       delete  calls kubectl to remove runtimes or versions.

@@ -11,7 +11,6 @@
   - [Requirements](#requirements)
   - [Basic usage](#basic-usage)
   - [Local Environment](#local-environment)
-    - [Login](#login)
   - [Versioning lifecycle](#Versioning-lifecycle)
     - [Alphas](#Alphas)
     - [Releases](#Releases)
@@ -173,7 +172,6 @@ $> kaictl.sh [command] --help
       dev     creates a complete local environment.
       start   starts minikube kai profile.
       stop    stops minikube kai profile.
-      login   creates a login URL and open your browser automatically on the admin page.
       build   calls docker to build all images inside minikube.
       deploy  calls helm to create install/upgrade a kai release on minikube.
       delete  calls kubectl to remove runtimes or versions.
@@ -193,9 +191,9 @@ $ ./kaictl.sh dev
 
 It will install everything in the namespace specified in your development `.kaictl.conf` file.
 
-### Login to local environment
+### Hosts Configuration
 
-First, remember to edit your `/etc/hosts`, see `./kaictl.sh dev` output for more details.
+Remember to edit your `/etc/hosts`, see `./kaictl.sh dev` output for more details.
 
 **NOTE**: If you have the [hostctl](https://github.com/guumaster/hostctl) tool installed, updating `/etc/hosts` will be
 done automatically too.

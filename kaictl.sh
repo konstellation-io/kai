@@ -18,7 +18,6 @@ BUILD_ALL=1
 BUILD_ENGINE=0
 BUILD_RUNTIME=0
 BUILD_RUNNERS=0
-SKIP_FRONTEND_BUILD=0
 HOSTCTL_INSTALLED=0
 MINIKUBE_RESET=0
 MINIKUBE_CLEAN=0
@@ -40,7 +39,6 @@ ADMIN_DEV_EMAIL="dev@local.local"
 . ./scripts/kaictl/cmd_dev.sh
 . ./scripts/kaictl/cmd_build.sh
 . ./scripts/kaictl/cmd_deploy.sh
-. ./scripts/kaictl/cmd_login.sh
 . ./scripts/kaictl/cmd_delete.sh
 . ./scripts/kaictl/cmd_restart.sh
 
@@ -122,12 +120,6 @@ case $COMMAND in
   restart)
     cmd_restart "$@"
     echo_done "Restart done"
-    exit 0
-  ;;
-
-  login)
-    cmd_login "$@"
-    echo_done "Login done"
     exit 0
   ;;
 
