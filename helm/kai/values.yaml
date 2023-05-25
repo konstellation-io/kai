@@ -56,7 +56,7 @@ config:
   # -- Base domain name for Admin API and K8S Manager apps
   baseDomainName: 'local'
   admin:
-    # -- Api Hostname for Admin UI and Admin API
+    # -- Api Hostname for Admin API
     apiHost: api.kai.local
     # -- Frontend Base URL for Admin API
     frontendBaseURL: http://admin.kai.local

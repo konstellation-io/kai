@@ -1,4 +1,3 @@
-{{- $protocol := ternary  "https" "http" .Values.adminUI.tls.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,7 +9,7 @@ data:
   KRE_DEVELOPMENT_MODE: "{{ .Values.developmentMode }}"
   KRE_RELEASE_NAME: "{{ .Release.Name }}"
   KRE_ADMIN_FRONTEND_BASE_URL: "{{ .Values.config.admin.frontendBaseURL }}"
-  KRE_ADMIN_API_BASE_URL: "{{ $protocol }}://{{ .Values.config.admin.apiHost }}"
+  KRE_ADMIN_API_BASE_URL: "https://{{ .Values.config.admin.apiHost }}"
   KRE_ADMIN_CORS_ENABLED: "{{ .Values.config.admin.corsEnabled }}"
   KRE_SERVICES_K8S_MANAGER: "{{ .Release.Name }}-k8s-manager:50051"
   KRE_SERVICES_NATS_MANAGER: "{{ .Release.Name }}-nats-manager:50051"
