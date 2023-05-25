@@ -59,22 +59,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Admin UI labels
-*/}}
-{{- define "admin-ui.labels" -}}
-{{ include "kai.labels" . }}
-{{ include "admin-ui.selectorLabels" . }}
-{{- end }}
-
-{{/*
-Admin UI selector labels
-*/}}
-{{- define "admin-ui.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kai.name" . }}-admin-ui
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
 Chronograf labels
 */}}
 {{- define "chronograf.labels" -}}

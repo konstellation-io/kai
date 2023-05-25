@@ -1,5 +1,5 @@
 # -- Provide a name in place of kai for `app.kubernetes.io/name` labels
-nameOverride: ""
+nameOverride: ''
 
 # -- Whether to setup developement mode
 developmentMode: false
@@ -13,14 +13,14 @@ mongoExpress:
     # -- Image repository
     repository: mongo-express
     # -- Image tag
-    tag: "0.54.0"
+    tag: '0.54.0'
     # -- Image pull policy
     pullPolicy: IfNotPresent
   connectionString:
     # -- The name of the secret that contains a key with the MongoDB connection string.
-    secretName: ""
+    secretName: ''
     # --The name of the secret key that contains the MongoDB connection string.
-    secretKey: ""
+    secretKey: ''
 
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -30,7 +30,8 @@ mongoExpress:
   # -- Assign custom affinity rules to the Mongo Express pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
-  affinity: {}
+  affinity:
+    {}
     # nodeAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #     nodeSelectorTerms:
@@ -53,7 +54,7 @@ mongoExpress:
 # Config from kai/helm
 config:
   # -- Base domain name for Admin API and K8S Manager apps
-  baseDomainName: "local"
+  baseDomainName: 'local'
   admin:
     # -- Api Hostname for Admin UI and Admin API
     apiHost: api.kai.local
@@ -67,9 +68,9 @@ config:
     # -- Whether to enable SMTP server connection
     enabled: false
     # -- SMTP server user
-    user: ""
+    user: ''
     # -- SMTP server password
-    pass: ""
+    pass: ''
   auth:
     # -- Verification login link duration
     verificationCodeDurationInMinutes: 1
@@ -84,9 +85,9 @@ config:
   mongodb:
     connectionString:
       # -- The name of the secret that contains a key with the MongoDB connection string.
-      secretName: ""
+      secretName: ''
       # --The name of the secret key that contains the MongoDB connection string.
-      secretKey: ""
+      secretKey: ''
 
 adminApi:
   # -- Default application log level
@@ -151,72 +152,8 @@ adminApi:
   # -- Assign custom affinity rules to the Admin API pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
-  affinity: {}
-    # nodeAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #     nodeSelectorTerms:
-    #     - matchExpressions:
-    #       - key: kubernetes.io/e2e-az-name
-    #         operator: In
-    #         values:
-    #         - e2e-az1
-    #         - e2e-az2
-
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-
-adminUI:
-  image:
-    # -- Image repository
-    repository: konstellation/kai-admin-ui
-    # -- Image tag
-    tag: latest
-    # -- Image pull policy
-    pullPolicy: IfNotPresent
-  ingress:
-    ## This Chart has been developed using Nginx Ingress Controller by default.
-    ## Using the following default annotations ensures its correct operation.
-    ## Ref: https://kubernetes.github.io/ingress-nginx/
-    ##
-    # -- The name of the ingress class to use
-    className: nginx
-    # -- Ingress annotations
-    annotations: {}
-      ## If additional annotations are needed to configure it, provide an additional
-      ## file ensuring they are appended to the default ones.
-      ##
-      ## Example:
-      ##
-      # kubernetes.io/ingress.class: nginx
-      # cert-manager.io/issuer: your-issuer
-
-      ## Ensure different annotations are provided when another ingress controller is being used
-      ## (for example, through an additional values.yaml)
-      ## For example, when the ingress controller is Traefik instead of Nginx:
-      ##
-      # traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
-      # kubernetes.io/ingress.class: traefik
-  tls:
-    # -- Whether to enable TLS
-    enabled: false
-  # -- Hostname
-  host: admin.kai.local
-
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-
-  # -- Assign custom affinity rules to the Admin UI pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
+  affinity:
+    {}
     # nodeAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #     nodeSelectorTerms:
@@ -249,7 +186,7 @@ k8sManager:
     create: true
     # -- The name of the service account.
     # @default: A pre-generated name based on the chart relase fullname sufixed by `-k8s-manager`
-    name: ""
+    name: ''
     # -- The Service Account annotations
     annotations: {}
   krtFilesDownloader:
@@ -265,7 +202,7 @@ k8sManager:
     tls: false
     ingress:
       # -- The ingressClassName to use for the enypoints' generated ingresses
-      className: "nginx"
+      className: 'nginx'
       # -- The annotations that all the generated ingresses for the entrypoints will have
       # @default -- See `entrypoints.ingress.annotations` in [values.yaml](./values.yaml)
       annotations:
@@ -274,7 +211,7 @@ k8sManager:
         ## Ref: https://kubernetes.github.io/ingress-nginx/
         ##
         nginx.ingress.kubernetes.io/proxy-body-size: 16m
-        nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+        nginx.ingress.kubernetes.io/backend-protocol: 'GRPC'
         # Based on this snippet:
         # https://github.com/kubernetes/ingress-nginx/issues/5609#issuecomment-634908849
         nginx.ingress.kubernetes.io/server-snippet: |
@@ -309,7 +246,7 @@ k8sManager:
       tls:
         # -- TLS certificate secret name. If defined, wildcard for the current application domain must be used.
         # @default -- If not defined, every created ingress will use an autogenerated certificate name based on the deployed runtimeId and .Values.config.baseDomainName.
-        secretName: ""
+        secretName: ''
 
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -319,7 +256,8 @@ k8sManager:
   # -- Assign custom affinity rules to the K8S Manager pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
-  affinity: {}
+  affinity:
+    {}
     # nodeAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #     nodeSelectorTerms:
@@ -356,7 +294,8 @@ mongoWriter:
   # -- Assign custom affinity rules to the Mongo Writter pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
-  affinity: {}
+  affinity:
+    {}
     # nodeAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #     nodeSelectorTerms:
@@ -444,10 +383,10 @@ nats:
     pingInterval:
 
     # -- Grace period after pod begins shutdown before starting to close client connections
-    lameDuckGracePeriod: "10s"
+    lameDuckGracePeriod: '10s'
 
     # -- Duration over which to slowly close close client connections after lameDuckGracePeriod has passed
-    lameDuckDuration: "30s"
+    lameDuckDuration: '30s'
 
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -457,7 +396,8 @@ nats:
   # -- Assign custom affinity rules to the NATS pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
-  affinity: {}
+  affinity:
+    {}
     # nodeAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #     nodeSelectorTerms:
@@ -489,7 +429,7 @@ chronograf:
     # -- Whether to enable persistence
     enabled: true
     # -- Storage class name
-    storageClass: "standard"
+    storageClass: 'standard'
     # -- Access mode for the volume
     accessMode: ReadWriteOnce
     # -- Storage size
@@ -503,7 +443,8 @@ chronograf:
   # -- Assign custom affinity rules to the Chronograf pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
-  affinity: {}
+  affinity:
+    {}
     # nodeAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #     nodeSelectorTerms:
@@ -537,7 +478,7 @@ influxdb:
     # -- Whether to enable persistence. See https://github.com/influxdata/helm-charts/tree/master/charts/influxdb#configure-the-chart for more info
     enabled: true
     # -- Storage class name
-    storageClass: "standard"
+    storageClass: 'standard'
     # -- Access mode for the volume
     accessMode: ReadWriteOnce
     # -- Storage size
@@ -558,7 +499,8 @@ influxdb:
   # -- Assign custom affinity rules to the InfluxDB pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
-  affinity: {}
+  affinity:
+    {}
     # nodeAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #     nodeSelectorTerms:
