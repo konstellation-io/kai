@@ -18,20 +18,6 @@ cmd_dev() {
         shift
       ;;
 
-      # Use it when you want to develop on admin-ui outside k8s and using the mock server
-      --frontend-mock)
-        KRE_ADMIN_API_HOST="dev-admin.kai.local:4000"
-        KRE_ADMIN_FRONTEND_BASE_URL="http://dev-admin.kai.local:3000"
-        SKIP_FRONTEND_BUILD=1
-        shift
-      ;;
-
-      # Use it when you want to develop on admin-ui outside k8s
-      --local-frontend)
-        KRE_ADMIN_FRONTEND_BASE_URL="http://dev-admin.kai.local:3000"
-        SKIP_FRONTEND_BUILD=1
-        shift
-      ;;
       --etchost)
         # Automatic update of /etc/hosts
         update_etc_hosts
