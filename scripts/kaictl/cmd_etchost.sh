@@ -6,7 +6,6 @@ cmd_etchost() {
     update_etc_hosts
   else
     show_etc_hosts
-    echo_info "After that you can run \`$(basename $0) login \` to access Admin UI"
     echo
     echo_yellow "This can be automated with 'hostctl' tool. Download it from here: https://github.com/guumaster/hostctl/releases"
   fi
