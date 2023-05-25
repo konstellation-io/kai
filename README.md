@@ -26,7 +26,6 @@ Konstellation AI is an application that allow to run AI/ML models for inference 
 
 |  Component  | Coverage  |  Bugs  |  Maintainability Rating  |  Go report  |
 | :---------: | :-----:   |  :---: |  :--------------------:  |  :---: |
-|  Admin UI  | [![coverage][admin-ui-coverage]][admin-ui-coverage-link] | [![bugs][admin-ui-bugs]][admin-ui-bugs-link] | [![mr][admin-ui-mr]][admin-ui-mr-link] | - | 
 |  Admin API  | [![coverage][admin-api-coverage]][admin-api-coverage-link] | [![bugs][admin-api-bugs]][admin-api-bugs-link] | [![mr][admin-api-mr]][admin-api-mr-link] | [![report][admin-api-report-badge]][admin-api-report-link] | 
 |  K8s Manager | [![coverage][k8s-manager-coverage]][k8s-manager-coverage-link] | [![bugs][k8s-manager-bugs]][k8s-manager-bugs-link] | [![mr][k8s-manager-mr]][k8s-manager-mr-link] | [![report][k8s-manager-report-badge]][k8s-manager-report-badge] |
 |  NATS Manager | [![coverage][nats-manager-coverage]][nats-manager-coverage-link] | [![bugs][nats-manager-bugs]][nats-manager-bugs-link] | [![mr][nats-manager-mr]][nats-manager-mr-link] | [![report][nats-manager-report-badge]][nats-manager-report-badge] |
@@ -64,7 +63,6 @@ managing the full lifecycle of this AI solution.
 
 The Engine is composed of the following components:
 
-* [Admin UI](engine/admin-ui/README.md)
 * [Admin API](engine/admin-api/README.md)
 * [K8s Manager](engine/k8s-manager/README.md)
 * [Mongo Writer](engine/mongo-writer/README.md)
@@ -195,32 +193,6 @@ $ ./kaictl.sh dev
 
 It will install everything in the namespace specified in your development `.kaictl.conf` file.
 
-### Login to local environment
-
-First, remember to edit your `/etc/hosts`, see `./kaictl.sh dev` output for more details.
-
-**NOTE**: If you have the [hostctl](https://github.com/guumaster/hostctl) tool installed, updating `/etc/hosts` will be
-done automatically too.
-
-Now you can access the admin UI visiting the login URL that will be opened automatically by executing the following
-script:
-
-```bash
-$ ./kaictl.sh login [--new]
-```
-
-You will see an output like this:
-
-```bash
-⏳ Calling Admin API...
-
- Login done. Open your browser at:
-
- 🌎 http://admin.kai.local/signin/c7d024eb-ce35-4328-961a-7d2b79ee8988
-
-✔️  Done.
-```
-
 # Versioning lifecycle
 
 There are three stages in the development lifecycle of KAI there are three main stages depending on if we are going to
@@ -244,23 +216,6 @@ If you find out a bug in a release, you can apply a bugfix just by creating a `f
 branch, and create a Pull Request towards the same release branch. When merged, the tests will be run against it, and
 after passing all the tests, a new `fix tag` will be created increasing the patch portion of the version, and a new
 release will be build and released.
-
-
-[admin-ui-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_admin_ui&metric=coverage
-
-[admin-ui-coverage-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kre_admin_ui&metric=Coverage
-
-[admin-ui-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_admin_ui&metric=bugs
-
-[admin-ui-bugs-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kre_admin_ui&metric=Reliability
-
-[admin-ui-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_admin_ui&metric=ncloc
-
-[admin-ui-loc-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kre_admin_ui&metric=Coverage
-
-[admin-ui-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_admin_ui&metric=sqale_rating
-
-[admin-ui-mr-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kre_admin_ui&metric=Maintainability
 
 [admin-api-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_admin_api&metric=coverage
 

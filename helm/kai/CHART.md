@@ -25,16 +25,6 @@
 | adminApi.storage.size | string | `"1Gi"` | Storage class size |
 | adminApi.tls.enabled | bool | `false` | Whether to enable TLS |
 | adminApi.tolerations | list | `[]` | Tolerations for use with node taints |
-| adminUI.affinity | object | `{}` | Assign custom affinity rules to the Admin UI pods |
-| adminUI.host | string | `"admin.kai.local"` | Hostname |
-| adminUI.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
-| adminUI.image.repository | string | `"konstellation/kai-admin-ui"` | Image repository |
-| adminUI.image.tag | string | `"latest"` | Image tag |
-| adminUI.ingress.annotations | object | `{}` | Ingress annotations |
-| adminUI.ingress.className | string | `"nginx"` | The name of the ingress class to use |
-| adminUI.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
-| adminUI.tls.enabled | bool | `false` | Whether to enable TLS |
-| adminUI.tolerations | list | `[]` | Tolerations for use with node taints |
 | chronograf.affinity | object | `{}` | Assign custom affinity rules to the Chronograf pods |
 | chronograf.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | chronograf.image.repository | string | `"chronograf"` | Image repository |
@@ -45,7 +35,7 @@
 | chronograf.persistence.size | string | `"2Gi"` | Storage size |
 | chronograf.persistence.storageClass | string | `"standard"` | Storage class name |
 | chronograf.tolerations | list | `[]` | Tolerations for use with node taints |
-| config.admin.apiHost | string | `"api.kai.local"` | Api Hostname for Admin UI and Admin API |
+| config.admin.apiHost | string | `"api.kai.local"` | Api Hostname for Admin API |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.admin.frontendBaseURL | string | `"http://admin.kai.local"` | Frontend Base URL for Admin API |
 | config.admin.userEmail | string | `"dev@local.local"` | Email address for sending notifications |
