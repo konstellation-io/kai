@@ -54,7 +54,6 @@ type VersionInteractor struct {
 	userActivityInteractor UserActivityInteracter
 	accessControl          auth.AccessControl
 	idGenerator            version.IDGenerator
-	docGenerator           version.DocGenerator
 	dashboardService       service.DashboardService
 	nodeLogRepo            repository.NodeLogRepository
 }
@@ -70,7 +69,6 @@ func NewVersionInteractor(
 	userActivityInteractor UserActivityInteracter,
 	accessControl auth.AccessControl,
 	idGenerator version.IDGenerator,
-	docGenerator version.DocGenerator,
 	dashboardService service.DashboardService,
 	nodeLogRepo repository.NodeLogRepository,
 ) *VersionInteractor {
@@ -84,7 +82,6 @@ func NewVersionInteractor(
 		userActivityInteractor,
 		accessControl,
 		idGenerator,
-		docGenerator,
 		dashboardService,
 		nodeLogRepo,
 	}
@@ -266,9 +263,6 @@ func (i *VersionInteractor) completeVersionCreation(
 	dashboardsFolder := path.Join(tmpDir, "metrics/dashboards")
 	contentErrors = i.saveKRTDashboards(ctx, dashboardsFolder, product, versionCreated, contentErrors)
 
-	docFolder := path.Join(tmpDir, "docs")
-	contentErrors = i.saveKRTDoc(product.ID, docFolder, versionCreated, contentErrors, ctx)
-
 	err := i.versionRepo.UploadKRTFile(product.ID, versionCreated, tmpKrtFile.Name())
 	if err != nil {
 		errorMessage := "error storing KRT file"
@@ -311,33 +305,6 @@ func (i *VersionInteractor) saveKRTDashboards(
 			//nolint:goerr113 // errors dynamically generated
 			contentErrors = append(contentErrors, errors.New(errorMessage))
 		}
-	}
-
-	return contentErrors
-}
-
-func (i *VersionInteractor) saveKRTDoc(
-	productID, docFolder string,
-	versionCreated *entity.Version,
-	contentErrors []error,
-	ctx context.Context,
-) []error {
-	if _, err := os.Stat(path.Join(docFolder, "README.md")); err == nil {
-		err = i.docGenerator.Generate(versionCreated.Name, docFolder)
-		if err != nil {
-			errorMessage := "error generating version doc"
-			//nolint:goerr113 // errors dynamically generated
-			contentErrors = append(contentErrors, errors.New(errorMessage))
-		}
-
-		err = i.versionRepo.SetHasDoc(ctx, productID, versionCreated.ID, true)
-		if err != nil {
-			errorMessage := "error updating has doc field"
-			//nolint:goerr113 // errors dynamically generated
-			contentErrors = append(contentErrors, errors.New(errorMessage))
-		}
-	} else {
-		i.logger.Infof("No documentation found inside the krt files")
 	}
 
 	return contentErrors
