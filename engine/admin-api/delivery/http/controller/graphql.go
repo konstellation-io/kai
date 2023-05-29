@@ -16,7 +16,6 @@ import (
 
 //go:generate mockgen -source=${GOFILE} -destination=../../../mocks/controller_${GOFILE} -package=mocks
 
-const UserIDContextKey = "userID"
 const UserContextKey = "user"
 
 type GraphQL interface {
@@ -72,7 +71,7 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 	r := c.Request()
 
 	//nolint:staticcheck // legacy code
-	ctx := context.WithValue(r.Context(), UserIDContextKey, user.ID)
+	ctx := context.WithValue(r.Context(), UserContextKey, user)
 
 	h.ServeHTTP(c.Response(), r.WithContext(ctx))
 
