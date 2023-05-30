@@ -2,7 +2,6 @@ developmentMode: {{ requiredEnv "DEVELOPMENT_MODE" }}
 config:
   admin:
     apiHost: {{ requiredEnv "KRE_ADMIN_API_HOST" | quote }}
-    frontendBaseURL: {{ requiredEnv "KRE_ADMIN_FRONTEND_BASE_URL" | quote }}
   mongodb:
     connectionString:
       secretName: mongodb-database-kai-connection-string

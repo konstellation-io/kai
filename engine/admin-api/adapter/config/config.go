@@ -21,11 +21,10 @@ type Config struct {
 	} `yaml:"application"`
 
 	Admin struct {
-		APIAddress      string `yaml:"apiAddress" envconfig:"KRE_ADMIN_API_ADDRESS"`
-		BaseURL         string `yaml:"baseURL" envconfig:"KRE_ADMIN_API_BASE_URL"`
-		FrontEndBaseURL string `yaml:"frontendBaseURL" envconfig:"KRE_ADMIN_FRONTEND_BASE_URL"`
-		CORSEnabled     bool   `yaml:"corsEnabled" envconfig:"KRE_ADMIN_CORS_ENABLED"`
-		StoragePath     string `yaml:"storagePath" envconfig:"KRE_ADMIN_STORAGE_PATH"`
+		APIAddress  string `yaml:"apiAddress" envconfig:"KRE_ADMIN_API_ADDRESS"`
+		BaseURL     string `yaml:"baseURL" envconfig:"KRE_ADMIN_API_BASE_URL"`
+		CORSEnabled bool   `yaml:"corsEnabled" envconfig:"KRE_ADMIN_CORS_ENABLED"`
+		StoragePath string `yaml:"storagePath" envconfig:"KRE_ADMIN_STORAGE_PATH"`
 	} `yaml:"admin"`
 	MongoDB struct {
 		Address             string `yaml:"address" envconfig:"KRE_MONGODB_URI"`

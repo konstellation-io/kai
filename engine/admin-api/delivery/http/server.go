@@ -43,7 +43,6 @@ func NewApp(
 
 	if cfg.Admin.CORSEnabled {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     []string{cfg.Admin.FrontEndBaseURL},
 			AllowCredentials: true,
 		}))
 	}
