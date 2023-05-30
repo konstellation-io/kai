@@ -104,7 +104,6 @@ This major version comes with the following changes:
 * **Resource label refactor**: Labels have changed for some resources, so the following resources must be manually deleted before updating.
 
     Affected deployment resources:
-    * Admin UI
     * Admin API
     * Chronograf
     * k8s-manager

@@ -5,7 +5,6 @@ application:
 admin:
   apiAddress: ":4000"
   baseURL: "http://api.kai.local"
-  frontendBaseURL: "http://admin.kai.local"
   corsEnabled: true
   storagePath: /admin-api-files
 smtp:

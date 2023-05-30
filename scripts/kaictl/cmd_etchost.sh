@@ -6,7 +6,7 @@ cmd_etchost() {
     update_etc_hosts
   else
     show_etc_hosts
-    echo_info "After that you can run \`$(basename $0) login \` to access Admin UI"
+    echo_info "After that you can run \`$(basename $0) login \` to access Admin API"
     echo
     echo_yellow "This can be automated with 'hostctl' tool. Download it from here: https://github.com/guumaster/hostctl/releases"
   fi
@@ -23,8 +23,6 @@ update_etc_hosts() {
   MINIKUBE_IP=$(minikube ip -p "$MINIKUBE_PROFILE")
   echo "$MINIKUBE_IP api.kai.local
 $MINIKUBE_IP admin.kai.local
-# If you are using local frontend
-127.0.0.1 dev-admin.kai.local
 " > /tmp/kai.hostctl
 
   SUDO=''
@@ -47,6 +45,5 @@ show_etc_hosts() {
   echo
   echo "$MINIKUBE_IP api.kai.local"
   echo "$MINIKUBE_IP admin.kai.local"
-  echo "127.0.0.1 dev-admin.kai.local # If you are using local frontend"
   echo
 }
