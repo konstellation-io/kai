@@ -1,0 +1,47 @@
+resources:
+- apiVersion: postgresql.cnpg.io/v1
+  kind: Cluster
+  metadata:
+    name: kai-postgres
+  spec:
+    description: "KAI server development database cluster"
+    imageName: ghcr.io/cloudnative-pg/postgresql:15.2
+    instances: 1
+    startDelay: 60
+    stopDelay: 60
+    primaryUpdateStrategy: unsupervised
+
+    postgresql:
+      # parameters:
+      #   shared_buffers: 256MB
+      #   pg_stat_statements.max: '10000'
+      #   pg_stat_statements.track: all
+      #   auto_explain.log_min_duration: '10s'
+      # pg_hba:
+      #   - host all all 10.244.0.0/16 md5
+
+    bootstrap:
+      initdb:
+        # Random password will be generated
+        database: keycloak
+        owner: keycloak    
+
+    #superuserSecret:
+    #  name: cluster-example-superuser
+
+    storage:
+      storageClass: standard
+      size: 1Gi
+
+
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "1"
+      limits:
+        memory: "1Gi"
+        cpu: "2"
+
+    nodeMaintenanceWindow:
+      inProgress: false
+      reusePVC: false

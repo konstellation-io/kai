@@ -18,6 +18,8 @@ templates:
     - "values/{{`{{ .Release.Name }}`}}/values.yaml"
 
 repositories:
+  - name: cnpg
+    url: https://cloudnative-pg.github.io/charts
   - name: mongodb
     url: https://mongodb.github.io/helm-charts
   - name: bedag
@@ -33,9 +35,22 @@ releases:
     chart: bedag/raw
     needs:
     - kai/mongodb-operator
+  
+  - name: cnpg
+    <<: *default
+    chart: cnpg/cloudnative-pg
+    version: 0.18.0
+    namespace: cnpg-system
+
+  - name: postgres-database
+    <<: *default
+    chart: bedag/raw
+    needs:
+    - cnpg-system/cnpg
 
   - name: "{{ requiredEnv "RELEASE_NAME" }}"
     <<: *default
     chart: ../../helm/kai
     needs:
     - kai/mongodb-database
+    - kai/postgres-database
