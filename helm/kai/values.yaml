@@ -114,7 +114,6 @@ adminApi:
     # -- Ingress annotations
     # @default -- See `adminApi.ingress.annotations` in [values.yaml](./values.yaml)
     annotations: {}
-      ## If additional 
 
   storage:
     # -- Storage class name
@@ -235,7 +234,7 @@ keycloak:
       passwordKey: ""
 
   # -- Args to pass to the Keycloak startup command. This takes precedence over options passed through env variables
-  argsOverride:
+  argsOverride: {}
   # argsOverride:
   #  - "--hostname-strict-https"
 
@@ -244,16 +243,30 @@ keycloak:
   # extraEnv:
   #  KC_HOSTNAME_STRICT_HTTPS: "false"
   #  KC_FEATURES: "admin-fine-grained-authz"
+
+  # -- The name of the realm that will be crated on Keycloak first startup
+  realmName: "konstellation"
+  # -- The name of the client that will be crated on Keycloak first startup
+  
+  oidcClient:
+    clientId: "konstellation-oidc"
+    # -- The secret for the OIDC client that will be created on Keycloak first startup
+    secret: ""
+  kong:
+    # -- The name of the OIDC Kong plugin
+    oidcPluginName: "oidc"
  
   config:
-    # -- Wethter to enable metrics
+    # -- Whether to enable metrics
     metricsEnabled: "false"
-    # -- Wethter to enable http
+    # -- Whether to enable http
     httpEnabled: "true"
     # -- Disables dynamically resolving the hostname from request headers. Should always be set to true in production, unless proxy verifies the Host header.
     hostnameStrict: "false"
     # -- The proxy address forwarding mode if the server is behind a reverse proxy. Valid values are `none`, `edge`, `reencrypt` and `passthrough` 
     proxy: edge
+    # -- If the server should expose health check endpoints. If set to "false", container liveness and readiness probes should be disabled. 
+    healthEnabled: "true"
   
   db:
     # -- Keycloak database type
@@ -276,7 +289,7 @@ keycloak:
       # -- The name of the secret key that contains the database password.
       secretPasswordKey: ""
       # -- The name of the secret key that contains the database name. Takes precedence over `database`
-      secretDatabaseKey: ""  
+      secretDatabaseKey: ""
 
   image:
     # -- The image repository
@@ -324,7 +337,7 @@ keycloak:
 
   tls:
     # -- Whether to enable TLS
-    enabled: true
+    enabled: false
     
   ingress:
     ## This Chart has been developed using Nginx Ingress Controller by default.
@@ -342,10 +355,25 @@ keycloak:
   resources: {}
 
   # -- Container liveness probe
-  livinessProbe: {}
+  livinessProbe:
+    httpGet:
+      path: /health/live
+      port: http
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+
 
   # -- Container readiness probe
-  readinessProbe: {}
+  readinessProbe:
+    httpGet:
+      path: /health/ready
+      port: http
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
 
   # -- Define which Nodes the Pods are scheduled on.
   nodeSelector: {}

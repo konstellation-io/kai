@@ -10,7 +10,7 @@ metadata:
   {{- end }}
 spec:
   ingressClassName: {{ .Values.keycloak.ingress.className }}
-  {{- if .Values.keycloak.tls }}
+  {{- if .Values.keycloak.tls.enabled }}
   tls:
     - hosts:
         - {{ .Values.keycloak.host }}

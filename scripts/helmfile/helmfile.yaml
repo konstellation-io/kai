@@ -18,6 +18,8 @@ templates:
     - "values/{{`{{ .Release.Name }}`}}/values.yaml"
 
 repositories:
+  - name: kong
+    url: https://charts.konghq.com
   - name: cnpg
     url: https://cloudnative-pg.github.io/charts
   - name: mongodb
@@ -26,6 +28,12 @@ repositories:
     url: https://bedag.github.io/helm-charts/
 
 releases:
+  - name: kong
+    <<: *default
+    chart: kong/kong
+    version: 2.22.0
+    namespace: kong
+
   - name: "mongodb-operator"
     <<: *default
     chart: mongodb/community-operator
@@ -54,3 +62,4 @@ releases:
     needs:
     - kai/mongodb-database
     - kai/postgres-database
+    - kong/kong

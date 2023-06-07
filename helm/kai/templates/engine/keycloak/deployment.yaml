@@ -11,8 +11,10 @@ spec:
       {{- include "keycloak.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.keycloak.podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/engine/keycloak/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/engine/keycloak/secret.yaml") . | sha256sum }}
+      {{- with .Values.keycloak.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -37,6 +39,7 @@ spec:
           {{- else }}
           args:
             - start
+            - --import-realm
           {{- end }}
           envFrom:
             - configMapRef:
@@ -98,17 +101,20 @@ spec:
             - name: https
               containerPort: 8443
               protocol: TCP
-          {{- if .Values.keycloak.livenessProbe }}}
+          {{- with .Values.keycloak.livinessProbe }}
           livenessProbe:
-            {{- toYaml .Values.keycloak.livinessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.keycloak.readinessProbe }}
+          {{- with .Values.keycloak.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.keycloak.readinessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.keycloak.resources | nindent 12 }}
           volumeMounts:
+            - name: keycloak-realm-config
+              mountPath: /opt/keycloak/data/import/konstellation-realm.json
+              subPath: realm.json
             {{- if .Values.keycloak.extraVolumeMounts }}
             {{- toYaml .Values.keycloak.extraVolumeMounts | nindent 12 }}
             {{- end }}
@@ -125,6 +131,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
+        - name: keycloak-realm-config
+          secret:
+            secretName: {{ include "keycloak.secretName" . }}-realm-config
         {{- if .Values.keycloak.extraVolumes }}
         {{- toYaml .Values.keycloak.extraVolumes | nindent 8 }}
         {{- end }}

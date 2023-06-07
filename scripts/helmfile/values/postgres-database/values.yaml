@@ -24,7 +24,7 @@ resources:
       initdb:
         # Random password will be generated
         database: keycloak
-        owner: keycloak    
+        owner: keycloak
 
     #superuserSecret:
     #  name: cluster-example-superuser

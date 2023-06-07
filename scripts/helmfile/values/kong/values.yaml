@@ -1,0 +1,19 @@
+env.database: "off"
+
+image:
+  repository: cristianchiru/docker-kong-oidc
+  tag: 3.2.2-4
+
+env:
+    plugins: bundled,oidc
+
+    # We set SHM as session storage because is the recomended setting for a single Kong instance when
+    # using cristianchiru/docker-kong-oidc image.
+    # See https://github.com/revomatico/docker-kong-oidc#session-shm
+    x_session_storage: shm
+    x_session_secret: c2VjcmV0
+
+proxy:
+  type: LoadBalancer
+  tls:
+    enabled: false

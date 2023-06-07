@@ -39,6 +39,7 @@ minikube_start() {
         --driver="$MINIKUBE_DRIVER" \
         #--extra-config=apiserver.authorization-mode=RBAC
 
+      run minikube addons enable kong -p "$MINIKUBE_PROFILE"
       run minikube addons enable ingress -p "$MINIKUBE_PROFILE"
       run minikube addons enable registry -p "$MINIKUBE_PROFILE"
       run minikube addons enable storage-provisioner -p "$MINIKUBE_PROFILE"

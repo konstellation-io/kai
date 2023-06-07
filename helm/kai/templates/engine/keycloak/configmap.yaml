@@ -9,6 +9,7 @@ data:
   KC_HTTP_ENABLED: "{{ .Values.keycloak.config.httpEnabled }}"
   KC_HOSTNAME_STRICT: "{{ .Values.keycloak.config.hostnameStrict }}"
   KC_PROXY: "{{ .Values.keycloak.config.proxy }}"
+  KC_HEALTH_ENABLED: "{{ .Values.keycloak.config.healthEnabled }}"
   {{- if not .Values.keycloak.db.auth.secretDatabaseKey }}
   KC_DB_URL_DATABASE: "{{ .Values.keycloak.db.auth.database }}"
   {{- end }}

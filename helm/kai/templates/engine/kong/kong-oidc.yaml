@@ -1,0 +1,13 @@
+{{- $protocol := ternary  "https" "http" .Values.keycloak.tls.enabled -}}
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: {{ include "kai.fullname" .}}-oidc
+config:
+  client_id: "{{ .Values.keycloak.oidcClient.clientId }}"
+  client_secret: "{{ .Values.keycloak.oidcClient.secret }}"
+  discovery: {{ $protocol }}://{{ .Values.keycloak.host }}/realms/{{ .Values.keycloak.realmName }}/.well-known/openid-configuration
+  access_token_header_name: "Authorization"
+  access_token_as_bearer: "yes"
+  scope: "openid"
+plugin: {{ .Values.keycloak.kong.oidcPluginName }}
