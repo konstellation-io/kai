@@ -15,5 +15,5 @@ dependencies:
 - name: raw
   repository: https://bedag.github.io/helm-charts/
   version: 2.0.0
-digest: sha256:6e58ba3e5eaa422ae874e7f9602d83dddebdcd408b48cdd6943fc13f503456d2
-generated: "2023-06-07T21:12:59.572333955+02:00"
+digest: sha256:e60e84eee4181454c96e2036e0bea1fde096d77e52f65d97a29c5773ccc7ccbf
+generated: "2023-06-08T19:27:14.505581689+02:00"

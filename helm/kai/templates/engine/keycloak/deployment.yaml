@@ -95,9 +95,11 @@ spec:
             {{- end }}
             {{- end }}
           ports:
+            {{- if .Values.keycloak.config.httpEnabled }}
             - name: http
               containerPort: 8080
               protocol: TCP
+            {{- end }}
             - name: https
               containerPort: 8443
               protocol: TCP

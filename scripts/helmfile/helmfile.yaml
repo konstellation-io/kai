@@ -33,6 +33,7 @@ releases:
     chart: kong/kong
     version: 2.22.0
     namespace: kong
+    wait: false
 
   - name: "mongodb-operator"
     <<: *default

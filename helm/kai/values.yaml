@@ -219,7 +219,7 @@ k8sManager:
   #   effect: "NoSchedule"
 
 keycloak:
-  host: "keycloak.kai.local"
+  host: "auth.kai.local"
   auth:
     # -- Keycloak admin username
     adminUser: admin
@@ -248,14 +248,20 @@ keycloak:
   realmName: "konstellation"
   # -- The name of the client that will be crated on Keycloak first startup
   
-  oidcClient:
-    clientId: "konstellation-oidc"
-    # -- The secret for the OIDC client that will be created on Keycloak first startup
-    secret: ""
   kong:
-    # -- The name of the OIDC Kong plugin
+    # -- The name of the OIDC Kong plugin that should be installed on Kong ingress controller
     oidcPluginName: "oidc"
- 
+    oidcClient:
+      # -- The name of the OIDC client in Keycloak for Kong
+      clientId: "kong-oidc"
+      # -- The secret for the OIDC client that will be created on Keycloak first startup
+      secret: ""
+
+  kli:
+    oidcClient:
+      # -- The name of the OIDC client in Keycloak for KLI
+      clientId: "kai-kli-oidc"
+
   config:
     # -- Whether to enable metrics
     metricsEnabled: "false"

@@ -14,6 +14,8 @@ env:
     x_session_secret: c2VjcmV0
 
 proxy:
-  type: LoadBalancer
+  type: NodePort
+  http:
+    hostPort: 80
   tls:
-    enabled: false
+    hostPort: 443
