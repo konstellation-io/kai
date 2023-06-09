@@ -93,7 +93,6 @@ func initApp(
 		log.Fatal(err)
 	}
 
-	docGenerator := version.NewHTTPStaticDocGenerator(cfg, logger)
 	idGenerator := version.NewIDGenerator()
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
@@ -129,7 +128,6 @@ func initApp(
 		userActivityInteractor,
 		accessControl,
 		idGenerator,
-		docGenerator,
 		chronografDashboard,
 		nodeLogRepo,
 	)
