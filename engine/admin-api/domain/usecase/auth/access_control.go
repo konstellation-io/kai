@@ -41,6 +41,6 @@ func (e AccessControlAction) String() string {
 
 type AccessControl interface {
 	CheckProductGrants(user *entity.User, product string, action AccessControlAction) error
-	CheckGrants(user *entity.User, action AccessControlAction) error
+	CheckAdminGrants(user *entity.User, action AccessControlAction) error
 	IsAdmin(user *entity.User) bool
 }

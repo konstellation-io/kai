@@ -262,6 +262,11 @@ keycloak:
       # -- The name of the OIDC client in Keycloak for KLI
       clientId: "kai-kli-oidc"
 
+  adminApi:
+    oidcClient:
+      # -- The name of the OIDC client in Keycloak for the master realm admin
+      clientId: "admin-cli"
+
   config:
     # -- Whether to enable metrics
     metricsEnabled: "false"

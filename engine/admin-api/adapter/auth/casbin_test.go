@@ -182,7 +182,7 @@ func TestCheckProductGrants_InvalidAct(t *testing.T) {
 	product := "product-01"
 
 	err = authorizer.CheckProductGrants(user, product, "invalid act")
-	assert.ErrorIs(t, auth.InvalidAccessControlActionError, err)
+	assert.ErrorIs(t, auth.ErrInvalidAccessControlAction, err)
 }
 
 func TestNewCasbinAccessControl_ErrorInitEnforcer(t *testing.T) {
