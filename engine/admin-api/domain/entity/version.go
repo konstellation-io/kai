@@ -151,7 +151,6 @@ type Version struct {
 	Entrypoint Entrypoint        `bson:"entrypoint"`
 	Workflows  []*Workflow       `bson:"workflows"`
 
-	HasDoc bool     `bson:"hasDoc"`
 	Errors []string `bson:"errors"`
 }
 

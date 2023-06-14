@@ -179,7 +179,6 @@ type ComplexityRoot struct {
 		CreationDate      func(childComplexity int) int
 		Description       func(childComplexity int) int
 		Errors            func(childComplexity int) int
-		HasDoc            func(childComplexity int) int
 		ID                func(childComplexity int) int
 		KrtVersion        func(childComplexity int) int
 		Name              func(childComplexity int) int
@@ -893,13 +892,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Version.Errors(childComplexity), true
 
-	case "Version.hasDoc":
-		if e.complexity.Version.HasDoc == nil {
-			break
-		}
-
-		return e.complexity.Version.HasDoc(childComplexity), true
-
 	case "Version.id":
 		if e.complexity.Version.ID == nil {
 			break
@@ -1271,7 +1263,6 @@ type Version {
   publicationAuthor: String
   workflows: [Workflow!]!
   config: VersionUserConfig!
-  hasDoc: Boolean
   errors: [String!]!
 }
 
@@ -3020,8 +3011,6 @@ func (ec *executionContext) fieldContext_Mutation_createVersion(ctx context.Cont
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -3103,8 +3092,6 @@ func (ec *executionContext) fieldContext_Mutation_startVersion(ctx context.Conte
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -3186,8 +3173,6 @@ func (ec *executionContext) fieldContext_Mutation_stopVersion(ctx context.Contex
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -3269,8 +3254,6 @@ func (ec *executionContext) fieldContext_Mutation_publishVersion(ctx context.Con
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -3352,8 +3335,6 @@ func (ec *executionContext) fieldContext_Mutation_unpublishVersion(ctx context.C
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -3435,8 +3416,6 @@ func (ec *executionContext) fieldContext_Mutation_updateVersionUserConfiguration
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -4498,8 +4477,6 @@ func (ec *executionContext) fieldContext_Product_publishedVersion(ctx context.Co
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -4753,8 +4730,6 @@ func (ec *executionContext) fieldContext_Query_version(ctx context.Context, fiel
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -4836,8 +4811,6 @@ func (ec *executionContext) fieldContext_Query_versions(ctx context.Context, fie
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -5504,8 +5477,6 @@ func (ec *executionContext) fieldContext_Subscription_watchVersion(ctx context.C
 				return ec.fieldContext_Version_workflows(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
-			case "hasDoc":
-				return ec.fieldContext_Version_hasDoc(ctx, field)
 			case "errors":
 				return ec.fieldContext_Version_errors(ctx, field)
 			}
@@ -6364,47 +6335,6 @@ func (ec *executionContext) fieldContext_Version_config(ctx context.Context, fie
 				return ec.fieldContext_VersionUserConfig_completed(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VersionUserConfig", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Version_hasDoc(ctx context.Context, field graphql.CollectedField, obj *entity.Version) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Version_hasDoc(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.HasDoc, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalOBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Version_hasDoc(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Version",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -10324,10 +10254,6 @@ func (ec *executionContext) _Version(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "hasDoc":
-
-			out.Values[i] = ec._Version_hasDoc(ctx, field, obj)
-
 		case "errors":
 
 			out.Values[i] = ec._Version_errors(ctx, field, obj)

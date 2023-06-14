@@ -139,20 +139,6 @@ func (mr *MockVersionRepoMockRecorder) SetErrors(ctx, productID, version, errorM
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetErrors", reflect.TypeOf((*MockVersionRepo)(nil).SetErrors), ctx, productID, version, errorMessages)
 }
 
-// SetHasDoc mocks base method.
-func (m *MockVersionRepo) SetHasDoc(ctx context.Context, productID, versionID string, hasDoc bool) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetHasDoc", ctx, productID, versionID, hasDoc)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SetHasDoc indicates an expected call of SetHasDoc.
-func (mr *MockVersionRepoMockRecorder) SetHasDoc(ctx, productID, versionID, hasDoc interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetHasDoc", reflect.TypeOf((*MockVersionRepo)(nil).SetHasDoc), ctx, productID, versionID, hasDoc)
-}
-
 // SetStatus mocks base method.
 func (m *MockVersionRepo) SetStatus(ctx context.Context, productID, versionID string, status entity.VersionStatus) error {
 	m.ctrl.T.Helper()

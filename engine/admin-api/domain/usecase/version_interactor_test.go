@@ -56,7 +56,6 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	userActivityRepo := mocks.NewMockUserActivityRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
 	idGenerator := mocks.NewMockIDGenerator(ctrl)
-	docGenerator := mocks.NewMockDocGenerator(ctrl)
 	dashboardService := mocks.NewMockDashboardService(ctrl)
 	nodeLogRepo := mocks.NewMockNodeLogRepository(ctrl)
 
@@ -70,7 +69,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 
 	versionInteractor := usecase.NewVersionInteractor(
 		cfg, logger, versionRepo, productRepo, versionService, natsManagerService,
-		userActivityInteractor, accessControl, idGenerator, docGenerator, dashboardService, nodeLogRepo)
+		userActivityInteractor, accessControl, idGenerator, dashboardService, nodeLogRepo)
 
 	s.ctrl = ctrl
 	s.mocks = versionSuiteMocks{

@@ -148,21 +148,6 @@ func (r *VersionRepoMongoDB) GetByProduct(ctx context.Context, productID string)
 	return versions, nil
 }
 
-func (r *VersionRepoMongoDB) SetHasDoc(ctx context.Context, productID, versionID string, hasDoc bool) error {
-	collection := r.client.Database(productID).Collection(versionsCollectionName)
-
-	result, err := collection.UpdateOne(ctx, bson.M{"_id": versionID}, bson.M{"$set": bson.M{"hasDoc": hasDoc}})
-	if err != nil {
-		return err
-	}
-
-	if result.ModifiedCount != 1 {
-		return usecase.ErrVersionNotFound
-	}
-
-	return nil
-}
-
 func (r *VersionRepoMongoDB) SetStatus(ctx context.Context, productID, versionID string, status entity.VersionStatus) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
