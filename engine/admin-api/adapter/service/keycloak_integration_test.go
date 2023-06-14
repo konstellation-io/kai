@@ -66,14 +66,6 @@ func (s *GocloakTestSuite) SetupSuite() {
 	keycloakEndpoint, err := keycloakContainer.Endpoint(ctx, "http")
 	s.Require().NoError(err)
 
-	s.cfg = &KeycloakConfig{
-		Realm:         "example",
-		MasterRealm:   "master",
-		AdminUsername: "admin",
-		AdminPassword: "admin",
-		AdminClientID: "admin-cli",
-	}
-
 	s.keycloakContainer = keycloakContainer
 	s.gocloakClient = WithClient(keycloakEndpoint)
 }
@@ -84,6 +76,7 @@ func (s *GocloakTestSuite) TearDownSuite() {
 }
 
 func (s *GocloakTestSuite) SetupTest() {
+	s.cfg = s.getConfig()
 	gocloakUserRegistry, err := NewGocloakUserRegistry(s.gocloakClient, s.cfg)
 	s.Require().NoError(err)
 
@@ -91,6 +84,7 @@ func (s *GocloakTestSuite) SetupTest() {
 }
 
 func (s *GocloakTestSuite) TearDownTest() {
+	s.cfg = s.getConfig()
 	testUser := s.getTestUser()
 	testUser.Attributes = &map[string][]string{}
 	err := s.gocloakClient.UpdateUser(
@@ -100,6 +94,16 @@ func (s *GocloakTestSuite) TearDownTest() {
 		*testUser,
 	)
 	s.Require().NoError(err)
+}
+
+func (s *GocloakTestSuite) getConfig() *KeycloakConfig {
+	return &KeycloakConfig{
+		Realm:         "example",
+		MasterRealm:   "master",
+		AdminUsername: "admin",
+		AdminPassword: "admin",
+		AdminClientID: "admin-cli",
+	}
 }
 
 func (s *GocloakTestSuite) getTestUser() *gocloak.User {
@@ -347,4 +351,29 @@ func (s *GocloakTestSuite) TestRefreshExpiredRefreshToken() {
 	// THEN a new token is obtained
 	s.True(now.Before(s.gocloakUserRegistry.tokenExpiresAt))
 	s.True(now.Before(s.gocloakUserRegistry.refreshtokenExpiresAt))
+}
+
+func (s *GocloakTestSuite) TestRefreshExpiredTokenWithError() {
+	// GIVEN an expired token
+	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+
+	// WHEN refreshing the token with invalid credentials
+	s.gocloakUserRegistry.token.RefreshToken = "invalid"
+	err := s.gocloakUserRegistry.refreshToken()
+
+	// THEN an error promts
+	s.Require().Error(err)
+}
+
+func (s *GocloakTestSuite) TestRefreshExpiredRefreshTokenWithError() {
+	// GIVEN both an expired token and its refresh token expired as well
+	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+	s.gocloakUserRegistry.refreshtokenExpiresAt = time.Now().Add(-time.Hour)
+
+	// WHEN refreshing the token with invalid credentials
+	s.gocloakUserRegistry.cfg.AdminPassword = "invalid"
+	err := s.gocloakUserRegistry.refreshToken()
+
+	// THEN an error promts
+	s.Require().Error(err)
 }
