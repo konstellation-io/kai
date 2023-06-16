@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/casbin/casbin/v2"
 
@@ -67,13 +67,13 @@ func (a *CasbinAccessControl) addCustomFunctions() {
 	a.enforcer.AddFunction("hasGrantsForResource", a.hasGrantsForResourceFunc)
 }
 
-func (a *CasbinAccessControl) CheckProductGrants(
+func (a *CasbinAccessControl) checkGrants(
 	user *entity.User,
 	product string,
 	action auth.AccessControlAction,
 ) error {
 	if !action.IsValid() {
-		return InvalidAccessControlActionError
+		return ErrInvalidAccessControlAction
 	}
 
 	for _, realmRole := range user.Roles {
@@ -93,15 +93,36 @@ func (a *CasbinAccessControl) CheckProductGrants(
 		}
 	}
 
-	//nolint:goerr113 // errors need to be wrapped
-	return fmt.Errorf("you are not allowed to %q in product %q", action, product)
+	return ErrNonAuthorized
 }
 
-func (a *CasbinAccessControl) CheckGrants(
+func (a *CasbinAccessControl) CheckAdminGrants(
 	user *entity.User,
 	action auth.AccessControlAction,
 ) error {
-	return a.CheckProductGrants(user, "", action)
+	err := a.checkGrants(user, "", action)
+	if errors.Is(err, ErrNonAuthorized) {
+		return NonAdminAccess(action.String())
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *CasbinAccessControl) CheckProductGrants(
+	user *entity.User,
+	product string,
+	action auth.AccessControlAction,
+) error {
+	err := a.checkGrants(user, product, action)
+	if errors.Is(err, ErrNonAuthorized) {
+		return NonAuthorizedForProductError(action.String(), product)
+	} else if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *CasbinAccessControl) hasGrantsForResource(

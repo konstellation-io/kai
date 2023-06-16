@@ -33,6 +33,7 @@ deploy() {
   replace_env_vars
   create_namespace
   deploy_helm_chart
+  cmd_etchost
 }
 
 HELM_READY=""

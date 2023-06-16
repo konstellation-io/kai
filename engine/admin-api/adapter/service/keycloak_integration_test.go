@@ -1,5 +1,7 @@
 //go:build integration
 
+// This test file needs to be in service package, otherwise it won't be able to access the private
+// fields of the service package. As some tests alter manually GocloakUserRegistry struct variables.
 package service
 
 import (
@@ -7,6 +9,7 @@ import (
 	"encoding/json"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/stretchr/testify/suite"
@@ -20,7 +23,6 @@ type GocloakTestSuite struct {
 	cfg                 *KeycloakConfig
 	gocloakUserRegistry *GocloakUserRegistry
 	gocloakClient       *gocloak.GoCloak
-	gocloakToken        *gocloak.JWT
 }
 
 func TestGocloakTestSuite(t *testing.T) {
@@ -64,29 +66,8 @@ func (s *GocloakTestSuite) SetupSuite() {
 	keycloakEndpoint, err := keycloakContainer.Endpoint(ctx, "http")
 	s.Require().NoError(err)
 
-	s.cfg = &KeycloakConfig{
-		Realm:         "example",
-		MasterRealm:   "master",
-		AdminUsername: "admin",
-		AdminPassword: "admin",
-	}
-
-	gocloakClient := WithClient(keycloakEndpoint)
-	gocloakUserRegistry, err := NewGocloakUserRegistry(gocloakClient, s.cfg)
-	s.Require().NoError(err)
-
-	token, err := gocloakClient.LoginAdmin(
-		ctx,
-		s.cfg.AdminUsername,
-		s.cfg.AdminPassword,
-		s.cfg.MasterRealm,
-	)
-	s.Require().NoError(err)
-
 	s.keycloakContainer = keycloakContainer
-	s.gocloakUserRegistry = gocloakUserRegistry
-	s.gocloakClient = gocloakClient
-	s.gocloakToken = token
+	s.gocloakClient = WithClient(keycloakEndpoint)
 }
 
 func (s *GocloakTestSuite) TearDownSuite() {
@@ -94,22 +75,41 @@ func (s *GocloakTestSuite) TearDownSuite() {
 	s.Require().NoError(err)
 }
 
+func (s *GocloakTestSuite) SetupTest() {
+	s.cfg = s.getConfig()
+	gocloakUserRegistry, err := NewGocloakUserRegistry(s.gocloakClient, s.cfg)
+	s.Require().NoError(err)
+
+	s.gocloakUserRegistry = gocloakUserRegistry
+}
+
 func (s *GocloakTestSuite) TearDownTest() {
+	s.cfg = s.getConfig()
 	testUser := s.getTestUser()
 	testUser.Attributes = &map[string][]string{}
 	err := s.gocloakClient.UpdateUser(
 		context.Background(),
-		s.gocloakToken.AccessToken,
+		s.gocloakUserRegistry.token.AccessToken,
 		s.cfg.Realm,
 		*testUser,
 	)
 	s.Require().NoError(err)
 }
 
+func (s *GocloakTestSuite) getConfig() *KeycloakConfig {
+	return &KeycloakConfig{
+		Realm:         "example",
+		MasterRealm:   "master",
+		AdminUsername: "admin",
+		AdminPassword: "admin",
+		AdminClientID: "admin-cli",
+	}
+}
+
 func (s *GocloakTestSuite) getTestUser() *gocloak.User {
 	users, err := s.gocloakClient.GetUsers(
 		context.Background(),
-		s.gocloakToken.AccessToken,
+		s.gocloakUserRegistry.token.AccessToken,
 		s.cfg.Realm,
 		gocloak.GetUsersParams{},
 	)
@@ -264,4 +264,116 @@ func (s *GocloakTestSuite) TestRevokeUserProductGrants() {
 	expectedResult := map[string]interface{}{}
 
 	s.Equal(expectedResult, obtainedResult)
+}
+
+func (s *GocloakTestSuite) TestRevokeUserProductGrantsForOtherProduct() {
+	// GIVEN a user with no previous existing grants and two products
+	user := s.getTestUser()
+	product := "test-product"
+	product2 := "test-product-2"
+
+	// GIVEN previous existing grants
+	err := s.gocloakUserRegistry.UpdateUserProductGrants(
+		*user.ID,
+		product,
+		[]string{"grant1", "grant2"},
+	)
+	s.Require().NoError(err)
+
+	err = s.gocloakUserRegistry.UpdateUserProductGrants(
+		*user.ID,
+		product2,
+		[]string{"grant3", "grant4"},
+	)
+	s.Require().NoError(err)
+
+	// WHEN revoking grants for one product
+	err = s.gocloakUserRegistry.UpdateUserProductGrants(
+		*user.ID,
+		product,
+		[]string{},
+	)
+	s.Require().NoError(err)
+
+	// THEN grants for the other product are not revoked
+	updatedUser := s.getTestUser()
+	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
+
+	s.Require().NotNil(marshalledAttributes)
+	s.Require().Len(marshalledAttributes, 1)
+
+	obtainedResult := make(map[string]interface{})
+	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
+	s.Require().NoError(err)
+
+	expectedResult := map[string]interface{}{
+		product2: []interface{}{"grant3", "grant4"},
+	}
+
+	s.Equal(expectedResult, obtainedResult)
+}
+
+func (s *GocloakTestSuite) TestRefreshNotExpiredToken() {
+	// GIVEN the recently obtained token through setup test
+	expiredTimeCopy := s.gocloakUserRegistry.tokenExpiresAt
+
+	// WHEN refreshing the token
+	err := s.gocloakUserRegistry.refreshToken()
+	s.Require().NoError(err)
+
+	// THEN the token is not refreshed
+	s.True(expiredTimeCopy.Equal(s.gocloakUserRegistry.tokenExpiresAt))
+}
+
+func (s *GocloakTestSuite) TestRefreshExpiredToken() {
+	// GIVEN an expired token
+	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+
+	// WHEN refreshing the token
+	now := time.Now()
+	err := s.gocloakUserRegistry.refreshToken()
+	s.Require().NoError(err)
+
+	// THEN the token is refreshed
+	s.True(now.Before(s.gocloakUserRegistry.tokenExpiresAt))
+}
+
+func (s *GocloakTestSuite) TestRefreshExpiredRefreshToken() {
+	// GIVEN both an expired token and its refresh token expired as well
+	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+	s.gocloakUserRegistry.refreshtokenExpiresAt = time.Now().Add(-time.Hour)
+
+	// WHEN refreshing the token
+	now := time.Now()
+	err := s.gocloakUserRegistry.refreshToken()
+	s.Require().NoError(err)
+
+	// THEN a new token is obtained
+	s.True(now.Before(s.gocloakUserRegistry.tokenExpiresAt))
+	s.True(now.Before(s.gocloakUserRegistry.refreshtokenExpiresAt))
+}
+
+func (s *GocloakTestSuite) TestRefreshExpiredTokenWithError() {
+	// GIVEN an expired token
+	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+
+	// WHEN refreshing the token with invalid credentials
+	s.gocloakUserRegistry.token.RefreshToken = "invalid"
+	err := s.gocloakUserRegistry.refreshToken()
+
+	// THEN an error promts
+	s.Require().Error(err)
+}
+
+func (s *GocloakTestSuite) TestRefreshExpiredRefreshTokenWithError() {
+	// GIVEN both an expired token and its refresh token expired as well
+	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+	s.gocloakUserRegistry.refreshtokenExpiresAt = time.Now().Add(-time.Hour)
+
+	// WHEN refreshing the token with invalid credentials
+	s.gocloakUserRegistry.cfg.AdminPassword = "invalid"
+	err := s.gocloakUserRegistry.refreshToken()
+
+	// THEN an error promts
+	s.Require().Error(err)
 }

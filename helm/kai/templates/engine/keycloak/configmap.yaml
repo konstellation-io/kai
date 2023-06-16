@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+data:
+  KC_METRICS_ENABLED: "{{ .Values.keycloak.config.metricsEnabled }}"
+  KC_HTTP_ENABLED: "{{ .Values.keycloak.config.httpEnabled }}"
+  KC_HOSTNAME_STRICT: "{{ .Values.keycloak.config.hostnameStrict }}"
+  KC_PROXY: "{{ .Values.keycloak.config.proxy }}"
+  KC_HEALTH_ENABLED: "{{ .Values.keycloak.config.healthEnabled }}"
+  {{- if not .Values.keycloak.db.auth.secretDatabaseKey }}
+  KC_DB_URL_DATABASE: "{{ .Values.keycloak.db.auth.database }}"
+  {{- end }}
+  {{- if not .Values.keycloak.db.auth.secretHostKey }}
+  KC_DB_URL_HOST: "{{ .Values.keycloak.db.auth.host }}"
+  {{- end }}
+  {{- if not .Values.keycloak.db.auth.secretPortKey }}
+  KC_DB_URL_PORT: "{{ .Values.keycloak.db.auth.port }}"
+  {{- end }}
+  {{- if .Values.keycloak.extraEnv }}
+  {{- toYaml .Values.keycloak.extraEnv | nindent 2 }}
+  {{- end }}

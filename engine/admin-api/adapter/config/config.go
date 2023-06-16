@@ -54,15 +54,13 @@ type Config struct {
 	Keycloak KeycloakConfig `yaml:"keycloak"`
 }
 
-// TODO: Get into an agreement with infra
-//
-//nolint:godox // this is a task to be done
 type KeycloakConfig struct {
-	URL           string `yaml:"base_url" envconfig:"KEYCLOAK_BASE_URL"`
+	URL           string `yaml:"baseUrl" envconfig:"KEYCLOAK_BASE_URL"`
 	Realm         string `yaml:"realm" envconfig:"KEYCLOAK_REALM"`
-	MasterRealm   string `yaml:"master_realm" envconfig:"KEYCLOAK_MASTER_REALM"`
-	AdminUsername string `yaml:"admin_username" envconfig:"KEYCLOAK_ADMIN_USERNAME"`
-	AdminPassword string `yaml:"admin_password" envconfig:"KEYCLOAK_ADMIN_PASSWORD"`
+	MasterRealm   string `yaml:"masterRealm" envconfig:"KEYCLOAK_MASTER_REALM"`
+	AdminUsername string `yaml:"adminUsername" envconfig:"KEYCLOAK_ADMIN_USERNAME"`
+	AdminPassword string `yaml:"adminPassword" envconfig:"KEYCLOAK_ADMIN_PASSWORD"`
+	AdminClientID string `yaml:"clientId" envconfig:"KEYCLOAK_ADMIN_CLIENT_ID"`
 }
 
 // NewConfig will read the config.yml file and override values with env vars.

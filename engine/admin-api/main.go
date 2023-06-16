@@ -86,6 +86,7 @@ func initApp(
 		MasterRealm:   cfg.Keycloak.MasterRealm,
 		AdminUsername: cfg.Keycloak.AdminUsername,
 		AdminPassword: cfg.Keycloak.AdminPassword,
+		AdminClientID: cfg.Keycloak.AdminClientID,
 	}
 
 	gocloakUserRegistry, err := service.NewGocloakUserRegistry(service.WithClient(cfg.Keycloak.URL), &keycloakCfg)

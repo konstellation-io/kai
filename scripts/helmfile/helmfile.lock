@@ -1,10 +1,19 @@
-version: 0.148.1
+version: v0.144.0
 dependencies:
-  - name: community-operator
-    repository: https://mongodb.github.io/helm-charts
-    version: 0.8.0
-  - name: raw
-    repository: https://bedag.github.io/helm-charts/
-    version: 2.0.0
-digest: sha256:81bbd738dfadf339195beed38b724b36861f2a7f05b31081dd8500af5af70f44
-generated: "2023-05-21T12:57:50.302336646-04:00"
+- name: cloudnative-pg
+  repository: https://cloudnative-pg.github.io/charts
+  version: 0.18.0
+- name: community-operator
+  repository: https://mongodb.github.io/helm-charts
+  version: 0.8.0
+- name: kong
+  repository: https://charts.konghq.com
+  version: 2.22.0
+- name: raw
+  repository: https://bedag.github.io/helm-charts/
+  version: 2.0.0
+- name: raw
+  repository: https://bedag.github.io/helm-charts/
+  version: 2.0.0
+digest: sha256:3fc47c91efd1bbc7738875b7df5e2ee10f950b86865274a1fadb022c3dee598e
+generated: "2023-06-14T11:06:09.891746764+02:00"

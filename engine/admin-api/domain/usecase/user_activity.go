@@ -59,7 +59,7 @@ func (i *UserActivityInteractor) Get(
 	toDate *string,
 	lastID *string,
 ) ([]*entity.UserActivity, error) {
-	if err := i.accessControl.CheckGrants(user, auth.ActViewUserActivities); err != nil {
+	if err := i.accessControl.CheckAdminGrants(user, auth.ActViewUserActivities); err != nil {
 		return nil, err
 	}
 

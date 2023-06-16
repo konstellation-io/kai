@@ -35,18 +35,18 @@ func (m *MockAccessControl) EXPECT() *MockAccessControlMockRecorder {
 	return m.recorder
 }
 
-// CheckGrants mocks base method.
-func (m *MockAccessControl) CheckGrants(user *entity.User, action auth.AccessControlAction) error {
+// CheckAdminGrants mocks base method.
+func (m *MockAccessControl) CheckAdminGrants(user *entity.User, action auth.AccessControlAction) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckGrants", user, action)
+	ret := m.ctrl.Call(m, "CheckAdminGrants", user, action)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CheckGrants indicates an expected call of CheckGrants.
-func (mr *MockAccessControlMockRecorder) CheckGrants(user, action interface{}) *gomock.Call {
+// CheckAdminGrants indicates an expected call of CheckAdminGrants.
+func (mr *MockAccessControlMockRecorder) CheckAdminGrants(user, action interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckGrants", reflect.TypeOf((*MockAccessControl)(nil).CheckGrants), user, action)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAdminGrants", reflect.TypeOf((*MockAccessControl)(nil).CheckAdminGrants), user, action)
 }
 
 // CheckProductGrants mocks base method.

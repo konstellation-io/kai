@@ -59,6 +59,22 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Admin UI labels
+*/}}
+{{- define "admin-ui.labels" -}}
+{{ include "kai.labels" . }}
+{{ include "admin-ui.selectorLabels" . }}
+{{- end }}
+
+{{/*
+Admin UI selector labels
+*/}}
+{{- define "admin-ui.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kai.name" . }}-admin-ui
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Chronograf labels
 */}}
 {{- define "chronograf.labels" -}}
@@ -222,3 +238,56 @@ nats manager selector labels
 app.kubernetes.io/name: {{ include "kai.name" . }}-nats-manager
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/* Fullname suffixed with keycloak */}}
+{{- define "keycloak.fullname" -}}
+{{- printf "%s-keycloak" (include "kai.fullname" .) -}}
+{{- end }}
+
+{{/*
+kaycloak labels
+*/}}
+{{- define "keycloak.labels" -}}
+{{ include "kai.labels" . }}
+{{ include "keycloak.selectorLabels" . }}
+{{- end }}
+
+{{/*
+kaycloak selector labels
+*/}}
+{{- define "keycloak.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kai.name" . }}-keycloak
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+keycloak serviceaccount name
+*/}}
+{{- define "keycloak.serviceAccountName" -}}
+{{- if .Values.keycloak.serviceAccount.create -}}
+    {{ default (include "keycloak.fullname" .) .Values.keycloak.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.keycloak.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+keycloak secret name
+*/}}
+{{- define "keycloak.secretName" -}}
+{{ default (include "keycloak.fullname" . ) .Values.keycloak.auth.existingSecret.name }}
+{{- end -}}
+
+{{/*
+keycloak secret user key
+*/}}
+{{- define "keycloak.secretUserKey" -}}
+{{ default "admin-user" .Values.keycloak.auth.existingSecret.userKey }}
+{{- end -}}
+
+{{/*
+keycloak secret password key
+*/}}
+{{- define "keycloak.secretPasswordKey" -}}
+{{ default "admin-password" .Values.keycloak.auth.existingSecret.passwordKey }}
+{{- end -}}
