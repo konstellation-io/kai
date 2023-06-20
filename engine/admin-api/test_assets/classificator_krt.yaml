@@ -1,0 +1,67 @@
+name: email-classificator
+description: Email classificator for branching features.
+version: v1.0.0
+
+config:
+  key1: value1
+  key2: value2
+workflows:
+  - name: go-classificator
+    type: data
+    config:
+      key1: value1
+      key2: value2
+    processes:
+      - name: entrypoint
+        type: trigger
+        image: konstellation/kai-grpc-trigger:latest
+        subscriptions:
+          - 'exitpoint'
+        networking:
+          targetPort: 9000
+          targetProtocol: TCP
+          destinationPort: 9000
+          destinationProtocol: TCP
+
+      - name: etl
+        type: task
+        image: konstellation/kai-etl-task:latest
+        objectStore:
+          name: emails
+          scope: workflow
+        subscriptions:
+          - 'entrypoint'
+
+      - name: email-classificator
+        type: task
+        image: konstellation/kai-ec-task:latest
+        objectStore:
+          name: emails
+          scope: workflow
+        subscriptions:
+          - 'etl'
+
+      - name: repairs-handler
+        type: task
+        image: konstellation/kai-rh-task:latest
+        subscriptions:
+          - 'email-classificator.repairs'
+
+      - name: stats-storer
+        type: task
+        image: konstellation/kai-ss-task:latest
+        objectStore:
+          name: emails
+          scope: workflow
+        subscriptions:
+          - 'email-classificator'
+
+      - name: exitpoint
+        type: exit
+        image: konstellation/kai-exitpoint:latest
+        objectStore:
+          name: emails
+          scope: workflow
+        subscriptions:
+          - 'etl'
+          - 'stats-storer'

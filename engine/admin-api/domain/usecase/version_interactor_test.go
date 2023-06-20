@@ -6,7 +6,6 @@ import (
 	"context"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
@@ -15,8 +14,10 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
+	"github.com/konstellation-io/krt/pkg/krt"
 )
 
 type versionSuiteMocks struct {
@@ -57,7 +58,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	accessControl := mocks.NewMockAccessControl(ctrl)
 	idGenerator := mocks.NewMockIDGenerator(ctrl)
 	dashboardService := mocks.NewMockDashboardService(ctrl)
-	nodeLogRepo := mocks.NewMockNodeLogRepository(ctrl)
+	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 
 	mocks.AddLoggerExpects(logger)
 
@@ -69,7 +70,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 
 	versionInteractor := usecase.NewVersionInteractor(
 		cfg, logger, versionRepo, productRepo, versionService, natsManagerService,
-		userActivityInteractor, accessControl, idGenerator, dashboardService, nodeLogRepo)
+		userActivityInteractor, accessControl, idGenerator, dashboardService, processLogRepo)
 
 	s.ctrl = ctrl
 	s.mocks = versionSuiteMocks{
@@ -92,40 +93,71 @@ func (s *VersionInteractorSuite) TearDownSuite() {
 	s.ctrl.Finish()
 }
 
+func (s *VersionInteractorSuite) getTestVersion() *entity.Version {
+	defaultReplicas := krt.DefaultNumberOfReplicas
+	defaultGPU := krt.DefaultGPUValue
+
+	return &entity.Version{
+		ID: "version-id",
+		KRT: &krt.Krt{
+			Name:        "email-classificator",
+			Description: "Email classificator for branching features.",
+			Version:     "v1.0.0",
+			Config: map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+			},
+			Workflows: []krt.Workflow{
+				krt.Workflow{
+					Name: "go-classificator",
+					Type: krt.WorkflowTypeData,
+					Config: map[string]string{
+						"key1": "value1",
+						"key2": "value2",
+					},
+					Processes: []krt.Process{
+						krt.Process{
+							Name:          "entrypoint",
+							Type:          krt.ProcessTypeTrigger,
+							Image:         "konstellation/kai-grpc-trigger:latest",
+							Replicas:      &defaultReplicas,
+							GPU:           &defaultGPU,
+							Subscriptions: []string{"exitpoint"},
+							Networking: &krt.ProcessNetworking{
+								TargetPort:          9000,
+								TargetProtocol:      krt.NetworkingProtocolTCP,
+								DestinationPort:     9000,
+								DestinationProtocol: krt.NetworkingProtocolTCP,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func (s *VersionInteractorSuite) TestCreateNewVersion() {
 	user := testhelpers.NewUserBuilder().Build()
-	productID := "run-1"
+	productID := "product-1"
 
 	product := &entity.Product{
 		ID: productID,
 	}
 
 	versionName := "classificator-v1"
-	version := &entity.Version{
-		ID:                user.ID,
-		Name:              versionName,
-		KrtVersion:        "v2",
-		Description:       "",
-		CreationDate:      time.Time{},
-		CreationAuthor:    "",
-		PublicationDate:   nil,
-		PublicationUserID: nil,
-		Status:            "",
-		Config:            entity.VersionUserConfig{},
-		Entrypoint:        entity.Entrypoint{},
-		Workflows:         nil,
-	}
-	file, err := os.Open("../../test_assets/classificator-v1.krt")
+	testVersion := s.getTestVersion()
+
+	file, err := os.Open("../../test_assets/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
 	s.mocks.idGenerator.EXPECT().NewID().Return("fakepass").Times(6)
 	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(product, nil)
-	s.mocks.versionRepo.EXPECT().GetByProduct(s.ctx, productID).Return([]*entity.Version{version}, nil)
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, versionName).Return(nil, usecase.ErrVersionNotFound)
-	s.mocks.versionRepo.EXPECT().Create(user.ID, productID, gomock.Any()).Return(version, nil)
-	s.mocks.versionRepo.EXPECT().SetStatus(s.ctx, productID, version.ID, entity.VersionStatusCreated).Return(nil)
-	s.mocks.versionRepo.EXPECT().UploadKRTFile(productID, version, gomock.Any()).Return(nil)
+	s.mocks.versionRepo.EXPECT().Create(user.ID, productID, gomock.Any()).Return(testVersion, nil)
+	s.mocks.versionRepo.EXPECT().SetStatus(s.ctx, productID, testVersion.ID, entity.VersionStatusCreated).Return(nil)
+	s.mocks.versionRepo.EXPECT().UploadKRTFile(productID, testVersion, gomock.Any()).Return(nil)
+	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, versionName).Return(nil, errors.ErrVersionNotFound)
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).Return(nil)
 	s.mocks.dashboardService.EXPECT().Create(s.ctx, productID, gomock.Any(), gomock.Any()).Return(nil)
 
@@ -133,46 +165,31 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 	s.Require().NoError(err)
 
 	actual := <-statusCh
-	expected := version
+	expected := testVersion
 	expected.Status = entity.VersionStatusCreated
 	s.Equal(expected, actual)
 }
 
 func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplicated() {
-	userID := "user1"
-	productID := "run-1"
+	productID := "product-1"
 
 	user := testhelpers.NewUserBuilder().Build()
 
-	runtime := &entity.Product{
+	product := &entity.Product{
 		ID: productID,
 	}
 
-	versionName := "classificator-v1"
-	version := &entity.Version{
-		ID:                userID,
-		Name:              versionName,
-		Description:       "",
-		CreationDate:      time.Time{},
-		CreationAuthor:    "",
-		PublicationDate:   nil,
-		PublicationUserID: nil,
-		Status:            "",
-		Config:            entity.VersionUserConfig{},
-		Entrypoint:        entity.Entrypoint{},
-		Workflows:         nil,
-	}
+	testVersion := s.getTestVersion()
 
 	file, err := os.Open("../../test_assets/classificator-v1.krt")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
-	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(runtime, nil)
-	s.mocks.versionRepo.EXPECT().GetByProduct(s.ctx, productID).Return([]*entity.Version{version}, nil)
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, versionName).Return(version, nil)
+	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(product, nil)
+	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.KRT.Name).Return(testVersion, nil)
 
 	_, _, err = s.versionInteractor.Create(context.Background(), user, productID, file)
-	s.ErrorIs(err, usecase.ErrVersionDuplicated)
+	s.ErrorIs(err, errors.ErrVersionDuplicated)
 }
 
 func (s *VersionInteractorSuite) TestGetByName() {
@@ -181,25 +198,13 @@ func (s *VersionInteractorSuite) TestGetByName() {
 
 	user := testhelpers.NewUserBuilder().Build()
 
-	expected := &entity.Version{
-		ID:                "version-id",
-		Name:              versionName,
-		Description:       "",
-		CreationDate:      time.Time{},
-		CreationAuthor:    "",
-		PublicationDate:   nil,
-		PublicationUserID: nil,
-		Status:            entity.VersionStatusCreated,
-		Config:            entity.VersionUserConfig{},
-		Entrypoint:        entity.Entrypoint{},
-		Workflows:         nil,
-	}
+	testVersion := s.getTestVersion()
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewVersion).Return(nil)
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, versionName).Return(expected, nil)
+	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, versionName).Return(testVersion, nil)
 
 	actual, err := s.versionInteractor.GetByName(s.ctx, user, productID, versionName)
 	s.Require().NoError(err)
 
-	s.Equal(expected, actual)
+	s.Equal(testVersion, actual)
 }

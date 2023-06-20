@@ -147,10 +147,10 @@ func (i *VersionInteractor) Create(
 	}
 
 	_, err = i.versionRepo.GetByName(ctx, productID, krtYml.Version)
-	if errors.Is(err, errors.ErrVersionNotFound) {
-		return nil, nil, errors.ErrVersionDuplicated
-	} else if err != nil {
+	if err != nil && !errors.Is(err, errors.ErrVersionNotFound) {
 		return nil, nil, fmt.Errorf("error version repo GetByName: %w", err)
+	} else if err == nil {
+		return nil, nil, errors.ErrVersionDuplicated
 	}
 
 	versionCreated, err := i.versionRepo.Create(
