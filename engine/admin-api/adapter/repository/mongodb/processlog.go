@@ -17,20 +17,20 @@ import (
 const logsCollectionName = "logs"
 const logSearchPageSize = 40
 
-type NodeLogMongoDBRepo struct {
+type ProcessLogMongoDBRepo struct {
 	cfg    *config.Config
 	logger logging.Logger
 	client *mongo.Client
 }
 
-func NewNodeLogMongoDBRepo(cfg *config.Config, logger logging.Logger, client *mongo.Client) *NodeLogMongoDBRepo {
-	return &NodeLogMongoDBRepo{cfg: cfg, logger: logger, client: client}
+func NewProcessLogMongoDBRepo(cfg *config.Config, logger logging.Logger, client *mongo.Client) *ProcessLogMongoDBRepo {
+	return &ProcessLogMongoDBRepo{cfg: cfg, logger: logger, client: client}
 }
 
-func (n *NodeLogMongoDBRepo) WatchNodeLogs(ctx context.Context, runtimeID, versionName string,
-	filters entity.LogFilters) (<-chan *entity.NodeLog, error) {
+func (n *ProcessLogMongoDBRepo) WatchProcessLogs(ctx context.Context, runtimeID, versionName string,
+	filters entity.LogFilters) (<-chan *entity.ProcessLog, error) {
 	collection := n.client.Database(runtimeID).Collection(logsCollectionName)
-	logsCh := make(chan *entity.NodeLog, 1)
+	logsCh := make(chan *entity.ProcessLog, 1)
 
 	go func() {
 		defer close(logsCh)
@@ -63,16 +63,16 @@ func (n *NodeLogMongoDBRepo) WatchNodeLogs(ctx context.Context, runtimeID, versi
 		for {
 			ok := stream.Next(ctx)
 			if !ok {
-				n.logger.Infof("[LogRepo.WatchNodeLogs] Watcher closed, stream.Next() is false: %s", stream.Err())
+				n.logger.Infof("[LogRepo.WatchProcessLogs] Watcher closed, stream.Next() is false: %s", stream.Err())
 				return
 			}
 
 			changeDoc := struct {
-				FullDocument entity.NodeLog `bson:"fullDocument"`
+				FullDocument entity.ProcessLog `bson:"fullDocument"`
 			}{}
 
 			if e := stream.Decode(&changeDoc); e != nil {
-				n.logger.Warnf("[LogRepo.WatchNodeLogs] error decoding changeDoc: %s", e)
+				n.logger.Warnf("[LogRepo.WatchProcessLogs] error decoding changeDoc: %s", e)
 				continue
 			}
 
@@ -85,14 +85,14 @@ func (n *NodeLogMongoDBRepo) WatchNodeLogs(ctx context.Context, runtimeID, versi
 	return logsCh, nil
 }
 
-func (n *NodeLogMongoDBRepo) getSearchConditions(versionName string, filters entity.LogFilters) bson.A {
+func (n *ProcessLogMongoDBRepo) getSearchConditions(versionName string, filters entity.LogFilters) bson.A {
 	conditions := bson.A{
 		bson.M{"operationType": "insert"},
 		bson.M{"fullDocument.versionName": versionName},
 	}
 
-	if len(filters.NodeIDs) > 0 {
-		conditions = append(conditions, bson.M{"fullDocument.nodeId": bson.M{"$in": filters.NodeIDs}})
+	if len(filters.ProcessIDs) > 0 {
+		conditions = append(conditions, bson.M{"fullDocument.processId": bson.M{"$in": filters.ProcessIDs}})
 	}
 
 	if len(filters.Levels) > 0 {
@@ -102,7 +102,7 @@ func (n *NodeLogMongoDBRepo) getSearchConditions(versionName string, filters ent
 	return conditions
 }
 
-func (n *NodeLogMongoDBRepo) PaginatedSearch(
+func (n *ProcessLogMongoDBRepo) PaginatedSearch(
 	ctx context.Context,
 	runtimeID string,
 	searchOpts *entity.SearchLogsOptions,
@@ -129,8 +129,8 @@ func (n *NodeLogMongoDBRepo) PaginatedSearch(
 		filter["$text"] = bson.M{"$search": *searchOpts.Search}
 	}
 
-	if len(searchOpts.NodeIDs) > 0 {
-		filter["nodeId"] = bson.M{"$in": searchOpts.NodeIDs}
+	if len(searchOpts.ProcessIDs) > 0 {
+		filter["processId"] = bson.M{"$in": searchOpts.ProcessIDs}
 	}
 
 	if len(searchOpts.Levels) > 0 {
@@ -161,7 +161,7 @@ func (n *NodeLogMongoDBRepo) PaginatedSearch(
 		return &result, err
 	}
 
-	var logs []*entity.NodeLog
+	var logs []*entity.ProcessLog
 	if err := cur.All(ctx, &logs); err != nil {
 		return &result, err
 	}
@@ -177,7 +177,7 @@ func (n *NodeLogMongoDBRepo) PaginatedSearch(
 	return &result, nil
 }
 
-func (n *NodeLogMongoDBRepo) CreateIndexes(ctx context.Context, runtimeID string) error {
+func (n *ProcessLogMongoDBRepo) CreateIndexes(ctx context.Context, runtimeID string) error {
 	collection := n.client.Database(runtimeID).Collection(logsCollectionName)
 	n.logger.Infof("MongoDB creating indexes for %s collection...", logsCollectionName)
 
@@ -189,7 +189,7 @@ func (n *NodeLogMongoDBRepo) CreateIndexes(ctx context.Context, runtimeID string
 			Keys: bson.M{"date": 1},
 		},
 		{
-			Keys: bson.M{"date": 1, "nodeId": 1, "versionId": 1},
+			Keys: bson.M{"date": 1, "processId": 1, "versionId": 1},
 		},
 	})
 	if err != nil {

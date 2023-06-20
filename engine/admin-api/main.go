@@ -104,7 +104,7 @@ func initApp(
 		MeasurementRepo: measurementRepo,
 		VersionRepo:     versionMongoRepo,
 		MetricRepo:      metricRepo,
-		NodeLogRepo:     nodeLogRepo,
+		ProcessLogRepo:  nodeLogRepo,
 		UserActivity:    userActivityInteractor,
 		AccessControl:   accessControl,
 	}

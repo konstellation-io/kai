@@ -30,7 +30,7 @@ type productSuiteMocks struct {
 	measurementRepo  *mocks.MockMeasurementRepo
 	versionRepo      *mocks.MockVersionRepo
 	metricRepo       *mocks.MockMetricRepo
-	nodeLogRepo      *mocks.MockNodeLogRepository
+	processLogRepo   *mocks.MockProcessLogRepository
 	userActivityRepo *mocks.MockUserActivityRepo
 	accessControl    *mocks.MockAccessControl
 }
@@ -48,7 +48,7 @@ func newProductSuite(t *testing.T) *productSuite {
 	measurementRepo := mocks.NewMockMeasurementRepo(ctrl)
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
 	metricRepo := mocks.NewMockMetricRepo(ctrl)
-	nodeLogRepo := mocks.NewMockNodeLogRepository(ctrl)
+	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
 
 	mocks.AddLoggerExpects(logger)
@@ -70,7 +70,7 @@ func newProductSuite(t *testing.T) *productSuite {
 		MeasurementRepo: measurementRepo,
 		VersionRepo:     versionRepo,
 		MetricRepo:      metricRepo,
-		NodeLogRepo:     nodeLogRepo,
+		ProcessLogRepo:  processLogRepo,
 		UserActivity:    userActivity,
 		AccessControl:   accessControl,
 	}
@@ -85,7 +85,7 @@ func newProductSuite(t *testing.T) *productSuite {
 			measurementRepo,
 			versionRepo,
 			metricRepo,
-			nodeLogRepo,
+			processLogRepo,
 			userActivityRepo,
 			accessControl,
 		},
@@ -138,7 +138,7 @@ func TestCreateNewProduct(t *testing.T) {
 	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
 	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.nodeLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 
