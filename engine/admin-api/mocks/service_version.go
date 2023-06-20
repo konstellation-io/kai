@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	krt "github.com/konstellation-io/krt/pkg/krt"
 )
 
 // MockVersionService is a mock of VersionService interface.
@@ -105,17 +106,17 @@ func (mr *MockVersionServiceMockRecorder) UpdateConfig(runtimeID, version interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfig", reflect.TypeOf((*MockVersionService)(nil).UpdateConfig), runtimeID, version)
 }
 
-// WatchNodeStatus mocks base method.
-func (m *MockVersionService) WatchNodeStatus(ctx context.Context, runtimeID, versionName string) (<-chan *entity.Node, error) {
+// WatchProcessStatus mocks base method.
+func (m *MockVersionService) WatchProcessStatus(ctx context.Context, runtimeID, versionName string) (<-chan *krt.Process, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WatchNodeStatus", ctx, runtimeID, versionName)
-	ret0, _ := ret[0].(<-chan *entity.Node)
+	ret := m.ctrl.Call(m, "WatchProcessStatus", ctx, runtimeID, versionName)
+	ret0, _ := ret[0].(<-chan *krt.Process)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// WatchNodeStatus indicates an expected call of WatchNodeStatus.
-func (mr *MockVersionServiceMockRecorder) WatchNodeStatus(ctx, runtimeID, versionName interface{}) *gomock.Call {
+// WatchProcessStatus indicates an expected call of WatchProcessStatus.
+func (mr *MockVersionServiceMockRecorder) WatchProcessStatus(ctx, runtimeID, versionName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchNodeStatus", reflect.TypeOf((*MockVersionService)(nil).WatchNodeStatus), ctx, runtimeID, versionName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchProcessStatus", reflect.TypeOf((*MockVersionService)(nil).WatchProcessStatus), ctx, runtimeID, versionName)
 }
