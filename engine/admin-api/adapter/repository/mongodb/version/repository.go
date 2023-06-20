@@ -130,7 +130,6 @@ func (r *VersionRepoMongoDB) GetVersionsByProduct(ctx context.Context, productID
 	var versions []*entity.Version
 
 	cur, err := collection.Find(ctxWithTimeout, bson.M{})
-
 	if err != nil {
 		return versions, err
 	}
