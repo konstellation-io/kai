@@ -19,7 +19,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 )
 
 // VersionInteractor contains app logic about Version entities.
@@ -32,7 +31,6 @@ type VersionInteractor struct {
 	natsManagerService     service.NatsManagerService
 	userActivityInteractor UserActivityInteracter
 	accessControl          auth.AccessControl
-	idGenerator            version.IDGenerator
 	dashboardService       service.DashboardService
 	processLogRepo         repository.ProcessLogRepository
 }
@@ -47,7 +45,6 @@ func NewVersionInteractor(
 	natsManagerService service.NatsManagerService,
 	userActivityInteractor UserActivityInteracter,
 	accessControl auth.AccessControl,
-	idGenerator version.IDGenerator,
 	dashboardService service.DashboardService,
 	processLogRepo repository.ProcessLogRepository,
 ) *VersionInteractor {
@@ -60,7 +57,6 @@ func NewVersionInteractor(
 		natsManagerService,
 		userActivityInteractor,
 		accessControl,
-		idGenerator,
 		dashboardService,
 		processLogRepo,
 	}
@@ -146,7 +142,7 @@ func (i *VersionInteractor) Create(
 		return nil, nil, errors.InvalidKRTError(err)
 	}
 
-	_, err = i.versionRepo.GetByName(ctx, productID, krtYml.Version)
+	_, err = i.versionRepo.GetByName(ctx, productID, krtYml.Name)
 	if err != nil && !errors.Is(err, errors.ErrVersionNotFound) {
 		return nil, nil, fmt.Errorf("error version repo GetByName: %w", err)
 	} else if err == nil {
@@ -235,6 +231,7 @@ func (i *VersionInteractor) completeVersionCreation(
 	}
 }
 
+// TODO what happens with this
 func (i *VersionInteractor) saveKRTDashboards(
 	ctx context.Context,
 	dashboardsFolder string,

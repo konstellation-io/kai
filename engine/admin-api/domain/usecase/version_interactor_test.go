@@ -28,7 +28,6 @@ type versionSuiteMocks struct {
 	versionService   *mocks.MockVersionService
 	userActivityRepo *mocks.MockUserActivityRepo
 	accessControl    *mocks.MockAccessControl
-	idGenerator      *mocks.MockIDGenerator
 	dashboardService *mocks.MockDashboardService
 }
 
@@ -56,7 +55,6 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	natsManagerService := mocks.NewMockNatsManagerService(ctrl)
 	userActivityRepo := mocks.NewMockUserActivityRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
-	idGenerator := mocks.NewMockIDGenerator(ctrl)
 	dashboardService := mocks.NewMockDashboardService(ctrl)
 	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 
@@ -70,7 +68,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 
 	versionInteractor := usecase.NewVersionInteractor(
 		cfg, logger, versionRepo, productRepo, versionService, natsManagerService,
-		userActivityInteractor, accessControl, idGenerator, dashboardService, processLogRepo)
+		userActivityInteractor, accessControl, dashboardService, processLogRepo)
 
 	s.ctrl = ctrl
 	s.mocks = versionSuiteMocks{
@@ -81,7 +79,6 @@ func (s *VersionInteractorSuite) SetupSuite() {
 		versionService,
 		userActivityRepo,
 		accessControl,
-		idGenerator,
 		dashboardService,
 	}
 	s.versionInteractor = versionInteractor
@@ -94,42 +91,77 @@ func (s *VersionInteractorSuite) TearDownSuite() {
 }
 
 func (s *VersionInteractorSuite) getTestVersion() *entity.Version {
+	return &entity.Version{
+		ID:  "version-id",
+		KRT: s.getClassificatorKRT(),
+	}
+}
+
+func (s *VersionInteractorSuite) getClassificatorKRT() *krt.Krt {
 	defaultReplicas := krt.DefaultNumberOfReplicas
 	defaultGPU := krt.DefaultGPUValue
+	commonObjectStore := &krt.ProcessObjectStore{
+		Name:  "emails",
+		Scope: krt.ObjectStoreScopeWorkflow,
+	}
 
-	return &entity.Version{
-		ID: "version-id",
-		KRT: &krt.Krt{
-			Name:        "email-classificator",
-			Description: "Email classificator for branching features.",
-			Version:     "v1.0.0",
-			Config: map[string]string{
-				"key1": "value1",
-				"key2": "value2",
-			},
-			Workflows: []krt.Workflow{
-				krt.Workflow{
-					Name: "go-classificator",
-					Type: krt.WorkflowTypeData,
-					Config: map[string]string{
-						"key1": "value1",
-						"key2": "value2",
-					},
-					Processes: []krt.Process{
-						krt.Process{
-							Name:          "entrypoint",
-							Type:          krt.ProcessTypeTrigger,
-							Image:         "konstellation/kai-grpc-trigger:latest",
-							Replicas:      &defaultReplicas,
-							GPU:           &defaultGPU,
-							Subscriptions: []string{"exitpoint"},
-							Networking: &krt.ProcessNetworking{
-								TargetPort:          9000,
-								TargetProtocol:      krt.NetworkingProtocolTCP,
-								DestinationPort:     9000,
-								DestinationProtocol: krt.NetworkingProtocolTCP,
-							},
+	return &krt.Krt{
+		Name:        "email-classificator",
+		Description: "Email classificator for branching features.",
+		Version:     "v1.0.0",
+		Config: map[string]string{
+			"key1": "value1",
+			"key2": "value2",
+		},
+		Workflows: []krt.Workflow{
+			{
+				Name: "go-classificator",
+				Type: krt.WorkflowTypeData,
+				Config: map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				},
+				Processes: []krt.Process{
+					{
+						Name:          "entrypoint",
+						Type:          krt.ProcessTypeTrigger,
+						Image:         "konstellation/kai-grpc-trigger:latest",
+						Replicas:      &defaultReplicas,
+						GPU:           &defaultGPU,
+						Subscriptions: []string{"exitpoint"},
+						Networking: &krt.ProcessNetworking{
+							TargetPort:          9000,
+							TargetProtocol:      krt.NetworkingProtocolTCP,
+							DestinationPort:     9000,
+							DestinationProtocol: krt.NetworkingProtocolTCP,
 						},
+					},
+					{
+						Name:          "etl",
+						Type:          krt.ProcessTypeTask,
+						Image:         "konstellation/kai-etl-task:latest",
+						Replicas:      &defaultReplicas,
+						GPU:           &defaultGPU,
+						ObjectStore:   commonObjectStore,
+						Subscriptions: []string{"entrypoint"},
+					},
+					{
+						Name:          "email-classificator",
+						Type:          krt.ProcessTypeTask,
+						Image:         "konstellation/kai-ec-task:latest",
+						Replicas:      &defaultReplicas,
+						GPU:           &defaultGPU,
+						ObjectStore:   commonObjectStore,
+						Subscriptions: []string{"etl"},
+					},
+					{
+						Name:          "exitpoint",
+						Type:          krt.ProcessTypeExit,
+						Image:         "konstellation/kai-exitpoint:latest",
+						Replicas:      &defaultReplicas,
+						GPU:           &defaultGPU,
+						ObjectStore:   commonObjectStore,
+						Subscriptions: []string{"etl", "stats-storer"},
 					},
 				},
 			},
@@ -145,21 +177,25 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 		ID: productID,
 	}
 
-	versionName := "classificator-v1"
 	testVersion := s.getTestVersion()
+	krtClassificator := s.getClassificatorKRT()
 
 	file, err := os.Open("../../test_assets/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
-	s.mocks.idGenerator.EXPECT().NewID().Return("fakepass").Times(6)
 	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(product, nil)
-	s.mocks.versionRepo.EXPECT().Create(user.ID, productID, gomock.Any()).Return(testVersion, nil)
+	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.KRT.Name).Return(nil, errors.ErrVersionNotFound)
 	s.mocks.versionRepo.EXPECT().SetStatus(s.ctx, productID, testVersion.ID, entity.VersionStatusCreated).Return(nil)
 	s.mocks.versionRepo.EXPECT().UploadKRTFile(productID, testVersion, gomock.Any()).Return(nil)
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, versionName).Return(nil, errors.ErrVersionNotFound)
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).Return(nil)
-	s.mocks.dashboardService.EXPECT().Create(s.ctx, productID, gomock.Any(), gomock.Any()).Return(nil)
+	s.mocks.versionRepo.EXPECT().Create(
+		user.ID,
+		productID,
+		&entity.Version{
+			KRT: krtClassificator,
+		},
+	).Return(testVersion, nil)
 
 	_, statusCh, err := s.versionInteractor.Create(context.Background(), user, productID, file)
 	s.Require().NoError(err)
@@ -181,7 +217,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplic
 
 	testVersion := s.getTestVersion()
 
-	file, err := os.Open("../../test_assets/classificator-v1.krt")
+	file, err := os.Open("../../test_assets/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
@@ -194,16 +230,13 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplic
 
 func (s *VersionInteractorSuite) TestGetByName() {
 	productID := "product-1"
-	versionName := "version-name"
 
 	user := testhelpers.NewUserBuilder().Build()
-
 	testVersion := s.getTestVersion()
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewVersion).Return(nil)
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, versionName).Return(testVersion, nil)
+	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.KRT.Name).Return(testVersion, nil)
 
-	actual, err := s.versionInteractor.GetByName(s.ctx, user, productID, versionName)
+	actual, err := s.versionInteractor.GetByName(s.ctx, user, productID, testVersion.KRT.Name)
 	s.Require().NoError(err)
 
 	s.Equal(testVersion, actual)

@@ -41,21 +41,6 @@ workflows:
         subscriptions:
           - 'etl'
 
-      - name: repairs-handler
-        type: task
-        image: konstellation/kai-rh-task:latest
-        subscriptions:
-          - 'email-classificator.repairs'
-
-      - name: stats-storer
-        type: task
-        image: konstellation/kai-ss-task:latest
-        objectStore:
-          name: emails
-          scope: workflow
-        subscriptions:
-          - 'email-classificator'
-
       - name: exitpoint
         type: exit
         image: konstellation/kai-exitpoint:latest
