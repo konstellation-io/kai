@@ -93,7 +93,7 @@ func (s *VersionInteractorSuite) TearDownSuite() {
 func (s *VersionInteractorSuite) getTestVersion() *entity.Version {
 	return &entity.Version{
 		ID:  "version-id",
-		KRT: s.getClassificatorKRT(),
+		Krt: s.getClassificatorKRT(),
 	}
 }
 
@@ -185,7 +185,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
 	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(product, nil)
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.KRT.Name).Return(nil, errors.ErrVersionNotFound)
+	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.Name).Return(nil, errors.ErrVersionNotFound)
 	s.mocks.versionRepo.EXPECT().SetStatus(s.ctx, productID, testVersion.ID, entity.VersionStatusCreated).Return(nil)
 	s.mocks.versionRepo.EXPECT().UploadKRTFile(productID, testVersion, gomock.Any()).Return(nil)
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).Return(nil)
@@ -193,7 +193,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 		user.ID,
 		productID,
 		&entity.Version{
-			KRT: krtClassificator,
+			Krt: krtClassificator,
 		},
 	).Return(testVersion, nil)
 
@@ -222,7 +222,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplic
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
 	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(product, nil)
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.KRT.Name).Return(testVersion, nil)
+	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.Name).Return(testVersion, nil)
 
 	_, _, err = s.versionInteractor.Create(context.Background(), user, productID, file)
 	s.ErrorIs(err, errors.ErrVersionDuplicated)
@@ -234,9 +234,9 @@ func (s *VersionInteractorSuite) TestGetByName() {
 	user := testhelpers.NewUserBuilder().Build()
 	testVersion := s.getTestVersion()
 
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.KRT.Name).Return(testVersion, nil)
+	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.Name).Return(testVersion, nil)
 
-	actual, err := s.versionInteractor.GetByName(s.ctx, user, productID, testVersion.KRT.Name)
+	actual, err := s.versionInteractor.GetByName(s.ctx, user, productID, testVersion.Name)
 	s.Require().NoError(err)
 
 	s.Equal(testVersion, actual)

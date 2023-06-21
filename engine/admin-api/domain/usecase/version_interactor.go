@@ -27,7 +27,7 @@ type VersionInteractor struct {
 	logger                 logging.Logger
 	versionRepo            repository.VersionRepo
 	productRepo            repository.ProductRepo
-	versionService         service.VersionService
+	k8sService             service.K8sService
 	natsManagerService     service.NatsManagerService
 	userActivityInteractor UserActivityInteracter
 	accessControl          auth.AccessControl
@@ -41,7 +41,7 @@ func NewVersionInteractor(
 	logger logging.Logger,
 	versionRepo repository.VersionRepo,
 	productRepo repository.ProductRepo,
-	versionService service.VersionService,
+	k8sService service.K8sService,
 	natsManagerService service.NatsManagerService,
 	userActivityInteractor UserActivityInteracter,
 	accessControl auth.AccessControl,
@@ -53,7 +53,7 @@ func NewVersionInteractor(
 		logger,
 		versionRepo,
 		productRepo,
-		versionService,
+		k8sService,
 		natsManagerService,
 		userActivityInteractor,
 		accessControl,
@@ -153,7 +153,7 @@ func (i *VersionInteractor) Create(
 		user.ID,
 		productID,
 		&entity.Version{
-			KRT: krtYml,
+			Krt: krtYml,
 		},
 	)
 
@@ -240,7 +240,7 @@ func (i *VersionInteractor) saveKRTDashboards(
 	contentErrors []error,
 ) []error {
 	if _, err := os.Stat(path.Join(dashboardsFolder)); err == nil {
-		err := i.storeDashboards(ctx, dashboardsFolder, product.ID, versionCreated.KRT.Name)
+		err := i.storeDashboards(ctx, dashboardsFolder, product.ID, versionCreated.Name)
 		if err != nil {
 			contentErrors = append(contentErrors, errors.ErrCreatingDashboard)
 		}
@@ -290,17 +290,17 @@ func (i *VersionInteractor) Start(
 
 	versionStreamCfg, err := i.natsManagerService.CreateStreams(ctx, productID, v)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error creating streams for version %q: %w", v.KRT.Name, err)
+		return nil, nil, fmt.Errorf("error creating streams for version %q: %w", v.Name, err)
 	}
 
 	objectStoreCfg, err := i.natsManagerService.CreateObjectStores(ctx, productID, v)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error creating objects stores for version %q: %w", v.KRT.Name, err)
+		return nil, nil, fmt.Errorf("error creating objects stores for version %q: %w", v.Name, err)
 	}
 
 	kvStoreCfg, err := i.natsManagerService.CreateKeyValueStores(ctx, productID, v)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error creating key-value stores for version %q: %w", v.KRT.Name, err)
+		return nil, nil, fmt.Errorf("error creating key-value stores for version %q: %w", v.Name, err)
 	}
 
 	versionCfg := entity.NewVersionConfig(versionStreamCfg, objectStoreCfg, kvStoreCfg)
@@ -378,19 +378,19 @@ func (i *VersionInteractor) startAndNotify(
 		i.logger.Debug("[versionInteractor.startAndNotify] channel closed")
 	}()
 
-	err := i.versionService.Start(ctx, productID, vers, versionConfig)
+	err := i.k8sService.Start(ctx, productID, vers, versionConfig)
 	if err != nil {
-		i.logger.Errorf("[versionInteractor.startAndNotify] error starting version %q: %s", vers.KRT.Name, err)
+		i.logger.Errorf("[versionInteractor.startAndNotify] error starting version %q: %s", vers.Name, err)
 	}
 
 	err = i.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarted)
 	if err != nil {
-		i.logger.Errorf("[versionInteractor.startAndNotify] error starting version %q: %s", vers.KRT.Name, err)
+		i.logger.Errorf("[versionInteractor.startAndNotify] error starting version %q: %s", vers.Name, err)
 	}
 
 	vers.Status = entity.VersionStatusStarted
 	notifyStatusCh <- vers
-	i.logger.Infof("[versionInteractor.startAndNotify] version %q started", vers.KRT.Name)
+	i.logger.Infof("[versionInteractor.startAndNotify] version %q started", vers.Name)
 }
 
 func (i *VersionInteractor) stopAndNotify(
@@ -406,19 +406,19 @@ func (i *VersionInteractor) stopAndNotify(
 		i.logger.Debug("[versionInteractor.stopAndNotify] channel closed")
 	}()
 
-	err := i.versionService.Stop(ctx, productID, vers)
+	err := i.k8sService.Stop(ctx, productID, vers)
 	if err != nil {
-		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", vers.KRT.Name, err)
+		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", vers.Name, err)
 	}
 
 	err = i.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopped)
 	if err != nil {
-		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", vers.KRT.Name, err)
+		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", vers.Name, err)
 	}
 
 	vers.Status = entity.VersionStatusStopped
 	notifyStatusCh <- vers
-	i.logger.Infof("[versionInteractor.stopAndNotify] version %q stopped", vers.KRT.Name)
+	i.logger.Infof("[versionInteractor.stopAndNotify] version %q stopped", vers.Name)
 }
 
 // Publish set a Version as published on DB and K8s.
@@ -444,7 +444,7 @@ func (i *VersionInteractor) Publish(
 		return nil, errors.ErrInvalidVersionStatusBeforePublishing
 	}
 
-	err = i.versionService.Publish(productID, v)
+	err = i.k8sService.Publish(productID, v)
 	if err != nil {
 		return nil, err
 	}
@@ -495,7 +495,7 @@ func (i *VersionInteractor) Unpublish(
 		return nil, errors.ErrInvalidVersionStatusBeforeUnpublishing
 	}
 
-	err = i.versionService.Unpublish(productID, v)
+	err = i.k8sService.Unpublish(productID, v)
 	if err != nil {
 		return nil, err
 	}
@@ -532,7 +532,7 @@ func (i *VersionInteractor) WatchProcessStatus(
 		return nil, err
 	}
 
-	return i.versionService.WatchProcessStatus(ctx, productID, v.KRT.Name)
+	return i.k8sService.WatchProcessStatus(ctx, productID, v.Name)
 }
 
 func (i *VersionInteractor) WatchProcessLogs(
@@ -601,7 +601,7 @@ func (i *VersionInteractor) setStatusError(
 		errorMessages[idx] = err.Error()
 	}
 
-	i.logger.Errorf("The version %q has the following errors: %s", vers.KRT.Name,
+	i.logger.Errorf("The version %q has the following errors: %s", vers.Name,
 		strings.Join(errorMessages, "\n"))
 
 	versionWithError, err := i.versionRepo.SetErrors(ctx, productID, vers, errorMessages)

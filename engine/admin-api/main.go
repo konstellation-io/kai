@@ -66,7 +66,7 @@ func initApp(
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
 
-	versionService, err := service.NewK8sVersionClient(cfg, logger)
+	k8sService, err := service.NewK8sVersionClient(cfg, logger)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -121,7 +121,7 @@ func initApp(
 		logger,
 		versionMongoRepo,
 		productRepo,
-		versionService,
+		k8sService,
 		natsManagerService,
 		userActivityInteractor,
 		accessControl,

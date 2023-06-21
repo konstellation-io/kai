@@ -8,13 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt/validator"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
@@ -80,10 +79,10 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 
 	version, notifyCh, err := r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
 	if err != nil {
-		if errs, ok := err.(validator.ValidationError); ok {
+		if errors.Is(err, errors.ErrInvalidKRT) {
 			extensions := make(map[string]interface{})
 			extensions["code"] = "krt_validation_error"
-			extensions["details"] = errs.Messages
+			extensions["details"] = err
 
 			return nil, &gqlerror.Error{
 				Message:    "the krt.yml file contains errors",
@@ -155,26 +154,6 @@ func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVers
 	return r.versionInteractor.Publish(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
 }
 
-func (r *mutationResolver) UpdateVersionUserConfiguration(ctx context.Context, input UpdateConfigurationInput) (*entity.Version, error) {
-	loggedUser := ctx.Value("user").(*entity.User)
-
-	v, err := r.versionInteractor.GetByName(ctx, loggedUser, input.ProductID, input.VersionName)
-	if err != nil {
-		return nil, err
-	}
-
-	cfg := make([]*entity.ConfigurationVariable, len(input.ConfigurationVariables))
-
-	for i, c := range input.ConfigurationVariables {
-		cfg[i] = &entity.ConfigurationVariable{
-			Key:   c.Key,
-			Value: c.Value,
-		}
-	}
-
-	return r.versionInteractor.UpdateVersionConfig(ctx, loggedUser, input.ProductID, v, cfg)
-}
-
 func (r *mutationResolver) UpdateUserProductGrants(
 	ctx context.Context,
 	input UpdateUserProductGrantsInput,
@@ -231,7 +210,7 @@ func (r *queryResolver) Version(ctx context.Context, name, productID string) (*e
 
 func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.GetByProduct(ctx, loggedUser, productID)
+	return r.versionInteractor.GetVersionsByProduct(ctx, loggedUser, productID)
 }
 
 func (r *queryResolver) UserActivityList(
@@ -299,35 +278,10 @@ func (r *productResolver) EntrypointAddress(_ context.Context, _ *entity.Product
 	return fmt.Sprintf("entrypoint.%s", r.cfg.BaseDomainName), nil
 }
 
-func (r *subscriptionResolver) WatchVersion(ctx context.Context) (<-chan *entity.Version, error) {
-	id := uuid.New().String()
-
-	versionStatusCh := make(chan *entity.Version, 1)
-
-	go func() {
-		<-ctx.Done()
-		mux.Lock()
-		delete(versionStatusChannels, id)
-		mux.Unlock()
-	}()
-
-	mux.Lock()
-	versionStatusChannels[id] = versionStatusCh
-	mux.Unlock()
-
-	return versionStatusCh, nil
-}
-
-func (r *subscriptionResolver) WatchNodeStatus(ctx context.Context,
-	versionName, productID string) (<-chan *entity.Node, error) {
+func (r *subscriptionResolver) WatchProcessLogs(ctx context.Context, productID, versionName string,
+	filters entity.LogFilters) (<-chan *entity.ProcessLog, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.WatchNodeStatus(ctx, loggedUser, productID, versionName)
-}
-
-func (r *subscriptionResolver) WatchNodeLogs(ctx context.Context, productID, versionName string,
-	filters entity.LogFilters) (<-chan *entity.NodeLog, error) {
-	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.WatchNodeLogs(ctx, loggedUser, productID, versionName, filters)
+	return r.versionInteractor.WatchProcessLogs(ctx, loggedUser, productID, versionName, filters)
 }
 
 func (r *userActivityResolver) Date(_ context.Context, obj *entity.UserActivity) (string, error) {
@@ -357,11 +311,11 @@ func (r *versionResolver) PublicationDate(_ context.Context, obj *entity.Version
 }
 
 func (r *versionResolver) PublicationAuthor(_ context.Context, obj *entity.Version) (*string, error) {
-	if obj.PublicationUserID == nil {
+	if obj.PublicationAuthor == nil {
 		return nil, nil
 	}
 
-	return obj.PublicationUserID, nil
+	return obj.PublicationAuthor, nil
 }
 
 // Mutation returns MutationResolver implementation.

@@ -126,7 +126,7 @@ func (i *UserActivityInteractor) RegisterCreateAction(
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
 			{Key: "VERSION_ID", Value: version.ID},
-			{Key: "VERSION_NAME", Value: version.KRT.Name},
+			{Key: "VERSION_NAME", Value: version.Name},
 		})
 
 	return checkUserActivityError(i.logger, err)
@@ -144,7 +144,7 @@ func (i *UserActivityInteractor) RegisterStartAction(
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
 			{Key: "VERSION_ID", Value: version.ID},
-			{Key: "VERSION_NAME", Value: version.KRT.Name},
+			{Key: "VERSION_NAME", Value: version.Name},
 			{Key: "COMMENT", Value: comment},
 		})
 
@@ -163,7 +163,7 @@ func (i *UserActivityInteractor) RegisterStopAction(
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
 			{Key: "VERSION_ID", Value: version.ID},
-			{Key: "VERSION_NAME", Value: version.KRT.Name},
+			{Key: "VERSION_NAME", Value: version.Name},
 			{Key: "COMMENT", Value: comment},
 		})
 
@@ -181,9 +181,9 @@ func (i *UserActivityInteractor) RegisterPublishAction(
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
 			{Key: "VERSION_ID", Value: version.ID},
-			{Key: "VERSION_NAME", Value: version.KRT.Name},
+			{Key: "VERSION_NAME", Value: version.Name},
 			{Key: "OLD_PUBLISHED_VERSION_ID", Value: prev.ID},
-			{Key: "OLD_PUBLISHED_VERSION_NAME", Value: prev.KRT.Name},
+			{Key: "OLD_PUBLISHED_VERSION_NAME", Value: prev.Name},
 			{Key: "COMMENT", Value: comment},
 		})
 
@@ -202,7 +202,7 @@ func (i *UserActivityInteractor) RegisterUnpublishAction(
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
 			{Key: "VERSION_ID", Value: version.ID},
-			{Key: "VERSION_NAME", Value: version.KRT.Name},
+			{Key: "VERSION_NAME", Value: version.Name},
 			{Key: "COMMENT", Value: comment},
 		})
 

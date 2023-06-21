@@ -7,8 +7,8 @@ import (
 )
 
 type Version struct {
-	ID  string
-	KRT *krt.Krt
+	*krt.Krt
+	ID string
 
 	CreationDate   time.Time
 	CreationAuthor string

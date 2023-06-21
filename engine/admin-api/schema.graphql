@@ -29,7 +29,6 @@ type Mutation {
   stopVersion(input: StopVersionInput!): Version!
   publishVersion(input: PublishVersionInput!): Version!
   unpublishVersion(input: UnpublishVersionInput!): Version!
-  updateVersionUserConfiguration(input: UpdateConfigurationInput!): Version!
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
 }
@@ -39,13 +38,11 @@ type User {
 }
 
 type Subscription {
-  watchNodeLogs(
+  watchProcessLogs(
     productID: ID!
     versionName: String!
     filters: LogFilters!
-  ): NodeLog!
-  watchNodeStatus(versionName: String!, productID: ID!): Node!
-  watchVersion: Version!
+  ): ProcessLog!
 }
 
 input CreateProductInput {
@@ -96,90 +93,31 @@ input RevokeUserProductGrantsInput {
   comment: String
 }
 
-input SettingsInput {
-  authAllowedDomains: [String!]
-  sessionLifetimeInDays: Int
-}
-
 type ConfigurationVariable {
   key: String!
   value: String!
-  type: ConfigurationVariableType!
-}
-
-enum ConfigurationVariableType {
-  VARIABLE
-  FILE
-}
-
-input ConfigurationVariablesInput {
-  key: String!
-  value: String!
-}
-
-input UpdateConfigurationInput {
-  versionName: String!
-  productID: ID!
-  configurationVariables: [ConfigurationVariablesInput!]!
 }
 
 type Product {
   id: ID!
   name: String!
   description: String!
-  creationDate: String!
   measurementsUrl: String!
   databaseUrl: String!
   entrypointAddress: String!
   publishedVersion: Version
   creationAuthor: String!
-}
-
-type Node {
-  id: ID!
-  name: String!
-  status: NodeStatus!
-  subscriptions: [String!]
-  replicas: Int!
-}
-
-enum NodeStatus {
-  STARTING
-  STARTED
-  STOPPED
-  ERROR
-}
-
-type Workflow {
-  id: ID!
-  name: String!
-  entrypoint: String
-  exitpoint: String
-  nodes: [Node!]!
-}
-
-enum KrtVersion {
-  v2
+  creationDate: String!
 }
 
 type Version {
   id: ID!
-  krtVersion: KrtVersion!
-  name: String!
-  description: String!
-  status: VersionStatus!
   creationDate: String!
   creationAuthor: String!
   publicationDate: String
   publicationAuthor: String
-  workflows: [Workflow!]!
-  config: VersionUserConfig!
+  status: VersionStatus!
   errors: [String!]!
-}
-
-type VersionUserConfig {
-  vars: [ConfigurationVariable!]!
-  completed: Boolean!
 }
 
 enum VersionStatus {
@@ -189,6 +127,45 @@ enum VersionStatus {
   STARTED
   PUBLISHED
   STOPPING
+  STOPPED
+  ERROR
+}
+
+type Workflow {
+  id: ID!
+  name: String!
+  workflowType: WorkflowType!
+  config: [ConfigurationVariable]
+  processes: [Process!]!
+}
+
+enum WorkflowType {
+  DATA
+  TRAINING
+  FEEDBACK
+  SERVING
+}
+
+type Process {
+  id: ID!
+  name: String!
+  processType: ProcessType!
+  image: String!
+  replicas: Int!
+  config: [ConfigurationVariable]
+  subscriptions: [String!]!
+  status: ProcessStatus!
+}
+
+enum ProcessType {
+  TRIGGER
+  TASK
+  EXIT
+}
+
+enum ProcessStatus {
+  STARTING
+  STARTED
   STOPPED
   ERROR
 }
@@ -232,7 +209,7 @@ input LogFilters {
   endDate: String
   search: String
   levels: [LogLevel!]
-  nodeIds: [ID!]
+  processIds: [ID!]
   versionsIds: [ID!]
   workflowsNames: [ID!]
 }
@@ -244,11 +221,11 @@ enum LogLevel {
   DEBUG
 }
 
-type NodeLog {
+type ProcessLog {
   id: ID!
   date: String!
-  nodeId: String
-  nodeName: String
+  processId: String
+  processName: String
   workflowId: String
   workflowName: String
   message: String!
@@ -257,7 +234,7 @@ type NodeLog {
 
 type LogPage {
   cursor: String
-  items: [NodeLog!]!
+  items: [ProcessLog!]!
 }
 
 type Metrics {

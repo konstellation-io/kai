@@ -1,19 +1,20 @@
 package version
 
 import (
-	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/krt/pkg/krt"
+
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 func mapDTOToEntity(dto *versionDTO) *entity.Version {
 	return &entity.Version{
-		ID: dto.ID,
-		KRT: krt.Krt{
+		Krt: &krt.Krt{
 			Name:        dto.Name,
 			Description: dto.Description,
 			Config:      dto.Config,
 			Workflows:   mapDTOToEntityWorkflows(dto.Workflows),
 		},
+		ID: dto.ID,
 
 		CreationDate:   dto.CreationDate,
 		CreationAuthor: dto.CreationAuthor,
@@ -93,10 +94,10 @@ func mapDTOToEntityProcessNetworking(dto *processNetworkingDTO) *krt.ProcessNetw
 func mapEntityToDTO(entity *entity.Version) *versionDTO {
 	return &versionDTO{
 		ID:          entity.ID,
-		Name:        entity.KRT.Name,
-		Description: entity.KRT.Description,
-		Config:      entity.KRT.Config,
-		Workflows:   mapEntityToDTOWorkflows(entity.KRT.Workflows),
+		Name:        entity.Name,
+		Description: entity.Description,
+		Config:      entity.Config,
+		Workflows:   mapEntityToDTOWorkflows(entity.Workflows),
 
 		CreationDate:   entity.CreationDate,
 		CreationAuthor: entity.CreationAuthor,

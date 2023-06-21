@@ -49,11 +49,6 @@ type processDTO struct {
 	Status        krt.ProcessStatus      `bson:"-"` // This field value is calculated in k8s
 }
 
-type objectStoreDTO struct {
-	Name  string               `bson:"name"`
-	Scope krt.ObjectStoreScope `bson:"scope"`
-}
-
 type processObjectStoreDTO struct {
 	Name  string               `bson:"name"`
 	Scope krt.ObjectStoreScope `bson:"scope"`
