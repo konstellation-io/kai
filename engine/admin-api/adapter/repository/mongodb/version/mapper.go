@@ -28,7 +28,7 @@ func mapDTOToEntity(dto *versionDTO) *entity.Version {
 }
 
 func mapDTOToEntityWorkflows(dtos []workflowDTO) []krt.Workflow {
-	var workflows []krt.Workflow
+	workflows := make([]krt.Workflow, len(dtos))
 
 	for _, dto := range dtos {
 		workflows = append(workflows, krt.Workflow{
@@ -44,7 +44,7 @@ func mapDTOToEntityWorkflows(dtos []workflowDTO) []krt.Workflow {
 }
 
 func mapDTOToEntityProcesses(dtos []processDTO) []krt.Process {
-	var processes []krt.Process
+	processes := make([]krt.Process, len(dtos))
 
 	for _, dto := range dtos {
 		replicas := int(dto.Replicas)
@@ -91,28 +91,28 @@ func mapDTOToEntityProcessNetworking(dto *processNetworkingDTO) *krt.ProcessNetw
 	}
 }
 
-func mapEntityToDTO(entity *entity.Version) *versionDTO {
+func mapEntityToDTO(versionEntity *entity.Version) *versionDTO {
 	return &versionDTO{
-		ID:          entity.ID,
-		Name:        entity.Name,
-		Description: entity.Description,
-		Config:      entity.Config,
-		Workflows:   mapEntityToDTOWorkflows(entity.Workflows),
+		ID:          versionEntity.ID,
+		Name:        versionEntity.Name,
+		Description: versionEntity.Description,
+		Config:      versionEntity.Config,
+		Workflows:   mapEntityToDTOWorkflows(versionEntity.Workflows),
 
-		CreationDate:   entity.CreationDate,
-		CreationAuthor: entity.CreationAuthor,
+		CreationDate:   versionEntity.CreationDate,
+		CreationAuthor: versionEntity.CreationAuthor,
 
-		PublicationDate:   entity.PublicationDate,
-		PublicationAuthor: entity.PublicationAuthor,
+		PublicationDate:   versionEntity.PublicationDate,
+		PublicationAuthor: versionEntity.PublicationAuthor,
 
-		Status: entity.Status,
+		Status: versionEntity.Status,
 
-		Errors: entity.Errors,
+		Errors: versionEntity.Errors,
 	}
 }
 
 func mapEntityToDTOWorkflows(workflows []krt.Workflow) []workflowDTO {
-	var dtos []workflowDTO
+	dtos := make([]workflowDTO, len(workflows))
 
 	for _, workflow := range workflows {
 		dtos = append(dtos, workflowDTO{
@@ -128,7 +128,7 @@ func mapEntityToDTOWorkflows(workflows []krt.Workflow) []workflowDTO {
 }
 
 func mapEntityToDTOProcesses(processes []krt.Process) []processDTO {
-	var dtos []processDTO
+	dtos := make([]processDTO, len(processes))
 
 	for _, process := range processes {
 		dtos = append(dtos, processDTO{

@@ -143,7 +143,9 @@ func (n *NatsManagerClient) DeleteObjectStores(ctx context.Context, runtimeID, v
 	return nil
 }
 
-// TODO migrate to new krt once proto is updated
+// TODO migrate to new krt once proto is updated.
+//
+//nolint:godox // To be done.
 func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]*natspb.Workflow, error) {
 	var workflows = make([]*natspb.Workflow, 0, len(version.Workflows))
 
@@ -187,7 +189,7 @@ func (n *NatsManagerClient) dtoToVersionStreamConfig(
 	for workflow, streamCfg := range workflows {
 		workflowsConfig[workflow] = &entity.WorkflowStreamConfig{
 			Stream:            streamCfg.Stream,
-			Processs:          n.dtoToProcesssStreamConfig(streamCfg.Nodes),
+			Processes:         n.dtoToProcesssStreamConfig(streamCfg.Nodes),
 			EntrypointSubject: streamCfg.EntrypointSubject,
 		}
 	}
@@ -198,11 +200,11 @@ func (n *NatsManagerClient) dtoToVersionStreamConfig(
 }
 
 func (n *NatsManagerClient) dtoToProcesssStreamConfig(
-	processs map[string]*natspb.CreateStreamsResponse_NodeStreamConfig,
+	processes map[string]*natspb.CreateStreamsResponse_NodeStreamConfig,
 ) map[string]*entity.ProcessStreamConfig {
 	processsStreamCfg := map[string]*entity.ProcessStreamConfig{}
 
-	for process, subjectCfg := range processs {
+	for process, subjectCfg := range processes {
 		processsStreamCfg[process] = &entity.ProcessStreamConfig{
 			Subject:       subjectCfg.Subject,
 			Subscriptions: subjectCfg.Subscriptions,
@@ -245,7 +247,9 @@ func (n *NatsManagerClient) dtoToVersionKeyValueStoreConfig(
 	}
 }
 
-// TODO, migrate project to product in proto
+// TODO, migrate project to product in proto.
+//
+//nolint:godox // To be done.
 func translateObjectStoreEnum(scope krt.ObjectStoreScope) (natspb.ObjectStoreScope, error) {
 	switch scope {
 	case krt.ObjectStoreScopeProduct:

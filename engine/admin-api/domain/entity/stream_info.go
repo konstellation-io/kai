@@ -11,13 +11,13 @@ type VersionStreamsConfig struct {
 
 type WorkflowStreamConfig struct {
 	Stream            string
-	Processs          map[string]*ProcessStreamConfig
+	Processes         map[string]*ProcessStreamConfig
 	EntrypointSubject string
 	KeyValueStore     string
 }
 
 func (w *WorkflowStreamConfig) GetProcessConfig(processName string) (*ProcessStreamConfig, error) {
-	processConfig, ok := w.Processs[processName]
+	processConfig, ok := w.Processes[processName]
 	if !ok {
 		//nolint:goerr113 // The error needs to be dynamic
 		return nil, fmt.Errorf("error obtaining stream config for process %q", processName)

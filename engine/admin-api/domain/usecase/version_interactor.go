@@ -166,7 +166,7 @@ func (i *VersionInteractor) Create(
 	notifyStatusCh := make(chan *entity.Version, 1)
 
 	go i.completeVersionCreation(
-		user.ID, tmpKrtFile, krtYml, tmpDir, product, versionCreated, notifyStatusCh,
+		user.ID, tmpKrtFile, tmpDir, product, versionCreated, notifyStatusCh,
 	)
 
 	return versionCreated, notifyStatusCh, nil
@@ -175,7 +175,6 @@ func (i *VersionInteractor) Create(
 func (i *VersionInteractor) completeVersionCreation(
 	loggedUserID string,
 	tmpKrtFile *os.File,
-	krtYml *krt.Krt,
 	tmpDir string,
 	product *entity.Product,
 	versionCreated *entity.Version,
@@ -215,9 +214,11 @@ func (i *VersionInteractor) completeVersionCreation(
 
 	err = i.versionRepo.SetStatus(ctx, product.ID, versionCreated.ID, entity.VersionStatusCreated)
 	if err != nil {
-		i.logger.Errorf("error setting version status: %s", err)
 		versionCreated.Status = entity.VersionStatusError
+
+		i.logger.Errorf("error setting version status: %s", err)
 		notifyStatusCh <- versionCreated
+
 		return
 	}
 
@@ -231,7 +232,9 @@ func (i *VersionInteractor) completeVersionCreation(
 	}
 }
 
-// TODO what happens with this
+// TODO discuss what will happen with this.
+//
+//nolint:godox // To be done.
 func (i *VersionInteractor) saveKRTDashboards(
 	ctx context.Context,
 	dashboardsFolder string,

@@ -52,6 +52,7 @@ func (k *K8sVersionClient) Start(
 		return err
 	}
 
+	//nolint:godox // To be done.
 	// TODO: Update to new proto
 	req := versionpb.StartRequest{
 		ProductId:      productID,
@@ -143,8 +144,8 @@ func (k *K8sVersionClient) Publish(productID string, version *entity.Version) er
 
 func versionToConfig(version *entity.Version) []*versionpb.Config {
 	configVars := make([]*versionpb.Config, len(version.Config))
-
 	idx := 0
+
 	for k, v := range version.Config {
 		configVars[idx] = &versionpb.Config{
 			Key:   k,
@@ -156,7 +157,9 @@ func versionToConfig(version *entity.Version) []*versionpb.Config {
 	return configVars
 }
 
-// TODO: Transform to new krt when protobuf is updated
+// TODO: Transform to new krt when protobuf is updated.
+//
+//nolint:godox // To be done.
 func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionConfig) ([]*versionpb.Workflow, error) {
 	wf := make([]*versionpb.Workflow, len(version.Workflows))
 
