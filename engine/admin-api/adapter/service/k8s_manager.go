@@ -52,6 +52,7 @@ func (k *K8sVersionClient) Start(
 		return err
 	}
 
+	// TODO: Update to new proto
 	req := versionpb.StartRequest{
 		ProductId:      productID,
 		VersionId:      version.ID,
@@ -62,11 +63,7 @@ func (k *K8sVersionClient) Start(
 		MongoDbName:    k.cfg.MongoDB.DBName,
 		MongoKrtBucket: k.cfg.MongoDB.KRTBucket,
 		InfluxUri:      fmt.Sprintf("http://%s-influxdb:8086", k.cfg.ReleaseName),
-		Entrypoint: &versionpb.Entrypoint{
-			ProtoFile: version.Entrypoint.ProtoFile,
-			Image:     version.Entrypoint.Image,
-		},
-		KeyValueStore: versionConfig.KeyValueStoresConfig.ProjectKeyValueStore,
+		KeyValueStore:  versionConfig.KeyValueStoresConfig.ProjectKeyValueStore,
 	}
 
 	_, err = k.client.Start(ctx, &req)
@@ -78,7 +75,11 @@ func (k *K8sVersionClient) Stop(ctx context.Context, productID string, version *
 	workflowEntrypoints := make([]string, 0)
 
 	for _, w := range version.Workflows {
-		workflowEntrypoints = append(workflowEntrypoints, w.Entrypoint)
+		for _, p := range w.Processes {
+			if p.Type == krt.ProcessTypeTrigger {
+				workflowEntrypoints = append(workflowEntrypoints, p.Name)
+			}
+		}
 	}
 
 	req := versionpb.VersionInfo{
@@ -141,18 +142,21 @@ func (k *K8sVersionClient) Publish(productID string, version *entity.Version) er
 }
 
 func versionToConfig(version *entity.Version) []*versionpb.Config {
-	configVars := make([]*versionpb.Config, len(version.Config.Vars))
+	configVars := make([]*versionpb.Config, len(version.Config))
 
-	for i, c := range version.Config.Vars {
-		configVars[i] = &versionpb.Config{
-			Key:   c.Key,
-			Value: c.Value,
+	idx := 0
+	for k, v := range version.Config {
+		configVars[idx] = &versionpb.Config{
+			Key:   k,
+			Value: v,
 		}
+		idx++
 	}
 
 	return configVars
 }
 
+// TODO: Transform to new krt when protobuf is updated
 func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionConfig) ([]*versionpb.Workflow, error) {
 	wf := make([]*versionpb.Workflow, len(version.Workflows))
 
@@ -169,9 +173,9 @@ func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionCo
 			return nil, fmt.Errorf("error getting workflow %q key-value store: %w", w.Name, err)
 		}
 
-		processs := make([]*versionpb.Workflow_Process, len(w.Processs))
+		process := make([]*versionpb.Workflow_Node, len(w.Processes))
 
-		for j, n := range w.Processs {
+		for j, n := range w.Processes {
 			processStreamCfg, err := workflowStreamConfig.GetProcessStreamConfig(n.Name)
 			if err != nil {
 				return nil, fmt.Errorf("error getting stream configuration from process %q: %w", n.Name, err)
@@ -186,29 +190,18 @@ func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionCo
 				return nil, fmt.Errorf("error getting process key-value store config: %w", err)
 			}
 
-			processs[j] = &versionpb.Workflow_Process{
-				Id:            n.ID,
+			process[j] = &versionpb.Workflow_Node{
 				Name:          n.Name,
 				Image:         n.Image,
-				Src:           n.Src,
-				Gpu:           n.GPU,
 				Subscriptions: processStreamCfg.Subscriptions,
 				Subject:       processStreamCfg.Subject,
 				ObjectStore:   versionConfig.GetProcessObjectStoreConfig(w.Name, n.Name),
 				KeyValueStore: processKeyValueStore,
-				Replicas:      n.Replicas,
 			}
 		}
 
 		wf[i] = &versionpb.Workflow{
-			Id:   w.ID,
-			Name: w.Name,
-			Entrypoint: &versionpb.Workflow_Entrypoint{
-				Name:    w.Entrypoint,
-				Subject: workflowStreamConfig.EntrypointSubject,
-			},
-			Processs:      processs,
-			Exitpoint:     w.Exitpoint,
+			Name:          w.Name,
 			Stream:        workflowStreamConfig.Stream,
 			KeyValueStore: workflowKeyValueStoresConfig.WorkflowKeyValueStore,
 		}
@@ -222,7 +215,7 @@ func (k *K8sVersionClient) WatchProcessStatus(
 	productID,
 	versionName string,
 ) (<-chan *krt.Process, error) {
-	stream, err := k.client.WatchProcessStatus(ctx, &versionpb.ProcessStatusRequest{
+	stream, err := k.client.WatchNodeStatus(ctx, &versionpb.NodeStatusRequest{
 		VersionName: versionName,
 		ProductId:   productID,
 	})
@@ -230,7 +223,7 @@ func (k *K8sVersionClient) WatchProcessStatus(
 		return nil, fmt.Errorf("version status opening stream: %w", err)
 	}
 
-	ch := make(chan *entity.Process, 1)
+	ch := make(chan *krt.Process, 1)
 
 	go func() {
 		defer close(ch)
@@ -257,14 +250,13 @@ func (k *K8sVersionClient) WatchProcessStatus(
 
 			k.logger.Debug("[VersionService.WatchProcessStatus] Message received")
 
-			status := entity.ProcessStatus(msg.GetStatus())
+			status := krt.ProcessStatus(msg.GetStatus())
 			if !status.IsValid() {
 				k.logger.Errorf("[VersionService.WatchProcessStatus] Invalid process status: %s", status)
 				continue
 			}
 
-			ch <- &entity.Process{
-				ID:     msg.GetProcessId(),
+			ch <- &krt.Process{
 				Name:   msg.GetName(),
 				Status: status,
 			}
