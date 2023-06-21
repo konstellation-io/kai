@@ -13,6 +13,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/krt/pkg/krt"
 )
 
 type NatsManagerClient struct {
@@ -142,37 +143,37 @@ func (n *NatsManagerClient) DeleteObjectStores(ctx context.Context, runtimeID, v
 	return nil
 }
 
+// TODO migrate to new krt once proto is updated
 func (n *NatsManagerClient) getWorkflowsFromVersion(version *entity.Version) ([]*natspb.Workflow, error) {
 	var workflows = make([]*natspb.Workflow, 0, len(version.Workflows))
 
 	for _, w := range version.Workflows {
-		nodes := make([]*natspb.Node, 0, len(w.Nodes))
+		processes := make([]*natspb.Node, 0, len(w.Processes))
 
-		for _, node := range w.Nodes {
-			nodeToAppend := natspb.Node{
-				Name:          node.Name,
-				Subscriptions: node.Subscriptions,
+		for _, process := range w.Processes {
+			processToAppend := natspb.Node{
+				Name:          process.Name,
+				Subscriptions: process.Subscriptions,
 			}
 
-			if node.ObjectStore != nil {
-				scope, err := translateObjectStoreEnum(node.ObjectStore.Scope)
+			if process.ObjectStore != nil {
+				scope, err := translateObjectStoreEnum(process.ObjectStore.Scope)
 				if err != nil {
 					return nil, err
 				}
 
-				nodeToAppend.ObjectStore = &natspb.ObjectStore{
-					Name:  node.ObjectStore.Name,
+				processToAppend.ObjectStore = &natspb.ObjectStore{
+					Name:  process.ObjectStore.Name,
 					Scope: scope,
 				}
 			}
 
-			nodes = append(nodes, &nodeToAppend)
+			processes = append(processes, &processToAppend)
 		}
 
 		workflows = append(workflows, &natspb.Workflow{
-			Entrypoint: w.Entrypoint,
-			Name:       w.Name,
-			Nodes:      nodes,
+			Name:  w.Name,
+			Nodes: processes,
 		})
 	}
 
@@ -186,7 +187,7 @@ func (n *NatsManagerClient) dtoToVersionStreamConfig(
 	for workflow, streamCfg := range workflows {
 		workflowsConfig[workflow] = &entity.WorkflowStreamConfig{
 			Stream:            streamCfg.Stream,
-			Nodes:             n.dtoToNodesStreamConfig(streamCfg.Nodes),
+			Processs:          n.dtoToProcesssStreamConfig(streamCfg.Nodes),
 			EntrypointSubject: streamCfg.EntrypointSubject,
 		}
 	}
@@ -196,19 +197,19 @@ func (n *NatsManagerClient) dtoToVersionStreamConfig(
 	}
 }
 
-func (n *NatsManagerClient) dtoToNodesStreamConfig(
-	nodes map[string]*natspb.CreateStreamsResponse_NodeStreamConfig,
-) map[string]*entity.NodeStreamConfig {
-	nodesStreamCfg := map[string]*entity.NodeStreamConfig{}
+func (n *NatsManagerClient) dtoToProcesssStreamConfig(
+	processs map[string]*natspb.CreateStreamsResponse_NodeStreamConfig,
+) map[string]*entity.ProcessStreamConfig {
+	processsStreamCfg := map[string]*entity.ProcessStreamConfig{}
 
-	for node, subjectCfg := range nodes {
-		nodesStreamCfg[node] = &entity.NodeStreamConfig{
+	for process, subjectCfg := range processs {
+		processsStreamCfg[process] = &entity.ProcessStreamConfig{
 			Subject:       subjectCfg.Subject,
 			Subscriptions: subjectCfg.Subscriptions,
 		}
 	}
 
-	return nodesStreamCfg
+	return processsStreamCfg
 }
 
 func (n *NatsManagerClient) dtoToVersionObjectStoreConfig(
@@ -233,8 +234,8 @@ func (n *NatsManagerClient) dtoToVersionKeyValueStoreConfig(
 
 	for workflow, kvStoreCfg := range workflows {
 		workflowsKVConfig[workflow] = &entity.WorkflowKeyValueStores{
-			WorkflowKeyValueStore: kvStoreCfg.KeyValueStore,
-			NodesKeyValueStores:   kvStoreCfg.Nodes,
+			WorkflowKeyValueStore:  kvStoreCfg.KeyValueStore,
+			ProcesssKeyValueStores: kvStoreCfg.Nodes,
 		}
 	}
 
@@ -244,11 +245,12 @@ func (n *NatsManagerClient) dtoToVersionKeyValueStoreConfig(
 	}
 }
 
-func translateObjectStoreEnum(scope string) (natspb.ObjectStoreScope, error) {
+// TODO, migrate project to product in proto
+func translateObjectStoreEnum(scope krt.ObjectStoreScope) (natspb.ObjectStoreScope, error) {
 	switch scope {
-	case "project":
+	case krt.ObjectStoreScopeProduct:
 		return natspb.ObjectStoreScope_SCOPE_PROJECT, nil
-	case "workflow":
+	case krt.ObjectStoreScopeWorkflow:
 		return natspb.ObjectStoreScope_SCOPE_WORKFLOW, nil
 	default:
 		//nolint:goerr113 // error needs to be wrapped
