@@ -62,6 +62,16 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.config.mongodb.connectionString.secretName }}
                   key: {{ .Values.config.mongodb.connectionString.secretKey }}
+            - name: KEYCLOAK_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.secretUserKey" . }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.secretPasswordKey" . }}
           ports:
             - containerPort: 8080
               protocol: TCP

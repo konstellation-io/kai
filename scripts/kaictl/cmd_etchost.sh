@@ -22,7 +22,7 @@ show_etchost_help() {
 update_etc_hosts() {
   MINIKUBE_IP=$(minikube ip -p "$MINIKUBE_PROFILE")
   echo "$MINIKUBE_IP api.kai.local
-$MINIKUBE_IP admin.kai.local
+$MINIKUBE_IP auth.kai.local
 " > /tmp/kai.hostctl
 
   SUDO=''
@@ -34,16 +34,16 @@ $MINIKUBE_IP admin.kai.local
 }
 
 show_etc_hosts() {
-  MINIKUBE_IP=$(minikube ip -p "$MINIKUBE_PROFILE")
+  INGRESS_IP=$(minikube ip -p "$MINIKUBE_PROFILE")
 
-  if [ -z "$MINIKUBE_IP" ]; then
+  if [ -z "$INGRESS_IP" ]; then
     echo_warning "If you are using a different profile run the script with the profile name."
     return
   fi
   echo
   echo_info "👇 Add the following lines to your /etc/hosts"
   echo
-  echo "$MINIKUBE_IP api.kai.local"
-  echo "$MINIKUBE_IP admin.kai.local"
+  echo "$INGRESS_IP api.kai.local"
+  echo "$INGRESS_IP auth.kai.local"
   echo
 }

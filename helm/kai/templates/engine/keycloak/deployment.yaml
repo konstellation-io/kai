@@ -1,0 +1,141 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/engine/keycloak/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/engine/keycloak/secret.yaml") . | sha256sum }}
+      {{- with .Values.keycloak.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "keycloak.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.keycloak.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "keycloak.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.keycloak.podSecurityContext | nindent 8 }}
+      containers:
+        - name: keycloak
+          securityContext:
+            {{- toYaml .Values.keycloak.securityContext | nindent 12 }}
+          image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
+          {{- if .Values.keycloak.argsOverride }}
+          args:
+            {{- toYaml .Values.keycloak.argsOverride | nindent 12 }}
+          {{- else }}
+          args:
+            - start
+            - --import-realm
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "keycloak.fullname" . }}
+          env:
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.secretUserKey" . }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.secretPasswordKey" . }}
+            - name: KC_DB
+              value: {{ .Values.keycloak.db.type }}
+            {{- if .Values.keycloak.db.auth.secretName }}
+            {{- if .Values.keycloak.db.auth.secretUserKey }}
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.db.auth.secretName }}
+                  key: {{ .Values.keycloak.db.auth.secretUserKey }}
+            {{- end }}
+            {{- if .Values.keycloak.db.auth.secretPasswordKey}}
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.db.auth.secretName }}
+                  key: {{ .Values.keycloak.db.auth.secretPasswordKey }}
+            {{- end }}
+            {{- if .Values.keycloak.db.auth.secretDatabaseKey }}
+            - name: KC_DB_URL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.db.auth.secretName }}
+                  key: {{ .Values.keycloak.db.auth.secretDatabaseKey }}
+            {{- end }}
+            {{- if .Values.keycloak.db.auth.secretHostKey }}
+            - name: KC_DB_URL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.db.auth.secretName }}
+                  key: {{ .Values.keycloak.db.auth.secretHostKey }}
+            {{- end }}
+            {{- if .Values.keycloak.db.auth.secretPortKey }}
+            - name: KC_DB_URL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.db.auth.secretName }}
+                  key: {{ .Values.keycloak.db.auth.secretPortKey }}
+            {{- end }}
+            {{- end }}
+          ports:
+            {{- if .Values.keycloak.config.httpEnabled }}
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            {{- end }}
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+          {{- with .Values.keycloak.livinessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.keycloak.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.keycloak.resources | nindent 12 }}
+          volumeMounts:
+            - name: keycloak-realm-config
+              mountPath: /opt/keycloak/data/import/konstellation-realm.json
+              subPath: realm.json
+            {{- if .Values.keycloak.extraVolumeMounts }}
+            {{- toYaml .Values.keycloak.extraVolumeMounts | nindent 12 }}
+            {{- end }}
+      {{- with .Values.keycloak.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.keycloak.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.keycloak.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: keycloak-realm-config
+          secret:
+            secretName: {{ include "keycloak.secretName" . }}-realm-config
+        {{- if .Values.keycloak.extraVolumes }}
+        {{- toYaml .Values.keycloak.extraVolumes | nindent 8 }}
+        {{- end }}

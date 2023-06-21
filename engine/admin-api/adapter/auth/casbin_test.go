@@ -102,6 +102,46 @@ func TestCheckProductGrants(t *testing.T) {
 	}
 }
 
+func TestCheckAdminGrants(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	logger := mocks.NewMockLogger(ctrl)
+	mocks.AddLoggerExpects(logger)
+
+	authorizer, err := auth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name     string
+		user     *entity.User
+		act      auth2.AccessControlAction
+		hasError bool
+	}{
+		{
+			name:     "user with admin grants can update user roles",
+			user:     testhelpers.NewUserBuilder().WithRoles([]string{auth2.DefaultAdminRole}).Build(),
+			act:      auth2.ActUpdateUserGrants,
+			hasError: false,
+		},
+		{
+			name:     "user without admin grants cannot update user roles",
+			user:     testhelpers.NewUserBuilder().WithRoles([]string{}).Build(),
+			act:      auth2.ActUpdateUserGrants,
+			hasError: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := authorizer.CheckAdminGrants(tc.user, tc.act)
+			if tc.hasError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
 func TestIsadmin(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	logger := mocks.NewMockLogger(ctrl)
@@ -182,7 +222,7 @@ func TestCheckProductGrants_InvalidAct(t *testing.T) {
 	product := "product-01"
 
 	err = authorizer.CheckProductGrants(user, product, "invalid act")
-	assert.ErrorIs(t, auth.InvalidAccessControlActionError, err)
+	assert.ErrorIs(t, auth.ErrInvalidAccessControlAction, err)
 }
 
 func TestNewCasbinAccessControl_ErrorInitEnforcer(t *testing.T) {

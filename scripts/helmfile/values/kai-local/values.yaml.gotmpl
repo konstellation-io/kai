@@ -16,3 +16,23 @@ kapacitor:
 nats:
   limits:
     maxPayload: 8MB
+keycloak:
+  auth:
+    username: admin
+    password: admin
+  db:
+    auth:
+      host: kai-postgres-rw
+      port: 5432
+      database: keycloak
+
+      # cnpg generated
+      secretName: kai-postgres-app
+      secretUserKey: username
+      secretPasswordKey: password
+  extraArgs:
+    - --verbose
+  kong:
+    oidcClient:
+      secret: "Xtdi7NZ3Ny98N74vpqV59dillSrGnHpX"
+

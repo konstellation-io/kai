@@ -2,10 +2,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}-admin-api
-  {{- with .Values.adminApi.ingress.annotations }}
   annotations:
+    konghq.com/plugins: {{ include "kai.fullname" . }}-oidc
+    konghq.com/strip-path: "false"
+    {{- with .Values.adminApi.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- end }}
   labels:
     {{- include "admin-api.labels" . | nindent 4 }}
 spec:
