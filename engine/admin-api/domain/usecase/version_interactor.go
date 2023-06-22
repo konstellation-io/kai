@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/konstellation-io/krt/pkg/krt"
 	"github.com/konstellation-io/krt/pkg/parse"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -152,9 +151,7 @@ func (i *VersionInteractor) Create(
 	versionCreated, err := i.versionRepo.Create(
 		user.ID,
 		productID,
-		&entity.Version{
-			Krt: krtYml,
-		},
+		service.MapKrtYamlToVersion(krtYml),
 	)
 
 	if err != nil {
@@ -525,7 +522,7 @@ func (i *VersionInteractor) WatchProcessStatus(
 	user *entity.User,
 	productID,
 	versionName string,
-) (<-chan *krt.Process, error) {
+) (<-chan *entity.Process, error) {
 	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct); err != nil {
 		return nil, err
 	}

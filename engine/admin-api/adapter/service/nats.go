@@ -13,7 +13,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
-	"github.com/konstellation-io/krt/pkg/krt"
 )
 
 type NatsManagerClient struct {
@@ -250,11 +249,11 @@ func (n *NatsManagerClient) dtoToVersionKeyValueStoreConfig(
 // TODO, migrate project to product in proto.
 //
 //nolint:godox // To be done.
-func translateObjectStoreEnum(scope krt.ObjectStoreScope) (natspb.ObjectStoreScope, error) {
+func translateObjectStoreEnum(scope entity.ObjectStoreScope) (natspb.ObjectStoreScope, error) {
 	switch scope {
-	case krt.ObjectStoreScopeProduct:
+	case entity.ObjectStoreScopeProduct:
 		return natspb.ObjectStoreScope_SCOPE_PROJECT, nil
-	case krt.ObjectStoreScopeWorkflow:
+	case entity.ObjectStoreScopeWorkflow:
 		return natspb.ObjectStoreScope_SCOPE_WORKFLOW, nil
 	default:
 		//nolint:goerr113 // error needs to be wrapped

@@ -70,7 +70,7 @@ func (r *VersionRepoMongoDB) Create(userID, productID string, newVersion *entity
 	versionDTO.ID = primitive.NewObjectID().Hex()
 	versionDTO.CreationDate = time.Now().UTC()
 	versionDTO.CreationAuthor = userID
-	versionDTO.Status = entity.VersionStatusCreating
+	versionDTO.Status = entity.VersionStatusCreating.String()
 
 	res, err := collection.InsertOne(context.Background(), versionDTO)
 	if err != nil {
@@ -183,7 +183,7 @@ func (r *VersionRepoMongoDB) SetErrors(
 
 	versionDTO := mapEntityToDTO(version)
 
-	versionDTO.Status = entity.VersionStatusError
+	versionDTO.Status = entity.VersionStatusError.String()
 	versionDTO.Errors = errorMessages
 
 	elem := bson.M{"$set": bson.M{"status": versionDTO.Status, "errors": versionDTO.Errors}}

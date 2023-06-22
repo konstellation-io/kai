@@ -14,7 +14,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
-	"github.com/konstellation-io/krt/pkg/krt"
 )
 
 type K8sVersionClient struct {
@@ -77,7 +76,7 @@ func (k *K8sVersionClient) Stop(ctx context.Context, productID string, version *
 
 	for _, w := range version.Workflows {
 		for _, p := range w.Processes {
-			if p.Type == krt.ProcessTypeTrigger {
+			if p.Type == entity.ProcessTypeTrigger {
 				workflowEntrypoints = append(workflowEntrypoints, p.Name)
 			}
 		}
@@ -146,10 +145,10 @@ func versionToConfig(version *entity.Version) []*versionpb.Config {
 	configVars := make([]*versionpb.Config, len(version.Config))
 	idx := 0
 
-	for k, v := range version.Config {
+	for _, config := range version.Config {
 		configVars[idx] = &versionpb.Config{
-			Key:   k,
-			Value: v,
+			Key:   config.Key,
+			Value: config.Value,
 		}
 		idx++
 	}
@@ -217,7 +216,7 @@ func (k *K8sVersionClient) WatchProcessStatus(
 	ctx context.Context,
 	productID,
 	versionName string,
-) (<-chan *krt.Process, error) {
+) (<-chan *entity.Process, error) {
 	stream, err := k.client.WatchNodeStatus(ctx, &versionpb.NodeStatusRequest{
 		VersionName: versionName,
 		ProductId:   productID,
@@ -226,7 +225,7 @@ func (k *K8sVersionClient) WatchProcessStatus(
 		return nil, fmt.Errorf("version status opening stream: %w", err)
 	}
 
-	ch := make(chan *krt.Process, 1)
+	ch := make(chan *entity.Process, 1)
 
 	go func() {
 		defer close(ch)
@@ -253,13 +252,13 @@ func (k *K8sVersionClient) WatchProcessStatus(
 
 			k.logger.Debug("[VersionService.WatchProcessStatus] Message received")
 
-			status := krt.ProcessStatus(msg.GetStatus())
+			status := entity.ProcessStatus(msg.GetStatus())
 			if !status.IsValid() {
 				k.logger.Errorf("[VersionService.WatchProcessStatus] Invalid process status: %s", status)
 				continue
 			}
 
-			ch <- &krt.Process{
+			ch <- &entity.Process{
 				Name:   msg.GetName(),
 				Status: status,
 			}

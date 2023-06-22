@@ -39,10 +39,6 @@ models:
         resolver: true
       publicationAuthor:
         resolver: true
-    extraFields:
-      Krt:
-        description: KRT struct
-        type: github.com/konstellation-io/krt/pkg/krt
   UserActivity:
     model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.UserActivity
     fields:

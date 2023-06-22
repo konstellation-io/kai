@@ -25,7 +25,7 @@ type versionSuiteMocks struct {
 	logger           *mocks.MockLogger
 	versionRepo      *mocks.MockVersionRepo
 	productRepo      *mocks.MockProductRepo
-	versionService   *mocks.MockVersionService
+	k8sService       *mocks.MockK8sService
 	userActivityRepo *mocks.MockUserActivityRepo
 	accessControl    *mocks.MockAccessControl
 	dashboardService *mocks.MockDashboardService
@@ -51,7 +51,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	logger := mocks.NewMockLogger(ctrl)
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
 	productRepo := mocks.NewMockProductRepo(ctrl)
-	versionService := mocks.NewMockVersionService(ctrl)
+	k8sService := mocks.NewMockK8sService(ctrl)
 	natsManagerService := mocks.NewMockNatsManagerService(ctrl)
 	userActivityRepo := mocks.NewMockUserActivityRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
@@ -67,7 +67,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	)
 
 	versionInteractor := usecase.NewVersionInteractor(
-		cfg, logger, versionRepo, productRepo, versionService, natsManagerService,
+		cfg, logger, versionRepo, productRepo, k8sService, natsManagerService,
 		userActivityInteractor, accessControl, dashboardService, processLogRepo)
 
 	s.ctrl = ctrl
@@ -76,7 +76,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 		logger,
 		versionRepo,
 		productRepo,
-		versionService,
+		k8sService,
 		userActivityRepo,
 		accessControl,
 		dashboardService,
@@ -91,75 +91,78 @@ func (s *VersionInteractorSuite) TearDownSuite() {
 }
 
 func (s *VersionInteractorSuite) getTestVersion() *entity.Version {
-	return &entity.Version{
-		ID:  "version-id",
-		Krt: s.getClassificatorKRT(),
-	}
-}
-
-func (s *VersionInteractorSuite) getClassificatorKRT() *krt.Krt {
-	defaultReplicas := krt.DefaultNumberOfReplicas
-	defaultGPU := krt.DefaultGPUValue
-	commonObjectStore := &krt.ProcessObjectStore{
+	commonObjectStore := &entity.ProcessObjectStore{
 		Name:  "emails",
-		Scope: krt.ObjectStoreScopeWorkflow,
+		Scope: "workflow",
 	}
 
-	return &krt.Krt{
+	return &entity.Version{
+		ID:          "", // ID to be given after create
 		Name:        "email-classificator",
 		Description: "Email classificator for branching features.",
 		Version:     "v1.0.0",
-		Config: map[string]string{
-			"key1": "value1",
-			"key2": "value2",
+		Config: []entity.ConfigurationVariable{
+			{
+				Key:   "keyA",
+				Value: "value1",
+			},
+			{
+				Key:   "keyB",
+				Value: "value2",
+			},
 		},
-		Workflows: []krt.Workflow{
+		Workflows: []entity.Workflow{
 			{
 				Name: "go-classificator",
-				Type: krt.WorkflowTypeData,
-				Config: map[string]string{
-					"key1": "value1",
-					"key2": "value2",
+				Type: "data",
+				Config: []entity.ConfigurationVariable{
+					{
+						Key:   "keyA",
+						Value: "value1",
+					},
+					{
+						Key:   "keyB",
+						Value: "value2",
+					},
 				},
-				Processes: []krt.Process{
+				Processes: []entity.Process{
 					{
 						Name:          "entrypoint",
-						Type:          krt.ProcessTypeTrigger,
+						Type:          "trigger",
 						Image:         "konstellation/kai-grpc-trigger:latest",
-						Replicas:      &defaultReplicas,
-						GPU:           &defaultGPU,
+						Replicas:      krt.DefaultNumberOfReplicas,
+						GPU:           krt.DefaultGPUValue,
 						Subscriptions: []string{"exitpoint"},
-						Networking: &krt.ProcessNetworking{
-							TargetPort:          9000,
-							TargetProtocol:      krt.NetworkingProtocolTCP,
-							DestinationPort:     9000,
-							DestinationProtocol: krt.NetworkingProtocolTCP,
+						Networking: &entity.ProcessNetworking{
+							TargetPort:      9000,
+							DestinationPort: 9000,
+							Protocol:        "TCP",
 						},
 					},
 					{
 						Name:          "etl",
-						Type:          krt.ProcessTypeTask,
+						Type:          "task",
 						Image:         "konstellation/kai-etl-task:latest",
-						Replicas:      &defaultReplicas,
-						GPU:           &defaultGPU,
+						Replicas:      krt.DefaultNumberOfReplicas,
+						GPU:           krt.DefaultGPUValue,
 						ObjectStore:   commonObjectStore,
 						Subscriptions: []string{"entrypoint"},
 					},
 					{
 						Name:          "email-classificator",
-						Type:          krt.ProcessTypeTask,
+						Type:          "task",
 						Image:         "konstellation/kai-ec-task:latest",
-						Replicas:      &defaultReplicas,
-						GPU:           &defaultGPU,
+						Replicas:      krt.DefaultNumberOfReplicas,
+						GPU:           krt.DefaultGPUValue,
 						ObjectStore:   commonObjectStore,
 						Subscriptions: []string{"etl"},
 					},
 					{
 						Name:          "exitpoint",
-						Type:          krt.ProcessTypeExit,
+						Type:          "exit",
 						Image:         "konstellation/kai-exitpoint:latest",
-						Replicas:      &defaultReplicas,
-						GPU:           &defaultGPU,
+						Replicas:      krt.DefaultNumberOfReplicas,
+						GPU:           krt.DefaultGPUValue,
 						ObjectStore:   commonObjectStore,
 						Subscriptions: []string{"etl", "stats-storer"},
 					},
@@ -178,7 +181,6 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 	}
 
 	testVersion := s.getTestVersion()
-	krtClassificator := s.getClassificatorKRT()
 
 	file, err := os.Open("../../test_assets/classificator_krt.yaml")
 	s.Require().NoError(err)
@@ -189,13 +191,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 	s.mocks.versionRepo.EXPECT().SetStatus(s.ctx, productID, testVersion.ID, entity.VersionStatusCreated).Return(nil)
 	s.mocks.versionRepo.EXPECT().UploadKRTFile(productID, testVersion, gomock.Any()).Return(nil)
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).Return(nil)
-	s.mocks.versionRepo.EXPECT().Create(
-		user.ID,
-		productID,
-		&entity.Version{
-			Krt: krtClassificator,
-		},
-	).Return(testVersion, nil)
+	s.mocks.versionRepo.EXPECT().Create(user.ID, productID, testVersion).Return(testVersion, nil)
 
 	_, statusCh, err := s.versionInteractor.Create(context.Background(), user, productID, file)
 	s.Require().NoError(err)

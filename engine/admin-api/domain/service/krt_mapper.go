@@ -1,0 +1,94 @@
+package service
+
+import (
+	"github.com/konstellation-io/krt/pkg/krt"
+
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+)
+
+// KrtMapper is a service to map KRT YAML to entity.Version
+//
+// caution: this method takes for granted the KRT YAML is valid
+func MapKrtYamlToVersion(krt *krt.Krt) *entity.Version {
+	version := &entity.Version{
+		Name:        krt.Name,
+		Description: krt.Description,
+		Version:     krt.Version,
+		Config:      keyValueMapToConfigurationVariableArray(krt.Config),
+		Workflows:   mapKrtYamlToWorkflows(krt.Workflows),
+	}
+
+	return version
+}
+
+func mapKrtYamlToWorkflows(krtWorkflows []krt.Workflow) []entity.Workflow {
+	workflows := make([]entity.Workflow, len(krtWorkflows))
+
+	for i, krtWorkflow := range krtWorkflows {
+		workflows[i] = entity.Workflow{
+			Name:      krtWorkflow.Name,
+			Type:      entity.WorkflowType(krtWorkflow.Type),
+			Config:    keyValueMapToConfigurationVariableArray(krtWorkflow.Config),
+			Processes: mapKrtYamlToProcesses(krtWorkflow.Processes),
+		}
+	}
+
+	return workflows
+}
+
+func mapKrtYamlToProcesses(krtProcesses []krt.Process) []entity.Process {
+	processes := make([]entity.Process, len(krtProcesses))
+
+	for i, krtProcess := range krtProcesses {
+		processes[i] = entity.Process{
+			Name:          krtProcess.Name,
+			Type:          entity.ProcessType(krtProcess.Type),
+			Image:         krtProcess.Image,
+			Replicas:      int32(*krtProcess.Replicas),
+			GPU:           *krtProcess.GPU,
+			Config:        keyValueMapToConfigurationVariableArray(krtProcess.Config),
+			ObjectStore:   mapKrtYamlToProcessObjectStore(krtProcess.ObjectStore),
+			Secrets:       keyValueMapToConfigurationVariableArray(krtProcess.Secrets),
+			Subscriptions: krtProcess.Subscriptions,
+			Networking:    mapKrtYamlToProcessNetworking(krtProcess.Networking),
+		}
+	}
+
+	return processes
+}
+
+func mapKrtYamlToProcessObjectStore(krtObjectStore *krt.ProcessObjectStore) *entity.ProcessObjectStore {
+	if krtObjectStore == nil {
+		return nil
+	}
+
+	return &entity.ProcessObjectStore{
+		Name:  krtObjectStore.Name,
+		Scope: entity.ObjectStoreScope(krtObjectStore.Scope),
+	}
+}
+
+func mapKrtYamlToProcessNetworking(krtNetworking *krt.ProcessNetworking) *entity.ProcessNetworking {
+	if krtNetworking == nil {
+		return nil
+	}
+
+	return &entity.ProcessNetworking{
+		TargetPort:      krtNetworking.TargetPort,
+		DestinationPort: krtNetworking.DestinationPort,
+		Protocol:        string(krtNetworking.Protocol),
+	}
+}
+
+func keyValueMapToConfigurationVariableArray(m map[string]string) []entity.ConfigurationVariable {
+	var config []entity.ConfigurationVariable
+
+	for k, v := range m {
+		config = append(config, entity.ConfigurationVariable{
+			Key:   k,
+			Value: v,
+		})
+	}
+
+	return config
+}

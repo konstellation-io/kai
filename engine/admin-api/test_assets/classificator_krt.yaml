@@ -3,14 +3,14 @@ description: Email classificator for branching features.
 version: v1.0.0
 
 config:
-  key1: value1
-  key2: value2
+  keyA: value1
+  keyB: value2
 workflows:
   - name: go-classificator
     type: data
     config:
-      key1: value1
-      key2: value2
+      keyA: value1
+      keyB: value2
     processes:
       - name: entrypoint
         type: trigger

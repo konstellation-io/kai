@@ -2,18 +2,19 @@ package version
 
 import (
 	"time"
-
-	"github.com/konstellation-io/krt/pkg/krt"
-
-	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
+type ConfigurationVariable struct {
+	Key   string
+	Value string
+}
+
 type versionDTO struct {
-	ID          string            `bson:"_id"`
-	Name        string            `bson:"name"`
-	Description string            `bson:"description"`
-	Config      map[string]string `bson:"config,omitempty"`
-	Workflows   []workflowDTO     `bson:"workflows"`
+	ID          string                  `bson:"_id"`
+	Name        string                  `bson:"name"`
+	Description string                  `bson:"description"`
+	Config      []ConfigurationVariable `bson:"config,omitempty"`
+	Workflows   []workflowDTO           `bson:"workflows"`
 
 	CreationDate   time.Time `bson:"creationDate"`
 	CreationAuthor string    `bson:"creationAuthor"`
@@ -21,42 +22,40 @@ type versionDTO struct {
 	PublicationDate   *time.Time `bson:"publicationDate"`
 	PublicationAuthor *string    `bson:"publicationUserId"`
 
-	Status entity.VersionStatus `bson:"status"`
+	Status string `bson:"status"`
 
 	Errors []string `bson:"errors"`
 }
 
 type workflowDTO struct {
-	ID        string            `bson:"id"`
-	Type      krt.WorkflowType  `bson:"type"`
-	Config    map[string]string `bson:"config,omitempty"`
-	Processes []processDTO      `bson:"processes"`
-	Stream    string            `bson:"-"`
+	ID        string                  `bson:"id"`
+	Name      string                  `bson:"name"`
+	Type      string                  `bson:"type"`
+	Config    []ConfigurationVariable `bson:"config,omitempty"`
+	Processes []processDTO            `bson:"processes"`
 }
 
 type processDTO struct {
-	ID            string                 `bson:"id"`
-	Name          string                 `bson:"name"`
-	Type          krt.ProcessType        `bson:"type"`
-	Image         string                 `bson:"image"`
-	Replicas      int32                  `bson:"replicas"`
-	GPU           bool                   `bson:"gpu"`
-	Config        map[string]string      `bson:"config,omitempty"`
-	ObjectStore   *processObjectStoreDTO `bson:"objectStore,omitempty"`
-	Secrets       map[string]string      `bson:"secrets,omitempty"`
-	Subscriptions []string               `bson:"subscriptions"`
-	Networking    *processNetworkingDTO  `bson:"networking,omitempty"`
-	Status        krt.ProcessStatus      `bson:"-"` // This field value is calculated in k8s
+	ID            string                  `bson:"id"`
+	Name          string                  `bson:"name"`
+	Type          string                  `bson:"type"`
+	Image         string                  `bson:"image"`
+	Replicas      int32                   `bson:"replicas"`
+	GPU           bool                    `bson:"gpu"`
+	Config        []ConfigurationVariable `bson:"config,omitempty"`
+	ObjectStore   *processObjectStoreDTO  `bson:"objectStore,omitempty"`
+	Secrets       []ConfigurationVariable `bson:"secrets,omitempty"`
+	Subscriptions []string                `bson:"subscriptions"`
+	Networking    *processNetworkingDTO   `bson:"networking,omitempty"`
 }
 
 type processObjectStoreDTO struct {
-	Name  string               `bson:"name"`
-	Scope krt.ObjectStoreScope `bson:"scope"`
+	Name  string `bson:"name"`
+	Scope string `bson:"scope"`
 }
 
 type processNetworkingDTO struct {
-	TargetPort          int                    `bson:"targetPort"`
-	TargetProtocol      krt.NetworkingProtocol `bson:"targetProtocol"`
-	DestinationPort     int                    `bson:"destinationPort"`
-	DestinationProtocol krt.NetworkingProtocol `bson:"destinationProtocol"`
+	TargetPort      int    `bson:"targetPort"`
+	DestinationPort int    `bson:"destinationPort"`
+	Protocol        string `bson:"protocol"`
 }

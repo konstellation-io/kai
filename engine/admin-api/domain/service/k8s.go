@@ -5,8 +5,6 @@ package service
 import (
 	"context"
 
-	"github.com/konstellation-io/krt/pkg/krt"
-
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
@@ -16,5 +14,5 @@ type K8sService interface {
 	Publish(runtimeID string, version *entity.Version) error
 	Unpublish(runtimeID string, version *entity.Version) error
 	UpdateConfig(runtimeID string, version *entity.Version) error
-	WatchProcessStatus(ctx context.Context, runtimeID, versionName string) (<-chan *krt.Process, error)
+	WatchProcessStatus(ctx context.Context, runtimeID, versionName string) (<-chan *entity.Process, error)
 }

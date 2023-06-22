@@ -112,12 +112,17 @@ type Product {
 
 type Version {
   id: ID!
+  name: String!
+  description: String!
+  version: String!
+  config: [ConfigurationVariable]
+  workflows: [Workflow!]!
   creationDate: String!
   creationAuthor: String!
   publicationDate: String
   publicationAuthor: String
   status: VersionStatus!
-  errors: [String!]!
+  errors: [String]
 }
 
 enum VersionStatus {
@@ -134,7 +139,7 @@ enum VersionStatus {
 type Workflow {
   id: ID!
   name: String!
-  workflowType: WorkflowType!
+  type: WorkflowType!
   config: [ConfigurationVariable]
   processes: [Process!]!
 }
@@ -149,10 +154,12 @@ enum WorkflowType {
 type Process {
   id: ID!
   name: String!
-  processType: ProcessType!
+  type: ProcessType!
   image: String!
   replicas: Int!
+  gpu: Boolean!
   config: [ConfigurationVariable]
+  secrets: [ConfigurationVariable]
   subscriptions: [String!]!
   status: ProcessStatus!
 }
@@ -168,11 +175,6 @@ enum ProcessStatus {
   STARTED
   STOPPED
   ERROR
-}
-
-type Settings {
-  authAllowedDomains: [String!]!
-  sessionLifetimeInDays: Int!
 }
 
 type UserActivityVar {
