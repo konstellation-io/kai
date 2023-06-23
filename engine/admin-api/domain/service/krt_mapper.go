@@ -82,8 +82,8 @@ func mapKrtYamlToProcessNetworking(krtNetworking *krt.ProcessNetworking) *entity
 
 func keyValueMapToConfigurationVariableArray(m map[string]string) []entity.ConfigurationVariable {
 	config := make([]entity.ConfigurationVariable, len(m))
-
 	idx := 0
+
 	for k, v := range m {
 		config[idx] = entity.ConfigurationVariable{
 			Key:   k,
