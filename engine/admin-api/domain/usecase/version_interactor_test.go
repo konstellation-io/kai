@@ -90,6 +90,9 @@ func (s *VersionInteractorSuite) TearDownSuite() {
 	s.ctrl.Finish()
 }
 
+// TODO: this big version that reflects the yaml file should be in the mapper testing
+//
+//nolint:godox // To be done.
 func (s *VersionInteractorSuite) getTestVersion() *entity.Version {
 	commonObjectStore := &entity.ProcessObjectStore{
 		Name:  "emails",
@@ -188,10 +191,10 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
 	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(product, nil)
 	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.Name).Return(nil, errors.ErrVersionNotFound)
+	s.mocks.versionRepo.EXPECT().Create(user.ID, productID, gomock.Any()).Return(testVersion, nil)
 	s.mocks.versionRepo.EXPECT().SetStatus(s.ctx, productID, testVersion.ID, entity.VersionStatusCreated).Return(nil)
 	s.mocks.versionRepo.EXPECT().UploadKRTFile(productID, testVersion, gomock.Any()).Return(nil)
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).Return(nil)
-	s.mocks.versionRepo.EXPECT().Create(user.ID, productID, testVersion).Return(testVersion, nil)
 
 	_, statusCh, err := s.versionInteractor.Create(context.Background(), user, productID, file)
 	s.Require().NoError(err)
