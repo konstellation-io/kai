@@ -90,9 +90,6 @@ func (s *VersionInteractorSuite) TearDownSuite() {
 	s.ctrl.Finish()
 }
 
-// TODO: this big version that reflects the yaml file should be in the mapper testing
-//
-//nolint:godox // To be done.
 func (s *VersionInteractorSuite) getTestVersion() *entity.Version {
 	commonObjectStore := &entity.ProcessObjectStore{
 		Name:  "emails",
