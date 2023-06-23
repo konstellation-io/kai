@@ -9,13 +9,13 @@ import (
 // KrtMapper is a service to map KRT YAML to entity.Version
 //
 // caution: this method takes for granted the KRT YAML is valid
-func MapKrtYamlToVersion(krt *krt.Krt) *entity.Version {
+func MapKrtYamlToVersion(krtYml *krt.Krt) *entity.Version {
 	version := &entity.Version{
-		Name:        krt.Name,
-		Description: krt.Description,
-		Version:     krt.Version,
-		Config:      keyValueMapToConfigurationVariableArray(krt.Config),
-		Workflows:   mapKrtYamlToWorkflows(krt.Workflows),
+		Name:        krtYml.Name,
+		Description: krtYml.Description,
+		Version:     krtYml.Version,
+		Config:      keyValueMapToConfigurationVariableArray(krtYml.Config),
+		Workflows:   mapKrtYamlToWorkflows(krtYml.Workflows),
 	}
 
 	return version
@@ -81,7 +81,7 @@ func mapKrtYamlToProcessNetworking(krtNetworking *krt.ProcessNetworking) *entity
 }
 
 func keyValueMapToConfigurationVariableArray(m map[string]string) []entity.ConfigurationVariable {
-	var config []entity.ConfigurationVariable
+	config := make([]entity.ConfigurationVariable, len(m))
 
 	for k, v := range m {
 		config = append(config, entity.ConfigurationVariable{
