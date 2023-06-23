@@ -27,10 +27,6 @@ func getExpectedVersion() *entity.Version {
 				Key:   "keyA",
 				Value: "value1",
 			},
-			{
-				Key:   "keyB",
-				Value: "value2",
-			},
 		},
 		Workflows: []entity.Workflow{
 			{
@@ -40,10 +36,6 @@ func getExpectedVersion() *entity.Version {
 					{
 						Key:   "keyA",
 						Value: "value1",
-					},
-					{
-						Key:   "keyB",
-						Value: "value2",
 					},
 				},
 				Processes: []entity.Process{

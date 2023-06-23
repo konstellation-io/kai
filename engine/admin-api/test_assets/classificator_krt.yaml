@@ -4,13 +4,11 @@ version: v1.0.0
 
 config:
   keyA: value1
-  keyB: value2
 workflows:
   - name: go-classificator
     type: data
     config:
       keyA: value1
-      keyB: value2
     processes:
       - name: entrypoint
         type: trigger
