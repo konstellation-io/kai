@@ -63,7 +63,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          working-directory: ./${{ matrix.component }}/nats-manager
+          working-directory: ./engine/${{ matrix.component }}
           args: --timeout=5m
       - name: Run unit tests
         if: matrix.changes == 'true'
@@ -106,16 +106,15 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage-report
-          path: engine/admin-api
+          path: engine/${{ matrix.component }}
       - name: SonarCloud Scan
         if: matrix.changes == 'true'
         uses: SonarSource/sonarcloud-github-action@master
         with:
-          projectBaseDir: engine/admin-api
+          projectBaseDir: engine/${{ matrix.component }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets[matrix.sonar_token_secret] }}
-
 
   release-version:
     name: Publish the release (if any) with Nyx
