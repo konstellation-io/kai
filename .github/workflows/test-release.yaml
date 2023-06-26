@@ -1,6 +1,14 @@
 name: Test and release
 on:
   push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    paths:
+      - 'engine/**/*'
+      - 'helm/**/*'
+      - '.github/workflows/test-release.yaml'
 
 jobs:
   check-folder-changes:
