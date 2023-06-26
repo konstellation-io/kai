@@ -5,3 +5,9 @@ config.dev.yml
 helm/values-dell.yaml
 runners
 helm/kai/charts/
+
+# Nyx generated files
+CHANGELOG.md
+changelog.old
+.nyx-state.json
+.nyx-summary.txt
