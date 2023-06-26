@@ -55,11 +55,8 @@ func (r *VersionRepoMongoDB) CreateIndexes(ctx context.Context, productID string
 	}
 
 	_, err := collection.Indexes().CreateMany(ctx, indexes)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func (r *VersionRepoMongoDB) Create(userID, productID string, newVersion *entity.Version) (*entity.Version, error) {
@@ -200,6 +197,9 @@ func (r *VersionRepoMongoDB) SetErrors(
 	return mapDTOToEntity(versionDTO), nil
 }
 
+// TODO: Rethink this to upload krt YAML files.
+//
+//nolint:godox // To be done.
 func (r *VersionRepoMongoDB) UploadKRTFile(productID string, version *entity.Version, file string) error {
 	data, err := os.ReadFile(file)
 	if err != nil {
@@ -243,15 +243,23 @@ func (r *VersionRepoMongoDB) ClearPublishedVersion(ctx context.Context, productI
 	oldPublishedVersion := &versionDTO{}
 
 	filter := bson.M{"status": entity.VersionStatusPublished}
+
 	upd := bson.M{
 		"$set": bson.M{
 			"status":            entity.VersionStatusStarted,
 			"publicationDate":   nil,
-			"publicationUserId": nil,
+			"publicationAuthor": nil,
 		},
 	}
 
-	result := collection.FindOneAndUpdate(ctx, filter, upd)
+	upsert := true
+	after := options.After
+	opt := &options.FindOneAndUpdateOptions{
+		ReturnDocument: &after,
+		Upsert:         &upsert,
+	}
+
+	result := collection.FindOneAndUpdate(ctx, filter, upd, opt)
 	err := result.Decode(oldPublishedVersion)
 
 	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
@@ -260,3 +268,7 @@ func (r *VersionRepoMongoDB) ClearPublishedVersion(ctx context.Context, productI
 
 	return mapDTOToEntity(oldPublishedVersion), nil
 }
+
+// TODO: Delete version method.
+//
+//nolint:godox // To be done.

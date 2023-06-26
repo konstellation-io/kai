@@ -20,7 +20,7 @@ type versionDTO struct {
 	CreationAuthor string    `bson:"creationAuthor"`
 
 	PublicationDate   *time.Time `bson:"publicationDate"`
-	PublicationAuthor *string    `bson:"publicationUserId"`
+	PublicationAuthor *string    `bson:"publicationAuthor"`
 
 	Status string `bson:"status"`
 

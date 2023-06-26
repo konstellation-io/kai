@@ -68,12 +68,7 @@ func (i *VersionInteractor) GetByID(productID, versionID string) (*entity.Versio
 
 // GetByName returns a Version by its unique name.
 func (i *VersionInteractor) GetByName(ctx context.Context, user *entity.User, productID, name string) (*entity.Version, error) {
-	v, err := i.versionRepo.GetByName(ctx, productID, name)
-	if err != nil {
-		return nil, err
-	}
-
-	return v, nil
+	return i.versionRepo.GetByName(ctx, productID, name)
 }
 
 // GetByProduct returns all Versions of the given Product.
