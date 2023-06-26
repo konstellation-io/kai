@@ -11,7 +11,7 @@ git:
       password: "{{#environmentVariable}}GH_TOKEN{{/environmentVariable}}"
 changelog:
   path: "CHANGELOG.md"
-  template: "./ci/CHANGELOG.tpl"
+  template: "./.ci/CHANGELOG.tpl"
   sections:
     "Added": "^feat$"
     "Fixed": "^fix$"

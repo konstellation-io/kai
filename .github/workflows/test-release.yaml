@@ -21,16 +21,16 @@ jobs:
         filters: |
           admin-api:
             - 'engine/admin-api/**/*'
-            - '.github/workflows/test-admin-api.yaml'
+            - '.github/workflows/test-release.yaml'
           k8s-manager:
             - 'engine/k8s-manager/**/*'
-            - '.github/workflows/test-k8s-manager.yaml'
+            - '.github/workflows/test-release.yaml'
           mongo-writer:
             - 'engine/mongo-writer/**/*'
-            - '.github/workflows/test-mongo-writer.yaml'
+            - '.github/workflows/test-release.yaml'
           nats-manager:
             - 'engine/nats-manager/**/*'
-            - '.github/workflows/test-nats-manager.yaml'
+            - '.github/workflows/test-release.yaml'
 
   unit-tests:
     runs-on: ubuntu-latest
