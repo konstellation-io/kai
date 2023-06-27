@@ -91,7 +91,7 @@ func TestKrtYmlMapper(t *testing.T) {
 	expectedVersion := getExpectedVersion()
 
 	// GIVEN a KRT YAML file with a valid format
-	krtYml, err := krtapp.ParseFile("../../test_assets/classificator_krt.yaml")
+	krtYml, err := krtapp.ParseFile("../../testdata/classificator_krt.yaml")
 	require.NoError(t, err)
 
 	err = krtYml.Validate()

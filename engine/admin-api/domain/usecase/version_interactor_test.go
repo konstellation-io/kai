@@ -182,7 +182,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 
 	testVersion := s.getTestVersion()
 
-	file, err := os.Open("../../test_assets/classificator_krt.yaml")
+	file, err := os.Open("../../testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
@@ -213,7 +213,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplic
 
 	testVersion := s.getTestVersion()
 
-	file, err := os.Open("../../test_assets/classificator_krt.yaml")
+	file, err := os.Open("../../testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
