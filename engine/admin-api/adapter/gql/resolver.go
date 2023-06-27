@@ -79,10 +79,11 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 
 	version, notifyCh, err := r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
 	if err != nil {
-		if errors.Is(err, errors.ErrInvalidKRT) {
+		var errInvalidKRT *errors.ErrInvalidKRT
+		if errors.As(err, errInvalidKRT) {
 			extensions := make(map[string]interface{})
 			extensions["code"] = "krt_validation_error"
-			extensions["details"] = err
+			extensions["details"] = errInvalidKRT.GetErrors().Error()
 
 			return nil, &gqlerror.Error{
 				Message:    "the krt.yml file contains errors",

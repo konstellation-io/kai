@@ -13,6 +13,10 @@ func Is(err, target error) bool {
 	return errors.Is(err, target)
 }
 
+func As(err error, target interface{}) bool {
+	return errors.As(err, target)
+}
+
 var (
 	// ErrVersionNotFound error.
 	ErrVersionNotFound = errors.New("error version not found")
@@ -47,9 +51,6 @@ var (
 	// ErrParsingKRTFile error.
 	ErrParsingKRTFile = errors.New("error parsing KRT file")
 
-	// ErrInvalidKRT error.
-	ErrInvalidKRT = errors.New("invalid KRT")
-
 	// ErrStoringKRTFile error.
 	ErrStoringKRTFile = errors.New("error storing KRT file")
 )
@@ -58,6 +59,22 @@ func ParsingKRTFileError(err error) error {
 	return fmt.Errorf("%w: %w", ErrParsingKRTFile, err)
 }
 
-func InvalidKRTError(validationErrors error) error {
-	return fmt.Errorf("%w:\n%w", ErrInvalidKRT, validationErrors)
+type ErrInvalidKRT struct {
+	msg  string
+	errs error
+}
+
+func (e ErrInvalidKRT) Error() string {
+	return fmt.Sprintf("%s:\n%s", e.msg, e.errs)
+}
+
+func (e ErrInvalidKRT) GetErrors() error {
+	return e.errs
+}
+
+func NewErrInvalidKRT(msg string, errs error) ErrInvalidKRT {
+	return ErrInvalidKRT{
+		msg:  msg,
+		errs: errs,
+	}
 }
