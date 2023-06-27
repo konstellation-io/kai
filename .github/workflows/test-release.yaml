@@ -81,7 +81,7 @@ jobs:
         if: matrix.changes == 'true'
         uses: actions/upload-artifact@v3
         with:
-          name: coverage-report
+          name: coverage-report-${{ matrix.component }}
           path: engine/${{ matrix.component }}/coverage.out
 
   sonarcloud:
