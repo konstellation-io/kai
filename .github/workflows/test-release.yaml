@@ -135,6 +135,7 @@ jobs:
 
     outputs:
       newRelease: ${{ steps.nyx-publish.outputs.newRelease }}
+      newVersion: ${{ steps.nyx-publish.outputs.newVersion }}
       version: ${{ steps.nyx-publish.outputs.version }}
 
     steps:
