@@ -9,9 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/konstellation-io/krt/pkg/parse"
-
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/krt"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
@@ -126,7 +125,7 @@ func (i *VersionInteractor) Create(
 		return nil, nil, fmt.Errorf("error creating temp krt file for version: %w", err)
 	}
 
-	krtYml, err := parse.ParseFile(tmpKrtFile.Name())
+	krtYml, err := krt.ParseFile(tmpKrtFile.Name())
 	if err != nil {
 		return nil, nil, errors.ParsingKRTFileError(err)
 	}
@@ -149,7 +148,7 @@ func (i *VersionInteractor) Create(
 	versionCreated, err := i.versionRepo.Create(
 		user.ID,
 		productID,
-		service.MapKrtYamlToVersion(krtYml),
+		krt.MapKrtYamlToVersion(krtYml),
 	)
 
 	if err != nil {

@@ -1,4 +1,4 @@
-package service
+package krt
 
 import (
 	"github.com/konstellation-io/krt/pkg/krt"

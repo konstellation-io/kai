@@ -1,14 +1,15 @@
-package service_test
+//go:build unit
+
+package krt_test
 
 import (
 	"testing"
 
 	"github.com/konstellation-io/krt/pkg/krt"
-	"github.com/konstellation-io/krt/pkg/parse"
 	"github.com/stretchr/testify/require"
 
+	krtapp "github.com/konstellation-io/kai/engine/admin-api/adapter/krt"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 )
 
 func getExpectedVersion() *entity.Version {
@@ -18,7 +19,7 @@ func getExpectedVersion() *entity.Version {
 	}
 
 	return &entity.Version{
-		ID:          "", // ID to be given after create
+		ID:          "", // ID is not defined in KRT YAML
 		Name:        "email-classificator",
 		Description: "Email classificator for branching features.",
 		Version:     "v1.0.0",
@@ -90,14 +91,14 @@ func TestKrtYmlMapper(t *testing.T) {
 	expectedVersion := getExpectedVersion()
 
 	// GIVEN a KRT YAML file with a valid format
-	krtYml, err := parse.ParseFile("../../test_assets/classificator_krt.yaml")
+	krtYml, err := krtapp.ParseFile("../../test_assets/classificator_krt.yaml")
 	require.NoError(t, err)
 
 	err = krtYml.Validate()
 	require.NoError(t, err)
 
 	// WHEN the KRT YAML is mapped to a Version entity
-	version := service.MapKrtYamlToVersion(krtYml)
+	version := krtapp.MapKrtYamlToVersion(krtYml)
 
 	// THEN the Version entity is the expected
 	require.Equal(t, expectedVersion, version)
