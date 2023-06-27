@@ -1,0 +1,260 @@
+name: Test and release
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    paths:
+      - 'engine/**/*'
+      - 'helm/**/*'
+      - '.github/workflows/test-release.yaml'
+
+jobs:
+  check-folder-changes:
+    runs-on: ubuntu-latest
+    name: Check folder changes
+    outputs:
+      admin-api: ${{ steps.filter.outputs.admin-api }}
+      k8s-manager: ${{ steps.filter.outputs.k8s-manager }}
+      mongo-writer: ${{ steps.filter.outputs.mongo-writer }}
+      nats-manager: ${{ steps.filter.outputs.nats-manager }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          admin-api:
+            - 'engine/admin-api/**/*'
+            - '.github/workflows/test-release.yaml'
+          k8s-manager:
+            - 'engine/k8s-manager/**/*'
+            - '.github/workflows/test-release.yaml'
+          mongo-writer:
+            - 'engine/mongo-writer/**/*'
+            - '.github/workflows/test-release.yaml'
+          nats-manager:
+            - 'engine/nats-manager/**/*'
+            - '.github/workflows/test-release.yaml'
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    name: Linting and Unit tests
+    needs: check-folder-changes
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - component: admin-api
+            changes: ${{ needs.check-folder-changes.outputs.admin-api }}
+          - component: k8s-manager
+            changes: ${{ needs.check-folder-changes.outputs.k8s-manager }}
+          - component: mongo-writer
+            changes: ${{ needs.check-folder-changes.outputs.mongo-writer }}
+          - component: nats-manager
+            changes: ${{ needs.check-folder-changes.outputs.nats-manager }}
+
+    steps:
+      - name: Checkout code
+        if: matrix.changes == 'true'
+        uses: actions/checkout@v3
+      - name: Install Go
+        if: matrix.changes == 'true'
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.20.x
+      - name: Run golangci-lint
+        if: matrix.changes == 'true'
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          working-directory: ./engine/${{ matrix.component }}
+          args: --timeout=5m
+      - name: Run unit tests
+        if: matrix.changes == 'true'
+        run: go test ./... -cover -v -coverprofile=coverage.out
+        working-directory: ./engine/${{ matrix.component }}
+      - name: Archive code coverage results
+        if: matrix.changes == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: engine/${{ matrix.component }}/coverage.out
+
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    needs:
+      - check-folder-changes
+      - unit-tests
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - component: admin-api
+            changes: ${{ needs.check-folder-changes.outputs.admin-api }}
+            sonar_token_secret: SONAR_TOKEN_ADMIN_API
+          - component: k8s-manager
+            changes: ${{ needs.check-folder-changes.outputs.k8s-manager }}
+            sonar_token_secret: SONAR_TOKEN_K8S_MANAGER
+          - component: mongo-writer
+            changes: ${{ needs.check-folder-changes.outputs.mongo-writer }}
+            sonar_token_secret: SONAR_TOKEN_MONGO_WRITER
+          - component: nats-manager
+            changes: ${{ needs.check-folder-changes.outputs.nats-manager }}
+            sonar_token_secret: SONAR_TOKEN_NATS_MANAGER
+    steps:
+      - uses: actions/checkout@v3
+        if: matrix.changes == 'true'
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Download code coverage results
+        if: matrix.changes == 'true'
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
+          path: engine/${{ matrix.component }}
+      - name: SonarCloud Scan
+        if: matrix.changes == 'true'
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: engine/${{ matrix.component }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets[matrix.sonar_token_secret] }}
+
+  release-version:
+    name: Publish the release (if any) with Nyx
+    needs: SonarCloud
+    runs-on: ubuntu-latest
+    env:
+      NYX_VERBOSITY: 'INFO'
+
+    outputs:
+      newRelease: ${{ steps.nyx-publish.outputs.newRelease }}
+      version: ${{ steps.nyx-publish.outputs.version }}
+
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Configure Git
+      run: |
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+    - name: Run nyx Infer
+      id: nyx-infer
+      uses: mooltiverse/nyx-github-action@main
+      with:
+        command: infer
+
+    - name: Bump chart versions
+      if: steps.nyx-infer.outputs.newVersion == 'true'
+      run: |
+        ./.ci/utils/publish.sh ${{ steps.nyx-infer.outputs.version }}
+
+    - name: Nyx make
+      uses: mooltiverse/nyx-github-action@main
+      if: steps.nyx-infer.outputs.newRelease == 'true'
+      with:
+        command: 'make'
+
+    # We only generate the release notes when a new release is published and it is a core version.
+    - name: Generate release notes
+      if: steps.nyx-infer.outputs.newRelease == 'true'
+      run: |
+        mv RELEASE_NOTES.md RELEASE_NOTES.old
+        cat CHANGELOG.md RELEASE_NOTES.old >> RELEASE_NOTES.md
+        rm RELEASE_NOTES.old
+
+    - name: Nyx publish
+      if: steps.nyx-infer.outputs.newVersion == 'true'
+      id: nyx-publish
+      uses: mooltiverse/nyx-github-action@main
+      with:
+        command: 'publish'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-chart:
+    name: Publish the chart
+    runs-on: ubuntu-latest
+    needs: release-version
+    if: needs.release-version.outputs.newRelease == 'true'
+   
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{ needs.release-version.outputs.version }}
+
+    - name: Configure Git
+      run: |
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+    - name: Install Chart Releaser
+      uses: helm/chart-releaser-action@v1.5.0
+      with:
+        install_only: true
+        version: v1.5.0
+    
+    - name: Get repository name
+      run: echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
+    - name: Publish chart
+      run: ./.ci/utils/release_chart.sh
+      env:
+        REPOSITORY_OWNER: ${{ github.repository_owner }}
+        REPOSITORY_NAME: ${{ env.REPOSITORY_NAME }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+  docker:
+    name: Build and push Docker images
+    runs-on: ubuntu-latest
+    needs:
+      - release-version
+    if: needs.release-version.outputs.newVersion == 'true'
+    strategy:
+      fail-fast: true
+      matrix:
+        component:
+          - admin-api
+          - k8s-manager
+          - mongo-writer
+          - nats-manager
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub Registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push to Docker Hub ALPHA
+        if: ${{ contains( github.event.ref, 'alpha' ) }}
+        uses: docker/build-push-action@v3
+        with:
+          context: ./engine/${{ matrix.component }}
+          file: ./engine/${{ matrix.component }}/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            konstellation/kai-${{ matrix.component }}:${{ needs.release-version.outputs.version }}
+            konstellation/kai-${{ matrix.component }}:latest
