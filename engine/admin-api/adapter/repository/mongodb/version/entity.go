@@ -4,17 +4,18 @@ import (
 	"time"
 )
 
-type ConfigurationVariable struct {
-	Key   string
-	Value string
+type configurationVariableDTO struct {
+	Key   string `bson:"key"`
+	Value string `bson:"value"`
 }
 
 type versionDTO struct {
-	ID          string                  `bson:"_id"`
-	Name        string                  `bson:"name"`
-	Description string                  `bson:"description"`
-	Config      []ConfigurationVariable `bson:"config,omitempty"`
-	Workflows   []workflowDTO           `bson:"workflows"`
+	ID          string                     `bson:"_id"`
+	Name        string                     `bson:"name"`
+	Version     string                     `bson:"version"`
+	Description string                     `bson:"description"`
+	Config      []configurationVariableDTO `bson:"config,omitempty"`
+	Workflows   []workflowDTO              `bson:"workflows"`
 
 	CreationDate   time.Time `bson:"creationDate"`
 	CreationAuthor string    `bson:"creationAuthor"`
@@ -28,25 +29,25 @@ type versionDTO struct {
 }
 
 type workflowDTO struct {
-	ID        string                  `bson:"id"`
-	Name      string                  `bson:"name"`
-	Type      string                  `bson:"type"`
-	Config    []ConfigurationVariable `bson:"config,omitempty"`
-	Processes []processDTO            `bson:"processes"`
+	ID        string                     `bson:"id"`
+	Name      string                     `bson:"name"`
+	Type      string                     `bson:"type"`
+	Config    []configurationVariableDTO `bson:"config,omitempty"`
+	Processes []processDTO               `bson:"processes"`
 }
 
 type processDTO struct {
-	ID            string                  `bson:"id"`
-	Name          string                  `bson:"name"`
-	Type          string                  `bson:"type"`
-	Image         string                  `bson:"image"`
-	Replicas      int32                   `bson:"replicas"`
-	GPU           bool                    `bson:"gpu"`
-	Config        []ConfigurationVariable `bson:"config,omitempty"`
-	ObjectStore   *processObjectStoreDTO  `bson:"objectStore,omitempty"`
-	Secrets       []ConfigurationVariable `bson:"secrets,omitempty"`
-	Subscriptions []string                `bson:"subscriptions"`
-	Networking    *processNetworkingDTO   `bson:"networking,omitempty"`
+	ID            string                     `bson:"id"`
+	Name          string                     `bson:"name"`
+	Type          string                     `bson:"type"`
+	Image         string                     `bson:"image"`
+	Replicas      int32                      `bson:"replicas"`
+	GPU           bool                       `bson:"gpu"`
+	Config        []configurationVariableDTO `bson:"config,omitempty"`
+	ObjectStore   *processObjectStoreDTO     `bson:"objectStore,omitempty"`
+	Secrets       []configurationVariableDTO `bson:"secrets,omitempty"`
+	Subscriptions []string                   `bson:"subscriptions"`
+	Networking    *processNetworkingDTO      `bson:"networking,omitempty"`
 }
 
 type processObjectStoreDTO struct {

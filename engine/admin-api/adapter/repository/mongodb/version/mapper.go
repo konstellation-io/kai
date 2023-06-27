@@ -9,6 +9,7 @@ func mapDTOToEntity(dto *versionDTO) *entity.Version {
 		ID:          dto.ID,
 		Name:        dto.Name,
 		Description: dto.Description,
+		Version:     dto.Version,
 		Config:      mapDTOConfigToEntityConfig(dto.Config),
 		Workflows:   mapDTOToEntityWorkflows(dto.Workflows),
 
@@ -26,14 +27,14 @@ func mapDTOToEntity(dto *versionDTO) *entity.Version {
 func mapDTOToEntityWorkflows(dtos []workflowDTO) []entity.Workflow {
 	workflows := make([]entity.Workflow, len(dtos))
 
-	for _, dto := range dtos {
-		workflows = append(workflows, entity.Workflow{
+	for idx, dto := range dtos {
+		workflows[idx] = entity.Workflow{
 			ID:        dto.ID,
 			Name:      dto.Name,
 			Type:      entity.WorkflowType(dto.Type),
 			Config:    mapDTOConfigToEntityConfig(dto.Config),
 			Processes: mapDTOToEntityProcesses(dto.Processes),
-		})
+		}
 	}
 
 	return workflows
@@ -42,9 +43,10 @@ func mapDTOToEntityWorkflows(dtos []workflowDTO) []entity.Workflow {
 func mapDTOToEntityProcesses(dtos []processDTO) []entity.Process {
 	processes := make([]entity.Process, len(dtos))
 
-	for _, dto := range dtos {
-		processes = append(processes, entity.Process{
-			Name:          dto.ID,
+	for idx, dto := range dtos {
+		processes[idx] = entity.Process{
+			ID:            dto.ID,
+			Name:          dto.Name,
 			Type:          entity.ProcessType(dto.Type),
 			Image:         dto.Image,
 			Replicas:      dto.Replicas,
@@ -54,7 +56,7 @@ func mapDTOToEntityProcesses(dtos []processDTO) []entity.Process {
 			Secrets:       mapDTOConfigToEntityConfig(dto.Secrets),
 			Subscriptions: dto.Subscriptions,
 			Networking:    mapDTOToEntityProcessNetworking(dto.Networking),
-		})
+		}
 	}
 
 	return processes
@@ -83,7 +85,11 @@ func mapDTOToEntityProcessNetworking(dto *processNetworkingDTO) *entity.ProcessN
 	}
 }
 
-func mapDTOConfigToEntityConfig(config []ConfigurationVariable) []entity.ConfigurationVariable {
+func mapDTOConfigToEntityConfig(config []configurationVariableDTO) []entity.ConfigurationVariable {
+	if config == nil {
+		return nil
+	}
+
 	entityConfig := make([]entity.ConfigurationVariable, len(config))
 
 	for i, c := range config {
@@ -101,6 +107,7 @@ func mapEntityToDTO(versionEntity *entity.Version) *versionDTO {
 		ID:          versionEntity.ID,
 		Name:        versionEntity.Name,
 		Description: versionEntity.Description,
+		Version:     versionEntity.Version,
 		Config:      mapEntityConfigToDTOConfig(versionEntity.Config),
 		Workflows:   mapEntityToDTOWorkflows(versionEntity.Workflows),
 
@@ -118,14 +125,17 @@ func mapEntityToDTO(versionEntity *entity.Version) *versionDTO {
 
 func mapEntityToDTOWorkflows(workflows []entity.Workflow) []workflowDTO {
 	dtos := make([]workflowDTO, len(workflows))
+	idx := 0
 
 	for _, workflow := range workflows {
-		dtos = append(dtos, workflowDTO{
-			ID:        workflow.Name,
+		dtos[idx] = workflowDTO{
+			ID:        workflow.ID,
+			Name:      workflow.Name,
 			Type:      workflow.Type.String(),
 			Config:    mapEntityConfigToDTOConfig(workflow.Config),
 			Processes: mapEntityToDTOProcesses(workflow.Processes),
-		})
+		}
+		idx++
 	}
 
 	return dtos
@@ -133,10 +143,12 @@ func mapEntityToDTOWorkflows(workflows []entity.Workflow) []workflowDTO {
 
 func mapEntityToDTOProcesses(processes []entity.Process) []processDTO {
 	dtos := make([]processDTO, len(processes))
+	idx := 0
 
 	for _, process := range processes {
-		dtos = append(dtos, processDTO{
-			ID:            process.Name,
+		dtos[idx] = processDTO{
+			ID:            process.ID,
+			Name:          process.Name,
 			Type:          process.Type.String(),
 			Image:         process.Image,
 			Replicas:      process.Replicas,
@@ -146,7 +158,8 @@ func mapEntityToDTOProcesses(processes []entity.Process) []processDTO {
 			Secrets:       mapEntityConfigToDTOConfig(process.Secrets),
 			Subscriptions: process.Subscriptions,
 			Networking:    mapEntityToDTOProcessNetworking(process.Networking),
-		})
+		}
+		idx++
 	}
 
 	return dtos
@@ -175,11 +188,15 @@ func mapEntityToDTOProcessNetworking(networking *entity.ProcessNetworking) *proc
 	}
 }
 
-func mapEntityConfigToDTOConfig(config []entity.ConfigurationVariable) []ConfigurationVariable {
-	dtoConfig := make([]ConfigurationVariable, len(config))
+func mapEntityConfigToDTOConfig(config []entity.ConfigurationVariable) []configurationVariableDTO {
+	if config == nil {
+		return nil
+	}
+
+	dtoConfig := make([]configurationVariableDTO, len(config))
 
 	for i, c := range config {
-		dtoConfig[i] = ConfigurationVariable{
+		dtoConfig[i] = configurationVariableDTO{
 			Key:   c.Key,
 			Value: c.Value,
 		}
