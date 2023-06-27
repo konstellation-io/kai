@@ -72,8 +72,8 @@ func (i *VersionInteractor) GetByName(ctx context.Context, user *entity.User, pr
 }
 
 // GetByProduct returns all Versions of the given Product.
-func (i *VersionInteractor) GetVersionsByProduct(ctx context.Context, user *entity.User, productID string) ([]*entity.Version, error) {
-	versions, err := i.versionRepo.GetVersionsByProduct(ctx, productID)
+func (i *VersionInteractor) ListVersionsByProduct(ctx context.Context, user *entity.User, productID string) ([]*entity.Version, error) {
+	versions, err := i.versionRepo.ListVersionsByProduct(ctx, productID)
 	if err != nil {
 		return nil, err
 	}

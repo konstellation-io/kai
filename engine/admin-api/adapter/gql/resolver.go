@@ -211,7 +211,7 @@ func (r *queryResolver) Version(ctx context.Context, name, productID string) (*e
 
 func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.GetVersionsByProduct(ctx, loggedUser, productID)
+	return r.versionInteractor.ListVersionsByProduct(ctx, loggedUser, productID)
 }
 
 func (r *queryResolver) UserActivityList(

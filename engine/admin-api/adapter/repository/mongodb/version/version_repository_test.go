@@ -159,7 +159,7 @@ func (s *VersionRepositoryTestSuite) TestUpdate() {
 	s.Equal(createdVer.Description, updatedVer.Description)
 }
 
-func (s *VersionRepositoryTestSuite) TestGetVersionsByProduct() {
+func (s *VersionRepositoryTestSuite) TestListVersionsByProduct() {
 	testVersion := &entity.Version{
 		Name: versionName,
 	}
@@ -173,7 +173,7 @@ func (s *VersionRepositoryTestSuite) TestGetVersionsByProduct() {
 	_, err = s.versionRepo.Create(creatorID, productID, testVersion2)
 	s.Require().NoError(err)
 
-	versions, err := s.versionRepo.GetVersionsByProduct(context.Background(), productID)
+	versions, err := s.versionRepo.ListVersionsByProduct(context.Background(), productID)
 	s.Require().NoError(err)
 
 	s.Require().Len(versions, 2)

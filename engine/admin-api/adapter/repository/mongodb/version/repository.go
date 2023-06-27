@@ -16,7 +16,7 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	usecaseErrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
+	apperrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
@@ -89,7 +89,7 @@ func (r *VersionRepoMongoDB) GetByID(productID, versionID string) (*entity.Versi
 
 	err := collection.FindOne(context.Background(), filter).Decode(versionDTO)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, usecaseErrors.ErrVersionNotFound
+		return nil, apperrors.ErrVersionNotFound
 	}
 
 	return mapDTOToEntity(versionDTO), err
@@ -103,7 +103,7 @@ func (r *VersionRepoMongoDB) GetByName(ctx context.Context, productID, name stri
 
 	err := collection.FindOne(ctx, filter).Decode(versionDTO)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, usecaseErrors.ErrVersionNotFound
+		return nil, apperrors.ErrVersionNotFound
 	}
 
 	return mapDTOToEntity(versionDTO), err
@@ -118,7 +118,7 @@ func (r *VersionRepoMongoDB) Update(productID string, version *entity.Version) e
 	return err
 }
 
-func (r *VersionRepoMongoDB) GetVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
+func (r *VersionRepoMongoDB) ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 60*time.Second)
@@ -164,7 +164,7 @@ func (r *VersionRepoMongoDB) SetStatus(
 	}
 
 	if result.ModifiedCount != 1 {
-		return usecaseErrors.ErrVersionNotFound
+		return apperrors.ErrVersionNotFound
 	}
 
 	return nil
@@ -191,7 +191,7 @@ func (r *VersionRepoMongoDB) SetErrors(
 	}
 
 	if result.ModifiedCount != 1 {
-		return nil, usecaseErrors.ErrVersionNotFound
+		return nil, apperrors.ErrVersionNotFound
 	}
 
 	return mapDTOToEntity(versionDTO), nil
