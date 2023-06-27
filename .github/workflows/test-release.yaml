@@ -115,7 +115,7 @@ jobs:
         if: matrix.changes == 'true'
         uses: actions/download-artifact@v3
         with:
-          name: coverage-report
+          name: coverage-report-${{ matrix.component }}
           path: engine/${{ matrix.component }}
       - name: SonarCloud Scan
         if: matrix.changes == 'true'
