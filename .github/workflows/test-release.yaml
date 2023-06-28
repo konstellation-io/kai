@@ -75,14 +75,20 @@ jobs:
           args: --timeout=5m
       - name: Run unit tests
         if: matrix.changes == 'true'
-        run: go test ./... -cover -v -coverprofile=coverage.out
+        run: go test ./... -cover -v -coverprofile=coverage-unit.out --tags=unit
+        working-directory: ./engine/${{ matrix.component }}
+      - name: Run integration tests
+        if: matrix.changes == 'true'
+        run: go test ./... -cover -v -coverprofile=coverage-integration.out --tags=integration
         working-directory: ./engine/${{ matrix.component }}
       - name: Archive code coverage results
         if: matrix.changes == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report-${{ matrix.component }}
-          path: engine/${{ matrix.component }}/coverage.out
+          path: |
+            engine/${{ matrix.component }}/coverage-unit.out
+            engine/${{ matrix.component }}/coverage-integration.out
 
   sonarcloud:
     name: SonarCloud
@@ -116,7 +122,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage-report-${{ matrix.component }}
-          path: engine/${{ matrix.component }}
+          path: |
+            engine/${{ matrix.component }}
       - name: SonarCloud Scan
         if: matrix.changes == 'true'
         uses: SonarSource/sonarcloud-github-action@master
