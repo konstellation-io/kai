@@ -1,0 +1,90 @@
+typemeta:
+    kind: ""
+    apiversion: ""
+objectmeta:
+    name: test-product-test-version-conf-files
+    generatename: ""
+    namespace: test
+    selflink: ""
+    uid: ""
+    resourceversion: ""
+    generation: 0
+    creationtimestamp: "0001-01-01T00:00:00Z"
+    deletiontimestamp: null
+    deletiongraceperiodseconds: null
+    labels:
+        product: test-product
+        type: configuration
+        version: test-version
+    annotations: {}
+    ownerreferences: []
+    finalizers: []
+    managedfields: []
+immutable: null
+data:
+    fluent-bit.conf: |4
+        [SERVICE]
+            Flush        1
+            Verbose      1
+
+            Daemon       Off
+            Log_Level    info
+
+            Plugins_File plugins.conf
+            Parsers_File parsers.conf
+
+            HTTP_Server  Off
+            HTTP_Listen  0.0.0.0
+            HTTP_Port    2020
+
+        [INPUT]
+            Name        tail
+            Tag         mongo_writer_logs.${KAI_PRODUCT_ID}
+            Buffer_Chunk_Size 1k
+            Path        /var/log/app/*.log
+            Multiline On
+            Parser_Firstline multiline_pattern
+
+        [FILTER]
+            Name record_modifier
+            Match *
+            Record versionId ${KAI_VERSION_ID}
+            Record processId ${KAI_PROCESS_ID}
+            Record workflowId ${KAI_WORKFLOW_ID}
+
+        [FILTER]
+            Name  stdout
+            Match *
+
+        [OUTPUT]
+            Name  nats
+            Match *
+            Host  ${KAI_MESSAGING_HOST}
+            Port  ${KAI_MESSAGING_PORT}
+    parsers.conf: |4
+        [PARSER]
+            Name multiline_pattern
+            Format regex
+            Regex ^(?<logtime>\d{4}\-\d{2}\-\d{2}T\d{1,2}\:\d{1,2}\:\d{1,2}(\.\d+Z|\+0000)) (?<level>(ERROR|WARN|INFO|DEBUG)) (?<capture>.*)
+    test-product-test-version-test-workflow-test-process: |
+        metadata:
+            product_id: test-product
+            version_id: test-version
+            workflow_id: test-workflow
+            process_id: test-process
+            base_path: ""
+            process_type: task
+        nats:
+            url: ""
+            stream: test-stream
+            output: test-subject
+            inputs:
+                - other-process
+        centralized_configuration:
+            product:
+                bucket: test-version-kv-store
+            workflow:
+                bucket: test-workflow-kv-store
+            process:
+                bucket: test-process-kv-store
+binarydata: {}

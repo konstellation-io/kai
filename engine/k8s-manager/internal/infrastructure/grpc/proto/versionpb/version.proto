@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package version;
+option go_package = "./versionpb";
+
+enum ProcessType {
+  ProcessTypeUnknown = 0;
+  ProcessTypeTrigger = 1;
+  ProcessTypeTask = 2;
+  ProcessTypeExit = 3;
+}
+
+message Workflow {
+  string id = 1;
+  string stream = 2;
+  string key_value_store = 3;
+  repeated Process processes = 4;
+}
+
+message Process {
+  string id = 1;
+  string image = 2;
+  bool gpu = 3;
+  repeated string subscriptions = 4;
+  string subject = 5;
+  int32 replicas = 6;
+  optional string object_store = 7;
+  string key_value_store = 8;
+  ProcessType type = 9;
+  Network networking = 10;
+  map<string, string> config = 11;
+}
+
+message Network {
+  int32 target_port = 1;
+  string protocol = 2;
+  int32 source_port = 3;
+}
+
+message StartRequest {
+  string product_id = 1;
+  string version_id = 2;
+  string key_value_store = 3;
+  repeated Workflow workflows = 4;
+}
+
+message StopRequest {
+  string product = 1;
+  string version = 2;
+}
+
+message PublishRequest {
+  string product = 1;
+  string version = 2;
+  repeated string workflows = 3;
+}
+
+message UnpublishRequest {
+  string product = 1;
+  string version = 2;
+}
+
+message Response {
+  string message = 2;
+}
+
+message NodeStatusRequest {
+  string version_name = 1;
+  string product_id = 2;
+}
+
+message NodeStatusResponse {
+  string node_id = 1;
+  string status = 2;
+  string name = 3;
+}
+
+service VersionService {
+  rpc Start (StartRequest) returns (Response);
+  rpc Stop (StopRequest) returns (Response);
+  rpc Publish (PublishRequest) returns (Response);
+  rpc Unpublish (UnpublishRequest) returns (Response);
+  rpc WatchNodeStatus (NodeStatusRequest) returns (stream NodeStatusResponse);
+};

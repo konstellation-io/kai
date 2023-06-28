@@ -104,6 +104,7 @@ issues:
   exclude-rules:
     - path: _test\.go
       linters:
+        - goerr113
         - gomnd
     # https://github.com/go-critic/go-critic/issues/926
     - linters:

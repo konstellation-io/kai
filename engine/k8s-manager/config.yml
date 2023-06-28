@@ -1,24 +1,36 @@
+kubernetes:
+  isInsideCluster: true
+  namespace: kai
 baseDomainName: "local"
-entrypoint:
-  requestTimeout: "30"
 server:
   port: "50051"
-nats_streaming:
-  url: "kai-nats:4222"
-  host: "kai-nats"
-  port: "4222"
-  storage:
-    className: "standard"
-    size: 1G
-mongo:
-  persistentVolume:
-    storageClass: "standard"
-    size: 5G
-chronograf:
-  persistentVolume:
-    storageClass: "standard"
-    size: 1G
-influxdb:
-  persistentVolume:
-    storageClass: "standard"
-    size: 5G
+krtFilesDownloader:
+  image: konstellation/krt-files-downloader
+  tag: latest
+nats:
+  url: "kai-local-nats:4222"
+krtFiles:
+  path: /krt-files
+fluentbit:
+  image: fluent/fluent-bit
+  tag: 1.3
+configPath: /kai
+# nats_streaming:
+#   url: "kai-nats:4222"
+#   host: "kai-nats"
+#   port: "4222"
+#   storage:
+#     className: "standard"
+#     size: 1G
+# mongo:
+#   persistentVolume:
+#     storageClass: "standard"
+#     size: 5G
+# chronograf:
+#   persistentVolume:
+#     storageClass: "standard"
+#     size: 1G
+# influxdb:
+#   persistentVolume:
+#     storageClass: "standard"
+#     size: 5G
