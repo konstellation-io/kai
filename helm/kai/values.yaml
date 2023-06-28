@@ -51,8 +51,6 @@ config:
   admin:
     # -- Api Hostname for Admin UI and Admin API
     apiHost: api.kai.local
-    # -- Frontend Base URL for Admin API
-    frontendBaseURL: http://admin.kai.local
     # -- Whether to enable CORS on Admin API
     corsEnabled: true
     # -- Email address for sending notifications
@@ -256,9 +254,9 @@ keycloak:
     httpEnabled: "true"
     # -- Disables dynamically resolving the hostname from request headers. Should always be set to true in production, unless proxy verifies the Host header.
     hostnameStrict: "false"
-    # -- The proxy address forwarding mode if the server is behind a reverse proxy. Valid values are `none`, `edge`, `reencrypt` and `passthrough` 
+    # -- The proxy address forwarding mode if the server is behind a reverse proxy. Valid values are `none`, `edge`, `reencrypt` and `passthrough`
     proxy: edge
-    # -- If the server should expose health check endpoints. If set to "false", container liveness and readiness probes should be disabled. 
+    # -- If the server should expose health check endpoints. If set to "false", container liveness and readiness probes should be disabled.
     healthEnabled: "true"
   db:
     # -- Keycloak database type
@@ -318,7 +316,7 @@ keycloak:
     # -- Service type
     type: ClusterIP
     ports:
-      # -- The http port the service will listen on. Only 
+      # -- The http port the service will listen on. Only
       http: 8080
       # -- The https port the service will listen on
       https: 8443
