@@ -8,8 +8,8 @@ import (
 	"github.com/konstellation-io/krt/pkg/krt"
 	"github.com/stretchr/testify/require"
 
-	krtapp "github.com/konstellation-io/kai/engine/admin-api/adapter/krt"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	krtapp "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
 )
 
 func getExpectedVersion() *entity.Version {
@@ -91,7 +91,7 @@ func TestKrtYmlMapper(t *testing.T) {
 	expectedVersion := getExpectedVersion()
 
 	// GIVEN a KRT YAML file with a valid format
-	krtYml, err := krtapp.ParseFile("../../testdata/classificator_krt.yaml")
+	krtYml, err := krtapp.ParseFile("../../../testdata/classificator_krt.yaml")
 	require.NoError(t, err)
 
 	err = krtYml.Validate()
