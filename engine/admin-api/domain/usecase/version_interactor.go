@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/krt"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
