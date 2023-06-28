@@ -224,6 +224,42 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplic
 	s.ErrorIs(err, errors.ErrVersionDuplicated)
 }
 
+func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfProductNotFound() {
+	productID := "product-1"
+
+	user := testhelpers.NewUserBuilder().Build()
+
+	file, err := os.Open("../../testdata/classificator_krt.yaml")
+	s.Require().NoError(err)
+
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
+	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(nil, usecase.ErrProductNotFound)
+
+	_, _, err = s.versionInteractor.Create(context.Background(), user, productID, file)
+	s.ErrorIs(err, usecase.ErrProductNotFound)
+}
+
+func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfKrtIsInvalid() {
+	productID := "product-1"
+
+	user := testhelpers.NewUserBuilder().Build()
+
+	product := &entity.Product{
+		ID: productID,
+	}
+
+	file, err := os.Open("../../testdata/invalid_krt.yaml")
+	s.Require().NoError(err)
+
+	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
+	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(product, nil)
+
+	_, _, err = s.versionInteractor.Create(context.Background(), user, productID, file)
+
+	invalidKrtErr := &errors.ErrInvalidKRT{}
+	s.True(s.ErrorAs(err, invalidKrtErr))
+}
+
 func (s *VersionInteractorSuite) TestGetByName() {
 	productID := "product-1"
 
