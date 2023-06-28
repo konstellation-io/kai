@@ -1,0 +1,11 @@
+name: invalid-classificator
+description: This krt is malformed.
+version: v1.0.0
+
+workflows:
+  - name: go-classificator
+    processes:
+      - name: entrypoint
+        image: konstellation/kai-grpc-trigger:latest
+        subscriptions:
+          - 'exitpoint'

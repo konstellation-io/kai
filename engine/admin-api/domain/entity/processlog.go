@@ -2,14 +2,14 @@ package entity
 
 import "time"
 
-type NodeLog struct {
+type ProcessLog struct {
 	ID           string   `bson:"_id"`
 	Date         string   `bson:"date"`
 	Message      string   `bson:"message"`
 	Level        LogLevel `bson:"level"`
 	PodID        string   `bson:"podId"`
-	NodeID       string   `bson:"nodeId" gqlgen:"nodeId"`
-	NodeName     string   `bson:"nodeName"`
+	ProcessID    string   `bson:"processId" gqlgen:"processId"`
+	ProcessName  string   `bson:"processName"`
 	VersionID    string   `bson:"versionId"`
 	VersionName  string   `bson:"versionName"`
 	WorkflowID   string   `bson:"workflowId" gqlgen:"workflowId"`
@@ -21,7 +21,7 @@ type SearchLogsOptions struct {
 	EndDate        time.Time
 	Search         *string
 	Levels         []LogLevel
-	NodeIDs        []string
+	ProcessIDs     []string
 	Cursor         *string
 	VersionsIDs    []string
 	WorkflowsNames []string
@@ -29,7 +29,7 @@ type SearchLogsOptions struct {
 
 type SearchLogsResult struct {
 	Cursor string
-	Logs   []*NodeLog
+	Logs   []*ProcessLog
 }
 
 type LogFilters struct {
@@ -37,7 +37,7 @@ type LogFilters struct {
 	EndDate        *string    `json:"endDate"`
 	Search         *string    `json:"search"`
 	Levels         []LogLevel `json:"levels"`
-	NodeIDs        []string   `json:"nodeIds"`
+	ProcessIDs     []string   `json:"processIds"`
 	VersionsIDs    []string   `json:"versionsIds"`
 	WorkflowsNames []string   `json:"workflowsNames"`
 }

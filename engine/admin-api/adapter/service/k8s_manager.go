@@ -7,9 +7,8 @@ import (
 	"io"
 	"time"
 
-	"google.golang.org/grpc/credentials/insecure"
-
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
@@ -52,6 +51,8 @@ func (k *K8sVersionClient) Start(
 		return err
 	}
 
+	//nolint:godox // To be done.
+	// TODO: Update to new proto
 	req := versionpb.StartRequest{
 		ProductId:      productID,
 		VersionId:      version.ID,
@@ -62,11 +63,7 @@ func (k *K8sVersionClient) Start(
 		MongoDbName:    k.cfg.MongoDB.DBName,
 		MongoKrtBucket: k.cfg.MongoDB.KRTBucket,
 		InfluxUri:      fmt.Sprintf("http://%s-influxdb:8086", k.cfg.ReleaseName),
-		Entrypoint: &versionpb.Entrypoint{
-			ProtoFile: version.Entrypoint.ProtoFile,
-			Image:     version.Entrypoint.Image,
-		},
-		KeyValueStore: versionConfig.KeyValueStoresConfig.ProjectKeyValueStore,
+		KeyValueStore:  versionConfig.KeyValueStoresConfig.ProjectKeyValueStore,
 	}
 
 	_, err = k.client.Start(ctx, &req)
@@ -78,7 +75,11 @@ func (k *K8sVersionClient) Stop(ctx context.Context, productID string, version *
 	workflowEntrypoints := make([]string, 0)
 
 	for _, w := range version.Workflows {
-		workflowEntrypoints = append(workflowEntrypoints, w.Entrypoint)
+		for _, p := range w.Processes {
+			if p.Type == entity.ProcessTypeTrigger {
+				workflowEntrypoints = append(workflowEntrypoints, p.Name)
+			}
+		}
 	}
 
 	req := versionpb.VersionInfo{
@@ -141,18 +142,23 @@ func (k *K8sVersionClient) Publish(productID string, version *entity.Version) er
 }
 
 func versionToConfig(version *entity.Version) []*versionpb.Config {
-	configVars := make([]*versionpb.Config, len(version.Config.Vars))
+	configVars := make([]*versionpb.Config, len(version.Config))
+	idx := 0
 
-	for i, c := range version.Config.Vars {
-		configVars[i] = &versionpb.Config{
-			Key:   c.Key,
-			Value: c.Value,
+	for _, config := range version.Config {
+		configVars[idx] = &versionpb.Config{
+			Key:   config.Key,
+			Value: config.Value,
 		}
+		idx++
 	}
 
 	return configVars
 }
 
+// TODO: Transform to new krt when protobuf is updated.
+//
+//nolint:godox // To be done.
 func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionConfig) ([]*versionpb.Workflow, error) {
 	wf := make([]*versionpb.Workflow, len(version.Workflows))
 
@@ -169,46 +175,35 @@ func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionCo
 			return nil, fmt.Errorf("error getting workflow %q key-value store: %w", w.Name, err)
 		}
 
-		nodes := make([]*versionpb.Workflow_Node, len(w.Nodes))
+		process := make([]*versionpb.Workflow_Node, len(w.Processes))
 
-		for j, n := range w.Nodes {
-			nodeStreamCfg, err := workflowStreamConfig.GetNodeStreamConfig(n.Name)
+		for j, n := range w.Processes {
+			processStreamCfg, err := workflowStreamConfig.GetProcessStreamConfig(n.Name)
 			if err != nil {
-				return nil, fmt.Errorf("error getting stream configuration from node %q: %w", n.Name, err)
+				return nil, fmt.Errorf("error getting stream configuration from process %q: %w", n.Name, err)
 			}
 
-			nodeKeyValueStore, err := workflowKeyValueStoresConfig.GetNodeKeyValueStore(n.Name)
+			processKeyValueStore, err := workflowKeyValueStoresConfig.GetProcessKeyValueStore(n.Name)
 			if err != nil {
 				return nil, fmt.Errorf("error translating version in workflow %q: %w", w.Name, err)
 			}
 
 			if err != nil {
-				return nil, fmt.Errorf("error getting node key-value store config: %w", err)
+				return nil, fmt.Errorf("error getting process key-value store config: %w", err)
 			}
 
-			nodes[j] = &versionpb.Workflow_Node{
-				Id:            n.ID,
+			process[j] = &versionpb.Workflow_Node{
 				Name:          n.Name,
 				Image:         n.Image,
-				Src:           n.Src,
-				Gpu:           n.GPU,
-				Subscriptions: nodeStreamCfg.Subscriptions,
-				Subject:       nodeStreamCfg.Subject,
-				ObjectStore:   versionConfig.GetNodeObjectStoreConfig(w.Name, n.Name),
-				KeyValueStore: nodeKeyValueStore,
-				Replicas:      n.Replicas,
+				Subscriptions: processStreamCfg.Subscriptions,
+				Subject:       processStreamCfg.Subject,
+				ObjectStore:   versionConfig.GetProcessObjectStoreConfig(w.Name, n.Name),
+				KeyValueStore: processKeyValueStore,
 			}
 		}
 
 		wf[i] = &versionpb.Workflow{
-			Id:   w.ID,
-			Name: w.Name,
-			Entrypoint: &versionpb.Workflow_Entrypoint{
-				Name:    w.Entrypoint,
-				Subject: workflowStreamConfig.EntrypointSubject,
-			},
-			Nodes:         nodes,
-			Exitpoint:     w.Exitpoint,
+			Name:          w.Name,
 			Stream:        workflowStreamConfig.Stream,
 			KeyValueStore: workflowKeyValueStoresConfig.WorkflowKeyValueStore,
 		}
@@ -217,7 +212,11 @@ func versionToWorkflows(version *entity.Version, versionConfig *entity.VersionCo
 	return wf, nil
 }
 
-func (k *K8sVersionClient) WatchNodeStatus(ctx context.Context, productID, versionName string) (<-chan *entity.Node, error) {
+func (k *K8sVersionClient) WatchProcessStatus(
+	ctx context.Context,
+	productID,
+	versionName string,
+) (<-chan *entity.Process, error) {
 	stream, err := k.client.WatchNodeStatus(ctx, &versionpb.NodeStatusRequest{
 		VersionName: versionName,
 		ProductId:   productID,
@@ -226,41 +225,40 @@ func (k *K8sVersionClient) WatchNodeStatus(ctx context.Context, productID, versi
 		return nil, fmt.Errorf("version status opening stream: %w", err)
 	}
 
-	ch := make(chan *entity.Node, 1)
+	ch := make(chan *entity.Process, 1)
 
 	go func() {
 		defer close(ch)
 
 		for {
-			k.logger.Debug("[VersionService.WatchNodeStatus] waiting for stream.Recv()...")
+			k.logger.Debug("[VersionService.WatchProcessStatus] waiting for stream.Recv()...")
 
 			msg, err := stream.Recv()
 
 			if errors.Is(stream.Context().Err(), context.Canceled) {
-				k.logger.Debug("[VersionService.WatchNodeStatus] Context canceled.")
+				k.logger.Debug("[VersionService.WatchProcessStatus] Context canceled.")
 				return
 			}
 
 			if errors.Is(err, io.EOF) {
-				k.logger.Debug("[VersionService.WatchNodeStatus] EOF msg received.")
+				k.logger.Debug("[VersionService.WatchProcessStatus] EOF msg received.")
 				return
 			}
 
 			if err != nil {
-				k.logger.Errorf("[VersionService.WatchNodeStatus] Unexpected error: %s", err)
+				k.logger.Errorf("[VersionService.WatchProcessStatus] Unexpected error: %s", err)
 				return
 			}
 
-			k.logger.Debug("[VersionService.WatchNodeStatus] Message received")
+			k.logger.Debug("[VersionService.WatchProcessStatus] Message received")
 
-			status := entity.NodeStatus(msg.GetStatus())
+			status := entity.ProcessStatus(msg.GetStatus())
 			if !status.IsValid() {
-				k.logger.Errorf("[VersionService.WatchNodeStatus] Invalid node status: %s", status)
+				k.logger.Errorf("[VersionService.WatchProcessStatus] Invalid process status: %s", status)
 				continue
 			}
 
-			ch <- &entity.Node{
-				ID:     msg.GetNodeId(),
+			ch <- &entity.Process{
 				Name:   msg.GetName(),
 				Status: status,
 			}

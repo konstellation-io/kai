@@ -1,4 +1,4 @@
-package mongodb
+package version
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	apperrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
@@ -55,71 +55,74 @@ func (r *VersionRepoMongoDB) CreateIndexes(ctx context.Context, productID string
 	}
 
 	_, err := collection.Indexes().CreateMany(ctx, indexes)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func (r *VersionRepoMongoDB) Create(userID, productID string, newVersion *entity.Version) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	newVersion.ID = primitive.NewObjectID().Hex()
-	newVersion.CreationDate = time.Now().UTC()
-	newVersion.CreationAuthor = userID
-	newVersion.Status = entity.VersionStatusCreating
+	versionDTO := mapEntityToDTO(newVersion)
 
-	res, err := collection.InsertOne(context.Background(), newVersion)
+	versionDTO.ID = primitive.NewObjectID().Hex()
+	versionDTO.CreationDate = time.Now().UTC()
+	versionDTO.CreationAuthor = userID
+	versionDTO.Status = entity.VersionStatusCreating.String()
+
+	res, err := collection.InsertOne(context.Background(), versionDTO)
 	if err != nil {
 		return nil, err
 	}
 
-	newVersion.ID = res.InsertedID.(string)
+	versionDTO.ID = res.InsertedID.(string)
 
-	return newVersion, nil
+	savedVersion := mapDTOToEntity(versionDTO)
+
+	return savedVersion, nil
 }
 
 func (r *VersionRepoMongoDB) GetByID(productID, versionID string) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	v := &entity.Version{}
+	versionDTO := &versionDTO{}
 	filter := bson.M{"_id": versionID}
 
-	err := collection.FindOne(context.Background(), filter).Decode(v)
+	err := collection.FindOne(context.Background(), filter).Decode(versionDTO)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		return v, usecase.ErrVersionNotFound
+		return nil, apperrors.ErrVersionNotFound
 	}
 
-	return v, err
+	return mapDTOToEntity(versionDTO), err
 }
 
 func (r *VersionRepoMongoDB) GetByName(ctx context.Context, productID, name string) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	v := &entity.Version{}
+	versionDTO := &versionDTO{}
 	filter := bson.M{"name": name}
 
-	err := collection.FindOne(ctx, filter).Decode(v)
+	err := collection.FindOne(ctx, filter).Decode(versionDTO)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, usecase.ErrVersionNotFound
+		return nil, apperrors.ErrVersionNotFound
 	}
 
-	return v, err
+	return mapDTOToEntity(versionDTO), err
 }
 
 func (r *VersionRepoMongoDB) Update(productID string, version *entity.Version) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	_, err := collection.ReplaceOne(context.Background(), bson.M{"_id": version.ID}, version)
-	if err != nil {
-		return err
+	versionDTO := mapEntityToDTO(version)
+	updateResult, err := collection.ReplaceOne(context.Background(), bson.M{"_id": version.ID}, versionDTO)
+
+	if updateResult.ModifiedCount == 0 {
+		return apperrors.ErrVersionNotFound
 	}
 
-	return nil
+	return err
 }
 
-func (r *VersionRepoMongoDB) GetByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
+func (r *VersionRepoMongoDB) ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 60*time.Second)
@@ -128,36 +131,44 @@ func (r *VersionRepoMongoDB) GetByProduct(ctx context.Context, productID string)
 	var versions []*entity.Version
 
 	cur, err := collection.Find(ctxWithTimeout, bson.M{})
-
 	if err != nil {
 		return versions, err
 	}
 	defer cur.Close(ctxWithTimeout)
 
 	for cur.Next(ctxWithTimeout) {
-		var v entity.Version
+		var versionDTO versionDTO
 
-		err = cur.Decode(&v)
+		err = cur.Decode(&versionDTO)
 		if err != nil {
 			return versions, err
 		}
 
-		versions = append(versions, &v)
+		versions = append(versions, mapDTOToEntity(&versionDTO))
 	}
 
 	return versions, nil
 }
 
-func (r *VersionRepoMongoDB) SetStatus(ctx context.Context, productID, versionID string, status entity.VersionStatus) error {
+func (r *VersionRepoMongoDB) SetStatus(
+	ctx context.Context,
+	productID string,
+	versionID string,
+	status entity.VersionStatus,
+) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	result, err := collection.UpdateOne(ctx, bson.M{"_id": versionID}, bson.M{"$set": bson.M{"status": status}})
+	result, err := collection.UpdateOne(
+		ctx,
+		bson.M{"_id": versionID},
+		bson.M{"$set": bson.M{"status": status}},
+	)
 	if err != nil {
 		return err
 	}
 
-	if result.ModifiedCount != 1 {
-		return usecase.ErrVersionNotFound
+	if result.ModifiedCount == 0 {
+		return apperrors.ErrVersionNotFound
 	}
 
 	return nil
@@ -171,24 +182,26 @@ func (r *VersionRepoMongoDB) SetErrors(
 ) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	version.Status = entity.VersionStatusError
-	version.Errors = errorMessages
+	versionDTO := mapEntityToDTO(version)
 
-	elem := bson.M{"$set": bson.M{"status": version.Status, "errors": version.Errors}}
+	versionDTO.Status = entity.VersionStatusError.String()
+	versionDTO.Errors = errorMessages
 
-	result, err := collection.UpdateOne(ctx, bson.M{"_id": version.ID}, elem)
+	elem := bson.M{"$set": bson.M{"status": versionDTO.Status, "errors": versionDTO.Errors}}
+
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": versionDTO.ID}, elem)
 	if err != nil {
 		return nil, err
 	}
 
-	if result.ModifiedCount != 1 {
-		return nil, usecase.ErrVersionNotFound
+	if result.ModifiedCount == 0 {
+		return nil, apperrors.ErrVersionNotFound
 	}
 
-	return version, nil
+	return mapDTOToEntity(versionDTO), nil
 }
 
-func (r *VersionRepoMongoDB) UploadKRTFile(productID string, version *entity.Version, file string) error {
+func (r *VersionRepoMongoDB) UploadKRTYamlFile(productID string, version *entity.Version, file string) error {
 	data, err := os.ReadFile(file)
 	if err != nil {
 		return fmt.Errorf("reading KRT file at %s: %w", file, err)
@@ -202,10 +215,12 @@ func (r *VersionRepoMongoDB) UploadKRTFile(productID string, version *entity.Ver
 		return fmt.Errorf("creating bucket %q to store KRT files: %w", r.cfg.MongoDB.DBName, err)
 	}
 
-	filename := fmt.Sprintf("%s.krt", version.Name)
+	versionDTO := mapEntityToDTO(version)
+
+	filename := fmt.Sprintf("%s-%s.yaml", versionDTO.Name, versionDTO.Version)
 
 	uploadStream, err := bucket.OpenUploadStreamWithID(
-		version.ID,
+		versionDTO.ID,
 		filename,
 	)
 	if err != nil {
@@ -226,23 +241,35 @@ func (r *VersionRepoMongoDB) UploadKRTFile(productID string, version *entity.Ver
 func (r *VersionRepoMongoDB) ClearPublishedVersion(ctx context.Context, productID string) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	oldPublishedVersion := &entity.Version{}
+	oldPublishedVersion := &versionDTO{}
 
 	filter := bson.M{"status": entity.VersionStatusPublished}
+
 	upd := bson.M{
 		"$set": bson.M{
 			"status":            entity.VersionStatusStarted,
 			"publicationDate":   nil,
-			"publicationUserId": nil,
+			"publicationAuthor": nil,
 		},
 	}
 
-	result := collection.FindOneAndUpdate(ctx, filter, upd)
+	upsert := true
+	after := options.After
+	opt := &options.FindOneAndUpdateOptions{
+		ReturnDocument: &after,
+		Upsert:         &upsert,
+	}
+
+	result := collection.FindOneAndUpdate(ctx, filter, upd, opt)
 	err := result.Decode(oldPublishedVersion)
 
 	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, err
 	}
 
-	return oldPublishedVersion, nil
+	return mapDTOToEntity(oldPublishedVersion), nil
 }
+
+// TODO: Delete version method.
+//
+//nolint:godox // To be done.
