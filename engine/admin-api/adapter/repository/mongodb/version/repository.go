@@ -113,7 +113,11 @@ func (r *VersionRepoMongoDB) Update(productID string, version *entity.Version) e
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
 	versionDTO := mapEntityToDTO(version)
-	_, err := collection.ReplaceOne(context.Background(), bson.M{"_id": version.ID}, versionDTO)
+	updateResult, err := collection.ReplaceOne(context.Background(), bson.M{"_id": version.ID}, versionDTO)
+
+	if updateResult.ModifiedCount == 0 {
+		return apperrors.ErrVersionNotFound
+	}
 
 	return err
 }
@@ -163,7 +167,7 @@ func (r *VersionRepoMongoDB) SetStatus(
 		return err
 	}
 
-	if result.ModifiedCount != 1 {
+	if result.ModifiedCount == 0 {
 		return apperrors.ErrVersionNotFound
 	}
 
@@ -190,17 +194,14 @@ func (r *VersionRepoMongoDB) SetErrors(
 		return nil, err
 	}
 
-	if result.ModifiedCount != 1 {
+	if result.ModifiedCount == 0 {
 		return nil, apperrors.ErrVersionNotFound
 	}
 
 	return mapDTOToEntity(versionDTO), nil
 }
 
-// TODO: Rethink this to upload krt YAML files.
-//
-//nolint:godox // To be done.
-func (r *VersionRepoMongoDB) UploadKRTFile(productID string, version *entity.Version, file string) error {
+func (r *VersionRepoMongoDB) UploadKRTYamlFile(productID string, version *entity.Version, file string) error {
 	data, err := os.ReadFile(file)
 	if err != nil {
 		return fmt.Errorf("reading KRT file at %s: %w", file, err)
@@ -216,7 +217,7 @@ func (r *VersionRepoMongoDB) UploadKRTFile(productID string, version *entity.Ver
 
 	versionDTO := mapEntityToDTO(version)
 
-	filename := fmt.Sprintf("%s.krt", versionDTO.Name)
+	filename := fmt.Sprintf("%s-%s.yaml", versionDTO.Name, versionDTO.Version)
 
 	uploadStream, err := bucket.OpenUploadStreamWithID(
 		versionDTO.ID,

@@ -4,6 +4,7 @@ package version
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -13,10 +14,12 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	apperrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
@@ -26,6 +29,7 @@ var creatorID = "creatorID"
 
 type VersionRepositoryTestSuite struct {
 	suite.Suite
+	cfg              *config.Config
 	mongoDBContainer testcontainers.Container
 	mongoClient      *mongo.Client
 	versionRepo      *VersionRepoMongoDB
@@ -39,6 +43,8 @@ func (s *VersionRepositoryTestSuite) SetupSuite() {
 	ctx := context.Background()
 	cfg := &config.Config{}
 	logger := simplelogger.New(simplelogger.LevelInfo)
+
+	cfg.MongoDB.KRTBucket = "krt"
 
 	req := testcontainers.ContainerRequest{
 		Image:        "mongo:latest",
@@ -66,6 +72,7 @@ func (s *VersionRepositoryTestSuite) SetupSuite() {
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 	s.Require().NoError(err)
 
+	s.cfg = cfg
 	s.mongoDBContainer = mongoDBContainer
 	s.mongoClient = client
 	s.versionRepo = NewVersionRepoMongoDB(cfg, logger, client)
@@ -126,6 +133,12 @@ func (s *VersionRepositoryTestSuite) TestGetByID() {
 	s.Equal(testVersion.Name, ver.Name)
 }
 
+func (s *VersionRepositoryTestSuite) TestGetByIDNotFound() {
+	_, err := s.versionRepo.GetByID(productID, "notfound")
+	s.Require().Error(err)
+	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
+}
+
 func (s *VersionRepositoryTestSuite) TestGetByName() {
 	testVersion := &entity.Version{
 		Name: versionName,
@@ -138,6 +151,12 @@ func (s *VersionRepositoryTestSuite) TestGetByName() {
 	s.Require().NoError(err)
 
 	s.Equal(testVersion.Name, ver.Name)
+}
+
+func (s *VersionRepositoryTestSuite) TestGetByNameNotFound() {
+	_, err := s.versionRepo.GetByName(context.Background(), productID, "notfound")
+	s.Require().Error(err)
+	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
 }
 
 func (s *VersionRepositoryTestSuite) TestUpdate() {
@@ -157,6 +176,16 @@ func (s *VersionRepositoryTestSuite) TestUpdate() {
 	s.Require().NoError(err)
 
 	s.Equal(createdVer.Description, updatedVer.Description)
+}
+
+func (s *VersionRepositoryTestSuite) TestUpdateNotFound() {
+	testVersion := &entity.Version{
+		Name: versionName,
+	}
+
+	err := s.versionRepo.Update(productID, testVersion)
+	s.Require().Error(err)
+	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
 }
 
 func (s *VersionRepositoryTestSuite) TestListVersionsByProduct() {
@@ -198,6 +227,12 @@ func (s *VersionRepositoryTestSuite) TestSetStatus() {
 	s.Equal(entity.VersionStatusCreated, updatedVer.Status)
 }
 
+func (s *VersionRepositoryTestSuite) TestSetStatusNotFound() {
+	err := s.versionRepo.SetStatus(context.Background(), productID, "notfound", entity.VersionStatusCreated)
+	s.Require().Error(err)
+	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
+}
+
 func (s *VersionRepositoryTestSuite) TestSetErrors() {
 	testVersion := &entity.Version{
 		Name: versionName,
@@ -213,6 +248,49 @@ func (s *VersionRepositoryTestSuite) TestSetErrors() {
 	s.Require().NoError(err)
 
 	s.Equal([]string{"error1", "error2"}, updatedVer.Errors)
+}
+
+func (s *VersionRepositoryTestSuite) TestSetErrorsNotFound() {
+	_, err := s.versionRepo.SetErrors(context.Background(), productID, &entity.Version{ID: "notfound"}, []string{"error1", "error2"})
+	s.Require().Error(err)
+	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
+}
+
+func (s *VersionRepositoryTestSuite) TestUploadKRTYamlFile() {
+	testVersion := &entity.Version{
+		Name:    versionName,
+		Version: "v1",
+	}
+
+	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
+	s.Require().NoError(err)
+
+	err = s.versionRepo.UploadKRTYamlFile(productID, createdVer, "../../../../testdata/classificator_krt.yaml")
+	s.Require().NoError(err)
+
+	bucket, err := gridfs.NewBucket(
+		s.mongoClient.Database(productID),
+		options.GridFSBucket().SetName(s.cfg.MongoDB.KRTBucket),
+	)
+
+	filter := bson.M{"_id": createdVer.ID}
+	cursor, err := bucket.Find(filter)
+	s.Require().NoError(err)
+
+	defer func() {
+		err := cursor.Close(context.TODO())
+		s.Require().NoError(err)
+	}()
+
+	type gridfsFile struct {
+		Name   string `bson:"filename"`
+		Length int64  `bson:"length"`
+	}
+	var foundFiles []gridfsFile
+	err = cursor.All(context.TODO(), &foundFiles)
+	s.Require().NoError(err)
+
+	s.Len(foundFiles, 1)
 }
 
 func (s *VersionRepositoryTestSuite) TestClearPublishedVersion() {

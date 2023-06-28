@@ -196,7 +196,7 @@ func (i *VersionInteractor) completeVersionCreation(
 	dashboardsFolder := path.Join(tmpDir, "metrics/dashboards")
 	contentErrors = i.saveKRTDashboards(ctx, dashboardsFolder, product, versionCreated, contentErrors)
 
-	err := i.versionRepo.UploadKRTFile(product.ID, versionCreated, tmpKrtFile.Name())
+	err := i.versionRepo.UploadKRTYamlFile(product.ID, versionCreated, tmpKrtFile.Name())
 	if err != nil {
 		contentErrors = append(contentErrors, errors.ErrStoringKRTFile)
 	}

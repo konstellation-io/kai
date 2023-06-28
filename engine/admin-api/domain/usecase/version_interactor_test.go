@@ -190,7 +190,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.Name).Return(nil, errors.ErrVersionNotFound)
 	s.mocks.versionRepo.EXPECT().Create(user.ID, productID, gomock.Any()).Return(testVersion, nil)
 	s.mocks.versionRepo.EXPECT().SetStatus(s.ctx, productID, testVersion.ID, entity.VersionStatusCreated).Return(nil)
-	s.mocks.versionRepo.EXPECT().UploadKRTFile(productID, testVersion, gomock.Any()).Return(nil)
+	s.mocks.versionRepo.EXPECT().UploadKRTYamlFile(productID, testVersion, gomock.Any()).Return(nil)
 	s.mocks.userActivityRepo.EXPECT().Create(gomock.Any()).Return(nil)
 
 	_, statusCh, err := s.versionInteractor.Create(context.Background(), user, productID, file)
