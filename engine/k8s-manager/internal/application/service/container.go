@@ -24,18 +24,9 @@ type CreateNetworkParams struct {
 }
 
 type ContainerStarter interface {
-	CreateProcess(
-		ctx context.Context,
-		params CreateProcessParams,
-	) error
-	CreateNetwork(
-		ctx context.Context,
-		params CreateNetworkParams,
-	) error
-	CreateVersionConfiguration(
-		ctx context.Context,
-		version domain.Version,
-	) (string, error)
+	CreateProcess(ctx context.Context, params CreateProcessParams) error
+	CreateNetwork(ctx context.Context, params CreateNetworkParams) error
+	CreateVersionConfiguration(ctx context.Context, version domain.Version) (string, error)
 }
 
 type ContainerStopper interface {
