@@ -9,8 +9,8 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/version"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/version"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
@@ -61,12 +61,12 @@ func initApp(
 ) {
 	productRepo := mongodb.NewProductRepoMongoDB(cfg, logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
-	versionMongoRepo := mongodb.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
-	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
+	versionMongoRepo := version.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
+	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, logger, mongodbClient)
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
 
-	versionService, err := service.NewK8sVersionClient(cfg, logger)
+	k8sService, err := service.NewK8sVersionClient(cfg, logger)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,8 +94,6 @@ func initApp(
 		log.Fatal(err)
 	}
 
-	idGenerator := version.NewIDGenerator()
-
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
 	ps := usecase.ProductInteractorOpts{
@@ -105,7 +103,7 @@ func initApp(
 		MeasurementRepo: measurementRepo,
 		VersionRepo:     versionMongoRepo,
 		MetricRepo:      metricRepo,
-		NodeLogRepo:     nodeLogRepo,
+		ProcessLogRepo:  processLogRepo,
 		UserActivity:    userActivityInteractor,
 		AccessControl:   accessControl,
 	}
@@ -124,13 +122,12 @@ func initApp(
 		logger,
 		versionMongoRepo,
 		productRepo,
-		versionService,
+		k8sService,
 		natsManagerService,
 		userActivityInteractor,
 		accessControl,
-		idGenerator,
 		chronografDashboard,
-		nodeLogRepo,
+		processLogRepo,
 	)
 
 	metricsInteractor := usecase.NewMetricsInteractor(

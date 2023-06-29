@@ -21,17 +21,17 @@ func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *V
 	}
 }
 
-func (w *WorkflowStreamConfig) GetNodeStreamConfig(node string) (*NodeStreamConfig, error) {
-	return w.GetNodeConfig(node)
+func (w *WorkflowStreamConfig) GetProcessStreamConfig(process string) (*ProcessStreamConfig, error) {
+	return w.GetProcessConfig(process)
 }
 
-func (v *VersionConfig) GetNodeObjectStoreConfig(workflow, node string) *string {
+func (v *VersionConfig) GetProcessObjectStoreConfig(workflow, process string) *string {
 	w, ok := v.ObjectStoresConfig.Workflows[workflow]
 	if !ok {
 		return nil
 	}
 
-	n, ok := w[node]
+	n, ok := w[process]
 	if !ok {
 		return nil
 	}

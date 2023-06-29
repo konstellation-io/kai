@@ -2,7 +2,7 @@ package entity
 
 import "fmt"
 
-const entrypointNodeName = "entrypoint"
+const entrypointProcessName = "entrypoint"
 
 type VersionStreamsConfig struct {
 	KeyValueStore string
@@ -11,23 +11,23 @@ type VersionStreamsConfig struct {
 
 type WorkflowStreamConfig struct {
 	Stream            string
-	Nodes             map[string]*NodeStreamConfig
+	Processes         map[string]*ProcessStreamConfig
 	EntrypointSubject string
 	KeyValueStore     string
 }
 
-func (w *WorkflowStreamConfig) GetNodeConfig(nodeName string) (*NodeStreamConfig, error) {
-	nodeConfig, ok := w.Nodes[nodeName]
+func (w *WorkflowStreamConfig) GetProcessConfig(processName string) (*ProcessStreamConfig, error) {
+	processConfig, ok := w.Processes[processName]
 	if !ok {
 		//nolint:goerr113 // The error needs to be dynamic
-		return nil, fmt.Errorf("error obtaining stream config for node %q", nodeName)
+		return nil, fmt.Errorf("error obtaining stream config for process %q", processName)
 	}
 
-	return nodeConfig, nil
+	return processConfig, nil
 }
 
 func (w *WorkflowStreamConfig) GetEntrypointSubject() (string, error) {
-	entrypointConfig, err := w.GetNodeConfig(entrypointNodeName)
+	entrypointConfig, err := w.GetProcessConfig(entrypointProcessName)
 	if err != nil {
 		return "", err
 	}
@@ -35,7 +35,7 @@ func (w *WorkflowStreamConfig) GetEntrypointSubject() (string, error) {
 	return entrypointConfig.Subject, nil
 }
 
-type NodeStreamConfig struct {
+type ProcessStreamConfig struct {
 	Subject       string
 	ObjectStore   *string
 	KeyValueStore string
@@ -43,6 +43,6 @@ type NodeStreamConfig struct {
 }
 
 type StreamInfo struct {
-	Stream        string
-	NodesSubjects map[string]string
+	Stream           string
+	ProcesssSubjects map[string]string
 }

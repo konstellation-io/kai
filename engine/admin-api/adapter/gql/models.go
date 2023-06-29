@@ -7,11 +7,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-type ConfigurationVariablesInput struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
 type CreateProductInput struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
@@ -24,8 +19,8 @@ type CreateVersionInput struct {
 }
 
 type LogPage struct {
-	Cursor *string           `json:"cursor,omitempty"`
-	Items  []*entity.NodeLog `json:"items"`
+	Cursor *string              `json:"cursor,omitempty"`
+	Items  []*entity.ProcessLog `json:"items"`
 }
 
 type PublishVersionInput struct {
@@ -38,16 +33,6 @@ type RevokeUserProductGrantsInput struct {
 	TargetID string  `json:"targetID"`
 	Product  string  `json:"product"`
 	Comment  *string `json:"comment,omitempty"`
-}
-
-type Settings struct {
-	AuthAllowedDomains    []string `json:"authAllowedDomains"`
-	SessionLifetimeInDays int      `json:"sessionLifetimeInDays"`
-}
-
-type SettingsInput struct {
-	AuthAllowedDomains    []string `json:"authAllowedDomains,omitempty"`
-	SessionLifetimeInDays *int     `json:"sessionLifetimeInDays,omitempty"`
 }
 
 type StartVersionInput struct {
@@ -66,12 +51,6 @@ type UnpublishVersionInput struct {
 	VersionName string `json:"versionName"`
 	Comment     string `json:"comment"`
 	ProductID   string `json:"productID"`
-}
-
-type UpdateConfigurationInput struct {
-	VersionName            string                         `json:"versionName"`
-	ProductID              string                         `json:"productID"`
-	ConfigurationVariables []*ConfigurationVariablesInput `json:"configurationVariables"`
 }
 
 type UpdateUserProductGrantsInput struct {

@@ -109,19 +109,19 @@ func (mr *MockVersionRepoMockRecorder) GetByName(ctx, productID, name interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByName", reflect.TypeOf((*MockVersionRepo)(nil).GetByName), ctx, productID, name)
 }
 
-// GetByProduct mocks base method.
-func (m *MockVersionRepo) GetByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
+// ListVersionsByProduct mocks base method.
+func (m *MockVersionRepo) ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByProduct", ctx, productID)
+	ret := m.ctrl.Call(m, "ListVersionsByProduct", ctx, productID)
 	ret0, _ := ret[0].([]*entity.Version)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetByProduct indicates an expected call of GetByProduct.
-func (mr *MockVersionRepoMockRecorder) GetByProduct(ctx, productID interface{}) *gomock.Call {
+// ListVersionsByProduct indicates an expected call of ListVersionsByProduct.
+func (mr *MockVersionRepoMockRecorder) ListVersionsByProduct(ctx, productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByProduct", reflect.TypeOf((*MockVersionRepo)(nil).GetByProduct), ctx, productID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVersionsByProduct", reflect.TypeOf((*MockVersionRepo)(nil).ListVersionsByProduct), ctx, productID)
 }
 
 // SetErrors mocks base method.
@@ -167,16 +167,16 @@ func (mr *MockVersionRepoMockRecorder) Update(productID, version interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockVersionRepo)(nil).Update), productID, version)
 }
 
-// UploadKRTFile mocks base method.
-func (m *MockVersionRepo) UploadKRTFile(productID string, version *entity.Version, file string) error {
+// UploadKRTYamlFile mocks base method.
+func (m *MockVersionRepo) UploadKRTYamlFile(productID string, version *entity.Version, file string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadKRTFile", productID, version, file)
+	ret := m.ctrl.Call(m, "UploadKRTYamlFile", productID, version, file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UploadKRTFile indicates an expected call of UploadKRTFile.
-func (mr *MockVersionRepoMockRecorder) UploadKRTFile(productID, version, file interface{}) *gomock.Call {
+// UploadKRTYamlFile indicates an expected call of UploadKRTYamlFile.
+func (mr *MockVersionRepoMockRecorder) UploadKRTYamlFile(productID, version, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadKRTFile", reflect.TypeOf((*MockVersionRepo)(nil).UploadKRTFile), productID, version, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadKRTYamlFile", reflect.TypeOf((*MockVersionRepo)(nil).UploadKRTYamlFile), productID, version, file)
 }

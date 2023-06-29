@@ -39,13 +39,6 @@ models:
         resolver: true
       publicationAuthor:
         resolver: true
-      date:
-        resolver: true
-  VersionNodeStatus:
-    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.VersionNodeStatus
-    fields:
-      date:
-        resolver: true
   UserActivity:
     model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.UserActivity
     fields:

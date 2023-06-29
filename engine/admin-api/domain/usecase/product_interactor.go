@@ -26,7 +26,7 @@ type ProductInteractor struct {
 	measurementRepo repository.MeasurementRepo
 	versionRepo     repository.VersionRepo
 	metricRepo      repository.MetricRepo
-	nodeLogRepo     repository.NodeLogRepository
+	processLogRepo  repository.ProcessLogRepository
 	userActivity    UserActivityInteracter
 	accessControl   auth.AccessControl
 }
@@ -38,7 +38,7 @@ type ProductInteractorOpts struct {
 	MeasurementRepo repository.MeasurementRepo
 	VersionRepo     repository.VersionRepo
 	MetricRepo      repository.MetricRepo
-	NodeLogRepo     repository.NodeLogRepository
+	ProcessLogRepo  repository.ProcessLogRepository
 	UserActivity    UserActivityInteracter
 	AccessControl   auth.AccessControl
 }
@@ -52,7 +52,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.MeasurementRepo,
 		ps.VersionRepo,
 		ps.MetricRepo,
-		ps.NodeLogRepo,
+		ps.ProcessLogRepo,
 		ps.UserActivity,
 		ps.AccessControl,
 	}
@@ -132,7 +132,7 @@ func (i *ProductInteractor) createDatabaseIndexes(ctx context.Context, productID
 		return err
 	}
 
-	err = i.nodeLogRepo.CreateIndexes(ctx, productID)
+	err = i.processLogRepo.CreateIndexes(ctx, productID)
 	if err != nil {
 		return err
 	}

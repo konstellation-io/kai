@@ -32,17 +32,16 @@ func newVersionDashboardsSuite(t *testing.T) *versionDashboardsSuite {
 	dashboardService := mocks.NewMockDashboardService(ctrl)
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
 	runtimeRepo := mocks.NewMockProductRepo(ctrl)
-	versionService := mocks.NewMockVersionService(ctrl)
+	k8sService := mocks.NewMockK8sService(ctrl)
 	natsManagerService := mocks.NewMockNatsManagerService(ctrl)
 	userActivityInteractor := mocks.NewMockUserActivityInteracter(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
-	idGenerator := mocks.NewMockIDGenerator(ctrl)
-	nodeLogRepo := mocks.NewMockNodeLogRepository(ctrl)
+	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 
 	mocks.AddLoggerExpects(logger)
 
-	versionInteractor := NewVersionInteractor(cfg, logger, versionRepo, runtimeRepo, versionService,
-		natsManagerService, userActivityInteractor, accessControl, idGenerator, dashboardService, nodeLogRepo)
+	versionInteractor := NewVersionInteractor(cfg, logger, versionRepo, runtimeRepo, k8sService,
+		natsManagerService, userActivityInteractor, accessControl, dashboardService, processLogRepo)
 
 	return &versionDashboardsSuite{ctrl: ctrl,
 		versionInteractor: versionInteractor,
@@ -59,7 +58,7 @@ func TestStoreDashboard(t *testing.T) {
 
 	version := "test"
 	runtimeID := "test-runtime-id"
-	dashboardsFolder := "../../test_assets/dashboards"
+	dashboardsFolder := "../../testdata/dashboards"
 	dashboardPath := fmt.Sprintf("%s/models.json", dashboardsFolder)
 	s.mocks.dashboardService.EXPECT().Create(context.Background(), runtimeID, version, dashboardPath).Return(nil)
 
@@ -73,9 +72,9 @@ func TestStoreDashboardWrongFolderPath(t *testing.T) {
 
 	version := "test"
 	runtimeID := "test-runtime-id"
-	dashboardsFolder := "../../test_assets/dashboard"
+	dashboardsFolder := "../../testdata/dashboard"
 
 	err := s.versionInteractor.storeDashboards(context.Background(), dashboardsFolder, runtimeID, version)
 	assert.NotNil(t, err)
-	assert.Contains(t, err[0].Error(), "error listing dashboards files: open ../../test_assets/dashboard: no such file or directory")
+	assert.Contains(t, err[0].Error(), "error listing dashboards files: open ../../testdata/dashboard: no such file or directory")
 }
