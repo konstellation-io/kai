@@ -70,7 +70,7 @@ func (i *VersionInteractor) GetByName(ctx context.Context, user *entity.User, pr
 	return i.versionRepo.GetByName(ctx, productID, name)
 }
 
-// GetByProduct returns all Versions of the given Product.
+// ListVersionsByProduct returns all Versions of the given Product.
 func (i *VersionInteractor) ListVersionsByProduct(ctx context.Context, user *entity.User, productID string) ([]*entity.Version, error) {
 	versions, err := i.versionRepo.ListVersionsByProduct(ctx, productID)
 	if err != nil {
@@ -441,7 +441,7 @@ func (i *VersionInteractor) Publish(
 		return nil, errors.ErrInvalidVersionStatusBeforePublishing
 	}
 
-	err = i.k8sService.Publish(productID, v)
+	err = i.k8sService.Publish(ctx, productID, v)
 	if err != nil {
 		return nil, err
 	}
@@ -492,7 +492,7 @@ func (i *VersionInteractor) Unpublish(
 		return nil, errors.ErrInvalidVersionStatusBeforeUnpublishing
 	}
 
-	err = i.k8sService.Unpublish(productID, v)
+	err = i.k8sService.Unpublish(ctx, productID, v)
 	if err != nil {
 		return nil, err
 	}

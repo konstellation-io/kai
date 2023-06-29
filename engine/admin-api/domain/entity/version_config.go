@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -21,24 +22,6 @@ func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *V
 	}
 }
 
-func (w *WorkflowStreamConfig) GetProcessStreamConfig(process string) (*ProcessStreamConfig, error) {
-	return w.GetProcessConfig(process)
-}
-
-func (v *VersionConfig) GetProcessObjectStoreConfig(workflow, process string) *string {
-	w, ok := v.ObjectStoresConfig.Workflows[workflow]
-	if !ok {
-		return nil
-	}
-
-	n, ok := w[process]
-	if !ok {
-		return nil
-	}
-
-	return &n
-}
-
 func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStreamConfig, error) {
 	w, ok := v.StreamsConfig.Workflows[workflow]
 	if !ok {
@@ -46,7 +29,7 @@ func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStrea
 		return nil, fmt.Errorf("workflow %q stream config not found", workflow)
 	}
 
-	return w, nil
+	return &w, nil
 }
 
 func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*WorkflowKeyValueStores, error) {
@@ -57,4 +40,14 @@ func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*Workf
 	}
 
 	return w, nil
+}
+
+func (v *VersionConfig) GetWorkflowObjectStoresConfig(workflow string) (*WorkflowObjectStoresConfig, error) {
+	w, ok := v.ObjectStoresConfig.Workflows[workflow]
+	if !ok {
+		//nolint:goerr113 // errors need to be dynamic
+		return nil, errors.New("object store config not found")
+	}
+
+	return &w, nil
 }

@@ -5,11 +5,10 @@ package krt_test
 import (
 	"testing"
 
-	"github.com/konstellation-io/krt/pkg/krt"
-	"github.com/stretchr/testify/require"
-
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	krtapp "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
+	"github.com/konstellation-io/krt/pkg/krt"
+	"github.com/stretchr/testify/require"
 )
 
 func getExpectedVersion() *entity.Version {

@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/k8smanager"
+
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/auth"
@@ -66,7 +68,7 @@ func initApp(
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
 
-	k8sService, err := service.NewK8sVersionClient(cfg, logger)
+	k8sService, err := k8smanager.NewK8sVersionClient(cfg, logger)
 	if err != nil {
 		log.Fatal(err)
 	}
