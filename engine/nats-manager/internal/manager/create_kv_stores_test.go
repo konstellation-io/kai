@@ -8,11 +8,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/manager"
 	"github.com/konstellation-io/kai/engine/nats-manager/mocks"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateKVStore(t *testing.T) {

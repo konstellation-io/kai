@@ -56,7 +56,7 @@ func mapProcessesToDTO(
 			return nil, fmt.Errorf("get node's %q stream config: %w", p.Name, err)
 		}
 
-		keyValueStore, err := kvConfig.GetNodeKeyValueStore(p.Name)
+		keyValueStore, err := kvConfig.GetProcessKeyValueStore(p.Name)
 		if err != nil {
 			return nil, fmt.Errorf("get process' %q key value store config: %w", p.Name, err)
 		}

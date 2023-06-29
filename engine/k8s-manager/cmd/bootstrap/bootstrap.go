@@ -10,6 +10,7 @@ import (
 	internalgrpc "github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/grpc"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/grpc/proto/versionpb"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -21,7 +22,7 @@ func Run() error {
 		return err
 	}
 
-	port := 50051
+	port := viper.GetInt("server.port")
 
 	serverAddress := fmt.Sprintf("0.0.0.0:%d", port)
 

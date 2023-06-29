@@ -50,6 +50,8 @@ func (v *VersionService) Stop(
 	ctx context.Context,
 	req *versionpb.StopRequest,
 ) (*versionpb.Response, error) {
+	v.logger.Info("Stop request received")
+
 	err := v.stopper.StopVersion(ctx, usecase.StopParams{
 		Product: req.Product,
 		Version: req.Version,

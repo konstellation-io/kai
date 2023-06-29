@@ -53,7 +53,7 @@ func (k *K8sVersionClient) Start(
 
 	req := versionpb.StartRequest{
 		ProductId:     productID,
-		VersionId:     version.ID,
+		VersionId:     version.Name,
 		Workflows:     wf,
 		KeyValueStore: versionConfig.KeyValueStoresConfig.ProductKeyValueStore,
 	}
@@ -106,7 +106,7 @@ func (k *K8sVersionClient) Publish(ctx context.Context, productID string, versio
 }
 
 func (k *K8sVersionClient) WatchProcessStatus(ctx context.Context, productID, versionName string) (<-chan *entity.Process, error) {
-	stream, err := k.client.WatchNodeStatus(ctx, &versionpb.NodeStatusRequest{
+	stream, err := k.client.WatchProcessStatus(ctx, &versionpb.NodeStatusRequest{
 		VersionName: versionName,
 		ProductId:   productID,
 	})
@@ -120,30 +120,30 @@ func (k *K8sVersionClient) WatchProcessStatus(ctx context.Context, productID, ve
 		defer close(ch)
 
 		for {
-			k.logger.Debug("[VersionService.WatchNodeStatus] waiting for stream.Recv()...")
+			k.logger.Debug("[VersionService.WatchProcessStatus] waiting for stream.Recv()...")
 
 			msg, err := stream.Recv()
 
 			if errors.Is(stream.Context().Err(), context.Canceled) {
-				k.logger.Debug("[VersionService.WatchNodeStatus] Context canceled.")
+				k.logger.Debug("[VersionService.WatchProcessStatus] Context canceled.")
 				return
 			}
 
 			if errors.Is(err, io.EOF) {
-				k.logger.Debug("[VersionService.WatchNodeStatus] EOF msg received.")
+				k.logger.Debug("[VersionService.WatchProcessStatus] EOF msg received.")
 				return
 			}
 
 			if err != nil {
-				k.logger.Errorf("[VersionService.WatchNodeStatus] Unexpected error: %s", err)
+				k.logger.Errorf("[VersionService.WatchProcessStatus] Unexpected error: %s", err)
 				return
 			}
 
-			k.logger.Debug("[VersionService.WatchNodeStatus] Message received")
+			k.logger.Debug("[VersionService.WatchProcessStatus] Message received")
 
 			status := entity.ProcessStatus(msg.GetStatus())
 			if !status.IsValid() {
-				k.logger.Errorf("[VersionService.WatchNodeStatus] Invalid node status: %s", status)
+				k.logger.Errorf("[VersionService.WatchProcessStatus] Invalid node status: %s", status)
 				continue
 			}
 

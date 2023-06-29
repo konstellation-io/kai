@@ -14,7 +14,7 @@ type WorkflowKeyValueStores struct {
 	ProcessesKeyValueStores map[string]string
 }
 
-func (w *WorkflowKeyValueStores) GetNodeKeyValueStore(process string) (string, error) {
+func (w *WorkflowKeyValueStores) GetProcessKeyValueStore(process string) (string, error) {
 	store, ok := w.ProcessesKeyValueStores[process]
 	if !ok {
 		//nolint:goerr113 // error needs to be dynamic

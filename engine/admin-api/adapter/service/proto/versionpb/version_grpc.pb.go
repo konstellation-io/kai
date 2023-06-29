@@ -26,7 +26,7 @@ type VersionServiceClient interface {
 	Stop(ctx context.Context, in *StopRequest, opts ...grpc.CallOption) (*Response, error)
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*Response, error)
 	Unpublish(ctx context.Context, in *UnpublishRequest, opts ...grpc.CallOption) (*Response, error)
-	WatchNodeStatus(ctx context.Context, in *NodeStatusRequest, opts ...grpc.CallOption) (VersionService_WatchNodeStatusClient, error)
+	WatchProcessStatus(ctx context.Context, in *ProcessStatusRequest, opts ...grpc.CallOption) (VersionService_WatchProcessStatusClient, error)
 }
 
 type versionServiceClient struct {
@@ -73,12 +73,12 @@ func (c *versionServiceClient) Unpublish(ctx context.Context, in *UnpublishReque
 	return out, nil
 }
 
-func (c *versionServiceClient) WatchNodeStatus(ctx context.Context, in *NodeStatusRequest, opts ...grpc.CallOption) (VersionService_WatchNodeStatusClient, error) {
-	stream, err := c.cc.NewStream(ctx, &VersionService_ServiceDesc.Streams[0], "/version.VersionService/WatchNodeStatus", opts...)
+func (c *versionServiceClient) WatchProcessStatus(ctx context.Context, in *ProcessStatusRequest, opts ...grpc.CallOption) (VersionService_WatchProcessStatusClient, error) {
+	stream, err := c.cc.NewStream(ctx, &VersionService_ServiceDesc.Streams[0], "/version.VersionService/WatchProcessStatus", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &versionServiceWatchNodeStatusClient{stream}
+	x := &versionServiceWatchProcessStatusClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -88,17 +88,17 @@ func (c *versionServiceClient) WatchNodeStatus(ctx context.Context, in *NodeStat
 	return x, nil
 }
 
-type VersionService_WatchNodeStatusClient interface {
-	Recv() (*NodeStatusResponse, error)
+type VersionService_WatchProcessStatusClient interface {
+	Recv() (*ProcessStatusResponse, error)
 	grpc.ClientStream
 }
 
-type versionServiceWatchNodeStatusClient struct {
+type versionServiceWatchProcessStatusClient struct {
 	grpc.ClientStream
 }
 
-func (x *versionServiceWatchNodeStatusClient) Recv() (*NodeStatusResponse, error) {
-	m := new(NodeStatusResponse)
+func (x *versionServiceWatchProcessStatusClient) Recv() (*ProcessStatusResponse, error) {
+	m := new(ProcessStatusResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ type VersionServiceServer interface {
 	Stop(context.Context, *StopRequest) (*Response, error)
 	Publish(context.Context, *PublishRequest) (*Response, error)
 	Unpublish(context.Context, *UnpublishRequest) (*Response, error)
-	WatchNodeStatus(*NodeStatusRequest, VersionService_WatchNodeStatusServer) error
+	WatchProcessStatus(*ProcessStatusRequest, VersionService_WatchProcessStatusServer) error
 	mustEmbedUnimplementedVersionServiceServer()
 }
 
@@ -133,8 +133,8 @@ func (UnimplementedVersionServiceServer) Publish(context.Context, *PublishReques
 func (UnimplementedVersionServiceServer) Unpublish(context.Context, *UnpublishRequest) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Unpublish not implemented")
 }
-func (UnimplementedVersionServiceServer) WatchNodeStatus(*NodeStatusRequest, VersionService_WatchNodeStatusServer) error {
-	return status.Errorf(codes.Unimplemented, "method WatchNodeStatus not implemented")
+func (UnimplementedVersionServiceServer) WatchProcessStatus(*ProcessStatusRequest, VersionService_WatchProcessStatusServer) error {
+	return status.Errorf(codes.Unimplemented, "method WatchProcessStatus not implemented")
 }
 func (UnimplementedVersionServiceServer) mustEmbedUnimplementedVersionServiceServer() {}
 
@@ -221,24 +221,24 @@ func _VersionService_Unpublish_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _VersionService_WatchNodeStatus_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(NodeStatusRequest)
+func _VersionService_WatchProcessStatus_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ProcessStatusRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(VersionServiceServer).WatchNodeStatus(m, &versionServiceWatchNodeStatusServer{stream})
+	return srv.(VersionServiceServer).WatchProcessStatus(m, &versionServiceWatchProcessStatusServer{stream})
 }
 
-type VersionService_WatchNodeStatusServer interface {
-	Send(*NodeStatusResponse) error
+type VersionService_WatchProcessStatusServer interface {
+	Send(*ProcessStatusResponse) error
 	grpc.ServerStream
 }
 
-type versionServiceWatchNodeStatusServer struct {
+type versionServiceWatchProcessStatusServer struct {
 	grpc.ServerStream
 }
 
-func (x *versionServiceWatchNodeStatusServer) Send(m *NodeStatusResponse) error {
+func (x *versionServiceWatchProcessStatusServer) Send(m *ProcessStatusResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -268,8 +268,8 @@ var VersionService_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "WatchNodeStatus",
-			Handler:       _VersionService_WatchNodeStatus_Handler,
+			StreamName:    "WatchProcessStatus",
+			Handler:       _VersionService_WatchProcessStatus_Handler,
 			ServerStreams: true,
 		},
 	},

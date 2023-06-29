@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/k8smanager"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -73,7 +74,7 @@ func initApp(
 		log.Fatal(err)
 	}
 
-	natsManagerService, err := service.NewNatsManagerClient(cfg, logger)
+	natsManagerService, err := natsmanager.NewNatsManagerClient(cfg, logger)
 	if err != nil {
 		log.Fatal(err)
 	}

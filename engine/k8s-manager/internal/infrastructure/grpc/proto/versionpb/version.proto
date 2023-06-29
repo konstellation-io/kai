@@ -61,16 +61,16 @@ message UnpublishRequest {
 }
 
 message Response {
-  string message = 2;
+  string message = 1;
 }
 
-message NodeStatusRequest {
+message ProcessStatusRequest {
   string version_name = 1;
   string product_id = 2;
 }
 
-message NodeStatusResponse {
-  string node_id = 1;
+message ProcessStatusResponse {
+  string process_id = 1;
   string status = 2;
   string name = 3;
 }
@@ -80,5 +80,5 @@ service VersionService {
   rpc Stop (StopRequest) returns (Response);
   rpc Publish (PublishRequest) returns (Response);
   rpc Unpublish (UnpublishRequest) returns (Response);
-  rpc WatchNodeStatus (NodeStatusRequest) returns (stream NodeStatusResponse);
+  rpc WatchProcessStatus (ProcessStatusRequest) returns (stream ProcessStatusResponse);
 };

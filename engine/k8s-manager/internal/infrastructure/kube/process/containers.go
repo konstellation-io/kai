@@ -10,6 +10,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
+const _configFilesVolume = "version-conf-files"
+
 func getAppContainer(configMapName string, process *domain.Process) corev1.Container {
 	container := corev1.Container{
 		Name:            process.ID,
@@ -32,7 +34,7 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 		},
 		VolumeMounts: []corev1.VolumeMount{
 			{
-				Name:      "version-conf-files",
+				Name:      _configFilesVolume,
 				ReadOnly:  true,
 				MountPath: viper.GetString("configPath"),
 			},
@@ -116,13 +118,13 @@ func getFluentBitContainer(spec *processSpec) corev1.Container {
 		Env: envVars,
 		VolumeMounts: []corev1.VolumeMount{
 			{
-				Name:      "version-conf-files",
+				Name:      _configFilesVolume,
 				ReadOnly:  true,
 				MountPath: "/fluent-bit/etc/fluent-bit.conf",
 				SubPath:   "fluent-bit.conf",
 			},
 			{
-				Name:      "version-conf-files",
+				Name:      _configFilesVolume,
 				ReadOnly:  true,
 				MountPath: "/fluent-bit/etc/parsers.conf",
 				SubPath:   "parsers.conf",

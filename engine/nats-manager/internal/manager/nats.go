@@ -170,14 +170,14 @@ func (m *NatsManager) CreateKeyValueStores(
 	m.logger.Info("Creating key-value stores")
 
 	// create key-value store for project
-	projectKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, "", "", entity.ScopeProject)
+	productKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, "", "", entity.ScopeProject)
 	if err != nil {
 		return nil, err
 	}
 
-	err = m.client.CreateKeyValueStore(projectKeyValueStore)
+	err = m.client.CreateKeyValueStore(productKeyValueStore)
 	if err != nil {
-		return nil, fmt.Errorf("create key-value store %q: %w", projectKeyValueStore, err)
+		return nil, fmt.Errorf("create product key-value store %q: %w", productKeyValueStore, err)
 	}
 
 	workflowsKeyValueStores := map[string]*entity.WorkflowKeyValueStores{}
@@ -191,7 +191,7 @@ func (m *NatsManager) CreateKeyValueStores(
 
 		err = m.client.CreateKeyValueStore(workflowKeyValueStore)
 		if err != nil {
-			return nil, fmt.Errorf("create key-value store %q: %w", workflowKeyValueStore, err)
+			return nil, fmt.Errorf("create workflow key-value store %q: %w", workflowKeyValueStore, err)
 		}
 
 		processesKeyValueStores := map[string]string{}
@@ -204,7 +204,7 @@ func (m *NatsManager) CreateKeyValueStores(
 
 			err = m.client.CreateKeyValueStore(processKeyValueStore)
 			if err != nil {
-				return nil, fmt.Errorf("create key-value store %q: %w", processKeyValueStore, err)
+				return nil, fmt.Errorf("create process key-value store %q: %w", processKeyValueStore, err)
 			}
 
 			processesKeyValueStores[process.ID] = processKeyValueStore
@@ -217,7 +217,7 @@ func (m *NatsManager) CreateKeyValueStores(
 	}
 
 	return &entity.VersionKeyValueStores{
-		ProjectStore:    projectKeyValueStore,
+		ProjectStore:    productKeyValueStore,
 		WorkflowsStores: workflowsKeyValueStores,
 	}, nil
 }
