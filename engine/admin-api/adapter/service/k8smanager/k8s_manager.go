@@ -106,7 +106,7 @@ func (k *K8sVersionClient) Publish(ctx context.Context, productID string, versio
 }
 
 func (k *K8sVersionClient) WatchProcessStatus(ctx context.Context, productID, versionName string) (<-chan *entity.Process, error) {
-	stream, err := k.client.WatchProcessStatus(ctx, &versionpb.NodeStatusRequest{
+	stream, err := k.client.WatchProcessStatus(ctx, &versionpb.ProcessStatusRequest{
 		VersionName: versionName,
 		ProductId:   productID,
 	})
@@ -148,8 +148,8 @@ func (k *K8sVersionClient) WatchProcessStatus(ctx context.Context, productID, ve
 			}
 
 			ch <- &entity.Process{
-				ID:     msg.GetNodeId(),
-				Name:   msg.GetName(),
+				ID:     msg.ProcessId,
+				Name:   msg.Name,
 				Status: status,
 			}
 		}
