@@ -43,7 +43,7 @@ func (n *NatsService) CreateStreams(
 
 	workflows := n.dtoToWorkflows(req.Workflows)
 
-	streamConfig, err := n.manager.CreateStreams(req.RuntimeId, req.VersionName, workflows)
+	streamConfig, err := n.manager.CreateStreams(req.ProductId, req.VersionName, workflows)
 	if err != nil {
 		n.logger.Errorf("Error creating streams: %s", err)
 		return nil, err
@@ -61,13 +61,13 @@ func (n *NatsService) CreateObjectStores(
 ) (*natspb.CreateObjectStoresResponse, error) {
 	n.logger.Info("CreateObjectStores request received")
 
-	objectStores, err := n.manager.CreateObjectStores(req.RuntimeId, req.VersionName, n.dtoToWorkflows(req.Workflows))
+	objectStores, err := n.manager.CreateObjectStores(req.ProductId, req.VersionName, n.dtoToWorkflows(req.Workflows))
 	if err != nil {
 		n.logger.Errorf("Error creating object store: %s", err)
 		return nil, err
 	}
 	return &natspb.CreateObjectStoresResponse{
-		Workflows: n.workflowsObjStoreToDto(objectStores),
+		Workflows: n.mapWorkflowsObjStoreToDTO(objectStores),
 	}, nil
 }
 
@@ -78,14 +78,14 @@ func (n *NatsService) DeleteStreams(
 ) (*natspb.DeleteResponse, error) {
 	n.logger.Info("Delete streams request received")
 
-	err := n.manager.DeleteStreams(req.RuntimeId, req.VersionName)
+	err := n.manager.DeleteStreams(req.ProductId, req.VersionName)
 	if err != nil {
 		n.logger.Errorf("Error deleting streams: %s", err)
 		return nil, err
 	}
 
 	return &natspb.DeleteResponse{
-		Message: fmt.Sprintf("Streams and subjects for version %q on runtime %s deleted", req.VersionName, req.RuntimeId),
+		Message: fmt.Sprintf("Streams and subjects for version %q on product %s deleted", req.VersionName, req.ProductId),
 	}, nil
 }
 
@@ -96,14 +96,14 @@ func (n *NatsService) DeleteObjectStores(
 ) (*natspb.DeleteResponse, error) {
 	n.logger.Info("Delete object stores request received")
 
-	err := n.manager.DeleteObjectStores(req.RuntimeId, req.VersionName)
+	err := n.manager.DeleteObjectStores(req.ProductId, req.VersionName)
 	if err != nil {
 		n.logger.Errorf("Error deleting object stores: %s", err)
 		return nil, err
 	}
 
 	return &natspb.DeleteResponse{
-		Message: fmt.Sprintf("Object stores for version %q on runtime %s deleted", req.VersionName, req.RuntimeId),
+		Message: fmt.Sprintf("Object stores for version %q on product %s deleted", req.VersionName, req.ProductId),
 	}, nil
 }
 
@@ -113,101 +113,99 @@ func (n *NatsService) CreateKeyValueStores(
 ) (*natspb.CreateKeyValueStoreResponse, error) {
 	n.logger.Info("CreateKeyValueStores request received")
 
-	keyValueStores, err := n.manager.CreateKeyValueStores(req.RuntimeId, req.VersionName, n.dtoToWorkflows(req.Workflows))
+	keyValueStores, err := n.manager.CreateKeyValueStores(req.ProductId, req.VersionName, n.dtoToWorkflows(req.Workflows))
 	if err != nil {
 		n.logger.Errorf("Error creating object store: %s", err)
 		return nil, err
 	}
-	return n.keyValueStoresToDto(keyValueStores), nil
+	return n.mapKeyValueStoresToDTO(keyValueStores), nil
 }
 
-func (n *NatsService) dtoToWorkflows(dtoWorkflows []*natspb.Workflow) []*entity.Workflow {
-	workflows := make([]*entity.Workflow, 0, len(dtoWorkflows))
+func (n *NatsService) dtoToWorkflows(dtoWorkflows []*natspb.Workflow) []entity.Workflow {
+	workflows := make([]entity.Workflow, 0, len(dtoWorkflows))
 
 	for _, dtoWorkflow := range dtoWorkflows {
-		workflows = append(workflows, &entity.Workflow{
-			Name:       dtoWorkflow.Name,
-			Entrypoint: dtoWorkflow.Entrypoint,
-			Nodes:      n.dtoToNodes(dtoWorkflow.Nodes),
+		workflows = append(workflows, entity.Workflow{
+			ID:        dtoWorkflow.Id,
+			Processes: n.dtoToProcesses(dtoWorkflow.Processes),
 		})
 	}
 
 	return workflows
 }
 
-func (n *NatsService) dtoToNodes(dtoNodes []*natspb.Node) []*entity.Node {
-	nodes := make([]*entity.Node, 0, len(dtoNodes))
+func (n *NatsService) dtoToProcesses(processesDTO []*natspb.Process) []entity.Process {
+	processes := make([]entity.Process, 0, len(processesDTO))
 
-	for _, dtoNode := range dtoNodes {
-		node := &entity.Node{
-			Name:          dtoNode.Name,
-			Subscriptions: dtoNode.Subscriptions,
+	for _, processDTO := range processesDTO {
+		process := entity.Process{
+			ID:            processDTO.Id,
+			Subscriptions: processDTO.Subscriptions,
 		}
 
-		if dtoNode.ObjectStore != nil {
-			node.ObjectStore = &entity.ObjectStore{
-				Name:  dtoNode.ObjectStore.Name,
-				Scope: entity.ObjectStoreScope(dtoNode.ObjectStore.Scope),
+		if processDTO.ObjectStore != nil {
+			process.ObjectStore = &entity.ObjectStore{
+				Name:  processDTO.ObjectStore.Name,
+				Scope: entity.ObjectStoreScope(processDTO.ObjectStore.Scope),
 			}
 		}
-		nodes = append(nodes, node)
+		processes = append(processes, process)
 	}
 
-	return nodes
+	return processes
 }
 
 func (n *NatsService) workflowsStreamConfigToDto(
 	workflows entity.WorkflowsStreamsConfig,
-) map[string]*natspb.CreateStreamsResponse_WorkflowStreamConfig {
-	workflowsStreamCfg := map[string]*natspb.CreateStreamsResponse_WorkflowStreamConfig{}
+) map[string]*natspb.WorkflowStreamConfig {
+	workflowsStreamCfg := make(map[string]*natspb.WorkflowStreamConfig, len(workflows))
 
 	for workflow, cfg := range workflows {
-		workflowsStreamCfg[workflow] = &natspb.CreateStreamsResponse_WorkflowStreamConfig{
-			Stream:            cfg.Stream,
-			Nodes:             n.nodesStreamConfigToDto(cfg.Nodes),
-			EntrypointSubject: cfg.EntrypointSubject,
+		workflowsStreamCfg[workflow] = &natspb.WorkflowStreamConfig{
+			Stream:    cfg.Stream,
+			Processes: n.mapProcessStreamConfigToDTO(cfg.Processes),
 		}
 	}
 
 	return workflowsStreamCfg
 }
 
-func (n *NatsService) nodesStreamConfigToDto(
-	nodes entity.NodesStreamConfig,
-) map[string]*natspb.CreateStreamsResponse_NodeStreamConfig {
-	nodesStreamCfg := map[string]*natspb.CreateStreamsResponse_NodeStreamConfig{}
+func (n *NatsService) mapProcessStreamConfigToDTO(
+	processes entity.ProcessesStreamConfig,
+) map[string]*natspb.ProcessStreamConfig {
+	processesStreamCfg := make(map[string]*natspb.ProcessStreamConfig, len(processes))
 
-	for node, cfg := range nodes {
-		nodesStreamCfg[node] = &natspb.CreateStreamsResponse_NodeStreamConfig{
+	for process, cfg := range processes {
+		processesStreamCfg[process] = &natspb.ProcessStreamConfig{
 			Subject:       cfg.Subject,
 			Subscriptions: cfg.Subscriptions,
 		}
 	}
 
-	return nodesStreamCfg
+	return processesStreamCfg
 }
 
-func (n *NatsService) workflowsObjStoreToDto(
+func (n *NatsService) mapWorkflowsObjStoreToDTO(
 	workflowsObjStores entity.WorkflowsObjectStoresConfig,
-) map[string]*natspb.CreateObjectStoresResponse_WorkflowObjectStoreConfig {
-	workflowsConfig := map[string]*natspb.CreateObjectStoresResponse_WorkflowObjectStoreConfig{}
+) map[string]*natspb.WorkflowObjectStoreConfig {
+	workflowsConfig := map[string]*natspb.WorkflowObjectStoreConfig{}
 
 	for workflow, objectStoresConfig := range workflowsObjStores {
-		workflowsConfig[workflow] = &natspb.CreateObjectStoresResponse_WorkflowObjectStoreConfig{
-			Nodes: objectStoresConfig.Nodes,
+		workflowsConfig[workflow] = &natspb.WorkflowObjectStoreConfig{
+			Processes: objectStoresConfig.Processes,
 		}
 	}
 
 	return workflowsConfig
 }
 
-func (n *NatsService) keyValueStoresToDto(stores *entity.VersionKeyValueStores) *natspb.CreateKeyValueStoreResponse {
-	workflowsStores := map[string]*natspb.CreateKeyValueStoreResponse_WorkflowKeyValueStoreConfig{}
+func (n *NatsService) mapKeyValueStoresToDTO(stores *entity.VersionKeyValueStores) *natspb.CreateKeyValueStoreResponse {
+	workflowsStores := make(map[string]*natspb.WorkflowKeyValueStoreConfig, len(stores.WorkflowsStores))
 
 	for workflow, storesConfig := range stores.WorkflowsStores {
-		workflowsStores[workflow] = &natspb.CreateKeyValueStoreResponse_WorkflowKeyValueStoreConfig{
+		workflowsStores[workflow] = &natspb.WorkflowKeyValueStoreConfig{
 			KeyValueStore: storesConfig.WorkflowStore,
-			Nodes:         storesConfig.Nodes,
+			Processes:     storesConfig.Processes,
 		}
 	}
 

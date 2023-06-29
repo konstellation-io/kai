@@ -3,7 +3,7 @@ package entity
 import (
 	"regexp"
 
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/errors"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 )
 
 type ObjectStoreScope int
@@ -11,7 +11,7 @@ type ObjectStoreScope int
 const (
 	ScopeWorkflow = iota
 	ScopeProject
-	ScopeNode
+	ScopeProcess
 )
 
 type ObjectStore struct {
@@ -23,13 +23,13 @@ func (o *ObjectStore) Validate() error {
 	isValidName, _ := regexp.MatchString("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$", o.Name)
 
 	if !isValidName {
-		return errors.ErrInvalidObjectStoreName
+		return internal.ErrInvalidObjectStoreName
 	}
 
 	switch o.Scope {
 	case ScopeProject, ScopeWorkflow:
 		return nil
 	default:
-		return errors.ErrInvalidObjectStoreScope
+		return internal.ErrInvalidObjectStoreScope
 	}
 }

@@ -3,27 +3,22 @@ package entity
 import (
 	"fmt"
 
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/errors"
+	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 )
 
 type Workflow struct {
-	Name       string
-	Entrypoint string
-	Nodes      []*Node
+	ID        string
+	Processes []Process
 }
 
-func (w *Workflow) Validate() error {
-	if w.Name == "" {
-		return errors.ErrEmptyWorkflow
+func (w Workflow) Validate() error {
+	if w.ID == "" {
+		return internal.ErrEmptyWorkflow
 	}
 
-	if w.Entrypoint == "" {
-		return errors.ErrEmptyEntrypointService
-	}
-
-	for _, node := range w.Nodes {
-		if err := node.Validate(); err != nil {
-			return fmt.Errorf("invalid node: %w", err)
+	for _, process := range w.Processes {
+		if err := process.Validate(); err != nil {
+			return fmt.Errorf("invalid process: %w", err)
 		}
 	}
 

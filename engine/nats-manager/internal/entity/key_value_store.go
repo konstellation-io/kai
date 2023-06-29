@@ -2,7 +2,7 @@ package entity
 
 type WorkflowKeyValueStores struct {
 	WorkflowStore string
-	Nodes         map[string]string
+	Processes     map[string]string
 }
 
 type VersionKeyValueStores struct {

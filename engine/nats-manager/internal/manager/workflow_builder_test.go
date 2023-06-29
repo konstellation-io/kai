@@ -13,47 +13,41 @@ type WorkflowBuilder struct {
 func NewWorkflowBuilder() *WorkflowBuilder {
 	return &WorkflowBuilder{
 		&entity.Workflow{
-			Name:       "test-workflow",
-			Entrypoint: "defaultEntrypoint",
-			Nodes: []*entity.Node{
+			ID: "test-workflow",
+			Processes: []entity.Process{
 				{
-					Name: "defaultNode",
+					ID: "defaultProcess",
 				},
 			},
 		},
 	}
 }
 
-func (w *WorkflowBuilder) Build() *entity.Workflow {
-	return w.workflow
+func (w *WorkflowBuilder) Build() entity.Workflow {
+	return *w.workflow
 }
 
-func (w *WorkflowBuilder) WithName(name string) *WorkflowBuilder {
-	w.workflow.Name = name
+func (w *WorkflowBuilder) WithID(name string) *WorkflowBuilder {
+	w.workflow.ID = name
 	return w
 }
 
-func (w *WorkflowBuilder) WithEntrypoint(entrypoint string) *WorkflowBuilder {
-	w.workflow.Entrypoint = entrypoint
+func (w *WorkflowBuilder) WithProcessName(name string) *WorkflowBuilder {
+	w.workflow.Processes[0].ID = name
 	return w
 }
 
-func (w *WorkflowBuilder) WithNodeName(name string) *WorkflowBuilder {
-	w.workflow.Nodes[0].Name = name
+func (w *WorkflowBuilder) WithProcessSubscriptions(subscriptions []string) *WorkflowBuilder {
+	w.workflow.Processes[0].Subscriptions = subscriptions
 	return w
 }
 
-func (w *WorkflowBuilder) WithNodeSubscriptions(subscriptions []string) *WorkflowBuilder {
-	w.workflow.Nodes[0].Subscriptions = subscriptions
+func (w *WorkflowBuilder) WithProcessObjectStore(objectStore *entity.ObjectStore) *WorkflowBuilder {
+	w.workflow.Processes[0].ObjectStore = objectStore
 	return w
 }
 
-func (w *WorkflowBuilder) WithNodeObjectStore(objectStore *entity.ObjectStore) *WorkflowBuilder {
-	w.workflow.Nodes[0].ObjectStore = objectStore
-	return w
-}
-
-func (w *WorkflowBuilder) WithNodes(nodes []*entity.Node) *WorkflowBuilder {
-	w.workflow.Nodes = nodes
+func (w *WorkflowBuilder) WithProcesses(processes []entity.Process) *WorkflowBuilder {
+	w.workflow.Processes = processes
 	return w
 }
