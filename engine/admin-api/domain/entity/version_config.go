@@ -30,7 +30,6 @@ func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *V
 func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStreamConfig, error) {
 	w, ok := v.StreamsConfig.Workflows[workflow]
 	if !ok {
-		//nolint:goerr113 // The error needs to be dynamic
 		return nil, ErrWorkflowStreamNotFound
 	}
 
@@ -40,7 +39,6 @@ func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStrea
 func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*WorkflowKeyValueStores, error) {
 	w, ok := v.KeyValueStoresConfig.Workflows[workflow]
 	if !ok {
-		//nolint:goerr113 // errors need to be dynamic
 		return nil, ErrWorkflowKVStoreNotFound
 	}
 

@@ -73,10 +73,11 @@ func initApp(
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
 
 	ccK8sManager, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	k8sManagerClient := versionpb.NewVersionServiceClient(ccK8sManager)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	k8sManagerClient := versionpb.NewVersionServiceClient(ccK8sManager)
 
 	k8sService, err := k8smanager.NewK8sVersionClient(cfg, logger, k8sManagerClient)
 	if err != nil {
