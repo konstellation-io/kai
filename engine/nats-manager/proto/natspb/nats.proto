@@ -14,13 +14,13 @@ message ObjectStore {
 }
 
 message Process {
-  string id = 1;
+  string name = 1;
   repeated string subscriptions = 2;
   optional ObjectStore object_store = 3;
 }
 
 message Workflow {
-  string id = 1;
+  string name = 1;
   repeated Process processes = 2;
 }
 

@@ -15,7 +15,7 @@ func (n *NatsManagerClient) mapWorkflowsToDTO(workflows []entity.Workflow) ([]*n
 
 		for _, process := range w.Processes {
 			processToAppend := natspb.Process{
-				Id:            process.Name,
+				Name:          process.Name,
 				Subscriptions: process.Subscriptions,
 			}
 
@@ -35,7 +35,7 @@ func (n *NatsManagerClient) mapWorkflowsToDTO(workflows []entity.Workflow) ([]*n
 		}
 
 		workflowsDTO = append(workflowsDTO, &natspb.Workflow{
-			Id:        w.Name,
+			Name:      w.Name,
 			Processes: processes,
 		})
 	}
@@ -99,14 +99,14 @@ func (n *NatsManagerClient) mapDTOToVersionKeyValueStoreConfig(
 
 	for workflow, kvStoreCfg := range workflows {
 		workflowsKVConfig[workflow] = &entity.WorkflowKeyValueStores{
-			WorkflowKeyValueStore:   kvStoreCfg.KeyValueStore,
-			ProcessesKeyValueStores: kvStoreCfg.Processes,
+			KeyValueStore: kvStoreCfg.KeyValueStore,
+			Processes:     kvStoreCfg.Processes,
 		}
 	}
 
 	return &entity.KeyValueStoresConfig{
-		ProductKeyValueStore:    projectKeyValueStore,
-		WorkflowsKeyValueStores: workflowsKVConfig,
+		KeyValueStore: projectKeyValueStore,
+		Workflows:     workflowsKVConfig,
 	}
 }
 

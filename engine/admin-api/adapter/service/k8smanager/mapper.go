@@ -32,10 +32,10 @@ func mapWorkflowsToDTO(workflows []entity.Workflow, versionConfig *entity.Versio
 		}
 
 		workflowsDTO = append(workflowsDTO, &versionpb.Workflow{
-			Id:            w.ID,
+			Name:          w.Name,
 			Processes:     processesDTO,
 			Stream:        wStreamCfg.Stream,
-			KeyValueStore: wKeyValueCfg.WorkflowKeyValueStore,
+			KeyValueStore: wKeyValueCfg.KeyValueStore,
 		})
 	}
 
@@ -51,7 +51,7 @@ func mapProcessesToDTO(
 	processesDTO := make([]*versionpb.Process, 0, len(processes))
 
 	for _, p := range processes {
-		nodeStreamCfg, err := streamConfig.GetProcessConfig(p.Name)
+		processStreamCfg, err := streamConfig.GetProcessConfig(p.Name)
 		if err != nil {
 			return nil, fmt.Errorf("get node's %q stream config: %w", p.Name, err)
 		}
@@ -62,11 +62,11 @@ func mapProcessesToDTO(
 		}
 
 		process := &versionpb.Process{
-			Id:            p.ID,
+			Name:          p.Name,
 			Image:         p.Image,
 			Gpu:           p.GPU,
-			Subscriptions: nodeStreamCfg.Subscriptions,
-			Subject:       nodeStreamCfg.Subject,
+			Subscriptions: processStreamCfg.Subscriptions,
+			Subject:       processStreamCfg.Subject,
 			KeyValueStore: keyValueStore,
 			Replicas:      p.Replicas,
 			Config:        mapProcessConfigToDTO(p.Config),

@@ -126,7 +126,7 @@ func (n *NatsService) dtoToWorkflows(dtoWorkflows []*natspb.Workflow) []entity.W
 
 	for _, dtoWorkflow := range dtoWorkflows {
 		workflows = append(workflows, entity.Workflow{
-			ID:        dtoWorkflow.Id,
+			Name:      dtoWorkflow.Name,
 			Processes: n.dtoToProcesses(dtoWorkflow.Processes),
 		})
 	}
@@ -139,7 +139,7 @@ func (n *NatsService) dtoToProcesses(processesDTO []*natspb.Process) []entity.Pr
 
 	for _, processDTO := range processesDTO {
 		process := entity.Process{
-			ID:            processDTO.Id,
+			Name:          processDTO.Name,
 			Subscriptions: processDTO.Subscriptions,
 		}
 

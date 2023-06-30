@@ -13,7 +13,7 @@ import (
 func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, version domain.Version) (string, error) {
 	kc.logger.Info("Creating version config files",
 		"product", version.Product,
-		"version", version.ID,
+		"version", version.Name,
 	)
 
 	processYamlConfigs := make(map[string]string, version.GetAmountOfProcesses())
@@ -26,7 +26,7 @@ func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, vers
 				return "", err
 			}
 
-			processYamlConfigs[kc.getFullProcessIdentifier(version.Product, version.ID, workflow.ID, process.ID)] = string(processYaml)
+			processYamlConfigs[kc.getFullProcessIdentifier(version.Product, version.Name, workflow.Name, process.Name)] = string(processYaml)
 		}
 	}
 
@@ -51,12 +51,12 @@ func (kc KubeConfiguration) getProcessConfig(
 ) ProcessConfig {
 	return ProcessConfig{
 		Metadata: Metadata{
-			ProductID:   version.Product,
-			VersionID:   version.ID,
-			WorkflowID:  workflow.ID,
-			ProcessID:   process.ID,
-			ProcessType: process.Type.ToString(),
-			BasePath:    viper.GetString("krtFiles.path"),
+			ProductID:    version.Product,
+			VersionName:  version.Name,
+			WorkflowName: workflow.Name,
+			ProcessName:  process.Name,
+			ProcessType:  process.Type.ToString(),
+			BasePath:     viper.GetString("krtFiles.path"),
 		},
 		Nats: NatsConfig{
 			URL:           viper.GetString("nats.url"),

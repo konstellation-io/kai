@@ -27,7 +27,7 @@ func (kp *KubeProcess) Create(
 	kp.logger.Info("Starting process",
 		"product", params.Product,
 		"version", params.Version,
-		"process", params.Process.ID,
+		"process", params.Process.Name,
 	)
 
 	deploymentSpec := kp.getDeploymentSpec(params.ConfigName, &processSpec{
@@ -43,7 +43,7 @@ func (kp *KubeProcess) Create(
 func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec) *appsv1.Deployment {
 	labels := kp.getProcessLabels(spec)
 
-	processIdentifier := getFullProcessIdentifier(spec.Product, spec.Version, spec.Workflow, spec.Process.ID)
+	processIdentifier := getFullProcessIdentifier(spec.Product, spec.Version, spec.Workflow, spec.Process.Name)
 
 	var initContainers []corev1.Container
 	if viper.GetBool("krtFilesDownloader.enabled") {
@@ -84,7 +84,7 @@ func (kp *KubeProcess) getProcessLabels(process *processSpec) map[string]string 
 		"product":  process.Product,
 		"version":  process.Version,
 		"workflow": process.Workflow,
-		"process":  process.Process.ID,
+		"process":  process.Process.Name,
 		"type":     process.Process.Type.ToString(),
 	}
 }

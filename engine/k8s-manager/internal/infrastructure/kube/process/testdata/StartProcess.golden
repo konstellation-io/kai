@@ -199,13 +199,13 @@ items:
                         - name: KAI_PRODUCT_ID
                           value: test-product
                           valuefrom: null
-                        - name: KAI_VERSION_ID
+                        - name: KAI_VERSION_NAME
                           value: test-version
                           valuefrom: null
-                        - name: KAI_WORKFLOW_ID
+                        - name: KAI_WORKFLOW_NAME
                           value: test-workflow
                           valuefrom: null
-                        - name: KAI_PROCESS_ID
+                        - name: KAI_PROCESS_NAME
                           value: test-process
                           valuefrom: null
                       resources:

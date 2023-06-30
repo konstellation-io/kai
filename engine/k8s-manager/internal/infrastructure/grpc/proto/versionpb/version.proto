@@ -11,14 +11,14 @@ enum ProcessType {
 }
 
 message Workflow {
-  string id = 1;
+  string name = 1;
   string stream = 2;
   string key_value_store = 3;
   repeated Process processes = 4;
 }
 
 message Process {
-  string id = 1;
+  string name = 1;
   string image = 2;
   bool gpu = 3;
   repeated string subscriptions = 4;
@@ -39,7 +39,7 @@ message Network {
 
 message StartRequest {
   string product_id = 1;
-  string version_id = 2;
+  string version_name = 2;
   string key_value_store = 3;
   repeated Workflow workflows = 4;
 }
@@ -65,8 +65,8 @@ message Response {
 }
 
 message ProcessStatusRequest {
-  string version_name = 1;
-  string product_id = 2;
+  string product_id = 1;
+  string version_name = 2;
 }
 
 message ProcessStatusResponse {

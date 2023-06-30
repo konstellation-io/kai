@@ -7,12 +7,12 @@ type ProcessConfig struct {
 }
 
 type Metadata struct {
-	ProductID   string `yaml:"product_id"`
-	VersionID   string `yaml:"version_id"`
-	WorkflowID  string `yaml:"workflow_id"`
-	ProcessID   string `yaml:"process_id"`
-	BasePath    string `yaml:"base_path"`
-	ProcessType string `yaml:"process_type"`
+	ProductID    string `yaml:"product_id"`
+	VersionName  string `yaml:"version_name"`
+	WorkflowName string `yaml:"workflow_name"`
+	ProcessName  string `yaml:"process_name"`
+	BasePath     string `yaml:"base_path"`
+	ProcessType  string `yaml:"process_type"`
 }
 
 type CentralizedConfig struct {

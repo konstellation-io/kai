@@ -47,7 +47,7 @@ func (m *NatsManager) CreateStreams(
 	workflowsStreamsConfig := entity.WorkflowsStreamsConfig{}
 
 	for _, workflow := range workflows {
-		stream := m.getStreamName(productID, versionName, workflow.ID)
+		stream := m.getStreamName(productID, versionName, workflow.Name)
 		processesStreamConfig := m.getProcessesStreamConfig(stream, workflow.Processes)
 
 		streamConfig := &entity.StreamConfig{
@@ -60,7 +60,7 @@ func (m *NatsManager) CreateStreams(
 			return nil, fmt.Errorf("error creating stream %q: %w", stream, err)
 		}
 
-		workflowsStreamsConfig[workflow.ID] = streamConfig
+		workflowsStreamsConfig[workflow.Name] = streamConfig
 	}
 
 	return workflowsStreamsConfig, nil
@@ -86,7 +86,7 @@ func (m *NatsManager) CreateObjectStores(
 
 		for _, process := range workflow.Processes {
 			if process.ObjectStore != nil {
-				objectStore, err := m.getObjectStoreName(productID, versionName, workflow.ID, process.ObjectStore)
+				objectStore, err := m.getObjectStoreName(productID, versionName, workflow.Name, process.ObjectStore)
 				if err != nil {
 					return nil, err
 				}
@@ -96,10 +96,10 @@ func (m *NatsManager) CreateObjectStores(
 					return nil, fmt.Errorf("error creating object store %q: %w", objectStore, err)
 				}
 
-				processesObjectStoresConfig[process.ID] = objectStore
+				processesObjectStoresConfig[process.Name] = objectStore
 			}
 		}
-		workflowsObjectStoresConfig[workflow.ID] = &entity.WorkflowObjectStoresConfig{
+		workflowsObjectStoresConfig[workflow.Name] = &entity.WorkflowObjectStoresConfig{
 			Processes: processesObjectStoresConfig,
 		}
 	}
@@ -184,7 +184,7 @@ func (m *NatsManager) CreateKeyValueStores(
 
 	for _, workflow := range workflows {
 		// create key-value store for workflow
-		workflowKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.ID, "", entity.ScopeWorkflow)
+		workflowKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.Name, "", entity.ScopeWorkflow)
 		if err != nil {
 			return nil, err
 		}
@@ -197,7 +197,7 @@ func (m *NatsManager) CreateKeyValueStores(
 		processesKeyValueStores := map[string]string{}
 		for _, process := range workflow.Processes {
 			// create key-value store for process
-			processKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.ID, process.ID, entity.ScopeProcess)
+			processKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.Name, process.Name, entity.ScopeProcess)
 			if err != nil {
 				return nil, err
 			}
@@ -207,10 +207,10 @@ func (m *NatsManager) CreateKeyValueStores(
 				return nil, fmt.Errorf("create process key-value store %q: %w", processKeyValueStore, err)
 			}
 
-			processesKeyValueStores[process.ID] = processKeyValueStore
+			processesKeyValueStores[process.Name] = processKeyValueStore
 		}
 
-		workflowsKeyValueStores[workflow.ID] = &entity.WorkflowKeyValueStores{
+		workflowsKeyValueStores[workflow.Name] = &entity.WorkflowKeyValueStores{
 			WorkflowStore: workflowKeyValueStore,
 			Processes:     processesKeyValueStores,
 		}
@@ -241,8 +241,8 @@ func (m *NatsManager) getKeyValueStoreName(
 func (m *NatsManager) getProcessesStreamConfig(stream string, processes []entity.Process) entity.ProcessesStreamConfig {
 	processesConfig := entity.ProcessesStreamConfig{}
 	for _, process := range processes {
-		processesConfig[process.ID] = entity.ProcessStreamConfig{
-			Subject:       m.getSubjectName(stream, process.ID),
+		processesConfig[process.Name] = entity.ProcessStreamConfig{
+			Subject:       m.getSubjectName(stream, process.Name),
 			Subscriptions: m.getSubjectsToSubscribe(stream, process.Subscriptions),
 		}
 	}

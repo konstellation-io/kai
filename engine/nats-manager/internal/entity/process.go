@@ -7,14 +7,14 @@ import (
 )
 
 type Process struct {
-	ID            string
+	Name          string
 	Subscriptions []string
 	ObjectStore   *ObjectStore
 }
 
 func (n *Process) Validate() error {
-	if n.ID == "" {
-		return internal.ErrEmptyProcessID
+	if n.Name == "" {
+		return internal.ErrEmptyProcessName
 	}
 
 	if n.ObjectStore == nil {

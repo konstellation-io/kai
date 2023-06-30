@@ -11,11 +11,11 @@ import (
 func GetAppConfig(version domain.Version, processesConfig map[string]string) apiv1.ConfigMap {
 	labels := map[string]string{
 		"product": version.Product,
-		"version": version.ID,
+		"version": version.Name,
 		"type":    "configuration",
 	}
 
-	configMapName := fmt.Sprintf("%s-%s-conf-files", version.Product, version.ID)
+	configMapName := fmt.Sprintf("%s-%s-conf-files", version.Product, version.Name)
 
 	return apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -61,9 +61,9 @@ func getFluentBitConfig() map[string]string {
 [FILTER]
     Name record_modifier
     Match *
-    Record versionId ${KAI_VERSION_ID}
-    Record processId ${KAI_PROCESS_ID}
-    Record workflowId ${KAI_WORKFLOW_ID}
+    Record versionName ${KAI_VERSION_NAME}
+    Record processName ${KAI_PROCESS_NAME}
+    Record workflowName ${KAI_WORKFLOW_NAME}
 
 [FILTER]
     Name  stdout

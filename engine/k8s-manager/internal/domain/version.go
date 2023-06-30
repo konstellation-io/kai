@@ -1,7 +1,7 @@
 package domain
 
 type Version struct {
-	ID            string
+	Name          string
 	Product       string
 	KeyValueStore string
 
@@ -9,7 +9,7 @@ type Version struct {
 }
 
 type Workflow struct {
-	ID            string
+	Name          string
 	Stream        string
 	KeyValueStore string
 	Processes     []*Process

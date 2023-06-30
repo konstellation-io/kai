@@ -2,7 +2,7 @@ package domain
 
 //nolint:maligned
 type Process struct {
-	ID            string
+	Name          string
 	Image         string
 	EnableGpu     bool
 	Type          ProcessType

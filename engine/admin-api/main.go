@@ -5,6 +5,9 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/k8smanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -69,7 +72,13 @@ func initApp(
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
 
-	k8sService, err := k8smanager.NewK8sVersionClient(cfg, logger)
+	ccK8sManager, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	k8sManagerClient := versionpb.NewVersionServiceClient(ccK8sManager)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	k8sService, err := k8smanager.NewK8sVersionClient(cfg, logger, k8sManagerClient)
 	if err != nil {
 		log.Fatal(err)
 	}

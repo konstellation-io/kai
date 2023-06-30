@@ -8,7 +8,7 @@ import (
 func mapRequestToVersion(req *versionpb.StartRequest) domain.Version {
 	return domain.Version{
 		Product:       req.ProductId,
-		ID:            req.VersionId,
+		Name:          req.VersionName,
 		KeyValueStore: req.KeyValueStore,
 		Workflows:     mapReqWorkflowsToWorkflows(req.Workflows),
 	}
@@ -19,7 +19,7 @@ func mapReqWorkflowsToWorkflows(reqWorkflows []*versionpb.Workflow) []*domain.Wo
 
 	for _, workflow := range reqWorkflows {
 		workflows = append(workflows, &domain.Workflow{
-			ID:            workflow.Id,
+			Name:          workflow.Name,
 			Stream:        workflow.Stream,
 			KeyValueStore: workflow.KeyValueStore,
 			Processes:     mapReqProcessToProcess(workflow.Processes),
@@ -34,7 +34,7 @@ func mapReqProcessToProcess(reqProcesses []*versionpb.Process) []*domain.Process
 
 	for _, process := range reqProcesses {
 		p := &domain.Process{
-			ID:            process.Id,
+			Name:          process.Name,
 			Type:          mapReqProcessTypeTpProcessType(process.Type),
 			Image:         process.Image,
 			Subject:       process.Subject,

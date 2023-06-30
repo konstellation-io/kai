@@ -16,15 +16,15 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 		"product", params.Product,
 		"version", params.Version,
 		"workflow", params.Workflow,
-		"process", params.Process.ID,
+		"process", params.Process.Name,
 	)
 
 	networking := params.Process.Networking
 
 	_, err := kn.client.CoreV1().Services(kn.namespace).Create(ctx, &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   kn.getServiceName(params.Product, params.Version, params.Workflow, params.Process.ID),
-			Labels: kn.getNetworkLabels(params.Product, params.Version, params.Workflow, params.Process.ID),
+			Name:   kn.getServiceName(params.Product, params.Version, params.Workflow, params.Process.Name),
+			Labels: kn.getNetworkLabels(params.Product, params.Version, params.Workflow, params.Process.Name),
 		},
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceTypeClusterIP,

@@ -7,13 +7,13 @@ import (
 )
 
 type Workflow struct {
-	ID        string
+	Name      string
 	Processes []Process
 }
 
 func (w Workflow) Validate() error {
-	if w.ID == "" {
-		return internal.ErrEmptyWorkflow
+	if w.Name == "" {
+		return internal.ErrEmptyWorkflowName
 	}
 
 	for _, process := range w.Processes {

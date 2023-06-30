@@ -48,9 +48,9 @@ data:
         [FILTER]
             Name record_modifier
             Match *
-            Record versionId ${KAI_VERSION_ID}
-            Record processId ${KAI_PROCESS_ID}
-            Record workflowId ${KAI_WORKFLOW_ID}
+            Record versionName ${KAI_VERSION_NAME}
+            Record processName ${KAI_PROCESS_NAME}
+            Record workflowName ${KAI_WORKFLOW_NAME}
 
         [FILTER]
             Name  stdout
@@ -69,9 +69,9 @@ data:
     test-product-test-version-test-workflow-test-process: |
         metadata:
             product_id: test-product
-            version_id: test-version
-            workflow_id: test-workflow
-            process_id: test-process
+            version_name: test-version
+            workflow_name: test-workflow
+            process_name: test-process
             base_path: ""
             process_type: task
         nats:

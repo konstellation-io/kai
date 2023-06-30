@@ -13,10 +13,10 @@ type WorkflowBuilder struct {
 func NewWorkflowBuilder() *WorkflowBuilder {
 	return &WorkflowBuilder{
 		&entity.Workflow{
-			ID: "test-workflow",
+			Name: "test-workflow",
 			Processes: []entity.Process{
 				{
-					ID: "defaultProcess",
+					Name: "defaultProcess",
 				},
 			},
 		},
@@ -28,12 +28,12 @@ func (w *WorkflowBuilder) Build() entity.Workflow {
 }
 
 func (w *WorkflowBuilder) WithID(name string) *WorkflowBuilder {
-	w.workflow.ID = name
+	w.workflow.Name = name
 	return w
 }
 
 func (w *WorkflowBuilder) WithProcessName(name string) *WorkflowBuilder {
-	w.workflow.Processes[0].ID = name
+	w.workflow.Processes[0].Name = name
 	return w
 }
 

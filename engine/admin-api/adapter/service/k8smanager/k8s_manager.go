@@ -12,9 +12,11 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
+
+//go:generate mockgen -source=../proto/versionpb/version_grpc.pb.go -destination=../../../mocks/${GOFILE} -package=mocks
+
+const _requestTimeout = 1 * time.Minute
 
 type K8sVersionClient struct {
 	cfg    *config.Config
@@ -24,14 +26,7 @@ type K8sVersionClient struct {
 
 var _ service.K8sService = (*K8sVersionClient)(nil)
 
-func NewK8sVersionClient(cfg *config.Config, logger logging.Logger) (*K8sVersionClient, error) {
-	cc, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	client := versionpb.NewVersionServiceClient(cc)
-
-	if err != nil {
-		return nil, err
-	}
-
+func NewK8sVersionClient(cfg *config.Config, logger logging.Logger, client versionpb.VersionServiceClient) (*K8sVersionClient, error) {
 	return &K8sVersionClient{
 		cfg,
 		client,
@@ -53,9 +48,9 @@ func (k *K8sVersionClient) Start(
 
 	req := versionpb.StartRequest{
 		ProductId:     productID,
-		VersionId:     version.Name,
+		VersionName:   version.Name,
 		Workflows:     wf,
-		KeyValueStore: versionConfig.KeyValueStoresConfig.ProductKeyValueStore,
+		KeyValueStore: versionConfig.KeyValueStoresConfig.KeyValueStore,
 	}
 
 	_, err = k.client.Start(ctx, &req)
@@ -83,7 +78,7 @@ func (k *K8sVersionClient) Unpublish(ctx context.Context, productID string, vers
 		Version: version.Name,
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	ctx, cancel := context.WithTimeout(ctx, _requestTimeout)
 	defer cancel()
 
 	_, err := k.client.Unpublish(ctx, &req)
@@ -97,7 +92,7 @@ func (k *K8sVersionClient) Publish(ctx context.Context, productID string, versio
 		Version: version.Name,
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	ctx, cancel := context.WithTimeout(ctx, _requestTimeout)
 	defer cancel()
 
 	_, err := k.client.Publish(ctx, &req)

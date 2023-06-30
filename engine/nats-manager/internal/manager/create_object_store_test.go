@@ -193,14 +193,14 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcesses(
 						[]entity.Process{
 							{
-								ID: "test-process-1",
+								Name: "test-process-1",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
 									Scope: entity.ScopeWorkflow,
 								},
 							},
 							{
-								ID: "test-process-2",
+								Name: "test-process-2",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
 									Scope: entity.ScopeWorkflow,
@@ -223,14 +223,14 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcesses(
 						[]entity.Process{
 							{
-								ID: "test-process-1",
+								Name: "test-process-1",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
 									Scope: entity.ScopeWorkflow,
 								},
 							},
 							{
-								ID: "test-process-2",
+								Name: "test-process-2",
 								ObjectStore: &entity.ObjectStore{
 									Name:  "another-object-store",
 									Scope: entity.ScopeWorkflow,
@@ -253,14 +253,14 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcesses(
 						[]entity.Process{
 							{
-								ID: "test-process-1",
+								Name: "test-process-1",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
 									Scope: entity.ScopeProject,
 								},
 							},
 							{
-								ID: "test-process-2",
+								Name: "test-process-2",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
 									Scope: entity.ScopeProject,
@@ -283,14 +283,14 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcesses(
 						[]entity.Process{
 							{
-								ID: "test-process-1",
+								Name: "test-process-1",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
 									Scope: entity.ScopeProject,
 								},
 							},
 							{
-								ID: "test-process-2",
+								Name: "test-process-2",
 								ObjectStore: &entity.ObjectStore{
 									Name:  "another-object-store",
 									Scope: entity.ScopeProject,

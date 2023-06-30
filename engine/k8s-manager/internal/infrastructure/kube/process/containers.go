@@ -14,7 +14,7 @@ const _configFilesVolume = "version-conf-files"
 
 func getAppContainer(configMapName string, process *domain.Process) corev1.Container {
 	container := corev1.Container{
-		Name:            process.ID,
+		Name:            process.Name,
 		Image:           process.Image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Env: []corev1.EnvVar{
@@ -80,8 +80,8 @@ func getKrtFilesDownloaderContainer(spec *processSpec) corev1.Container {
 				Value: spec.Version,
 			},
 			{
-				Name:  "KAI_PROCESS_ID",
-				Value: spec.Process.ID,
+				Name:  "KAI_PROCESS_NAME",
+				Value: spec.Process.Name,
 			},
 		},
 		VolumeMounts: []corev1.VolumeMount{
@@ -100,9 +100,9 @@ func getFluentBitContainer(spec *processSpec) corev1.Container {
 		{Name: "KAI_MESSAGING_HOST", Value: viper.GetString("messaging.host")},
 		{Name: "KAI_MESSAGING_PORT", Value: viper.GetString("messaging.port")},
 		{Name: "KAI_PRODUCT_ID", Value: spec.Product},
-		{Name: "KAI_VERSION_ID", Value: spec.Version},
-		{Name: "KAI_WORKFLOW_ID", Value: spec.Workflow},
-		{Name: "KAI_PROCESS_ID", Value: spec.Process.ID},
+		{Name: "KAI_VERSION_NAME", Value: spec.Version},
+		{Name: "KAI_WORKFLOW_NAME", Value: spec.Workflow},
+		{Name: "KAI_PROCESS_NAME", Value: spec.Process.Name},
 	}
 
 	return corev1.Container{

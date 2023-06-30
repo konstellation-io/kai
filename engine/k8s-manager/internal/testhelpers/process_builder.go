@@ -9,7 +9,7 @@ type ProcessBuilder struct {
 func NewProcessBuilder() *ProcessBuilder {
 	return &ProcessBuilder{
 		&domain.Process{
-			ID:            "test-process",
+			Name:          "test-process",
 			Image:         "test-image@test",
 			EnableGpu:     false,
 			Type:          domain.TaskProcessType,
@@ -22,7 +22,7 @@ func NewProcessBuilder() *ProcessBuilder {
 }
 
 func (pb *ProcessBuilder) WithID(id string) *ProcessBuilder {
-	pb.process.ID = id
+	pb.process.Name = id
 	return pb
 }
 

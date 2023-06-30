@@ -38,11 +38,11 @@ func (v *VersionService) Start(
 
 	err := v.starter.StartVersion(ctx, mapRequestToVersion(req))
 	if err != nil {
-		return nil, fmt.Errorf("start version %q in product %q: %w", req.VersionId, req.ProductId, err)
+		return nil, fmt.Errorf("start version %q in product %q: %w", req.VersionName, req.ProductId, err)
 	}
 
 	return &versionpb.Response{
-		Message: fmt.Sprintf("Version %q in product %q started", req.VersionId, req.ProductId),
+		Message: fmt.Sprintf("Version %q in product %q started", req.VersionName, req.ProductId),
 	}, nil
 }
 

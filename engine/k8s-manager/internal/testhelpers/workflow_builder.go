@@ -9,7 +9,7 @@ type WorkflowBuilder struct {
 func NewWorkflowBuilder() *WorkflowBuilder {
 	return &WorkflowBuilder{
 		&domain.Workflow{
-			ID:            "test-workflow",
+			Name:          "test-workflow",
 			Stream:        "test-stream",
 			KeyValueStore: "test-workflow-kv-store",
 			Processes: []*domain.Process{
