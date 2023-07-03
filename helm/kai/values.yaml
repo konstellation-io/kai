@@ -51,8 +51,6 @@ config:
   admin:
     # -- Api Hostname for Admin UI and Admin API
     apiHost: api.kai.local
-    # -- Frontend Base URL for Admin API
-    frontendBaseURL: http://admin.kai.local
     # -- Whether to enable CORS on Admin API
     corsEnabled: true
     # -- Email address for sending notifications
@@ -88,7 +86,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 1.0.0-develop.1
+    tag: 0.1.1-develop.2
     # -- Image pull policy
     pullPolicy: IfNotPresent
   tls:
@@ -145,7 +143,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 1.0.0-develop.1
+    tag: 0.1.1-develop.2
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -256,9 +254,9 @@ keycloak:
     httpEnabled: "true"
     # -- Disables dynamically resolving the hostname from request headers. Should always be set to true in production, unless proxy verifies the Host header.
     hostnameStrict: "false"
-    # -- The proxy address forwarding mode if the server is behind a reverse proxy. Valid values are `none`, `edge`, `reencrypt` and `passthrough` 
+    # -- The proxy address forwarding mode if the server is behind a reverse proxy. Valid values are `none`, `edge`, `reencrypt` and `passthrough`
     proxy: edge
-    # -- If the server should expose health check endpoints. If set to "false", container liveness and readiness probes should be disabled. 
+    # -- If the server should expose health check endpoints. If set to "false", container liveness and readiness probes should be disabled.
     healthEnabled: "true"
   db:
     # -- Keycloak database type
@@ -318,7 +316,7 @@ keycloak:
     # -- Service type
     type: ClusterIP
     ports:
-      # -- The http port the service will listen on. Only 
+      # -- The http port the service will listen on. Only
       http: 8080
       # -- The https port the service will listen on
       https: 8443
@@ -371,7 +369,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 1.0.0-develop.1
+    tag: 0.1.1-develop.2
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -609,6 +607,6 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 1.0.0-develop.1
+    tag: 0.1.1-develop.2
     # -- Image pull policy
     pullPolicy: IfNotPresent
