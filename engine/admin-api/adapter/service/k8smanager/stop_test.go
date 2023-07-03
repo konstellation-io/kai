@@ -1,3 +1,5 @@
+//go:build unit
+
 package k8smanager_test
 
 import (
