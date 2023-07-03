@@ -86,7 +86,6 @@ func initApp(
 	ccNatsManager, err := grpc.Dial(cfg.Services.NatsManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
-
 	}
 
 	natsManagerClient := natspb.NewNatsManagerServiceClient(ccNatsManager)
