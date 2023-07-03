@@ -8,9 +8,9 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
+
+//go:generate mockgen -source=../proto/natspb/nats_grpc.pb.go -destination=../../../mocks/${GOFILE} -package=mocks
 
 type NatsManagerClient struct {
 	cfg    *config.Config
@@ -18,15 +18,7 @@ type NatsManagerClient struct {
 	logger logging.Logger
 }
 
-func NewNatsManagerClient(cfg *config.Config, logger logging.Logger) (*NatsManagerClient, error) {
-	cc, err := grpc.Dial(cfg.Services.NatsManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
-
-	if err != nil {
-		return nil, err
-	}
-
-	client := natspb.NewNatsManagerServiceClient(cc)
-
+func NewNatsManagerClient(cfg *config.Config, logger logging.Logger, client natspb.NatsManagerServiceClient) (*NatsManagerClient, error) {
 	return &NatsManagerClient{
 		cfg,
 		client,
