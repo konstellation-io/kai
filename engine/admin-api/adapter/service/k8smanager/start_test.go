@@ -12,9 +12,10 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/k8smanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type startRequestMatcher struct {
@@ -39,10 +40,35 @@ func (m startRequestMatcher) Matches(actual interface{}) bool {
 	return reflect.DeepEqual(actualCfg, m.expectedStartRequest)
 }
 
-func TestStartVersion(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	service := mocks.NewMockVersionServiceClient(ctrl)
+type StartVersionTestSuite struct {
+	suite.Suite
+	cfg              *config.Config
+	logger           logging.Logger
+	mockService      *mocks.MockVersionServiceClient
+	k8sVersionClient *k8smanager.K8sVersionClient
+}
 
+func TestStartVersionTestSuite(t *testing.T) {
+	suite.Run(t, new(StartVersionTestSuite))
+}
+
+func (s *StartVersionTestSuite) SetupSuite() {
+	mockController := gomock.NewController(s.T())
+	cfg := &config.Config{}
+	logger := mocks.NewMockLogger(mockController)
+	mocks.AddLoggerExpects(logger)
+	service := mocks.NewMockVersionServiceClient(mockController)
+
+	k8sVersionClient, err := k8smanager.NewK8sVersionClient(cfg, logger, service)
+	s.Require().NoError(err)
+
+	s.cfg = cfg
+	s.logger = logger
+	s.mockService = service
+	s.k8sVersionClient = k8sVersionClient
+}
+
+func (s *StartVersionTestSuite) TestStartVersion() {
 	ctx := context.Background()
 
 	var (
@@ -68,7 +94,7 @@ func TestStartVersion(t *testing.T) {
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(&version)
 
 		workflowStreamCfg = versionConfig.StreamsConfig.Workflows[workflow.Name]
 		processStreamCfg  = workflowStreamCfg.Processes[process.Name]
@@ -109,55 +135,31 @@ func TestStartVersion(t *testing.T) {
 	}
 
 	customMatcher := newStartRequestMatcher(req)
-	service.EXPECT().Start(ctx, customMatcher).Return(&versionpb.Response{Message: "ok"}, nil)
+	s.mockService.EXPECT().Start(ctx, customMatcher).Return(&versionpb.Response{Message: "ok"}, nil)
 
-	cfg := &config.Config{}
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
-
-	client, _ := k8smanager.NewK8sVersionClient(cfg, logger, service)
-
-	err := client.Start(ctx, productID, &version, versionConfig)
-
-	assert.NoError(t, err)
+	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	s.Require().NoError(err)
 }
 
-func TestStartVersion_ClientError(t *testing.T) {
-	var (
-		ctrl    = gomock.NewController(t)
-		service = mocks.NewMockVersionServiceClient(ctrl)
-		logger  = mocks.NewMockLogger(ctrl)
-		cfg     = &config.Config{}
-		ctx     = context.Background()
-	)
-
-	mocks.AddLoggerExpects(logger)
+func (s *StartVersionTestSuite) TestStartVersion_ClientError() {
+	ctx := context.Background()
 
 	var (
 		productID     = "test-product"
 		version       = testhelpers.NewVersionBuilder().Build()
-		versionConfig = getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(&version)
 	)
 
 	expectedError := errors.New("client error")
 
-	client, _ := k8smanager.NewK8sVersionClient(cfg, logger, service)
-	service.EXPECT().Start(gomock.Any(), gomock.Any()).Return(nil, expectedError)
+	s.mockService.EXPECT().Start(gomock.Any(), gomock.Any()).Return(nil, expectedError)
 
-	err := client.Start(ctx, productID, &version, versionConfig)
-	assert.ErrorIs(t, err, expectedError)
+	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	s.Assert().ErrorIs(err, expectedError)
 }
 
-func TestStartVersion_ErrorMapping_WorkflowStreamFound(t *testing.T) {
-	var (
-		ctrl    = gomock.NewController(t)
-		service = mocks.NewMockVersionServiceClient(ctrl)
-		logger  = mocks.NewMockLogger(ctrl)
-		cfg     = &config.Config{}
-		ctx     = context.Background()
-	)
-
-	mocks.AddLoggerExpects(logger)
+func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFound() {
+	ctx := context.Background()
 
 	var (
 		productID = "test-product"
@@ -182,28 +184,18 @@ func TestStartVersion_ErrorMapping_WorkflowStreamFound(t *testing.T) {
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(&version)
 	)
 
 	// override default workflow to empty map
 	versionConfig.StreamsConfig.Workflows = map[string]entity.WorkflowStreamConfig{}
 
-	client, _ := k8smanager.NewK8sVersionClient(cfg, logger, service)
-
-	err := client.Start(ctx, productID, &version, versionConfig)
-	assert.ErrorIs(t, err, entity.ErrWorkflowStreamNotFound)
+	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	s.Assert().ErrorIs(err, entity.ErrWorkflowStreamNotFound)
 }
 
-func TestStartVersion_ErrorMapping_NoWorkflowKeyValueStoreFound(t *testing.T) {
-	var (
-		ctrl    = gomock.NewController(t)
-		service = mocks.NewMockVersionServiceClient(ctrl)
-		logger  = mocks.NewMockLogger(ctrl)
-		cfg     = &config.Config{}
-		ctx     = context.Background()
-	)
-
-	mocks.AddLoggerExpects(logger)
+func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowKeyValueStoreFound() {
+	ctx := context.Background()
 
 	var (
 		productID = "test-product"
@@ -218,28 +210,18 @@ func TestStartVersion_ErrorMapping_NoWorkflowKeyValueStoreFound(t *testing.T) {
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(&version)
 	)
 
 	// override default workflow config to empty map
 	versionConfig.KeyValueStoresConfig.Workflows = entity.WorkflowsKeyValueStoresConfig{}
 
-	client, _ := k8smanager.NewK8sVersionClient(cfg, logger, service)
-
-	err := client.Start(ctx, productID, &version, versionConfig)
-	assert.ErrorIs(t, err, entity.ErrWorkflowKVStoreNotFound)
+	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	s.Assert().ErrorIs(err, entity.ErrWorkflowKVStoreNotFound)
 }
 
-func TestStartVersion_ErrorMapping_NoWorkflowObjectStoreFound(t *testing.T) {
-	var (
-		ctrl    = gomock.NewController(t)
-		service = mocks.NewMockVersionServiceClient(ctrl)
-		logger  = mocks.NewMockLogger(ctrl)
-		cfg     = &config.Config{}
-		ctx     = context.Background()
-	)
-
-	mocks.AddLoggerExpects(logger)
+func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowObjectStoreFound() {
+	ctx := context.Background()
 
 	var (
 		productID = "test-product"
@@ -254,28 +236,18 @@ func TestStartVersion_ErrorMapping_NoWorkflowObjectStoreFound(t *testing.T) {
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(&version)
 	)
 
 	// override default workflow config to empty map
 	versionConfig.ObjectStoresConfig.Workflows = map[string]entity.WorkflowObjectStoresConfig{}
 
-	client, _ := k8smanager.NewK8sVersionClient(cfg, logger, service)
-
-	err := client.Start(ctx, productID, &version, versionConfig)
-	assert.ErrorIs(t, err, entity.ErrWorkflowObjectStoreNotFound)
+	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	s.Assert().ErrorIs(err, entity.ErrWorkflowObjectStoreNotFound)
 }
 
-func TestStartVersion_ErrorMapping_ProcessStreamNotFound(t *testing.T) {
-	var (
-		ctrl    = gomock.NewController(t)
-		service = mocks.NewMockVersionServiceClient(ctrl)
-		logger  = mocks.NewMockLogger(ctrl)
-		cfg     = &config.Config{}
-		ctx     = context.Background()
-	)
-
-	mocks.AddLoggerExpects(logger)
+func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_ProcessStreamNotFound() {
+	ctx := context.Background()
 
 	var (
 		productID = "test-product"
@@ -290,7 +262,7 @@ func TestStartVersion_ErrorMapping_ProcessStreamNotFound(t *testing.T) {
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(&version)
 	)
 
 	// override default workflow config to empty map
@@ -299,13 +271,11 @@ func TestStartVersion_ErrorMapping_ProcessStreamNotFound(t *testing.T) {
 		Processes: map[string]entity.ProcessStreamConfig{},
 	}
 
-	client, _ := k8smanager.NewK8sVersionClient(cfg, logger, service)
-
-	err := client.Start(ctx, productID, &version, versionConfig)
-	assert.ErrorIs(t, err, entity.ErrProcessStreamNotFound)
+	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	s.Assert().ErrorIs(err, entity.ErrProcessStreamNotFound)
 }
 
-func getConfigForVersion(version *entity.Version) *entity.VersionConfig {
+func (s *StartVersionTestSuite) getConfigForVersion(version *entity.Version) *entity.VersionConfig {
 	var (
 		workflow = version.Workflows[0]
 		process  = version.Workflows[0].Processes[0]
