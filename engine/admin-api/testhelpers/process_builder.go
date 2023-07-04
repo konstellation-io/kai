@@ -33,3 +33,8 @@ func (pb *ProcessBuilder) WithNetworking(networking *entity.ProcessNetworking) *
 	pb.process.Networking = networking
 	return pb
 }
+
+func (pb *ProcessBuilder) WithConfig(config []entity.ConfigurationVariable) *ProcessBuilder {
+	pb.process.Config = config
+	return pb
+}

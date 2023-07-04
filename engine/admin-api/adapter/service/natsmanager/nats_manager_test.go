@@ -4,6 +4,7 @@ package natsmanager_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -16,28 +17,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 	"github.com/stretchr/testify/suite"
 )
-
-// type natspbWorkflowsMatcher struct {
-// 	expectedWorkflows []*natspb.Workflow
-// }
-
-// func NewNatspbWorkflowsMatcher(expectedWorkflows []*natspb.Workflow) *natspbWorkflowsMatcher {
-// 	return &natspbWorkflowsMatcher{
-// 		expectedWorkflows: expectedWorkflows,
-// 	}
-// }
-// func (m natspbWorkflowsMatcher) String() string {
-// 	return fmt.Sprintf("is equal to %v", m.expectedWorkflows)
-// }
-
-// func (m natspbWorkflowsMatcher) Matches(actual interface{}) bool {
-// 	actualWorkflows, ok := actual.([]*natspb.Workflow)
-// 	if !ok {
-// 		return false
-// 	}
-
-// 	return reflect.DeepEqual(actualWorkflows, m.expectedWorkflows)
-// }
 
 const productID = "test-product"
 
@@ -253,4 +232,54 @@ func (s *NatsManagerTestSuite) TestDeleteObjectStores() {
 
 	err := s.natsManagerClient.DeleteObjectStores(ctx, productID, testVersion.Name)
 	s.Require().NoError(err)
+}
+
+func (s *NatsManagerTestSuite) TestCreateStreamsManagerError() {
+	ctx := context.Background()
+
+	s.mockService.EXPECT().CreateStreams(ctx, gomock.Any()).
+		Return(&natspb.CreateStreamsResponse{}, errors.New("mocked error"))
+
+	_, err := s.natsManagerClient.CreateStreams(ctx, productID, &testVersion)
+	s.Error(err)
+}
+
+func (s *NatsManagerTestSuite) TestCreateObjectStoresManagerError() {
+	ctx := context.Background()
+
+	s.mockService.EXPECT().CreateObjectStores(ctx, gomock.Any()).
+		Return(&natspb.CreateObjectStoresResponse{}, errors.New("mocked error"))
+
+	_, err := s.natsManagerClient.CreateObjectStores(ctx, productID, &testVersion)
+	s.Error(err)
+}
+
+func (s *NatsManagerTestSuite) TestCreateKeyValueStoresManagerError() {
+	ctx := context.Background()
+
+	s.mockService.EXPECT().CreateKeyValueStores(ctx, gomock.Any()).
+		Return(&natspb.CreateKeyValueStoreResponse{}, errors.New("mocked error"))
+
+	_, err := s.natsManagerClient.CreateKeyValueStores(ctx, productID, &testVersion)
+	s.Error(err)
+}
+
+func (s *NatsManagerTestSuite) TestDeleteStreamsManagerError() {
+	ctx := context.Background()
+
+	s.mockService.EXPECT().DeleteStreams(ctx, gomock.Any()).
+		Return(&natspb.DeleteResponse{}, errors.New("mocked error"))
+
+	err := s.natsManagerClient.DeleteStreams(ctx, productID, testVersion.Name)
+	s.Error(err)
+}
+
+func (s *NatsManagerTestSuite) TestDeleteObjectStoresManagerError() {
+	ctx := context.Background()
+
+	s.mockService.EXPECT().DeleteObjectStores(ctx, gomock.Any()).
+		Return(&natspb.DeleteResponse{}, errors.New("mocked error"))
+
+	err := s.natsManagerClient.DeleteObjectStores(ctx, productID, testVersion.Name)
+	s.Error(err)
 }

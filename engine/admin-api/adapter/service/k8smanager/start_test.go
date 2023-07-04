@@ -86,6 +86,9 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 				DestinationPort: 8080,
 				Protocol:        "TCP",
 			}).
+			WithConfig([]entity.ConfigurationVariable{
+				{Key: "test-key", Value: "test-value"},
+			}).
 			Build()
 
 		workflow = testhelpers.NewWorkflowBuilder().
@@ -130,6 +133,9 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 							SourcePort: int32(process.Networking.DestinationPort),
 						},
 						Type: versionpb.ProcessType_ProcessTypeTask,
+						Config: map[string]string{
+							process.Config[0].Key: process.Config[0].Value,
+						},
 					},
 				},
 			},
