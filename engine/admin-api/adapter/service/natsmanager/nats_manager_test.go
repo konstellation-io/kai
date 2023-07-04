@@ -4,8 +4,6 @@ package natsmanager_test
 
 import (
 	"context"
-	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -19,27 +17,67 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type createStreamsRequestMatcher struct {
-	expectedCreateStreamsRequest *natspb.CreateStreamsRequest
-}
+// type natspbWorkflowsMatcher struct {
+// 	expectedWorkflows []*natspb.Workflow
+// }
 
-func newCreateStreamsRequestMatcher(expectedStreamConfig *natspb.CreateStreamsRequest) *createStreamsRequestMatcher {
-	return &createStreamsRequestMatcher{
-		expectedCreateStreamsRequest: expectedStreamConfig,
+// func NewNatspbWorkflowsMatcher(expectedWorkflows []*natspb.Workflow) *natspbWorkflowsMatcher {
+// 	return &natspbWorkflowsMatcher{
+// 		expectedWorkflows: expectedWorkflows,
+// 	}
+// }
+// func (m natspbWorkflowsMatcher) String() string {
+// 	return fmt.Sprintf("is equal to %v", m.expectedWorkflows)
+// }
+
+// func (m natspbWorkflowsMatcher) Matches(actual interface{}) bool {
+// 	actualWorkflows, ok := actual.([]*natspb.Workflow)
+// 	if !ok {
+// 		return false
+// 	}
+
+// 	return reflect.DeepEqual(actualWorkflows, m.expectedWorkflows)
+// }
+
+const productID = "test-product"
+
+var (
+	testProcess = testhelpers.NewProcessBuilder().
+			WithObjectStore(&entity.ProcessObjectStore{
+			Name:  "test-object-store",
+			Scope: entity.ObjectStoreScopeWorkflow,
+		}).
+		WithNetworking(&entity.ProcessNetworking{
+			TargetPort:      8080,
+			DestinationPort: 8080,
+			Protocol:        "TCP",
+		}).
+		Build()
+
+	testWorkflow = testhelpers.NewWorkflowBuilder().
+			WithProcesses([]entity.Process{testProcess}).
+			Build()
+
+	testVersion = testhelpers.NewVersionBuilder().
+			WithWorkflows([]entity.Workflow{testWorkflow}).
+			Build()
+
+	testReqWorkflows = []*natspb.Workflow{
+		{
+			Name: testWorkflow.Name,
+			Processes: []*natspb.Process{
+				{
+					Name: testProcess.Name,
+					ObjectStore: &natspb.ObjectStore{
+						Name:  testProcess.ObjectStore.Name,
+						Scope: natspb.ObjectStoreScope_SCOPE_WORKFLOW,
+					},
+					Subscriptions: testProcess.Subscriptions,
+				},
+			},
+		},
 	}
-}
-func (m createStreamsRequestMatcher) String() string {
-	return fmt.Sprintf("is equal to %v", m.expectedCreateStreamsRequest)
-}
-
-func (m createStreamsRequestMatcher) Matches(actual interface{}) bool {
-	actualCfg, ok := actual.(*natspb.CreateStreamsRequest)
-	if !ok {
-		return false
-	}
-
-	return reflect.DeepEqual(actualCfg, m.expectedCreateStreamsRequest)
-}
+)
 
 type NatsManagerTestSuite struct {
 	suite.Suite
@@ -72,53 +110,147 @@ func (s *NatsManagerTestSuite) SetupSuite() {
 func (s *NatsManagerTestSuite) TestCreateStreams() {
 	ctx := context.Background()
 
-	var (
-		productID = "test-product"
-
-		process = testhelpers.NewProcessBuilder().
-			WithObjectStore(&entity.ProcessObjectStore{
-				Name:  "test-object-store",
-				Scope: entity.ObjectStoreScopeWorkflow,
-			}).
-			WithNetworking(&entity.ProcessNetworking{
-				TargetPort:      8080,
-				DestinationPort: 8080,
-				Protocol:        "TCP",
-			}).
-			Build()
-
-		workflow = testhelpers.NewWorkflowBuilder().
-				WithProcesses([]entity.Process{process}).
-				Build()
-
-		version = testhelpers.NewVersionBuilder().
-			WithWorkflows([]entity.Workflow{workflow}).
-			Build()
-	)
-
 	req := &natspb.CreateStreamsRequest{
 		ProductId:   productID,
-		VersionName: version.Name,
-		Workflows: []*natspb.Workflow{
-			{
-				Name: workflow.Name,
-				Processes: []*natspb.Process{
-					{
-						Name: process.Name,
-						ObjectStore: &natspb.ObjectStore{
-							Name:  process.ObjectStore.Name,
-							Scope: natspb.ObjectStoreScope_SCOPE_WORKFLOW,
-						},
-						Subscriptions: process.Subscriptions,
+		VersionName: testVersion.Name,
+		Workflows:   testReqWorkflows,
+	}
+
+	natsManagerResponse := &natspb.CreateStreamsResponse{
+		Workflows: map[string]*natspb.WorkflowStreamConfig{
+			testWorkflow.Name: {
+				Stream: "test-workflow-stream-name",
+				Processes: map[string]*natspb.ProcessStreamConfig{
+					testProcess.Name: {
+						Subject:       "test-process-subject-name",
+						Subscriptions: testProcess.Subscriptions,
 					},
 				},
 			},
 		},
 	}
 
-	customMatcher := newCreateStreamsRequestMatcher(req)
-	s.mockService.EXPECT().CreateStreams(ctx, customMatcher).Return(&natspb.CreateStreamsResponse{}, nil)
+	expctedResponse := &entity.VersionStreamsConfig{
+		Workflows: map[string]entity.WorkflowStreamConfig{
+			testWorkflow.Name: {
+				Stream: "test-workflow-stream-name",
+				Processes: map[string]entity.ProcessStreamConfig{
+					testProcess.Name: {
+						Subject:       "test-process-subject-name",
+						Subscriptions: testProcess.Subscriptions,
+					},
+				},
+			},
+		},
+	}
 
-	_, err := s.natsManagerClient.CreateStreams(ctx, productID, &version)
+	s.mockService.EXPECT().CreateStreams(ctx, req).Return(natsManagerResponse, nil)
+
+	res, err := s.natsManagerClient.CreateStreams(ctx, productID, &testVersion)
+	s.Require().NoError(err)
+	s.Equal(expctedResponse, res)
+}
+
+func (s *NatsManagerTestSuite) TestCreateObjectStores() {
+	ctx := context.Background()
+
+	req := &natspb.CreateObjectStoresRequest{
+		ProductId:   productID,
+		VersionName: testVersion.Name,
+		Workflows:   testReqWorkflows,
+	}
+
+	natsManagerResponse := &natspb.CreateObjectStoresResponse{
+		Workflows: map[string]*natspb.WorkflowObjectStoreConfig{
+			testWorkflow.Name: {
+				Processes: map[string]string{
+					testProcess.Name: "test-object-store-name",
+				},
+			},
+		},
+	}
+
+	expectedResponse := &entity.VersionObjectStoresConfig{
+		Workflows: map[string]entity.WorkflowObjectStoresConfig{
+			testWorkflow.Name: {
+				Processes: map[string]string{
+					testProcess.Name: "test-object-store-name",
+				},
+			},
+		},
+	}
+
+	s.mockService.EXPECT().CreateObjectStores(ctx, req).Return(natsManagerResponse, nil)
+
+	res, err := s.natsManagerClient.CreateObjectStores(ctx, productID, &testVersion)
+	s.Require().NoError(err)
+	s.Equal(expectedResponse, res)
+}
+
+func (s *NatsManagerTestSuite) TestCreateKeyValueStores() {
+	ctx := context.Background()
+
+	req := &natspb.CreateKeyValueStoresRequest{
+		ProductId:   productID,
+		VersionName: testVersion.Name,
+		Workflows:   testReqWorkflows,
+	}
+
+	natsManagerResponse := &natspb.CreateKeyValueStoreResponse{
+		KeyValueStore: "test-version-key-value-store-name",
+		Workflows: map[string]*natspb.WorkflowKeyValueStoreConfig{
+			testWorkflow.Name: {
+				KeyValueStore: "test-workflow-key-value-store-name",
+				Processes: map[string]string{
+					testProcess.Name: "test-process-key-value-store-name",
+				},
+			},
+		},
+	}
+
+	expectedResponse := &entity.KeyValueStoresConfig{
+		KeyValueStore: "test-version-key-value-store-name",
+		Workflows: entity.WorkflowsKeyValueStoresConfig{
+			testWorkflow.Name: {
+				KeyValueStore: "test-workflow-key-value-store-name",
+				Processes: map[string]string{
+					testProcess.Name: "test-process-key-value-store-name",
+				},
+			},
+		},
+	}
+
+	s.mockService.EXPECT().CreateKeyValueStores(ctx, req).Return(natsManagerResponse, nil)
+
+	res, err := s.natsManagerClient.CreateKeyValueStores(ctx, productID, &testVersion)
+	s.Require().NoError(err)
+	s.Equal(expectedResponse, res)
+}
+
+func (s *NatsManagerTestSuite) TestDeleteStreams() {
+	ctx := context.Background()
+
+	req := &natspb.DeleteStreamsRequest{
+		ProductId:   productID,
+		VersionName: testVersion.Name,
+	}
+
+	s.mockService.EXPECT().DeleteStreams(ctx, req).Return(&natspb.DeleteResponse{}, nil)
+
+	err := s.natsManagerClient.DeleteStreams(ctx, productID, testVersion.Name)
+	s.Require().NoError(err)
+}
+
+func (s *NatsManagerTestSuite) TestDeleteObjectStores() {
+	ctx := context.Background()
+
+	req := &natspb.DeleteObjectStoresRequest{
+		ProductId:   productID,
+		VersionName: testVersion.Name,
+	}
+
+	s.mockService.EXPECT().DeleteObjectStores(ctx, req).Return(&natspb.DeleteResponse{}, nil)
+
+	err := s.natsManagerClient.DeleteObjectStores(ctx, productID, testVersion.Name)
 	s.Require().NoError(err)
 }
