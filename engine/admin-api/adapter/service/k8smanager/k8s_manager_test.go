@@ -4,6 +4,7 @@ package k8smanager_test
 
 import (
 	"context"
+	"errors"
 	"io"
 	"testing"
 
@@ -101,5 +102,53 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatus() {
 	s.Require().Equal(entity.ProcessStatusStarted, process.Status)
 
 	process = <-statusChannel
+	s.Nil(process)
+}
+
+func (s *K8sManagerTestSuite) TestWatchProcessStatusManagerError() {
+	ctx := context.Background()
+
+	s.mockService.EXPECT().WatchProcessStatus(ctx, gomock.Any()).Return(nil, errors.New("mocked error"))
+
+	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(ctx, productID, version.Name)
+	s.Error(err)
+	s.Nil(statusChannel)
+}
+
+func (s *K8sManagerTestSuite) TestWatchProcessStatusContextCancelled() {
+	ctx := context.Background()
+	cancelContext, cancel := context.WithCancel(ctx)
+
+	processStatusResponse := &versionpb.ProcessStatusResponse{}
+
+	stream := mocks.NewMockVersionService_WatchProcessStatusClient(gomock.NewController(s.T()))
+
+	s.mockService.EXPECT().WatchProcessStatus(cancelContext, gomock.Any()).Return(stream, nil)
+	stream.EXPECT().Recv().Return(processStatusResponse, nil)
+	stream.EXPECT().Context().Return(cancelContext)
+
+	cancel()
+	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(cancelContext, productID, version.Name)
+	s.Require().NoError(err)
+
+	process := <-statusChannel
+	s.Nil(process)
+}
+
+func (s *K8sManagerTestSuite) TestWatchProcessStatusUnexpectedError() {
+	ctx := context.Background()
+
+	processStatusResponse := &versionpb.ProcessStatusResponse{}
+
+	stream := mocks.NewMockVersionService_WatchProcessStatusClient(gomock.NewController(s.T()))
+
+	s.mockService.EXPECT().WatchProcessStatus(ctx, gomock.Any()).Return(stream, nil)
+	stream.EXPECT().Recv().Return(processStatusResponse, errors.New("mocked error"))
+	stream.EXPECT().Context().Return(ctx)
+
+	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(ctx, productID, version.Name)
+	s.Require().NoError(err)
+
+	process := <-statusChannel
 	s.Nil(process)
 }
