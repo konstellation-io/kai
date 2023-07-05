@@ -179,7 +179,7 @@
 | natsManager.image.tag | string | `"0.1.1-develop.2"` | Image tag |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | registry.affinity | object | `{}` |  |
-| registry.config | string | `""` |  |
+| registry.config | string | `""` | A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/. |
 | registry.configSecret.key | string | `""` | The name of the secret key that contains the registry config file |
 | registry.configSecret.name | string | `""` | Takes precedence over 'registry.config'. The name of the secret that contains the registry config file. |
 | registry.containerPort | int | `5000` | The container port |

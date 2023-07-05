@@ -643,7 +643,6 @@ registry:
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
-  # -- A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/.
 
   service:
     # -- Service type
@@ -652,6 +651,7 @@ registry:
       # -- The http port the service will listen on. Only
       http: 5000
   host: registry.kai.local
+  # -- A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/.
   config: ""
   configSecret:
     # -- Takes precedence over 'registry.config'. The name of the secret that contains the registry config file.

@@ -12,6 +12,7 @@ spec:
   template:
     metadata:
       annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/engine/registry/secret.yaml") . | sha256sum }}
       {{- with .Values.registry.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -37,11 +38,16 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.registry.resources | nindent 12 }}
-          {{- if .Values.registry.storage.enabled }}
           volumeMounts:
+            {{- if .Values.registry.config }}
+            - name: config
+              mountPath: /etc/docker/registry/config.yml
+              subPath: config.yml
+            {{- end }}
+            {{- if .Values.registry.storage.enabled }}
             - name: registry-storage
               mountPath: {{ .Values.registry.storage.path }}
-          {{- end }}
+            {{- end }}
       {{- with .Values.registry.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -54,9 +60,14 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.registry.storage.enabled }}
       volumes:
+        {{- if .Values.registry.config }}
+        - name: config
+          secret:
+            secretName: {{ include "registry.fullname" . }}
+        {{- end }}
+        {{- if .Values.registry.storage.enabled }}
         - name: registry-storage
           persistentVolumeClaim:
             claimName: {{ include "registry.fullname" . }}
-      {{- end }}
+        {{- end }}

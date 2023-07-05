@@ -298,7 +298,7 @@ keycloak secret password key
 {{- end }}
 
 {{/*
-kaycloak labels
+Registry labels
 */}}
 {{- define "registry.labels" -}}
 {{ include "kai.labels" . }}
@@ -306,7 +306,7 @@ kaycloak labels
 {{- end }}
 
 {{/*
-kaycloak selector labels
+Registru selector labels
 */}}
 {{- define "registry.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "kai.name" . }}-registry
@@ -314,7 +314,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-keycloak serviceaccount name
+Registry serviceaccount name
 */}}
 {{- define "registry.serviceAccountName" -}}
 {{- if .Values.registry.serviceAccount.create -}}
