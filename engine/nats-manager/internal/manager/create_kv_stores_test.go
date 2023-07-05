@@ -19,7 +19,7 @@ func TestCreateKVStore(t *testing.T) {
 
 	logger := mocks.NewMockLogger(ctrl)
 	logger.EXPECT().Info(gomock.Any()).Return().AnyTimes()
-	client := mocks.NewMockClient(ctrl)
+	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
 	const (

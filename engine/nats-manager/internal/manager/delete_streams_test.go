@@ -19,7 +19,7 @@ func TestDeleteStreams(t *testing.T) {
 
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
-	client := mocks.NewMockClient(ctrl)
+	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
@@ -38,7 +38,7 @@ func TestDeleteStreams_ErrorDeletingStream(t *testing.T) {
 
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
-	client := mocks.NewMockClient(ctrl)
+	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
@@ -55,7 +55,7 @@ func TestDeleteStreams_ErrorGettingStreamsNames(t *testing.T) {
 
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
-	client := mocks.NewMockClient(ctrl)
+	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"

@@ -19,7 +19,7 @@ func TestCreateStreams(t *testing.T) {
 
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
-	client := mocks.NewMockClient(ctrl)
+	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
@@ -62,7 +62,7 @@ func TestCreateStreams_ClientFails(t *testing.T) {
 
 	logger := mocks.NewMockLogger(ctrl)
 	mocks.AddLoggerExpects(logger)
-	client := mocks.NewMockClient(ctrl)
+	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
 	const (
@@ -91,7 +91,7 @@ func TestCreateStreams_FailsIfNoWorkflowsAreDefined(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	logger := mocks.NewMockLogger(ctrl)
-	client := mocks.NewMockClient(ctrl)
+	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
