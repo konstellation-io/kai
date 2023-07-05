@@ -291,3 +291,35 @@ keycloak secret password key
 {{- define "keycloak.secretPasswordKey" -}}
 {{ default "admin-password" .Values.keycloak.auth.existingSecret.passwordKey }}
 {{- end -}}
+
+{{/* Fullname suffixed with registry */}}
+{{- define "registry.fullname" -}}
+{{- printf "%s-registry" (include "kai.fullname" .) -}}
+{{- end }}
+
+{{/*
+kaycloak labels
+*/}}
+{{- define "registry.labels" -}}
+{{ include "kai.labels" . }}
+{{ include "registry.selectorLabels" . }}
+{{- end }}
+
+{{/*
+kaycloak selector labels
+*/}}
+{{- define "registry.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kai.name" . }}-registry
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+keycloak serviceaccount name
+*/}}
+{{- define "registry.serviceAccountName" -}}
+{{- if .Values.registry.serviceAccount.create -}}
+    {{ default (include "registry.fullname" .) .Values.registry.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.registry.serviceAccount.name }}
+{{- end -}}
+{{- end -}}

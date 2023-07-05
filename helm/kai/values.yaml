@@ -610,3 +610,82 @@ natsManager:
     tag: 0.1.1-develop.2
     # -- Image pull policy
     pullPolicy: IfNotPresent
+
+registry:
+  image:
+    # -- Image repository
+    repository: registry
+    # -- Image tag
+    tag: 2.8.2
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+  # -- Image pull secrets
+  imagePullSecrets: []
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+  # -- Pod annotations
+  podAnnotations: {}
+  # -- Pod security context
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  # Container security Context
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  # -- A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/.
+
+  service:
+    # -- Service type
+    type: ClusterIP
+    ports:
+      # -- The http port the service will listen on. Only
+      http: 5000
+  host: registry.kai.local
+  config: ""
+  configSecret:
+    # -- Takes precedence over 'registry.config'. The name of the secret that contains the registry config file.
+    name: ""
+    # -- The name of the secret key that contains the registry config file
+    key: ""
+  storage:
+    # -- Whether to enable persistence
+    enabled: true
+    # -- Storage class name
+    storageClass: "sandard"
+    # -- Access mode for the volume
+    accessMode: ReadWriteOnce
+    # -- Storage size
+    size: 10Gi
+    # -- Persistent volume mount point. This will define Registry app workdir too.
+    path: /var/lib/registry
+  tls:
+    # -- Whether to enable TLS
+    enabled: false
+  ingress:
+    ## This Chart has been developed using Kong Ingress Controller by default.
+    ## Using the following default annotations ensures its correct operation.
+    ## Ref: https://kubernetes.github.io/ingress-nginx/
+    ##
+
+    # -- The name of the ingress class to use
+    className: kong
+    # -- Ingress annotations
+    annotations: {}
+  # -- Container resources
+  resources: {}
+  # -- The container port
+  containerPort: 5000
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
