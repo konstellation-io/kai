@@ -1,18 +1,17 @@
 package natsmanager
 
 import (
-	"errors"
-
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-func (n *NatsManagerClient) mapWorkflowsToDTO(workflows []entity.Workflow) ([]*natspb.Workflow, error) {
+func (n *NatsManagerClient) mapWorkflowsToDTO(workflows []entity.Workflow) []*natspb.Workflow {
 	workflowsDTO := make([]*natspb.Workflow, 0, len(workflows))
 
 	for _, w := range workflows {
 		processes := make([]*natspb.Process, 0, len(w.Processes))
 
+		//nolint:gocritic // irrelevant error
 		for _, process := range w.Processes {
 			processToAppend := natspb.Process{
 				Name:          process.Name,
@@ -20,14 +19,9 @@ func (n *NatsManagerClient) mapWorkflowsToDTO(workflows []entity.Workflow) ([]*n
 			}
 
 			if process.ObjectStore != nil {
-				scope, err := mapObjectStoreScopeToDTO(process.ObjectStore.Scope)
-				if err != nil {
-					return nil, err
-				}
-
 				processToAppend.ObjectStore = &natspb.ObjectStore{
 					Name:  process.ObjectStore.Name,
-					Scope: scope,
+					Scope: mapObjectStoreScopeToDTO(process.ObjectStore.Scope),
 				}
 			}
 
@@ -40,7 +34,7 @@ func (n *NatsManagerClient) mapWorkflowsToDTO(workflows []entity.Workflow) ([]*n
 		})
 	}
 
-	return workflowsDTO, nil
+	return workflowsDTO
 }
 
 func (n *NatsManagerClient) mapDTOToVersionStreamConfig(
@@ -110,15 +104,14 @@ func (n *NatsManagerClient) mapDTOToVersionKeyValueStoreConfig(
 	}
 }
 
-func mapObjectStoreScopeToDTO(scope entity.ObjectStoreScope) (natspb.ObjectStoreScope, error) {
+func mapObjectStoreScopeToDTO(scope entity.ObjectStoreScope) natspb.ObjectStoreScope {
 	//nolint:exhaustive // wrong lint rule
 	switch scope {
 	case "project":
-		return natspb.ObjectStoreScope_SCOPE_PROJECT, nil
+		return natspb.ObjectStoreScope_SCOPE_PROJECT
 	case "workflow":
-		return natspb.ObjectStoreScope_SCOPE_WORKFLOW, nil
+		return natspb.ObjectStoreScope_SCOPE_WORKFLOW
 	default:
-		//nolint:goerr113 // error needs to be wrapped
-		return natspb.ObjectStoreScope_SCOPE_WORKFLOW, errors.New("invalid object store scope")
+		return natspb.ObjectStoreScope_SCOPE_WORKFLOW
 	}
 }

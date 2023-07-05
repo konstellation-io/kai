@@ -34,15 +34,10 @@ func (n *NatsManagerClient) CreateStreams(
 	productID string,
 	version *entity.Version,
 ) (*entity.VersionStreamsConfig, error) {
-	workflows, err := n.mapWorkflowsToDTO(version.Workflows)
-	if err != nil {
-		return nil, err
-	}
-
 	req := natspb.CreateStreamsRequest{
 		ProductId:   productID,
 		VersionName: version.Name,
-		Workflows:   workflows,
+		Workflows:   n.mapWorkflowsToDTO(version.Workflows),
 	}
 
 	res, err := n.client.CreateStreams(ctx, &req)
@@ -61,15 +56,10 @@ func (n *NatsManagerClient) CreateObjectStores(
 	productID string,
 	version *entity.Version,
 ) (*entity.VersionObjectStoresConfig, error) {
-	workflows, err := n.mapWorkflowsToDTO(version.Workflows)
-	if err != nil {
-		return nil, err
-	}
-
 	req := natspb.CreateObjectStoresRequest{
 		ProductId:   productID,
 		VersionName: version.Name,
-		Workflows:   workflows,
+		Workflows:   n.mapWorkflowsToDTO(version.Workflows),
 	}
 
 	res, err := n.client.CreateObjectStores(ctx, &req)
@@ -86,15 +76,10 @@ func (n *NatsManagerClient) CreateKeyValueStores(
 	productID string,
 	version *entity.Version,
 ) (*entity.KeyValueStoresConfig, error) {
-	workflows, err := n.mapWorkflowsToDTO(version.Workflows)
-	if err != nil {
-		return nil, err
-	}
-
 	req := natspb.CreateKeyValueStoresRequest{
 		ProductId:   productID,
 		VersionName: version.Name,
-		Workflows:   workflows,
+		Workflows:   n.mapWorkflowsToDTO(version.Workflows),
 	}
 
 	res, err := n.client.CreateKeyValueStores(ctx, &req)
