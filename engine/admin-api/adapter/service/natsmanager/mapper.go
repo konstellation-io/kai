@@ -11,7 +11,6 @@ func (n *NatsManagerClient) mapWorkflowsToDTO(workflows []entity.Workflow) []*na
 	for _, w := range workflows {
 		processes := make([]*natspb.Process, 0, len(w.Processes))
 
-		//nolint:gocritic // irrelevant error
 		for _, process := range w.Processes {
 			processToAppend := natspb.Process{
 				Name:          process.Name,

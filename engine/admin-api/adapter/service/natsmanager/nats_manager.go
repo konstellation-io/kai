@@ -27,8 +27,6 @@ func NewNatsManagerClient(cfg *config.Config, logger logging.Logger, client nats
 }
 
 // CreateStreams calls nats-manager to create NATS streams for given version.
-//
-//nolint:dupl // this is not being duplicated
 func (n *NatsManagerClient) CreateStreams(
 	ctx context.Context,
 	productID string,
@@ -49,8 +47,6 @@ func (n *NatsManagerClient) CreateStreams(
 }
 
 // CreateObjectStores calls nats-manager to create NATS Object Stores for given version.
-//
-//nolint:dupl // this is not being duplicated
 func (n *NatsManagerClient) CreateObjectStores(
 	ctx context.Context,
 	productID string,
