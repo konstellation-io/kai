@@ -11,7 +11,7 @@ import (
 type K8sService interface {
 	Start(ctx context.Context, productID string, version *entity.Version, versionConfig *entity.VersionConfig) error
 	Stop(ctx context.Context, productID string, version *entity.Version) error
-	Publish(ctx context.Context, runtimeID string, version *entity.Version) error
-	Unpublish(ctx context.Context, runtimeID string, version *entity.Version) error
+	Publish(ctx context.Context, productID string, version *entity.Version) error
+	Unpublish(ctx context.Context, productID string, version *entity.Version) error
 	WatchProcessStatus(ctx context.Context, productID, versionName string) (<-chan *entity.Process, error)
 }
