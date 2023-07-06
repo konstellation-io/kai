@@ -28,5 +28,6 @@ k8s:
   namespace: ""
 services:
   k8sManager: "localhost:50051"
+  natsManager: "localhost:50052"
 runtime:
   name: ""

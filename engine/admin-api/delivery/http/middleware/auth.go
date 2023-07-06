@@ -1,6 +1,11 @@
 package middleware
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"regexp"
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -21,12 +26,30 @@ func extractTokenFromAuthHeader(authHeader string) string {
 func NewJwtAuthMiddleware(_ *config.Config, logger logging.Logger, tokenParser *token.Parser) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			b, err := io.ReadAll(c.Request().Body)
+			if err != nil {
+				return err
+			}
+
+			bodyBuffer := bytes.NewBuffer(b)
+			c.Request().Body = io.NopCloser(bodyBuffer)
+
+			operation, err := getOperation(b)
+			if err != nil {
+				logger.Info("Unable to get graphql operation")
+			}
+
 			authHeader := c.Request().Header.Get("Authorization")
 			plainToken := extractTokenFromAuthHeader(authHeader)
 
 			user, err := tokenParser.GetUser(plainToken)
 			if err != nil {
-				logger.Error("No token found in context")
+				logger.Warn("No token found in context")
+
+				if operation == "info" {
+					fmt.Println("here")
+					return next(c)
+				}
 
 				return httperrors.HTTPErrUnauthorized
 			}
@@ -36,4 +59,22 @@ func NewJwtAuthMiddleware(_ *config.Config, logger logging.Logger, tokenParser *
 			return next(c)
 		}
 	}
+}
+
+type graphqlReqBody struct {
+	Query string `json:"query"`
+}
+
+func getOperation(body []byte) (string, error) {
+	var graphqlBody graphqlReqBody
+	err := json.Unmarshal(body, &graphqlBody)
+	if err != nil {
+		return "", err
+	}
+
+	operation := regexp.MustCompile("{.*{").FindString(graphqlBody.Query)
+	operation = strings.ReplaceAll(operation, `\n`, "")
+	operation = regexp.MustCompile(`[a-zA-Z]+`).FindString(operation)
+
+	return operation, nil
 }
