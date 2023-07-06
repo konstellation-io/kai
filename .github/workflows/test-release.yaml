@@ -8,7 +8,7 @@ on:
       - 'hotfix/**'
   pull_request:
     paths:
-      - 'engine/**/**'
+      - 'engine/**/*'
       - 'helm/**/*'
       - '.github/workflows/test-release.yaml'
     branches:
