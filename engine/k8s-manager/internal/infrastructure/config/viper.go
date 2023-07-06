@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -10,6 +11,8 @@ import (
 )
 
 const (
+	KubeConfigPathKey = "kubernetes.kubeConfigPath"
+
 	configType = "yaml"
 
 	_defaultServerPort     = 50051
@@ -52,4 +55,10 @@ func setDefaultValues() {
 
 	viper.SetDefault("kubernetes.isInsideCluster", true)
 	viper.SetDefault("kubernetes.namespace", "kai")
+
+	userHome, ok := os.LookupEnv("HOME")
+	if ok {
+		viper.SetDefault(KubeConfigPathKey, filepath.Join(userHome, ".kube", "config"))
+	}
+
 }

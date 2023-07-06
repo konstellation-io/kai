@@ -1,9 +1,7 @@
 package kube
 
 import (
-	"os"
-	"path/filepath"
-
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -34,11 +32,8 @@ func newKubernetesConfig() (*rest.Config, error) {
 		return kubeConfig, nil
 	}
 
-	// NOTE: It works only with the default user's config, not even the exported KUBECONFIG value
-	kubeConfigPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-
 	// use the current context in kubeConfigPath
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", viper.GetString(config.KubeConfigPathKey))
 	if err != nil {
 		return nil, err
 	}
