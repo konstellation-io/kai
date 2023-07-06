@@ -23,6 +23,7 @@ update_etc_hosts() {
   MINIKUBE_IP=$(minikube ip -p "$MINIKUBE_PROFILE")
   echo "$MINIKUBE_IP api.kai.local
 $MINIKUBE_IP auth.kai.local
+$MINIKUBE_IP registry.kai.local
 " > /tmp/kai.hostctl
 
   SUDO=''
