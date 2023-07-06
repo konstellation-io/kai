@@ -23,7 +23,7 @@ func NewClientset() (kubernetes.Interface, error) {
 }
 
 func newKubernetesConfig() (*rest.Config, error) {
-	if viper.GetBool("kubernetes.isInsideCluster") {
+	if viper.GetBool(config.IsInsideClusterKey) {
 		kubeConfig, err := rest.InClusterConfig()
 		if err != nil {
 			return nil, err

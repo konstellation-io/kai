@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	KubeConfigPathKey = "kubernetes.kubeConfigPath"
-	ServerPortKey     = "server.port"
+	KubeConfigPathKey  = "kubernetes.kubeConfigPath"
+	ServerPortKey      = "server.port"
+	IsInsideClusterKey = "kubernetes.isInsideCluster"
 
 	configType = "yaml"
 
