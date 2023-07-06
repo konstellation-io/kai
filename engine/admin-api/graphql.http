@@ -6,7 +6,7 @@
 GRAPHQL http://localhost:8080/graphql
 #Authorization: Bearer {{admin_access_token}}
 
-query GetInfo { info {  id name } }
+query GetInfo { info {  components {version status} } }
 
 ### HTTP Get Product
 < {%

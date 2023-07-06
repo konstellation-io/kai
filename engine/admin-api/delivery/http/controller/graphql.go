@@ -62,9 +62,8 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 	if ok {
 		//nolint:staticcheck // legacy code
 		ctx = context.WithValue(ctx, UserContextKey, user)
+		g.logger.Info("Request from user " + user.ID)
 	}
-
-	g.logger.Info("Request from user " + user.ID)
 
 	h := gql.NewHTTPHandler(
 		g.logger,

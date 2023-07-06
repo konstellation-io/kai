@@ -1,5 +1,6 @@
 baseDomainName: "local"
 releaseName: ""
+releaseVersion: "latest"
 application:
   versionStatusTimeout: 20m
 admin:

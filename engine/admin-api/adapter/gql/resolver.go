@@ -251,6 +251,15 @@ func (r *queryResolver) Logs(
 	}, nil
 }
 
+func (r *queryResolver) Info(ctx context.Context) (*entity.ServerInfo, error) {
+	_, ok := ctx.Value("user").(*entity.User)
+	if !ok {
+		return usecase.GetKAIServerInfo(ctx)
+	}
+
+	return usecase.GetKAIComponentsInfo(ctx)
+}
+
 func (r *productResolver) CreationAuthor(_ context.Context, product *entity.Product) (string, error) {
 	return product.Owner, nil
 }
@@ -318,6 +327,9 @@ func (r *versionResolver) PublicationAuthor(_ context.Context, obj *entity.Versi
 
 	return obj.PublicationAuthor, nil
 }
+func (r *componentInfoResolver) Status(_ context.Context, obj *entity.ComponentInfo) (string, error) {
+	return string(obj.Status), nil
+}
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
@@ -337,9 +349,12 @@ func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityRes
 // Version returns VersionResolver implementation.
 func (r *Resolver) Version() VersionResolver { return &versionResolver{r} }
 
+func (r *Resolver) ComponentInfo() ComponentInfoResolver { return &componentInfoResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type productResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userActivityResolver struct{ *Resolver }
 type versionResolver struct{ *Resolver }
+type componentInfoResolver struct{ *Resolver }

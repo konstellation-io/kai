@@ -19,6 +19,7 @@ import (
 
 func main() {
 	cfg := config.NewConfig()
+	config.InitConfig()
 	logger := logging.NewLogger(cfg.LogLevel)
 
 	db := mongodb.NewMongoDB(cfg, logger)

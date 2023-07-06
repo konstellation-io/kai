@@ -46,3 +46,8 @@ models:
         resolver: true
       user:
         resolver: true
+  ComponentInfo:
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.ComponentInfo
+    fields:
+      status:
+        resolver: true
