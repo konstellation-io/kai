@@ -4,8 +4,9 @@ package nats;
 option go_package = "./natspb";
 
 enum ObjectStoreScope{
-  SCOPE_WORKFLOW = 0;
-  SCOPE_PROJECT = 1;
+  SCOPE_UNDEFINED = 0;
+  SCOPE_WORKFLOW = 1;
+  SCOPE_PROJECT = 2;
   }
 
 message ObjectStore {

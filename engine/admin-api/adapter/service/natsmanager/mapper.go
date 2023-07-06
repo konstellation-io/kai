@@ -111,6 +111,6 @@ func mapObjectStoreScopeToDTO(scope entity.ObjectStoreScope) natspb.ObjectStoreS
 	case "workflow":
 		return natspb.ObjectStoreScope_SCOPE_WORKFLOW
 	default:
-		return natspb.ObjectStoreScope_SCOPE_WORKFLOW
+		return natspb.ObjectStoreScope_SCOPE_UNDEFINED
 	}
 }
