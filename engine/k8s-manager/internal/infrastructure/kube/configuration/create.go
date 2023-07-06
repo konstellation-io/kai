@@ -16,7 +16,7 @@ func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, vers
 		"version", version.Name,
 	)
 
-	processYamlConfigs := make(map[string]string, version.GetAmountOfProcesses())
+	processYamlConfigs := make(map[string]string, getProcessesAmount(version))
 
 	for _, workflow := range version.Workflows {
 		for _, process := range workflow.Processes {
@@ -78,4 +78,13 @@ func (kc KubeConfiguration) getProcessConfig(
 			},
 		},
 	}
+}
+
+func getProcessesAmount(v domain.Version) int {
+	amount := 0
+	for _, w := range v.Workflows {
+		amount += len(w.Processes)
+	}
+
+	return amount
 }

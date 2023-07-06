@@ -14,12 +14,3 @@ type Workflow struct {
 	KeyValueStore string
 	Processes     []*Process
 }
-
-func (v Version) GetAmountOfProcesses() int {
-	amount := 0
-	for _, w := range v.Workflows {
-		amount += len(w.Processes)
-	}
-
-	return amount
-}

@@ -30,6 +30,7 @@ items:
         annotations: {}
         ownerreferences: []
         finalizers: []
+        zzz_deprecatedclustername: ""
         managedfields: []
       spec:
         ports:
