@@ -65,14 +65,15 @@ func initGrpcServer(logger logr.Logger) (*grpc.Server, error) {
 }
 
 func startServer(logger logr.Logger, s *grpc.Server) error {
-	serverAddress := fmt.Sprintf("0.0.0.0:%d", viper.GetInt("server.port"))
+	port := viper.GetInt(config.ServerPortKey)
+	serverAddress := fmt.Sprintf("0.0.0.0:%d", port)
 
 	listener, err := net.Listen("tcp", serverAddress)
 	if err != nil {
 		return err
 	}
 
-	logger.Info("Server listening", "port", viper.GetInt("server.port"))
+	logger.Info("Server listening", "port", port)
 
 	if err := s.Serve(listener); err != nil {
 		logger.Error(err, "Failed to serve")
