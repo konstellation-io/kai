@@ -39,7 +39,7 @@ spec:
           resources:
             {{- toYaml .Values.registry.resources | nindent 12 }}
           volumeMounts:
-            {{- if or .Values.registry.config .Values.registry.configSecret }}
+            {{- if or .Values.registry.config .Values.registry.configSecret.name }}
             - name: config
               mountPath: /etc/docker/registry/config.yml
               subPath: config.yml
@@ -61,7 +61,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        {{- if .Values.registry.configSecret }}
+        {{- if .Values.registry.configSecret.name }}
         - name: config
           secret:
             secretName: {{ .Values.registry.configSecret.name }}
