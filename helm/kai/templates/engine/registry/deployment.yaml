@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "registry.fullname" . }}
+  labels:
+    {{- include "registry.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "registry.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/engine/registry/secret.yaml") . | sha256sum }}
+      {{- with .Values.registry.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "registry.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.registry.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "registry.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.registry.podSecurityContext | nindent 8 }}
+      containers:
+        - name: registry
+          securityContext:
+            {{- toYaml .Values.registry.securityContext | nindent 12 }}
+          image: "{{ .Values.registry.image.repository }}:{{ .Values.registry.image.tag }}"
+          imagePullPolicy: {{ .Values.registry.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.registry.containerPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.registry.resources | nindent 12 }}
+          volumeMounts:
+            {{- if or .Values.registry.config .Values.registry.configSecret.name }}
+            - name: config
+              mountPath: /etc/docker/registry/config.yml
+              subPath: config.yml
+            {{- end }}
+            {{- if .Values.registry.storage.enabled }}
+            - name: registry-storage
+              mountPath: {{ .Values.registry.storage.path }}
+            {{- end }}
+      {{- with .Values.registry.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.registry.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.registry.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if .Values.registry.configSecret.name }}
+        - name: config
+          secret:
+            secretName: {{ .Values.registry.configSecret.name }}
+            items:
+              - key: {{ .Values.registry.configSecret.key }}
+                path: config.yml
+        {{- else if .Values.registry.config }}
+        - name: config
+          secret:
+            secretName: {{ include "registry.fullname" . }}
+        {{- end }}
+        {{- if .Values.registry.storage.enabled }}
+        - name: registry-storage
+          persistentVolumeClaim:
+            claimName: {{ include "registry.fullname" . }}
+        {{- end }}
