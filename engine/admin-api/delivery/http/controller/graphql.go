@@ -54,9 +54,16 @@ func NewGraphQLController(
 }
 
 func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
-	user := c.Get("user").(*entity.User)
+	r := c.Request()
 
-	g.logger.Info("Request from user " + user.ID)
+	ctx := r.Context()
+
+	user, ok := c.Get("user").(*entity.User)
+	if ok {
+		//nolint:staticcheck // legacy code
+		ctx = context.WithValue(ctx, UserContextKey, user)
+		g.logger.Info("Request from user " + user.ID)
+	}
 
 	h := gql.NewHTTPHandler(
 		g.logger,
@@ -67,11 +74,6 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 		g.metricsInteractor,
 		g.cfg,
 	)
-
-	r := c.Request()
-
-	//nolint:staticcheck // legacy code
-	ctx := context.WithValue(r.Context(), UserContextKey, user)
 
 	h.ServeHTTP(c.Response(), r.WithContext(ctx))
 

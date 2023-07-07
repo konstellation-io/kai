@@ -48,10 +48,11 @@ func NewApp(
 	}
 
 	tokenParser := token.NewParser()
-	jwtAuthMiddleware := kaimiddleware.NewJwtAuthMiddleware(cfg, logger, tokenParser)
+	graphqlOperationMiddleware := kaimiddleware.NewGraphQLOperationMiddleware(logger)
+	jwtAuthMiddleware := kaimiddleware.NewJwtAuthMiddleware(logger, tokenParser)
 
 	r := e.Group("/graphql")
-	r.Use(jwtAuthMiddleware)
+	r.Use(graphqlOperationMiddleware, jwtAuthMiddleware)
 	r.Any("", gqlController.GraphQLHandler)
 	r.GET("/playground", gqlController.PlaygroundHandler)
 

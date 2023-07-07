@@ -20,6 +20,16 @@ type Query {
     startDate: String!
     endDate: String!
   ): Metrics
+  info: ServerInfo!
+}
+
+type ServerInfo {
+  components: [ComponentInfo!]!
+}
+
+type ComponentInfo {
+  version: String!
+  status: String!
 }
 
 type Mutation {
