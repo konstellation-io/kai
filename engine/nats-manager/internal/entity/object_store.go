@@ -9,9 +9,9 @@ import (
 type ObjectStoreScope int
 
 const (
-	ScopeWorkflow = iota
+	ScopeUndefined = iota
+	ScopeWorkflow
 	ScopeProject
-	ScopeProcess
 )
 
 type ObjectStore struct {

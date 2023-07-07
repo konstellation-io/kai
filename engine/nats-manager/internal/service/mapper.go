@@ -30,13 +30,24 @@ func (n *NatsService) dtoToProcesses(processesDTO []*natspb.Process) []entity.Pr
 		if processDTO.ObjectStore != nil {
 			process.ObjectStore = &entity.ObjectStore{
 				Name:  processDTO.ObjectStore.Name,
-				Scope: entity.ObjectStoreScope(processDTO.ObjectStore.Scope),
+				Scope: n.dtoToObjectStoreScope(processDTO.ObjectStore.Scope),
 			}
 		}
 		processes = append(processes, process)
 	}
 
 	return processes
+}
+
+func (n *NatsService) dtoToObjectStoreScope(scope natspb.ObjectStoreScope) entity.ObjectStoreScope {
+	switch scope {
+	case natspb.ObjectStoreScope_SCOPE_PROJECT:
+		return entity.ScopeProject
+	case natspb.ObjectStoreScope_SCOPE_WORKFLOW:
+		return entity.ScopeWorkflow
+	default:
+		return entity.ScopeUndefined
+	}
 }
 
 func (n *NatsService) workflowsStreamConfigToDto(
