@@ -114,9 +114,9 @@ func (m *NatsManager) DeleteStreams(productID, versionName string) error {
 
 func (m *NatsManager) getObjectStoreName(productID, versionName, workflowName string, objectStore *entity.ObjectStore) (string, error) {
 	switch objectStore.Scope {
-	case entity.ScopeProject:
+	case entity.ObjStoreScopeProject:
 		return m.joinWithUnderscores(productID, versionName, objectStore.Name), nil
-	case entity.ScopeWorkflow:
+	case entity.ObjStoreScopeWorkflow:
 		return m.joinWithUnderscores(productID, versionName, workflowName, objectStore.Name), nil
 	default:
 		return "", internal.ErrInvalidObjectStoreScope
@@ -159,7 +159,7 @@ func (m *NatsManager) CreateKeyValueStores(
 	m.logger.Info("Creating key-value stores")
 
 	// create key-value store for project
-	productKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, "", "", entity.ScopeProject)
+	productKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, "", "", entity.KVScopeProject)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (m *NatsManager) CreateKeyValueStores(
 
 	for _, workflow := range workflows {
 		// create key-value store for workflow
-		workflowKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.Name, "", entity.ScopeWorkflow)
+		workflowKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.Name, "", entity.KVScopeWorkflow)
 		if err != nil {
 			return nil, err
 		}
@@ -186,7 +186,7 @@ func (m *NatsManager) CreateKeyValueStores(
 		processesKeyValueStores := map[string]string{}
 		for _, process := range workflow.Processes {
 			// create key-value store for process
-			processKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.Name, process.Name, entity.ScopeProcess)
+			processKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.Name, process.Name, entity.KVScopeProcess)
 			if err != nil {
 				return nil, err
 			}
@@ -213,14 +213,14 @@ func (m *NatsManager) CreateKeyValueStores(
 
 func (m *NatsManager) getKeyValueStoreName(
 	product, version, workflow, process string,
-	keyValueStore entity.ObjectStoreScope,
+	keyValueStore entity.KeyValueStoreScope,
 ) (string, error) {
 	switch keyValueStore {
-	case entity.ScopeProject:
+	case entity.KVScopeProject:
 		return fmt.Sprintf("key-store_%s_%s", product, version), nil
-	case entity.ScopeWorkflow:
+	case entity.KVScopeWorkflow:
 		return fmt.Sprintf("key-store_%s_%s_%s", product, version, workflow), nil
-	case entity.ScopeProcess:
+	case entity.KVScopeProcess:
 		return fmt.Sprintf("key-store_%s_%s_%s_%s", product, version, workflow, process), nil
 	default:
 		return "", internal.ErrInvalidKeyValueStoreScope

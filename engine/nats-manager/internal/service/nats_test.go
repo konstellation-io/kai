@@ -47,7 +47,7 @@ var (
 					Subscriptions: protoWorkflows[0].Processes[0].Subscriptions,
 					ObjectStore: &entity.ObjectStore{
 						Name:  protoWorkflows[0].Processes[0].ObjectStore.Name,
-						Scope: entity.ScopeWorkflow,
+						Scope: entity.ObjStoreScopeWorkflow,
 					},
 				},
 			},

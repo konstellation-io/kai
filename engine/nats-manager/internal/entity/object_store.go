@@ -6,12 +6,12 @@ import (
 	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 )
 
-type ObjectStoreScope int
+type ObjectStoreScope string
 
 const (
-	ScopeUndefined = iota
-	ScopeWorkflow
-	ScopeProject
+	ObjStoreScopeUndefined ObjectStoreScope = "undefined"
+	ObjStoreScopeWorkflow  ObjectStoreScope = "workflow"
+	ObjStoreScopeProject   ObjectStoreScope = "project"
 )
 
 type ObjectStore struct {
@@ -27,7 +27,7 @@ func (o *ObjectStore) Validate() error {
 	}
 
 	switch o.Scope {
-	case ScopeProject, ScopeWorkflow:
+	case ObjStoreScopeProject, ObjStoreScopeWorkflow:
 		return nil
 	default:
 		return internal.ErrInvalidObjectStoreScope

@@ -40,7 +40,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  testObjectStore,
-							Scope: entity.ScopeProject,
+							Scope: entity.ObjStoreScopeProject,
 						},
 					).
 					Build(),
@@ -55,7 +55,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  testObjectStore,
-							Scope: entity.ScopeWorkflow,
+							Scope: entity.ObjStoreScopeWorkflow,
 						},
 					).
 					Build(),
@@ -72,7 +72,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  "",
-							Scope: entity.ScopeWorkflow,
+							Scope: entity.ObjStoreScopeWorkflow,
 						},
 					).
 					Build(),
@@ -87,7 +87,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  testObjectStore,
-							Scope: -1,
+							Scope: "invalid",
 						},
 					).
 					Build(),
@@ -112,7 +112,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  testObjectStore,
-							Scope: entity.ScopeWorkflow,
+							Scope: entity.ObjStoreScopeWorkflow,
 						},
 					).
 					Build(),
@@ -121,7 +121,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  testObjectStore,
-							Scope: entity.ScopeWorkflow,
+							Scope: entity.ObjStoreScopeWorkflow,
 						},
 					).
 					Build(),
@@ -139,7 +139,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  testObjectStore,
-							Scope: entity.ScopeProject,
+							Scope: entity.ObjStoreScopeProject,
 						},
 					).
 					Build(),
@@ -148,7 +148,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  testObjectStore,
-							Scope: entity.ScopeProject,
+							Scope: entity.ObjStoreScopeProject,
 						},
 					).
 					Build(),
@@ -166,7 +166,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  testObjectStore,
-							Scope: entity.ScopeProject,
+							Scope: entity.ObjStoreScopeProject,
 						},
 					).
 					Build(),
@@ -175,7 +175,7 @@ func TestCreateObjectStore(t *testing.T) {
 					WithProcessObjectStore(
 						&entity.ObjectStore{
 							Name:  "another-object-store",
-							Scope: entity.ScopeProject,
+							Scope: entity.ObjStoreScopeProject,
 						},
 					).
 					Build(),
@@ -196,14 +196,14 @@ func TestCreateObjectStore(t *testing.T) {
 								Name: "test-process-1",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
-									Scope: entity.ScopeWorkflow,
+									Scope: entity.ObjStoreScopeWorkflow,
 								},
 							},
 							{
 								Name: "test-process-2",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
-									Scope: entity.ScopeWorkflow,
+									Scope: entity.ObjStoreScopeWorkflow,
 								},
 							},
 						},
@@ -226,14 +226,14 @@ func TestCreateObjectStore(t *testing.T) {
 								Name: "test-process-1",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
-									Scope: entity.ScopeWorkflow,
+									Scope: entity.ObjStoreScopeWorkflow,
 								},
 							},
 							{
 								Name: "test-process-2",
 								ObjectStore: &entity.ObjectStore{
 									Name:  "another-object-store",
-									Scope: entity.ScopeWorkflow,
+									Scope: entity.ObjStoreScopeWorkflow,
 								},
 							},
 						},
@@ -256,14 +256,14 @@ func TestCreateObjectStore(t *testing.T) {
 								Name: "test-process-1",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
-									Scope: entity.ScopeProject,
+									Scope: entity.ObjStoreScopeProject,
 								},
 							},
 							{
 								Name: "test-process-2",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
-									Scope: entity.ScopeProject,
+									Scope: entity.ObjStoreScopeProject,
 								},
 							},
 						},
@@ -286,14 +286,14 @@ func TestCreateObjectStore(t *testing.T) {
 								Name: "test-process-1",
 								ObjectStore: &entity.ObjectStore{
 									Name:  testObjectStore,
-									Scope: entity.ScopeProject,
+									Scope: entity.ObjStoreScopeProject,
 								},
 							},
 							{
 								Name: "test-process-2",
 								ObjectStore: &entity.ObjectStore{
 									Name:  "another-object-store",
-									Scope: entity.ScopeProject,
+									Scope: entity.ObjStoreScopeProject,
 								},
 							},
 						},
@@ -311,7 +311,7 @@ func TestCreateObjectStore(t *testing.T) {
 				NewWorkflowBuilder().
 					WithProcessObjectStore(&entity.ObjectStore{
 						Name:  testObjectStore,
-						Scope: entity.ScopeWorkflow,
+						Scope: entity.ObjStoreScopeWorkflow,
 					}).Build()},
 			expectedObjectStores: []string{
 				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionName, testWorkflowName, testObjectStore),
@@ -324,7 +324,7 @@ func TestCreateObjectStore(t *testing.T) {
 				NewWorkflowBuilder().
 					WithProcessObjectStore(&entity.ObjectStore{
 						Name:  testObjectStore,
-						Scope: entity.ObjectStoreScope(-1),
+						Scope: entity.ObjectStoreScope("invalid"),
 					}).Build()},
 			expectedError: internal.ErrInvalidObjectStoreScope,
 		},

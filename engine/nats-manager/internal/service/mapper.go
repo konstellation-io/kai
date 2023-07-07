@@ -42,11 +42,11 @@ func (n *NatsService) dtoToProcesses(processesDTO []*natspb.Process) []entity.Pr
 func (n *NatsService) dtoToObjectStoreScope(scope natspb.ObjectStoreScope) entity.ObjectStoreScope {
 	switch scope {
 	case natspb.ObjectStoreScope_SCOPE_PROJECT:
-		return entity.ScopeProject
+		return entity.ObjStoreScopeProject
 	case natspb.ObjectStoreScope_SCOPE_WORKFLOW:
-		return entity.ScopeWorkflow
+		return entity.ObjStoreScopeWorkflow
 	default:
-		return entity.ScopeUndefined
+		return entity.ObjStoreScopeUndefined
 	}
 }
 
