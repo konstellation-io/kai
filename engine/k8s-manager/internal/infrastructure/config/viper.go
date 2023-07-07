@@ -62,5 +62,4 @@ func setDefaultValues() {
 	if ok {
 		viper.SetDefault(KubeConfigPathKey, filepath.Join(userHome, ".kube", "config"))
 	}
-
 }

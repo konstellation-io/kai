@@ -7,7 +7,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func GeKrtFilesDownloaderContainer(commonEnvVars []corev1.EnvVar, volumes []corev1.VolumeMount) corev1.Container {
+func GeKrtFilesDownloaderContainer(commonEnvVars []corev1.EnvVar) corev1.Container {
 	image := fmt.Sprintf("%s:%s", viper.Get("krtFilesDownloader.image"), viper.Get("krtFilesDownloader.tag"))
 
 	return corev1.Container{
