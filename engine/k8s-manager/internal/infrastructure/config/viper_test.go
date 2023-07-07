@@ -24,3 +24,8 @@ func TestInitConfig_OverrideWithEnv(t *testing.T) {
 	port := viper.GetInt("server.port")
 	assert.Equal(t, port, 9090)
 }
+
+func TestInitConfig_NoInitFile(t *testing.T) {
+	err := config.Init("no-file")
+	require.Error(t, err)
+}
