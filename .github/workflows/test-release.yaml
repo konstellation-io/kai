@@ -12,8 +12,8 @@ on:
       - 'helm/**/*'
       - '.github/workflows/test-release.yaml'
     branches:
-      - 'feature/**'
-      - 'fix/**'
+      # Destination branches
+      - 'develop'
 
 jobs:
   check-folder-changes:
