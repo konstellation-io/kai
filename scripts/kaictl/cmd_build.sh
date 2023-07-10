@@ -78,10 +78,6 @@ build_engine() {
 }
 
 build_runners() {
-  # TODO: Fix runners naming
-  build_image kai-entrypoint runners/kre-entrypoint
-  build_image kai-py runners/kre-py
-  build_image kai-go runners/kre-go
   build_image krt-files-downloader runners/krt-files-downloader
 }
 
