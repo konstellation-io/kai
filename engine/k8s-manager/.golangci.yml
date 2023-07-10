@@ -51,64 +51,60 @@ linters:
   # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
   disable-all: true
   enable:
+    - asciicheck
     - bodyclose
-    - deadcode
     - dogsled
     - dupl
     - errcheck
     - exhaustive
+    - exportloopref
     - funlen
+    - gochecknoglobals
     - gochecknoinits
+    - gocognit
     - goconst
     - gocritic
     - gocyclo
+    - godot
+    - godox
+    - goerr113
     - gofmt
     - goimports
-    - golint
     - gomnd
     - goprintffuncname
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
     - misspell
     - nakedret
+    - nestif
     - noctx
     - nolintlint
+    - prealloc
+    - revive
     - rowserrcheck
-    - scopelint
     - staticcheck
-    - structcheck
     - stylecheck
+    - testpackage
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
-    - asciicheck
-    - gochecknoglobals
-    - gocognit
-    - godot
-    - godox
-    - maligned
-    - nestif
-    - prealloc
     - wsl
-    - testpackage
-    - goerr113
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
     - path: _test\.go
       linters:
+        - goerr113
         - gomnd
     # https://github.com/go-critic/go-critic/issues/926
     - linters:
         - gocritic
-      text: "unnecessaryDefer:"
+      text: 'unnecessaryDefer:'
 run:
   skip-dirs:
     - test_krt

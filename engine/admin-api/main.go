@@ -3,18 +3,23 @@ package main
 import (
 	"log"
 
-	"go.mongodb.org/mongo-driver/mongo"
-
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/version"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/k8smanager"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"go.mongodb.org/mongo-driver/mongo"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -66,12 +71,26 @@ func initApp(
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
 
-	k8sService, err := service.NewK8sVersionClient(cfg, logger)
+	ccK8sManager, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	natsManagerService, err := service.NewNatsManagerClient(cfg, logger)
+	k8sManagerClient := versionpb.NewVersionServiceClient(ccK8sManager)
+
+	k8sService, err := k8smanager.NewK8sVersionClient(cfg, logger, k8sManagerClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ccNatsManager, err := grpc.Dial(cfg.Services.NatsManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	natsManagerClient := natspb.NewNatsManagerServiceClient(ccNatsManager)
+
+	natsManagerService, err := natsmanager.NewNatsManagerClient(cfg, logger, natsManagerClient)
 	if err != nil {
 		log.Fatal(err)
 	}

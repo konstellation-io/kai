@@ -8,13 +8,13 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 	natslib "github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/errors"
 	"github.com/konstellation-io/kai/engine/nats-manager/nats"
 	"github.com/konstellation-io/kai/libs/simplelogger"
 )
@@ -88,29 +88,34 @@ func (s *ClientTestSuite) AfterTest(_, _ string) {
 			log.Fatalf("error deleting object store %q: %s", objStore, err)
 		}
 	}
+
+	kvStores := s.js.KeyValueStoreNames()
+	for kvStore := range kvStores {
+		err := s.js.DeleteKeyValue(kvStore)
+		if err != nil {
+			log.Fatalf("error deleting key-value store %q: %s", kvStore, err)
+		}
+	}
 }
 
 func (s *ClientTestSuite) TestNatsClient_CreateStream() {
-	testNodeSubject := "test-stream-test-subject"
-	testEntrypointSubject := "test-stream-entrypoint"
+	testProcesSubject := "test-stream-test-subject"
 
 	streamConfig := &entity.StreamConfig{
 		Stream: "test-stream",
-		Nodes: entity.NodesStreamConfig{
-			"test-node": entity.NodeStreamConfig{
-				Subject: testNodeSubject,
+		Processes: entity.ProcessesStreamConfig{
+			"test-process": entity.ProcessStreamConfig{
+				Subject: testProcesSubject,
 			},
 		},
-		EntrypointSubject: "test-stream-entrypoint",
 	}
 
 	err := s.natsClient.CreateStream(streamConfig)
 	s.Require().NoError(err)
 
 	expectedSubjects := []string{
-		testNodeSubject,
-		testNodeSubject + ".*",
-		testEntrypointSubject,
+		testProcesSubject,
+		testProcesSubject + ".*",
 	}
 
 	streams := s.js.Streams()
@@ -127,16 +132,15 @@ func (s *ClientTestSuite) TestNatsClient_CreateStream() {
 
 func (s *ClientTestSuite) TestNatsClient_CreateStream_ErrorIfStreamAlreadyExists() {
 	testStream := "test-stream"
-	testNodeSubject := "test-stream-test-subject"
+	testProcesSubject := "test-stream-test-subject"
 
 	streamConfig := &entity.StreamConfig{
 		Stream: testStream,
-		Nodes: entity.NodesStreamConfig{
-			"test-node": entity.NodeStreamConfig{
-				Subject: testNodeSubject,
+		Processes: entity.ProcessesStreamConfig{
+			"test-process": entity.ProcessStreamConfig{
+				Subject: testProcesSubject,
 			},
 		},
-		EntrypointSubject: "test-stream-entrypoint",
 	}
 
 	_, err := s.js.AddStream(&natslib.StreamConfig{
@@ -288,7 +292,7 @@ func (s *ClientTestSuite) TestNatsClient_GetObjectStoresNames() {
 			expectedObjectStores: nil,
 			optFilter:            []*regexp.Regexp{regexp.MustCompile(""), regexp.MustCompile("")},
 			wantError:            true,
-			expectedError:        errors.ErrNoOptFilter,
+			expectedError:        internal.ErrNoOptFilter,
 		},
 	}
 
@@ -373,7 +377,7 @@ func (s *ClientTestSuite) TestNatsClient_GetStreamNames() {
 			expectedStreams: nil,
 			optFilter:       []*regexp.Regexp{regexp.MustCompile(""), regexp.MustCompile("")},
 			wantError:       true,
-			expectedError:   errors.ErrNoOptFilter,
+			expectedError:   internal.ErrNoOptFilter,
 		},
 	}
 
@@ -406,7 +410,7 @@ func (s *ClientTestSuite) TestNatsClient_GetStreamNames() {
 }
 
 func (s *ClientTestSuite) TestNatsClient_GetStreamNames_DoesntReturnObjectStores() {
-	testStreamName := "runtime-id_version-id_workflows-id"
+	testStreamName := "product-id_version-id_workflows-id"
 
 	_, err := s.js.CreateObjectStore(&natslib.ObjectStoreConfig{
 		Bucket:  testStreamName,
@@ -420,9 +424,48 @@ func (s *ClientTestSuite) TestNatsClient_GetStreamNames_DoesntReturnObjectStores
 	})
 	s.Require().NoError(err)
 
-	actualStreams, err := s.natsClient.GetStreamNames(regexp.MustCompile("^runtime-id_version-id_.*"))
+	actualStreams, err := s.natsClient.GetStreamNames(regexp.MustCompile("^product-id_version-id_.*"))
 	s.Assert().NoError(err)
 	expectedStreams := []string{testStreamName}
 
 	s.Assert().ElementsMatch(expectedStreams, actualStreams)
+}
+
+func (s *ClientTestSuite) TestNatsClient_CreateCreateKeyValueStore() {
+	testKeyValueStore := "test-kv-store"
+
+	err := s.natsClient.CreateKeyValueStore(testKeyValueStore)
+	s.Assert().NoError(err)
+
+	keyValueStores := s.js.KeyValueStores()
+
+	keyValueStore := <-keyValueStores
+	s.Assert().Equal(testKeyValueStore, keyValueStore.Bucket())
+
+	s.Assert().Equal(nil, <-keyValueStores)
+}
+
+func (s *ClientTestSuite) TestNatsClient_CreateCreateKeyValueStore_NoErrorWhenKVStoreHaveSameNameAndConfig() {
+	testKeyValueStore := "test-kv-store"
+
+	_, err := s.js.CreateKeyValue(&natslib.KeyValueConfig{
+		Bucket: testKeyValueStore,
+	})
+	s.Require().NoError(err)
+
+	err = s.natsClient.CreateKeyValueStore(testKeyValueStore)
+	s.Assert().NoError(err)
+}
+
+func (s *ClientTestSuite) TestNatsClient_CreateCreateKeyValueStore_ErrorWhenDuplicatedNameHasDiffConfig() {
+	testKeyValueStore := "test-kv-store"
+
+	_, err := s.js.CreateKeyValue(&natslib.KeyValueConfig{
+		Bucket:  testKeyValueStore,
+		Storage: natslib.MemoryStorage,
+	})
+	s.Require().NoError(err)
+
+	err = s.natsClient.CreateKeyValueStore(testKeyValueStore)
+	s.Assert().ErrorIs(err, natslib.ErrStreamNameAlreadyInUse)
 }

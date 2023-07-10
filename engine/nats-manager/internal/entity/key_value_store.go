@@ -1,8 +1,16 @@
 package entity
 
+type KeyValueStoreScope string
+
+const (
+	KVScopeProject  KeyValueStoreScope = "project"
+	KVScopeWorkflow KeyValueStoreScope = "workflow"
+	KVScopeProcess  KeyValueStoreScope = "process"
+)
+
 type WorkflowKeyValueStores struct {
 	WorkflowStore string
-	Nodes         map[string]string
+	Processes     map[string]string
 }
 
 type VersionKeyValueStores struct {

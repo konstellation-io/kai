@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/nats-io/nats.go"
-
+	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/errors"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
+	"github.com/nats-io/nats.go"
 )
 
 type NatsClient struct {
@@ -40,12 +39,12 @@ func InitJetStreamConnection(url string) (nats.JetStreamContext, error) {
 func (n *NatsClient) CreateStream(streamConfig *entity.StreamConfig) error {
 	n.logger.Infof("Creating stream  %q", streamConfig.Stream)
 
-	subjects := n.getNodesSubjects(streamConfig.Nodes)
+	subjects := n.getProcessesSubjects(streamConfig.Processes)
 
 	streamCfg := &nats.StreamConfig{
 		Name:        streamConfig.Stream,
 		Description: "",
-		Subjects:    append(subjects, streamConfig.EntrypointSubject),
+		Subjects:    subjects,
 		Retention:   nats.InterestPolicy,
 	}
 
@@ -53,25 +52,11 @@ func (n *NatsClient) CreateStream(streamConfig *entity.StreamConfig) error {
 	return err
 }
 
-func (n *NatsClient) CreateObjectStores(objectStore string) error {
-	n.logger.Infof("Creating object store %q", objectStore)
-
-	_, err := n.js.CreateObjectStore(&nats.ObjectStoreConfig{
-		Bucket:  objectStore,
-		Storage: nats.FileStorage,
-	})
-	if err != nil {
-		return fmt.Errorf("error creating the object store: %w", err)
-	}
-
-	return nil
-}
-
 // GetObjectStoreNames returns the list of object stores.
 // The optional param `optFilter` accepts 0 or 1 value.
 func (n *NatsClient) GetObjectStoreNames(optFilter ...*regexp.Regexp) ([]string, error) {
 	if len(optFilter) > 1 {
-		return nil, errors.ErrNoOptFilter
+		return nil, internal.ErrNoOptFilter
 	}
 
 	var regexpFilter *regexp.Regexp
@@ -115,7 +100,7 @@ func (n *NatsClient) CreateKeyValueStore(keyValueStore string) error {
 		Bucket: keyValueStore,
 	})
 	if err != nil {
-		return fmt.Errorf("error creating the key-value store: %s", err)
+		return fmt.Errorf("error creating the key-value store: %w", err)
 	}
 
 	return nil
@@ -137,7 +122,7 @@ func (n *NatsClient) DeleteObjectStore(objectStore string) error {
 // The optional param `optFilter` accepts 0 or 1 value.
 func (n *NatsClient) GetStreamNames(optFilter ...*regexp.Regexp) ([]string, error) {
 	if len(optFilter) > 1 {
-		return nil, errors.ErrNoOptFilter
+		return nil, internal.ErrNoOptFilter
 	}
 
 	var regexpFilter *regexp.Regexp
@@ -158,12 +143,12 @@ func (n *NatsClient) GetStreamNames(optFilter ...*regexp.Regexp) ([]string, erro
 	return streams, nil
 }
 
-func (n *NatsClient) getNodesSubjects(nodes entity.NodesStreamConfig) []string {
-	subjects := make([]string, 0, len(nodes)*2)
+func (n *NatsClient) getProcessesSubjects(processes entity.ProcessesStreamConfig) []string {
+	subjects := make([]string, 0, len(processes)*2)
 
-	for _, nodeCfg := range nodes {
-		subSubject := nodeCfg.Subject + ".*"
-		subjects = append(subjects, nodeCfg.Subject, subSubject)
+	for _, processCfg := range processes {
+		subSubject := processCfg.Subject + ".*"
+		subjects = append(subjects, processCfg.Subject, subSubject)
 	}
 
 	return subjects

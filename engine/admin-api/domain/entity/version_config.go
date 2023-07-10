@@ -1,7 +1,13 @@
 package entity
 
 import (
-	"fmt"
+	"errors"
+)
+
+var (
+	ErrWorkflowStreamNotFound      = errors.New("workflow stream config not found")
+	ErrWorkflowKVStoreNotFound     = errors.New("workflow key-value store config not found")
+	ErrWorkflowObjectStoreNotFound = errors.New("workflow key-value store config not found")
 )
 
 type VersionConfig struct {
@@ -21,40 +27,29 @@ func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *V
 	}
 }
 
-func (w *WorkflowStreamConfig) GetProcessStreamConfig(process string) (*ProcessStreamConfig, error) {
-	return w.GetProcessConfig(process)
-}
-
-func (v *VersionConfig) GetProcessObjectStoreConfig(workflow, process string) *string {
-	w, ok := v.ObjectStoresConfig.Workflows[workflow]
-	if !ok {
-		return nil
-	}
-
-	n, ok := w[process]
-	if !ok {
-		return nil
-	}
-
-	return &n
-}
-
 func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStreamConfig, error) {
 	w, ok := v.StreamsConfig.Workflows[workflow]
 	if !ok {
-		//nolint:goerr113 // The error needs to be dynamic
-		return nil, fmt.Errorf("workflow %q stream config not found", workflow)
+		return nil, ErrWorkflowStreamNotFound
+	}
+
+	return &w, nil
+}
+
+func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*WorkflowKeyValueStores, error) {
+	w, ok := v.KeyValueStoresConfig.Workflows[workflow]
+	if !ok {
+		return nil, ErrWorkflowKVStoreNotFound
 	}
 
 	return w, nil
 }
 
-func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*WorkflowKeyValueStores, error) {
-	w, ok := v.KeyValueStoresConfig.WorkflowsKeyValueStores[workflow]
+func (v *VersionConfig) GetWorkflowObjectStoresConfig(workflow string) (*WorkflowObjectStoresConfig, error) {
+	w, ok := v.ObjectStoresConfig.Workflows[workflow]
 	if !ok {
-		//nolint:goerr113 // errors need to be dynamic
-		return nil, fmt.Errorf("workflow %q stream config not found", workflow)
+		return nil, ErrWorkflowObjectStoreNotFound
 	}
 
-	return w, nil
+	return &w, nil
 }
