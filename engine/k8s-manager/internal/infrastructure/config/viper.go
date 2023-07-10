@@ -39,6 +39,7 @@ func Init(configFilePath string) error {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	viper.RegisterAlias("nats.url", "NATS_URL")
+	viper.RegisterAlias("kubernetes.namespace", "KUBERNETES_NAMESPACE")
 
 	viper.AutomaticEnv()
 

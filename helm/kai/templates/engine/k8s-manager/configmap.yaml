@@ -6,6 +6,7 @@ metadata:
     {{- include "k8s-manager.labels" . | nindent 4 }}
 data:
   KAI_API_LOG_LEVEL: {{ .Values.adminApi.logLevel }}
+  KAI_KUBERNETES_NAMESPACE: "{{ .Release.Namespace }}"
   KAI_DEVELOPMENT_MODE: "{{ .Values.developmentMode }}"
   KAI_RELEASE_NAME: "{{ .Release.Name }}"
   KAI_BASE_DOMAIN_NAME: {{ .Values.config.baseDomainName }}
