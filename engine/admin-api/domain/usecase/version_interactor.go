@@ -133,7 +133,7 @@ func (i *VersionInteractor) Create(
 	err = krtYml.Validate()
 	if err != nil {
 		return nil, nil, errors.NewErrInvalidKRT(
-			"create version: invalid KRT file",
+			"invalid KRT file",
 			err,
 		)
 	}
