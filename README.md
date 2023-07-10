@@ -131,6 +131,7 @@ In order to start development on this project you will need these tools:
 - **[helm](https://helm.sh/)**: K8s package manager. Make sure you have v3+
 - **[helm-docs](https://github.com/norwoodj/helm-docs)**: Helm doc auto-generation tool
 - **[yq](https://github.com/mikefarah/yq)**: YAML processor. Make sure you have v4+
+- **[gitlint](https://jorisroovers.com/gitlint)**: Checks your commit messages for style.
 - **[pre-commit](https://pre-commit.com/)**: Pre-commit hooks execution tool ensures the best practices are followed before commiting any change
 
 ## Pre-commit hooks setup
@@ -139,6 +140,7 @@ From the repository root execute the following commands:
 ```bash
 pre-commit install
 pre-commit install-hooks
+pre-commit install --hook-type commit-msg
 ```
 
 **Note**: Contributing commits that had not passed the required hooks will be rejected.
