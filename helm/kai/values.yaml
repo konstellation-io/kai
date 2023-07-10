@@ -86,7 +86,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.1.1-develop.1
+    tag: 0.2.0-develop.3
     # -- Image pull policy
     pullPolicy: IfNotPresent
   tls:
@@ -143,7 +143,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.1.1-develop.1
+    tag: 0.2.0-develop.3
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -369,7 +369,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.1.1-develop.1
+    tag: 0.2.0-develop.3
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -607,6 +607,92 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.1.1-develop.1
+    tag: 0.2.0-develop.3
     # -- Image pull policy
     pullPolicy: IfNotPresent
+registry:
+  image:
+    # -- Image repository
+    repository: registry
+    # -- Image tag
+    tag: 2.8.2
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+  # -- Image pull secrets
+  imagePullSecrets: []
+  serviceAccount:
+    # -- Specifies whether a service account should be created
+    create: true
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+    name: ""
+  # -- Pod annotations
+  podAnnotations: {}
+  # -- Pod security context
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  # Container security Context
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    # -- Service type
+    type: ClusterIP
+    ports:
+      # -- The http port the service will listen on. Only
+      http: 5000
+  # -- A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/.
+  config: ""
+  configSecret:
+    # -- Takes precedence over 'registry.config'. The name of the secret that contains the registry config file.
+    name: ""
+    # -- The name of the secret key that contains the registry config file
+    key: ""
+  storage:
+    # -- Whether to enable persistence
+    enabled: true
+    # -- Storage class name
+    storageClass: "sandard"
+    # -- Access mode for the volume
+    accessMode: ReadWriteOnce
+    # -- Storage size
+    size: 10Gi
+    # -- Persistent volume mount point. This will define Registry app workdir too.
+    path: /var/lib/registry
+  # -- Container resources
+  resources: {}
+  # -- The container port
+  containerPort: 5000
+  # -- Define which Nodes the Pods are scheduled on.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+  # -- Assign custom affinity rules to the pods
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/e2e-az-name
+  #         operator: In
+  #         values:
+  #         - e2e-az1
+  #         - e2e-az2
+
+  # -- Tolerations for use with node taints
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"

@@ -4,11 +4,16 @@ on:
     branches:
       - main
       - develop
+      - 'release/**'
+      - 'hotfix/**'
   pull_request:
     paths:
       - 'engine/**/*'
       - 'helm/**/*'
       - '.github/workflows/test-release.yaml'
+    branches:
+      # Destination branches
+      - 'develop'
 
 jobs:
   check-folder-changes:
