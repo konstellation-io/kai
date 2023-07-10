@@ -15,7 +15,7 @@ line-length=72
 # Comma-separated list of words that should not occur in the title. Matching is case
 # insensitive. It's fine if the keyword occurs as part of a larger word (so "WIPING"
 # will not cause a violation, but "WIP: my title" will.
-words=WIP
+words=WIP,kre,kdl
 
 [body-max-line-length]
 line-length=80
