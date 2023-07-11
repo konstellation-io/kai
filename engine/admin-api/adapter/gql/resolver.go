@@ -4,6 +4,7 @@ package gql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -13,7 +14,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
+	internalerrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
@@ -79,15 +80,13 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 
 	version, notifyCh, err := r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
 	if err != nil {
-		var errInvalidKRT *errors.ErrInvalidKRT
-		if errors.As(err, errInvalidKRT) {
-			extensions := make(map[string]interface{})
-			extensions["code"] = "krt_validation_error"
-			extensions["details"] = errInvalidKRT.GetErrors().Error()
-
+		var errInvalidKRT internalerrors.ErrInvalidKRT
+		if errors.As(err, &errInvalidKRT) {
 			return nil, &gqlerror.Error{
-				Message:    "the krt.yml file contains errors",
-				Extensions: extensions,
+				Message: errInvalidKRT.Error(),
+				Extensions: map[string]interface{}{
+					"code": "krt_validation_error",
+				},
 			}
 		}
 

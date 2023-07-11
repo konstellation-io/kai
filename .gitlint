@@ -1,0 +1,25 @@
+[general]
+# Ignore following rules
+ignore=body-is-missing
+# verbosity should be a value between 1 and 3, the commandline -v flags take precedence over this
+verbosity = 2
+# By default gitlint will ignore merge commits. Set to 'false' to disable.
+ignore-merge-commits=true
+
+contrib = contrib-title-conventional-commits
+
+[title-max-length]
+line-length=72
+
+[title-must-not-contain-word]
+# Comma-separated list of words that should not occur in the title. Matching is case
+# insensitive. It's fine if the keyword occurs as part of a larger word (so "WIPING"
+# will not cause a violation, but "WIP: my title" will.
+words=WIP,kre,kdl
+
+[body-max-line-length]
+line-length=80
+
+[body-min-length]
+# If commit body exists, no min length is required for it
+min-length=0

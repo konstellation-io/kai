@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY scripts scripts
 
-COPY proto proto
+COPY ./internal/infrastructure/grpc/proto ./internal/infrastructure/grpc/proto
 
 RUN ./scripts/generate_proto.sh
 
@@ -19,11 +19,10 @@ WORKDIR /app
 COPY go.* ./
 RUN go mod download
 COPY . .
-RUN rm -rf /app/proto
-COPY --from=protobuf /app/proto/ /app/proto/
+RUN rm -rf /app/internal/infrastructure/grpc/proto
+COPY --from=protobuf /app/internal/infrastructure/grpc/proto/ /app/internal/infrastructure/grpc/proto/
 
-RUN go build -o k8s-manager .
-
+RUN go build -o k8s-manager cmd/main.go
 
 # Final image
 FROM alpine:3.10.2

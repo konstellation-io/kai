@@ -86,7 +86,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.2
+    tag: 0.2.0-develop.7
     # -- Image pull policy
     pullPolicy: IfNotPresent
   tls:
@@ -143,7 +143,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.2
+    tag: 0.2.0-develop.7
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -369,7 +369,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.2
+    tag: 0.2.0-develop.7
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -607,7 +607,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.2
+    tag: 0.2.0-develop.7
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
@@ -621,12 +621,11 @@ registry:
   # -- Image pull secrets
   imagePullSecrets: []
   serviceAccount:
-    # Specifies whether a service account should be created
+    # -- Specifies whether a service account should be created
     create: true
-    # Annotations to add to the service account
+    # -- Annotations to add to the service account
     annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
+    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
     name: ""
   # -- Pod annotations
   podAnnotations: {}
@@ -649,7 +648,6 @@ registry:
     ports:
       # -- The http port the service will listen on. Only
       http: 5000
-  host: registry.kai.local
   # -- A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/.
   config: ""
   configSecret:
@@ -668,23 +666,33 @@ registry:
     size: 10Gi
     # -- Persistent volume mount point. This will define Registry app workdir too.
     path: /var/lib/registry
-  tls:
-    # -- Whether to enable TLS
-    enabled: false
-  ingress:
-    ## This Chart has been developed using Kong Ingress Controller by default.
-    ## Using the following default annotations ensures its correct operation.
-    ## Ref: https://kubernetes.github.io/ingress-nginx/
-    ##
-
-    # -- The name of the ingress class to use
-    className: kong
-    # -- Ingress annotations
-    annotations: {}
   # -- Container resources
   resources: {}
   # -- The container port
   containerPort: 5000
+  # -- Define which Nodes the Pods are scheduled on.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
   nodeSelector: {}
+  # -- Assign custom affinity rules to the pods
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
   affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/e2e-az-name
+  #         operator: In
+  #         values:
+  #         - e2e-az1
+  #         - e2e-az2
+
+  # -- Tolerations for use with node taints
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
   tolerations: []
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"

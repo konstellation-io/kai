@@ -12,8 +12,8 @@ on:
       - 'helm/**/*'
       - '.github/workflows/test-release.yaml'
     branches:
-      - 'feature/**'
-      - 'fix/**'
+      # Destination branches
+      - 'develop'
 
 jobs:
   check-folder-changes:
@@ -80,11 +80,11 @@ jobs:
           args: --timeout=5m
       - name: Run unit tests
         if: matrix.changes == 'true'
-        run: go test ./... -cover -v -coverprofile=coverage-unit.out --tags=unit
+        run: go test ./... -cover -v -coverpkg=./... -coverprofile=coverage-unit.out --tags=unit
         working-directory: ./engine/${{ matrix.component }}
       - name: Run integration tests
         if: matrix.changes == 'true'
-        run: go test ./... -cover -v -coverprofile=coverage-integration.out --tags=integration
+        run: go test ./... -cover -v -coverpkg=./... -coverprofile=coverage-integration.out --tags=integration
         working-directory: ./engine/${{ matrix.component }}
       - name: Archive code coverage results
         if: matrix.changes == 'true'

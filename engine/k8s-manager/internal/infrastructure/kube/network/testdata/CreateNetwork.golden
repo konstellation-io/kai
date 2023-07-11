@@ -1,0 +1,67 @@
+typemeta:
+    kind: ""
+    apiversion: ""
+listmeta:
+    selflink: ""
+    resourceversion: ""
+    continue: ""
+    remainingitemcount: null
+items:
+    - typemeta:
+        kind: ""
+        apiversion: ""
+      objectmeta:
+        name: test-product-test-version-test-workflow-test-process
+        generatename: ""
+        namespace: test
+        selflink: ""
+        uid: ""
+        resourceversion: ""
+        generation: 0
+        creationtimestamp: "0001-01-01T00:00:00Z"
+        deletiontimestamp: null
+        deletiongraceperiodseconds: null
+        labels:
+            process: test-process
+            product: test-product
+            type: network
+            version: test-version
+            workflow: test-workflow
+        annotations: {}
+        ownerreferences: []
+        finalizers: []
+        zzz_deprecatedclustername: ""
+        managedfields: []
+      spec:
+        ports:
+            - name: ""
+              protocol: TCP
+              appprotocol: null
+              port: 80
+              targetport:
+                type: 0
+                intval: 80
+                strval: ""
+              nodeport: 0
+        selector: {}
+        clusterip: ""
+        clusterips: []
+        type: ClusterIP
+        externalips: []
+        sessionaffinity: ""
+        loadbalancerip: ""
+        loadbalancersourceranges: []
+        externalname: ""
+        externaltrafficpolicy: ""
+        healthchecknodeport: 0
+        publishnotreadyaddresses: false
+        sessionaffinityconfig: null
+        ipfamilies: []
+        ipfamilypolicy: null
+        allocateloadbalancernodeports: null
+        loadbalancerclass: null
+        internaltrafficpolicy: null
+      status:
+        loadbalancer:
+            ingress: []
+        conditions: []

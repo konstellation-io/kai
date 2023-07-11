@@ -1,9 +1,20 @@
 package entity
 
 type VersionObjectStoresConfig struct {
-	Workflows WorkflowsObjectStoresConfig
+	Workflows map[string]WorkflowObjectStoresConfig
 }
 
-type WorkflowsObjectStoresConfig map[string]NodesObjectStoresConfig
+type WorkflowObjectStoresConfig struct {
+	Processes ProcessObjectStoresConfig
+}
 
-type NodesObjectStoresConfig map[string]string
+type ProcessObjectStoresConfig map[string]string
+
+func (n ProcessObjectStoresConfig) GetProcessObjectStoreConfig(process string) *string {
+	processObjStore, ok := n[process]
+	if !ok {
+		return nil
+	}
+
+	return &processObjStore
+}

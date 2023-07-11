@@ -1,0 +1,361 @@
+typemeta:
+    kind: ""
+    apiversion: ""
+listmeta:
+    selflink: ""
+    resourceversion: ""
+    continue: ""
+    remainingitemcount: null
+items:
+    - typemeta:
+        kind: ""
+        apiversion: ""
+      objectmeta:
+        name: test-product-test-version-test-workflow-test-process
+        generatename: ""
+        namespace: test
+        selflink: ""
+        uid: ""
+        resourceversion: ""
+        generation: 0
+        creationtimestamp: "0001-01-01T00:00:00Z"
+        deletiontimestamp: null
+        deletiongraceperiodseconds: null
+        labels:
+            process: test-process
+            product: test-product
+            type: task
+            version: test-version
+            workflow: test-workflow
+        annotations: {}
+        ownerreferences: []
+        finalizers: []
+        zzz_deprecatedclustername: ""
+        managedfields: []
+      spec:
+        replicas: 1
+        selector:
+            matchlabels:
+                process: test-process
+                product: test-product
+                type: task
+                version: test-version
+                workflow: test-workflow
+            matchexpressions: []
+        template:
+            objectmeta:
+                name: ""
+                generatename: ""
+                namespace: ""
+                selflink: ""
+                uid: ""
+                resourceversion: ""
+                generation: 0
+                creationtimestamp: "0001-01-01T00:00:00Z"
+                deletiontimestamp: null
+                deletiongraceperiodseconds: null
+                labels:
+                    process: test-process
+                    product: test-product
+                    type: task
+                    version: test-version
+                    workflow: test-workflow
+                annotations: {}
+                ownerreferences: []
+                finalizers: []
+                zzz_deprecatedclustername: ""
+                managedfields: []
+            spec:
+                volumes:
+                    - name: krt-base-path
+                      volumesource:
+                        hostpath: null
+                        emptydir:
+                            medium: ""
+                            sizelimit: null
+                        gcepersistentdisk: null
+                        awselasticblockstore: null
+                        gitrepo: null
+                        secret: null
+                        nfs: null
+                        iscsi: null
+                        glusterfs: null
+                        persistentvolumeclaim: null
+                        rbd: null
+                        flexvolume: null
+                        cinder: null
+                        cephfs: null
+                        flocker: null
+                        downwardapi: null
+                        fc: null
+                        azurefile: null
+                        configmap: null
+                        vspherevolume: null
+                        quobyte: null
+                        azuredisk: null
+                        photonpersistentdisk: null
+                        projected: null
+                        portworxvolume: null
+                        scaleio: null
+                        storageos: null
+                        csi: null
+                        ephemeral: null
+                    - name: version-conf-files
+                      volumesource:
+                        hostpath: null
+                        emptydir: null
+                        gcepersistentdisk: null
+                        awselasticblockstore: null
+                        gitrepo: null
+                        secret: null
+                        nfs: null
+                        iscsi: null
+                        glusterfs: null
+                        persistentvolumeclaim: null
+                        rbd: null
+                        flexvolume: null
+                        cinder: null
+                        cephfs: null
+                        flocker: null
+                        downwardapi: null
+                        fc: null
+                        azurefile: null
+                        configmap:
+                            localobjectreference:
+                                name: configmap-name
+                            items:
+                                - key: test-product-test-version-test-workflow-test-process
+                                  path: app.yaml
+                                  mode: null
+                                - key: parsers.conf
+                                  path: parsers.conf
+                                  mode: null
+                                - key: fluent-bit.conf
+                                  path: fluent-bit.conf
+                                  mode: null
+                            defaultmode: null
+                            optional: null
+                        vspherevolume: null
+                        quobyte: null
+                        azuredisk: null
+                        photonpersistentdisk: null
+                        projected: null
+                        portworxvolume: null
+                        scaleio: null
+                        storageos: null
+                        csi: null
+                        ephemeral: null
+                    - name: app-log-volume
+                      volumesource:
+                        hostpath: null
+                        emptydir:
+                            medium: ""
+                            sizelimit: null
+                        gcepersistentdisk: null
+                        awselasticblockstore: null
+                        gitrepo: null
+                        secret: null
+                        nfs: null
+                        iscsi: null
+                        glusterfs: null
+                        persistentvolumeclaim: null
+                        rbd: null
+                        flexvolume: null
+                        cinder: null
+                        cephfs: null
+                        flocker: null
+                        downwardapi: null
+                        fc: null
+                        azurefile: null
+                        configmap: null
+                        vspherevolume: null
+                        quobyte: null
+                        azuredisk: null
+                        photonpersistentdisk: null
+                        projected: null
+                        portworxvolume: null
+                        scaleio: null
+                        storageos: null
+                        csi: null
+                        ephemeral: null
+                initcontainers: []
+                containers:
+                    - name: fluent-bit
+                      image: ':'
+                      command:
+                        - /fluent-bit/bin/fluent-bit
+                        - -c
+                        - /fluent-bit/etc/fluent-bit.conf
+                        - -v
+                      args: []
+                      workingdir: ""
+                      ports: []
+                      envfrom: []
+                      env:
+                        - name: KAI_MESSAGING_HOST
+                          value: ""
+                          valuefrom: null
+                        - name: KAI_MESSAGING_PORT
+                          value: ""
+                          valuefrom: null
+                        - name: KAI_PRODUCT_ID
+                          value: test-product
+                          valuefrom: null
+                        - name: KAI_VERSION_NAME
+                          value: test-version
+                          valuefrom: null
+                        - name: KAI_WORKFLOW_NAME
+                          value: test-workflow
+                          valuefrom: null
+                        - name: KAI_PROCESS_NAME
+                          value: test-process
+                          valuefrom: null
+                      resources:
+                        limits: {}
+                        requests: {}
+                      volumemounts:
+                        - name: version-conf-files
+                          readonly: true
+                          mountpath: /fluent-bit/etc/fluent-bit.conf
+                          subpath: fluent-bit.conf
+                          mountpropagation: null
+                          subpathexpr: ""
+                        - name: version-conf-files
+                          readonly: true
+                          mountpath: /fluent-bit/etc/parsers.conf
+                          subpath: parsers.conf
+                          mountpropagation: null
+                          subpathexpr: ""
+                        - name: app-log-volume
+                          readonly: true
+                          mountpath: /var/log/app
+                          subpath: ""
+                          mountpropagation: null
+                          subpathexpr: ""
+                      volumedevices: []
+                      livenessprobe: null
+                      readinessprobe: null
+                      startupprobe: null
+                      lifecycle: null
+                      terminationmessagepath: ""
+                      terminationmessagepolicy: ""
+                      imagepullpolicy: IfNotPresent
+                      securitycontext: null
+                      stdin: false
+                      stdinonce: false
+                      tty: false
+                    - name: test-process
+                      image: test-image@test
+                      command: []
+                      args: []
+                      workingdir: ""
+                      ports: []
+                      envfrom:
+                        - prefix: ""
+                          configmapref:
+                            localobjectreference:
+                                name: configmap-name
+                            optional: null
+                          secretref: null
+                      env:
+                        - name: KAI_APP_CONFIG_PATH
+                          value: ""
+                          valuefrom: null
+                      resources:
+                        limits:
+                            nvidia.com/gpu:
+                                format: DecimalSI
+                        requests:
+                            nvidia.com/gpu:
+                                format: DecimalSI
+                      volumemounts:
+                        - name: version-conf-files
+                          readonly: true
+                          mountpath: ""
+                          subpath: ""
+                          mountpropagation: null
+                          subpathexpr: ""
+                        - name: krt-base-path
+                          readonly: true
+                          mountpath: ""
+                          subpath: ""
+                          mountpropagation: null
+                          subpathexpr: ""
+                        - name: app-log-volume
+                          readonly: true
+                          mountpath: /app/logs
+                          subpath: ""
+                          mountpropagation: null
+                          subpathexpr: ""
+                      volumedevices: []
+                      livenessprobe: null
+                      readinessprobe: null
+                      startupprobe: null
+                      lifecycle: null
+                      terminationmessagepath: ""
+                      terminationmessagepolicy: ""
+                      imagepullpolicy: IfNotPresent
+                      securitycontext: null
+                      stdin: false
+                      stdinonce: false
+                      tty: false
+                ephemeralcontainers: []
+                restartpolicy: ""
+                terminationgraceperiodseconds: null
+                activedeadlineseconds: null
+                dnspolicy: ""
+                nodeselector:
+                    konstellation.io/gpu: "true"
+                serviceaccountname: ""
+                deprecatedserviceaccount: ""
+                automountserviceaccounttoken: null
+                nodename: ""
+                hostnetwork: false
+                hostpid: false
+                hostipc: false
+                shareprocessnamespace: null
+                securitycontext: null
+                imagepullsecrets: []
+                hostname: ""
+                subdomain: ""
+                affinity: null
+                schedulername: ""
+                tolerations:
+                    - key: konstellation.io/gpu
+                      operator: Exists
+                      value: ""
+                      effect: NoSchedule
+                      tolerationseconds: null
+                    - key: nvidia.com/gpu
+                      operator: Exists
+                      value: ""
+                      effect: NoSchedule
+                      tolerationseconds: null
+                hostaliases: []
+                priorityclassname: ""
+                priority: null
+                dnsconfig: null
+                readinessgates: []
+                runtimeclassname: null
+                enableservicelinks: null
+                preemptionpolicy: null
+                overhead: {}
+                topologyspreadconstraints: []
+                sethostnameasfqdn: null
+                os: null
+        strategy:
+            type: ""
+            rollingupdate: null
+        minreadyseconds: 0
+        revisionhistorylimit: null
+        paused: false
+        progressdeadlineseconds: null
+      status:
+        observedgeneration: 0
+        replicas: 0
+        updatedreplicas: 0
+        readyreplicas: 0
+        availablereplicas: 0
+        unavailablereplicas: 0
+        conditions: []
+        collisioncount: null
