@@ -50,8 +50,8 @@ func (s *K8sManagerTestSuite) TestPublish() {
 	ctx := context.Background()
 
 	req := &versionpb.PublishRequest{
-		Product: productID,
-		Version: version.Name,
+		Product:    productID,
+		VersionTag: version.Version,
 	}
 
 	s.mockService.EXPECT().Publish(gomock.Any(), req).Return(&versionpb.Response{Message: "ok"}, nil)
@@ -64,8 +64,8 @@ func (s *K8sManagerTestSuite) TestUnpublish() {
 	ctx := context.Background()
 
 	req := &versionpb.UnpublishRequest{
-		Product: productID,
-		Version: version.Name,
+		Product:    productID,
+		VersionTag: version.Version,
 	}
 
 	s.mockService.EXPECT().Unpublish(gomock.Any(), req).Return(&versionpb.Response{Message: "ok"}, nil)
@@ -78,8 +78,8 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatus() {
 	ctx := context.Background()
 
 	req := &versionpb.ProcessStatusRequest{
-		ProductId:   productID,
-		VersionName: version.Name,
+		ProductId:  productID,
+		VersionTag: version.Version,
 	}
 
 	processStatusResponse := &versionpb.ProcessStatusResponse{
@@ -95,7 +95,7 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatus() {
 	stream.EXPECT().Context().Return(ctx).Times(2)
 	stream.EXPECT().Recv().Return(nil, io.EOF)
 
-	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(ctx, productID, version.Name)
+	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(ctx, productID, version.Version)
 	s.Require().NoError(err)
 
 	process := <-statusChannel
@@ -110,7 +110,7 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatusManagerError() {
 
 	s.mockService.EXPECT().WatchProcessStatus(ctx, gomock.Any()).Return(nil, errors.New("mocked error"))
 
-	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(ctx, productID, version.Name)
+	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(ctx, productID, version.Version)
 	s.Error(err)
 	s.Nil(statusChannel)
 }
@@ -128,7 +128,7 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatusContextCancelled() {
 	stream.EXPECT().Context().Return(cancelContext)
 
 	cancel()
-	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(cancelContext, productID, version.Name)
+	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(cancelContext, productID, version.Version)
 	s.Require().NoError(err)
 
 	process := <-statusChannel
@@ -146,7 +146,7 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatusUnexpectedError() {
 	stream.EXPECT().Recv().Return(processStatusResponse, errors.New("mocked error"))
 	stream.EXPECT().Context().Return(ctx)
 
-	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(ctx, productID, version.Name)
+	statusChannel, err := s.k8sVersionClient.WatchProcessStatus(ctx, productID, version.Version)
 	s.Require().NoError(err)
 
 	process := <-statusChannel

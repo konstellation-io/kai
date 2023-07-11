@@ -13,7 +13,7 @@ import (
 func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, version domain.Version) (string, error) {
 	kc.logger.Info("Creating version config files",
 		"product", version.Product,
-		"version", version.Name,
+		"version", version.Tag,
 	)
 
 	processYamlConfigs := make(map[string]string, getProcessesAmount(version))
@@ -26,7 +26,7 @@ func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, vers
 				return "", err
 			}
 
-			processYamlConfigs[kc.getFullProcessIdentifier(version.Product, version.Name, workflow.Name, process.Name)] = string(processYaml)
+			processYamlConfigs[kc.getFullProcessIdentifier(version.Product, version.Tag, workflow.Name, process.Name)] = string(processYaml)
 		}
 	}
 
@@ -52,7 +52,7 @@ func (kc KubeConfiguration) getProcessConfig(
 	return ProcessConfig{
 		Metadata: Metadata{
 			ProductID:    version.Product,
-			VersionName:  version.Name,
+			VersionTag:   version.Tag,
 			WorkflowName: workflow.Name,
 			ProcessName:  process.Name,
 			ProcessType:  process.Type.ToString(),

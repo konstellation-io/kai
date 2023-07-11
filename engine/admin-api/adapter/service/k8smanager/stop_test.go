@@ -54,8 +54,8 @@ func (s *StopVersionTestSuite) TestStopVersion() {
 	ctx := context.Background()
 
 	req := &versionpb.StopRequest{
-		Product: productID,
-		Version: version.Name,
+		Product:    productID,
+		VersionTag: version.Version,
 	}
 
 	s.mockService.EXPECT().Stop(gomock.Any(), req).Return(&versionpb.Response{Message: "ok"}, nil)
@@ -70,8 +70,8 @@ func (s *StopVersionTestSuite) TestStopVersion_ClientError() {
 	expectedError := errors.New("client error")
 
 	req := &versionpb.StopRequest{
-		Product: productID,
-		Version: version.Name,
+		Product:    productID,
+		VersionTag: version.Version,
 	}
 
 	s.mockService.EXPECT().Stop(gomock.Any(), req).Return(nil, expectedError)

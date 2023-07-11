@@ -38,7 +38,7 @@ func TestStartProcess(t *testing.T) {
 	params := service.CreateProcessParams{
 		ConfigName: "configmap-name",
 		Product:    "test-product",
-		Version:    "test-version",
+		Version:    "v1.0.0",
 		Workflow:   "test-workflow",
 		Process:    process,
 	}
@@ -77,7 +77,7 @@ func TestStartProcess_WithNetwork(t *testing.T) {
 	params := service.CreateProcessParams{
 		ConfigName: "configmap-name",
 		Product:    "test-product",
-		Version:    "test-version",
+		Version:    "v1.0.0",
 		Workflow:   "test-workflow",
 		Process:    process,
 	}
@@ -110,7 +110,7 @@ func TestStartProcess_WithMoreReplicas(t *testing.T) {
 	params := service.CreateProcessParams{
 		ConfigName: "configmap-name",
 		Product:    "test-product",
-		Version:    "test-version",
+		Version:    "v1.0.0",
 		Workflow:   "test-workflow",
 		Process:    process,
 	}
@@ -143,7 +143,7 @@ func TestStartProcess_WithGpuEnabled(t *testing.T) {
 	params := service.CreateProcessParams{
 		ConfigName: "configmap-name",
 		Product:    "test-product",
-		Version:    "test-version",
+		Version:    "v1.0.0",
 		Workflow:   "test-workflow",
 		Process:    process,
 	}
@@ -180,7 +180,7 @@ func TestStartProcess_ClientError(t *testing.T) {
 	params := service.CreateProcessParams{
 		ConfigName: "configmap-name",
 		Product:    "test-product",
-		Version:    "test-version",
+		Version:    "v1.0.0",
 		Workflow:   "test-workflow",
 		Process:    process,
 	}

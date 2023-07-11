@@ -110,7 +110,7 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 
 	req := &versionpb.StartRequest{
 		ProductId:     productID,
-		VersionName:   version.Name,
+		VersionTag:    version.Version,
 		KeyValueStore: versionConfig.KeyValueStoresConfig.KeyValueStore,
 		Workflows: []*versionpb.Workflow{
 			{

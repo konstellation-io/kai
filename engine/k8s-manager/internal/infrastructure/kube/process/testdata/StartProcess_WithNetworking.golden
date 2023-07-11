@@ -11,7 +11,7 @@ items:
         kind: ""
         apiversion: ""
       objectmeta:
-        name: test-product-test-version-test-workflow-test-process
+        name: test-product-v1.0.0-test-workflow-test-process
         generatename: ""
         namespace: test
         selflink: ""
@@ -25,7 +25,7 @@ items:
             process: test-process
             product: test-product
             type: task
-            version: test-version
+            version: v1.0.0
             workflow: test-workflow
         annotations: {}
         ownerreferences: []
@@ -39,7 +39,7 @@ items:
                 process: test-process
                 product: test-product
                 type: task
-                version: test-version
+                version: v1.0.0
                 workflow: test-workflow
             matchexpressions: []
         template:
@@ -58,7 +58,7 @@ items:
                     process: test-process
                     product: test-product
                     type: task
-                    version: test-version
+                    version: v1.0.0
                     workflow: test-workflow
                 annotations: {}
                 ownerreferences: []
@@ -124,7 +124,7 @@ items:
                             localobjectreference:
                                 name: configmap-name
                             items:
-                                - key: test-product-test-version-test-workflow-test-process
+                                - key: test-product-v1.0.0-test-workflow-test-process
                                   path: app.yaml
                                   mode: null
                                 - key: parsers.conf
@@ -201,8 +201,8 @@ items:
                         - name: KAI_PRODUCT_ID
                           value: test-product
                           valuefrom: null
-                        - name: KAI_VERSION_NAME
-                          value: test-version
+                        - name: KAI_VERSION_TAG
+                          value: v1.0.0
                           valuefrom: null
                         - name: KAI_WORKFLOW_NAME
                           value: test-workflow

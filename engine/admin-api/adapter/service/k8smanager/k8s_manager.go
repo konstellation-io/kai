@@ -48,7 +48,7 @@ func (k *K8sVersionClient) Start(
 
 	req := versionpb.StartRequest{
 		ProductId:     productID,
-		VersionName:   version.Name,
+		VersionTag:    version.Version,
 		Workflows:     wf,
 		KeyValueStore: versionConfig.KeyValueStoresConfig.KeyValueStore,
 	}
@@ -60,13 +60,13 @@ func (k *K8sVersionClient) Start(
 
 func (k *K8sVersionClient) Stop(ctx context.Context, productID string, version *entity.Version) error {
 	req := versionpb.StopRequest{
-		Product: productID,
-		Version: version.Name,
+		Product:    productID,
+		VersionTag: version.Version,
 	}
 
 	_, err := k.client.Stop(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("stop version %q in product %q error: %w", version.Name, productID, err)
+		return fmt.Errorf("stop version %q in product %q error: %w", version.Version, productID, err)
 	}
 
 	return nil
@@ -74,8 +74,8 @@ func (k *K8sVersionClient) Stop(ctx context.Context, productID string, version *
 
 func (k *K8sVersionClient) Unpublish(ctx context.Context, productID string, version *entity.Version) error {
 	req := versionpb.UnpublishRequest{
-		Product: productID,
-		Version: version.Name,
+		Product:    productID,
+		VersionTag: version.Version,
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, _requestTimeout)
@@ -88,8 +88,8 @@ func (k *K8sVersionClient) Unpublish(ctx context.Context, productID string, vers
 
 func (k *K8sVersionClient) Publish(ctx context.Context, productID string, version *entity.Version) error {
 	req := versionpb.PublishRequest{
-		Product: productID,
-		Version: version.Name,
+		Product:    productID,
+		VersionTag: version.Version,
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, _requestTimeout)
@@ -100,10 +100,10 @@ func (k *K8sVersionClient) Publish(ctx context.Context, productID string, versio
 	return err
 }
 
-func (k *K8sVersionClient) WatchProcessStatus(ctx context.Context, productID, versionName string) (<-chan *entity.Process, error) {
+func (k *K8sVersionClient) WatchProcessStatus(ctx context.Context, productID, VersionTag string) (<-chan *entity.Process, error) {
 	stream, err := k.client.WatchProcessStatus(ctx, &versionpb.ProcessStatusRequest{
-		VersionName: versionName,
-		ProductId:   productID,
+		VersionTag: VersionTag,
+		ProductId:  productID,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("version status opening stream: %w", err)
