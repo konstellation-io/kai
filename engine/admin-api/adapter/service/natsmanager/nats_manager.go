@@ -33,9 +33,9 @@ func (n *NatsManagerClient) CreateStreams(
 	version *entity.Version,
 ) (*entity.VersionStreamsConfig, error) {
 	req := natspb.CreateStreamsRequest{
-		ProductId:   productID,
-		VersionName: version.Name,
-		Workflows:   n.mapWorkflowsToDTO(version.Workflows),
+		ProductId:  productID,
+		VersionTag: version.Version,
+		Workflows:  n.mapWorkflowsToDTO(version.Workflows),
 	}
 
 	res, err := n.client.CreateStreams(ctx, &req)
@@ -53,9 +53,9 @@ func (n *NatsManagerClient) CreateObjectStores(
 	version *entity.Version,
 ) (*entity.VersionObjectStoresConfig, error) {
 	req := natspb.CreateObjectStoresRequest{
-		ProductId:   productID,
-		VersionName: version.Name,
-		Workflows:   n.mapWorkflowsToDTO(version.Workflows),
+		ProductId:  productID,
+		VersionTag: version.Version,
+		Workflows:  n.mapWorkflowsToDTO(version.Workflows),
 	}
 
 	res, err := n.client.CreateObjectStores(ctx, &req)
@@ -73,9 +73,9 @@ func (n *NatsManagerClient) CreateKeyValueStores(
 	version *entity.Version,
 ) (*entity.KeyValueStoresConfig, error) {
 	req := natspb.CreateKeyValueStoresRequest{
-		ProductId:   productID,
-		VersionName: version.Name,
-		Workflows:   n.mapWorkflowsToDTO(version.Workflows),
+		ProductId:  productID,
+		VersionTag: version.Version,
+		Workflows:  n.mapWorkflowsToDTO(version.Workflows),
 	}
 
 	res, err := n.client.CreateKeyValueStores(ctx, &req)
@@ -87,30 +87,30 @@ func (n *NatsManagerClient) CreateKeyValueStores(
 }
 
 // DeleteStreams calls nats-manager to delete NATS streams for given version.
-func (n *NatsManagerClient) DeleteStreams(ctx context.Context, productID, versionName string) error {
+func (n *NatsManagerClient) DeleteStreams(ctx context.Context, productID, versionTag string) error {
 	req := natspb.DeleteStreamsRequest{
-		ProductId:   productID,
-		VersionName: versionName,
+		ProductId:  productID,
+		VersionTag: versionTag,
 	}
 
 	_, err := n.client.DeleteStreams(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("error deleting version %q NATS streams: %w", versionName, err)
+		return fmt.Errorf("error deleting version %q NATS streams: %w", versionTag, err)
 	}
 
 	return nil
 }
 
 // DeleteObjectStores calls nats-manager to delete NATS Object Stores for given version.
-func (n *NatsManagerClient) DeleteObjectStores(ctx context.Context, productID, versionName string) error {
+func (n *NatsManagerClient) DeleteObjectStores(ctx context.Context, productID, versionTag string) error {
 	req := natspb.DeleteObjectStoresRequest{
-		ProductId:   productID,
-		VersionName: versionName,
+		ProductId:  productID,
+		VersionTag: versionTag,
 	}
 
 	_, err := n.client.DeleteObjectStores(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("error deleting version %q NATS object stores: %w", versionName, err)
+		return fmt.Errorf("error deleting version %q NATS object stores: %w", versionTag, err)
 	}
 
 	return nil

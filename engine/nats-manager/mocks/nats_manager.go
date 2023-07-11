@@ -35,74 +35,74 @@ func (m *MockNatsManager) EXPECT() *MockNatsManagerMockRecorder {
 }
 
 // CreateKeyValueStores mocks base method.
-func (m *MockNatsManager) CreateKeyValueStores(productID, versionName string, workflows []entity.Workflow) (*entity.VersionKeyValueStores, error) {
+func (m *MockNatsManager) CreateKeyValueStores(productID, versionTag string, workflows []entity.Workflow) (*entity.VersionKeyValueStores, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateKeyValueStores", productID, versionName, workflows)
+	ret := m.ctrl.Call(m, "CreateKeyValueStores", productID, versionTag, workflows)
 	ret0, _ := ret[0].(*entity.VersionKeyValueStores)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateKeyValueStores indicates an expected call of CreateKeyValueStores.
-func (mr *MockNatsManagerMockRecorder) CreateKeyValueStores(productID, versionName, workflows interface{}) *gomock.Call {
+func (mr *MockNatsManagerMockRecorder) CreateKeyValueStores(productID, versionTag, workflows interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKeyValueStores", reflect.TypeOf((*MockNatsManager)(nil).CreateKeyValueStores), productID, versionName, workflows)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKeyValueStores", reflect.TypeOf((*MockNatsManager)(nil).CreateKeyValueStores), productID, versionTag, workflows)
 }
 
 // CreateObjectStores mocks base method.
-func (m *MockNatsManager) CreateObjectStores(productID, versionName string, workflows []entity.Workflow) (entity.WorkflowsObjectStoresConfig, error) {
+func (m *MockNatsManager) CreateObjectStores(productID, versionTag string, workflows []entity.Workflow) (entity.WorkflowsObjectStoresConfig, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateObjectStores", productID, versionName, workflows)
+	ret := m.ctrl.Call(m, "CreateObjectStores", productID, versionTag, workflows)
 	ret0, _ := ret[0].(entity.WorkflowsObjectStoresConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateObjectStores indicates an expected call of CreateObjectStores.
-func (mr *MockNatsManagerMockRecorder) CreateObjectStores(productID, versionName, workflows interface{}) *gomock.Call {
+func (mr *MockNatsManagerMockRecorder) CreateObjectStores(productID, versionTag, workflows interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateObjectStores", reflect.TypeOf((*MockNatsManager)(nil).CreateObjectStores), productID, versionName, workflows)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateObjectStores", reflect.TypeOf((*MockNatsManager)(nil).CreateObjectStores), productID, versionTag, workflows)
 }
 
 // CreateStreams mocks base method.
-func (m *MockNatsManager) CreateStreams(productID, versionName string, workflows []entity.Workflow) (entity.WorkflowsStreamsConfig, error) {
+func (m *MockNatsManager) CreateStreams(productID, versionTag string, workflows []entity.Workflow) (entity.WorkflowsStreamsConfig, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateStreams", productID, versionName, workflows)
+	ret := m.ctrl.Call(m, "CreateStreams", productID, versionTag, workflows)
 	ret0, _ := ret[0].(entity.WorkflowsStreamsConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateStreams indicates an expected call of CreateStreams.
-func (mr *MockNatsManagerMockRecorder) CreateStreams(productID, versionName, workflows interface{}) *gomock.Call {
+func (mr *MockNatsManagerMockRecorder) CreateStreams(productID, versionTag, workflows interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStreams", reflect.TypeOf((*MockNatsManager)(nil).CreateStreams), productID, versionName, workflows)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStreams", reflect.TypeOf((*MockNatsManager)(nil).CreateStreams), productID, versionTag, workflows)
 }
 
 // DeleteObjectStores mocks base method.
-func (m *MockNatsManager) DeleteObjectStores(productID, versionName string) error {
+func (m *MockNatsManager) DeleteObjectStores(productID, versionTag string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteObjectStores", productID, versionName)
+	ret := m.ctrl.Call(m, "DeleteObjectStores", productID, versionTag)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteObjectStores indicates an expected call of DeleteObjectStores.
-func (mr *MockNatsManagerMockRecorder) DeleteObjectStores(productID, versionName interface{}) *gomock.Call {
+func (mr *MockNatsManagerMockRecorder) DeleteObjectStores(productID, versionTag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteObjectStores", reflect.TypeOf((*MockNatsManager)(nil).DeleteObjectStores), productID, versionName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteObjectStores", reflect.TypeOf((*MockNatsManager)(nil).DeleteObjectStores), productID, versionTag)
 }
 
 // DeleteStreams mocks base method.
-func (m *MockNatsManager) DeleteStreams(productID, versionName string) error {
+func (m *MockNatsManager) DeleteStreams(productID, versionTag string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteStreams", productID, versionName)
+	ret := m.ctrl.Call(m, "DeleteStreams", productID, versionTag)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteStreams indicates an expected call of DeleteStreams.
-func (mr *MockNatsManagerMockRecorder) DeleteStreams(productID, versionName interface{}) *gomock.Call {
+func (mr *MockNatsManagerMockRecorder) DeleteStreams(productID, versionTag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManager)(nil).DeleteStreams), productID, versionName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManager)(nil).DeleteStreams), productID, versionTag)
 }

@@ -24,12 +24,12 @@ func TestCreateKVStore(t *testing.T) {
 
 	const (
 		testProductID         = "test-product"
-		testVersionName       = "test-version"
+		testVersionTag        = "v1.0.0"
 		testWorkflowID        = "test-workflow"
 		testProcessName       = "test-process"
-		projectKeyValueStore  = "key-store_test-product_test-version"
-		workflowKeyValueStore = "key-store_test-product_test-version_test-workflow"
-		processKeyValueStore  = "key-store_test-product_test-version_test-workflow_test-process"
+		projectKeyValueStore  = "key-store_test-product_v1.0.0"
+		workflowKeyValueStore = "key-store_test-product_v1.0.0_test-workflow"
+		processKeyValueStore  = "key-store_test-product_v1.0.0_test-workflow_test-process"
 	)
 
 	tests := []struct {
@@ -50,9 +50,9 @@ func TestCreateKVStore(t *testing.T) {
 					Build(),
 			},
 			expectedKVStores: []string{
-				fmt.Sprintf("key-store_%s_%s", testProductID, testVersionName),
-				fmt.Sprintf("key-store_%s_%s_%s", testProductID, testVersionName, testWorkflowID),
-				fmt.Sprintf("key-store_%s_%s_%s_%s", testProductID, testVersionName, testWorkflowID, testProcessName),
+				fmt.Sprintf("key-store_%s_%s", testProductID, testVersionTag),
+				fmt.Sprintf("key-store_%s_%s_%s", testProductID, testVersionTag, testWorkflowID),
+				fmt.Sprintf("key-store_%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowID, testProcessName),
 			},
 			expectedWorkflowsKVCfg: &entity.VersionKeyValueStores{
 				ProjectStore: projectKeyValueStore,
@@ -77,8 +77,8 @@ func TestCreateKVStore(t *testing.T) {
 					Build(),
 			},
 			expectedKVStores: []string{
-				fmt.Sprintf("key-store_%s_%s", testProductID, testVersionName),
-				fmt.Sprintf("key-store_%s_%s_%s", testProductID, testVersionName, testWorkflowID),
+				fmt.Sprintf("key-store_%s_%s", testProductID, testVersionTag),
+				fmt.Sprintf("key-store_%s_%s_%s", testProductID, testVersionTag, testWorkflowID),
 			},
 			expectedWorkflowsKVCfg: &entity.VersionKeyValueStores{
 				ProjectStore: projectKeyValueStore,
@@ -108,7 +108,7 @@ func TestCreateKVStore(t *testing.T) {
 				client.EXPECT().CreateKeyValueStore(expectedKVStore).Return(nil)
 			}
 
-			workflowsKVCfg, err := natsManager.CreateKeyValueStores(testProductID, testVersionName, tc.workflows)
+			workflowsKVCfg, err := natsManager.CreateKeyValueStores(testProductID, testVersionTag, tc.workflows)
 			if tc.wantError {
 				assert.ErrorIs(t, err, tc.wantedError)
 				return

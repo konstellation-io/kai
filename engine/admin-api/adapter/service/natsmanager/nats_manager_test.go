@@ -90,9 +90,9 @@ func (s *NatsManagerTestSuite) TestCreateStreams() {
 	ctx := context.Background()
 
 	req := &natspb.CreateStreamsRequest{
-		ProductId:   productID,
-		VersionName: testVersion.Name,
-		Workflows:   testReqWorkflows,
+		ProductId:  productID,
+		VersionTag: testVersion.Version,
+		Workflows:  testReqWorkflows,
 	}
 
 	natsManagerResponse := &natspb.CreateStreamsResponse{
@@ -134,9 +134,9 @@ func (s *NatsManagerTestSuite) TestCreateObjectStores() {
 	ctx := context.Background()
 
 	req := &natspb.CreateObjectStoresRequest{
-		ProductId:   productID,
-		VersionName: testVersion.Name,
-		Workflows:   testReqWorkflows,
+		ProductId:  productID,
+		VersionTag: testVersion.Version,
+		Workflows:  testReqWorkflows,
 	}
 
 	natsManagerResponse := &natspb.CreateObjectStoresResponse{
@@ -170,9 +170,9 @@ func (s *NatsManagerTestSuite) TestCreateKeyValueStores() {
 	ctx := context.Background()
 
 	req := &natspb.CreateKeyValueStoresRequest{
-		ProductId:   productID,
-		VersionName: testVersion.Name,
-		Workflows:   testReqWorkflows,
+		ProductId:  productID,
+		VersionTag: testVersion.Version,
+		Workflows:  testReqWorkflows,
 	}
 
 	natsManagerResponse := &natspb.CreateKeyValueStoreResponse{
@@ -210,13 +210,13 @@ func (s *NatsManagerTestSuite) TestDeleteStreams() {
 	ctx := context.Background()
 
 	req := &natspb.DeleteStreamsRequest{
-		ProductId:   productID,
-		VersionName: testVersion.Name,
+		ProductId:  productID,
+		VersionTag: testVersion.Version,
 	}
 
 	s.mockService.EXPECT().DeleteStreams(ctx, req).Return(&natspb.DeleteResponse{}, nil)
 
-	err := s.natsManagerClient.DeleteStreams(ctx, productID, testVersion.Name)
+	err := s.natsManagerClient.DeleteStreams(ctx, productID, testVersion.Version)
 	s.Require().NoError(err)
 }
 
@@ -224,13 +224,13 @@ func (s *NatsManagerTestSuite) TestDeleteObjectStores() {
 	ctx := context.Background()
 
 	req := &natspb.DeleteObjectStoresRequest{
-		ProductId:   productID,
-		VersionName: testVersion.Name,
+		ProductId:  productID,
+		VersionTag: testVersion.Version,
 	}
 
 	s.mockService.EXPECT().DeleteObjectStores(ctx, req).Return(&natspb.DeleteResponse{}, nil)
 
-	err := s.natsManagerClient.DeleteObjectStores(ctx, productID, testVersion.Name)
+	err := s.natsManagerClient.DeleteObjectStores(ctx, productID, testVersion.Version)
 	s.Require().NoError(err)
 }
 
@@ -270,7 +270,7 @@ func (s *NatsManagerTestSuite) TestDeleteStreamsManagerError() {
 	s.mockService.EXPECT().DeleteStreams(ctx, gomock.Any()).
 		Return(&natspb.DeleteResponse{}, errors.New("mocked error"))
 
-	err := s.natsManagerClient.DeleteStreams(ctx, productID, testVersion.Name)
+	err := s.natsManagerClient.DeleteStreams(ctx, productID, testVersion.Version)
 	s.Error(err)
 }
 
@@ -280,6 +280,6 @@ func (s *NatsManagerTestSuite) TestDeleteObjectStoresManagerError() {
 	s.mockService.EXPECT().DeleteObjectStores(ctx, gomock.Any()).
 		Return(&natspb.DeleteResponse{}, errors.New("mocked error"))
 
-	err := s.natsManagerClient.DeleteObjectStores(ctx, productID, testVersion.Name)
+	err := s.natsManagerClient.DeleteObjectStores(ctx, productID, testVersion.Version)
 	s.Error(err)
 }

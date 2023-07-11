@@ -26,7 +26,7 @@ func NewNatsManager(logger logging.Logger, client interfaces.NatsClient) *NatsMa
 
 func (m *NatsManager) CreateStreams(
 	productID,
-	versionName string,
+	versionTag string,
 	workflows []entity.Workflow,
 ) (entity.WorkflowsStreamsConfig, error) {
 	if len(workflows) <= 0 {
@@ -36,7 +36,7 @@ func (m *NatsManager) CreateStreams(
 	workflowsStreamsConfig := entity.WorkflowsStreamsConfig{}
 
 	for _, workflow := range workflows {
-		stream := m.getStreamName(productID, versionName, workflow.Name)
+		stream := m.getStreamName(productID, versionTag, workflow.Name)
 		processesStreamConfig := m.getProcessesStreamConfig(stream, workflow.Processes)
 
 		streamConfig := &entity.StreamConfig{
@@ -57,7 +57,7 @@ func (m *NatsManager) CreateStreams(
 
 func (m *NatsManager) CreateObjectStores(
 	productID,
-	versionName string,
+	versionTag string,
 	workflows []entity.Workflow,
 ) (entity.WorkflowsObjectStoresConfig, error) {
 	if len(workflows) <= 0 {
@@ -75,7 +75,7 @@ func (m *NatsManager) CreateObjectStores(
 
 		for _, process := range workflow.Processes {
 			if process.ObjectStore != nil {
-				objectStore, err := m.getObjectStoreName(productID, versionName, workflow.Name, process.ObjectStore)
+				objectStore, err := m.getObjectStoreName(productID, versionTag, workflow.Name, process.ObjectStore)
 				if err != nil {
 					return nil, err
 				}
@@ -96,8 +96,8 @@ func (m *NatsManager) CreateObjectStores(
 	return workflowsObjectStoresConfig, nil
 }
 
-func (m *NatsManager) DeleteStreams(productID, versionName string) error {
-	versionStreamsRegExp := m.getVersionStreamFilter(productID, versionName)
+func (m *NatsManager) DeleteStreams(productID, versionTag string) error {
+	versionStreamsRegExp := m.getVersionStreamFilter(productID, versionTag)
 
 	allStreams, err := m.client.GetStreamNames(versionStreamsRegExp)
 	if err != nil {
@@ -112,19 +112,19 @@ func (m *NatsManager) DeleteStreams(productID, versionName string) error {
 	return nil
 }
 
-func (m *NatsManager) getObjectStoreName(productID, versionName, workflowName string, objectStore *entity.ObjectStore) (string, error) {
+func (m *NatsManager) getObjectStoreName(productID, versionTag, workflowName string, objectStore *entity.ObjectStore) (string, error) {
 	switch objectStore.Scope {
 	case entity.ObjStoreScopeProject:
-		return m.joinWithUnderscores(productID, versionName, objectStore.Name), nil
+		return m.joinWithUnderscores(productID, versionTag, objectStore.Name), nil
 	case entity.ObjStoreScopeWorkflow:
-		return m.joinWithUnderscores(productID, versionName, workflowName, objectStore.Name), nil
+		return m.joinWithUnderscores(productID, versionTag, workflowName, objectStore.Name), nil
 	default:
 		return "", internal.ErrInvalidObjectStoreScope
 	}
 }
 
-func (m *NatsManager) DeleteObjectStores(productID, versionName string) error {
-	versionObjStoreRegExp := m.getVersionStreamFilter(productID, versionName)
+func (m *NatsManager) DeleteObjectStores(productID, versionTag string) error {
+	versionObjStoreRegExp := m.getVersionStreamFilter(productID, versionTag)
 
 	allObjectStores, err := m.client.GetObjectStoreNames(versionObjStoreRegExp)
 	if err != nil {
@@ -143,13 +143,13 @@ func (m *NatsManager) DeleteObjectStores(productID, versionName string) error {
 	return nil
 }
 
-func (m *NatsManager) getStreamName(productID, versionName, workflowID string) string {
-	return m.joinWithUnderscores(productID, versionName, workflowID)
+func (m *NatsManager) getStreamName(productID, versionTag, workflowID string) string {
+	return m.joinWithUnderscores(productID, versionTag, workflowID)
 }
 
 func (m *NatsManager) CreateKeyValueStores(
 	productID,
-	versionName string,
+	versionTag string,
 	workflows []entity.Workflow,
 ) (*entity.VersionKeyValueStores, error) {
 	if len(workflows) <= 0 {
@@ -159,7 +159,7 @@ func (m *NatsManager) CreateKeyValueStores(
 	m.logger.Info("Creating key-value stores")
 
 	// create key-value store for project
-	productKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, "", "", entity.KVScopeProject)
+	productKeyValueStore, err := m.getKeyValueStoreName(productID, versionTag, "", "", entity.KVScopeProject)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (m *NatsManager) CreateKeyValueStores(
 
 	for _, workflow := range workflows {
 		// create key-value store for workflow
-		workflowKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.Name, "", entity.KVScopeWorkflow)
+		workflowKeyValueStore, err := m.getKeyValueStoreName(productID, versionTag, workflow.Name, "", entity.KVScopeWorkflow)
 		if err != nil {
 			return nil, err
 		}
@@ -186,7 +186,7 @@ func (m *NatsManager) CreateKeyValueStores(
 		processesKeyValueStores := map[string]string{}
 		for _, process := range workflow.Processes {
 			// create key-value store for process
-			processKeyValueStore, err := m.getKeyValueStoreName(productID, versionName, workflow.Name, process.Name, entity.KVScopeProcess)
+			processKeyValueStore, err := m.getKeyValueStoreName(productID, versionTag, workflow.Name, process.Name, entity.KVScopeProcess)
 			if err != nil {
 				return nil, err
 			}
@@ -259,8 +259,8 @@ func (m *NatsManager) validateWorkflows(workflows []entity.Workflow) error {
 	return nil
 }
 
-func (m *NatsManager) getVersionStreamFilter(productID, versionName string) *regexp.Regexp {
-	return regexp.MustCompile(fmt.Sprintf("^%s", m.joinWithUnderscores(productID, versionName, ".*")))
+func (m *NatsManager) getVersionStreamFilter(productID, versionTag string) *regexp.Regexp {
+	return regexp.MustCompile(fmt.Sprintf("^%s", m.joinWithUnderscores(productID, versionTag, ".*")))
 }
 
 func (m *NatsManager) joinWithUnderscores(elements ...string) string {
