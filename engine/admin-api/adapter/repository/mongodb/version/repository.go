@@ -48,7 +48,7 @@ func (r *VersionRepoMongoDB) CreateIndexes(ctx context.Context, productID string
 	indexes := []mongo.IndexModel{
 		{
 			Keys: bson.M{
-				"name": 1,
+				"tag": 1,
 			},
 			Options: options.Index().SetUnique(true),
 		},
@@ -95,11 +95,11 @@ func (r *VersionRepoMongoDB) GetByID(productID, versionID string) (*entity.Versi
 	return mapDTOToEntity(versionDTO), err
 }
 
-func (r *VersionRepoMongoDB) GetByName(ctx context.Context, productID, name string) (*entity.Version, error) {
+func (r *VersionRepoMongoDB) GetByTag(ctx context.Context, productID, tag string) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
 	versionDTO := &versionDTO{}
-	filter := bson.M{"name": name}
+	filter := bson.M{"tag": tag}
 
 	err := collection.FindOne(ctx, filter).Decode(versionDTO)
 	if errors.Is(err, mongo.ErrNoDocuments) {
@@ -217,7 +217,7 @@ func (r *VersionRepoMongoDB) UploadKRTYamlFile(productID string, version *entity
 
 	versionDTO := mapEntityToDTO(version)
 
-	filename := fmt.Sprintf("%s-%s.yaml", versionDTO.Name, versionDTO.Version)
+	filename := fmt.Sprintf("%s-%s.yaml", productID, versionDTO.Tag)
 
 	uploadStream, err := bucket.OpenUploadStreamWithID(
 		versionDTO.ID,

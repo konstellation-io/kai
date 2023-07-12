@@ -65,16 +65,16 @@ func (mr *MockProcessLogRepositoryMockRecorder) PaginatedSearch(ctx, runtimeID, 
 }
 
 // WatchProcessLogs mocks base method.
-func (m *MockProcessLogRepository) WatchProcessLogs(ctx context.Context, runtimeID, versionName string, filters entity.LogFilters) (<-chan *entity.ProcessLog, error) {
+func (m *MockProcessLogRepository) WatchProcessLogs(ctx context.Context, runtimeID, versionTag string, filters entity.LogFilters) (<-chan *entity.ProcessLog, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WatchProcessLogs", ctx, runtimeID, versionName, filters)
+	ret := m.ctrl.Call(m, "WatchProcessLogs", ctx, runtimeID, versionTag, filters)
 	ret0, _ := ret[0].(<-chan *entity.ProcessLog)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // WatchProcessLogs indicates an expected call of WatchProcessLogs.
-func (mr *MockProcessLogRepositoryMockRecorder) WatchProcessLogs(ctx, runtimeID, versionName, filters interface{}) *gomock.Call {
+func (mr *MockProcessLogRepositoryMockRecorder) WatchProcessLogs(ctx, runtimeID, versionTag, filters interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchProcessLogs", reflect.TypeOf((*MockProcessLogRepository)(nil).WatchProcessLogs), ctx, runtimeID, versionName, filters)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchProcessLogs", reflect.TypeOf((*MockProcessLogRepository)(nil).WatchProcessLogs), ctx, runtimeID, versionTag, filters)
 }

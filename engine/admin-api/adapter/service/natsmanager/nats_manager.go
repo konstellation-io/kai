@@ -34,7 +34,7 @@ func (n *NatsManagerClient) CreateStreams(
 ) (*entity.VersionStreamsConfig, error) {
 	req := natspb.CreateStreamsRequest{
 		ProductId:  productID,
-		VersionTag: version.Version,
+		VersionTag: version.Tag,
 		Workflows:  n.mapWorkflowsToDTO(version.Workflows),
 	}
 
@@ -54,7 +54,7 @@ func (n *NatsManagerClient) CreateObjectStores(
 ) (*entity.VersionObjectStoresConfig, error) {
 	req := natspb.CreateObjectStoresRequest{
 		ProductId:  productID,
-		VersionTag: version.Version,
+		VersionTag: version.Tag,
 		Workflows:  n.mapWorkflowsToDTO(version.Workflows),
 	}
 
@@ -74,7 +74,7 @@ func (n *NatsManagerClient) CreateKeyValueStores(
 ) (*entity.KeyValueStoresConfig, error) {
 	req := natspb.CreateKeyValueStoresRequest{
 		ProductId:  productID,
-		VersionTag: version.Version,
+		VersionTag: version.Tag,
 		Workflows:  n.mapWorkflowsToDTO(version.Workflows),
 	}
 

@@ -24,7 +24,7 @@ import (
 )
 
 var productID = "productID"
-var versionName = "versionName"
+var versionTag = "v1.0.0"
 var creatorID = "creatorID"
 
 type VersionRepositoryTestSuite struct {
@@ -76,6 +76,9 @@ func (s *VersionRepositoryTestSuite) SetupSuite() {
 	s.mongoDBContainer = mongoDBContainer
 	s.mongoClient = client
 	s.versionRepo = NewVersionRepoMongoDB(cfg, logger, client)
+
+	err = s.versionRepo.CreateIndexes(context.Background(), productID)
+	s.Require().NoError(err)
 }
 
 func (s *VersionRepositoryTestSuite) TearDownSuite() {
@@ -91,15 +94,9 @@ func (s *VersionRepositoryTestSuite) TearDownTest() {
 	s.Require().NoError(err)
 }
 
-func (s *VersionRepositoryTestSuite) TestCreateIndexes() {
-	err := s.versionRepo.CreateIndexes(context.Background(), productID)
-
-	s.Require().NoError(err)
-}
-
 func (s *VersionRepositoryTestSuite) TestCreate() {
 	testVersion := &entity.Version{
-		Name: versionName,
+		Tag: versionTag,
 	}
 
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
@@ -119,9 +116,25 @@ func (s *VersionRepositoryTestSuite) TestCreate() {
 	s.Require().NoError(err)
 }
 
+func (s *VersionRepositoryTestSuite) TestCreateDuplicateTagError() {
+	testVersion := &entity.Version{
+		Tag: versionTag,
+	}
+
+	duplicatedVersion := &entity.Version{
+		Tag: versionTag,
+	}
+
+	_, err := s.versionRepo.Create(creatorID, productID, testVersion)
+	s.Require().NoError(err)
+
+	_, err = s.versionRepo.Create(creatorID, productID, duplicatedVersion)
+	s.Require().Error(err)
+}
+
 func (s *VersionRepositoryTestSuite) TestGetByID() {
 	testVersion := &entity.Version{
-		Name: versionName,
+		Tag: versionTag,
 	}
 
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
@@ -130,7 +143,7 @@ func (s *VersionRepositoryTestSuite) TestGetByID() {
 	ver, err := s.versionRepo.GetByID(productID, createdVer.ID)
 	s.Require().NoError(err)
 
-	s.Equal(testVersion.Name, ver.Name)
+	s.Equal(testVersion.Tag, ver.Tag)
 }
 
 func (s *VersionRepositoryTestSuite) TestGetByIDNotFound() {
@@ -139,29 +152,29 @@ func (s *VersionRepositoryTestSuite) TestGetByIDNotFound() {
 	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
 }
 
-func (s *VersionRepositoryTestSuite) TestGetByName() {
+func (s *VersionRepositoryTestSuite) TestGetByTag() {
 	testVersion := &entity.Version{
-		Name: versionName,
+		Tag: versionTag,
 	}
 
 	_, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
 
-	ver, err := s.versionRepo.GetByName(context.Background(), productID, testVersion.Name)
+	ver, err := s.versionRepo.GetByTag(context.Background(), productID, testVersion.Tag)
 	s.Require().NoError(err)
 
-	s.Equal(testVersion.Name, ver.Name)
+	s.Equal(testVersion.Tag, ver.Tag)
 }
 
-func (s *VersionRepositoryTestSuite) TestGetByNameNotFound() {
-	_, err := s.versionRepo.GetByName(context.Background(), productID, "notfound")
+func (s *VersionRepositoryTestSuite) TestGetByTagNotFound() {
+	_, err := s.versionRepo.GetByTag(context.Background(), productID, "notfound")
 	s.Require().Error(err)
 	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
 }
 
 func (s *VersionRepositoryTestSuite) TestUpdate() {
 	testVersion := &entity.Version{
-		Name: versionName,
+		Tag: versionTag,
 	}
 
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
@@ -180,7 +193,7 @@ func (s *VersionRepositoryTestSuite) TestUpdate() {
 
 func (s *VersionRepositoryTestSuite) TestUpdateNotFound() {
 	testVersion := &entity.Version{
-		Name: versionName,
+		Tag: versionTag,
 	}
 
 	err := s.versionRepo.Update(productID, testVersion)
@@ -190,11 +203,11 @@ func (s *VersionRepositoryTestSuite) TestUpdateNotFound() {
 
 func (s *VersionRepositoryTestSuite) TestListVersionsByProduct() {
 	testVersion := &entity.Version{
-		Name: versionName,
+		Tag: versionTag,
 	}
 
 	testVersion2 := &entity.Version{
-		Name: versionName + "2",
+		Tag: "v2.0.0",
 	}
 
 	_, err := s.versionRepo.Create(creatorID, productID, testVersion)
@@ -206,13 +219,13 @@ func (s *VersionRepositoryTestSuite) TestListVersionsByProduct() {
 	s.Require().NoError(err)
 
 	s.Require().Len(versions, 2)
-	s.Equal(testVersion.Name, versions[0].Name)
-	s.Equal(testVersion2.Name, versions[1].Name)
+	s.Equal(testVersion.Tag, versions[0].Tag)
+	s.Equal(testVersion2.Tag, versions[1].Tag)
 }
 
 func (s *VersionRepositoryTestSuite) TestSetStatus() {
 	testVersion := &entity.Version{
-		Name: versionName,
+		Tag: versionTag,
 	}
 
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
@@ -235,7 +248,7 @@ func (s *VersionRepositoryTestSuite) TestSetStatusNotFound() {
 
 func (s *VersionRepositoryTestSuite) TestSetErrors() {
 	testVersion := &entity.Version{
-		Name: versionName,
+		Tag: versionTag,
 	}
 
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
@@ -258,8 +271,7 @@ func (s *VersionRepositoryTestSuite) TestSetErrorsNotFound() {
 
 func (s *VersionRepositoryTestSuite) TestUploadKRTYamlFile() {
 	testVersion := &entity.Version{
-		Name:    versionName,
-		Version: "v1",
+		Tag: versionTag,
 	}
 
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
@@ -295,7 +307,7 @@ func (s *VersionRepositoryTestSuite) TestUploadKRTYamlFile() {
 
 func (s *VersionRepositoryTestSuite) TestClearPublishedVersion() {
 	testVersion := &entity.Version{
-		Name: versionName,
+		Tag: versionTag,
 	}
 
 	createdVersion, err := s.versionRepo.Create(creatorID, productID, testVersion)
@@ -307,6 +319,6 @@ func (s *VersionRepositoryTestSuite) TestClearPublishedVersion() {
 	oldPublishedVErsion, err := s.versionRepo.ClearPublishedVersion(context.Background(), productID)
 	s.Require().NoError(err)
 
-	s.Equal(testVersion.Name, oldPublishedVErsion.Name)
+	s.Equal(testVersion.Tag, oldPublishedVErsion.Tag)
 	s.Equal(entity.VersionStatusStarted, oldPublishedVErsion.Status)
 }

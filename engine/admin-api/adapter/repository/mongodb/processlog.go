@@ -27,7 +27,7 @@ func NewProcessLogMongoDBRepo(cfg *config.Config, logger logging.Logger, client 
 	return &ProcessLogMongoDBRepo{cfg: cfg, logger: logger, client: client}
 }
 
-func (n *ProcessLogMongoDBRepo) WatchProcessLogs(ctx context.Context, runtimeID, versionName string,
+func (n *ProcessLogMongoDBRepo) WatchProcessLogs(ctx context.Context, runtimeID, versionTag string,
 	filters entity.LogFilters) (<-chan *entity.ProcessLog, error) {
 	collection := n.client.Database(runtimeID).Collection(logsCollectionName)
 	logsCh := make(chan *entity.ProcessLog, 1)
@@ -42,7 +42,7 @@ func (n *ProcessLogMongoDBRepo) WatchProcessLogs(ctx context.Context, runtimeID,
 			I: 0,
 		})
 
-		conditions := n.getSearchConditions(versionName, filters)
+		conditions := n.getSearchConditions(versionTag, filters)
 
 		//nolint:govet // ignore warning about bson.D
 		pipeline := mongo.Pipeline{bson.D{
@@ -85,10 +85,10 @@ func (n *ProcessLogMongoDBRepo) WatchProcessLogs(ctx context.Context, runtimeID,
 	return logsCh, nil
 }
 
-func (n *ProcessLogMongoDBRepo) getSearchConditions(versionName string, filters entity.LogFilters) bson.A {
+func (n *ProcessLogMongoDBRepo) getSearchConditions(versionTag string, filters entity.LogFilters) bson.A {
 	conditions := bson.A{
 		bson.M{"operationType": "insert"},
-		bson.M{"fullDocument.versionName": versionName},
+		bson.M{"fullDocument.versionTag": versionTag},
 	}
 
 	if len(filters.ProcessIDs) > 0 {

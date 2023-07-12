@@ -13,5 +13,5 @@ type K8sService interface {
 	Stop(ctx context.Context, productID string, version *entity.Version) error
 	Publish(ctx context.Context, productID string, version *entity.Version) error
 	Unpublish(ctx context.Context, productID string, version *entity.Version) error
-	WatchProcessStatus(ctx context.Context, productID, versionName string) (<-chan *entity.Process, error)
+	WatchProcessStatus(ctx context.Context, productID, versionTag string) (<-chan *entity.Process, error)
 }
