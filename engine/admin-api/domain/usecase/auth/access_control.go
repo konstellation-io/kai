@@ -20,6 +20,7 @@ const ActEditVersion AccessControlAction = "edit_version"
 const ActViewVersion AccessControlAction = "view_version"
 
 const ActViewMetrics AccessControlAction = "view_metrics"
+const ActViewServerInfo AccessControlAction = "view_server_info"
 
 const ActViewUserActivities AccessControlAction = "view_user_activities"
 const ActUpdateUserGrants AccessControlAction = "update_user_grants"

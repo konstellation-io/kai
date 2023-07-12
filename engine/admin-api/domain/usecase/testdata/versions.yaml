@@ -1,0 +1,4 @@
+aio:
+  version: latest
+mongoDB:
+  version: latest

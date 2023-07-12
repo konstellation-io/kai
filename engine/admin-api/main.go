@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/go-logr/zapr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
@@ -18,6 +19,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -33,8 +35,7 @@ func main() {
 	defer db.Disconnect()
 
 	userActivityInteractor, productInteractor, userInteractor,
-		versionInteractor, metricsInteractor := initApp(cfg, logger, mongodbClient)
-
+		versionInteractor, metricsInteractor, serverInfoGetter := initApp(cfg, logger, mongodbClient)
 	graphqlController := controller.NewGraphQLController(
 		cfg,
 		logger,
@@ -43,6 +44,7 @@ func main() {
 		userActivityInteractor,
 		versionInteractor,
 		metricsInteractor,
+		serverInfoGetter,
 	)
 
 	app := http.NewApp(
@@ -64,6 +66,7 @@ func initApp(
 	*usecase.UserInteractor,
 	*usecase.VersionInteractor,
 	*usecase.MetricsInteractor,
+	*usecase.ServerInfoGetter,
 ) {
 	productRepo := mongodb.NewProductRepoMongoDB(cfg, logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
@@ -157,5 +160,13 @@ func initApp(
 		metricRepo,
 	)
 
-	return userActivityInteractor, productInteractor, userInteractor, versionInteractor, metricsInteractor
+	zapLog, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	l := zapr.NewLogger(zapLog)
+	serverInfoGetter := usecase.NewServerInfoGetter(l, accessControl)
+
+	return userActivityInteractor, productInteractor, userInteractor, versionInteractor, metricsInteractor, serverInfoGetter
 }

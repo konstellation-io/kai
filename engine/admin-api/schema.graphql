@@ -20,7 +20,7 @@ type Query {
     startDate: String!
     endDate: String!
   ): Metrics
-  info: ServerInfo!
+  serverInfo: ServerInfo!
 }
 
 type ServerInfo {

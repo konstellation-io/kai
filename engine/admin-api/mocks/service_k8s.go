@@ -36,17 +36,17 @@ func (m *MockK8sService) EXPECT() *MockK8sServiceMockRecorder {
 }
 
 // Publish mocks base method.
-func (m *MockK8sService) Publish(ctx context.Context, runtimeID string, version *entity.Version) error {
+func (m *MockK8sService) Publish(ctx context.Context, productID string, version *entity.Version) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Publish", ctx, runtimeID, version)
+	ret := m.ctrl.Call(m, "Publish", ctx, productID, version)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Publish indicates an expected call of Publish.
-func (mr *MockK8sServiceMockRecorder) Publish(ctx, runtimeID, version interface{}) *gomock.Call {
+func (mr *MockK8sServiceMockRecorder) Publish(ctx, productID, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockK8sService)(nil).Publish), ctx, runtimeID, version)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockK8sService)(nil).Publish), ctx, productID, version)
 }
 
 // Start mocks base method.
@@ -78,17 +78,17 @@ func (mr *MockK8sServiceMockRecorder) Stop(ctx, productID, version interface{}) 
 }
 
 // Unpublish mocks base method.
-func (m *MockK8sService) Unpublish(ctx context.Context, runtimeID string, version *entity.Version) error {
+func (m *MockK8sService) Unpublish(ctx context.Context, productID string, version *entity.Version) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Unpublish", ctx, runtimeID, version)
+	ret := m.ctrl.Call(m, "Unpublish", ctx, productID, version)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Unpublish indicates an expected call of Unpublish.
-func (mr *MockK8sServiceMockRecorder) Unpublish(ctx, runtimeID, version interface{}) *gomock.Call {
+func (mr *MockK8sServiceMockRecorder) Unpublish(ctx, productID, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unpublish", reflect.TypeOf((*MockK8sService)(nil).Unpublish), ctx, runtimeID, version)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unpublish", reflect.TypeOf((*MockK8sService)(nil).Unpublish), ctx, productID, version)
 }
 
 // WatchProcessStatus mocks base method.

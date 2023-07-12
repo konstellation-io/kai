@@ -21,6 +21,7 @@ func NewHTTPHandler(
 	userActivityInteractor usecase.UserActivityInteracter,
 	versionInteractor *usecase.VersionInteractor,
 	metricsInteractor *usecase.MetricsInteractor,
+	serverInfoGetter *usecase.ServerInfoGetter,
 	cfg *config.Config,
 ) http.Handler {
 	graphQLResolver := NewGraphQLResolver(
@@ -30,6 +31,7 @@ func NewHTTPHandler(
 		userActivityInteractor,
 		versionInteractor,
 		metricsInteractor,
+		serverInfoGetter,
 		cfg,
 	)
 

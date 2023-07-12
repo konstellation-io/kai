@@ -145,11 +145,11 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Info             func(childComplexity int) int
 		Logs             func(childComplexity int, productID string, filters entity.LogFilters, cursor *string) int
 		Metrics          func(childComplexity int, productID string, versionName string, startDate string, endDate string) int
 		Product          func(childComplexity int, id string) int
 		Products         func(childComplexity int) int
+		ServerInfo       func(childComplexity int) int
 		UserActivityList func(childComplexity int, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) int
 		Version          func(childComplexity int, name string, productID string) int
 		Versions         func(childComplexity int, productID string) int
@@ -233,7 +233,7 @@ type QueryResolver interface {
 	UserActivityList(ctx context.Context, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) ([]*entity.UserActivity, error)
 	Logs(ctx context.Context, productID string, filters entity.LogFilters, cursor *string) (*LogPage, error)
 	Metrics(ctx context.Context, productID string, versionName string, startDate string, endDate string) (*entity.Metrics, error)
-	Info(ctx context.Context) (*entity.ServerInfo, error)
+	ServerInfo(ctx context.Context) (*entity.ServerInfo, error)
 }
 type SubscriptionResolver interface {
 	WatchProcessLogs(ctx context.Context, productID string, versionName string, filters entity.LogFilters) (<-chan *entity.ProcessLog, error)
@@ -710,13 +710,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Product.PublishedVersion(childComplexity), true
 
-	case "Query.info":
-		if e.complexity.Query.Info == nil {
-			break
-		}
-
-		return e.complexity.Query.Info(childComplexity), true
-
 	case "Query.logs":
 		if e.complexity.Query.Logs == nil {
 			break
@@ -759,6 +752,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Products(childComplexity), true
+
+	case "Query.serverInfo":
+		if e.complexity.Query.ServerInfo == nil {
+			break
+		}
+
+		return e.complexity.Query.ServerInfo(childComplexity), true
 
 	case "Query.userActivityList":
 		if e.complexity.Query.UserActivityList == nil {
@@ -1143,7 +1143,7 @@ type Query {
     startDate: String!
     endDate: String!
   ): Metrics
-  info: ServerInfo!
+  serverInfo: ServerInfo!
 }
 
 type ServerInfo {
@@ -5193,8 +5193,8 @@ func (ec *executionContext) fieldContext_Query_metrics(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_info(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_info(ctx, field)
+func (ec *executionContext) _Query_serverInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_serverInfo(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5207,7 +5207,7 @@ func (ec *executionContext) _Query_info(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Info(rctx)
+		return ec.resolvers.Query().ServerInfo(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5224,7 +5224,7 @@ func (ec *executionContext) _Query_info(ctx context.Context, field graphql.Colle
 	return ec.marshalNServerInfo2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐServerInfo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_info(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_serverInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -9969,7 +9969,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "info":
+		case "serverInfo":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -9978,7 +9978,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_info(ctx, field)
+				res = ec._Query_serverInfo(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

@@ -36,6 +36,7 @@ type Resolver struct {
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *usecase.VersionInteractor
 	metricsInteractor      *usecase.MetricsInteractor
+	serverInfoGetter       *usecase.ServerInfoGetter
 	cfg                    *config.Config
 }
 
@@ -46,6 +47,7 @@ func NewGraphQLResolver(
 	userActivityInteractor usecase.UserActivityInteracter,
 	versionInteractor *usecase.VersionInteractor,
 	metricsInteractor *usecase.MetricsInteractor,
+	serverInfoGetter *usecase.ServerInfoGetter,
 	cfg *config.Config,
 ) *Resolver {
 	initialize()
@@ -57,6 +59,7 @@ func NewGraphQLResolver(
 		userActivityInteractor,
 		versionInteractor,
 		metricsInteractor,
+		serverInfoGetter,
 		cfg,
 	}
 }
@@ -250,13 +253,9 @@ func (r *queryResolver) Logs(
 	}, nil
 }
 
-func (r *queryResolver) Info(ctx context.Context) (*entity.ServerInfo, error) {
-	_, ok := ctx.Value("user").(*entity.User)
-	if !ok {
-		return usecase.GetKAIServerInfo(ctx)
-	}
-
-	return usecase.GetKAIComponentsInfo(ctx)
+func (r *queryResolver) ServerInfo(ctx context.Context) (*entity.ServerInfo, error) {
+	user, _ := ctx.Value("user").(*entity.User)
+	return r.serverInfoGetter.GetKAIServerInfo(ctx, user)
 }
 
 func (r *productResolver) CreationAuthor(_ context.Context, product *entity.Product) (string, error) {

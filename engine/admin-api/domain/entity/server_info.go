@@ -8,11 +8,11 @@ const (
 )
 
 type ComponentInfo struct {
-	Component string
-	Version   string
-	Status    ComponentStatus
+	Name    string
+	Version string
 }
 
 type ServerInfo struct {
 	Components []ComponentInfo
+	Status     string
 }
