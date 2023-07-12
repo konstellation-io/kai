@@ -2,7 +2,7 @@ typemeta:
     kind: ""
     apiversion: ""
 objectmeta:
-    name: test-product-test-version-conf-files
+    name: test-product-v1.0.0-conf-files
     generatename: ""
     namespace: test
     selflink: ""
@@ -15,7 +15,7 @@ objectmeta:
     labels:
         product: test-product
         type: configuration
-        version: test-version
+        version: v1.0.0
     annotations: {}
     ownerreferences: []
     finalizers: []
@@ -49,7 +49,7 @@ data:
         [FILTER]
             Name record_modifier
             Match *
-            Record versionName ${KAI_VERSION_NAME}
+            Record versionTag ${KAI_VERSION_TAG}
             Record processName ${KAI_PROCESS_NAME}
             Record workflowName ${KAI_WORKFLOW_NAME}
 
@@ -67,10 +67,10 @@ data:
             Name multiline_pattern
             Format regex
             Regex ^(?<logtime>\d{4}\-\d{2}\-\d{2}T\d{1,2}\:\d{1,2}\:\d{1,2}(\.\d+Z|\+0000)) (?<level>(ERROR|WARN|INFO|DEBUG)) (?<capture>.*)
-    test-product-test-version-test-workflow-test-process: |
+    test-product-v1.0.0-test-workflow-test-process: |
         metadata:
             product_id: test-product
-            version_name: test-version
+            version_tag: v1.0.0
             workflow_name: test-workflow
             process_name: test-process
             base_path: ""
@@ -83,7 +83,7 @@ data:
                 - other-process
         centralized_configuration:
             product:
-                bucket: test-version-kv-store
+                bucket: v1.0.0-kv-store
             workflow:
                 bucket: test-workflow-kv-store
             process:

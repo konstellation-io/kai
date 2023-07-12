@@ -45,7 +45,7 @@ func (i *MetricsInteractor) GetMetrics(
 	ctx context.Context,
 	user *entity.User,
 	productID,
-	versionName,
+	versionTag,
 	startDate,
 	endDate string,
 ) (*entity.Metrics, error) {
@@ -65,7 +65,7 @@ func (i *MetricsInteractor) GetMetrics(
 		return result, fmt.Errorf("invalid end date: %w", err)
 	}
 
-	metrics, err := i.metricRepo.GetMetrics(ctx, parsedStartDate, parsedEndDate, productID, versionName)
+	metrics, err := i.metricRepo.GetMetrics(ctx, parsedStartDate, parsedEndDate, productID, versionTag)
 	if err != nil {
 		return result, fmt.Errorf("error getting metrics: %w", err)
 	}

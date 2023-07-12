@@ -22,7 +22,7 @@ func NewVersionStarter(logger logr.Logger, orchStarter service.ContainerStarter)
 }
 
 func (s *VersionStarter) StartVersion(ctx context.Context, version domain.Version) error {
-	s.logger.Info("Running version starter", "product", version.Product, "version", version.Name)
+	s.logger.Info("Running version starter", "product", version.Product, "version", version.Tag)
 
 	configName, err := s.containerStarter.CreateVersionConfiguration(ctx, version)
 	if err != nil {
@@ -34,7 +34,7 @@ func (s *VersionStarter) StartVersion(ctx context.Context, version domain.Versio
 			err := s.containerStarter.CreateProcess(ctx, service.CreateProcessParams{
 				ConfigName: configName,
 				Product:    version.Product,
-				Version:    version.Name,
+				Version:    version.Tag,
 				Workflow:   workflow.Name,
 				Process:    process,
 			})
@@ -45,7 +45,7 @@ func (s *VersionStarter) StartVersion(ctx context.Context, version domain.Versio
 			if process.IsTrigger() && process.Networking != nil {
 				err := s.containerStarter.CreateNetwork(ctx, service.CreateNetworkParams{
 					Product:  version.Product,
-					Version:  version.Name,
+					Version:  version.Tag,
 					Workflow: workflow.Name,
 					Process:  process,
 				})

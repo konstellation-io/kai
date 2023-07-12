@@ -39,7 +39,7 @@ func (n *NatsService) CreateStreams(
 ) (*natspb.CreateStreamsResponse, error) {
 	n.logger.Info("CreateStreams request received")
 
-	streamConfig, err := n.manager.CreateStreams(req.ProductId, req.VersionName, n.dtoToWorkflows(req.Workflows))
+	streamConfig, err := n.manager.CreateStreams(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
 	if err != nil {
 		n.logger.Errorf("Error creating streams: %s", err)
 		return nil, err
@@ -57,7 +57,7 @@ func (n *NatsService) CreateObjectStores(
 ) (*natspb.CreateObjectStoresResponse, error) {
 	n.logger.Info("CreateObjectStores request received")
 
-	objectStores, err := n.manager.CreateObjectStores(req.ProductId, req.VersionName, n.dtoToWorkflows(req.Workflows))
+	objectStores, err := n.manager.CreateObjectStores(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
 	if err != nil {
 		n.logger.Errorf("Error creating object store: %s", err)
 		return nil, err
@@ -74,14 +74,14 @@ func (n *NatsService) DeleteStreams(
 ) (*natspb.DeleteResponse, error) {
 	n.logger.Info("Delete streams request received")
 
-	err := n.manager.DeleteStreams(req.ProductId, req.VersionName)
+	err := n.manager.DeleteStreams(req.ProductId, req.VersionTag)
 	if err != nil {
 		n.logger.Errorf("Error deleting streams: %s", err)
 		return nil, err
 	}
 
 	return &natspb.DeleteResponse{
-		Message: fmt.Sprintf("Streams and subjects for version %q on product %s deleted", req.VersionName, req.ProductId),
+		Message: fmt.Sprintf("Streams and subjects for version %q on product %s deleted", req.VersionTag, req.ProductId),
 	}, nil
 }
 
@@ -92,14 +92,14 @@ func (n *NatsService) DeleteObjectStores(
 ) (*natspb.DeleteResponse, error) {
 	n.logger.Info("Delete object stores request received")
 
-	err := n.manager.DeleteObjectStores(req.ProductId, req.VersionName)
+	err := n.manager.DeleteObjectStores(req.ProductId, req.VersionTag)
 	if err != nil {
 		n.logger.Errorf("Error deleting object stores: %s", err)
 		return nil, err
 	}
 
 	return &natspb.DeleteResponse{
-		Message: fmt.Sprintf("Object stores for version %q on product %s deleted", req.VersionName, req.ProductId),
+		Message: fmt.Sprintf("Object stores for version %q on product %s deleted", req.VersionTag, req.ProductId),
 	}, nil
 }
 
@@ -109,7 +109,7 @@ func (n *NatsService) CreateKeyValueStores(
 ) (*natspb.CreateKeyValueStoreResponse, error) {
 	n.logger.Info("CreateKeyValueStores request received")
 
-	keyValueStores, err := n.manager.CreateKeyValueStores(req.ProductId, req.VersionName, n.dtoToWorkflows(req.Workflows))
+	keyValueStores, err := n.manager.CreateKeyValueStores(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
 	if err != nil {
 		n.logger.Errorf("Error creating object store: %s", err)
 		return nil, err

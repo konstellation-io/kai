@@ -11,7 +11,7 @@ items:
         kind: ""
         apiversion: ""
       objectmeta:
-        name: test-product-test-version-test-workflow-test-process
+        name: test-product-v1.0.0-test-workflow-test-process
         generatename: ""
         namespace: test
         selflink: ""
@@ -25,7 +25,7 @@ items:
             process: test-process
             product: test-product
             type: network
-            version: test-version
+            version: v1.0.0
             workflow: test-workflow
         annotations: {}
         ownerreferences: []

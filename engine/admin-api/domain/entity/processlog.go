@@ -11,7 +11,7 @@ type ProcessLog struct {
 	ProcessID    string   `bson:"processId" gqlgen:"processId"`
 	ProcessName  string   `bson:"processName"`
 	VersionID    string   `bson:"versionId"`
-	VersionName  string   `bson:"versionName"`
+	VersionTag   string   `bson:"versionTag"`
 	WorkflowID   string   `bson:"workflowId" gqlgen:"workflowId"`
 	WorkflowName string   `bson:"workflowName"`
 }

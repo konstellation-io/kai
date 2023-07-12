@@ -134,8 +134,8 @@ github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxv
 github.com/konsorten/go-windows-terminal-sequences v1.0.2/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459 h1:310+tQT8Nl319PRRgk+y7VvCLCN6WSP/iv6BawcLkww=
 github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459/go.mod h1:YUG3Uvb2wB64+MvlGsvO/9XsdcEPzVkphzqR0SnECLQ=
-github.com/konstellation-io/krt v0.1.1 h1:L4giOYoDd3RkknkPdCb3mO+lxnHtsyArgqXlXY+CJ2k=
-github.com/konstellation-io/krt v0.1.1/go.mod h1:G6ULLL3quzOV97e5Lt4QW/rRX3CzwLbGivuw6ej8wgo=
+github.com/konstellation-io/krt v0.1.2 h1:dcxn4ExlsBL7A9WgJ6dAZ9EZZ+Yav3Jo9XipQMHfaK4=
+github.com/konstellation-io/krt v0.1.2/go.mod h1:G6ULLL3quzOV97e5Lt4QW/rRX3CzwLbGivuw6ej8wgo=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pretty v0.3.0/go.mod h1:640gp4NfQd8pI5XOwp5fnNeVWj67G7CFk/SaSQn7NBk=

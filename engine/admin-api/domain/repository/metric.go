@@ -15,7 +15,7 @@ type MetricRepo interface {
 		startDate time.Time,
 		endDate time.Time,
 		runtimeID string,
-		versionName string,
+		versionTag string,
 	) ([]entity.ClassificationMetric, error)
 	CreateIndexes(ctx context.Context, runtimeID string) error
 }

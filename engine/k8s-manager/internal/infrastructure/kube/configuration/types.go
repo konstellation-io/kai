@@ -8,7 +8,7 @@ type ProcessConfig struct {
 
 type Metadata struct {
 	ProductID    string `yaml:"product_id"`
-	VersionName  string `yaml:"version_name"`
+	VersionTag   string `yaml:"version_tag"`
 	WorkflowName string `yaml:"workflow_name"`
 	ProcessName  string `yaml:"process_name"`
 	BasePath     string `yaml:"base_path"`

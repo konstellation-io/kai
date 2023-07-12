@@ -17,7 +17,7 @@ import (
 
 const (
 	_testProduct = "test-product"
-	_testVersion = "test-version"
+	_testVersion = "v1.0.0"
 )
 
 func TestDeleteConfiguration(t *testing.T) {

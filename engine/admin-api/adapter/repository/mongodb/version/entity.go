@@ -11,8 +11,7 @@ type configurationVariableDTO struct {
 
 type versionDTO struct {
 	ID          string                     `bson:"_id"`
-	Name        string                     `bson:"name"`
-	Version     string                     `bson:"version"`
+	Tag         string                     `bson:"tag"`
 	Description string                     `bson:"description"`
 	Config      []configurationVariableDTO `bson:"config,omitempty"`
 	Workflows   []workflowDTO              `bson:"workflows"`

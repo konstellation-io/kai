@@ -11,9 +11,8 @@ import (
 // caution: this method takes for granted the KRT YAML is valid
 func MapKrtYamlToVersion(krtYml *krt.Krt) *entity.Version {
 	version := &entity.Version{
-		Name:        krtYml.Name,
+		Tag:         krtYml.Version,
 		Description: krtYml.Description,
-		Version:     krtYml.Version,
 		Config:      keyValueMapToConfigurationVariableArray(krtYml.Config),
 		Workflows:   mapKrtYamlToWorkflows(krtYml.Workflows),
 	}

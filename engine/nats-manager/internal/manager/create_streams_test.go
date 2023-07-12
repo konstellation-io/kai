@@ -23,9 +23,9 @@ func TestCreateStreams(t *testing.T) {
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
-	testVersionName := "test-version"
+	testVersionTag := "v1.0.0"
 	testWorkflowName := "test-workflow"
-	testStreamName := "test-product_test-version_test-workflow"
+	testStreamName := "test-product_v1.0.0_test-workflow"
 	testProcess := "test-process"
 
 	testProcessSubject := fmt.Sprintf("%s.%s", testStreamName, testProcess)
@@ -52,7 +52,7 @@ func TestCreateStreams(t *testing.T) {
 	customMatcher := newStreamConfigMatcher(expectedWorkflowsStreamsCfg[testWorkflowName])
 
 	client.EXPECT().CreateStream(customMatcher).Return(nil)
-	workflowsStreamsCfg, err := natsManager.CreateStreams(testProductID, testVersionName, workflows)
+	workflowsStreamsCfg, err := natsManager.CreateStreams(testProductID, testVersionTag, workflows)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedWorkflowsStreamsCfg, workflowsStreamsCfg)
 }
@@ -67,7 +67,7 @@ func TestCreateStreams_ClientFails(t *testing.T) {
 
 	const (
 		testProductID    = "test-product"
-		testVersionName  = "test-version"
+		testVersionTag   = "v1.0.0"
 		testWorkflowName = "test-workflow"
 		testProcess      = "test-process"
 	)
@@ -82,7 +82,7 @@ func TestCreateStreams_ClientFails(t *testing.T) {
 	expectedError := fmt.Errorf("stream already exists")
 
 	client.EXPECT().CreateStream(gomock.Any()).Return(fmt.Errorf("stream already exists"))
-	workflowsStreamsConfig, err := natsManager.CreateStreams(testProductID, testVersionName, workflows)
+	workflowsStreamsConfig, err := natsManager.CreateStreams(testProductID, testVersionTag, workflows)
 	assert.Error(t, expectedError, err)
 	assert.Nil(t, workflowsStreamsConfig)
 }
@@ -95,10 +95,10 @@ func TestCreateStreams_FailsIfNoWorkflowsAreDefined(t *testing.T) {
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
-	testVersionName := "test-version"
+	testVersionTag := "v1.0.0"
 
 	var workflows []entity.Workflow
 
-	_, err := natsManager.CreateStreams(testProductID, testVersionName, workflows)
+	_, err := natsManager.CreateStreams(testProductID, testVersionTag, workflows)
 	assert.EqualError(t, err, "no workflows defined")
 }

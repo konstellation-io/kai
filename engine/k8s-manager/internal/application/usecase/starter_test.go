@@ -105,7 +105,7 @@ func TestStartVersion_WithNetworking(t *testing.T) {
 	createProcessParams := service.CreateProcessParams{
 		ConfigName: configName,
 		Product:    version.Product,
-		Version:    version.Name,
+		Version:    version.Tag,
 		Workflow:   version.Workflows[0].Name,
 		Process:    version.Workflows[0].Processes[0],
 	}
@@ -117,7 +117,7 @@ func TestStartVersion_WithNetworking(t *testing.T) {
 
 	createNetworkParams := service.CreateNetworkParams{
 		Product:  version.Product,
-		Version:  version.Name,
+		Version:  version.Tag,
 		Workflow: workflows[0].Name,
 		Process:  processes[0],
 	}
@@ -174,7 +174,7 @@ func TestStartVersion_ErrorCreatingProcess(t *testing.T) {
 	createProcessParams := service.CreateProcessParams{
 		ConfigName: configName,
 		Product:    version.Product,
-		Version:    version.Name,
+		Version:    version.Tag,
 		Workflow:   version.Workflows[0].Name,
 		Process:    version.Workflows[0].Processes[0],
 	}
@@ -209,7 +209,7 @@ func TestStartVersion_ErrorCreatingNetwork(t *testing.T) {
 	createProcessParams := service.CreateProcessParams{
 		ConfigName: configName,
 		Product:    version.Product,
-		Version:    version.Name,
+		Version:    version.Tag,
 		Workflow:   version.Workflows[0].Name,
 		Process:    version.Workflows[0].Processes[0],
 	}
@@ -221,7 +221,7 @@ func TestStartVersion_ErrorCreatingNetwork(t *testing.T) {
 
 	createNetworkParams := service.CreateNetworkParams{
 		Product:  version.Product,
-		Version:  version.Name,
+		Version:  version.Tag,
 		Workflow: version.Workflows[0].Name,
 		Process:  version.Workflows[0].Processes[0],
 	}
@@ -268,7 +268,7 @@ func mockCreateProcess(
 	createProcessParams := service.CreateProcessParams{
 		ConfigName: configName,
 		Product:    version.Product,
-		Version:    version.Name,
+		Version:    version.Tag,
 		Workflow:   version.Workflows[0].Name,
 		Process:    &process,
 	}
