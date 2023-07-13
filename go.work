@@ -1,9 +1,0 @@
-go 1.20
-
-use (
-	engine/admin-api
-	engine/k8s-manager
-	engine/mongo-writer
-	engine/nats-manager
-	libs/simplelogger
-)
