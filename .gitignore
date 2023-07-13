@@ -1,5 +1,7 @@
 .idea
 .vscode
+go.work
+go.work.sum
 
 config.dev.yml
 helm/values-dell.yaml
