@@ -4,44 +4,46 @@ import "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 
 //go:generate mockgen -source=${GOFILE} -destination=../../../mocks/auth_${GOFILE} -package=mocks
 
-type AccessControlAction string
+type Action string
 
 const DefaultAdminRole = "ADMIN"
 
-const ActViewProduct AccessControlAction = "view_product"
-const ActCreateProduct AccessControlAction = "create_product"
+const ActViewProduct Action = "view_product"
+const ActCreateProduct Action = "create_product"
 
-const ActCreateVersion AccessControlAction = "create_version"
-const ActStartVersion AccessControlAction = "start_version"
-const ActStopVersion AccessControlAction = "stop_version"
-const ActPublishVersion AccessControlAction = "publish_version"
-const ActUnpublishVersion AccessControlAction = "unpublish_version"
-const ActEditVersion AccessControlAction = "edit_version"
-const ActViewVersion AccessControlAction = "view_version"
+const ActCreateVersion Action = "create_version"
+const ActStartVersion Action = "start_version"
+const ActStopVersion Action = "stop_version"
+const ActPublishVersion Action = "publish_version"
+const ActUnpublishVersion Action = "unpublish_version"
+const ActEditVersion Action = "edit_version"
+const ActViewVersion Action = "view_version"
 
-const ActViewMetrics AccessControlAction = "view_metrics"
-const ActViewServerInfo AccessControlAction = "view_server_info"
+const ActViewMetrics Action = "view_metrics"
+const ActViewServerInfo Action = "view_server_info"
 
-const ActViewUserActivities AccessControlAction = "view_user_activities"
-const ActUpdateUserGrants AccessControlAction = "update_user_grants"
+const ActViewUserActivities Action = "view_user_activities"
+const ActUpdateUserGrants Action = "update_user_grants"
 
-func (e AccessControlAction) IsValid() bool {
+func (e Action) IsValid() bool {
 	switch e {
 	case ActCreateProduct, ActStartVersion, ActStopVersion, ActUpdateUserGrants,
 		ActPublishVersion, ActUnpublishVersion, ActEditVersion, ActViewMetrics,
-		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion:
+		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion,
+		ActViewServerInfo:
 		return true
 	}
 
 	return false
 }
 
-func (e AccessControlAction) String() string {
+func (e Action) String() string {
 	return string(e)
 }
 
 type AccessControl interface {
-	CheckProductGrants(user *entity.User, product string, action AccessControlAction) error
-	CheckAdminGrants(user *entity.User, action AccessControlAction) error
+	CheckRoleGrants(user *entity.User, action Action) error
+	CheckProductGrants(user *entity.User, product string, action Action) error
 	IsAdmin(user *entity.User) bool
+	GetUserProducts(user *entity.User) []string
 }

@@ -17,4 +17,6 @@ p, USER, view_user_activities
 
 p, USER, execute
 
+p, MLE, view_server_info
+
 p, ADMIN, update_user_grants

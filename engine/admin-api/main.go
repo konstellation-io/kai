@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/go-logr/zapr"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/casbinauth"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
@@ -26,7 +26,12 @@ import (
 
 func main() {
 	cfg := config.NewConfig()
-	config.InitConfig()
+
+	err := config.InitConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	logger := logging.NewLogger(cfg.LogLevel)
 
 	db := mongodb.NewMongoDB(cfg, logger)
@@ -34,18 +39,7 @@ func main() {
 	mongodbClient := db.Connect()
 	defer db.Disconnect()
 
-	userActivityInteractor, productInteractor, userInteractor,
-		versionInteractor, metricsInteractor, serverInfoGetter := initApp(cfg, logger, mongodbClient)
-	graphqlController := controller.NewGraphQLController(
-		cfg,
-		logger,
-		productInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
-		serverInfoGetter,
-	)
+	graphqlController := initGraphqlController(cfg, logger, mongodbClient)
 
 	app := http.NewApp(
 		cfg,
@@ -56,18 +50,11 @@ func main() {
 	app.Start()
 }
 
-func initApp(
+func initGraphqlController(
 	cfg *config.Config,
 	logger logging.Logger,
 	mongodbClient *mongo.Client,
-) (
-	usecase.UserActivityInteracter,
-	*usecase.ProductInteractor,
-	*usecase.UserInteractor,
-	*usecase.VersionInteractor,
-	*usecase.MetricsInteractor,
-	*usecase.ServerInfoGetter,
-) {
+) *controller.GraphQLController {
 	productRepo := mongodb.NewProductRepoMongoDB(cfg, logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
 	versionMongoRepo := version.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
@@ -99,7 +86,7 @@ func initApp(
 		log.Fatal(err)
 	}
 
-	accessControl, err := auth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
+	accessControl, err := casbinauth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -168,5 +155,14 @@ func initApp(
 	l := zapr.NewLogger(zapLog)
 	serverInfoGetter := usecase.NewServerInfoGetter(l, accessControl)
 
-	return userActivityInteractor, productInteractor, userInteractor, versionInteractor, metricsInteractor, serverInfoGetter
+	return controller.NewGraphQLController(
+		cfg,
+		logger,
+		productInteractor,
+		userInteractor,
+		userActivityInteractor,
+		versionInteractor,
+		metricsInteractor,
+		serverInfoGetter,
+	)
 }

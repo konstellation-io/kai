@@ -51,7 +51,7 @@ func (suite *ContextUserManagerSuite) TestUpdateUserProductGrants() {
 	loggedUser := suite.GetTestUser()
 	grants := []string{"grant1", "grant2"}
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
 	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(targetUserID, testProduct, grants).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		loggedUser.ID,
@@ -71,7 +71,7 @@ func (suite *ContextUserManagerSuite) TestUpdateUserProductGrantsGivenComment() 
 	grants := []string{"grant1", "grant2"}
 	testComment := "test comment"
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
 	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(targetUserID, testProduct, grants).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		loggedUser.ID,
@@ -91,7 +91,7 @@ func (suite *ContextUserManagerSuite) TestUpdateProductGrantsErrorUnauthorized()
 	grants := []string{"grant1", "grant2"}
 	exppectedError := errors.New("unauthorized")
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(exppectedError)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(exppectedError)
 
 	err := suite.userManager.UpdateUserProductGrants(loggedUser, targetUserID, testProduct, grants)
 	suite.Error(err)
@@ -102,7 +102,7 @@ func (suite *ContextUserManagerSuite) TestUpdateUserProductGrantsErrorInUserRegi
 	loggedUser := suite.GetTestUser()
 	grants := []string{"grant1", "grant2"}
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
 	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(targetUserID, testProduct, grants).Times(1).Return(fmt.Errorf("error"))
 
 	err := suite.userManager.UpdateUserProductGrants(loggedUser, targetUserID, testProduct, grants)
@@ -114,7 +114,7 @@ func (suite *ContextUserManagerSuite) TestUpdateUserGrantsErrorInUserActivity() 
 	loggedUser := suite.GetTestUser()
 	grants := []string{"grant1", "grant2"}
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
 	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(targetUserID, testProduct, grants).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		loggedUser.ID,
@@ -133,7 +133,7 @@ func (suite *ContextUserManagerSuite) TestRevokeProductGrants() {
 	loggedUser := suite.GetTestUser()
 	testComment := "test comment"
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
 	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(targetUserID, testProduct, []string{}).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		loggedUser.ID,
@@ -151,7 +151,7 @@ func (suite *ContextUserManagerSuite) TestRevokeProductGrants() {
 func (suite *ContextUserManagerSuite) TestRevokeProductGrantsGivenComment() {
 	loggedUser := suite.GetTestUser()
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
 	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(targetUserID, testProduct, []string{}).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		loggedUser.ID,
@@ -170,7 +170,7 @@ func (suite *ContextUserManagerSuite) TestRevokeProductGrantsErrorUnauthorized()
 	loggedUser := suite.GetTestUser()
 	exppectedError := errors.New("unauthorized")
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(exppectedError)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(exppectedError)
 
 	err := suite.userManager.RevokeUserProductGrants(loggedUser, targetUserID, testProduct)
 	suite.Error(err)
@@ -180,7 +180,7 @@ func (suite *ContextUserManagerSuite) TestRevokeProductGrantsErrorUnauthorized()
 func (suite *ContextUserManagerSuite) TestRevokeProductGrantsErrorInUserRegistry() {
 	loggedUser := suite.GetTestUser()
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
 	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(targetUserID, testProduct, []string{}).Times(1).Return(fmt.Errorf("error"))
 
 	err := suite.userManager.RevokeUserProductGrants(loggedUser, targetUserID, testProduct)
@@ -191,7 +191,7 @@ func (suite *ContextUserManagerSuite) TestRevokeProductGrantsErrorInUserRegistry
 func (suite *ContextUserManagerSuite) TestRevokeUserGrantsErrorInUserActivity() {
 	loggedUser := suite.GetTestUser()
 
-	suite.mockAccessControl.EXPECT().CheckAdminGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
+	suite.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActUpdateUserGrants).Return(nil)
 	suite.mockUserRegistry.EXPECT().UpdateUserProductGrants(targetUserID, testProduct, []string{}).Times(1).Return(nil)
 	suite.mockUserActivityInteractor.EXPECT().RegisterUpdateProductGrants(
 		loggedUser.ID,

@@ -1,7 +1,8 @@
-package auth
+package casbinauth
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/casbin/casbin/v2"
 
@@ -9,6 +10,8 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
+
+const _defaultResource = "__default__"
 
 type OptFunc func(*Opts)
 
@@ -62,15 +65,69 @@ func NewCasbinAccessControl(
 	return accessController, nil
 }
 
+func (a *CasbinAccessControl) CheckRoleGrants(user *entity.User, action auth.Action) error {
+	err := a.checkGrants(user, _defaultResource, action)
+	if errors.Is(err, ErrUnauthorized) {
+		// TODO: refactor tu custom error
+		return fmt.Errorf("user %s is not allowed to %s: %w", user.ID, action.String(), err)
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *CasbinAccessControl) CheckProductGrants(
+	user *entity.User,
+	product string,
+	action auth.Action,
+) error {
+	err := a.checkGrants(user, product, action)
+	if errors.Is(err, ErrUnauthorized) {
+		return fmt.Errorf("user %s is not allowed to %s in product %s: %w", user.ID, action.String(), product, err)
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *CasbinAccessControl) IsAdmin(user *entity.User) bool {
+	for _, role := range user.Roles {
+		if role == a.cfg.adminRole {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (a *CasbinAccessControl) GetUserProducts(user *entity.User) []string {
+	if a.IsAdmin(user) {
+		return nil
+	}
+
+	visibleProducts := make([]string, 0, len(user.ProductGrants))
+
+	for prod := range user.ProductGrants {
+		if err := a.CheckProductGrants(user, prod, auth.ActViewProduct); err == nil {
+			visibleProducts = append(visibleProducts, prod)
+		}
+	}
+
+	return visibleProducts
+}
+
 func (a *CasbinAccessControl) addCustomFunctions() {
 	a.enforcer.AddFunction("isAdmin", a.isAdminFunc)
 	a.enforcer.AddFunction("hasGrantsForResource", a.hasGrantsForResourceFunc)
+	a.enforcer.AddFunction("isDefaultResource", a.isDefaultResourceFunc)
 }
 
 func (a *CasbinAccessControl) checkGrants(
 	user *entity.User,
 	product string,
-	action auth.AccessControlAction,
+	action auth.Action,
 ) error {
 	if !action.IsValid() {
 		return ErrInvalidAccessControlAction
@@ -79,7 +136,6 @@ func (a *CasbinAccessControl) checkGrants(
 	for _, realmRole := range user.Roles {
 		allowed, err := a.enforcer.Enforce(realmRole, user.ProductGrants, product, action.String())
 		if err != nil {
-			a.logger.Errorf("error checking grants: %s", err)
 			return err
 		}
 
@@ -93,36 +149,7 @@ func (a *CasbinAccessControl) checkGrants(
 		}
 	}
 
-	return ErrNonAuthorized
-}
-
-func (a *CasbinAccessControl) CheckAdminGrants(
-	user *entity.User,
-	action auth.AccessControlAction,
-) error {
-	err := a.checkGrants(user, "", action)
-	if errors.Is(err, ErrNonAuthorized) {
-		return NonAdminAccess(action.String())
-	} else if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (a *CasbinAccessControl) CheckProductGrants(
-	user *entity.User,
-	product string,
-	action auth.AccessControlAction,
-) error {
-	err := a.checkGrants(user, product, action)
-	if errors.Is(err, ErrNonAuthorized) {
-		return NonAuthorizedForProductError(action.String(), product)
-	} else if err != nil {
-		return err
-	}
-
-	return nil
+	return ErrUnauthorized
 }
 
 func (a *CasbinAccessControl) hasGrantsForResource(
@@ -137,16 +164,6 @@ func (a *CasbinAccessControl) hasGrantsForResource(
 
 	for _, grant := range resGrants {
 		if grant == act {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (a *CasbinAccessControl) IsAdmin(user *entity.User) bool {
-	for _, role := range user.Roles {
-		if role == a.cfg.adminRole {
 			return true
 		}
 	}
@@ -174,4 +191,14 @@ func (a *CasbinAccessControl) isAdminFunc(args ...interface{}) (interface{}, err
 	role := args[0].(string)
 
 	return role == a.cfg.adminRole, nil
+}
+
+func (a *CasbinAccessControl) isDefaultResourceFunc(args ...interface{}) (interface{}, error) {
+	if len(args) != 1 {
+		return nil, ErrInvalidNumberOfArguments
+	}
+
+	res := args[0].(string)
+
+	return res == _defaultResource, nil
 }
