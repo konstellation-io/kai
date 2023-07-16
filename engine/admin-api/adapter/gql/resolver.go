@@ -9,13 +9,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	internalerrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 //nolint:gochecknoglobals // needs to be global to be used in the resolver
@@ -325,9 +324,6 @@ func (r *versionResolver) PublicationAuthor(_ context.Context, obj *entity.Versi
 
 	return obj.PublicationAuthor, nil
 }
-func (r *componentInfoResolver) Status(_ context.Context, obj *entity.ComponentInfo) (string, error) {
-	return string(obj.Status), nil
-}
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
@@ -347,12 +343,9 @@ func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityRes
 // Version returns VersionResolver implementation.
 func (r *Resolver) Version() VersionResolver { return &versionResolver{r} }
 
-func (r *Resolver) ComponentInfo() ComponentInfoResolver { return &componentInfoResolver{r} }
-
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type productResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userActivityResolver struct{ *Resolver }
 type versionResolver struct{ *Resolver }
-type componentInfoResolver struct{ *Resolver }

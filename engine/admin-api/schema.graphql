@@ -28,8 +28,8 @@ type ServerInfo {
 }
 
 type ComponentInfo {
+  name: String!
   version: String!
-  status: String!
 }
 
 type Mutation {

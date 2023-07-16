@@ -1,19 +1,30 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"fmt"
 
-const (
-	ReleaseVersionKey   = "releaseVersion"
-	VersionsFilePathKey = "VERSIONS_FILE_PATH"
+	"github.com/spf13/viper"
 )
 
-func InitConfig() {
+const (
+	ComponentsKey = "components"
+
+	CfgFilePathKey = "CONFIG_FILE_PATH"
+)
+
+func InitConfig() error {
 	viper.SetEnvPrefix("KAI")
 
-	viper.SetConfigFile("config.yml")
-	viper.SetDefault(ReleaseVersionKey, "latest")
+	viper.SetDefault("CONFIG_FILE_PATH", "config.yml")
 
 	viper.AutomaticEnv()
 
-	viper.SetDefault(VersionsFilePathKey, "versions.yaml")
+	viper.SetConfigFile(viper.GetString(CfgFilePathKey))
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		return fmt.Errorf("read config file: %w", err)
+	}
+
+	return nil
 }

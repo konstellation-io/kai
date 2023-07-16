@@ -1,18 +1,10 @@
 package entity
 
-type ComponentStatus string
-
-const (
-	ComponentStatusKO = "KO"
-	ComponentStatusOK = "OK"
-)
+type ServerInfo struct {
+	Components []ComponentInfo
+}
 
 type ComponentInfo struct {
 	Name    string
 	Version string
-}
-
-type ServerInfo struct {
-	Components []ComponentInfo
-	Status     string
 }

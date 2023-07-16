@@ -37,7 +37,6 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	ComponentInfo() ComponentInfoResolver
 	Mutation() MutationResolver
 	Product() ProductResolver
 	Query() QueryResolver
@@ -51,7 +50,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	ComponentInfo struct {
-		Status  func(childComplexity int) int
+		Name    func(childComplexity int) int
 		Version func(childComplexity int) int
 	}
 
@@ -204,9 +203,6 @@ type ComplexityRoot struct {
 	}
 }
 
-type ComponentInfoResolver interface {
-	Status(ctx context.Context, obj *entity.ComponentInfo) (string, error)
-}
 type MutationResolver interface {
 	CreateProduct(ctx context.Context, input CreateProductInput) (*entity.Product, error)
 	CreateVersion(ctx context.Context, input CreateVersionInput) (*entity.Version, error)
@@ -264,12 +260,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "ComponentInfo.status":
-		if e.complexity.ComponentInfo.Status == nil {
+	case "ComponentInfo.name":
+		if e.complexity.ComponentInfo.Name == nil {
 			break
 		}
 
-		return e.complexity.ComponentInfo.Status(childComplexity), true
+		return e.complexity.ComponentInfo.Name(childComplexity), true
 
 	case "ComponentInfo.version":
 		if e.complexity.ComponentInfo.Version == nil {
@@ -1151,8 +1147,8 @@ type ServerInfo {
 }
 
 type ComponentInfo {
+  name: String!
   version: String!
-  status: String!
 }
 
 type Mutation {
@@ -1806,6 +1802,50 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _ComponentInfo_name(ctx context.Context, field graphql.CollectedField, obj *entity.ComponentInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ComponentInfo_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ComponentInfo_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ComponentInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ComponentInfo_version(ctx context.Context, field graphql.CollectedField, obj *entity.ComponentInfo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ComponentInfo_version(ctx, field)
 	if err != nil {
@@ -1843,50 +1883,6 @@ func (ec *executionContext) fieldContext_ComponentInfo_version(ctx context.Conte
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ComponentInfo_status(ctx context.Context, field graphql.CollectedField, obj *entity.ComponentInfo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ComponentInfo_status(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ComponentInfo().Status(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ComponentInfo_status(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ComponentInfo",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -5409,10 +5405,10 @@ func (ec *executionContext) fieldContext_ServerInfo_components(ctx context.Conte
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "name":
+				return ec.fieldContext_ComponentInfo_name(ctx, field)
 			case "version":
 				return ec.fieldContext_ComponentInfo_version(ctx, field)
-			case "status":
-				return ec.fieldContext_ComponentInfo_status(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ComponentInfo", field.Name)
 		},
@@ -8895,47 +8891,16 @@ func (ec *executionContext) _ComponentInfo(ctx context.Context, sel ast.Selectio
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ComponentInfo")
+		case "name":
+			out.Values[i] = ec._ComponentInfo_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "version":
 			out.Values[i] = ec._ComponentInfo_version(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
-		case "status":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._ComponentInfo_status(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

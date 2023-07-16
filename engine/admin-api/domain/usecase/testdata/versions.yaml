@@ -1,4 +1,3 @@
-aio:
-  version: latest
-mongoDB:
-  version: latest
+components:
+  aio: latest
+  mongoDB: latest
