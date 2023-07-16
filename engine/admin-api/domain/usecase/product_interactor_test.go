@@ -324,9 +324,11 @@ func TestFindAll(t *testing.T) {
 		},
 	}
 
+	userProducts := []string{productID}
+
 	s.mocks.accessControl.EXPECT().IsAdmin(user).Return(false)
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().FindByIDs(ctx, []string{productID}).Return(expected, nil)
+	s.mocks.accessControl.EXPECT().GetUserProducts(user).Return(userProducts)
+	s.mocks.productRepo.EXPECT().FindByIDs(ctx, userProducts).Return(expected, nil)
 
 	actual, err := s.productInteractor.FindAll(ctx, user)
 
