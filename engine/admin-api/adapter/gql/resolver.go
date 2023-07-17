@@ -36,27 +36,18 @@ type Resolver struct {
 	cfg                    *config.Config
 }
 
-func NewGraphQLResolver(
-	logger logging.Logger,
-	productInteractor *usecase.ProductInteractor,
-	userInteractor *usecase.UserInteractor,
-	userActivityInteractor usecase.UserActivityInteracter,
-	versionInteractor *usecase.VersionInteractor,
-	metricsInteractor *usecase.MetricsInteractor,
-	serverInfoGetter *usecase.ServerInfoGetter,
-	cfg *config.Config,
-) *Resolver {
+func NewGraphQLResolver(params Params) *Resolver {
 	initialize()
 
 	return &Resolver{
-		logger,
-		productInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
-		serverInfoGetter,
-		cfg,
+		params.Logger,
+		params.ProductInteractor,
+		params.UserInteractor,
+		params.UserActivityInteractor,
+		params.VersionInteractor,
+		params.MetricsInteractor,
+		params.ServerInfoGetter,
+		params.Cfg,
 	}
 }
 

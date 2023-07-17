@@ -26,7 +26,7 @@ type GraphQL interface {
 type GraphQLController struct {
 	cfg                    *config.Config
 	logger                 logging.Logger
-	runtimeInteractor      *usecase.ProductInteractor
+	productInteractor      *usecase.ProductInteractor
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *usecase.VersionInteractor
@@ -34,25 +34,29 @@ type GraphQLController struct {
 	serverInfoGetter       *usecase.ServerInfoGetter
 }
 
+type Params struct {
+	Logger                 logging.Logger
+	Cfg                    *config.Config
+	ProductInteractor      *usecase.ProductInteractor
+	UserInteractor         *usecase.UserInteractor
+	UserActivityInteractor usecase.UserActivityInteracter
+	VersionInteractor      *usecase.VersionInteractor
+	MetricsInteractor      *usecase.MetricsInteractor
+	ServerInfoGetter       *usecase.ServerInfoGetter
+}
+
 func NewGraphQLController(
-	cfg *config.Config,
-	logger logging.Logger,
-	runtimeInteractor *usecase.ProductInteractor,
-	userInteractor *usecase.UserInteractor,
-	userActivityInteractor usecase.UserActivityInteracter,
-	versionInteractor *usecase.VersionInteractor,
-	metricsInteractor *usecase.MetricsInteractor,
-	serverInfoGetter *usecase.ServerInfoGetter,
+	params Params,
 ) *GraphQLController {
 	return &GraphQLController{
-		cfg,
-		logger,
-		runtimeInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
-		serverInfoGetter,
+		params.Cfg,
+		params.Logger,
+		params.ProductInteractor,
+		params.UserInteractor,
+		params.UserActivityInteractor,
+		params.VersionInteractor,
+		params.MetricsInteractor,
+		params.ServerInfoGetter,
 	}
 }
 
@@ -68,16 +72,16 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 		g.logger.Info("Request from user " + user.ID)
 	}
 
-	h := gql.NewHTTPHandler(
-		g.logger,
-		g.runtimeInteractor,
-		g.userInteractor,
-		g.userActivityInteractor,
-		g.versionInteractor,
-		g.metricsInteractor,
-		g.serverInfoGetter,
-		g.cfg,
-	)
+	h := gql.NewHTTPHandler(gql.Params{
+		Logger:                 g.logger,
+		Cfg:                    g.cfg,
+		ProductInteractor:      g.productInteractor,
+		UserInteractor:         g.userInteractor,
+		UserActivityInteractor: g.userActivityInteractor,
+		VersionInteractor:      g.versionInteractor,
+		MetricsInteractor:      g.metricsInteractor,
+		ServerInfoGetter:       g.serverInfoGetter,
+	})
 
 	h.ServeHTTP(c.Response(), r.WithContext(ctx))
 

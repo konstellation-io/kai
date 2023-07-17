@@ -156,13 +156,15 @@ func initGraphqlController(
 	serverInfoGetter := usecase.NewServerInfoGetter(l, accessControl)
 
 	return controller.NewGraphQLController(
-		cfg,
-		logger,
-		productInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
-		serverInfoGetter,
+		controller.Params{
+			Logger:                 logger,
+			Cfg:                    cfg,
+			ProductInteractor:      productInteractor,
+			UserInteractor:         userInteractor,
+			UserActivityInteractor: userActivityInteractor,
+			VersionInteractor:      versionInteractor,
+			MetricsInteractor:      metricsInteractor,
+			ServerInfoGetter:       serverInfoGetter,
+		},
 	)
 }

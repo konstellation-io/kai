@@ -20,26 +20,19 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
-func NewHTTPHandler(
-	logger logging.Logger,
-	runtimeInteractor *usecase.ProductInteractor,
-	userInteractor *usecase.UserInteractor,
-	userActivityInteractor usecase.UserActivityInteracter,
-	versionInteractor *usecase.VersionInteractor,
-	metricsInteractor *usecase.MetricsInteractor,
-	serverInfoGetter *usecase.ServerInfoGetter,
-	cfg *config.Config,
-) http.Handler {
-	graphQLResolver := NewGraphQLResolver(
-		logger,
-		runtimeInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
-		serverInfoGetter,
-		cfg,
-	)
+type Params struct {
+	Logger                 logging.Logger
+	Cfg                    *config.Config
+	ProductInteractor      *usecase.ProductInteractor
+	UserInteractor         *usecase.UserInteractor
+	UserActivityInteractor usecase.UserActivityInteracter
+	VersionInteractor      *usecase.VersionInteractor
+	MetricsInteractor      *usecase.MetricsInteractor
+	ServerInfoGetter       *usecase.ServerInfoGetter
+}
+
+func NewHTTPHandler(params Params) http.Handler {
+	graphQLResolver := NewGraphQLResolver(params)
 
 	var mb int64 = 1 << 20
 	maxUploadSize := 500 * mb
