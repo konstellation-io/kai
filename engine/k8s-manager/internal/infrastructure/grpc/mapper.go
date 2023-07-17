@@ -8,7 +8,7 @@ import (
 func mapRequestToVersion(req *versionpb.StartRequest) domain.Version {
 	return domain.Version{
 		Product:       req.ProductId,
-		Name:          req.VersionName,
+		Tag:           req.VersionTag,
 		KeyValueStore: req.KeyValueStore,
 		Workflows:     mapReqWorkflowsToWorkflows(req.Workflows),
 	}

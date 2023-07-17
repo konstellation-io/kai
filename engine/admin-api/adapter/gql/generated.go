@@ -49,11 +49,6 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	ComponentInfo struct {
-		Name    func(childComplexity int) int
-		Version func(childComplexity int) int
-	}
-
 	ConfigurationVariable struct {
 		Key   func(childComplexity int) int
 		Value func(childComplexity int) int
@@ -145,21 +140,16 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Logs             func(childComplexity int, productID string, filters entity.LogFilters, cursor *string) int
-		Metrics          func(childComplexity int, productID string, versionName string, startDate string, endDate string) int
+		Metrics          func(childComplexity int, productID string, versionTag string, startDate string, endDate string) int
 		Product          func(childComplexity int, id string) int
 		Products         func(childComplexity int) int
-		ServerInfo       func(childComplexity int) int
 		UserActivityList func(childComplexity int, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) int
 		Version          func(childComplexity int, name string, productID string) int
 		Versions         func(childComplexity int, productID string) int
 	}
 
-	ServerInfo struct {
-		Components func(childComplexity int) int
-	}
-
 	Subscription struct {
-		WatchProcessLogs func(childComplexity int, productID string, versionName string, filters entity.LogFilters) int
+		WatchProcessLogs func(childComplexity int, productID string, versionTag string, filters entity.LogFilters) int
 	}
 
 	User struct {
@@ -186,11 +176,10 @@ type ComplexityRoot struct {
 		Description       func(childComplexity int) int
 		Errors            func(childComplexity int) int
 		ID                func(childComplexity int) int
-		Name              func(childComplexity int) int
 		PublicationAuthor func(childComplexity int) int
 		PublicationDate   func(childComplexity int) int
 		Status            func(childComplexity int) int
-		Version           func(childComplexity int) int
+		Tag               func(childComplexity int) int
 		Workflows         func(childComplexity int) int
 	}
 
@@ -228,11 +217,10 @@ type QueryResolver interface {
 	Versions(ctx context.Context, productID string) ([]*entity.Version, error)
 	UserActivityList(ctx context.Context, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) ([]*entity.UserActivity, error)
 	Logs(ctx context.Context, productID string, filters entity.LogFilters, cursor *string) (*LogPage, error)
-	Metrics(ctx context.Context, productID string, versionName string, startDate string, endDate string) (*entity.Metrics, error)
-	ServerInfo(ctx context.Context) (*entity.ServerInfo, error)
+	Metrics(ctx context.Context, productID string, versionTag string, startDate string, endDate string) (*entity.Metrics, error)
 }
 type SubscriptionResolver interface {
-	WatchProcessLogs(ctx context.Context, productID string, versionName string, filters entity.LogFilters) (<-chan *entity.ProcessLog, error)
+	WatchProcessLogs(ctx context.Context, productID string, versionTag string, filters entity.LogFilters) (<-chan *entity.ProcessLog, error)
 }
 type UserActivityResolver interface {
 	User(ctx context.Context, obj *entity.UserActivity) (string, error)
@@ -259,20 +247,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "ComponentInfo.name":
-		if e.complexity.ComponentInfo.Name == nil {
-			break
-		}
-
-		return e.complexity.ComponentInfo.Name(childComplexity), true
-
-	case "ComponentInfo.version":
-		if e.complexity.ComponentInfo.Version == nil {
-			break
-		}
-
-		return e.complexity.ComponentInfo.Version(childComplexity), true
 
 	case "ConfigurationVariable.key":
 		if e.complexity.ConfigurationVariable.Key == nil {
@@ -728,7 +702,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Metrics(childComplexity, args["productID"].(string), args["versionName"].(string), args["startDate"].(string), args["endDate"].(string)), true
+		return e.complexity.Query.Metrics(childComplexity, args["productID"].(string), args["versionTag"].(string), args["startDate"].(string), args["endDate"].(string)), true
 
 	case "Query.product":
 		if e.complexity.Query.Product == nil {
@@ -748,13 +722,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Products(childComplexity), true
-
-	case "Query.serverInfo":
-		if e.complexity.Query.ServerInfo == nil {
-			break
-		}
-
-		return e.complexity.Query.ServerInfo(childComplexity), true
 
 	case "Query.userActivityList":
 		if e.complexity.Query.UserActivityList == nil {
@@ -792,13 +759,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Versions(childComplexity, args["productID"].(string)), true
 
-	case "ServerInfo.components":
-		if e.complexity.ServerInfo.Components == nil {
-			break
-		}
-
-		return e.complexity.ServerInfo.Components(childComplexity), true
-
 	case "Subscription.watchProcessLogs":
 		if e.complexity.Subscription.WatchProcessLogs == nil {
 			break
@@ -809,7 +769,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.WatchProcessLogs(childComplexity, args["productID"].(string), args["versionName"].(string), args["filters"].(entity.LogFilters)), true
+		return e.complexity.Subscription.WatchProcessLogs(childComplexity, args["productID"].(string), args["versionTag"].(string), args["filters"].(entity.LogFilters)), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -909,13 +869,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Version.ID(childComplexity), true
 
-	case "Version.name":
-		if e.complexity.Version.Name == nil {
-			break
-		}
-
-		return e.complexity.Version.Name(childComplexity), true
-
 	case "Version.publicationAuthor":
 		if e.complexity.Version.PublicationAuthor == nil {
 			break
@@ -937,12 +890,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Version.Status(childComplexity), true
 
-	case "Version.version":
-		if e.complexity.Version.Version == nil {
+	case "Version.tag":
+		if e.complexity.Version.Tag == nil {
 			break
 		}
 
-		return e.complexity.Version.Version(childComplexity), true
+		return e.complexity.Version.Tag(childComplexity), true
 
 	case "Version.workflows":
 		if e.complexity.Version.Workflows == nil {
@@ -1135,20 +1088,10 @@ type Query {
   logs(productID: ID!, filters: LogFilters!, cursor: String): LogPage!
   metrics(
     productID: ID!
-    versionName: String!
+    versionTag: String!
     startDate: String!
     endDate: String!
   ): Metrics
-  serverInfo: ServerInfo!
-}
-
-type ServerInfo {
-  components: [ComponentInfo!]!
-}
-
-type ComponentInfo {
-  name: String!
-  version: String!
 }
 
 type Mutation {
@@ -1169,7 +1112,7 @@ type User {
 type Subscription {
   watchProcessLogs(
     productID: ID!
-    versionName: String!
+    versionTag: String!
     filters: LogFilters!
   ): ProcessLog!
 }
@@ -1186,25 +1129,25 @@ input CreateVersionInput {
 }
 
 input StartVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
   productID: ID!
 }
 
 input StopVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
   productID: ID!
 }
 
 input PublishVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
   productID: ID!
 }
 
 input UnpublishVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
   productID: ID!
 }
@@ -1241,9 +1184,8 @@ type Product {
 
 type Version {
   id: ID!
-  name: String!
+  tag: String!
   description: String!
-  version: String!
   config: [ConfigurationVariable]
   workflows: [Workflow!]!
   creationDate: String!
@@ -1588,14 +1530,14 @@ func (ec *executionContext) field_Query_metrics_args(ctx context.Context, rawArg
 	}
 	args["productID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["versionName"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionName"))
+	if tmp, ok := rawArgs["versionTag"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["versionName"] = arg1
+	args["versionTag"] = arg1
 	var arg2 string
 	if tmp, ok := rawArgs["startDate"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
@@ -1744,14 +1686,14 @@ func (ec *executionContext) field_Subscription_watchProcessLogs_args(ctx context
 	}
 	args["productID"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["versionName"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionName"))
+	if tmp, ok := rawArgs["versionTag"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["versionName"] = arg1
+	args["versionTag"] = arg1
 	var arg2 entity.LogFilters
 	if tmp, ok := rawArgs["filters"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filters"))
@@ -1801,94 +1743,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
-
-func (ec *executionContext) _ComponentInfo_name(ctx context.Context, field graphql.CollectedField, obj *entity.ComponentInfo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ComponentInfo_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ComponentInfo_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ComponentInfo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ComponentInfo_version(ctx context.Context, field graphql.CollectedField, obj *entity.ComponentInfo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ComponentInfo_version(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Version, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ComponentInfo_version(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ComponentInfo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _ConfigurationVariable_key(ctx context.Context, field graphql.CollectedField, obj *entity.ConfigurationVariable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ConfigurationVariable_key(ctx, field)
@@ -3015,12 +2869,10 @@ func (ec *executionContext) fieldContext_Mutation_createVersion(ctx context.Cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Version_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Version_name(ctx, field)
+			case "tag":
+				return ec.fieldContext_Version_tag(ctx, field)
 			case "description":
 				return ec.fieldContext_Version_description(ctx, field)
-			case "version":
-				return ec.fieldContext_Version_version(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
 			case "workflows":
@@ -3096,12 +2948,10 @@ func (ec *executionContext) fieldContext_Mutation_startVersion(ctx context.Conte
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Version_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Version_name(ctx, field)
+			case "tag":
+				return ec.fieldContext_Version_tag(ctx, field)
 			case "description":
 				return ec.fieldContext_Version_description(ctx, field)
-			case "version":
-				return ec.fieldContext_Version_version(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
 			case "workflows":
@@ -3177,12 +3027,10 @@ func (ec *executionContext) fieldContext_Mutation_stopVersion(ctx context.Contex
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Version_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Version_name(ctx, field)
+			case "tag":
+				return ec.fieldContext_Version_tag(ctx, field)
 			case "description":
 				return ec.fieldContext_Version_description(ctx, field)
-			case "version":
-				return ec.fieldContext_Version_version(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
 			case "workflows":
@@ -3258,12 +3106,10 @@ func (ec *executionContext) fieldContext_Mutation_publishVersion(ctx context.Con
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Version_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Version_name(ctx, field)
+			case "tag":
+				return ec.fieldContext_Version_tag(ctx, field)
 			case "description":
 				return ec.fieldContext_Version_description(ctx, field)
-			case "version":
-				return ec.fieldContext_Version_version(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
 			case "workflows":
@@ -3339,12 +3185,10 @@ func (ec *executionContext) fieldContext_Mutation_unpublishVersion(ctx context.C
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Version_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Version_name(ctx, field)
+			case "tag":
+				return ec.fieldContext_Version_tag(ctx, field)
 			case "description":
 				return ec.fieldContext_Version_description(ctx, field)
-			case "version":
-				return ec.fieldContext_Version_version(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
 			case "workflows":
@@ -4585,12 +4429,10 @@ func (ec *executionContext) fieldContext_Product_publishedVersion(ctx context.Co
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Version_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Version_name(ctx, field)
+			case "tag":
+				return ec.fieldContext_Version_tag(ctx, field)
 			case "description":
 				return ec.fieldContext_Version_description(ctx, field)
-			case "version":
-				return ec.fieldContext_Version_version(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
 			case "workflows":
@@ -4882,12 +4724,10 @@ func (ec *executionContext) fieldContext_Query_version(ctx context.Context, fiel
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Version_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Version_name(ctx, field)
+			case "tag":
+				return ec.fieldContext_Version_tag(ctx, field)
 			case "description":
 				return ec.fieldContext_Version_description(ctx, field)
-			case "version":
-				return ec.fieldContext_Version_version(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
 			case "workflows":
@@ -4963,12 +4803,10 @@ func (ec *executionContext) fieldContext_Query_versions(ctx context.Context, fie
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Version_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Version_name(ctx, field)
+			case "tag":
+				return ec.fieldContext_Version_tag(ctx, field)
 			case "description":
 				return ec.fieldContext_Version_description(ctx, field)
-			case "version":
-				return ec.fieldContext_Version_version(ctx, field)
 			case "config":
 				return ec.fieldContext_Version_config(ctx, field)
 			case "workflows":
@@ -5145,7 +4983,7 @@ func (ec *executionContext) _Query_metrics(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Metrics(rctx, fc.Args["productID"].(string), fc.Args["versionName"].(string), fc.Args["startDate"].(string), fc.Args["endDate"].(string))
+		return ec.resolvers.Query().Metrics(rctx, fc.Args["productID"].(string), fc.Args["versionTag"].(string), fc.Args["startDate"].(string), fc.Args["endDate"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5185,54 +5023,6 @@ func (ec *executionContext) fieldContext_Query_metrics(ctx context.Context, fiel
 	if fc.Args, err = ec.field_Query_metrics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_serverInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_serverInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ServerInfo(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*entity.ServerInfo)
-	fc.Result = res
-	return ec.marshalNServerInfo2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐServerInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_serverInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "components":
-				return ec.fieldContext_ServerInfo_components(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ServerInfo", field.Name)
-		},
 	}
 	return fc, nil
 }
@@ -5366,56 +5156,6 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _ServerInfo_components(ctx context.Context, field graphql.CollectedField, obj *entity.ServerInfo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ServerInfo_components(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Components, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]entity.ComponentInfo)
-	fc.Result = res
-	return ec.marshalNComponentInfo2ᚕgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐComponentInfoᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ServerInfo_components(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ServerInfo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return ec.fieldContext_ComponentInfo_name(ctx, field)
-			case "version":
-				return ec.fieldContext_ComponentInfo_version(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ComponentInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Subscription_watchProcessLogs(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subscription_watchProcessLogs(ctx, field)
 	if err != nil {
@@ -5430,7 +5170,7 @@ func (ec *executionContext) _Subscription_watchProcessLogs(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Subscription().WatchProcessLogs(rctx, fc.Args["productID"].(string), fc.Args["versionName"].(string), fc.Args["filters"].(entity.LogFilters))
+		return ec.resolvers.Subscription().WatchProcessLogs(rctx, fc.Args["productID"].(string), fc.Args["versionTag"].(string), fc.Args["filters"].(entity.LogFilters))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5905,8 +5645,8 @@ func (ec *executionContext) fieldContext_Version_id(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Version_name(ctx context.Context, field graphql.CollectedField, obj *entity.Version) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Version_name(ctx, field)
+func (ec *executionContext) _Version_tag(ctx context.Context, field graphql.CollectedField, obj *entity.Version) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Version_tag(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5919,7 +5659,7 @@ func (ec *executionContext) _Version_name(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.Tag, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5936,7 +5676,7 @@ func (ec *executionContext) _Version_name(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Version_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Version_tag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Version",
 		Field:      field,
@@ -5981,50 +5721,6 @@ func (ec *executionContext) _Version_description(ctx context.Context, field grap
 }
 
 func (ec *executionContext) fieldContext_Version_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Version",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Version_version(ctx context.Context, field graphql.CollectedField, obj *entity.Version) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Version_version(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Version, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Version_version(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Version",
 		Field:      field,
@@ -8588,22 +8284,22 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"versionName", "comment", "productID"}
+	fieldsInOrder := [...]string{"versionTag", "comment", "productID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "versionName":
+		case "versionTag":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionName"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.VersionName = data
+			it.VersionTag = data
 		case "comment":
 			var err error
 
@@ -8682,22 +8378,22 @@ func (ec *executionContext) unmarshalInputStartVersionInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"versionName", "comment", "productID"}
+	fieldsInOrder := [...]string{"versionTag", "comment", "productID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "versionName":
+		case "versionTag":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionName"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.VersionName = data
+			it.VersionTag = data
 		case "comment":
 			var err error
 
@@ -8729,22 +8425,22 @@ func (ec *executionContext) unmarshalInputStopVersionInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"versionName", "comment", "productID"}
+	fieldsInOrder := [...]string{"versionTag", "comment", "productID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "versionName":
+		case "versionTag":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionName"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.VersionName = data
+			it.VersionTag = data
 		case "comment":
 			var err error
 
@@ -8776,22 +8472,22 @@ func (ec *executionContext) unmarshalInputUnpublishVersionInput(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"versionName", "comment", "productID"}
+	fieldsInOrder := [...]string{"versionTag", "comment", "productID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "versionName":
+		case "versionTag":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionName"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.VersionName = data
+			it.VersionTag = data
 		case "comment":
 			var err error
 
@@ -8879,50 +8575,6 @@ func (ec *executionContext) unmarshalInputUpdateUserProductGrantsInput(ctx conte
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
-
-var componentInfoImplementors = []string{"ComponentInfo"}
-
-func (ec *executionContext) _ComponentInfo(ctx context.Context, sel ast.SelectionSet, obj *entity.ComponentInfo) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, componentInfoImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ComponentInfo")
-		case "name":
-			out.Values[i] = ec._ComponentInfo_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "version":
-			out.Values[i] = ec._ComponentInfo_version(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
 
 var configurationVariableImplementors = []string{"ConfigurationVariable"}
 
@@ -9934,28 +9586,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "serverInfo":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_serverInfo(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -9964,45 +9594,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var serverInfoImplementors = []string{"ServerInfo"}
-
-func (ec *executionContext) _ServerInfo(ctx context.Context, sel ast.SelectionSet, obj *entity.ServerInfo) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, serverInfoImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ServerInfo")
-		case "components":
-			out.Values[i] = ec._ServerInfo_components(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10266,18 +9857,13 @@ func (ec *executionContext) _Version(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "name":
-			out.Values[i] = ec._Version_name(ctx, field, obj)
+		case "tag":
+			out.Values[i] = ec._Version_tag(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "description":
 			out.Values[i] = ec._Version_description(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "version":
-			out.Values[i] = ec._Version_version(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -10853,54 +10439,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNComponentInfo2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐComponentInfo(ctx context.Context, sel ast.SelectionSet, v entity.ComponentInfo) graphql.Marshaler {
-	return ec._ComponentInfo(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNComponentInfo2ᚕgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐComponentInfoᚄ(ctx context.Context, sel ast.SelectionSet, v []entity.ComponentInfo) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNComponentInfo2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐComponentInfo(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
 func (ec *executionContext) unmarshalNCreateProductInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐCreateProductInput(ctx context.Context, v interface{}) (CreateProductInput, error) {
 	res, err := ec.unmarshalInputCreateProductInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -11279,20 +10817,6 @@ func (ec *executionContext) unmarshalNPublishVersionInput2githubᚗcomᚋkonstel
 func (ec *executionContext) unmarshalNRevokeUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRevokeUserProductGrantsInput(ctx context.Context, v interface{}) (RevokeUserProductGrantsInput, error) {
 	res, err := ec.unmarshalInputRevokeUserProductGrantsInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNServerInfo2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐServerInfo(ctx context.Context, sel ast.SelectionSet, v entity.ServerInfo) graphql.Marshaler {
-	return ec._ServerInfo(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNServerInfo2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐServerInfo(ctx context.Context, sel ast.SelectionSet, v *entity.ServerInfo) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ServerInfo(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNStartVersionInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐStartVersionInput(ctx context.Context, v interface{}) (StartVersionInput, error) {

@@ -46,30 +46,30 @@ message WorkflowKeyValueStoreConfig {
 
 message CreateStreamsRequest {
 string product_id = 1;
-  string version_name = 2;
+  string version_tag = 2;
   repeated Workflow workflows = 3;
 }
 
 message CreateObjectStoresRequest {
   string product_id = 1;
-  string version_name = 2;
+  string version_tag = 2;
   repeated Workflow workflows = 3;
 }
 
 message CreateKeyValueStoresRequest {
   string product_id = 1;
-  string version_name = 2;
+  string version_tag = 2;
   repeated Workflow workflows = 3;
 }
 
 message DeleteStreamsRequest {
   string product_id = 1;
-  string version_name = 2;
+  string version_tag = 2;
 }
 
 message DeleteObjectStoresRequest {
   string product_id = 1;
-  string version_name = 2;
+  string version_tag = 2;
 }
 
 message CreateStreamsResponse {

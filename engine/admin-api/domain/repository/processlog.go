@@ -9,7 +9,7 @@ import (
 )
 
 type ProcessLogRepository interface {
-	WatchProcessLogs(ctx context.Context, runtimeID, versionName string, filters entity.LogFilters) (<-chan *entity.ProcessLog, error)
+	WatchProcessLogs(ctx context.Context, runtimeID, versionTag string, filters entity.LogFilters) (<-chan *entity.ProcessLog, error)
 	PaginatedSearch(ctx context.Context, runtimeID string, searchOpts *entity.SearchLogsOptions) (*entity.SearchLogsResult, error)
 	CreateIndexes(ctx context.Context, runtimeID string) error
 }

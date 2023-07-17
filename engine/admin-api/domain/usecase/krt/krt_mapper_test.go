@@ -19,9 +19,8 @@ func getExpectedVersion() *entity.Version {
 
 	return &entity.Version{
 		ID:          "", // ID is not defined in KRT YAML
-		Name:        "email-classificator",
 		Description: "Email classificator for branching features.",
-		Version:     "v1.0.0",
+		Tag:         "v1.0.0",
 		Config: []entity.ConfigurationVariable{
 			{
 				Key:   "keyA",

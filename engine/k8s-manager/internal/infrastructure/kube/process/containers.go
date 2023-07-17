@@ -76,7 +76,7 @@ func getKrtFilesDownloaderContainer(spec *processSpec) corev1.Container {
 				Value: spec.Product,
 			},
 			{
-				Name:  "KAI_VERSION_NAME",
+				Name:  "KAI_VERSION_TAG",
 				Value: spec.Version,
 			},
 			{
@@ -100,7 +100,7 @@ func getFluentBitContainer(spec *processSpec) corev1.Container {
 		{Name: "KAI_MESSAGING_HOST", Value: viper.GetString("messaging.host")},
 		{Name: "KAI_MESSAGING_PORT", Value: viper.GetString("messaging.port")},
 		{Name: "KAI_PRODUCT_ID", Value: spec.Product},
-		{Name: "KAI_VERSION_NAME", Value: spec.Version},
+		{Name: "KAI_VERSION_TAG", Value: spec.Version},
 		{Name: "KAI_WORKFLOW_NAME", Value: spec.Workflow},
 		{Name: "KAI_PROCESS_NAME", Value: spec.Process.Name},
 	}

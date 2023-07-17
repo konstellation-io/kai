@@ -23,13 +23,13 @@ func TestDeleteStreams(t *testing.T) {
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
-	testVersionName := "test-version"
-	testStreamName := "test-product_test-version_TestWorkflow"
-	expectedVersionStreamPattern := regexp.MustCompile(fmt.Sprintf("^%s_%s_.*", testProductID, testVersionName))
+	testVersionTag := "v1.0.0"
+	testStreamName := "test-product_v1.0.0_TestWorkflow"
+	expectedVersionStreamPattern := regexp.MustCompile(fmt.Sprintf("^%s_%s_.*", testProductID, testVersionTag))
 
 	client.EXPECT().GetStreamNames(expectedVersionStreamPattern).Return([]string{testStreamName}, nil)
 	client.EXPECT().DeleteStream(testStreamName).Return(nil)
-	err := natsManager.DeleteStreams(testProductID, testVersionName)
+	err := natsManager.DeleteStreams(testProductID, testVersionTag)
 	assert.Nil(t, err)
 }
 
@@ -42,12 +42,12 @@ func TestDeleteStreams_ErrorDeletingStream(t *testing.T) {
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
-	testVersionName := "test-version"
-	expectedVersionStreamPattern := regexp.MustCompile(fmt.Sprintf("^%s_%s_.*", testProductID, testVersionName))
+	testVersionTag := "v1.0.0"
+	expectedVersionStreamPattern := regexp.MustCompile(fmt.Sprintf("^%s_%s_.*", testProductID, testVersionTag))
 	expectedError := errors.New("error getting streams")
 
 	client.EXPECT().GetStreamNames(expectedVersionStreamPattern).Return(nil, expectedError)
-	err := natsManager.DeleteStreams(testProductID, testVersionName)
+	err := natsManager.DeleteStreams(testProductID, testVersionTag)
 	assert.ErrorIs(t, err, expectedError)
 }
 func TestDeleteStreams_ErrorGettingStreamsNames(t *testing.T) {
@@ -59,14 +59,14 @@ func TestDeleteStreams_ErrorGettingStreamsNames(t *testing.T) {
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
-	testVersionName := "test-version"
-	testStreamName := "test-product_test-version_TestWorkflow"
-	expectedVersionStreamPattern := regexp.MustCompile(fmt.Sprintf("^%s_%s_.*", testProductID, testVersionName))
+	testVersionTag := "v1.0.0"
+	testStreamName := "test-product_v1.0.0_TestWorkflow"
+	expectedVersionStreamPattern := regexp.MustCompile(fmt.Sprintf("^%s_%s_.*", testProductID, testVersionTag))
 	expectedError := errors.New("error deleting streams")
 
 	client.EXPECT().GetStreamNames(expectedVersionStreamPattern).Return([]string{testStreamName}, nil)
 	client.EXPECT().DeleteStream(testStreamName).Return(expectedError)
 
-	err := natsManager.DeleteStreams(testProductID, testVersionName)
+	err := natsManager.DeleteStreams(testProductID, testVersionTag)
 	assert.ErrorIs(t, err, expectedError)
 }

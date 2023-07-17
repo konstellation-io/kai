@@ -11,8 +11,8 @@ type VersionBuilder struct {
 func defaultVersion() domain.Version {
 	return domain.Version{
 		Product:       "test-product",
-		Name:          "test-version",
-		KeyValueStore: "test-version-kv-store",
+		Tag:           "v1.0.0",
+		KeyValueStore: "v1.0.0-kv-store",
 		Workflows: []*domain.Workflow{
 			NewWorkflowBuilder().Build(),
 		},

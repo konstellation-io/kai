@@ -24,9 +24,9 @@ type LogPage struct {
 }
 
 type PublishVersionInput struct {
-	VersionName string `json:"versionName"`
-	Comment     string `json:"comment"`
-	ProductID   string `json:"productID"`
+	VersionTag string `json:"versionTag"`
+	Comment    string `json:"comment"`
+	ProductID  string `json:"productID"`
 }
 
 type RevokeUserProductGrantsInput struct {
@@ -36,21 +36,21 @@ type RevokeUserProductGrantsInput struct {
 }
 
 type StartVersionInput struct {
-	VersionName string `json:"versionName"`
-	Comment     string `json:"comment"`
-	ProductID   string `json:"productID"`
+	VersionTag string `json:"versionTag"`
+	Comment    string `json:"comment"`
+	ProductID  string `json:"productID"`
 }
 
 type StopVersionInput struct {
-	VersionName string `json:"versionName"`
-	Comment     string `json:"comment"`
-	ProductID   string `json:"productID"`
+	VersionTag string `json:"versionTag"`
+	Comment    string `json:"comment"`
+	ProductID  string `json:"productID"`
 }
 
 type UnpublishVersionInput struct {
-	VersionName string `json:"versionName"`
-	Comment     string `json:"comment"`
-	ProductID   string `json:"productID"`
+	VersionTag string `json:"versionTag"`
+	Comment    string `json:"comment"`
+	ProductID  string `json:"productID"`
 }
 
 type UpdateUserProductGrantsInput struct {

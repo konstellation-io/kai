@@ -23,7 +23,7 @@ func TestStopVersion(t *testing.T) {
 
 	const (
 		product = "test-product"
-		version = "test-version"
+		version = "v1.0.0"
 	)
 
 	containerSvc.EXPECT().
@@ -58,7 +58,7 @@ func TestStopVersion_ErrorDeletingConfiguration(t *testing.T) {
 
 	const (
 		product = "test-product"
-		version = "test-version"
+		version = "v1.0.0"
 	)
 
 	expectedErr := errors.New("error deleting configuration")
@@ -95,7 +95,7 @@ func TestStopVersion_ErrorDeletingNetwork(t *testing.T) {
 
 	const (
 		product = "test-product"
-		version = "test-version"
+		version = "v1.0.0"
 	)
 
 	expectedErr := errors.New("error deleting network")
@@ -132,7 +132,7 @@ func TestStopVersion_ErrorDeletingProcesses(t *testing.T) {
 
 	const (
 		product = "test-product"
-		version = "test-version"
+		version = "v1.0.0"
 	)
 
 	expectedErr := errors.New("error deleting processes")
@@ -169,7 +169,7 @@ func TestStopVersion_ErrorDeletingAllResources(t *testing.T) {
 
 	const (
 		product = "test-product"
-		version = "test-version"
+		version = "v1.0.0"
 	)
 
 	var (

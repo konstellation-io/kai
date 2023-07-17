@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	productID   = "productID"
-	versionName = "versionName"
+	productID  = "productID"
+	versionTag = "v1.0.0"
 )
 
 var (
@@ -83,9 +83,9 @@ func (s *NatsServiceTestSuite) SetupSuite() {
 
 func (s *NatsServiceTestSuite) TestCreateStreams() {
 	req := &natspb.CreateStreamsRequest{
-		ProductId:   productID,
-		VersionName: versionName,
-		Workflows:   protoWorkflows,
+		ProductId:  productID,
+		VersionTag: versionTag,
+		Workflows:  protoWorkflows,
 	}
 
 	expectedEntityWorkflows := entityWorkflows
@@ -120,7 +120,7 @@ func (s *NatsServiceTestSuite) TestCreateStreams() {
 	}
 
 	s.natsManagerMock.EXPECT().
-		CreateStreams(req.ProductId, req.VersionName, expectedEntityWorkflows).
+		CreateStreams(req.ProductId, req.VersionTag, expectedEntityWorkflows).
 		Return(managerResponse, nil)
 
 	clientResponse, err := s.natsService.CreateStreams(nil, req)
@@ -130,9 +130,9 @@ func (s *NatsServiceTestSuite) TestCreateStreams() {
 
 func (s *NatsServiceTestSuite) TestCreateObjectStores() {
 	req := &natspb.CreateObjectStoresRequest{
-		ProductId:   productID,
-		VersionName: versionName,
-		Workflows:   protoWorkflows,
+		ProductId:  productID,
+		VersionTag: versionTag,
+		Workflows:  protoWorkflows,
 	}
 
 	expectedEntityWorkflows := entityWorkflows
@@ -157,7 +157,7 @@ func (s *NatsServiceTestSuite) TestCreateObjectStores() {
 	}
 
 	s.natsManagerMock.EXPECT().
-		CreateObjectStores(req.ProductId, req.VersionName, expectedEntityWorkflows).
+		CreateObjectStores(req.ProductId, req.VersionTag, expectedEntityWorkflows).
 		Return(managerResponse, nil)
 
 	clientResponse, err := s.natsService.CreateObjectStores(nil, req)
@@ -167,12 +167,12 @@ func (s *NatsServiceTestSuite) TestCreateObjectStores() {
 
 func (s *NatsServiceTestSuite) TestDeleteStreams() {
 	req := &natspb.DeleteStreamsRequest{
-		ProductId:   productID,
-		VersionName: versionName,
+		ProductId:  productID,
+		VersionTag: versionTag,
 	}
 
 	s.natsManagerMock.EXPECT().
-		DeleteStreams(req.ProductId, req.VersionName).
+		DeleteStreams(req.ProductId, req.VersionTag).
 		Return(nil)
 
 	clientResponse, err := s.natsService.DeleteStreams(nil, req)
@@ -182,12 +182,12 @@ func (s *NatsServiceTestSuite) TestDeleteStreams() {
 
 func (s *NatsServiceTestSuite) TestDeleteObjectStores() {
 	req := &natspb.DeleteObjectStoresRequest{
-		ProductId:   productID,
-		VersionName: versionName,
+		ProductId:  productID,
+		VersionTag: versionTag,
 	}
 
 	s.natsManagerMock.EXPECT().
-		DeleteObjectStores(req.ProductId, req.VersionName).
+		DeleteObjectStores(req.ProductId, req.VersionTag).
 		Return(nil)
 
 	clientResponse, err := s.natsService.DeleteObjectStores(nil, req)
@@ -197,9 +197,9 @@ func (s *NatsServiceTestSuite) TestDeleteObjectStores() {
 
 func (s *NatsServiceTestSuite) TestCreateKeyValueStores() {
 	req := &natspb.CreateKeyValueStoresRequest{
-		ProductId:   productID,
-		VersionName: versionName,
-		Workflows:   protoWorkflows,
+		ProductId:  productID,
+		VersionTag: versionTag,
+		Workflows:  protoWorkflows,
 	}
 
 	expectedEntityWorkflows := entityWorkflows
@@ -233,7 +233,7 @@ func (s *NatsServiceTestSuite) TestCreateKeyValueStores() {
 	}
 
 	s.natsManagerMock.EXPECT().
-		CreateKeyValueStores(req.ProductId, req.VersionName, expectedEntityWorkflows).
+		CreateKeyValueStores(req.ProductId, req.VersionTag, expectedEntityWorkflows).
 		Return(managerResponse, nil)
 
 	clientResponse, err := s.natsService.CreateKeyValueStores(nil, req)

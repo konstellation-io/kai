@@ -1,7 +1,7 @@
 package domain
 
 type Version struct {
-	Name          string
+	Tag           string
 	Product       string
 	KeyValueStore string
 

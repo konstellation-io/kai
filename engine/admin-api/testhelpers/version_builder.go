@@ -9,10 +9,9 @@ type VersionBuilder struct {
 func NewVersionBuilder() *VersionBuilder {
 	return &VersionBuilder{
 		version: entity.Version{
-			ID:          "test-version-id",
-			Name:        "test-version-name",
+			ID:          "version-id",
+			Tag:         "v1.0.0",
 			Description: "test description",
-			Version:     "v0.0.0",
 			Workflows: []entity.Workflow{
 				NewWorkflowBuilder().Build(),
 			},

@@ -7,9 +7,8 @@ import (
 func mapDTOToEntity(dto *versionDTO) *entity.Version {
 	return &entity.Version{
 		ID:          dto.ID,
-		Name:        dto.Name,
+		Tag:         dto.Tag,
 		Description: dto.Description,
-		Version:     dto.Version,
 		Config:      mapDTOConfigToEntityConfig(dto.Config),
 		Workflows:   mapDTOToEntityWorkflows(dto.Workflows),
 
@@ -105,9 +104,8 @@ func mapDTOConfigToEntityConfig(config []configurationVariableDTO) []entity.Conf
 func mapEntityToDTO(versionEntity *entity.Version) *versionDTO {
 	return &versionDTO{
 		ID:          versionEntity.ID,
-		Name:        versionEntity.Name,
+		Tag:         versionEntity.Tag,
 		Description: versionEntity.Description,
-		Version:     versionEntity.Version,
 		Config:      mapEntityConfigToDTOConfig(versionEntity.Config),
 		Workflows:   mapEntityToDTOWorkflows(versionEntity.Workflows),
 

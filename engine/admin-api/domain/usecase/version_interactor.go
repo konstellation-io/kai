@@ -65,9 +65,9 @@ func (i *VersionInteractor) GetByID(productID, versionID string) (*entity.Versio
 	return i.versionRepo.GetByID(productID, versionID)
 }
 
-// GetByName returns a Version by its unique name.
-func (i *VersionInteractor) GetByName(ctx context.Context, user *entity.User, productID, name string) (*entity.Version, error) {
-	return i.versionRepo.GetByName(ctx, productID, name)
+// GetByTag returns a Version by its unique tag.
+func (i *VersionInteractor) GetByTag(ctx context.Context, user *entity.User, productID, tag string) (*entity.Version, error) {
+	return i.versionRepo.GetByTag(ctx, productID, tag)
 }
 
 // ListVersionsByProduct returns all Versions of the given Product.
@@ -138,9 +138,9 @@ func (i *VersionInteractor) Create(
 		)
 	}
 
-	_, err = i.versionRepo.GetByName(ctx, productID, krtYml.Name)
+	_, err = i.versionRepo.GetByTag(ctx, productID, krtYml.Version)
 	if err != nil && !errors.Is(err, errors.ErrVersionNotFound) {
-		return nil, nil, fmt.Errorf("error version repo GetByName: %w", err)
+		return nil, nil, fmt.Errorf("error version repo GetByTag: %w", err)
 	} else if err == nil {
 		return nil, nil, errors.ErrVersionDuplicated
 	}
@@ -237,7 +237,7 @@ func (i *VersionInteractor) saveKRTDashboards(
 	contentErrors []error,
 ) []error {
 	if _, err := os.Stat(path.Join(dashboardsFolder)); err == nil {
-		err := i.storeDashboards(ctx, dashboardsFolder, product.ID, versionCreated.Name)
+		err := i.storeDashboards(ctx, dashboardsFolder, product.ID, versionCreated.Tag)
 		if err != nil {
 			contentErrors = append(contentErrors, errors.ErrCreatingDashboard)
 		}
@@ -251,16 +251,16 @@ func (i *VersionInteractor) Start(
 	ctx context.Context,
 	user *entity.User,
 	productID string,
-	versionName string,
+	versionTag string,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
 	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
 		return nil, nil, err
 	}
 
-	i.logger.Infof("The user %q is starting version %q on product %q", user.ID, versionName, productID)
+	i.logger.Infof("The user %q is starting version %q on product %q", user.ID, versionTag, productID)
 
-	v, err := i.versionRepo.GetByName(ctx, productID, versionName)
+	v, err := i.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -287,17 +287,17 @@ func (i *VersionInteractor) Start(
 
 	versionStreamCfg, err := i.natsManagerService.CreateStreams(ctx, productID, v)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error creating streams for version %q: %w", v.Name, err)
+		return nil, nil, fmt.Errorf("error creating streams for version %q: %w", v.Tag, err)
 	}
 
 	objectStoreCfg, err := i.natsManagerService.CreateObjectStores(ctx, productID, v)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error creating objects stores for version %q: %w", v.Name, err)
+		return nil, nil, fmt.Errorf("error creating objects stores for version %q: %w", v.Tag, err)
 	}
 
 	kvStoreCfg, err := i.natsManagerService.CreateKeyValueStores(ctx, productID, v)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error creating key-value stores for version %q: %w", v.Name, err)
+		return nil, nil, fmt.Errorf("error creating key-value stores for version %q: %w", v.Tag, err)
 	}
 
 	versionCfg := entity.NewVersionConfig(versionStreamCfg, objectStoreCfg, kvStoreCfg)
@@ -312,16 +312,16 @@ func (i *VersionInteractor) Stop(
 	ctx context.Context,
 	user *entity.User,
 	productID string,
-	versionName string,
+	versionTag string,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
 	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
 		return nil, nil, err
 	}
 
-	i.logger.Infof("The user %q is stopping version %q on product %q", user.ID, versionName, productID)
+	i.logger.Infof("The user %q is stopping version %q on product %q", user.ID, versionTag, productID)
 
-	v, err := i.versionRepo.GetByName(ctx, productID, versionName)
+	v, err := i.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -346,14 +346,14 @@ func (i *VersionInteractor) Stop(
 		return nil, nil, err
 	}
 
-	err = i.natsManagerService.DeleteStreams(ctx, productID, versionName)
+	err = i.natsManagerService.DeleteStreams(ctx, productID, versionTag)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error stopping version %q: %w", versionName, err)
+		return nil, nil, fmt.Errorf("error stopping version %q: %w", versionTag, err)
 	}
 
-	err = i.natsManagerService.DeleteObjectStores(ctx, productID, versionName)
+	err = i.natsManagerService.DeleteObjectStores(ctx, productID, versionTag)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error stopping version %q: %w", versionName, err)
+		return nil, nil, fmt.Errorf("error stopping version %q: %w", versionTag, err)
 	}
 
 	go i.stopAndNotify(productID, v, notifyStatusCh)
@@ -377,17 +377,17 @@ func (i *VersionInteractor) startAndNotify(
 
 	err := i.k8sService.Start(ctx, productID, vers, versionConfig)
 	if err != nil {
-		i.logger.Errorf("[versionInteractor.startAndNotify] error starting version %q: %s", vers.Name, err)
+		i.logger.Errorf("[versionInteractor.startAndNotify] error starting version %q: %s", vers.Tag, err)
 	}
 
 	err = i.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarted)
 	if err != nil {
-		i.logger.Errorf("[versionInteractor.startAndNotify] error starting version %q: %s", vers.Name, err)
+		i.logger.Errorf("[versionInteractor.startAndNotify] error starting version %q: %s", vers.Tag, err)
 	}
 
 	vers.Status = entity.VersionStatusStarted
 	notifyStatusCh <- vers
-	i.logger.Infof("[versionInteractor.startAndNotify] version %q started", vers.Name)
+	i.logger.Infof("[versionInteractor.startAndNotify] version %q started", vers.Tag)
 }
 
 func (i *VersionInteractor) stopAndNotify(
@@ -405,17 +405,17 @@ func (i *VersionInteractor) stopAndNotify(
 
 	err := i.k8sService.Stop(ctx, productID, vers)
 	if err != nil {
-		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", vers.Name, err)
+		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", vers.Tag, err)
 	}
 
 	err = i.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopped)
 	if err != nil {
-		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", vers.Name, err)
+		i.logger.Errorf("[versionInteractor.stopAndNotify] error stopping version %q: %s", vers.Tag, err)
 	}
 
 	vers.Status = entity.VersionStatusStopped
 	notifyStatusCh <- vers
-	i.logger.Infof("[versionInteractor.stopAndNotify] version %q stopped", vers.Name)
+	i.logger.Infof("[versionInteractor.stopAndNotify] version %q stopped", vers.Tag)
 }
 
 // Publish set a Version as published on DB and K8s.
@@ -423,16 +423,16 @@ func (i *VersionInteractor) Publish(
 	ctx context.Context,
 	user *entity.User,
 	productID,
-	versionName,
+	versionTag,
 	comment string,
 ) (*entity.Version, error) {
 	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActPublishVersion); err != nil {
 		return nil, err
 	}
 
-	i.logger.Infof("The user %s is publishing version %s on product", user.ID, versionName, productID)
+	i.logger.Infof("The user %s is publishing version %s on product", user.ID, versionTag, productID)
 
-	v, err := i.versionRepo.GetByName(ctx, productID, versionName)
+	v, err := i.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		return nil, err
 	}
@@ -474,16 +474,16 @@ func (i *VersionInteractor) Unpublish(
 	ctx context.Context,
 	user *entity.User,
 	productID,
-	versionName,
+	versionTag,
 	comment string,
 ) (*entity.Version, error) {
 	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActUnpublishVersion); err != nil {
 		return nil, err
 	}
 
-	i.logger.Infof("The user %s is unpublishing version %s on product %s", user.ID, versionName, productID)
+	i.logger.Infof("The user %s is unpublishing version %s on product %s", user.ID, versionTag, productID)
 
-	v, err := i.versionRepo.GetByName(ctx, productID, versionName)
+	v, err := i.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		return nil, err
 	}
@@ -518,32 +518,32 @@ func (i *VersionInteractor) WatchProcessStatus(
 	ctx context.Context,
 	user *entity.User,
 	productID,
-	versionName string,
+	versionTag string,
 ) (<-chan *entity.Process, error) {
 	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct); err != nil {
 		return nil, err
 	}
 
-	v, err := i.versionRepo.GetByName(ctx, productID, versionName)
+	v, err := i.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		return nil, err
 	}
 
-	return i.k8sService.WatchProcessStatus(ctx, productID, v.Name)
+	return i.k8sService.WatchProcessStatus(ctx, productID, v.Tag)
 }
 
 func (i *VersionInteractor) WatchProcessLogs(
 	ctx context.Context,
 	user *entity.User,
 	productID,
-	versionName string,
+	versionTag string,
 	filters entity.LogFilters,
 ) (<-chan *entity.ProcessLog, error) {
 	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewVersion); err != nil {
 		return nil, err
 	}
 
-	return i.processLogRepo.WatchProcessLogs(ctx, productID, versionName, filters)
+	return i.processLogRepo.WatchProcessLogs(ctx, productID, versionTag, filters)
 }
 
 func (i *VersionInteractor) SearchLogs(
@@ -598,7 +598,7 @@ func (i *VersionInteractor) setStatusError(
 		errorMessages[idx] = err.Error()
 	}
 
-	i.logger.Errorf("The version %q has the following errors: %s", vers.Name,
+	i.logger.Errorf("The version %q has the following errors: %s", vers.Tag,
 		strings.Join(errorMessages, "\n"))
 
 	versionWithError, err := i.versionRepo.SetErrors(ctx, productID, vers, errorMessages)

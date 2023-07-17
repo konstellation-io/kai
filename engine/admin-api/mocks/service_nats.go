@@ -81,29 +81,29 @@ func (mr *MockNatsManagerServiceMockRecorder) CreateStreams(ctx, runtimeID, vers
 }
 
 // DeleteObjectStores mocks base method.
-func (m *MockNatsManagerService) DeleteObjectStores(ctx context.Context, runtimeID, versionName string) error {
+func (m *MockNatsManagerService) DeleteObjectStores(ctx context.Context, runtimeID, versionTag string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteObjectStores", ctx, runtimeID, versionName)
+	ret := m.ctrl.Call(m, "DeleteObjectStores", ctx, runtimeID, versionTag)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteObjectStores indicates an expected call of DeleteObjectStores.
-func (mr *MockNatsManagerServiceMockRecorder) DeleteObjectStores(ctx, runtimeID, versionName interface{}) *gomock.Call {
+func (mr *MockNatsManagerServiceMockRecorder) DeleteObjectStores(ctx, runtimeID, versionTag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteObjectStores", reflect.TypeOf((*MockNatsManagerService)(nil).DeleteObjectStores), ctx, runtimeID, versionName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteObjectStores", reflect.TypeOf((*MockNatsManagerService)(nil).DeleteObjectStores), ctx, runtimeID, versionTag)
 }
 
 // DeleteStreams mocks base method.
-func (m *MockNatsManagerService) DeleteStreams(ctx context.Context, runtimeID, versionName string) error {
+func (m *MockNatsManagerService) DeleteStreams(ctx context.Context, runtimeID, versionTag string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteStreams", ctx, runtimeID, versionName)
+	ret := m.ctrl.Call(m, "DeleteStreams", ctx, runtimeID, versionTag)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteStreams indicates an expected call of DeleteStreams.
-func (mr *MockNatsManagerServiceMockRecorder) DeleteStreams(ctx, runtimeID, versionName interface{}) *gomock.Call {
+func (mr *MockNatsManagerServiceMockRecorder) DeleteStreams(ctx, runtimeID, versionTag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManagerService)(nil).DeleteStreams), ctx, runtimeID, versionName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManagerService)(nil).DeleteStreams), ctx, runtimeID, versionTag)
 }

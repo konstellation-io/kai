@@ -90,7 +90,7 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, notifyCh, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
+	v, notifyCh, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 	if err != nil {
 		r.logger.Errorf("[mutationResolver.StartVersion] errors starting version: %s", err)
 		return nil, err
@@ -104,7 +104,7 @@ func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionI
 func (r *mutationResolver) StopVersion(ctx context.Context, input StopVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, notifyCh, err := r.versionInteractor.Stop(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
+	v, notifyCh, err := r.versionInteractor.Stop(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 	if err != nil {
 		return nil, err
 	}
@@ -135,12 +135,12 @@ func (r *mutationResolver) notifyVersionStatus(notifyCh chan *entity.Version) {
 
 func (r *mutationResolver) UnpublishVersion(ctx context.Context, input UnpublishVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.Unpublish(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
+	return r.versionInteractor.Unpublish(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 }
 
 func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.Publish(ctx, loggedUser, input.ProductID, input.VersionName, input.Comment)
+	return r.versionInteractor.Publish(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 }
 
 func (r *mutationResolver) UpdateUserProductGrants(
@@ -177,9 +177,9 @@ func (r *mutationResolver) RevokeUserProductGrants(
 	return &entity.User{ID: input.TargetID}, nil
 }
 
-func (r *queryResolver) Metrics(ctx context.Context, productID, versionName, startDate, endDate string) (*entity.Metrics, error) {
+func (r *queryResolver) Metrics(ctx context.Context, productID, versionTag, startDate, endDate string) (*entity.Metrics, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.metricsInteractor.GetMetrics(ctx, loggedUser, productID, versionName, startDate, endDate)
+	return r.metricsInteractor.GetMetrics(ctx, loggedUser, productID, versionTag, startDate, endDate)
 }
 
 func (r *queryResolver) Product(ctx context.Context, id string) (*entity.Product, error) {
@@ -192,9 +192,9 @@ func (r *queryResolver) Products(ctx context.Context) ([]*entity.Product, error)
 	return r.productInteractor.FindAll(ctx, loggedUser)
 }
 
-func (r *queryResolver) Version(ctx context.Context, name, productID string) (*entity.Version, error) {
+func (r *queryResolver) Version(ctx context.Context, tag, productID string) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.GetByName(ctx, loggedUser, productID, name)
+	return r.versionInteractor.GetByTag(ctx, loggedUser, productID, tag)
 }
 
 func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*entity.Version, error) {
@@ -272,10 +272,10 @@ func (r *productResolver) EntrypointAddress(_ context.Context, _ *entity.Product
 	return fmt.Sprintf("entrypoint.%s", r.cfg.BaseDomainName), nil
 }
 
-func (r *subscriptionResolver) WatchProcessLogs(ctx context.Context, productID, versionName string,
+func (r *subscriptionResolver) WatchProcessLogs(ctx context.Context, productID, versionTag string,
 	filters entity.LogFilters) (<-chan *entity.ProcessLog, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.WatchProcessLogs(ctx, loggedUser, productID, versionName, filters)
+	return r.versionInteractor.WatchProcessLogs(ctx, loggedUser, productID, versionTag, filters)
 }
 
 func (r *userActivityResolver) Date(_ context.Context, obj *entity.UserActivity) (string, error) {

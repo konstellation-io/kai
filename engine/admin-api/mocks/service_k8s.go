@@ -92,16 +92,16 @@ func (mr *MockK8sServiceMockRecorder) Unpublish(ctx, productID, version interfac
 }
 
 // WatchProcessStatus mocks base method.
-func (m *MockK8sService) WatchProcessStatus(ctx context.Context, productID, versionName string) (<-chan *entity.Process, error) {
+func (m *MockK8sService) WatchProcessStatus(ctx context.Context, productID, versionTag string) (<-chan *entity.Process, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WatchProcessStatus", ctx, productID, versionName)
+	ret := m.ctrl.Call(m, "WatchProcessStatus", ctx, productID, versionTag)
 	ret0, _ := ret[0].(<-chan *entity.Process)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // WatchProcessStatus indicates an expected call of WatchProcessStatus.
-func (mr *MockK8sServiceMockRecorder) WatchProcessStatus(ctx, productID, versionName interface{}) *gomock.Call {
+func (mr *MockK8sServiceMockRecorder) WatchProcessStatus(ctx, productID, versionTag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchProcessStatus", reflect.TypeOf((*MockK8sService)(nil).WatchProcessStatus), ctx, productID, versionName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchProcessStatus", reflect.TypeOf((*MockK8sService)(nil).WatchProcessStatus), ctx, productID, versionTag)
 }

@@ -38,11 +38,11 @@ func (v *VersionService) Start(
 
 	err := v.starter.StartVersion(ctx, mapRequestToVersion(req))
 	if err != nil {
-		return nil, fmt.Errorf("start version %q in product %q: %w", req.VersionName, req.ProductId, err)
+		return nil, fmt.Errorf("start version %q in product %q: %w", req.VersionTag, req.ProductId, err)
 	}
 
 	return &versionpb.Response{
-		Message: fmt.Sprintf("Version %q in product %q started", req.VersionName, req.ProductId),
+		Message: fmt.Sprintf("Version %q in product %q started", req.VersionTag, req.ProductId),
 	}, nil
 }
 
@@ -54,12 +54,12 @@ func (v *VersionService) Stop(
 
 	err := v.stopper.StopVersion(ctx, usecase.StopParams{
 		Product: req.Product,
-		Version: req.Version,
+		Version: req.VersionTag,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("stop version %q in product %q: %w", req.Version, req.Product, err)
+		return nil, fmt.Errorf("stop version %q in product %q: %w", req.VersionTag, req.Product, err)
 	}
 
 	return &versionpb.Response{
-		Message: fmt.Sprintf("Version %q on product %q stopped", req.Version, req.Product)}, nil
+		Message: fmt.Sprintf("Version %q on product %q stopped", req.VersionTag, req.Product)}, nil
 }

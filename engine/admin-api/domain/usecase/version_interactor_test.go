@@ -98,9 +98,8 @@ func (s *VersionInteractorSuite) getTestVersion() *entity.Version {
 
 	return &entity.Version{
 		ID:          "", // ID to be given after create
-		Name:        "email-classificator",
+		Tag:         "v1.0.0",
 		Description: "Email classificator for branching features.",
-		Version:     "v1.0.0",
 		Config: []entity.ConfigurationVariable{
 			{
 				Key:   "keyA",
@@ -187,7 +186,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
 	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(product, nil)
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.Name).Return(nil, errors.ErrVersionNotFound)
+	s.mocks.versionRepo.EXPECT().GetByTag(s.ctx, productID, testVersion.Tag).Return(nil, errors.ErrVersionNotFound)
 	s.mocks.versionRepo.EXPECT().Create(user.ID, productID, gomock.Any()).Return(testVersion, nil)
 	s.mocks.versionRepo.EXPECT().SetStatus(s.ctx, productID, testVersion.ID, entity.VersionStatusCreated).Return(nil)
 	s.mocks.versionRepo.EXPECT().UploadKRTYamlFile(productID, testVersion, gomock.Any()).Return(nil)
@@ -202,7 +201,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 	s.Equal(expected, actual)
 }
 
-func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplicated() {
+func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionTagIsDuplicated() {
 	productID := "product-1"
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -218,7 +217,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionNameIsDuplic
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
 	s.mocks.productRepo.EXPECT().GetByID(s.ctx, productID).Return(product, nil)
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.Name).Return(testVersion, nil)
+	s.mocks.versionRepo.EXPECT().GetByTag(s.ctx, productID, testVersion.Tag).Return(testVersion, nil)
 
 	_, _, err = s.versionInteractor.Create(context.Background(), user, productID, file)
 	s.ErrorIs(err, errors.ErrVersionDuplicated)
@@ -260,15 +259,15 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfKrtIsInvalid() {
 	s.True(s.ErrorAs(err, invalidKrtErr))
 }
 
-func (s *VersionInteractorSuite) TestGetByName() {
+func (s *VersionInteractorSuite) TestGetByTag() {
 	productID := "product-1"
 
 	user := testhelpers.NewUserBuilder().Build()
 	testVersion := s.getTestVersion()
 
-	s.mocks.versionRepo.EXPECT().GetByName(s.ctx, productID, testVersion.Name).Return(testVersion, nil)
+	s.mocks.versionRepo.EXPECT().GetByTag(s.ctx, productID, testVersion.Tag).Return(testVersion, nil)
 
-	actual, err := s.versionInteractor.GetByName(s.ctx, user, productID, testVersion.Name)
+	actual, err := s.versionInteractor.GetByTag(s.ctx, user, productID, testVersion.Tag)
 	s.Require().NoError(err)
 
 	s.Equal(testVersion, actual)

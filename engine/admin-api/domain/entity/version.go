@@ -11,9 +11,8 @@ type ConfigurationVariable struct {
 
 type Version struct {
 	ID          string
-	Name        string
+	Tag         string
 	Description string
-	Version     string
 	Config      []ConfigurationVariable
 	Workflows   []Workflow
 

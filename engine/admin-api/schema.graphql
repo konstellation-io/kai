@@ -16,7 +16,7 @@ type Query {
   logs(productID: ID!, filters: LogFilters!, cursor: String): LogPage!
   metrics(
     productID: ID!
-    versionName: String!
+    versionTag: String!
     startDate: String!
     endDate: String!
   ): Metrics
@@ -50,7 +50,7 @@ type User {
 type Subscription {
   watchProcessLogs(
     productID: ID!
-    versionName: String!
+    versionTag: String!
     filters: LogFilters!
   ): ProcessLog!
 }
@@ -67,25 +67,25 @@ input CreateVersionInput {
 }
 
 input StartVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
   productID: ID!
 }
 
 input StopVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
   productID: ID!
 }
 
 input PublishVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
   productID: ID!
 }
 
 input UnpublishVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
   productID: ID!
 }
@@ -122,9 +122,8 @@ type Product {
 
 type Version {
   id: ID!
-  name: String!
+  tag: String!
   description: String!
-  version: String!
   config: [ConfigurationVariable]
   workflows: [Workflow!]!
   creationDate: String!

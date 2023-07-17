@@ -23,7 +23,7 @@ func TestDeleteObjectStore(t *testing.T) {
 	natsManager := manager.NewNatsManager(logger, client)
 
 	testProductID := "test-product"
-	testVersionName := "test-version"
+	testVersionTag := "v1.0.0"
 	testWorkflowName := "test-workflow"
 	testObjectStore := "test-object-store"
 
@@ -35,13 +35,13 @@ func TestDeleteObjectStore(t *testing.T) {
 	}{
 		{
 			name:                 "Project with 1 object store",
-			expectedObjectStores: []string{fmt.Sprintf("%s_%s_%s", testProductID, testVersionName, testObjectStore)},
+			expectedObjectStores: []string{fmt.Sprintf("%s_%s_%s", testProductID, testVersionTag, testObjectStore)},
 		},
 		{
 			name: "Project with multiple object stores",
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionName, testWorkflowName, testObjectStore),
-				fmt.Sprintf("%s_%s_%s_another-object-store", testProductID, testVersionName, testWorkflowName),
+				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowName, testObjectStore),
+				fmt.Sprintf("%s_%s_%s_another-object-store", testProductID, testVersionTag, testWorkflowName),
 			},
 		},
 		{
@@ -52,7 +52,7 @@ func TestDeleteObjectStore(t *testing.T) {
 		{
 			name: "Error deleting object store",
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionName, testWorkflowName, testObjectStore),
+				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowName, testObjectStore),
 			},
 			deleteObjectStoreError: errors.New("error deleting object store"),
 		},
@@ -60,13 +60,13 @@ func TestDeleteObjectStore(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			filter := regexp.MustCompile(fmt.Sprintf("^%s_%s_.*", testProductID, testVersionName))
+			filter := regexp.MustCompile(fmt.Sprintf("^%s_%s_.*", testProductID, testVersionTag))
 
 			client.EXPECT().GetObjectStoreNames(filter).Return(tc.expectedObjectStores, tc.getObjectStoresError)
 			for _, expectedObjStore := range tc.expectedObjectStores {
 				client.EXPECT().DeleteObjectStore(expectedObjStore).Return(tc.deleteObjectStoreError)
 			}
-			err := natsManager.DeleteObjectStores(testProductID, testVersionName)
+			err := natsManager.DeleteObjectStores(testProductID, testVersionTag)
 			if tc.getObjectStoresError != nil {
 				assert.ErrorIs(t, err, tc.getObjectStoresError)
 			} else {
