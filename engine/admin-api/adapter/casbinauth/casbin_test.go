@@ -30,6 +30,49 @@ func TestNewCasbinAccessControl_ErrorInitEnforcer(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestGetUserProducts(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	logger := mocks.NewMockLogger(ctrl)
+	mocks.AddLoggerExpects(logger)
+
+	authorizer, err := casbinauth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
+	require.NoError(t, err)
+
+	expectedProducts := []string{"product-1", "product-2"}
+	user := &entity.User{
+		Roles: []string{"USER"},
+		ProductGrants: map[string][]string{
+			expectedProducts[0]:                {auth.ActViewProduct.String()},
+			expectedProducts[1]:                {auth.ActViewProduct.String()},
+			"product-without-view-permissions": {},
+		},
+	}
+
+	userProducts := authorizer.GetUserProducts(user)
+	assert.EqualValues(t, expectedProducts, userProducts)
+}
+
+func TestGetUserProducts_AdminUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	logger := mocks.NewMockLogger(ctrl)
+	mocks.AddLoggerExpects(logger)
+
+	authorizer, err := casbinauth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
+	require.NoError(t, err)
+
+	user := &entity.User{
+		Roles: []string{auth.DefaultAdminRole},
+		ProductGrants: map[string][]string{
+			"product-1":                        {auth.ActViewProduct.String()},
+			"product-2":                        {auth.ActViewProduct.String()},
+			"product-without-view-permissions": {},
+		},
+	}
+
+	userProducts := authorizer.GetUserProducts(user)
+	assert.Nil(t, userProducts)
+}
+
 func TestIsadmin(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	logger := mocks.NewMockLogger(ctrl)
