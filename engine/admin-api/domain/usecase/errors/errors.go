@@ -5,16 +5,8 @@ import (
 	"fmt"
 )
 
-func Join(errs ...error) error {
-	return errors.Join(errs...)
-}
-
 func Is(err, target error) bool {
 	return errors.Is(err, target)
-}
-
-func As(err error, target interface{}) bool {
-	return errors.As(err, target)
 }
 
 var (
@@ -23,15 +15,6 @@ var (
 
 	// ErrVersionDuplicated error.
 	ErrVersionDuplicated = errors.New("error version duplicated")
-
-	// ErrVersionConfigIncomplete error.
-	ErrVersionConfigIncomplete = errors.New("version config is incomplete")
-
-	// ErrVersionConfigInvalidKey error.
-	ErrVersionConfigInvalidKey = errors.New("version config contains an unknown key")
-
-	// ErrUpdatingStartedVersionConfig error.
-	ErrUpdatingStartedVersionConfig = errors.New("config can't be incomplete for started version")
 
 	// ErrInvalidVersionStatusBeforeStarting error.
 	ErrInvalidVersionStatusBeforeStarting = errors.New("the version must be stopped before starting")
@@ -59,21 +42,21 @@ func ParsingKRTFileError(err error) error {
 	return fmt.Errorf("%w: %w", ErrParsingKRTFile, err)
 }
 
-type ErrInvalidKRT struct {
+type KRTValidationError struct {
 	msg  string
 	errs error
 }
 
-func (e ErrInvalidKRT) Error() string {
+func (e KRTValidationError) Error() string {
 	return fmt.Sprintf("%s:\n%s", e.msg, e.errs)
 }
 
-func (e ErrInvalidKRT) GetErrors() error {
+func (e KRTValidationError) GetErrors() error {
 	return e.errs
 }
 
-func NewErrInvalidKRT(msg string, errs error) ErrInvalidKRT {
-	return ErrInvalidKRT{
+func NewErrInvalidKRT(msg string, errs error) KRTValidationError {
+	return KRTValidationError{
 		msg:  msg,
 		errs: errs,
 	}

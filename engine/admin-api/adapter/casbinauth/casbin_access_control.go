@@ -1,9 +1,6 @@
 package casbinauth
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/casbin/casbin/v2"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
@@ -11,7 +8,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
-const _defaultResource = "__default__"
+const _defaultResource = ""
 
 type OptFunc func(*Opts)
 
@@ -67,10 +64,7 @@ func NewCasbinAccessControl(
 
 func (a *CasbinAccessControl) CheckRoleGrants(user *entity.User, action auth.Action) error {
 	err := a.checkGrants(user, _defaultResource, action)
-	if errors.Is(err, ErrUnauthorized) {
-		// TODO: refactor tu custom error
-		return fmt.Errorf("user %s is not allowed to %s: %w", user.ID, action.String(), err)
-	} else if err != nil {
+	if err != nil {
 		return err
 	}
 
@@ -83,9 +77,7 @@ func (a *CasbinAccessControl) CheckProductGrants(
 	action auth.Action,
 ) error {
 	err := a.checkGrants(user, product, action)
-	if errors.Is(err, ErrUnauthorized) {
-		return fmt.Errorf("user %s is not allowed to %s in product %s: %w", user.ID, action.String(), product, err)
-	} else if err != nil {
+	if err != nil {
 		return err
 	}
 
@@ -149,7 +141,10 @@ func (a *CasbinAccessControl) checkGrants(
 		}
 	}
 
-	return ErrUnauthorized
+	return auth.UnauthorizedError{
+		Product: product,
+		Action:  action,
+	}
 }
 
 func (a *CasbinAccessControl) hasGrantsForResource(

@@ -4,7 +4,6 @@ package gql
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -12,9 +11,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 //nolint:gochecknoglobals // needs to be global to be used in the resolver
@@ -82,16 +79,6 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 
 	version, notifyCh, err := r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
 	if err != nil {
-		var errInvalidKRT internalerrors.ErrInvalidKRT
-		if errors.As(err, &errInvalidKRT) {
-			return nil, &gqlerror.Error{
-				Message: errInvalidKRT.Error(),
-				Extensions: map[string]interface{}{
-					"code": "krt_validation_error",
-				},
-			}
-		}
-
 		return nil, err
 	}
 

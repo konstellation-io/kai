@@ -36,10 +36,12 @@ func TestCheckAdminGrants(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			name:          "user without ADMIN role can't update user roles",
-			user:          testhelpers.NewUserBuilder().WithRoles([]string{}).Build(),
-			act:           auth.ActUpdateUserGrants,
-			expectedError: casbinauth.ErrUnauthorized,
+			name: "user without ADMIN role can't update user roles",
+			user: testhelpers.NewUserBuilder().WithRoles([]string{}).Build(),
+			act:  auth.ActUpdateUserGrants,
+			expectedError: auth.UnauthorizedError{
+				Action: auth.ActUpdateUserGrants,
+			},
 		},
 		{
 			name:          "user with ADMIN role can view server info",
@@ -54,10 +56,12 @@ func TestCheckAdminGrants(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			name:          "an user who is neither ADMIN or MLE can't view server info",
-			user:          testhelpers.NewUserBuilder().WithRoles([]string{"USER"}).Build(),
-			act:           auth.ActViewServerInfo,
-			expectedError: casbinauth.ErrUnauthorized,
+			name: "an user who is neither ADMIN or MLE can't view server info",
+			user: testhelpers.NewUserBuilder().WithRoles([]string{"USER"}).Build(),
+			act:  auth.ActViewServerInfo,
+			expectedError: auth.UnauthorizedError{
+				Action: auth.ActViewServerInfo,
+			},
 		},
 	}
 

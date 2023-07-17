@@ -256,7 +256,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfKrtIsInvalid() {
 
 	_, _, err = s.versionInteractor.Create(context.Background(), user, productID, file)
 
-	invalidKrtErr := &errors.ErrInvalidKRT{}
+	invalidKrtErr := &errors.KRTValidationError{}
 	s.True(s.ErrorAs(err, invalidKrtErr))
 }
 
