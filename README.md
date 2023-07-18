@@ -38,7 +38,7 @@ Konstellation AI is an application that allow to run AI/ML models for inference 
 ## Runners
 
 Each language has a specialized runner associated with it. They are located at
-the [kai-runners repo](https://github.com/konstellation-io/kai-runners). You must clone that repository in a folder
+the [kai-sdk repo](https://github.com/konstellation-io/kai-sdk). You must clone that repository in a folder
 named `runners` at the root level inside this repository.
 
 # Helm Chart
@@ -127,9 +127,11 @@ workflows:
 In order to start development on this project you will need these tools:
 
 - **[gettext](https://www.gnu.org/software/gettext/)**: OS package to fill templates during deployment
-- **[minikube](https://github.com/kubernetes/minikube)**: the local version of Kubernetes to deploy KAI
+- **[minikube](https://github.com/kubernetes/minikube)**: Local version of Kubernetes to deploy KAI
+- **[kubectl](https://github.com/kubernetes/kubectl)**: Kubernetes' command line tool for communicating with a Kubernetes cluster's control plane, using the Kubernetes API.
 - **[helm](https://helm.sh/)**: K8s package manager. Make sure you have v3+
 - **[helm-docs](https://github.com/norwoodj/helm-docs)**: Helm doc auto-generation tool
+- **[helm-files](https://github.com/helmfile/helmfile)**: Declarative spec for deploying helm charts
 - **[yq](https://github.com/mikefarah/yq)**: YAML processor. Make sure you have v4+
 - **[gitlint](https://jorisroovers.com/gitlint)**: Checks your commit messages for style.
 - **[pre-commit](https://pre-commit.com/)**: Pre-commit hooks execution tool ensures the best practices are followed before commiting any change
