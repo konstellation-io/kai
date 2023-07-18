@@ -4,17 +4,13 @@ package gql
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sync"
 	"time"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
@@ -36,28 +32,22 @@ type Resolver struct {
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *usecase.VersionInteractor
 	metricsInteractor      *usecase.MetricsInteractor
+	serverInfoGetter       *usecase.ServerInfoGetter
 	cfg                    *config.Config
 }
 
-func NewGraphQLResolver(
-	logger logging.Logger,
-	productInteractor *usecase.ProductInteractor,
-	userInteractor *usecase.UserInteractor,
-	userActivityInteractor usecase.UserActivityInteracter,
-	versionInteractor *usecase.VersionInteractor,
-	metricsInteractor *usecase.MetricsInteractor,
-	cfg *config.Config,
-) *Resolver {
+func NewGraphQLResolver(params Params) *Resolver {
 	initialize()
 
 	return &Resolver{
-		logger,
-		productInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
-		cfg,
+		params.Logger,
+		params.ProductInteractor,
+		params.UserInteractor,
+		params.UserActivityInteractor,
+		params.VersionInteractor,
+		params.MetricsInteractor,
+		params.ServerInfoGetter,
+		params.Cfg,
 	}
 }
 
@@ -80,16 +70,6 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 
 	version, notifyCh, err := r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
 	if err != nil {
-		var errInvalidKRT internalerrors.ErrInvalidKRT
-		if errors.As(err, &errInvalidKRT) {
-			return nil, &gqlerror.Error{
-				Message: errInvalidKRT.Error(),
-				Extensions: map[string]interface{}{
-					"code": "krt_validation_error",
-				},
-			}
-		}
-
 		return nil, err
 	}
 
@@ -248,6 +228,11 @@ func (r *queryResolver) Logs(
 		Cursor: nextCursor,
 		Items:  searchResult.Logs,
 	}, nil
+}
+
+func (r *queryResolver) ServerInfo(ctx context.Context) (*entity.ServerInfo, error) {
+	user, _ := ctx.Value("user").(*entity.User)
+	return r.serverInfoGetter.GetKAIServerInfo(ctx, user)
 }
 
 func (r *productResolver) CreationAuthor(_ context.Context, product *entity.Product) (string, error) {

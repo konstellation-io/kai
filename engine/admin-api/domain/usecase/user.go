@@ -47,7 +47,7 @@ func (ui *UserInteractor) UpdateUserProductGrants(
 	comment ...string,
 ) error {
 	wrapErr := errors.Wrapper(updateUserProductGrantsWrapper + ": %w")
-	if err := ui.accessControl.CheckAdminGrants(user, auth.ActUpdateUserGrants); err != nil {
+	if err := ui.accessControl.CheckRoleGrants(user, auth.ActUpdateUserGrants); err != nil {
 		return wrapErr(err)
 	}
 
@@ -85,7 +85,7 @@ func (ui *UserInteractor) RevokeUserProductGrants(
 ) error {
 	wrapErr := errors.Wrapper(revokeUserProductGrantsWrapper + ": %w")
 
-	if err := ui.accessControl.CheckAdminGrants(user, auth.ActUpdateUserGrants); err != nil {
+	if err := ui.accessControl.CheckRoleGrants(user, auth.ActUpdateUserGrants); err != nil {
 		return wrapErr(err)
 	}
 

@@ -1,0 +1,3 @@
+components:
+  aio: latest
+  mongoDB: latest

@@ -158,19 +158,13 @@ func (i *ProductInteractor) GetByID(ctx context.Context, user *entity.User, prod
 	return i.productRepo.GetByID(ctx, productID)
 }
 
-// FindAll returns a list of all Runtimes.
+// FindAll returns a list of all Products.
 func (i *ProductInteractor) FindAll(ctx context.Context, user *entity.User) ([]*entity.Product, error) {
 	if i.accessControl.IsAdmin(user) {
 		return i.productRepo.FindAll(ctx)
 	}
 
-	visibleProducts := make([]string, 0, len(user.ProductGrants))
-
-	for prod := range user.ProductGrants {
-		if err := i.accessControl.CheckProductGrants(user, prod, auth.ActViewProduct); err == nil {
-			visibleProducts = append(visibleProducts, prod)
-		}
-	}
+	visibleProducts := i.accessControl.GetUserProducts(user)
 
 	return i.productRepo.FindByIDs(ctx, visibleProducts)
 }

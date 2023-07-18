@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/auth"
+	"github.com/go-logr/zapr"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/casbinauth"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
@@ -18,12 +19,19 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
 	cfg := config.NewConfig()
+
+	err := config.InitConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	logger := logging.NewLogger(cfg.LogLevel)
 
 	db := mongodb.NewMongoDB(cfg, logger)
@@ -31,18 +39,7 @@ func main() {
 	mongodbClient := db.Connect()
 	defer db.Disconnect()
 
-	userActivityInteractor, productInteractor, userInteractor,
-		versionInteractor, metricsInteractor := initApp(cfg, logger, mongodbClient)
-
-	graphqlController := controller.NewGraphQLController(
-		cfg,
-		logger,
-		productInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
-	)
+	graphqlController := initGraphqlController(cfg, logger, mongodbClient)
 
 	app := http.NewApp(
 		cfg,
@@ -53,17 +50,11 @@ func main() {
 	app.Start()
 }
 
-func initApp(
+func initGraphqlController(
 	cfg *config.Config,
 	logger logging.Logger,
 	mongodbClient *mongo.Client,
-) (
-	usecase.UserActivityInteracter,
-	*usecase.ProductInteractor,
-	*usecase.UserInteractor,
-	*usecase.VersionInteractor,
-	*usecase.MetricsInteractor,
-) {
+) *controller.GraphQLController {
 	productRepo := mongodb.NewProductRepoMongoDB(cfg, logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
 	versionMongoRepo := version.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
@@ -95,7 +86,7 @@ func initApp(
 		log.Fatal(err)
 	}
 
-	accessControl, err := auth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
+	accessControl, err := casbinauth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -156,5 +147,24 @@ func initApp(
 		metricRepo,
 	)
 
-	return userActivityInteractor, productInteractor, userInteractor, versionInteractor, metricsInteractor
+	zapLog, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	l := zapr.NewLogger(zapLog)
+	serverInfoGetter := usecase.NewServerInfoGetter(l, accessControl)
+
+	return controller.NewGraphQLController(
+		controller.Params{
+			Logger:                 logger,
+			Cfg:                    cfg,
+			ProductInteractor:      productInteractor,
+			UserInteractor:         userInteractor,
+			UserActivityInteractor: userActivityInteractor,
+			VersionInteractor:      versionInteractor,
+			MetricsInteractor:      metricsInteractor,
+			ServerInfoGetter:       serverInfoGetter,
+		},
+	)
 }

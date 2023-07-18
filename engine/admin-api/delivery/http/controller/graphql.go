@@ -26,52 +26,62 @@ type GraphQL interface {
 type GraphQLController struct {
 	cfg                    *config.Config
 	logger                 logging.Logger
-	runtimeInteractor      *usecase.ProductInteractor
+	productInteractor      *usecase.ProductInteractor
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *usecase.VersionInteractor
 	metricsInteractor      *usecase.MetricsInteractor
+	serverInfoGetter       *usecase.ServerInfoGetter
+}
+
+type Params struct {
+	Logger                 logging.Logger
+	Cfg                    *config.Config
+	ProductInteractor      *usecase.ProductInteractor
+	UserInteractor         *usecase.UserInteractor
+	UserActivityInteractor usecase.UserActivityInteracter
+	VersionInteractor      *usecase.VersionInteractor
+	MetricsInteractor      *usecase.MetricsInteractor
+	ServerInfoGetter       *usecase.ServerInfoGetter
 }
 
 func NewGraphQLController(
-	cfg *config.Config,
-	logger logging.Logger,
-	runtimeInteractor *usecase.ProductInteractor,
-	userInteractor *usecase.UserInteractor,
-	userActivityInteractor usecase.UserActivityInteracter,
-	versionInteractor *usecase.VersionInteractor,
-	metricsInteractor *usecase.MetricsInteractor,
+	params Params,
 ) *GraphQLController {
 	return &GraphQLController{
-		cfg,
-		logger,
-		runtimeInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
+		params.Cfg,
+		params.Logger,
+		params.ProductInteractor,
+		params.UserInteractor,
+		params.UserActivityInteractor,
+		params.VersionInteractor,
+		params.MetricsInteractor,
+		params.ServerInfoGetter,
 	}
 }
 
 func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
-	user := c.Get("user").(*entity.User)
-
-	g.logger.Info("Request from user " + user.ID)
-
-	h := gql.NewHTTPHandler(
-		g.logger,
-		g.runtimeInteractor,
-		g.userInteractor,
-		g.userActivityInteractor,
-		g.versionInteractor,
-		g.metricsInteractor,
-		g.cfg,
-	)
-
 	r := c.Request()
 
-	//nolint:staticcheck // legacy code
-	ctx := context.WithValue(r.Context(), UserContextKey, user)
+	ctx := r.Context()
+
+	user, ok := c.Get("user").(*entity.User)
+	if ok {
+		//nolint:staticcheck // legacy code
+		ctx = context.WithValue(ctx, UserContextKey, user)
+		g.logger.Info("Request from user " + user.ID)
+	}
+
+	h := gql.NewHTTPHandler(gql.Params{
+		Logger:                 g.logger,
+		Cfg:                    g.cfg,
+		ProductInteractor:      g.productInteractor,
+		UserInteractor:         g.userInteractor,
+		UserActivityInteractor: g.userActivityInteractor,
+		VersionInteractor:      g.versionInteractor,
+		MetricsInteractor:      g.metricsInteractor,
+		ServerInfoGetter:       g.serverInfoGetter,
+	})
 
 	h.ServeHTTP(c.Response(), r.WithContext(ctx))
 

@@ -1,5 +1,6 @@
 baseDomainName: "local"
 releaseName: ""
+releaseVersion: "latest"
 application:
   versionStatusTimeout: 20m
 admin:
@@ -28,5 +29,13 @@ k8s:
   namespace: ""
 services:
   k8sManager: "localhost:50051"
+  natsManager: "localhost:50052"
 runtime:
   name: ""
+components:
+  kai: "0.2.0-develop.7"
+  mongo-db: "4.2.8"
+  nats: "2.8.4"
+  keycloak: "21.1.1"
+  influx: "4.8.1"
+  registry: "2.8.2"
