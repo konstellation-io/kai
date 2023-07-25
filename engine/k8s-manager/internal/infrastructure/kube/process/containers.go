@@ -152,13 +152,13 @@ func getProtocol(protocol string) corev1.Protocol {
 	}
 }
 
-func getContainerResources(isGPUEnabled bool, CPU *domain.ProcessCPU, memory *domain.ProcessMemory) corev1.ResourceRequirements {
+func getContainerResources(isGPUEnabled bool, cpu *domain.ProcessCPU, memory *domain.ProcessMemory) corev1.ResourceRequirements {
 	requests := corev1.ResourceList{
-		corev1.ResourceCPU:    resource.MustParse(CPU.Request),
+		corev1.ResourceCPU:    resource.MustParse(cpu.Request),
 		corev1.ResourceMemory: resource.MustParse(memory.Request),
 	}
 	limits := corev1.ResourceList{
-		corev1.ResourceCPU:    resource.MustParse(CPU.Limit),
+		corev1.ResourceCPU:    resource.MustParse(cpu.Limit),
 		corev1.ResourceMemory: resource.MustParse(memory.Limit),
 	}
 
