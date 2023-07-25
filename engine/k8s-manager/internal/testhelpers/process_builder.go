@@ -51,12 +51,12 @@ func (pb *ProcessBuilder) WithEnableGpu(enableGpu bool) *ProcessBuilder {
 	return pb
 }
 
-func (pb *ProcessBuilder) WithCPU(cpu *domain.CPUConfig) *ProcessBuilder {
+func (pb *ProcessBuilder) WithCPU(cpu *domain.ProcessCPU) *ProcessBuilder {
 	pb.process.CPU = cpu
 	return pb
 }
 
-func (pb *ProcessBuilder) WithMemory(memory *domain.MemoryConfig) *ProcessBuilder {
+func (pb *ProcessBuilder) WithMemory(memory *domain.ProcessMemory) *ProcessBuilder {
 	pb.process.Memory = memory
 	return pb
 }

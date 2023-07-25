@@ -54,14 +54,14 @@ func mapReqProcessToProcess(reqProcesses []*versionpb.Process) []*domain.Process
 		}
 
 		if process.Cpu != nil {
-			p.CPU = &domain.CPUConfig{
+			p.CPU = &domain.ProcessCPU{
 				Request: process.Cpu.Request,
 				Limit:   process.Cpu.Limit,
 			}
 		}
 
 		if process.Mem != nil {
-			p.Memory = &domain.MemoryConfig{
+			p.Memory = &domain.ProcessMemory{
 				Request: process.Mem.Request,
 				Limit:   process.Mem.Limit,
 			}

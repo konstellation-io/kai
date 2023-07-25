@@ -159,8 +159,8 @@ type Process struct {
 	Type          ProcessType       `protobuf:"varint,9,opt,name=type,proto3,enum=version.ProcessType" json:"type,omitempty"`
 	Networking    *Network          `protobuf:"bytes,10,opt,name=networking,proto3" json:"networking,omitempty"`
 	Config        map[string]string `protobuf:"bytes,11,rep,name=config,proto3" json:"config,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	Cpu           *CPUConfig        `protobuf:"bytes,12,opt,name=cpu,proto3" json:"cpu,omitempty"`
-	Mem           *MEMConfig        `protobuf:"bytes,13,opt,name=mem,proto3" json:"mem,omitempty"`
+	Cpu           *ProcessCPU        `protobuf:"bytes,12,opt,name=cpu,proto3" json:"cpu,omitempty"`
+	Mem           *ProcessMemory        `protobuf:"bytes,13,opt,name=mem,proto3" json:"mem,omitempty"`
 }
 
 func (x *Process) Reset() {
@@ -272,14 +272,14 @@ func (x *Process) GetConfig() map[string]string {
 	return nil
 }
 
-func (x *Process) GetCpu() *CPUConfig {
+func (x *Process) GetCpu() *ProcessCPU {
 	if x != nil {
 		return x.Cpu
 	}
 	return nil
 }
 
-func (x *Process) GetMem() *MEMConfig {
+func (x *Process) GetMem() *ProcessMemory {
 	if x != nil {
 		return x.Mem
 	}
@@ -640,7 +640,7 @@ func (x *Response) GetMessage() string {
 	return ""
 }
 
-type CPUConfig struct {
+type ProcessCPU struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -649,8 +649,8 @@ type CPUConfig struct {
 	Limit   string `protobuf:"bytes,2,opt,name=limit,proto3" json:"limit,omitempty"`
 }
 
-func (x *CPUConfig) Reset() {
-	*x = CPUConfig{}
+func (x *ProcessCPU) Reset() {
+	*x = ProcessCPU{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_version_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -658,13 +658,13 @@ func (x *CPUConfig) Reset() {
 	}
 }
 
-func (x *CPUConfig) String() string {
+func (x *ProcessCPU) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CPUConfig) ProtoMessage() {}
+func (*ProcessCPU) ProtoMessage() {}
 
-func (x *CPUConfig) ProtoReflect() protoreflect.Message {
+func (x *ProcessCPU) ProtoReflect() protoreflect.Message {
 	mi := &file_version_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -676,26 +676,26 @@ func (x *CPUConfig) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CPUConfig.ProtoReflect.Descriptor instead.
-func (*CPUConfig) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProcessCPU.ProtoReflect.Descriptor instead.
+func (*ProcessCPU) Descriptor() ([]byte, []int) {
 	return file_version_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *CPUConfig) GetRequest() string {
+func (x *ProcessCPU) GetRequest() string {
 	if x != nil {
 		return x.Request
 	}
 	return ""
 }
 
-func (x *CPUConfig) GetLimit() string {
+func (x *ProcessCPU) GetLimit() string {
 	if x != nil {
 		return x.Limit
 	}
 	return ""
 }
 
-type MEMConfig struct {
+type ProcessMemory struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -704,8 +704,8 @@ type MEMConfig struct {
 	Limit   string `protobuf:"bytes,2,opt,name=limit,proto3" json:"limit,omitempty"`
 }
 
-func (x *MEMConfig) Reset() {
-	*x = MEMConfig{}
+func (x *ProcessMemory) Reset() {
+	*x = ProcessMemory{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_version_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -713,13 +713,13 @@ func (x *MEMConfig) Reset() {
 	}
 }
 
-func (x *MEMConfig) String() string {
+func (x *ProcessMemory) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MEMConfig) ProtoMessage() {}
+func (*ProcessMemory) ProtoMessage() {}
 
-func (x *MEMConfig) ProtoReflect() protoreflect.Message {
+func (x *ProcessMemory) ProtoReflect() protoreflect.Message {
 	mi := &file_version_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -731,19 +731,19 @@ func (x *MEMConfig) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MEMConfig.ProtoReflect.Descriptor instead.
-func (*MEMConfig) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProcessMemory.ProtoReflect.Descriptor instead.
+func (*ProcessMemory) Descriptor() ([]byte, []int) {
 	return file_version_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *MEMConfig) GetRequest() string {
+func (x *ProcessMemory) GetRequest() string {
 	if x != nil {
 		return x.Request
 	}
 	return ""
 }
 
-func (x *MEMConfig) GetLimit() string {
+func (x *ProcessMemory) GetLimit() string {
 	if x != nil {
 		return x.Limit
 	}
@@ -1025,8 +1025,8 @@ var file_version_proto_goTypes = []interface{}{
 	(*PublishRequest)(nil),        // 6: version.PublishRequest
 	(*UnpublishRequest)(nil),      // 7: version.UnpublishRequest
 	(*Response)(nil),              // 8: version.Response
-	(*CPUConfig)(nil),             // 9: version.CPUConfig
-	(*MEMConfig)(nil),             // 10: version.MEMConfig
+	(*ProcessCPU)(nil),             // 9: version.ProcessCPU
+	(*ProcessMemory)(nil),             // 10: version.ProcessMemory
 	(*ProcessStatusRequest)(nil),  // 11: version.ProcessStatusRequest
 	(*ProcessStatusResponse)(nil), // 12: version.ProcessStatusResponse
 	nil,                           // 13: version.Process.ConfigEntry
@@ -1036,8 +1036,8 @@ var file_version_proto_depIdxs = []int32{
 	0,  // 1: version.Process.type:type_name -> version.ProcessType
 	3,  // 2: version.Process.networking:type_name -> version.Network
 	13, // 3: version.Process.config:type_name -> version.Process.ConfigEntry
-	9,  // 4: version.Process.cpu:type_name -> version.CPUConfig
-	10, // 5: version.Process.mem:type_name -> version.MEMConfig
+	9,  // 4: version.Process.cpu:type_name -> version.ProcessCPU
+	10, // 5: version.Process.mem:type_name -> version.ProcessMemory
 	1,  // 6: version.StartRequest.workflows:type_name -> version.Workflow
 	4,  // 7: version.VersionService.Start:input_type -> version.StartRequest
 	5,  // 8: version.VersionService.Stop:input_type -> version.StopRequest
@@ -1159,7 +1159,7 @@ func file_version_proto_init() {
 			}
 		}
 		file_version_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CPUConfig); i {
+			switch v := v.(*ProcessCPU); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1171,7 +1171,7 @@ func file_version_proto_init() {
 			}
 		}
 		file_version_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MEMConfig); i {
+			switch v := v.(*ProcessMemory); i {
 			case 0:
 				return &v.state
 			case 1:

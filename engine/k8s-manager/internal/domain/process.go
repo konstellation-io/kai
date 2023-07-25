@@ -14,8 +14,8 @@ type Process struct {
 
 	Replicas   int32
 	Networking *Networking
-	CPU        *CPUConfig
-	Memory     *MemoryConfig
+	CPU        *ProcessCPU
+	Memory     *ProcessMemory
 }
 
 func (p *Process) IsTrigger() bool {
@@ -50,12 +50,12 @@ func (p ProcessType) ToString() string {
 	}
 }
 
-type CPUConfig struct {
+type ProcessCPU struct {
 	Request string
 	Limit   string
 }
 
-type MemoryConfig struct {
+type ProcessMemory struct {
 	Request string
 	Limit   string
 }
