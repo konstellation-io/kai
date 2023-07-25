@@ -95,6 +95,82 @@ func TestStartProcess_WithNetwork(t *testing.T) {
 	g.Assert(t, "StartProcess_WithNetworking", deploymentYaml)
 }
 
+func TestStartProcess_WithCPU(t *testing.T) {
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+	clientset := fake.NewSimpleClientset()
+
+	viper.Set("kubernetes.namespace", _namespace)
+
+	svc := kube.NewK8sContainerService(logger, clientset)
+
+	ctx := context.Background()
+
+	process := testhelpers.NewProcessBuilder().
+		WithCPU(&domain.ProcessCPU{
+			Request: "100M",
+			Limit:   "200M",
+		}).
+		Build()
+
+	params := service.CreateProcessParams{
+		ConfigName: "configmap-name",
+		Product:    "test-product",
+		Version:    "v1.0.0",
+		Workflow:   "test-workflow",
+		Process:    process,
+	}
+
+	err := svc.CreateProcess(ctx, params)
+	require.NoError(t, err)
+
+	deployment, err := clientset.AppsV1().Deployments(_namespace).List(ctx, v1.ListOptions{})
+	require.NoError(t, err)
+
+	deploymentYaml, err := yaml.Marshal(deployment)
+	require.NoError(t, err)
+
+	g := goldie.New(t)
+	g.Assert(t, "StartProcess_WithCPU", deploymentYaml)
+}
+
+func TestStartProcess_WithMemory(t *testing.T) {
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+	clientset := fake.NewSimpleClientset()
+
+	viper.Set("kubernetes.namespace", _namespace)
+
+	svc := kube.NewK8sContainerService(logger, clientset)
+
+	ctx := context.Background()
+
+	process := testhelpers.NewProcessBuilder().
+		WithMemory(&domain.ProcessMemory{
+			Request: "100MB",
+			Limit:   "200MB",
+		}).
+		Build()
+
+	params := service.CreateProcessParams{
+		ConfigName: "configmap-name",
+		Product:    "test-product",
+		Version:    "v1.0.0",
+		Workflow:   "test-workflow",
+		Process:    process,
+	}
+
+	err := svc.CreateProcess(ctx, params)
+	require.NoError(t, err)
+
+	deployment, err := clientset.AppsV1().Deployments(_namespace).List(ctx, v1.ListOptions{})
+	require.NoError(t, err)
+
+	deploymentYaml, err := yaml.Marshal(deployment)
+	require.NoError(t, err)
+
+	g := goldie.New(t)
+	g.Assert(t, "StartProcess_WithMemory", deploymentYaml)
+}
+
 func TestStartProcess_WithMoreReplicas(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()

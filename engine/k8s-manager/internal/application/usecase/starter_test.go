@@ -134,6 +134,74 @@ func TestStartVersion_WithNetworking(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestStartVersion_WithCPU(t *testing.T) {
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+	containerSvc := mocks.NewContainerService(t)
+
+	cpu := &domain.ProcessCPU{
+		Request: "100M",
+		Limit:   "200M",
+	}
+
+	processes := []*domain.Process{
+		testhelpers.NewProcessBuilder().WithCPU(cpu).Build(),
+	}
+	workflows := []*domain.Workflow{
+		testhelpers.NewWorkflowBuilder().WithProcesses(processes).Build(),
+	}
+
+	version := testhelpers.NewVersionBuilder().WithWorkflows(workflows).Build()
+
+	configName := "test-config-name"
+
+	containerSvc.EXPECT().
+		CreateVersionConfiguration(mock.Anything, version).
+		Return(configName, nil).
+		Once()
+
+	mockCreateProcess(t, containerSvc, configName, version, *version.Workflows[0].Processes[0])
+
+	starter := usecase.NewVersionStarter(logger, containerSvc)
+
+	ctx := context.Background()
+	err := starter.StartVersion(ctx, version)
+	assert.NoError(t, err)
+}
+
+func TestStartVersion_WithMemory(t *testing.T) {
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+	containerSvc := mocks.NewContainerService(t)
+
+	memory := &domain.ProcessMemory{
+		Request: "100MB",
+		Limit:   "200MB",
+	}
+
+	processes := []*domain.Process{
+		testhelpers.NewProcessBuilder().WithMemory(memory).Build(),
+	}
+	workflows := []*domain.Workflow{
+		testhelpers.NewWorkflowBuilder().WithProcesses(processes).Build(),
+	}
+
+	version := testhelpers.NewVersionBuilder().WithWorkflows(workflows).Build()
+
+	configName := "test-config-name"
+
+	containerSvc.EXPECT().
+		CreateVersionConfiguration(mock.Anything, version).
+		Return(configName, nil).
+		Once()
+
+	mockCreateProcess(t, containerSvc, configName, version, *version.Workflows[0].Processes[0])
+
+	starter := usecase.NewVersionStarter(logger, containerSvc)
+
+	ctx := context.Background()
+	err := starter.StartVersion(ctx, version)
+	assert.NoError(t, err)
+}
+
 func TestStartVersion_ErrorCreatingConfig(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	containerSvc := mocks.NewContainerService(t)
@@ -197,7 +265,7 @@ func TestStartVersion_ErrorCreatingNetwork(t *testing.T) {
 
 	expectedErr := errors.New("error creating network")
 
-	version := getVersionWithNetrking(t)
+	version := getVersionWithNetworking(t)
 
 	configName := "test-config-name"
 
@@ -238,7 +306,7 @@ func TestStartVersion_ErrorCreatingNetwork(t *testing.T) {
 	assert.ErrorIs(t, err, expectedErr)
 }
 
-func getVersionWithNetrking(t *testing.T) domain.Version {
+func getVersionWithNetworking(t *testing.T) domain.Version {
 	t.Helper()
 	processes := []*domain.Process{
 		testhelpers.NewProcessBuilder().
