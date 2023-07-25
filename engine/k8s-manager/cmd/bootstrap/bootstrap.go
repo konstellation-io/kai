@@ -55,8 +55,9 @@ func initGrpcServer(logger logr.Logger) (*grpc.Server, error) {
 	k8sContainerService := kube.NewK8sContainerService(logger, client)
 	starter := usecase.NewVersionStarter(logger, k8sContainerService)
 	stopper := usecase.NewVersionStopper(logger, k8sContainerService)
+	processRegister := usecase.NewProcessRegister(logger, k8sContainerService)
 
-	versionService := internalgrpc.NewVersionService(logger, starter, stopper)
+	versionService := internalgrpc.NewVersionService(logger, starter, stopper, processRegister)
 
 	versionpb.RegisterVersionServiceServer(s, versionService)
 	reflection.Register(s)

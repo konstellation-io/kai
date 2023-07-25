@@ -1,16 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"os"
 
-	"github.com/containers/buildah"
-	"github.com/containers/storage/pkg/unshare"
 	"github.com/go-logr/zapr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/casbinauth"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/registry"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/version"
@@ -30,11 +25,11 @@ import (
 )
 
 func main() {
-	if buildah.InitReexec() {
-		fmt.Println("couldn't initialize buildah asdf asdfasdfasdfasdf")
-		os.Exit(1)
-	}
-	unshare.MaybeReexecUsingUserNamespace(false)
+	//if buildah.InitReexec() {
+	//	fmt.Println("couldn't initialize buildah asdf asdfasdfasdfasdf")
+	//	os.Exit(1)
+	//}
+	//unshare.MaybeReexecUsingUserNamespace(false)
 
 	cfg := config.NewConfig()
 
@@ -166,8 +161,8 @@ func initGraphqlController(
 	l := zapr.NewLogger(zapLog)
 	serverInfoGetter := usecase.NewServerInfoGetter(l, accessControl)
 
-	processRegistry := registry.NewProcessRegistry(l)
-	processService := usecase.NewProcessService(l, processRegistry)
+	//processRegistry := registry.NewProcessRegistry(l)
+	processService := usecase.NewProcessService(l, k8sService)
 
 	return controller.NewGraphQLController(
 		controller.Params{

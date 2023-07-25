@@ -1,6 +1,5 @@
 kubernetes:
   isInsideCluster: true
-  namespace: kai-local
 baseDomainName: "local"
 server:
   port: "50051"

@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	KubeConfigPathKey  = "kubernetes.kubeConfigPath"
-	ServerPortKey      = "server.port"
-	IsInsideClusterKey = "kubernetes.isInsideCluster"
+	KubeConfigPathKey   = "kubernetes.kubeConfigPath"
+	ServerPortKey       = "server.port"
+	IsInsideClusterKey  = "kubernetes.isInsideCluster"
+	ImageRegistryURLKey = "registry.url"
 
 	configType = "yaml"
 
@@ -39,6 +40,7 @@ func Init(configFilePath string) error {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	viper.RegisterAlias("nats.url", "NATS_URL")
+	viper.RegisterAlias(ImageRegistryURLKey, "REGISTRY_URL")
 	viper.RegisterAlias("kubernetes.namespace", "KUBERNETES_NAMESPACE")
 
 	viper.AutomaticEnv()

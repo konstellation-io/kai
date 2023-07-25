@@ -4,21 +4,24 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/go-logr/logr"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 )
 
 type ProcessService struct {
-	logger            logr.Logger
-	processRegistry   ProcessRegistry
+	logger logr.Logger
+	//processRegistry   ProcessRegistry
 	processRepository ProcessRepository
+	processRegistry   service.K8sService
 }
 
 //go:generate mockgen -source=${GOFILE} -destination=../../mocks/${GOFILE} -package=mocks
 
-type ProcessRegistry interface {
-	RegisterProcess(ctx context.Context, product, version, process string, src io.Reader) (string, error)
-}
+//type ProcessRegistry interface {
+//	RegisterProcess(ctx context.Context, product, version, process string, src io.Reader) (string, error)
+//}
 
 type ProcessRepository interface {
 	CreateProcess() error
@@ -30,12 +33,14 @@ type ProcessMetadata struct {
 
 func NewProcessService(
 	logger logr.Logger,
-	processRegistry ProcessRegistry,
+	//processRegistry ProcessRegistry,
+	k8sService service.K8sService,
 	// processRepository ProcessRepository,
 ) *ProcessService {
 	return &ProcessService{
-		logger:          logger,
-		processRegistry: processRegistry,
+		logger: logger,
+		//processRegistry: processRegistry,
+		processRegistry: k8sService,
 		//processRepository: processRepository,
 	}
 }
@@ -47,7 +52,25 @@ func (ps *ProcessService) RegisterProcess(
 ) (string, error) {
 	ps.logger.Info("Registering new process")
 
-	processRef, err := ps.processRegistry.RegisterProcess(ctx, product, version, process, sources)
+	tmpFile, err := os.CreateTemp("", "process-compress-*.tar.gz")
+	if err != nil {
+		return "", fmt.Errorf("creating temp file for process: %w", err)
+	}
+	defer tmpFile.Close()
+	//defer os.Remove(tmpFile.Name())
+
+	_, err = io.Copy(tmpFile, sources)
+	if err != nil {
+		return "", fmt.Errorf("copying temp file for version: %w", err)
+	}
+
+	compressedFile, err := os.ReadFile(tmpFile.Name())
+	if err != nil {
+		return "", fmt.Errorf("opening process compressed file: %w", err)
+	}
+	fmt.Println(compressedFile)
+
+	processRef, err := ps.processRegistry.RegisterProcess(ctx, product, version, process, compressedFile)
 	if err != nil {
 		return "", fmt.Errorf("registering process: %w", err)
 	}

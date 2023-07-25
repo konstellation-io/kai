@@ -35,7 +35,12 @@ type ContainerStopper interface {
 	DeleteNetwork(ctx context.Context, product, version string) error
 }
 
+type ImageRegistry interface {
+	ProcessRegister(ctx context.Context, name string, file []byte) error
+}
+
 type ContainerService interface {
 	ContainerStarter
 	ContainerStopper
+	ImageRegistry
 }

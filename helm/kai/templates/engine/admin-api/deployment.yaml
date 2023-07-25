@@ -31,12 +31,12 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        allowPrivilegeEscalation: false
-        runAsUser: 0
-        capabilities:
-          add:
-            - 'SYS_ADMIN'
-          privileged: true
+{{/*        allowPrivilegeEscalation: false*/}}
+{{/*        runAsUser: 0*/}}
+{{/*        capabilities:*/}}
+{{/*          add:*/}}
+{{/*            - 'SYS_ADMIN'*/}}
+{{/*          privileged: true*/}}
         fsGroup: 10001
       initContainers:
         - name: create-admin-api-files-directory
@@ -53,11 +53,11 @@ spec:
         - name: admin-api
           image: {{ .Values.adminApi.image.repository }}:{{ .Values.adminApi.image.tag }}
           imagePullPolicy: {{ .Values.adminApi.image.pullPolicy }}
-          securityContext:
-            capabilities:
-              add:
-                - CAP_SETGID
-                - CAP_SETUID
+{{/*          securityContext:*/}}
+{{/*            capabilities:*/}}
+{{/*              add:*/}}
+{{/*                - CAP_SETGID*/}}
+{{/*                - CAP_SETUID*/}}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-admin-api

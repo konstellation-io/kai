@@ -152,3 +152,17 @@ func (k *K8sVersionClient) WatchProcessStatus(ctx context.Context, productID, ve
 
 	return ch, nil
 }
+
+func (k *K8sVersionClient) RegisterProcess(ctx context.Context, product, version, process string, file []byte) (string, error) {
+	_, err := k.client.RegisterProcess(ctx, &versionpb.RegisterProcessRequest{
+		Product: product,
+		Version: version,
+		Process: process,
+		File:    file,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return "this-should-be-the-image-name", nil
+}

@@ -75,10 +75,18 @@ message ProcessStatusResponse {
   string name = 3;
 }
 
+message RegisterProcessRequest {
+  string product = 1;
+  string version = 2;
+  string process = 3;
+  bytes file = 4;
+}
+
 service VersionService {
   rpc Start (StartRequest) returns (Response);
   rpc Stop (StopRequest) returns (Response);
   rpc Publish (PublishRequest) returns (Response);
   rpc Unpublish (UnpublishRequest) returns (Response);
   rpc WatchProcessStatus (ProcessStatusRequest) returns (stream ProcessStatusResponse);
+  rpc RegisterProcess (RegisterProcessRequest) returns (Response);
 };
