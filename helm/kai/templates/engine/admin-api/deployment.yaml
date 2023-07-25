@@ -31,6 +31,12 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
+{{/*        allowPrivilegeEscalation: false*/}}
+{{/*        runAsUser: 0*/}}
+        capabilities:
+          add:
+            - 'SYS_ADMIN'
+          privileged: true
         fsGroup: 10001
       initContainers:
         - name: create-admin-api-files-directory
@@ -47,17 +53,24 @@ spec:
         - name: admin-api
           image: {{ .Values.adminApi.image.repository }}:{{ .Values.adminApi.image.tag }}
           imagePullPolicy: {{ .Values.adminApi.image.pullPolicy }}
+          securityContext:
+            capabilities:
+              add:
+                - CAP_SETGID
+                - CAP_SETUID
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-admin-api
             - secretRef:
                 name: {{ .Release.Name }}-admin-api
           env:
+            - name: FOO
+              value: BAR
             - name: POD_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: KRE_MONGODB_URI
+            - name: KAI_MONGODB_URI
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.config.mongodb.connectionString.secretName }}
@@ -79,7 +92,19 @@ spec:
           volumeMounts:
             - name: admin-api-pv-storage
               mountPath: {{ .Values.adminApi.storage.path }}
+            - name: config
+              mountPath: /etc/containers
       volumes:
         - name: admin-api-pv-storage
           persistentVolumeClaim:
             claimName: admin-api-pv-claim
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}-admin-api
+            items:
+              - key: registries.conf
+                path: registries.conf
+              - key: policy.json
+                path: policy.json
+              - key: storage.conf
+                path: storage.conf

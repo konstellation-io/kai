@@ -29,6 +29,18 @@ type PublishVersionInput struct {
 	ProductID  string `json:"productID"`
 }
 
+type RegisterProcessInput struct {
+	File        graphql.Upload `json:"file"`
+	Version     string         `json:"version"`
+	ProductID   string         `json:"productID"`
+	ProcessID   string         `json:"processID"`
+	ProcessType string         `json:"processType"`
+}
+
+type RegisteredImage struct {
+	ProcessedImageID string `json:"processedImageID"`
+}
+
 type RevokeUserProductGrantsInput struct {
 	TargetID string  `json:"targetID"`
 	Product  string  `json:"product"`

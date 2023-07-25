@@ -41,10 +41,15 @@ type Mutation {
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
+  registerProcess(input: RegisterProcessInput!): RegisteredImage!
+}
+
+type RegisteredImage {
+  processedImageID: ID!
 }
 
 type User {
-	id: ID!
+  id: ID!
 }
 
 type Subscription {
@@ -64,6 +69,14 @@ input CreateProductInput {
 input CreateVersionInput {
   file: Upload!
   productID: ID!
+}
+
+input RegisterProcessInput {
+  file: Upload!
+  version: String!
+  productID: ID!
+  processID: ID!
+  processType: String!
 }
 
 input StartVersionInput {

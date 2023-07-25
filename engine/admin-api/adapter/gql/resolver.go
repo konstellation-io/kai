@@ -33,6 +33,7 @@ type Resolver struct {
 	versionInteractor      *usecase.VersionInteractor
 	metricsInteractor      *usecase.MetricsInteractor
 	serverInfoGetter       *usecase.ServerInfoGetter
+	processService         *usecase.ProcessService
 	cfg                    *config.Config
 }
 
@@ -47,6 +48,7 @@ func NewGraphQLResolver(params Params) *Resolver {
 		params.VersionInteractor,
 		params.MetricsInteractor,
 		params.ServerInfoGetter,
+		params.ProcessService,
 		params.Cfg,
 	}
 }
@@ -76,6 +78,19 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 	go r.notifyVersionStatus(notifyCh)
 
 	return version, nil
+}
+
+func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterProcessInput) (*RegisteredImage, error) {
+	_ = ctx.Value("user").(*entity.User)
+
+	registeredImage, err := r.processService.RegisterProcess(ctx, input.ProductID, input.Version, input.ProcessID, input.File.File)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RegisteredImage{
+		ProcessedImageID: registeredImage,
+	}, nil
 }
 
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {

@@ -100,6 +100,7 @@ type ComplexityRoot struct {
 		CreateProduct           func(childComplexity int, input CreateProductInput) int
 		CreateVersion           func(childComplexity int, input CreateVersionInput) int
 		PublishVersion          func(childComplexity int, input PublishVersionInput) int
+		RegisterProcess         func(childComplexity int, input RegisterProcessInput) int
 		RevokeUserProductGrants func(childComplexity int, input RevokeUserProductGrantsInput) int
 		StartVersion            func(childComplexity int, input StartVersionInput) int
 		StopVersion             func(childComplexity int, input StopVersionInput) int
@@ -152,6 +153,10 @@ type ComplexityRoot struct {
 		UserActivityList func(childComplexity int, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) int
 		Version          func(childComplexity int, name string, productID string) int
 		Versions         func(childComplexity int, productID string) int
+	}
+
+	RegisteredImage struct {
+		ProcessedImageID func(childComplexity int) int
 	}
 
 	ServerInfo struct {
@@ -211,6 +216,7 @@ type MutationResolver interface {
 	UnpublishVersion(ctx context.Context, input UnpublishVersionInput) (*entity.Version, error)
 	UpdateUserProductGrants(ctx context.Context, input UpdateUserProductGrantsInput) (*entity.User, error)
 	RevokeUserProductGrants(ctx context.Context, input RevokeUserProductGrantsInput) (*entity.User, error)
+	RegisterProcess(ctx context.Context, input RegisterProcessInput) (*RegisteredImage, error)
 }
 type ProductResolver interface {
 	MeasurementsURL(ctx context.Context, obj *entity.Product) (string, error)
@@ -455,6 +461,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.PublishVersion(childComplexity, args["input"].(PublishVersionInput)), true
+
+	case "Mutation.registerProcess":
+		if e.complexity.Mutation.RegisterProcess == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_registerProcess_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RegisterProcess(childComplexity, args["input"].(RegisterProcessInput)), true
 
 	case "Mutation.revokeUserProductGrants":
 		if e.complexity.Mutation.RevokeUserProductGrants == nil {
@@ -791,6 +809,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Versions(childComplexity, args["productID"].(string)), true
 
+	case "RegisteredImage.processedImageID":
+		if e.complexity.RegisteredImage.ProcessedImageID == nil {
+			break
+		}
+
+		return e.complexity.RegisteredImage.ProcessedImageID(childComplexity), true
+
 	case "ServerInfo.components":
 		if e.complexity.ServerInfo.Components == nil {
 			break
@@ -990,6 +1015,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateVersionInput,
 		ec.unmarshalInputLogFilters,
 		ec.unmarshalInputPublishVersionInput,
+		ec.unmarshalInputRegisterProcessInput,
 		ec.unmarshalInputRevokeUserProductGrantsInput,
 		ec.unmarshalInputStartVersionInput,
 		ec.unmarshalInputStopVersionInput,
@@ -1152,10 +1178,15 @@ type Mutation {
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
+  registerProcess(input: RegisterProcessInput!): RegisteredImage!
+}
+
+type RegisteredImage {
+  processedImageID: ID!
 }
 
 type User {
-	id: ID!
+  id: ID!
 }
 
 type Subscription {
@@ -1175,6 +1206,14 @@ input CreateProductInput {
 input CreateVersionInput {
   file: Upload!
   productID: ID!
+}
+
+input RegisterProcessInput {
+  file: Upload!
+  version: String!
+  productID: ID!
+  processID: ID!
+  processType: String!
 }
 
 input StartVersionInput {
@@ -1435,6 +1474,21 @@ func (ec *executionContext) field_Mutation_publishVersion_args(ctx context.Conte
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNPublishVersionInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐPublishVersionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_registerProcess_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 RegisterProcessInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRegisterProcessInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRegisterProcessInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3478,6 +3532,65 @@ func (ec *executionContext) fieldContext_Mutation_revokeUserProductGrants(ctx co
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_registerProcess(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_registerProcess(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RegisterProcess(rctx, fc.Args["input"].(RegisterProcessInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*RegisteredImage)
+	fc.Result = res
+	return ec.marshalNRegisteredImage2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRegisteredImage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_registerProcess(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "processedImageID":
+				return ec.fieldContext_RegisteredImage_processedImageID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RegisteredImage", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_registerProcess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Process_id(ctx context.Context, field graphql.CollectedField, obj *entity.Process) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Process_id(ctx, field)
 	if err != nil {
@@ -5336,6 +5449,50 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RegisteredImage_processedImageID(ctx context.Context, field graphql.CollectedField, obj *RegisteredImage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RegisteredImage_processedImageID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProcessedImageID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RegisteredImage_processedImageID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RegisteredImage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8559,6 +8716,71 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRegisterProcessInput(ctx context.Context, obj interface{}) (RegisterProcessInput, error) {
+	var it RegisterProcessInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"file", "version", "productID", "processID", "processType"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "file":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.File = data
+		case "version":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Version = data
+		case "productID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductID = data
+		case "processID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProcessID = data
+		case "processType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processType"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProcessType = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputRevokeUserProductGrantsInput(ctx context.Context, obj interface{}) (RevokeUserProductGrantsInput, error) {
 	var it RevokeUserProductGrantsInput
 	asMap := map[string]interface{}{}
@@ -9270,6 +9492,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "registerProcess":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_registerProcess(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9895,6 +10124,45 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var registeredImageImplementors = []string{"RegisteredImage"}
+
+func (ec *executionContext) _RegisteredImage(ctx context.Context, sel ast.SelectionSet, obj *RegisteredImage) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, registeredImageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RegisteredImage")
+		case "processedImageID":
+			out.Values[i] = ec._RegisteredImage_processedImageID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11200,6 +11468,25 @@ func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋkonstellationᚑio
 func (ec *executionContext) unmarshalNPublishVersionInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐPublishVersionInput(ctx context.Context, v interface{}) (PublishVersionInput, error) {
 	res, err := ec.unmarshalInputPublishVersionInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNRegisterProcessInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRegisterProcessInput(ctx context.Context, v interface{}) (RegisterProcessInput, error) {
+	res, err := ec.unmarshalInputRegisterProcessInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNRegisteredImage2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRegisteredImage(ctx context.Context, sel ast.SelectionSet, v RegisteredImage) graphql.Marshaler {
+	return ec._RegisteredImage(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRegisteredImage2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRegisteredImage(ctx context.Context, sel ast.SelectionSet, v *RegisteredImage) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RegisteredImage(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNRevokeUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRevokeUserProductGrantsInput(ctx context.Context, v interface{}) (RevokeUserProductGrantsInput, error) {
