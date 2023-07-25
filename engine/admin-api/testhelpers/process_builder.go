@@ -34,6 +34,16 @@ func (pb *ProcessBuilder) WithNetworking(networking *entity.ProcessNetworking) *
 	return pb
 }
 
+func (pb *ProcessBuilder) WithCPU(cpu *entity.ProcessCPU) *ProcessBuilder {
+	pb.process.CPU = cpu
+	return pb
+}
+
+func (pb *ProcessBuilder) WithMemory(memory *entity.ProcessMemory) *ProcessBuilder {
+	pb.process.Memory = memory
+	return pb
+}
+
 func (pb *ProcessBuilder) WithConfig(config []entity.ConfigurationVariable) *ProcessBuilder {
 	pb.process.Config = config
 	return pb

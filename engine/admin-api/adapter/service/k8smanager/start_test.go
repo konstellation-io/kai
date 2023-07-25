@@ -86,6 +86,14 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 				DestinationPort: 8080,
 				Protocol:        "TCP",
 			}).
+			WithCPU(&entity.ProcessCPU{
+				Request: "100M",
+				Limit:   "200M",
+			}).
+			WithMemory(&entity.ProcessMemory{
+				Request: "100MB",
+				Limit:   "200MB",
+			}).
 			WithConfig([]entity.ConfigurationVariable{
 				{Key: "test-key", Value: "test-value"},
 			}).
@@ -131,6 +139,14 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 							TargetPort: int32(process.Networking.TargetPort),
 							Protocol:   process.Networking.Protocol,
 							SourcePort: int32(process.Networking.DestinationPort),
+						},
+						Cpu: &versionpb.ProcessCPU{
+							Request: process.CPU.Request,
+							Limit:   process.CPU.Limit,
+						},
+						Memory: &versionpb.ProcessMemory{
+							Request: process.Memory.Request,
+							Limit:   process.Memory.Limit,
 						},
 						Type: versionpb.ProcessType_ProcessTypeTask,
 						Config: map[string]string{
@@ -181,6 +197,14 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFoun
 				TargetPort:      8080,
 				DestinationPort: 8080,
 				Protocol:        "TCP",
+			}).
+			WithCPU(&entity.ProcessCPU{
+				Request: "100M",
+				Limit:   "200M",
+			}).
+			WithMemory(&entity.ProcessMemory{
+				Request: "100MB",
+				Limit:   "200MB",
 			}).
 			Build()
 
