@@ -31,8 +31,8 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-{{/*        allowPrivilegeEscalation: false*/}}
-{{/*        runAsUser: 0*/}}
+        allowPrivilegeEscalation: false
+        runAsUser: 0
         capabilities:
           add:
             - 'SYS_ADMIN'

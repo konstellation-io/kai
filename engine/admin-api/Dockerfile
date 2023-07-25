@@ -18,16 +18,16 @@ FROM debian
 
 
 # Create kai user.
-ENV USER=kai
-ENV UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    "${USER}"
+#ENV USER=kai
+#ENV UID=0
+#RUN adduser \
+#    --disabled-password \
+#    --gecos "" \
+#    --home "/nonexistent" \
+#    --shell "/sbin/nologin" \
+#    --no-create-home \
+#    --uid "${UID}" \
+#    "${USER}"
 #
 RUN mkdir "/nonexistent"
 
@@ -44,16 +44,16 @@ COPY --from=builder /app/casbin_rbac_policy.csv .
 COPY config.yml .
 #RUN apk add libcap && setcap 'cap_net_bind_service=+ep' /app/admin-api
 RUN apt-get install -y libcap2-bin uidmap && setcap 'cap_net_bind_service=+ep' /app/admin-api
-RUN setcap 'cap_setgid=ep' /usr/bin/newgidmap && setcap 'cap_setuid+ep' /usr/bin/newuidmap
-RUN setcap 'cap_setgid=ep' /app/admin-api && setcap 'cap_setuid+ep' /app/admin-api
+RUN setcap 'cap_setgid=+ep' /usr/bin/newgidmap && setcap 'cap_setuid=+ep' /usr/bin/newuidmap
+RUN setcap 'cap_setgid=+ep' /app/admin-api && setcap 'cap_setuid=+ep' /app/admin-api
 
-RUN chown -R kai:0 /app \
-    && chmod -R g+w /app \
-    && chown -R kai:0 /var/log/app \
-    && chmod -R g+w /var/log/app \
-    && chown -R kai:0 /nonexistent \
-    && chmod -R g+w /nonexistent
+#RUN chown -R kai:0 /app \
+#    && chmod -R g+w /app \
+#    && chown -R kai:0 /var/log/app \
+#    && chmod -R g+w /var/log/app \
+#    && chown -R kai:0 /nonexistent \
+#    && chmod -R g+w /nonexistent
 
-USER kai
+#USER kai
 
 CMD ["sh","-c","/app/admin-api 2>&1 | tee -a /var/log/app/app.log"]
