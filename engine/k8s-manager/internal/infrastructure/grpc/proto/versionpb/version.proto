@@ -30,7 +30,7 @@ message Process {
   Network networking = 10;
   map<string, string> config = 11;
   ProcessCPU cpu = 12;
-  ProcessMemory mem = 13;
+  ProcessMemory memory = 13;
 }
 
 message Network {

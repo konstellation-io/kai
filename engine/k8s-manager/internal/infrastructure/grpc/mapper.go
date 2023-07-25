@@ -60,10 +60,10 @@ func mapReqProcessToProcess(reqProcesses []*versionpb.Process) []*domain.Process
 			}
 		}
 
-		if process.Mem != nil {
+		if process.Memory != nil {
 			p.Memory = &domain.ProcessMemory{
-				Request: process.Mem.Request,
-				Limit:   process.Mem.Limit,
+				Request: process.Memory.Request,
+				Limit:   process.Memory.Limit,
 			}
 		}
 
