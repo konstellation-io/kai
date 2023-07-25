@@ -89,8 +89,8 @@ type Process struct {
 	Secrets       []ConfigurationVariable
 	Subscriptions []string
 	Networking    *ProcessNetworking
-	CPU           *CPUConfig
-	Memory        *MemoryConfig
+	CPU           *ProcessCPU
+	Memory        *ProcessMemory
 	Status        ProcessStatus
 }
 
@@ -122,12 +122,12 @@ func (s ObjectStoreScope) String() string {
 	return string(s)
 }
 
-type CPUConfig struct {
+type ProcessCPU struct {
 	Request string
 	Limit   string
 }
 
-type MemoryConfig struct {
+type ProcessMemory struct {
 	Request string
 	Limit   string
 }
