@@ -107,8 +107,8 @@ func TestStartProcess_WithCPU(t *testing.T) {
 
 	process := testhelpers.NewProcessBuilder().
 		WithCPU(&domain.ProcessCPU{
-			Request: "100M",
-			Limit:   "200M",
+			Request: "300m",
+			Limit:   "600m",
 		}).
 		Build()
 
@@ -145,8 +145,8 @@ func TestStartProcess_WithMemory(t *testing.T) {
 
 	process := testhelpers.NewProcessBuilder().
 		WithMemory(&domain.ProcessMemory{
-			Request: "100MB",
-			Limit:   "200MB",
+			Request: "300Mi",
+			Limit:   "600Mi",
 		}).
 		Build()
 

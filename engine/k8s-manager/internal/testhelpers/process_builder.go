@@ -17,6 +17,14 @@ func NewProcessBuilder() *ProcessBuilder {
 			Replicas:      1,
 			Subscriptions: []string{"other-process"},
 			KeyValueStore: "test-process-kv-store",
+			CPU: &domain.ProcessCPU{
+				Request: "100m",
+				Limit:   "200m",
+			},
+			Memory: &domain.ProcessMemory{
+				Request: "100Mi",
+				Limit:   "200Mi",
+			},
 		},
 	}
 }
