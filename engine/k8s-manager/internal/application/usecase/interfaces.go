@@ -13,7 +13,7 @@ type VersionStopperService interface {
 	StopVersion(ctx context.Context, params StopParams) error
 }
 
-//go:generate mockgen -source=${GOFILE} -destination=../../../mocks/version_service_mock.go -package=mocks
+//go:generate mockery --name VersionService --output ../../../mocks --filename version_service_mock.go --structname VersionServiceMock
 type VersionService interface {
 	VersionStarterService
 	VersionStopperService

@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/logr/testr"
-	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/usecase"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
@@ -23,7 +22,7 @@ type VersionServiceTestSuite struct {
 	suite.Suite
 	cfg                *config.Config
 	logger             logr.Logger
-	versionServiceMock *mocks.MockVersionService
+	versionServiceMock *mocks.VersionServiceMock
 	versionGRPCService *grpc.VersionService
 }
 
@@ -32,11 +31,10 @@ func TestVersionServiceTestSuite(t *testing.T) {
 }
 
 func (s *VersionServiceTestSuite) SetupSuite() {
-	mockController := gomock.NewController(s.T())
 	cfg := &config.Config{}
 	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 
-	s.versionServiceMock = mocks.NewMockVersionService(mockController)
+	s.versionServiceMock = mocks.NewVersionServiceMock(s.T())
 
 	s.versionGRPCService = grpc.NewVersionService(
 		logger,
