@@ -55,6 +55,8 @@ func mapDTOToEntityProcesses(dtos []processDTO) []entity.Process {
 			Secrets:       mapDTOConfigToEntityConfig(dto.Secrets),
 			Subscriptions: dto.Subscriptions,
 			Networking:    mapDTOToEntityProcessNetworking(dto.Networking),
+			CPU:           mapDTOToEntityProcessCPU(dto.CPU),
+			Memory:        mapDTOToEntityProcessMemory(dto.Memory),
 		}
 	}
 
@@ -81,6 +83,28 @@ func mapDTOToEntityProcessNetworking(dto *processNetworkingDTO) *entity.ProcessN
 		TargetPort:      dto.TargetPort,
 		DestinationPort: dto.DestinationPort,
 		Protocol:        dto.Protocol,
+	}
+}
+
+func mapDTOToEntityProcessCPU(dto *processCPUDTO) *entity.ProcessCPU {
+	if dto == nil {
+		return nil
+	}
+
+	return &entity.ProcessCPU{
+		Request: dto.Request,
+		Limit:   dto.Limit,
+	}
+}
+
+func mapDTOToEntityProcessMemory(dto *processMemoryDTO) *entity.ProcessMemory {
+	if dto == nil {
+		return nil
+	}
+
+	return &entity.ProcessMemory{
+		Request: dto.Request,
+		Limit:   dto.Limit,
 	}
 }
 
@@ -156,6 +180,8 @@ func mapEntityToDTOProcesses(processes []entity.Process) []processDTO {
 			Secrets:       mapEntityConfigToDTOConfig(process.Secrets),
 			Subscriptions: process.Subscriptions,
 			Networking:    mapEntityToDTOProcessNetworking(process.Networking),
+			CPU:           mapEntityToDTOProcessCPU(process.CPU),
+			Memory:        mapEntityToDTOProcessMemory(process.Memory),
 		}
 		idx++
 	}
@@ -183,6 +209,28 @@ func mapEntityToDTOProcessNetworking(networking *entity.ProcessNetworking) *proc
 		TargetPort:      networking.TargetPort,
 		DestinationPort: networking.DestinationPort,
 		Protocol:        networking.Protocol,
+	}
+}
+
+func mapEntityToDTOProcessCPU(cpu *entity.ProcessCPU) *processCPUDTO {
+	if cpu == nil {
+		return nil
+	}
+
+	return &processCPUDTO{
+		Request: cpu.Request,
+		Limit:   cpu.Limit,
+	}
+}
+
+func mapEntityToDTOProcessMemory(memory *entity.ProcessMemory) *processMemoryDTO {
+	if memory == nil {
+		return nil
+	}
+
+	return &processMemoryDTO{
+		Request: memory.Request,
+		Limit:   memory.Limit,
 	}
 }
 

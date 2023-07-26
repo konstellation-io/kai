@@ -14,7 +14,7 @@ type VersionStarter struct {
 	containerStarter service.ContainerStarter
 }
 
-func NewVersionStarter(logger logr.Logger, orchStarter service.ContainerStarter) *VersionStarter {
+func NewVersionStarter(logger logr.Logger, orchStarter service.ContainerStarter) VersionStarterService {
 	return &VersionStarter{
 		logger,
 		orchStarter,

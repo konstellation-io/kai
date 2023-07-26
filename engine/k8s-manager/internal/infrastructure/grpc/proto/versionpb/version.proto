@@ -29,6 +29,8 @@ message Process {
   ProcessType type = 9;
   Network networking = 10;
   map<string, string> config = 11;
+  ProcessCPU cpu = 12;
+  ProcessMemory memory = 13;
 }
 
 message Network {
@@ -62,6 +64,16 @@ message UnpublishRequest {
 
 message Response {
   string message = 1;
+}
+
+message ProcessCPU {
+  string request = 1;
+  string limit = 2;
+}
+
+message ProcessMemory {
+  string request = 1;
+  string limit = 2;
 }
 
 message ProcessStatusRequest {

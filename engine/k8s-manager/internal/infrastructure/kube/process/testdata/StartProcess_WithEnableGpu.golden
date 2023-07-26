@@ -263,9 +263,17 @@ items:
                           valuefrom: null
                       resources:
                         limits:
+                            cpu:
+                                format: DecimalSI
+                            memory:
+                                format: BinarySI
                             nvidia.com/gpu:
                                 format: DecimalSI
                         requests:
+                            cpu:
+                                format: DecimalSI
+                            memory:
+                                format: BinarySI
                             nvidia.com/gpu:
                                 format: DecimalSI
                       volumemounts:

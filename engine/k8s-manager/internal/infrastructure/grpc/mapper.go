@@ -43,6 +43,7 @@ func mapReqProcessToProcess(reqProcesses []*versionpb.Process) []*domain.Process
 			Subscriptions: process.Subscriptions,
 			KeyValueStore: process.KeyValueStore,
 			ObjectStore:   process.ObjectStore,
+			Config:        process.Config,
 		}
 
 		if process.Networking != nil {
@@ -50,6 +51,20 @@ func mapReqProcessToProcess(reqProcesses []*versionpb.Process) []*domain.Process
 				SourcePort: int(process.Networking.SourcePort),
 				TargetPort: int(process.Networking.TargetPort),
 				Protocol:   process.Networking.Protocol,
+			}
+		}
+
+		if process.Cpu != nil {
+			p.CPU = &domain.ProcessCPU{
+				Request: process.Cpu.Request,
+				Limit:   process.Cpu.Limit,
+			}
+		}
+
+		if process.Memory != nil {
+			p.Memory = &domain.ProcessMemory{
+				Request: process.Memory.Request,
+				Limit:   process.Memory.Limit,
 			}
 		}
 

@@ -49,7 +49,7 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 				MountPath: "/app/logs",
 			},
 		},
-		Resources: getContainerResources(process.EnableGpu),
+		Resources: getContainerResources(process.EnableGpu, process.CPU, process.Memory),
 	}
 
 	if process.Networking != nil {
@@ -152,9 +152,15 @@ func getProtocol(protocol string) corev1.Protocol {
 	}
 }
 
-func getContainerResources(isGPUEnabled bool) corev1.ResourceRequirements {
-	requests := corev1.ResourceList{}
-	limits := corev1.ResourceList{}
+func getContainerResources(isGPUEnabled bool, cpu *domain.ProcessCPU, memory *domain.ProcessMemory) corev1.ResourceRequirements {
+	requests := corev1.ResourceList{
+		corev1.ResourceCPU:    resource.MustParse(cpu.Request),
+		corev1.ResourceMemory: resource.MustParse(memory.Request),
+	}
+	limits := corev1.ResourceList{
+		corev1.ResourceCPU:    resource.MustParse(cpu.Limit),
+		corev1.ResourceMemory: resource.MustParse(memory.Limit),
+	}
 
 	if isGPUEnabled {
 		limits[ResourceNameNvidia] = resource.MustParse("1")

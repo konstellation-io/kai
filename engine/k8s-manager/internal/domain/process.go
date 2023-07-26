@@ -14,6 +14,8 @@ type Process struct {
 
 	Replicas   int32
 	Networking *Networking
+	CPU        *ProcessCPU
+	Memory     *ProcessMemory
 }
 
 func (p *Process) IsTrigger() bool {
@@ -46,4 +48,14 @@ func (p ProcessType) ToString() string {
 	default:
 		return "unknown"
 	}
+}
+
+type ProcessCPU struct {
+	Request string
+	Limit   string
+}
+
+type ProcessMemory struct {
+	Request string
+	Limit   string
 }

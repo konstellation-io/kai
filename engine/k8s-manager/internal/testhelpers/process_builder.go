@@ -17,6 +17,14 @@ func NewProcessBuilder() *ProcessBuilder {
 			Replicas:      1,
 			Subscriptions: []string{"other-process"},
 			KeyValueStore: "test-process-kv-store",
+			CPU: &domain.ProcessCPU{
+				Request: "100m",
+				Limit:   "200m",
+			},
+			Memory: &domain.ProcessMemory{
+				Request: "100Mi",
+				Limit:   "200Mi",
+			},
 		},
 	}
 }
@@ -48,6 +56,16 @@ func (pb *ProcessBuilder) WithReplicas(replicas int32) *ProcessBuilder {
 
 func (pb *ProcessBuilder) WithEnableGpu(enableGpu bool) *ProcessBuilder {
 	pb.process.EnableGpu = enableGpu
+	return pb
+}
+
+func (pb *ProcessBuilder) WithCPU(cpu *domain.ProcessCPU) *ProcessBuilder {
+	pb.process.CPU = cpu
+	return pb
+}
+
+func (pb *ProcessBuilder) WithMemory(memory *domain.ProcessMemory) *ProcessBuilder {
+	pb.process.Memory = memory
 	return pb
 }
 

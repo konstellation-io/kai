@@ -47,6 +47,8 @@ type processDTO struct {
 	Secrets       []configurationVariableDTO `bson:"secrets,omitempty"`
 	Subscriptions []string                   `bson:"subscriptions"`
 	Networking    *processNetworkingDTO      `bson:"networking,omitempty"`
+	CPU           *processCPUDTO             `bson:"cpu,omitempty"`
+	Memory        *processMemoryDTO          `bson:"memory,omitempty"`
 }
 
 type processObjectStoreDTO struct {
@@ -58,4 +60,14 @@ type processNetworkingDTO struct {
 	TargetPort      int    `bson:"targetPort"`
 	DestinationPort int    `bson:"destinationPort"`
 	Protocol        string `bson:"protocol"`
+}
+
+type processCPUDTO struct {
+	Request string `bson:"request"`
+	Limit   string `bson:"limit"`
+}
+
+type processMemoryDTO struct {
+	Request string `bson:"request"`
+	Limit   string `bson:"limit"`
 }

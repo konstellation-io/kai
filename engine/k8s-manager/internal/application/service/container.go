@@ -6,8 +6,6 @@ import (
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 )
 
-//go:generate mockery --name ContainerService
-
 type CreateProcessParams struct {
 	ConfigName string
 	Product    string
@@ -35,6 +33,7 @@ type ContainerStopper interface {
 	DeleteNetwork(ctx context.Context, product, version string) error
 }
 
+//go:generate mockery --name ContainerService --output ../../../mocks --filename container_service_mock.go --structname ContainerServiceMock
 type ContainerService interface {
 	ContainerStarter
 	ContainerStopper
