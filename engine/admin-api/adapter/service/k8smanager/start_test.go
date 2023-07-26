@@ -29,6 +29,7 @@ func newStartRequestMatcher(expectedStreamConfig *versionpb.StartRequest) *start
 		expectedStartRequest: expectedStreamConfig,
 	}
 }
+
 func (m startRequestMatcher) String() string {
 	return fmt.Sprintf("is equal to %v", m.expectedStartRequest)
 }

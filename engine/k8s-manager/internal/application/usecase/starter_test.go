@@ -9,17 +9,17 @@ import (
 
 	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
-	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service/mocks"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/usecase"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/testhelpers"
+	"github.com/konstellation-io/kai/engine/k8s-manager/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestStartVersion(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	containerSvc := mocks.NewContainerService(t)
+	containerSvc := mocks.NewContainerServiceMock(t)
 
 	version := testhelpers.NewVersionBuilder().Build()
 
@@ -41,7 +41,7 @@ func TestStartVersion(t *testing.T) {
 
 func TestStartVersion_WithMultipleProcesses(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	containerSvc := mocks.NewContainerService(t)
+	containerSvc := mocks.NewContainerServiceMock(t)
 
 	processes := []*domain.Process{
 		testhelpers.NewProcessBuilder().WithID("test-process-1").Build(),
@@ -77,7 +77,7 @@ func TestStartVersion_WithMultipleProcesses(t *testing.T) {
 
 func TestStartVersion_WithNetworking(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	containerSvc := mocks.NewContainerService(t)
+	containerSvc := mocks.NewContainerServiceMock(t)
 
 	processes := []*domain.Process{
 		testhelpers.NewProcessBuilder().
@@ -136,7 +136,7 @@ func TestStartVersion_WithNetworking(t *testing.T) {
 
 func TestStartVersion_WithCPU(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	containerSvc := mocks.NewContainerService(t)
+	containerSvc := mocks.NewContainerServiceMock(t)
 
 	cpu := &domain.ProcessCPU{
 		Request: "100M",
@@ -170,7 +170,7 @@ func TestStartVersion_WithCPU(t *testing.T) {
 
 func TestStartVersion_WithMemory(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	containerSvc := mocks.NewContainerService(t)
+	containerSvc := mocks.NewContainerServiceMock(t)
 
 	memory := &domain.ProcessMemory{
 		Request: "100MB",
@@ -204,7 +204,7 @@ func TestStartVersion_WithMemory(t *testing.T) {
 
 func TestStartVersion_ErrorCreatingConfig(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	containerSvc := mocks.NewContainerService(t)
+	containerSvc := mocks.NewContainerServiceMock(t)
 
 	version := testhelpers.NewVersionBuilder().Build()
 
@@ -226,7 +226,7 @@ func TestStartVersion_ErrorCreatingConfig(t *testing.T) {
 
 func TestStartVersion_ErrorCreatingProcess(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: 0})
-	containerSvc := mocks.NewContainerService(t)
+	containerSvc := mocks.NewContainerServiceMock(t)
 
 	version := testhelpers.NewVersionBuilder().Build()
 
@@ -261,7 +261,7 @@ func TestStartVersion_ErrorCreatingProcess(t *testing.T) {
 
 func TestStartVersion_ErrorCreatingNetwork(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	containerSvc := mocks.NewContainerService(t)
+	containerSvc := mocks.NewContainerServiceMock(t)
 
 	expectedErr := errors.New("error creating network")
 
@@ -327,7 +327,7 @@ func getVersionWithNetworking(t *testing.T) domain.Version {
 
 func mockCreateProcess(
 	t *testing.T,
-	containerSvc *mocks.ContainerService,
+	containerSvc *mocks.ContainerServiceMock,
 	configName string,
 	version domain.Version,
 	process domain.Process,

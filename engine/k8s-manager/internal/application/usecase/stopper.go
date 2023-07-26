@@ -19,7 +19,7 @@ type VersionStopper struct {
 	containerService service.ContainerStopper
 }
 
-func NewVersionStopper(logger logr.Logger, containerService service.ContainerStopper) *VersionStopper {
+func NewVersionStopper(logger logr.Logger, containerService service.ContainerStopper) VersionStopperService {
 	return &VersionStopper{
 		logger:           logger,
 		containerService: containerService,
