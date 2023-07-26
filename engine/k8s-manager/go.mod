@@ -6,7 +6,6 @@ require (
 	github.com/bxcodec/faker/v3 v3.8.1
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.4
-	github.com/golang/mock v1.6.0
 	github.com/konstellation-io/kai/engine/admin-api v0.0.0-20230719063706-117db7065e02
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/spf13/viper v1.16.0
