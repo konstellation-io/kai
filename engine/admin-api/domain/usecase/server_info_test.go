@@ -48,6 +48,7 @@ func TestGetServerInfo(t *testing.T) {
 	serverInfoCollector := usecase.NewServerInfoGetter(logger, accessControl)
 	serverInfo, err := serverInfoCollector.GetKAIServerInfo(ctx, user)
 	assert.NoError(t, err)
+
 	for _, component := range serverInfo.Components {
 		assert.Contains(t, expectedServersInfo.Components, component)
 	}
