@@ -16,6 +16,14 @@ func NewProcessBuilder() *ProcessBuilder {
 			Replicas:      1,
 			GPU:           false,
 			Subscriptions: []string{"other-process"},
+			CPU: &entity.ProcessCPU{
+				Request: "100m",
+				Limit:   "200m",
+			},
+			Memory: &entity.ProcessMemory{
+				Request: "100Mi",
+				Limit:   "200Mi",
+			},
 		},
 	}
 }
