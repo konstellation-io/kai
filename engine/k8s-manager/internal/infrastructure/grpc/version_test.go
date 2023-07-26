@@ -4,14 +4,13 @@ package grpc_test
 
 import (
 	"context"
-	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/usecase"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/grpc"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/grpc/proto/versionpb"
@@ -19,29 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
-
-type versionMatcher struct {
-	expectedVersion domain.Version
-}
-
-func newVersionMatcher(expectedVersion domain.Version) *versionMatcher {
-	return &versionMatcher{
-		expectedVersion: expectedVersion,
-	}
-}
-
-func (m versionMatcher) String() string {
-	return fmt.Sprintf("is equal to %v", m.expectedVersion)
-}
-
-func (m versionMatcher) Matches(actual interface{}) bool {
-	actualVersion, ok := actual.(domain.Version)
-	if !ok {
-		return false
-	}
-
-	return reflect.DeepEqual(actualVersion, m.expectedVersion)
-}
 
 type VersionServiceTestSuite struct {
 	suite.Suite
@@ -154,10 +130,29 @@ func (s *VersionServiceTestSuite) TestStart() {
 		},
 	}
 
-	customMatcher := newVersionMatcher(expectedVersion)
-	s.versionServiceMock.EXPECT().StartVersion(ctx, customMatcher).Return(nil)
+	s.versionServiceMock.EXPECT().StartVersion(ctx, expectedVersion).Return(nil)
 
 	res, err := s.versionGRPCService.Start(ctx, req)
+	require.NoError(s.T(), err)
+	require.NotNil(s.T(), res)
+}
+
+func (s *VersionServiceTestSuite) TestStop() {
+	ctx := context.Background()
+
+	req := &versionpb.StopRequest{
+		Product:    "test-product",
+		VersionTag: "test-version",
+	}
+
+	expectedParams := usecase.StopParams{
+		Product: req.Product,
+		Version: req.VersionTag,
+	}
+
+	s.versionServiceMock.EXPECT().StopVersion(ctx, expectedParams).Return(nil)
+
+	res, err := s.versionGRPCService.Stop(ctx, req)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), res)
 }

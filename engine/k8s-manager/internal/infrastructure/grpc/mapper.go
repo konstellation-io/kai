@@ -43,6 +43,7 @@ func mapReqProcessToProcess(reqProcesses []*versionpb.Process) []*domain.Process
 			Subscriptions: process.Subscriptions,
 			KeyValueStore: process.KeyValueStore,
 			ObjectStore:   process.ObjectStore,
+			Config:        process.Config,
 		}
 
 		if process.Networking != nil {
