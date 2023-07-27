@@ -78,20 +78,19 @@ func (wt WorkflowType) String() string {
 }
 
 type Process struct {
-	ID            string
-	Name          string
-	Type          ProcessType
-	Image         string
-	Replicas      int32
-	GPU           bool
-	Config        []ConfigurationVariable
-	ObjectStore   *ProcessObjectStore
-	Secrets       []ConfigurationVariable
-	Subscriptions []string
-	Networking    *ProcessNetworking
-	CPU           *ProcessCPU
-	Memory        *ProcessMemory
-	Status        ProcessStatus
+	ID             string
+	Name           string
+	Type           ProcessType
+	Image          string
+	Replicas       int32
+	GPU            bool
+	Config         []ConfigurationVariable
+	ObjectStore    *ProcessObjectStore
+	Secrets        []ConfigurationVariable
+	Subscriptions  []string
+	Networking     *ProcessNetworking
+	ResourceLimits *ProcessResourceLimits
+	Status         ProcessStatus
 }
 
 type ProcessType string
@@ -122,20 +121,20 @@ func (s ObjectStoreScope) String() string {
 	return string(s)
 }
 
-type ProcessCPU struct {
-	Request string
-	Limit   string
-}
-
-type ProcessMemory struct {
-	Request string
-	Limit   string
-}
-
 type ProcessNetworking struct {
 	TargetPort      int
 	DestinationPort int
 	Protocol        string
+}
+
+type ResourceLimit struct {
+	Request string
+	Limit   string
+}
+
+type ProcessResourceLimits struct {
+	CPU    *ResourceLimit
+	Memory *ResourceLimit
 }
 
 type ProcessStatus string

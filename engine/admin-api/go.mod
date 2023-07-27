@@ -15,7 +15,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459
-	github.com/konstellation-io/krt v0.1.2
+	github.com/konstellation-io/krt v0.1.3
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
@@ -28,6 +28,8 @@ require (
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v2 v2.4.0
 )
+
+require github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect

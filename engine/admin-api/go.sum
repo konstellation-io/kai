@@ -52,6 +52,8 @@ github.com/Nerzal/gocloak/v13 v13.5.0 h1:HlI0ZqZeSLUCAiWNmY7NRT3PtlwgY+aINkv5Da6
 github.com/Nerzal/gocloak/v13 v13.5.0/go.mod h1:rRBtEdh5N0+JlZZEsrfZcB2sRMZWbgSxI2EIv9jpJp4=
 github.com/agnivade/levenshtein v1.1.1 h1:QY8M92nrzkmr798gCo3kmMyqXFzdQVpxLlGPRBij0P8=
 github.com/agnivade/levenshtein v1.1.1/go.mod h1:veldBMzWxcCG2ZvUTKD2kJNRdCk5hVbJomOvKkmgYbo=
+github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 h1:s6gZFSlWYmbqAuRjVTiNNhvNRfY2Wxp9nhfyel4rklc=
+github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137/go.mod h1:OMCwj8VM1Kc9e19TLln2VL61YJF0x1XFtfdL4JdbSyE=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 h1:bvNMNQO63//z+xNgfBlViaCIJKLlCJ6/fmUseuG0wVQ=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883/go.mod h1:rCTlJbsFo29Kk6CurOXKm700vrz8f0KW0JNfpkRJY/8=
 github.com/arbovm/levenshtein v0.0.0-20160628152529-48b4e1c0c4d0 h1:jfIu9sQUG6Ig+0+Ap1h4unLjW6YQJpKZVmUzxsD4E/Q=
@@ -261,8 +263,8 @@ github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxv
 github.com/konsorten/go-windows-terminal-sequences v1.0.2/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459 h1:310+tQT8Nl319PRRgk+y7VvCLCN6WSP/iv6BawcLkww=
 github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459/go.mod h1:YUG3Uvb2wB64+MvlGsvO/9XsdcEPzVkphzqR0SnECLQ=
-github.com/konstellation-io/krt v0.1.2 h1:dcxn4ExlsBL7A9WgJ6dAZ9EZZ+Yav3Jo9XipQMHfaK4=
-github.com/konstellation-io/krt v0.1.2/go.mod h1:G6ULLL3quzOV97e5Lt4QW/rRX3CzwLbGivuw6ej8wgo=
+github.com/konstellation-io/krt v0.1.3 h1:Te8p6JCpF+PtK79BN11BnZWMZhG8/J/IZkuybI9yH2o=
+github.com/konstellation-io/krt v0.1.3/go.mod h1:gzukJ5SZG8kGhrsjTuwZ+UR3z5XimRnn9Q0DMKnSeDs=
 github.com/kr/fs v0.1.0/go.mod h1:FFnZGqtBN9Gxj7eW1uZ42v5BccTP0vu6NEaFoC2HwRg=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=

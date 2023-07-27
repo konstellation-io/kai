@@ -86,17 +86,16 @@ func mapProcessesToDTO(
 			}
 		}
 
-		if p.CPU != nil {
-			process.Cpu = &versionpb.ProcessCPU{
-				Request: p.CPU.Request,
-				Limit:   p.CPU.Limit,
-			}
-		}
-
-		if p.Memory != nil {
-			process.Memory = &versionpb.ProcessMemory{
-				Request: p.Memory.Request,
-				Limit:   p.Memory.Limit,
+		if p.ResourceLimits != nil {
+			process.ResourceLimits = &versionpb.ProcessResourceLimits{
+				Cpu: &versionpb.ResourceLimit{
+					Request: p.ResourceLimits.CPU.Request,
+					Limit:   p.ResourceLimits.CPU.Limit,
+				},
+				Memory: &versionpb.ResourceLimit{
+					Request: p.ResourceLimits.Memory.Request,
+					Limit:   p.ResourceLimits.Memory.Limit,
+				},
 			}
 		}
 

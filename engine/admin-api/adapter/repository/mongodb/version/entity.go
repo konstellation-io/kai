@@ -36,19 +36,18 @@ type workflowDTO struct {
 }
 
 type processDTO struct {
-	ID            string                     `bson:"id"`
-	Name          string                     `bson:"name"`
-	Type          string                     `bson:"type"`
-	Image         string                     `bson:"image"`
-	Replicas      int32                      `bson:"replicas"`
-	GPU           bool                       `bson:"gpu"`
-	Config        []configurationVariableDTO `bson:"config,omitempty"`
-	ObjectStore   *processObjectStoreDTO     `bson:"objectStore,omitempty"`
-	Secrets       []configurationVariableDTO `bson:"secrets,omitempty"`
-	Subscriptions []string                   `bson:"subscriptions"`
-	Networking    *processNetworkingDTO      `bson:"networking,omitempty"`
-	CPU           *processCPUDTO             `bson:"cpu,omitempty"`
-	Memory        *processMemoryDTO          `bson:"memory,omitempty"`
+	ID             string                     `bson:"id"`
+	Name           string                     `bson:"name"`
+	Type           string                     `bson:"type"`
+	Image          string                     `bson:"image"`
+	Replicas       int32                      `bson:"replicas"`
+	GPU            bool                       `bson:"gpu"`
+	Config         []configurationVariableDTO `bson:"config,omitempty"`
+	ObjectStore    *processObjectStoreDTO     `bson:"objectStore,omitempty"`
+	Secrets        []configurationVariableDTO `bson:"secrets,omitempty"`
+	Subscriptions  []string                   `bson:"subscriptions"`
+	Networking     *processNetworkingDTO      `bson:"networking,omitempty"`
+	ResourceLimits *processResourceLimitsDTO  `bson:"resourceLimits,omitempty"`
 }
 
 type processObjectStoreDTO struct {
@@ -62,12 +61,12 @@ type processNetworkingDTO struct {
 	Protocol        string `bson:"protocol"`
 }
 
-type processCPUDTO struct {
+type resourceLimitDTO struct {
 	Request string `bson:"request"`
 	Limit   string `bson:"limit"`
 }
 
-type processMemoryDTO struct {
-	Request string `bson:"request"`
-	Limit   string `bson:"limit"`
+type processResourceLimitsDTO struct {
+	CPU    *resourceLimitDTO `bson:"cpu,omitempty"`
+	Memory *resourceLimitDTO `bson:"memory,omitempty"`
 }

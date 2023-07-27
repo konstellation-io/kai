@@ -138,13 +138,15 @@ func TestStartVersion_WithCPU(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	containerSvc := mocks.NewContainerServiceMock(t)
 
-	cpu := &domain.ProcessCPU{
-		Request: "100M",
-		Limit:   "200M",
+	resourceLimit := &domain.ProcessResourceLimits{
+		CPU: &domain.ResourceLimit{
+			Request: "100m",
+			Limit:   "200m",
+		},
 	}
 
 	processes := []*domain.Process{
-		testhelpers.NewProcessBuilder().WithCPU(cpu).Build(),
+		testhelpers.NewProcessBuilder().WithResourceLimits(resourceLimit).Build(),
 	}
 	workflows := []*domain.Workflow{
 		testhelpers.NewWorkflowBuilder().WithProcesses(processes).Build(),
@@ -172,13 +174,15 @@ func TestStartVersion_WithMemory(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	containerSvc := mocks.NewContainerServiceMock(t)
 
-	memory := &domain.ProcessMemory{
-		Request: "100MB",
-		Limit:   "200MB",
+	resourceLimit := &domain.ProcessResourceLimits{
+		Memory: &domain.ResourceLimit{
+			Request: "100Mi",
+			Limit:   "200Mi",
+		},
 	}
 
 	processes := []*domain.Process{
-		testhelpers.NewProcessBuilder().WithMemory(memory).Build(),
+		testhelpers.NewProcessBuilder().WithResourceLimits(resourceLimit).Build(),
 	}
 	workflows := []*domain.Workflow{
 		testhelpers.NewWorkflowBuilder().WithProcesses(processes).Build(),

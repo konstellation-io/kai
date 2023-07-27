@@ -87,13 +87,15 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 				DestinationPort: 8080,
 				Protocol:        "TCP",
 			}).
-			WithCPU(&entity.ProcessCPU{
-				Request: "100M",
-				Limit:   "200M",
-			}).
-			WithMemory(&entity.ProcessMemory{
-				Request: "100MB",
-				Limit:   "200MB",
+			WithResourceLimits(&entity.ProcessResourceLimits{
+				CPU: &entity.ResourceLimit{
+					Request: "100m",
+					Limit:   "200m",
+				},
+				Memory: &entity.ResourceLimit{
+					Request: "100Mi",
+					Limit:   "200Mi",
+				},
 			}).
 			WithConfig([]entity.ConfigurationVariable{
 				{Key: "test-key", Value: "test-value"},
@@ -141,13 +143,15 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 							Protocol:   process.Networking.Protocol,
 							SourcePort: int32(process.Networking.DestinationPort),
 						},
-						Cpu: &versionpb.ProcessCPU{
-							Request: process.CPU.Request,
-							Limit:   process.CPU.Limit,
-						},
-						Memory: &versionpb.ProcessMemory{
-							Request: process.Memory.Request,
-							Limit:   process.Memory.Limit,
+						ResourceLimits: &versionpb.ProcessResourceLimits{
+							Cpu: &versionpb.ResourceLimit{
+								Request: process.ResourceLimits.CPU.Request,
+								Limit:   process.ResourceLimits.CPU.Limit,
+							},
+							Memory: &versionpb.ResourceLimit{
+								Request: process.ResourceLimits.Memory.Request,
+								Limit:   process.ResourceLimits.Memory.Limit,
+							},
 						},
 						Type: versionpb.ProcessType_ProcessTypeTask,
 						Config: map[string]string{
@@ -199,13 +203,15 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFoun
 				DestinationPort: 8080,
 				Protocol:        "TCP",
 			}).
-			WithCPU(&entity.ProcessCPU{
-				Request: "100M",
-				Limit:   "200M",
-			}).
-			WithMemory(&entity.ProcessMemory{
-				Request: "100MB",
-				Limit:   "200MB",
+			WithResourceLimits(&entity.ProcessResourceLimits{
+				CPU: &entity.ResourceLimit{
+					Request: "100m",
+					Limit:   "200m",
+				},
+				Memory: &entity.ResourceLimit{
+					Request: "100Mi",
+					Limit:   "200Mi",
+				},
 			}).
 			Build()
 
