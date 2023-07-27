@@ -76,13 +76,15 @@ func (s *VersionServiceTestSuite) TestStart() {
 						Config: map[string]string{
 							"test-key": "test-value",
 						},
-						Cpu: &versionpb.ProcessCPU{
-							Request: "500m",
-							Limit:   "1000m",
-						},
-						Memory: &versionpb.ProcessMemory{
-							Request: "500Mi",
-							Limit:   "1000Mi",
+						ResourceLimits: &versionpb.ProcessResourceLimits{
+							Cpu: &versionpb.ResourceLimit{
+								Request: "500m",
+								Limit:   "1000m",
+							},
+							Memory: &versionpb.ResourceLimit{
+								Request: "500Mi",
+								Limit:   "1000Mi",
+							},
 						},
 					},
 				},
@@ -114,13 +116,16 @@ func (s *VersionServiceTestSuite) TestStart() {
 							TargetPort: int(req.Workflows[0].Processes[0].Networking.TargetPort),
 						},
 						Config: req.Workflows[0].Processes[0].Config,
-						CPU: &domain.ProcessCPU{
-							Request: req.Workflows[0].Processes[0].Cpu.Request,
-							Limit:   req.Workflows[0].Processes[0].Cpu.Limit,
-						},
-						Memory: &domain.ProcessMemory{
-							Request: req.Workflows[0].Processes[0].Memory.Request,
-							Limit:   req.Workflows[0].Processes[0].Memory.Limit,
+						ResourceLimits: &domain.ProcessResourceLimits{
+
+							CPU: &domain.ResourceLimit{
+								Request: req.Workflows[0].Processes[0].ResourceLimits.Cpu.Request,
+								Limit:   req.Workflows[0].Processes[0].ResourceLimits.Cpu.Limit,
+							},
+							Memory: &domain.ResourceLimit{
+								Request: req.Workflows[0].Processes[0].ResourceLimits.Memory.Request,
+								Limit:   req.Workflows[0].Processes[0].ResourceLimits.Memory.Limit,
+							},
 						},
 					},
 				},

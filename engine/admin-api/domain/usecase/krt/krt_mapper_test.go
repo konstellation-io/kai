@@ -50,6 +50,16 @@ func getExpectedVersion() *entity.Version {
 							DestinationPort: 9000,
 							Protocol:        "TCP",
 						},
+						ResourceLimits: &entity.ProcessResourceLimits{
+							CPU: &entity.ResourceLimit{
+								Request: "100m",
+								Limit:   "200m",
+							},
+							Memory: &entity.ResourceLimit{
+								Request: "100Mi",
+								Limit:   "200Mi",
+							},
+						},
 					},
 					{
 						Name:          "etl",
@@ -59,6 +69,16 @@ func getExpectedVersion() *entity.Version {
 						GPU:           krt.DefaultGPUValue,
 						ObjectStore:   commonObjectStore,
 						Subscriptions: []string{"entrypoint"},
+						ResourceLimits: &entity.ProcessResourceLimits{
+							CPU: &entity.ResourceLimit{
+								Request: "100m",
+								Limit:   "200m",
+							},
+							Memory: &entity.ResourceLimit{
+								Request: "100Mi",
+								Limit:   "200Mi",
+							},
+						},
 					},
 					{
 						Name:          "email-classificator",
@@ -68,6 +88,16 @@ func getExpectedVersion() *entity.Version {
 						GPU:           krt.DefaultGPUValue,
 						ObjectStore:   commonObjectStore,
 						Subscriptions: []string{"etl"},
+						ResourceLimits: &entity.ProcessResourceLimits{
+							CPU: &entity.ResourceLimit{
+								Request: "100m",
+								Limit:   "200m",
+							},
+							Memory: &entity.ResourceLimit{
+								Request: "100Mi",
+								Limit:   "200Mi",
+							},
+						},
 					},
 					{
 						Name:          "exitpoint",
@@ -76,7 +106,17 @@ func getExpectedVersion() *entity.Version {
 						Replicas:      krt.DefaultNumberOfReplicas,
 						GPU:           krt.DefaultGPUValue,
 						ObjectStore:   commonObjectStore,
-						Subscriptions: []string{"etl", "stats-storer"},
+						Subscriptions: []string{"etl", "email-classificator"},
+						ResourceLimits: &entity.ProcessResourceLimits{
+							CPU: &entity.ResourceLimit{
+								Request: "100m",
+								Limit:   "200m",
+							},
+							Memory: &entity.ResourceLimit{
+								Request: "100Mi",
+								Limit:   "200Mi",
+							},
+						},
 					},
 				},
 			},

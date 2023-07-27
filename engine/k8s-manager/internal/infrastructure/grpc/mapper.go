@@ -54,17 +54,16 @@ func mapReqProcessToProcess(reqProcesses []*versionpb.Process) []*domain.Process
 			}
 		}
 
-		if process.Cpu != nil {
-			p.CPU = &domain.ProcessCPU{
-				Request: process.Cpu.Request,
-				Limit:   process.Cpu.Limit,
-			}
-		}
-
-		if process.Memory != nil {
-			p.Memory = &domain.ProcessMemory{
-				Request: process.Memory.Request,
-				Limit:   process.Memory.Limit,
+		if process.ResourceLimits != nil {
+			p.ResourceLimits = &domain.ProcessResourceLimits{
+				CPU: &domain.ResourceLimit{
+					Request: process.ResourceLimits.Cpu.Request,
+					Limit:   process.ResourceLimits.Cpu.Limit,
+				},
+				Memory: &domain.ResourceLimit{
+					Request: process.ResourceLimits.Memory.Request,
+					Limit:   process.ResourceLimits.Memory.Limit,
+				},
 			}
 		}
 

@@ -49,7 +49,7 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 				MountPath: "/app/logs",
 			},
 		},
-		Resources: getContainerResources(process.EnableGpu, process.CPU, process.Memory),
+		Resources: getContainerResources(process.EnableGpu, process.ResourceLimits),
 	}
 
 	if process.Networking != nil {
@@ -152,14 +152,14 @@ func getProtocol(protocol string) corev1.Protocol {
 	}
 }
 
-func getContainerResources(isGPUEnabled bool, cpu *domain.ProcessCPU, memory *domain.ProcessMemory) corev1.ResourceRequirements {
+func getContainerResources(isGPUEnabled bool, resourceLimits *domain.ProcessResourceLimits) corev1.ResourceRequirements {
 	requests := corev1.ResourceList{
-		corev1.ResourceCPU:    resource.MustParse(cpu.Request),
-		corev1.ResourceMemory: resource.MustParse(memory.Request),
+		corev1.ResourceCPU:    resource.MustParse(resourceLimits.CPU.Request),
+		corev1.ResourceMemory: resource.MustParse(resourceLimits.Memory.Request),
 	}
 	limits := corev1.ResourceList{
-		corev1.ResourceCPU:    resource.MustParse(cpu.Limit),
-		corev1.ResourceMemory: resource.MustParse(memory.Limit),
+		corev1.ResourceCPU:    resource.MustParse(resourceLimits.CPU.Limit),
+		corev1.ResourceMemory: resource.MustParse(resourceLimits.Memory.Limit),
 	}
 
 	if isGPUEnabled {
