@@ -42,6 +42,11 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
+{{/* Fullname suffixed with admin-api */}}
+{{- define "admin-api.fullname" -}}
+{{- printf "%s-admin-api" (include "kai.fullname" .) -}}
+{{- end }}
+
 {{/*
 Admin API labels
 */}}
@@ -58,20 +63,9 @@ app.kubernetes.io/name: {{ include "kai.name" . }}-admin-api
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Admin UI labels
-*/}}
-{{- define "admin-ui.labels" -}}
-{{ include "kai.labels" . }}
-{{ include "admin-ui.selectorLabels" . }}
-{{- end }}
-
-{{/*
-Admin UI selector labels
-*/}}
-{{- define "admin-ui.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kai.name" . }}-admin-ui
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{/* Fullname suffixed with chronograf */}}
+{{- define "chronograf.fullname" -}}
+{{- printf "%s-chronograf" (include "kai.fullname" .) -}}
 {{- end }}
 
 {{/*
@@ -150,6 +144,10 @@ nats url
 {{- printf "%s:%d" (include "nats.host" .) (.Values.nats.client.port | int) -}}
 {{- end -}}
 
+{{/* Fullname suffixed with mongo-writer */}}
+{{- define "mongo-writer.fullname" -}}
+{{- printf "%s-mongo-writer" (include "kai.fullname" .) -}}
+{{- end }}
 
 {{/*
 mongo-writer labels
@@ -170,7 +168,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{/*
 Mongo Express name
 */}}
-{{- define "mongoExpress.name" -}}
+{{- define "mongoExpress.fullname" -}}
 {{ printf "%s-mongo-express" $.Release.Name }}
 {{- end }}
 

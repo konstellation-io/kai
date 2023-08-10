@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-admin-api
+  name: {{ include "admin-api.fullname" . }}
   labels:
     {{- include "admin-api.labels" . | nindent 4 }}
 spec:
@@ -41,7 +41,7 @@ spec:
           - -c
           - mkdir -p {{ .Values.adminApi.storage.path }} && chown 10001:10001 {{ .Values.adminApi.storage.path }}
           volumeMounts:
-            - name: admin-api-pv-storage
+            - name: admin-api-storage
               mountPath: {{ .Values.adminApi.storage.path }}
       containers:
         - name: admin-api
@@ -49,9 +49,9 @@ spec:
           imagePullPolicy: {{ .Values.adminApi.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-admin-api
+                name: {{ include "admin-api.fullname" . }}
             - secretRef:
-                name: {{ .Release.Name }}-admin-api
+                name: {{ include "admin-api.fullname" . }}
           env:
             - name: POD_NAMESPACE
               valueFrom:
@@ -77,9 +77,9 @@ spec:
               protocol: TCP
               name: grpc
           volumeMounts:
-            - name: admin-api-pv-storage
+            - name: admin-api-storage
               mountPath: {{ .Values.adminApi.storage.path }}
       volumes:
-        - name: admin-api-pv-storage
+        - name: admin-api-storage
           persistentVolumeClaim:
-            claimName: admin-api-pv-claim
+            claimName: {{ include "admin-api.fullname" . }}

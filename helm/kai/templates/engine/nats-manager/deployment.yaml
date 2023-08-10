@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-nats-manager
+  name: {{ include "nats-manager.fullname" . }}
   labels:
     {{- include "nats-manager.labels" . | nindent 4 }}
 spec:
@@ -17,13 +17,12 @@ spec:
         helm.sh/restart-deployment: {{ randAlphaNum 5 | quote }}
     spec:
       containers:
-        - name: {{ .Release.Name }}-nats-manager
+        - name: nats-manager
           image: {{ .Values.natsManager.image.repository }}:{{ .Values.natsManager.image.tag }}
           imagePullPolicy: {{ .Values.natsManager.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-nats-manager-config
-
+                name: {{ include "nats-manager.fullname" . }}
           env:
             - name: KRE_NATS_MANAGER_PORT
               value: "50051"

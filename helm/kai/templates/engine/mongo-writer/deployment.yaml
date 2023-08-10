@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-mongo-writer
+  name: {{ include "mongo-writer.fullname" . }}
   labels:
     {{- include "mongo-writer.labels" . | nindent 4 }}
 spec:
@@ -34,7 +34,7 @@ spec:
           imagePullPolicy: {{ .Values.mongoWriter.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-mongo-writer
+                name: {{ include "mongo-writer.fullname" . }}
           env:
           - name: KRE_RUNTIME_MONGO_URI
             valueFrom:
