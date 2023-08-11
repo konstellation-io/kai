@@ -18,18 +18,6 @@ data:
   KRE_BASE_DOMAIN_NAME: {{ .Values.config.baseDomainName }}
   KRE_ADMIN_STORAGE_PATH: {{ .Values.adminApi.storage.path }}
   KRE_ADMIN_API_ADDRESS: ":8080"
-  # SMTP
-  KRE_SMTP_ENABLED: "{{ .Values.config.smtp.enabled }}"
-  {{- if .Values.config.smtp.enabled }}
-  KRE_SMTP_SENDER: "{{ .Values.config.smtp.sender }}"
-  KRE_SMTP_SENDER_NAME: "{{ .Values.config.smtp.senderName }}"
-  KRE_SMTP_HOST: "{{ .Values.config.smtp.host }}"
-  KRE_SMTP_PORT: "{{ .Values.config.smtp.port }}"
-  {{- end }}
-  # Auth
-  KRE_AUTH_VERIFICATION_CODE_DURATION_IN_MINUTES: "{{ .Values.config.auth.verificationCodeDurationInMinutes }}"
-  KRE_AUTH_SECURE_COOKIE: "{{ .Values.config.auth.secureCookie }}"
-  KRE_AUTH_COOKIE_DOMAIN: "{{ .Values.config.auth.cookieDomain }}"
   # InfluxDB
   KRE_INFLUXDB_ADDRESS: {{ include "kai-influxdb.influxURL" . }}
   # Chronograf

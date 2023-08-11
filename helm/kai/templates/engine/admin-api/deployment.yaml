@@ -16,7 +16,6 @@ spec:
         type: admin
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/engine/admin-api/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/engine/admin-api/secret.yaml") . | sha256sum }}
     spec:
       {{- with .Values.adminApi.affinity }}
       affinity:
@@ -49,8 +48,6 @@ spec:
           imagePullPolicy: {{ .Values.adminApi.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "admin-api.fullname" . }}
-            - secretRef:
                 name: {{ include "admin-api.fullname" . }}
           env:
             - name: POD_NAMESPACE
