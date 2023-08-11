@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-k8s-manager
+  name: {{ include "k8s-manager.fullname" . }}
   labels:
     {{- include "k8s-manager.labels" . | nindent 4 }}
 spec:
@@ -30,12 +30,12 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ .Release.Name }}-k8s-manager
+        - name: {{ include "k8s-manager.fullname" . }}
           image: {{ .Values.k8sManager.image.repository }}:{{ .Values.k8sManager.image.tag }}
           imagePullPolicy: {{ .Values.k8sManager.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-k8s-manager
+                name: {{ include "k8s-manager.fullname" . }}
           env:
             - name: POD_NAMESPACE
               valueFrom:

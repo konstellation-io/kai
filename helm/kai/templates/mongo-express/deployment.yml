@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "mongoExpress.name" . }}
+  name: {{ include "mongoExpress.fullname" . }}
   labels:
     {{- include "mongoExpress.labels" . | nindent 4 }}
 spec:
@@ -40,6 +40,6 @@ spec:
               key: {{ .Values.mongoExpress.connectionString.secretKey }}
         envFrom:
         - configMapRef:
-            name: {{ include "mongoExpress.name" . }}
+            name: {{ include "mongoExpress.fullname" . }}
         ports:
           - containerPort: 8081
