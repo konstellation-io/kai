@@ -144,6 +144,7 @@ func (m *NatsManager) DeleteObjectStores(productID, versionTag string) error {
 }
 
 func (m *NatsManager) getStreamName(productID, versionTag, workflowID string) string {
+	versionTag = strings.ReplaceAll(versionTag, ".", "_")
 	return m.joinWithUnderscores(productID, versionTag, workflowID)
 }
 
@@ -215,6 +216,7 @@ func (m *NatsManager) getKeyValueStoreName(
 	product, version, workflow, process string,
 	keyValueStore entity.KeyValueStoreScope,
 ) (string, error) {
+	version = strings.ReplaceAll(version, ".", "_")
 	switch keyValueStore {
 	case entity.KVScopeProject:
 		return fmt.Sprintf("key-store_%s_%s", product, version), nil
