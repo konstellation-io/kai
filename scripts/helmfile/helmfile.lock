@@ -1,4 +1,4 @@
-version: 0.146.0
+version: v0.144.0
 dependencies:
 - name: cloudnative-pg
   repository: https://cloudnative-pg.github.io/charts
@@ -15,5 +15,5 @@ dependencies:
 - name: raw
   repository: https://bedag.github.io/helm-charts/
   version: 2.0.0
-digest: sha256:8b902c38b25767febfe9443f596591d5c1ea39e96173c3b99daf6e0ad4dab4e2
-generated: "2023-08-10T16:22:36.36053944+02:00"
+digest: sha256:3ce266f8e4c9d35f15ab5cfe3e86932c280cc48ce71fe1c8c3deafd85a359c6c
+generated: "2023-08-14T13:29:14.26795071+02:00"
