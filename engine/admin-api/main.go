@@ -25,12 +25,6 @@ import (
 )
 
 func main() {
-	//if buildah.InitReexec() {
-	//	fmt.Println("couldn't initialize buildah asdf asdfasdfasdfasdf")
-	//	os.Exit(1)
-	//}
-	//unshare.MaybeReexecUsingUserNamespace(false)
-
 	cfg := config.NewConfig()
 
 	err := config.InitConfig()

@@ -10,15 +10,10 @@ const (
 	ComponentsKey = "components"
 
 	CfgFilePathKey = "CONFIG_FILE_PATH"
-
-	RegistryURLKey         = "registry.url"
-	RegistriesConfPathKey  = "registry.registriesConfPath"
-	SignaturePolicyPathKey = "registry.signaturePolicyPath"
 )
 
 func InitConfig() error {
 	setDefaultConfig()
-	registerAliases()
 
 	return loadConfig()
 
@@ -26,13 +21,6 @@ func InitConfig() error {
 
 func setDefaultConfig() {
 	viper.SetDefault(CfgFilePathKey, "config.yml")
-	viper.SetDefault(RegistryURLKey, "localhost:5000")
-	viper.SetDefault(RegistriesConfPathKey, "/etc/containers/registries.conf")
-	viper.SetDefault(SignaturePolicyPathKey, "/etc/containers/policy.json")
-}
-
-func registerAliases() {
-	viper.RegisterAlias("REGISTRY_URL", RegistriesConfPathKey)
 }
 
 func loadConfig() error {
