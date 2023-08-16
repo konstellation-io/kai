@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-mongo-writer
+  name: {{ include "mongo-writer.fullname" . }}
   labels:
     {{- include "mongo-writer.labels" . | nindent 4 }}
 data:

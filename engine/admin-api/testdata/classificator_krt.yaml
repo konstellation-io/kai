@@ -13,13 +13,20 @@ workflows:
       - name: entrypoint
         type: trigger
         image: konstellation/kai-grpc-trigger:latest
-        subscriptions:
-          - 'exitpoint'
         networking:
           targetPort: 9000
           targetProtocol: TCP
           destinationPort: 9000
           destinationProtocol: TCP
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100Mi
+            limit: 200Mi
+        subscriptions:
+          - 'exitpoint'
 
       - name: etl
         type: task
@@ -27,6 +34,13 @@ workflows:
         objectStore:
           name: emails
           scope: workflow
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100Mi
+            limit: 200Mi
         subscriptions:
           - 'entrypoint'
 
@@ -36,6 +50,13 @@ workflows:
         objectStore:
           name: emails
           scope: workflow
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100Mi
+            limit: 200Mi
         subscriptions:
           - 'etl'
 
@@ -45,6 +66,13 @@ workflows:
         objectStore:
           name: emails
           scope: workflow
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100Mi
+            limit: 200Mi
         subscriptions:
           - 'etl'
-          - 'stats-storer'
+          - 'email-classificator'

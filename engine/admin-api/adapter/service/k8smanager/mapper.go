@@ -86,6 +86,19 @@ func mapProcessesToDTO(
 			}
 		}
 
+		if p.ResourceLimits != nil {
+			process.ResourceLimits = &versionpb.ProcessResourceLimits{
+				Cpu: &versionpb.ResourceLimit{
+					Request: p.ResourceLimits.CPU.Request,
+					Limit:   p.ResourceLimits.CPU.Limit,
+				},
+				Memory: &versionpb.ResourceLimit{
+					Request: p.ResourceLimits.Memory.Request,
+					Limit:   p.ResourceLimits.Memory.Limit,
+				},
+			}
+		}
+
 		processesDTO = append(processesDTO, process)
 	}
 

@@ -36,17 +36,18 @@ type workflowDTO struct {
 }
 
 type processDTO struct {
-	ID            string                     `bson:"id"`
-	Name          string                     `bson:"name"`
-	Type          string                     `bson:"type"`
-	Image         string                     `bson:"image"`
-	Replicas      int32                      `bson:"replicas"`
-	GPU           bool                       `bson:"gpu"`
-	Config        []configurationVariableDTO `bson:"config,omitempty"`
-	ObjectStore   *processObjectStoreDTO     `bson:"objectStore,omitempty"`
-	Secrets       []configurationVariableDTO `bson:"secrets,omitempty"`
-	Subscriptions []string                   `bson:"subscriptions"`
-	Networking    *processNetworkingDTO      `bson:"networking,omitempty"`
+	ID             string                     `bson:"id"`
+	Name           string                     `bson:"name"`
+	Type           string                     `bson:"type"`
+	Image          string                     `bson:"image"`
+	Replicas       int32                      `bson:"replicas"`
+	GPU            bool                       `bson:"gpu"`
+	Config         []configurationVariableDTO `bson:"config,omitempty"`
+	ObjectStore    *processObjectStoreDTO     `bson:"objectStore,omitempty"`
+	Secrets        []configurationVariableDTO `bson:"secrets,omitempty"`
+	Subscriptions  []string                   `bson:"subscriptions"`
+	Networking     *processNetworkingDTO      `bson:"networking,omitempty"`
+	ResourceLimits *processResourceLimitsDTO  `bson:"resourceLimits,omitempty"`
 }
 
 type processObjectStoreDTO struct {
@@ -58,4 +59,14 @@ type processNetworkingDTO struct {
 	TargetPort      int    `bson:"targetPort"`
 	DestinationPort int    `bson:"destinationPort"`
 	Protocol        string `bson:"protocol"`
+}
+
+type resourceLimitDTO struct {
+	Request string `bson:"request"`
+	Limit   string `bson:"limit"`
+}
+
+type processResourceLimitsDTO struct {
+	CPU    *resourceLimitDTO `bson:"cpu,omitempty"`
+	Memory *resourceLimitDTO `bson:"memory,omitempty"`
 }

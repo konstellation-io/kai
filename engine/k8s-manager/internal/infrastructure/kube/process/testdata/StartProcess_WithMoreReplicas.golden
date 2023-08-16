@@ -262,8 +262,16 @@ items:
                           value: ""
                           valuefrom: null
                       resources:
-                        limits: {}
-                        requests: {}
+                        limits:
+                            cpu:
+                                format: DecimalSI
+                            memory:
+                                format: BinarySI
+                        requests:
+                            cpu:
+                                format: DecimalSI
+                            memory:
+                                format: BinarySI
                       volumemounts:
                         - name: version-conf-files
                           readonly: true

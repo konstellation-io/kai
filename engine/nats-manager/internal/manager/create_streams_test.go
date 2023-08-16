@@ -25,7 +25,7 @@ func TestCreateStreams(t *testing.T) {
 	testProductID := "test-product"
 	testVersionTag := "v1.0.0"
 	testWorkflowName := "test-workflow"
-	testStreamName := "test-product_v1.0.0_test-workflow"
+	testStreamName := "test-product_v1_0_0_test-workflow"
 	testProcess := "test-process"
 
 	testProcessSubject := fmt.Sprintf("%s.%s", testStreamName, testProcess)

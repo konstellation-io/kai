@@ -53,26 +53,6 @@ config:
     apiHost: api.kai.local
     # -- Whether to enable CORS on Admin API
     corsEnabled: true
-    # -- Email address for sending notifications
-    userEmail: dev@local.local
-  smtp:
-    # -- Whether to enable SMTP server connection
-    enabled: false
-    # -- SMTP server user
-    user: ""
-    # -- SMTP server password
-    pass: ""
-  auth:
-    # -- Verification login link duration
-    verificationCodeDurationInMinutes: 1
-    # -- JWT Sign secret
-    jwtSignSecret: jwt_secret
-    # -- API token secret
-    apiTokenSecret: api_token_secret
-    # -- Whether to enable secure cookie for Admin API
-    secureCookie: false
-    # -- Admin API secure cookie domain
-    cookieDomain: kai.local
   mongodb:
     connectionString:
       # -- The name of the secret that contains a key with the MongoDB connection string.
@@ -86,7 +66,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.9
+    tag: 0.2.0-develop.10
     # -- Image pull policy
     pullPolicy: IfNotPresent
   tls:
@@ -143,7 +123,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.9
+    tag: 0.2.0-develop.10
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -369,7 +349,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.9
+    tag: 0.2.0-develop.10
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -607,7 +587,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.9
+    tag: 0.2.0-develop.10
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:

@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-admin-api
+  name: {{ include "admin-api.fullname" . }}
   labels:
     {{- include "admin-api.labels" . | nindent 4 }}
 data:
@@ -12,65 +12,18 @@ data:
   KAI_RELEASE_NAME: "{{ .Release.Name }}"
   KAI_ADMIN_API_BASE_URL: "{{ $protocol }}://{{ .Values.config.admin.apiHost }}"
   KAI_ADMIN_CORS_ENABLED: "{{ .Values.config.admin.corsEnabled }}"
-  KAI_SERVICES_K8S_MANAGER: "{{ .Release.Name }}-k8s-manager:50051"
-  KAI_SERVICES_NATS_MANAGER: "{{ .Release.Name }}-nats-manager:50051"
-  KAI_MONGODB_MONGOEXPRESS_ADDRESS: http://{{ include "mongoExpress.name" . }}
+  KAI_SERVICES_K8S_MANAGER: "{{ include "k8s-manager.fullname" . }}:50051"
+  KAI_SERVICES_NATS_MANAGER: "{{ include "nats-manager.fullname" . }}:50051"
+  KAI_MONGODB_MONGOEXPRESS_ADDRESS: http://{{ include "mongoExpress.fullname" . }}
   KAI_BASE_DOMAIN_NAME: "{{ .Values.config.baseDomainName }}"
   KAI_ADMIN_STORAGE_PATH: "{{ .Values.adminApi.storage.path }}"
   KAI_ADMIN_API_ADDRESS: ":8080"
   # InfluxDB
   KAI_INFLUXDB_ADDRESS: "{{ include "kai-influxdb.influxURL" . }}"
   # Chronograf
-  KAI_CHRONOGRAF_ADDRESS: "http://{{ .Release.Name }}-chronograf"
+  KAI_CHRONOGRAF_ADDRESS: "http://{{ include "chronograf.fullname" . }}"
   # Keycloak
   KEYCLOAK_BASE_URL: "http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}"
   KEYCLOAK_MASTER_REALM: "master"
   KEYCLOAK_REALM: "{{ .Values.keycloak.realmName }}"
   KEYCLOAK_ADMIN_CLIENT_ID: "{{ .Values.keycloak.adminApi.oidcClient.clientId }}"
-  # Registry
-  KAI_REGISTRY_URL: "http://{{ include "registry.fullname" . }}:{{ .Values.registry.service.ports.http }}"
-
-  registries.conf: |
-    [registries.search]
-    registries = ['docker.io']
-    unqualified-search-registries = ["docker.io"]
-
-    [registries.insecure]
-    registries = ["{{ include "registry.fullname" . }}:{{ .Values.registry.service.ports.http }}"]
-
-    [registries.block]
-    registries = []
-
-  policy.json: |-
-    {
-      "default": [
-        {
-          "type": "insecureAcceptAnything"
-        }
-      ],
-      "transports":
-      {
-        "docker-daemon":
-        {
-          "": [{"type":"insecureAcceptAnything"}]
-        }
-      }
-    }
-
-  storage.conf: |
-    [storage]
-    driver = "vfs"
-    runroot = "/run/containers/storage"
-    graphroot = "/var/lib/containers/storage"
-
-    [storage.options]
-    additionalimagestores = [
-      "/var/lib/shared",
-    ]
-    pull_options = {enable_partial_images = "false", use_hard_links = "false", ostree_repos=""}
-    ignore_chown_errors = "true"
-
-    [storage.options.overlay]
-    mountopt = "nodev,fsync=0"
-
-    [storage.options.thinpool]

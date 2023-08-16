@@ -29,6 +29,7 @@ message Process {
   ProcessType type = 9;
   Network networking = 10;
   map<string, string> config = 11;
+  ProcessResourceLimits resource_limits = 12;
 }
 
 message Network {
@@ -62,6 +63,16 @@ message UnpublishRequest {
 
 message Response {
   string message = 1;
+}
+
+message ResourceLimit {
+  string request = 1;
+  string limit = 2;
+}
+
+message ProcessResourceLimits {
+  ResourceLimit cpu = 1;
+  ResourceLimit memory = 2;
 }
 
 message ProcessStatusRequest {

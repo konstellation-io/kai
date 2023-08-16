@@ -49,6 +49,21 @@ func (mr *MockK8sServiceMockRecorder) Publish(ctx, productID, version interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockK8sService)(nil).Publish), ctx, productID, version)
 }
 
+// RegisterProcess mocks base method.
+func (m *MockK8sService) RegisterProcess(ctx context.Context, product, version, process string, file []byte) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterProcess", ctx, product, version, process, file)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterProcess indicates an expected call of RegisterProcess.
+func (mr *MockK8sServiceMockRecorder) RegisterProcess(ctx, product, version, process, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterProcess", reflect.TypeOf((*MockK8sService)(nil).RegisterProcess), ctx, product, version, process, file)
+}
+
 // Start mocks base method.
 func (m *MockK8sService) Start(ctx context.Context, productID string, version *entity.Version, versionConfig *entity.VersionConfig) error {
 	m.ctrl.T.Helper()

@@ -44,17 +44,18 @@ func mapDTOToEntityProcesses(dtos []processDTO) []entity.Process {
 
 	for idx, dto := range dtos {
 		processes[idx] = entity.Process{
-			ID:            dto.ID,
-			Name:          dto.Name,
-			Type:          entity.ProcessType(dto.Type),
-			Image:         dto.Image,
-			Replicas:      dto.Replicas,
-			GPU:           dto.GPU,
-			Config:        mapDTOConfigToEntityConfig(dto.Config),
-			ObjectStore:   mapDTOToEntityProcessObjectStore(dto.ObjectStore),
-			Secrets:       mapDTOConfigToEntityConfig(dto.Secrets),
-			Subscriptions: dto.Subscriptions,
-			Networking:    mapDTOToEntityProcessNetworking(dto.Networking),
+			ID:             dto.ID,
+			Name:           dto.Name,
+			Type:           entity.ProcessType(dto.Type),
+			Image:          dto.Image,
+			Replicas:       dto.Replicas,
+			GPU:            dto.GPU,
+			Config:         mapDTOConfigToEntityConfig(dto.Config),
+			ObjectStore:    mapDTOToEntityProcessObjectStore(dto.ObjectStore),
+			Secrets:        mapDTOConfigToEntityConfig(dto.Secrets),
+			Subscriptions:  dto.Subscriptions,
+			Networking:     mapDTOToEntityProcessNetworking(dto.Networking),
+			ResourceLimits: mapDTOToEntityProcessResourceLimits(dto.ResourceLimits),
 		}
 	}
 
@@ -81,6 +82,28 @@ func mapDTOToEntityProcessNetworking(dto *processNetworkingDTO) *entity.ProcessN
 		TargetPort:      dto.TargetPort,
 		DestinationPort: dto.DestinationPort,
 		Protocol:        dto.Protocol,
+	}
+}
+
+func mapDTOToEntityProcessResourceLimits(dto *processResourceLimitsDTO) *entity.ProcessResourceLimits {
+	if dto == nil {
+		return nil
+	}
+
+	return &entity.ProcessResourceLimits{
+		CPU:    mapDTOToEntityResourceLimit(dto.CPU),
+		Memory: mapDTOToEntityResourceLimit(dto.Memory),
+	}
+}
+
+func mapDTOToEntityResourceLimit(dto *resourceLimitDTO) *entity.ResourceLimit {
+	if dto == nil {
+		return nil
+	}
+
+	return &entity.ResourceLimit{
+		Request: dto.Request,
+		Limit:   dto.Limit,
 	}
 }
 
@@ -145,17 +168,18 @@ func mapEntityToDTOProcesses(processes []entity.Process) []processDTO {
 
 	for _, process := range processes {
 		dtos[idx] = processDTO{
-			ID:            process.ID,
-			Name:          process.Name,
-			Type:          process.Type.String(),
-			Image:         process.Image,
-			Replicas:      process.Replicas,
-			GPU:           process.GPU,
-			Config:        mapEntityConfigToDTOConfig(process.Config),
-			ObjectStore:   mapEntityToDTOProcessObjectStore(process.ObjectStore),
-			Secrets:       mapEntityConfigToDTOConfig(process.Secrets),
-			Subscriptions: process.Subscriptions,
-			Networking:    mapEntityToDTOProcessNetworking(process.Networking),
+			ID:             process.ID,
+			Name:           process.Name,
+			Type:           process.Type.String(),
+			Image:          process.Image,
+			Replicas:       process.Replicas,
+			GPU:            process.GPU,
+			Config:         mapEntityConfigToDTOConfig(process.Config),
+			ObjectStore:    mapEntityToDTOProcessObjectStore(process.ObjectStore),
+			Secrets:        mapEntityConfigToDTOConfig(process.Secrets),
+			Subscriptions:  process.Subscriptions,
+			Networking:     mapEntityToDTOProcessNetworking(process.Networking),
+			ResourceLimits: mapEntityToDTOProcessResourceLimits(process.ResourceLimits),
 		}
 		idx++
 	}
@@ -183,6 +207,28 @@ func mapEntityToDTOProcessNetworking(networking *entity.ProcessNetworking) *proc
 		TargetPort:      networking.TargetPort,
 		DestinationPort: networking.DestinationPort,
 		Protocol:        networking.Protocol,
+	}
+}
+
+func mapEntityToDTOProcessResourceLimits(resouceLimits *entity.ProcessResourceLimits) *processResourceLimitsDTO {
+	if resouceLimits == nil {
+		return nil
+	}
+
+	return &processResourceLimitsDTO{
+		CPU:    mapEntityToDTOresourceLimit(resouceLimits.CPU),
+		Memory: mapEntityToDTOresourceLimit(resouceLimits.Memory),
+	}
+}
+
+func mapEntityToDTOresourceLimit(cpu *entity.ResourceLimit) *resourceLimitDTO {
+	if cpu == nil {
+		return nil
+	}
+
+	return &resourceLimitDTO{
+		Request: cpu.Request,
+		Limit:   cpu.Limit,
 	}
 }
 

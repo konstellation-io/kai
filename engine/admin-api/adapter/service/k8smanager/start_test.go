@@ -29,6 +29,7 @@ func newStartRequestMatcher(expectedStreamConfig *versionpb.StartRequest) *start
 		expectedStartRequest: expectedStreamConfig,
 	}
 }
+
 func (m startRequestMatcher) String() string {
 	return fmt.Sprintf("is equal to %v", m.expectedStartRequest)
 }
@@ -86,6 +87,16 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 				DestinationPort: 8080,
 				Protocol:        "TCP",
 			}).
+			WithResourceLimits(&entity.ProcessResourceLimits{
+				CPU: &entity.ResourceLimit{
+					Request: "100m",
+					Limit:   "200m",
+				},
+				Memory: &entity.ResourceLimit{
+					Request: "100Mi",
+					Limit:   "200Mi",
+				},
+			}).
 			WithConfig([]entity.ConfigurationVariable{
 				{Key: "test-key", Value: "test-value"},
 			}).
@@ -131,6 +142,16 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 							TargetPort: int32(process.Networking.TargetPort),
 							Protocol:   process.Networking.Protocol,
 							SourcePort: int32(process.Networking.DestinationPort),
+						},
+						ResourceLimits: &versionpb.ProcessResourceLimits{
+							Cpu: &versionpb.ResourceLimit{
+								Request: process.ResourceLimits.CPU.Request,
+								Limit:   process.ResourceLimits.CPU.Limit,
+							},
+							Memory: &versionpb.ResourceLimit{
+								Request: process.ResourceLimits.Memory.Request,
+								Limit:   process.ResourceLimits.Memory.Limit,
+							},
 						},
 						Type: versionpb.ProcessType_ProcessTypeTask,
 						Config: map[string]string{
@@ -181,6 +202,16 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFoun
 				TargetPort:      8080,
 				DestinationPort: 8080,
 				Protocol:        "TCP",
+			}).
+			WithResourceLimits(&entity.ProcessResourceLimits{
+				CPU: &entity.ResourceLimit{
+					Request: "100m",
+					Limit:   "200m",
+				},
+				Memory: &entity.ResourceLimit{
+					Request: "100Mi",
+					Limit:   "200Mi",
+				},
 			}).
 			Build()
 

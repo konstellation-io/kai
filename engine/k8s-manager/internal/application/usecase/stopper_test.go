@@ -8,15 +8,15 @@ import (
 	"testing"
 
 	"github.com/go-logr/logr/testr"
-	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service/mocks"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/usecase"
+	"github.com/konstellation-io/kai/engine/k8s-manager/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestStopVersion(t *testing.T) {
 	var (
 		logger       = testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-		containerSvc = mocks.NewContainerService(t)
+		containerSvc = mocks.NewContainerServiceMock(t)
 		stopper      = usecase.NewVersionStopper(logger, containerSvc)
 		ctx          = context.Background()
 	)
@@ -51,7 +51,7 @@ func TestStopVersion(t *testing.T) {
 func TestStopVersion_ErrorDeletingConfiguration(t *testing.T) {
 	var (
 		logger       = testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-		containerSvc = mocks.NewContainerService(t)
+		containerSvc = mocks.NewContainerServiceMock(t)
 		stopper      = usecase.NewVersionStopper(logger, containerSvc)
 		ctx          = context.Background()
 	)
@@ -88,7 +88,7 @@ func TestStopVersion_ErrorDeletingConfiguration(t *testing.T) {
 func TestStopVersion_ErrorDeletingNetwork(t *testing.T) {
 	var (
 		logger       = testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-		containerSvc = mocks.NewContainerService(t)
+		containerSvc = mocks.NewContainerServiceMock(t)
 		stopper      = usecase.NewVersionStopper(logger, containerSvc)
 		ctx          = context.Background()
 	)
@@ -125,7 +125,7 @@ func TestStopVersion_ErrorDeletingNetwork(t *testing.T) {
 func TestStopVersion_ErrorDeletingProcesses(t *testing.T) {
 	var (
 		logger       = testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-		containerSvc = mocks.NewContainerService(t)
+		containerSvc = mocks.NewContainerServiceMock(t)
 		stopper      = usecase.NewVersionStopper(logger, containerSvc)
 		ctx          = context.Background()
 	)
@@ -162,7 +162,7 @@ func TestStopVersion_ErrorDeletingProcesses(t *testing.T) {
 func TestStopVersion_ErrorDeletingAllResources(t *testing.T) {
 	var (
 		logger       = testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-		containerSvc = mocks.NewContainerService(t)
+		containerSvc = mocks.NewContainerServiceMock(t)
 		stopper      = usecase.NewVersionStopper(logger, containerSvc)
 		ctx          = context.Background()
 	)

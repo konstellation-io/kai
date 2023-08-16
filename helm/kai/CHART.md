@@ -15,7 +15,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.2"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.9"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -37,18 +37,9 @@
 | chronograf.tolerations | list | `[]` | Tolerations for use with node taints |
 | config.admin.apiHost | string | `"api.kai.local"` | Api Hostname for Admin UI and Admin API |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
-| config.admin.userEmail | string | `"dev@local.local"` | Email address for sending notifications |
-| config.auth.apiTokenSecret | string | `"api_token_secret"` | API token secret |
-| config.auth.cookieDomain | string | `"kai.local"` | Admin API secure cookie domain |
-| config.auth.jwtSignSecret | string | `"jwt_secret"` | JWT Sign secret |
-| config.auth.secureCookie | bool | `false` | Whether to enable secure cookie for Admin API |
-| config.auth.verificationCodeDurationInMinutes | int | `1` | Verification login link duration |
 | config.baseDomainName | string | `"local"` | Base domain name for Admin API and K8S Manager apps |
 | config.mongodb.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | config.mongodb.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
-| config.smtp.enabled | bool | `false` | Whether to enable SMTP server connection |
-| config.smtp.pass | string | `""` | SMTP server password |
-| config.smtp.user | string | `""` | SMTP server user |
 | developmentMode | bool | `false` | Whether to setup developement mode |
 | influxdb.address | string | `"http://kai-influxdb/"` |  |
 | influxdb.affinity | object | `{}` | Assign custom affinity rules to the InfluxDB pods |
@@ -69,7 +60,7 @@
 | k8sManager.generatedEntrypoints.tls | bool | `false` | Whether to enable tls |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.2"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.9"` | Image tag |
 | k8sManager.krtFilesDownloader.image.pullPolicy | string | `"Always"` | Image pull policy |
 | k8sManager.krtFilesDownloader.image.repository | string | `"konstellation/krt-files-downloader"` | Image repository |
 | k8sManager.krtFilesDownloader.image.tag | string | `"latest"` | Image tag |
@@ -144,7 +135,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.2"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.9"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -176,7 +167,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.2"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.9"` | Image tag |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | registry.affinity | object | `{}` | Assign custom affinity rules to the pods |
 | registry.config | string | `""` | A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/. |

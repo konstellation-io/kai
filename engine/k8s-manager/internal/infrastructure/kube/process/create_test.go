@@ -95,6 +95,50 @@ func TestStartProcess_WithNetwork(t *testing.T) {
 	g.Assert(t, "StartProcess_WithNetworking", deploymentYaml)
 }
 
+func TestStartProcess_WithResourceLimits(t *testing.T) {
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+	clientset := fake.NewSimpleClientset()
+
+	viper.Set("kubernetes.namespace", _namespace)
+
+	svc := kube.NewK8sContainerService(logger, clientset)
+
+	ctx := context.Background()
+
+	process := testhelpers.NewProcessBuilder().
+		WithResourceLimits(&domain.ProcessResourceLimits{
+			CPU: &domain.ResourceLimit{
+				Request: "300m",
+				Limit:   "600m",
+			},
+			Memory: &domain.ResourceLimit{
+				Request: "300Mi",
+				Limit:   "600Mi",
+			},
+		}).
+		Build()
+
+	params := service.CreateProcessParams{
+		ConfigName: "configmap-name",
+		Product:    "test-product",
+		Version:    "v1.0.0",
+		Workflow:   "test-workflow",
+		Process:    process,
+	}
+
+	err := svc.CreateProcess(ctx, params)
+	require.NoError(t, err)
+
+	deployment, err := clientset.AppsV1().Deployments(_namespace).List(ctx, v1.ListOptions{})
+	require.NoError(t, err)
+
+	deploymentYaml, err := yaml.Marshal(deployment)
+	require.NoError(t, err)
+
+	g := goldie.New(t)
+	g.Assert(t, "StartProcess_WithCPU", deploymentYaml)
+}
+
 func TestStartProcess_WithMoreReplicas(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()

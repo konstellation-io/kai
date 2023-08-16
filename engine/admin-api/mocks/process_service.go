@@ -5,50 +5,10 @@
 package mocks
 
 import (
-	context "context"
-	io "io"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
 )
-
-// MockProcessRegistry is a mock of ProcessRegistry interface.
-type MockProcessRegistry struct {
-	ctrl     *gomock.Controller
-	recorder *MockProcessRegistryMockRecorder
-}
-
-// MockProcessRegistryMockRecorder is the mock recorder for MockProcessRegistry.
-type MockProcessRegistryMockRecorder struct {
-	mock *MockProcessRegistry
-}
-
-// NewMockProcessRegistry creates a new mock instance.
-func NewMockProcessRegistry(ctrl *gomock.Controller) *MockProcessRegistry {
-	mock := &MockProcessRegistry{ctrl: ctrl}
-	mock.recorder = &MockProcessRegistryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockProcessRegistry) EXPECT() *MockProcessRegistryMockRecorder {
-	return m.recorder
-}
-
-// RegisterProcess mocks base method.
-func (m *MockProcessRegistry) RegisterProcess(ctx context.Context, product, version, process string, src io.Reader) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterProcess", ctx, product, version, process, src)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// RegisterProcess indicates an expected call of RegisterProcess.
-func (mr *MockProcessRegistryMockRecorder) RegisterProcess(ctx, product, version, process, src interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterProcess", reflect.TypeOf((*MockProcessRegistry)(nil).RegisterProcess), ctx, product, version, process, src)
-}
 
 // MockProcessRepository is a mock of ProcessRepository interface.
 type MockProcessRepository struct {

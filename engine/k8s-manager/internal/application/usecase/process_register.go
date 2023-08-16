@@ -8,6 +8,12 @@ import (
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 )
 
+//go:generate mockery --name ProcessService --output ../../../mocks --filename process_service_mock.go --structname ProcessServiceMock
+
+type ProcessService interface {
+	RegisterProcess(ctx context.Context, params RegisterProcessParams) error
+}
+
 type ProcessRegister struct {
 	logger        logr.Logger
 	imageRegistry service.ImageRegistry

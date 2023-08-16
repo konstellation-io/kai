@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-admin-api
+  name: {{ include "admin-api.fullname" . }}
   annotations:
     konghq.com/plugins: {{ include "kai.fullname" . }}-oidc
     konghq.com/strip-path: "false"
@@ -31,10 +31,10 @@ spec:
             backend:
               {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
-                name: {{ .Release.Name }}-admin-api
+                name: {{ include "admin-api.fullname" . }}
                 port:
                   name: grpc
               {{- else }}
-              serviceName: {{ .Release.Name }}-admin-api
+              serviceName: {{ include "admin-api.fullname" . }}
               servicePort: grpc
               {{- end }}

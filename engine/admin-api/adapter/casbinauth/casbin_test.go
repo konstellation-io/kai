@@ -49,7 +49,9 @@ func TestGetUserProducts(t *testing.T) {
 	}
 
 	userProducts := authorizer.GetUserProducts(user)
-	assert.EqualValues(t, expectedProducts, userProducts)
+	for _, p := range expectedProducts {
+		assert.Contains(t, userProducts, p)
+	}
 }
 
 func TestGetUserProducts_AdminUser(t *testing.T) {

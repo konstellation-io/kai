@@ -16,6 +16,16 @@ func NewProcessBuilder() *ProcessBuilder {
 			Replicas:      1,
 			GPU:           false,
 			Subscriptions: []string{"other-process"},
+			ResourceLimits: &entity.ProcessResourceLimits{
+				CPU: &entity.ResourceLimit{
+					Request: "100m",
+					Limit:   "200m",
+				},
+				Memory: &entity.ResourceLimit{
+					Request: "100Mi",
+					Limit:   "200Mi",
+				},
+			},
 		},
 	}
 }
@@ -31,6 +41,11 @@ func (pb *ProcessBuilder) WithObjectStore(objectStore *entity.ProcessObjectStore
 
 func (pb *ProcessBuilder) WithNetworking(networking *entity.ProcessNetworking) *ProcessBuilder {
 	pb.process.Networking = networking
+	return pb
+}
+
+func (pb *ProcessBuilder) WithResourceLimits(resourceLimits *entity.ProcessResourceLimits) *ProcessBuilder {
+	pb.process.ResourceLimits = resourceLimits
 	return pb
 }
 

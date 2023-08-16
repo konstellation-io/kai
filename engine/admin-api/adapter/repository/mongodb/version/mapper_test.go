@@ -78,6 +78,16 @@ var domainVersion = &entity.Version{
 						DestinationPort: 8080,
 						Protocol:        "TCP",
 					},
+					ResourceLimits: &entity.ProcessResourceLimits{
+						CPU: &entity.ResourceLimit{
+							Request: "0.5",
+							Limit:   "1.5",
+						},
+						Memory: &entity.ResourceLimit{
+							Request: "400M",
+							Limit:   "600M",
+						},
+					},
 				},
 				{
 					ID:            "id_process_2",
@@ -160,6 +170,16 @@ var DTOVersion = &versionDTO{
 						TargetPort:      8080,
 						DestinationPort: 8080,
 						Protocol:        "TCP",
+					},
+					ResourceLimits: &processResourceLimitsDTO{
+						CPU: &resourceLimitDTO{
+							Request: "0.5",
+							Limit:   "1.5",
+						},
+						Memory: &resourceLimitDTO{
+							Request: "400M",
+							Limit:   "600M",
+						},
 					},
 				},
 				{

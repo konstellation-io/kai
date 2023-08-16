@@ -40,16 +40,17 @@ func mapKrtYamlToProcesses(krtProcesses []krt.Process) []entity.Process {
 
 	for i, krtProcess := range krtProcesses {
 		processes[i] = entity.Process{
-			Name:          krtProcess.Name,
-			Type:          entity.ProcessType(krtProcess.Type),
-			Image:         krtProcess.Image,
-			Replicas:      int32(*krtProcess.Replicas),
-			GPU:           *krtProcess.GPU,
-			Config:        keyValueMapToConfigurationVariableArray(krtProcess.Config),
-			ObjectStore:   mapKrtYamlToProcessObjectStore(krtProcess.ObjectStore),
-			Secrets:       keyValueMapToConfigurationVariableArray(krtProcess.Secrets),
-			Subscriptions: krtProcess.Subscriptions,
-			Networking:    mapKrtYamlToProcessNetworking(krtProcess.Networking),
+			Name:           krtProcess.Name,
+			Type:           entity.ProcessType(krtProcess.Type),
+			Image:          krtProcess.Image,
+			Replicas:       int32(*krtProcess.Replicas),
+			GPU:            *krtProcess.GPU,
+			Config:         keyValueMapToConfigurationVariableArray(krtProcess.Config),
+			ObjectStore:    mapKrtYamlToProcessObjectStore(krtProcess.ObjectStore),
+			Secrets:        keyValueMapToConfigurationVariableArray(krtProcess.Secrets),
+			Subscriptions:  krtProcess.Subscriptions,
+			Networking:     mapKrtYamlToProcessNetworking(krtProcess.Networking),
+			ResourceLimits: mapKrtYamlToProcessResourceLimits(krtProcess.ResourceLimits),
 		}
 	}
 
@@ -76,6 +77,28 @@ func mapKrtYamlToProcessNetworking(krtNetworking *krt.ProcessNetworking) *entity
 		TargetPort:      krtNetworking.TargetPort,
 		DestinationPort: krtNetworking.DestinationPort,
 		Protocol:        string(krtNetworking.Protocol),
+	}
+}
+
+func mapKrtYamlToResourceLimit(resourceLimit *krt.ResourceLimit) *entity.ResourceLimit {
+	if resourceLimit == nil {
+		return nil
+	}
+
+	return &entity.ResourceLimit{
+		Request: resourceLimit.Request,
+		Limit:   resourceLimit.Limit,
+	}
+}
+
+func mapKrtYamlToProcessResourceLimits(krtResourceLimits *krt.ProcessResourceLimits) *entity.ProcessResourceLimits {
+	if krtResourceLimits == nil {
+		return nil
+	}
+
+	return &entity.ProcessResourceLimits{
+		CPU:    mapKrtYamlToResourceLimit(krtResourceLimits.CPU),
+		Memory: mapKrtYamlToResourceLimit(krtResourceLimits.Memory),
 	}
 }
 

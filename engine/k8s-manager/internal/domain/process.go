@@ -12,8 +12,9 @@ type Process struct {
 	KeyValueStore string
 	Config        map[string]string
 
-	Replicas   int32
-	Networking *Networking
+	Replicas       int32
+	Networking     *Networking
+	ResourceLimits *ProcessResourceLimits
 }
 
 func (p *Process) IsTrigger() bool {
@@ -46,4 +47,14 @@ func (p ProcessType) ToString() string {
 	default:
 		return "unknown"
 	}
+}
+
+type ResourceLimit struct {
+	Request string
+	Limit   string
+}
+
+type ProcessResourceLimits struct {
+	CPU    *ResourceLimit
+	Memory *ResourceLimit
 }

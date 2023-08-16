@@ -14,16 +14,16 @@ import (
 type VersionService struct {
 	versionpb.UnimplementedVersionServiceServer
 	logger          logr.Logger
-	starter         *usecase.VersionStarter
-	stopper         *usecase.VersionStopper
-	processRegister *usecase.ProcessRegister
+	starter         usecase.VersionStarterService
+	stopper         usecase.VersionStopperService
+	processRegister usecase.ProcessService
 }
 
 func NewVersionService(
 	logger logr.Logger,
-	starter *usecase.VersionStarter,
-	stopper *usecase.VersionStopper,
-	processRegister *usecase.ProcessRegister,
+	starter usecase.VersionStarterService,
+	stopper usecase.VersionStopperService,
+	processRegister usecase.ProcessService,
 ) *VersionService {
 	return &VersionService{
 		versionpb.UnimplementedVersionServiceServer{},
