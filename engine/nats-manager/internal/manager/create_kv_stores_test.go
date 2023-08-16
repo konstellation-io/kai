@@ -27,9 +27,10 @@ func TestCreateKVStore(t *testing.T) {
 		testVersionTag        = "v1.0.0"
 		testWorkflowID        = "test-workflow"
 		testProcessName       = "test-process"
-		projectKeyValueStore  = "key-store_test-product_v1.0.0"
-		workflowKeyValueStore = "key-store_test-product_v1.0.0_test-workflow"
-		processKeyValueStore  = "key-store_test-product_v1.0.0_test-workflow_test-process"
+		testCleanedVersionTag = "v1_0_0"
+		projectKeyValueStore  = "key-store_test-product_v1_0_0"
+		workflowKeyValueStore = "key-store_test-product_v1_0_0_test-workflow"
+		processKeyValueStore  = "key-store_test-product_v1_0_0_test-workflow_test-process"
 	)
 
 	tests := []struct {
@@ -50,9 +51,9 @@ func TestCreateKVStore(t *testing.T) {
 					Build(),
 			},
 			expectedKVStores: []string{
-				fmt.Sprintf("key-store_%s_%s", testProductID, testVersionTag),
-				fmt.Sprintf("key-store_%s_%s_%s", testProductID, testVersionTag, testWorkflowID),
-				fmt.Sprintf("key-store_%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowID, testProcessName),
+				fmt.Sprintf("key-store_%s_%s", testProductID, testCleanedVersionTag),
+				fmt.Sprintf("key-store_%s_%s_%s", testProductID, testCleanedVersionTag, testWorkflowID),
+				fmt.Sprintf("key-store_%s_%s_%s_%s", testProductID, testCleanedVersionTag, testWorkflowID, testProcessName),
 			},
 			expectedWorkflowsKVCfg: &entity.VersionKeyValueStores{
 				ProjectStore: projectKeyValueStore,
@@ -77,8 +78,8 @@ func TestCreateKVStore(t *testing.T) {
 					Build(),
 			},
 			expectedKVStores: []string{
-				fmt.Sprintf("key-store_%s_%s", testProductID, testVersionTag),
-				fmt.Sprintf("key-store_%s_%s_%s", testProductID, testVersionTag, testWorkflowID),
+				fmt.Sprintf("key-store_%s_%s", testProductID, testCleanedVersionTag),
+				fmt.Sprintf("key-store_%s_%s_%s", testProductID, testCleanedVersionTag, testWorkflowID),
 			},
 			expectedWorkflowsKVCfg: &entity.VersionKeyValueStores{
 				ProjectStore: projectKeyValueStore,
