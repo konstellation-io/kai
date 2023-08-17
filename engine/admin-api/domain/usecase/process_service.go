@@ -5,16 +5,19 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 )
 
 type ProcessService struct {
 	logger logr.Logger
 	//processRegistry   ProcessRegistry
-	processRepository ProcessRepository
-	processRegistry   service.K8sService
+	processRegistryRepository repository.ProcessRegistryRepo
+	processRegistry           service.K8sService
 }
 
 //go:generate mockgen -source=${GOFILE} -destination=../../mocks/${GOFILE} -package=mocks
@@ -22,10 +25,6 @@ type ProcessService struct {
 //type ProcessRegistry interface {
 //	RegisterProcess(ctx context.Context, product, version, process string, src io.Reader) (string, error)
 //}
-
-type ProcessRepository interface {
-	CreateProcess() error
-}
 
 type ProcessMetadata struct {
 	Dockerfile string
@@ -35,19 +34,20 @@ func NewProcessService(
 	logger logr.Logger,
 	//processRegistry ProcessRegistry,
 	k8sService service.K8sService,
-	// processRepository ProcessRepository,
+	processRegistryRepository repository.ProcessRegistryRepo,
 ) *ProcessService {
 	return &ProcessService{
 		logger: logger,
 		//processRegistry: processRegistry,
-		processRegistry: k8sService,
-		//processRepository: processRepository,
+		processRegistry:           k8sService,
+		processRegistryRepository: processRegistryRepository,
 	}
 }
 
 func (ps *ProcessService) RegisterProcess(
 	ctx context.Context,
-	product, version, process string,
+	user *entity.User,
+	product, version, process, processType string,
 	sources io.Reader,
 ) (string, error) {
 	ps.logger.Info("Registering new process")
@@ -73,6 +73,20 @@ func (ps *ProcessService) RegisterProcess(
 	processRef, err := ps.processRegistry.RegisterProcess(ctx, product, version, process, compressedFile)
 	if err != nil {
 		return "", fmt.Errorf("registering process: %w", err)
+	}
+
+	registeredProcess := &entity.ProcessRegistry{
+		//ID:      processRef, is processRef a valid ID? should we use this instead of generated ID in repo logic?
+		Name:       process,
+		Version:    version,
+		Type:       processType,
+		UploadDate: time.Now(),
+		Owner:      user.ID,
+	}
+
+	_, err = ps.processRegistryRepository.Create(product, registeredProcess)
+	if err != nil {
+		return "", fmt.Errorf("saving process registry in db: %w", err)
 	}
 
 	ps.logger.Info("Registered process", "processRef", processRef)

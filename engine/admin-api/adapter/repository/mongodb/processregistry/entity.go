@@ -1,4 +1,4 @@
-package process_registry
+package processregistry
 
 import "time"
 

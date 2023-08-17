@@ -25,14 +25,15 @@ type productSuite struct {
 }
 
 type productSuiteMocks struct {
-	logger           *mocks.MockLogger
-	productRepo      *mocks.MockProductRepo
-	measurementRepo  *mocks.MockMeasurementRepo
-	versionRepo      *mocks.MockVersionRepo
-	metricRepo       *mocks.MockMetricRepo
-	processLogRepo   *mocks.MockProcessLogRepository
-	userActivityRepo *mocks.MockUserActivityRepo
-	accessControl    *mocks.MockAccessControl
+	logger              *mocks.MockLogger
+	productRepo         *mocks.MockProductRepo
+	measurementRepo     *mocks.MockMeasurementRepo
+	versionRepo         *mocks.MockVersionRepo
+	metricRepo          *mocks.MockMetricRepo
+	processLogRepo      *mocks.MockProcessLogRepository
+	processRegistryRepo *mocks.MockProcessRegistryRepo
+	userActivityRepo    *mocks.MockUserActivityRepo
+	accessControl       *mocks.MockAccessControl
 }
 
 const (
@@ -49,6 +50,7 @@ func newProductSuite(t *testing.T) *productSuite {
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
 	metricRepo := mocks.NewMockMetricRepo(ctrl)
 	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
+	processRegistryRepo := mocks.NewMockProcessRegistryRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
 
 	mocks.AddLoggerExpects(logger)
@@ -64,15 +66,16 @@ func newProductSuite(t *testing.T) *productSuite {
 	cfg.K8s.Namespace = k8sNamespace
 
 	ps := usecase.ProductInteractorOpts{
-		Cfg:             cfg,
-		Logger:          logger,
-		ProductRepo:     productRepo,
-		MeasurementRepo: measurementRepo,
-		VersionRepo:     versionRepo,
-		MetricRepo:      metricRepo,
-		ProcessLogRepo:  processLogRepo,
-		UserActivity:    userActivity,
-		AccessControl:   accessControl,
+		Cfg:                 cfg,
+		Logger:              logger,
+		ProductRepo:         productRepo,
+		MeasurementRepo:     measurementRepo,
+		VersionRepo:         versionRepo,
+		MetricRepo:          metricRepo,
+		ProcessLogRepo:      processLogRepo,
+		ProcessRegistryRepo: processRegistryRepo,
+		UserActivity:        userActivity,
+		AccessControl:       accessControl,
 	}
 	productInteractor := usecase.NewProductInteractor(&ps)
 
@@ -86,6 +89,7 @@ func newProductSuite(t *testing.T) *productSuite {
 			versionRepo,
 			metricRepo,
 			processLogRepo,
+			processRegistryRepo,
 			userActivityRepo,
 			accessControl,
 		},
@@ -139,6 +143,7 @@ func TestCreateNewProduct(t *testing.T) {
 	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.mocks.processRegistryRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 

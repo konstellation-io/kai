@@ -1,4 +1,4 @@
-package process_registry
+package processregistry
 
 import (
 	"context"
@@ -51,7 +51,6 @@ func (r *ProcessRegistryRepoMongoDB) CreateIndexes(ctx context.Context, productI
 }
 
 func (r *ProcessRegistryRepoMongoDB) Create(
-	userID string,
 	productID string,
 	newProcessRegistry *entity.ProcessRegistry,
 ) (*entity.ProcessRegistry, error) {
@@ -59,7 +58,6 @@ func (r *ProcessRegistryRepoMongoDB) Create(
 
 	processRegistryDTO := mapEntityToDTO(newProcessRegistry)
 	processRegistryDTO.ID = primitive.NewObjectID().Hex()
-	processRegistryDTO.Owner = userID
 
 	res, err := collection.InsertOne(context.Background(), processRegistryDTO)
 	if err != nil {

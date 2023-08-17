@@ -1,4 +1,4 @@
-package process_registry
+package processregistry
 
 import "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 

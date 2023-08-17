@@ -1,6 +1,6 @@
 //go:build integration
 
-package process_registry
+package processregistry
 
 import (
 	"context"
@@ -97,9 +97,10 @@ func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 		Version:    "1.0.0",
 		Type:       "trigger",
 		UploadDate: time.Now().Add(-time.Hour),
+		Owner:      ownerID,
 	}
 
-	createdProcessRegistry, err := s.processRegistryRepo.Create(ownerID, productID, testProcessRegistry)
+	createdProcessRegistry, err := s.processRegistryRepo.Create(productID, testProcessRegistry)
 	s.Require().NoError(err)
 
 	s.NotEmpty(createdProcessRegistry.ID)
@@ -107,7 +108,7 @@ func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 	s.Equal(testProcessRegistry.Version, createdProcessRegistry.Version)
 	s.Equal(testProcessRegistry.Type, createdProcessRegistry.Type)
 	s.Equal(testProcessRegistry.UploadDate, createdProcessRegistry.UploadDate)
-	s.Equal(ownerID, createdProcessRegistry.Owner)
+	s.Equal(testProcessRegistry.Owner, createdProcessRegistry.Owner)
 
 	// Check if the version is created in the DB
 	collection := s.mongoClient.Database(productID).Collection(processRegistryCollectionName)

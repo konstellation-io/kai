@@ -1,6 +1,6 @@
 //go:build unit
 
-package process_registry
+package processregistry
 
 import (
 	"testing"

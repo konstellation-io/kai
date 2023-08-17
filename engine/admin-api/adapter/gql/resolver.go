@@ -81,9 +81,11 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 }
 
 func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterProcessInput) (*RegisteredImage, error) {
-	_ = ctx.Value("user").(*entity.User)
+	loggedUser := ctx.Value("user").(*entity.User)
 
-	registeredImage, err := r.processService.RegisterProcess(ctx, input.ProductID, input.Version, input.ProcessID, input.File.File)
+	registeredImage, err := r.processService.RegisterProcess(
+		ctx, loggedUser, input.ProductID, input.Version, input.ProcessID, input.ProcessType, input.File.File,
+	)
 	if err != nil {
 		return nil, err
 	}
