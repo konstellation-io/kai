@@ -13,13 +13,13 @@ func mapDTOToEntity(dto *processRegistryDTO) *entity.ProcessRegistry {
 	}
 }
 
-func mapEntityToDTO(entity *entity.ProcessRegistry) *processRegistryDTO {
+func mapEntityToDTO(processEntity *entity.ProcessRegistry) *processRegistryDTO {
 	return &processRegistryDTO{
-		ID:         entity.ID,
-		Name:       entity.Name,
-		Version:    entity.Version,
-		Type:       entity.Type,
-		UploadDate: entity.UploadDate,
-		Owner:      entity.Owner,
+		ID:         processEntity.ID,
+		Name:       processEntity.Name,
+		Version:    processEntity.Version,
+		Type:       processEntity.Type,
+		UploadDate: processEntity.UploadDate,
+		Owner:      processEntity.Owner,
 	}
 }

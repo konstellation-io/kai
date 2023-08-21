@@ -68,6 +68,7 @@ func (ps *ProcessService) RegisterProcess(
 	if err != nil {
 		return "", fmt.Errorf("opening process compressed file: %w", err)
 	}
+
 	fmt.Println(compressedFile)
 
 	processRef, err := ps.processRegistry.RegisterProcess(ctx, product, version, process, compressedFile)
