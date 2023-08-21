@@ -52,8 +52,22 @@ type ProcessServiceTestSuite struct {
 }
 
 const (
-	userID    = "userID"
-	productID = "productID"
+	userID       = "userID"
+	productID    = "productID"
+	version      = "v1.0.0"
+	process      = "test-process"
+	processType  = "trigger"
+	testFileAddr = "testdata/fake_compressed_process.txt"
+)
+
+var (
+	user = &entity.User{
+		ID:    userID,
+		Roles: []string{"admin"},
+		ProductGrants: entity.ProductGrants{
+			productID: {"admin"},
+		},
+	}
 )
 
 func TestProcessTestSuite(t *testing.T) {
@@ -61,12 +75,19 @@ func TestProcessTestSuite(t *testing.T) {
 }
 
 func (s *ProcessServiceTestSuite) SetupSuite() {
-	s.ctrl = gomock.NewController(s.T())
-
 	logger := zapr.NewLogger(zap.NewNop())
+	s.ctrl = gomock.NewController(s.T())
 	s.processRegistryRepo = mocks.NewMockProcessRegistryRepo(s.ctrl)
 	s.k8sService = mocks.NewMockK8sService(s.ctrl)
 	s.processInteractor = usecase.NewProcessService(logger, s.k8sService, s.processRegistryRepo)
+
+	monkey.Patch(time.Now, func() time.Time {
+		return time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+	})
+}
+
+func (s *ProcessServiceTestSuite) TearDownSuite() {
+	monkey.UnpatchAll()
 }
 
 func (s *ProcessServiceTestSuite) TearDownTest() {
@@ -74,26 +95,11 @@ func (s *ProcessServiceTestSuite) TearDownTest() {
 }
 
 func (s *ProcessServiceTestSuite) TestRegisterProcess() {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
-	})
-	defer monkey.UnpatchAll()
-
 	ctx := context.Background()
-	user := &entity.User{
-		ID:    userID,
-		Roles: []string{"admin"},
-		ProductGrants: entity.ProductGrants{
-			productID: {"admin"},
-		},
-	}
-	version := "v1.0.0"
-	process := "test-process"
-	processType := entity.ProcessTypeTrigger.String()
 
-	testFile, err := os.Open("testdata/fake_compressed_process.txt")
+	testFile, err := os.Open(testFileAddr)
 	s.Require().NoError(err)
-	expectedBytes, err := os.ReadFile("testdata/fake_compressed_process.txt")
+	expectedBytes, err := os.ReadFile(testFileAddr)
 	s.Require().NoError(err)
 
 	mockedRef := "mocked-ref"
@@ -116,4 +122,68 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	s.Require().NoError(err)
 
 	s.Equal(mockedRef, returnedRef)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcessNoFileError() {
+	ctx := context.Background()
+
+	testFile, err := os.Open("no-file")
+	s.Require().Error(err)
+
+	returnedRef, err := s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, process, processType, testFile,
+	)
+	s.Require().Error(err)
+
+	s.Empty(returnedRef)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcessK8sManagerError() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+	expectedBytes, err := os.ReadFile(testFileAddr)
+	s.Require().NoError(err)
+
+	s.k8sService.EXPECT().
+		RegisterProcess(ctx, productID, version, process, expectedBytes).
+		Return("", fmt.Errorf("mocked error"))
+
+	returnedRef, err := s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, process, processType, testFile,
+	)
+	s.Require().Error(err)
+
+	s.Empty(returnedRef)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcessRepositoryError() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+	expectedBytes, err := os.ReadFile(testFileAddr)
+	s.Require().NoError(err)
+
+	mockedRef := "mocked-ref"
+	expectedRegisteredProcess := &entity.ProcessRegistry{
+		ID:         mockedRef,
+		Name:       process,
+		Version:    version,
+		Type:       processType,
+		UploadDate: time.Now(),
+		Owner:      userID,
+	}
+	customMatcher := newprocessRegistryMatcher(expectedRegisteredProcess)
+
+	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, process, expectedBytes).Return(mockedRef, nil)
+	s.processRegistryRepo.EXPECT().Create(productID, customMatcher).Return(nil, fmt.Errorf("mocked error"))
+
+	returnedRef, err := s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, process, processType, testFile,
+	)
+	s.Require().Error(err)
+
+	s.Empty(returnedRef)
 }
