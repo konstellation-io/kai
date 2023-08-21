@@ -76,7 +76,7 @@ func (ps *ProcessService) RegisterProcess(
 	}
 
 	registeredProcess := &entity.ProcessRegistry{
-		//ID:      processRef, is processRef a valid ID? should we use this instead of generated ID in repo logic?
+		ID:         processRef,
 		Name:       process,
 		Version:    version,
 		Type:       processType,

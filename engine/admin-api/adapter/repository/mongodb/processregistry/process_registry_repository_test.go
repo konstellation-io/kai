@@ -21,8 +21,11 @@ import (
 	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
-var productID = "productID"
-var ownerID = "ownerID"
+var (
+	processRef = "processRef"
+	productID  = "productID"
+	ownerID    = "ownerID"
+)
 
 type ProcessRegistryRepositoryTestSuite struct {
 	suite.Suite
@@ -93,8 +96,9 @@ func (s *ProcessRegistryRepositoryTestSuite) TearDownTest() {
 
 func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 	testProcessRegistry := &entity.ProcessRegistry{
+		ID:         processRef,
 		Name:       "test_trigger",
-		Version:    "1.0.0",
+		Version:    "v1.0.0",
 		Type:       "trigger",
 		UploadDate: time.Now().Add(-time.Hour),
 		Owner:      ownerID,
@@ -103,7 +107,7 @@ func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 	createdProcessRegistry, err := s.processRegistryRepo.Create(productID, testProcessRegistry)
 	s.Require().NoError(err)
 
-	s.NotEmpty(createdProcessRegistry.ID)
+	s.Equal(testProcessRegistry.ID, createdProcessRegistry.ID)
 	s.Equal(testProcessRegistry.Name, createdProcessRegistry.Name)
 	s.Equal(testProcessRegistry.Version, createdProcessRegistry.Version)
 	s.Equal(testProcessRegistry.Type, createdProcessRegistry.Type)

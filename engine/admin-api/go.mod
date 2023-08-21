@@ -90,6 +90,7 @@ require (
 )
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/Nerzal/gocloak/v13 v13.5.0
 	github.com/agnivade/levenshtein v1.1.1 // indirect

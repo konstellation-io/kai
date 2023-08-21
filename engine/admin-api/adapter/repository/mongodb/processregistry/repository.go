@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -57,7 +56,6 @@ func (r *ProcessRegistryRepoMongoDB) Create(
 	collection := r.client.Database(productID).Collection(processRegistryCollectionName)
 
 	processRegistryDTO := mapEntityToDTO(newProcessRegistry)
-	processRegistryDTO.ID = primitive.NewObjectID().Hex()
 
 	res, err := collection.InsertOne(context.Background(), processRegistryDTO)
 	if err != nil {
