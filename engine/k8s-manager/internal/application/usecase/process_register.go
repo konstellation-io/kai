@@ -11,18 +11,18 @@ import (
 //go:generate mockery --name ProcessService --output ../../../mocks --filename process_service_mock.go --structname ProcessServiceMock
 
 type ProcessService interface {
-	RegisterProcess(ctx context.Context, params RegisterProcessParams) error
+	RegisterProcess(ctx context.Context, params RegisterProcessParams) (string, error)
 }
 
 type ProcessRegister struct {
-	logger        logr.Logger
-	imageRegistry service.ImageRegistry
+	logger       logr.Logger
+	imageBuilder service.ImageBuilder
 }
 
-func NewProcessRegister(logger logr.Logger, imageRegistry service.ImageRegistry) *ProcessRegister {
+func NewProcessRegister(logger logr.Logger, imageRegistry service.ImageBuilder) *ProcessRegister {
 	return &ProcessRegister{
-		logger:        logger,
-		imageRegistry: imageRegistry,
+		logger:       logger,
+		imageBuilder: imageRegistry,
 	}
 }
 
@@ -33,8 +33,13 @@ type RegisterProcessParams struct {
 	File    []byte
 }
 
-func (pr *ProcessRegister) RegisterProcess(ctx context.Context, params RegisterProcessParams) error {
-	imageName := fmt.Sprintf("kai-local-registry:5000/%s-%s:%s", params.Product, params.Process, params.Version)
+func (pr *ProcessRegister) RegisterProcess(ctx context.Context, params RegisterProcessParams) (string, error) {
+	imageName := fmt.Sprintf("%s-%s:%s", params.Product, params.Process, params.Version)
 
-	return pr.imageRegistry.ProcessRegister(ctx, imageName, params.File)
+	imageID, err := pr.imageBuilder.BuildImage(ctx, imageName, params.File)
+	if err != nil {
+		return "", fmt.Errorf("building image: %w", err)
+	}
+
+	return imageID, nil
 }

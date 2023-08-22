@@ -93,11 +93,15 @@ message RegisterProcessRequest {
   bytes file = 4;
 }
 
+message RegisterProcessResponse {
+  string ImageID = 1;
+}
+
 service VersionService {
   rpc Start (StartRequest) returns (Response);
   rpc Stop (StopRequest) returns (Response);
   rpc Publish (PublishRequest) returns (Response);
   rpc Unpublish (UnpublishRequest) returns (Response);
   rpc WatchProcessStatus (ProcessStatusRequest) returns (stream ProcessStatusResponse);
-  rpc RegisterProcess (RegisterProcessRequest) returns (Response);
+  rpc RegisterProcess (RegisterProcessRequest) returns (RegisterProcessResponse);
 };

@@ -70,10 +70,10 @@ func (v *VersionService) Stop(
 func (v *VersionService) RegisterProcess(
 	ctx context.Context,
 	req *versionpb.RegisterProcessRequest,
-) (*versionpb.Response, error) {
+) (*versionpb.RegisterProcessResponse, error) {
 	v.logger.Info("Register process request received")
 
-	err := v.processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
+	imageID, err := v.processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
 		Product: req.Product,
 		Version: req.Version,
 		Process: req.Process,
@@ -83,6 +83,7 @@ func (v *VersionService) RegisterProcess(
 		return nil, fmt.Errorf("registering process: %w", err)
 	}
 
-	return &versionpb.Response{
-		Message: fmt.Sprintf("Registered process")}, nil
+	return &versionpb.RegisterProcessResponse{
+		ImageID: imageID,
+	}, nil
 }

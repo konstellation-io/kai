@@ -11,10 +11,12 @@ import (
 )
 
 const (
-	KubeConfigPathKey   = "kubernetes.kubeConfigPath"
-	ServerPortKey       = "server.port"
-	IsInsideClusterKey  = "kubernetes.isInsideCluster"
-	ImageRegistryURLKey = "registry.url"
+	KubeConfigPathKey    = "kubernetes.kubeConfigPath"
+	KubeNamespaceKey     = "kubernetes.namespace"
+	ServerPortKey        = "server.port"
+	IsInsideClusterKey   = "kubernetes.isInsideCluster"
+	ImageRegistryURLKey  = "registry.url"
+	ImageBuilderImageKey = "registry.imageBuilder.image"
 
 	configType = "yaml"
 
@@ -41,7 +43,7 @@ func Init(configFilePath string) error {
 
 	viper.RegisterAlias("nats.url", "NATS_URL")
 	viper.RegisterAlias(ImageRegistryURLKey, "REGISTRY_URL")
-	viper.RegisterAlias("kubernetes.namespace", "KUBERNETES_NAMESPACE")
+	viper.RegisterAlias(KubeNamespaceKey, "KUBERNETES_NAMESPACE")
 
 	viper.AutomaticEnv()
 
@@ -58,8 +60,10 @@ func setDefaultValues() {
 	viper.SetDefault("networking.trigger.requestTimeout", _defaultRequestTimeout)
 	viper.SetDefault("networking.trigger.ingressClassName", "")
 
+	viper.SetDefault("registry.imageBuilder.image", "gcr.io/kaniko-project/executor:latest")
+
 	viper.SetDefault("kubernetes.isInsideCluster", true)
-	viper.SetDefault("kubernetes.namespace", "kai")
+	viper.SetDefault(KubeNamespaceKey, "kai")
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {

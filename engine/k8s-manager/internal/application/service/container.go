@@ -33,13 +33,13 @@ type ContainerStopper interface {
 	DeleteNetwork(ctx context.Context, product, version string) error
 }
 
-type ImageRegistry interface {
-	ProcessRegister(ctx context.Context, name string, file []byte) error
+type ImageBuilder interface {
+	BuildImage(ctx context.Context, name string, file []byte) (string, error)
 }
 
 //go:generate mockery --name ContainerService --output ../../../mocks --filename container_service_mock.go --structname ContainerServiceMock
 type ContainerService interface {
 	ContainerStarter
 	ContainerStopper
-	ImageRegistry
+	//ImageBuilder
 }

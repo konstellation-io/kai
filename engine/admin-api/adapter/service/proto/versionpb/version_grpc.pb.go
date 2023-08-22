@@ -27,7 +27,7 @@ type VersionServiceClient interface {
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*Response, error)
 	Unpublish(ctx context.Context, in *UnpublishRequest, opts ...grpc.CallOption) (*Response, error)
 	WatchProcessStatus(ctx context.Context, in *ProcessStatusRequest, opts ...grpc.CallOption) (VersionService_WatchProcessStatusClient, error)
-	RegisterProcess(ctx context.Context, in *RegisterProcessRequest, opts ...grpc.CallOption) (*Response, error)
+	RegisterProcess(ctx context.Context, in *RegisterProcessRequest, opts ...grpc.CallOption) (*RegisterProcessResponse, error)
 }
 
 type versionServiceClient struct {
@@ -106,8 +106,8 @@ func (x *versionServiceWatchProcessStatusClient) Recv() (*ProcessStatusResponse,
 	return m, nil
 }
 
-func (c *versionServiceClient) RegisterProcess(ctx context.Context, in *RegisterProcessRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *versionServiceClient) RegisterProcess(ctx context.Context, in *RegisterProcessRequest, opts ...grpc.CallOption) (*RegisterProcessResponse, error) {
+	out := new(RegisterProcessResponse)
 	err := c.cc.Invoke(ctx, "/version.VersionService/RegisterProcess", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ type VersionServiceServer interface {
 	Publish(context.Context, *PublishRequest) (*Response, error)
 	Unpublish(context.Context, *UnpublishRequest) (*Response, error)
 	WatchProcessStatus(*ProcessStatusRequest, VersionService_WatchProcessStatusServer) error
-	RegisterProcess(context.Context, *RegisterProcessRequest) (*Response, error)
+	RegisterProcess(context.Context, *RegisterProcessRequest) (*RegisterProcessResponse, error)
 	mustEmbedUnimplementedVersionServiceServer()
 }
 
@@ -147,7 +147,7 @@ func (UnimplementedVersionServiceServer) Unpublish(context.Context, *UnpublishRe
 func (UnimplementedVersionServiceServer) WatchProcessStatus(*ProcessStatusRequest, VersionService_WatchProcessStatusServer) error {
 	return status.Errorf(codes.Unimplemented, "method WatchProcessStatus not implemented")
 }
-func (UnimplementedVersionServiceServer) RegisterProcess(context.Context, *RegisterProcessRequest) (*Response, error) {
+func (UnimplementedVersionServiceServer) RegisterProcess(context.Context, *RegisterProcessRequest) (*RegisterProcessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterProcess not implemented")
 }
 func (UnimplementedVersionServiceServer) mustEmbedUnimplementedVersionServiceServer() {}
