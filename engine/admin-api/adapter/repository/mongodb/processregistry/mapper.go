@@ -1,6 +1,10 @@
 package processregistry
 
-import "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+import (
+	"time"
+
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+)
 
 func mapDTOToEntity(dto *processRegistryDTO) *entity.ProcessRegistry {
 	return &entity.ProcessRegistry{
@@ -9,7 +13,7 @@ func mapDTOToEntity(dto *processRegistryDTO) *entity.ProcessRegistry {
 		Version:    dto.Version,
 		Type:       dto.Type,
 		Image:      dto.Image,
-		UploadDate: dto.UploadDate,
+		UploadDate: time.UnixMilli(dto.UploadDate).UTC(),
 		Owner:      dto.Owner,
 	}
 }
@@ -21,7 +25,7 @@ func mapEntityToDTO(processEntity *entity.ProcessRegistry) *processRegistryDTO {
 		Version:    processEntity.Version,
 		Type:       processEntity.Type,
 		Image:      processEntity.Image,
-		UploadDate: processEntity.UploadDate,
+		UploadDate: processEntity.UploadDate.UnixMilli(),
 		Owner:      processEntity.Owner,
 	}
 }

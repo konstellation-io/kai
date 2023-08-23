@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -22,8 +21,9 @@ import (
 )
 
 var (
-	productID = "productID"
-	ownerID   = "ownerID"
+	productID      = "productID"
+	ownerID        = "ownerID"
+	processVersion = "v1.0.0"
 )
 
 type ProcessRegistryRepositoryTestSuite struct {
@@ -97,23 +97,17 @@ func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 	testProcessRegistry := &entity.ProcessRegistry{
 		ID:         "process_id",
 		Name:       "test_trigger",
-		Version:    "v1.0.0",
+		Version:    processVersion,
 		Type:       "trigger",
 		Image:      "process_image",
-		UploadDate: time.Now().Add(-time.Hour),
+		UploadDate: testUploadDate,
 		Owner:      ownerID,
 	}
 
 	createdProcessRegistry, err := s.processRegistryRepo.Create(productID, testProcessRegistry)
 	s.Require().NoError(err)
 
-	s.Equal(testProcessRegistry.ID, createdProcessRegistry.ID)
-	s.Equal(testProcessRegistry.Name, createdProcessRegistry.Name)
-	s.Equal(testProcessRegistry.Version, createdProcessRegistry.Version)
-	s.Equal(testProcessRegistry.Type, createdProcessRegistry.Type)
-	s.Equal(testProcessRegistry.Image, createdProcessRegistry.Image)
-	s.Equal(testProcessRegistry.UploadDate, createdProcessRegistry.UploadDate)
-	s.Equal(testProcessRegistry.Owner, createdProcessRegistry.Owner)
+	s.Equal(testProcessRegistry, createdProcessRegistry)
 
 	// Check if the version is created in the DB
 	collection := s.mongoClient.Database(productID).Collection(processRegistryCollectionName)
@@ -122,4 +116,58 @@ func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 	var processRegistryDTO processRegistryDTO
 	err = collection.FindOne(context.Background(), filter).Decode(&processRegistryDTO)
 	s.Require().NoError(err)
+
+	fmt.Println(testProcessRegistry.UploadDate)
+	fmt.Println(processRegistryDTO.UploadDate)
+}
+
+func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
+	ctx := context.Background()
+
+	testTriggerProcess := &entity.ProcessRegistry{
+		ID:         "test_trigger_id",
+		Name:       "test_trigger",
+		Version:    processVersion,
+		Type:       "trigger",
+		Image:      "test_trigger_image",
+		UploadDate: testUploadDate,
+		Owner:      ownerID,
+	}
+
+	testTriggerProcess2 := &entity.ProcessRegistry{
+		ID:         "test_trigger_id_2",
+		Name:       "test_trigger_2",
+		Version:    processVersion,
+		Type:       "trigger",
+		Image:      "test_trigger_image_2",
+		UploadDate: testUploadDate,
+		Owner:      ownerID,
+	}
+
+	testTaskProcess := &entity.ProcessRegistry{
+		ID:         "test_task_id",
+		Name:       "test_task",
+		Version:    processVersion,
+		Type:       "task",
+		Image:      "test_task_image",
+		UploadDate: testUploadDate,
+		Owner:      ownerID,
+	}
+
+	processRegistries := []*entity.ProcessRegistry{
+		testTriggerProcess,
+		testTriggerProcess2,
+		testTaskProcess,
+	}
+
+	for _, p := range processRegistries {
+		_, err := s.processRegistryRepo.Create(productID, p)
+		s.Require().NoError(err)
+	}
+
+	processRegistries, err := s.processRegistryRepo.ListByProductWithTypeFilter(ctx, productID, "task")
+	s.Require().NoError(err)
+
+	s.Require().Len(processRegistries, 1)
+	s.Equal(testTaskProcess, processRegistries[0])
 }

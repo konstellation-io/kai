@@ -1,13 +1,11 @@
 package processregistry
 
-import "time"
-
 type processRegistryDTO struct {
-	ID         string    `bson:"_id"`
-	Name       string    `bson:"name"`
-	Version    string    `bson:"version"`
-	Type       string    `bson:"type"`
-	Image      string    `bson:"image"`
-	UploadDate time.Time `bson:"uploadDate"`
-	Owner      string    `bson:"owner"`
+	ID         string `bson:"_id"`
+	Name       string `bson:"name"`
+	Version    string `bson:"version"`
+	Type       string `bson:"type"`
+	Image      string `bson:"image"`
+	UploadDate int64  `bson:"uploadDate"`
+	Owner      string `bson:"owner"`
 }
