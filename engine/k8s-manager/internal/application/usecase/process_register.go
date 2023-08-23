@@ -34,7 +34,7 @@ type RegisterProcessParams struct {
 }
 
 func (pr *ProcessRegister) RegisterProcess(ctx context.Context, params RegisterProcessParams) (string, error) {
-	imageName := fmt.Sprintf("%s-%s:%s", params.Product, params.Process, params.Version)
+	imageName := fmt.Sprintf("%s_%s:%s", params.Product, params.Process, params.Version)
 
 	imageID, err := pr.imageBuilder.BuildImage(ctx, imageName, params.File)
 	if err != nil {
