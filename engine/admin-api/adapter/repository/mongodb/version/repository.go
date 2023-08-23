@@ -44,6 +44,7 @@ func NewVersionRepoMongoDB(
 
 func (r *VersionRepoMongoDB) CreateIndexes(ctx context.Context, productID string) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
+	r.logger.Infof("MongoDB creating indexes for %s collection...", versionsCollectionName)
 
 	indexes := []mongo.IndexModel{
 		{

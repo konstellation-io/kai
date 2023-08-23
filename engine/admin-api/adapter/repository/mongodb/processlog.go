@@ -189,7 +189,11 @@ func (n *ProcessLogMongoDBRepo) CreateIndexes(ctx context.Context, runtimeID str
 			Keys: bson.M{"date": 1},
 		},
 		{
-			Keys: bson.M{"date": 1, "processId": 1, "versionId": 1},
+			Keys: bson.D{
+				{Key: "date", Value: 1},
+				{Key: "processId", Value: 1},
+				{Key: "versionId", Value: 1},
+			},
 		},
 	})
 	if err != nil {

@@ -35,6 +35,7 @@ func NewProcessRegistryRepoMongoDB(
 
 func (r *ProcessRegistryRepoMongoDB) CreateIndexes(ctx context.Context, productID string) error {
 	collection := r.client.Database(productID).Collection(processRegistryCollectionName)
+	r.logger.Infof("MongoDB creating indexes for %s collection...", processRegistryCollectionName)
 
 	indexes := []mongo.IndexModel{
 		{
