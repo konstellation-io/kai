@@ -22,9 +22,8 @@ import (
 )
 
 var (
-	processRef = "processRef"
-	productID  = "productID"
-	ownerID    = "ownerID"
+	productID = "productID"
+	ownerID   = "ownerID"
 )
 
 type ProcessRegistryRepositoryTestSuite struct {
@@ -96,10 +95,11 @@ func (s *ProcessRegistryRepositoryTestSuite) TearDownTest() {
 
 func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 	testProcessRegistry := &entity.ProcessRegistry{
-		ID:         processRef,
+		ID:         "process_id",
 		Name:       "test_trigger",
 		Version:    "v1.0.0",
 		Type:       "trigger",
+		Image:      "process_image",
 		UploadDate: time.Now().Add(-time.Hour),
 		Owner:      ownerID,
 	}
@@ -111,6 +111,7 @@ func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 	s.Equal(testProcessRegistry.Name, createdProcessRegistry.Name)
 	s.Equal(testProcessRegistry.Version, createdProcessRegistry.Version)
 	s.Equal(testProcessRegistry.Type, createdProcessRegistry.Type)
+	s.Equal(testProcessRegistry.Image, createdProcessRegistry.Image)
 	s.Equal(testProcessRegistry.UploadDate, createdProcessRegistry.UploadDate)
 	s.Equal(testProcessRegistry.Owner, createdProcessRegistry.Owner)
 
