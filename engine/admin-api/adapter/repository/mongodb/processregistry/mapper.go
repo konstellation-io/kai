@@ -8,6 +8,7 @@ func mapDTOToEntity(dto *processRegistryDTO) *entity.ProcessRegistry {
 		Name:       dto.Name,
 		Version:    dto.Version,
 		Type:       dto.Type,
+		Image:      dto.Image,
 		UploadDate: dto.UploadDate,
 		Owner:      dto.Owner,
 	}
@@ -19,6 +20,7 @@ func mapEntityToDTO(processEntity *entity.ProcessRegistry) *processRegistryDTO {
 		Name:       processEntity.Name,
 		Version:    processEntity.Version,
 		Type:       processEntity.Type,
+		Image:      processEntity.Image,
 		UploadDate: processEntity.UploadDate,
 		Owner:      processEntity.Owner,
 	}

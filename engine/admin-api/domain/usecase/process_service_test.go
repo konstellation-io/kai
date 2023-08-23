@@ -54,8 +54,9 @@ type ProcessServiceTestSuite struct {
 const (
 	userID       = "userID"
 	productID    = "productID"
+	processID    = productID + "_" + processName + ":" + version
 	version      = "v1.0.0"
-	process      = "test-process"
+	processName  = "test-process"
 	processType  = "trigger"
 	testFileAddr = "testdata/fake_compressed_process.txt"
 )
@@ -102,26 +103,27 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	expectedBytes, err := os.ReadFile(testFileAddr)
 	s.Require().NoError(err)
 
-	mockedRef := "mocked-ref"
+	mockedRef := fmt.Sprintf("%s/%s_%s:%s", "kai-local-registry:5000", productID, processName, version)
 	expectedRegisteredProcess := &entity.ProcessRegistry{
-		ID:         mockedRef,
-		Name:       process,
+		ID:         processID,
+		Name:       processName,
 		Version:    version,
 		Type:       processType,
+		Image:      mockedRef,
 		UploadDate: time.Now(),
 		Owner:      userID,
 	}
 	customMatcher := newprocessRegistryMatcher(expectedRegisteredProcess)
 
-	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, process, expectedBytes).Return(mockedRef, nil)
+	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return(mockedRef, nil)
 	s.processRegistryRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
 
-	returnedRef, err := s.processInteractor.RegisterProcess(
-		ctx, user, productID, version, process, processType, testFile,
+	returnedID, err := s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, processName, processType, testFile,
 	)
 	s.Require().NoError(err)
 
-	s.Equal(mockedRef, returnedRef)
+	s.Equal(processID, returnedID)
 }
 
 func (s *ProcessServiceTestSuite) TestRegisterProcessNoFileError() {
@@ -131,7 +133,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessNoFileError() {
 	s.Require().Error(err)
 
 	returnedRef, err := s.processInteractor.RegisterProcess(
-		ctx, user, productID, version, process, processType, testFile,
+		ctx, user, productID, version, processName, processType, testFile,
 	)
 	s.Require().Error(err)
 
@@ -147,11 +149,11 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessK8sManagerError() {
 	s.Require().NoError(err)
 
 	s.k8sService.EXPECT().
-		RegisterProcess(ctx, productID, version, process, expectedBytes).
+		RegisterProcess(ctx, productID, version, processName, expectedBytes).
 		Return("", fmt.Errorf("mocked error"))
 
 	returnedRef, err := s.processInteractor.RegisterProcess(
-		ctx, user, productID, version, process, processType, testFile,
+		ctx, user, productID, version, processName, processType, testFile,
 	)
 	s.Require().Error(err)
 
@@ -166,22 +168,23 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessRepositoryError() {
 	expectedBytes, err := os.ReadFile(testFileAddr)
 	s.Require().NoError(err)
 
-	mockedRef := "mocked-ref"
+	mockedRef := fmt.Sprintf("%s/%s_%s:%s", "kai-local-registry:5000", productID, processName, version)
 	expectedRegisteredProcess := &entity.ProcessRegistry{
-		ID:         mockedRef,
-		Name:       process,
+		ID:         processID,
+		Name:       processName,
 		Version:    version,
 		Type:       processType,
+		Image:      mockedRef,
 		UploadDate: time.Now(),
 		Owner:      userID,
 	}
 	customMatcher := newprocessRegistryMatcher(expectedRegisteredProcess)
 
-	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, process, expectedBytes).Return(mockedRef, nil)
+	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return(mockedRef, nil)
 	s.processRegistryRepo.EXPECT().Create(productID, customMatcher).Return(nil, fmt.Errorf("mocked error"))
 
 	returnedRef, err := s.processInteractor.RegisterProcess(
-		ctx, user, productID, version, process, processType, testFile,
+		ctx, user, productID, version, processName, processType, testFile,
 	)
 	s.Require().Error(err)
 

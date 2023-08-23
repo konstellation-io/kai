@@ -21,6 +21,7 @@ var domainProcessRegistry = &entity.ProcessRegistry{
 	Name:       "test_trigger",
 	Version:    "1.0.0",
 	Type:       "trigger",
+	Image:      "test_image",
 	UploadDate: uploadDate,
 	Owner:      userID,
 }
@@ -30,6 +31,7 @@ var DTOProcessRegistry = &processRegistryDTO{
 	Name:       "test_trigger",
 	Version:    "1.0.0",
 	Type:       "trigger",
+	Image:      "test_image",
 	UploadDate: uploadDate,
 	Owner:      userID,
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -74,11 +75,13 @@ func (ps *ProcessService) RegisterProcess(
 		return "", fmt.Errorf("registering process: %w", err)
 	}
 
+	processID := ps.getProcessID(processRef)
 	registeredProcess := &entity.ProcessRegistry{
-		ID:         processRef,
+		ID:         processID,
 		Name:       process,
 		Version:    version,
 		Type:       processType,
+		Image:      processRef,
 		UploadDate: time.Now(),
 		Owner:      user.ID,
 	}
@@ -90,5 +93,14 @@ func (ps *ProcessService) RegisterProcess(
 
 	ps.logger.Info("Registered process", "processRef", processRef)
 
-	return processRef, nil
+	return processID, nil
+}
+
+func (ps *ProcessService) getProcessID(processRef string) string {
+	split := strings.Split(processRef, "/")
+	if len(split) != 2 {
+		ps.logger.Error(fmt.Errorf("invalid process ref: %s", processRef), "defaulting to use whole processRef")
+		return processRef
+	}
+	return split[1]
 }
