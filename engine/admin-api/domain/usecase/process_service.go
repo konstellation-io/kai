@@ -82,7 +82,7 @@ func (ps *ProcessService) RegisterProcess(
 		Version:    version,
 		Type:       processType,
 		Image:      processRef,
-		UploadDate: time.Now(),
+		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
 		Owner:      user.ID,
 	}
 
@@ -103,4 +103,17 @@ func (ps *ProcessService) getProcessID(processRef string) string {
 		return processRef
 	}
 	return split[1]
+}
+
+func (ps *ProcessService) ListByProductWithTypeFilter(
+	ctx context.Context,
+	productID, processType string,
+) ([]*entity.ProcessRegistry, error) {
+	ps.logger.Info("Retrieving process for product %q with process type filter %q", productID, processType)
+
+	if !entity.ProcessType(processType).IsValid() {
+		return nil, fmt.Errorf("invalid process type: %s", processType)
+	}
+
+	return ps.processRegistryRepository.ListByProductWithTypeFilter(ctx, productID, processType)
 }

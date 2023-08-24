@@ -190,3 +190,36 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessRepositoryError() {
 
 	s.Empty(returnedRef)
 }
+
+func (s *ProcessServiceTestSuite) TestListByProductWithTypeFilter() {
+	ctx := context.Background()
+
+	typeFilter := "trigger"
+	expectedProcessRegistry := []*entity.ProcessRegistry{
+		{
+			ID:         processID,
+			Name:       processName,
+			Version:    version,
+			Type:       processType,
+			Image:      "image",
+			UploadDate: time.Now(),
+			Owner:      userID,
+		},
+	}
+
+	s.processRegistryRepo.EXPECT().ListByProductWithTypeFilter(ctx, productID, typeFilter).Return(expectedProcessRegistry, nil)
+
+	returnedProcessRegistry, err := s.processInteractor.ListByProductWithTypeFilter(ctx, productID, typeFilter)
+	s.Require().NoError(err)
+
+	s.Equal(expectedProcessRegistry, returnedProcessRegistry)
+}
+
+func (s *ProcessServiceTestSuite) TestListByProductWithTypeFilterInvalidFilter() {
+	ctx := context.Background()
+
+	typeFilter := "invlaid"
+
+	_, err := s.processInteractor.ListByProductWithTypeFilter(ctx, productID, typeFilter)
+	s.Require().Error(err)
+}
