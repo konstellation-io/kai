@@ -37,30 +37,30 @@ func (m *MockMetricRepo) EXPECT() *MockMetricRepoMockRecorder {
 }
 
 // CreateIndexes mocks base method.
-func (m *MockMetricRepo) CreateIndexes(ctx context.Context, runtimeID string) error {
+func (m *MockMetricRepo) CreateIndexes(ctx context.Context, productID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateIndexes", ctx, runtimeID)
+	ret := m.ctrl.Call(m, "CreateIndexes", ctx, productID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateIndexes indicates an expected call of CreateIndexes.
-func (mr *MockMetricRepoMockRecorder) CreateIndexes(ctx, runtimeID interface{}) *gomock.Call {
+func (mr *MockMetricRepoMockRecorder) CreateIndexes(ctx, productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockMetricRepo)(nil).CreateIndexes), ctx, runtimeID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockMetricRepo)(nil).CreateIndexes), ctx, productID)
 }
 
 // GetMetrics mocks base method.
-func (m *MockMetricRepo) GetMetrics(ctx context.Context, startDate, endDate time.Time, runtimeID, versionTag string) ([]entity.ClassificationMetric, error) {
+func (m *MockMetricRepo) GetMetrics(ctx context.Context, startDate, endDate time.Time, productID, versionTag string) ([]entity.ClassificationMetric, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMetrics", ctx, startDate, endDate, runtimeID, versionTag)
+	ret := m.ctrl.Call(m, "GetMetrics", ctx, startDate, endDate, productID, versionTag)
 	ret0, _ := ret[0].([]entity.ClassificationMetric)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetMetrics indicates an expected call of GetMetrics.
-func (mr *MockMetricRepoMockRecorder) GetMetrics(ctx, startDate, endDate, runtimeID, versionTag interface{}) *gomock.Call {
+func (mr *MockMetricRepoMockRecorder) GetMetrics(ctx, startDate, endDate, productID, versionTag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetrics", reflect.TypeOf((*MockMetricRepo)(nil).GetMetrics), ctx, startDate, endDate, runtimeID, versionTag)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetrics", reflect.TypeOf((*MockMetricRepo)(nil).GetMetrics), ctx, startDate, endDate, productID, versionTag)
 }
