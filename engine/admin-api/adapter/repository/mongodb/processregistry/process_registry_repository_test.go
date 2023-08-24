@@ -170,4 +170,18 @@ func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
 
 	s.Require().Len(processRegistries, 1)
 	s.Equal(testTaskProcess, processRegistries[0])
+
+	processRegistries, err = s.processRegistryRepo.ListByProductWithTypeFilter(ctx, productID, "")
+	s.Require().NoError(err)
+
+	s.Require().Len(processRegistries, 3)
+}
+
+func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithUnexistingProduct() {
+	ctx := context.Background()
+
+	processRegistries, err := s.processRegistryRepo.ListByProductWithTypeFilter(ctx, "unexisting", "task")
+	s.Require().NoError(err)
+
+	s.Empty(processRegistries)
 }

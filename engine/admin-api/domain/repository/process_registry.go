@@ -9,6 +9,7 @@ import (
 )
 
 type ProcessRegistryRepo interface {
-	Create(productID string, newProcessRegistry *entity.ProcessRegistry) (*entity.ProcessRegistry, error)
 	CreateIndexes(ctx context.Context, productID string) error
+	Create(productID string, newProcessRegistry *entity.ProcessRegistry) (*entity.ProcessRegistry, error)
+	ListByProductWithTypeFilter(ctx context.Context, productID, processType string) ([]*entity.ProcessRegistry, error)
 }

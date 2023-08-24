@@ -63,3 +63,18 @@ func (mr *MockProcessRegistryRepoMockRecorder) CreateIndexes(ctx, productID inte
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockProcessRegistryRepo)(nil).CreateIndexes), ctx, productID)
 }
+
+// ListByProductWithTypeFilter mocks base method.
+func (m *MockProcessRegistryRepo) ListByProductWithTypeFilter(ctx context.Context, productID, processType string) ([]*entity.ProcessRegistry, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListByProductWithTypeFilter", ctx, productID, processType)
+	ret0, _ := ret[0].([]*entity.ProcessRegistry)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListByProductWithTypeFilter indicates an expected call of ListByProductWithTypeFilter.
+func (mr *MockProcessRegistryRepoMockRecorder) ListByProductWithTypeFilter(ctx, productID, processType interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByProductWithTypeFilter", reflect.TypeOf((*MockProcessRegistryRepo)(nil).ListByProductWithTypeFilter), ctx, productID, processType)
+}
