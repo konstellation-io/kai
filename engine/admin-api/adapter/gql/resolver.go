@@ -210,6 +210,17 @@ func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*enti
 	return r.versionInteractor.ListVersionsByProduct(ctx, loggedUser, productID)
 }
 
+func (r *queryResolver) ProcessRegistries(ctx context.Context, productID string, processType *string) ([]*entity.ProcessRegistry, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+
+	var processTypeFilter string
+	if processType != nil {
+		processTypeFilter = *processType
+	}
+
+	return r.processService.ListByProductWithTypeFilter(ctx, loggedUser, productID, processTypeFilter)
+}
+
 func (r *queryResolver) UserActivityList(
 	ctx context.Context,
 	userEmail *string,
@@ -320,6 +331,10 @@ func (r *versionResolver) PublicationAuthor(_ context.Context, obj *entity.Versi
 	return obj.PublicationAuthor, nil
 }
 
+func (r *processRegistryResolver) UploadDate(_ context.Context, obj *entity.ProcessRegistry) (string, error) {
+	return obj.UploadDate.Format(time.RFC3339), nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -338,9 +353,13 @@ func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityRes
 // Version returns VersionResolver implementation.
 func (r *Resolver) Version() VersionResolver { return &versionResolver{r} }
 
+// ProcessRegistry returns ProcessRegistryResolver implementation.
+func (r *Resolver) ProcessRegistry() ProcessRegistryResolver { return &processRegistryResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type productResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userActivityResolver struct{ *Resolver }
 type versionResolver struct{ *Resolver }
+type processRegistryResolver struct{ *Resolver }

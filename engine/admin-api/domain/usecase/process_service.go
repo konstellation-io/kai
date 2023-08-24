@@ -107,6 +107,7 @@ func (ps *ProcessService) getProcessID(processRef string) string {
 
 func (ps *ProcessService) ListByProductWithTypeFilter(
 	ctx context.Context,
+	user *entity.User,
 	productID, processType string,
 ) ([]*entity.ProcessRegistry, error) {
 	ps.logger.Info("Retrieving process for product %q with process type filter %q", productID, processType)
