@@ -29,6 +29,8 @@ const (
 	_jobStatusComplete
 )
 
+var ErrFailedImageBuild = errors.New("error building image")
+
 type KanikoImageBuilder struct {
 	logger    logr.Logger
 	client    kubernetes.Interface
@@ -182,13 +184,14 @@ func (ib *KanikoImageBuilder) watchForJob(ctx context.Context, job *batchv1.Job)
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("error creating label watcher: %s", err.Error())
+		return fmt.Errorf("error creating label watcher: %w", err)
 	}
 
 	defer rw.Stop()
 
 	for {
 		event := <-rw.ResultChan()
+
 		job, ok := event.Object.(*batchv1.Job)
 		if !ok {
 			return fmt.Errorf("unable to parse Kubernetes Job from Annotation watcher")
@@ -200,7 +203,7 @@ func (ib *KanikoImageBuilder) watchForJob(ctx context.Context, job *batchv1.Job)
 
 			switch status {
 			case _jobStatusFailed:
-				return errors.New("error building image")
+				return ErrFailedImageBuild
 			case _jobStatusComplete:
 				return nil
 			default:
