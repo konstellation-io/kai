@@ -112,7 +112,7 @@ func (ps *ProcessService) ListByProductWithTypeFilter(
 ) ([]*entity.ProcessRegistry, error) {
 	ps.logger.Info("Retrieving process for product %q with process type filter %q", productID, processType)
 
-	if !entity.ProcessType(processType).IsValid() {
+	if processType != "" && !entity.ProcessType(processType).IsValid() {
 		return nil, fmt.Errorf("invalid process type: %s", processType)
 	}
 

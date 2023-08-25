@@ -209,7 +209,31 @@ func (s *ProcessServiceTestSuite) TestListByProductWithTypeFilter() {
 
 	s.processRegistryRepo.EXPECT().ListByProductWithTypeFilter(ctx, productID, typeFilter).Return(expectedProcessRegistry, nil)
 
-	returnedProcessRegistry, err := s.processInteractor.ListByProductWithTypeFilter(ctx, productID, typeFilter)
+	returnedProcessRegistry, err := s.processInteractor.ListByProductWithTypeFilter(ctx, user, productID, typeFilter)
+	s.Require().NoError(err)
+
+	s.Equal(expectedProcessRegistry, returnedProcessRegistry)
+}
+
+func (s *ProcessServiceTestSuite) TestListByProductWithNoTypeFilter() {
+	ctx := context.Background()
+
+	typeFilter := ""
+	expectedProcessRegistry := []*entity.ProcessRegistry{
+		{
+			ID:         processID,
+			Name:       processName,
+			Version:    version,
+			Type:       processType,
+			Image:      "image",
+			UploadDate: time.Now(),
+			Owner:      userID,
+		},
+	}
+
+	s.processRegistryRepo.EXPECT().ListByProductWithTypeFilter(ctx, productID, typeFilter).Return(expectedProcessRegistry, nil)
+
+	returnedProcessRegistry, err := s.processInteractor.ListByProductWithTypeFilter(ctx, user, productID, "")
 	s.Require().NoError(err)
 
 	s.Equal(expectedProcessRegistry, returnedProcessRegistry)
@@ -220,6 +244,6 @@ func (s *ProcessServiceTestSuite) TestListByProductWithTypeFilterInvalidFilter()
 
 	typeFilter := "invlaid"
 
-	_, err := s.processInteractor.ListByProductWithTypeFilter(ctx, productID, typeFilter)
+	_, err := s.processInteractor.ListByProductWithTypeFilter(ctx, user, productID, typeFilter)
 	s.Require().Error(err)
 }
