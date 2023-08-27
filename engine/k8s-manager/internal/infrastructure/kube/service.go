@@ -2,8 +2,6 @@ package kube
 
 import (
 	"context"
-	"fmt"
-	"regexp"
 
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
@@ -63,9 +61,4 @@ func (k *K8sContainerService) CreateNetwork(ctx context.Context, params service.
 
 func (k *K8sContainerService) DeleteNetwork(ctx context.Context, product, version string) error {
 	return k.networkService.DeleteNetwork(ctx, product, version)
-}
-
-func (k *K8sContainerService) getJobNameForImage(imageName string) string {
-	normalizedImageName := regexp.MustCompile(`[^a-zA-Z0-9 ]+`).ReplaceAllString(imageName, "-")
-	return fmt.Sprintf("image-builder-%s", normalizedImageName)
 }

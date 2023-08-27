@@ -51,11 +51,7 @@ func main() {
 	app.Start()
 }
 
-func initGraphqlController(
-	cfg *config.Config,
-	logger logging.Logger,
-	mongodbClient *mongo.Client,
-) *controller.GraphQLController {
+func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) *controller.GraphQLController {
 	productRepo := mongodb.NewProductRepoMongoDB(cfg, logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
 	versionMongoRepo := version.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
@@ -158,7 +154,6 @@ func initGraphqlController(
 	l := zapr.NewLogger(zapLog)
 	serverInfoGetter := usecase.NewServerInfoGetter(l, accessControl)
 
-	//processRegistry := registry.NewProcessRegistry(l)
 	processService := usecase.NewProcessService(l, k8sService, processRegistryRepo)
 
 	return controller.NewGraphQLController(

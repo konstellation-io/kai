@@ -140,7 +140,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessNoFileError() {
 	s.Empty(returnedRef)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcessK8sManagerError() {
+func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
 	ctx := context.Background()
 
 	testFile, err := os.Open(testFileAddr)
@@ -160,7 +160,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessK8sManagerError() {
 	s.Empty(returnedRef)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcessRepositoryError() {
+func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 	ctx := context.Background()
 
 	testFile, err := os.Open(testFileAddr)
@@ -189,4 +189,20 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessRepositoryError() {
 	s.Require().Error(err)
 
 	s.Empty(returnedRef)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_InvalidProcessRef() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+	expectedBytes, err := os.ReadFile(testFileAddr)
+	s.Require().NoError(err)
+
+	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return("invalid reference", nil)
+
+	_, err = s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, processName, processType, testFile,
+	)
+	s.Require().ErrorIs(err, usecase.ErrInvalidProcessReference)
 }

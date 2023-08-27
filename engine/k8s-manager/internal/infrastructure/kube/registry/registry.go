@@ -27,9 +27,15 @@ const (
 	_jobStatusUnknown = iota
 	_jobStatusFailed
 	_jobStatusComplete
+
+	_ttlSecondsAfterFinishedJob = 100
 )
 
-var ErrFailedImageBuild = errors.New("error building image")
+var (
+	ErrFailedImageBuild = errors.New("error building image")
+	ErrParsingJob       = errors.New("unable to parse Kubernetes Job from Annotation watcher")
+	ErrErrorEvent       = errors.New("error event received")
+)
 
 type KanikoImageBuilder struct {
 	logger    logr.Logger
@@ -64,7 +70,8 @@ func (ib *KanikoImageBuilder) BuildImage(ctx context.Context, imageName string, 
 	defer func() {
 		deletePol := metav1.DeletePropagationBackground
 
-		if err := ib.client.BatchV1().Jobs(ib.namespace).Delete(ctx, job.Name, metav1.DeleteOptions{PropagationPolicy: &deletePol}); err != nil {
+		err := ib.client.BatchV1().Jobs(ib.namespace).Delete(ctx, job.Name, metav1.DeleteOptions{PropagationPolicy: &deletePol})
+		if err != nil && !apierrors.IsNotFound(err) {
 			ib.logger.Error(err, "Error deleting job, try to delete it manually", "job", job.Name)
 			return
 		}
@@ -120,7 +127,7 @@ func (ib *KanikoImageBuilder) getJobConfigMap(jobConfigName string, createdJob *
 	}
 }
 
-func (ib *KanikoImageBuilder) getImageBuilderJob(jobName string, imageWithDestination string, jobConfigName string) *batchv1.Job {
+func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination, jobConfigName string) *batchv1.Job {
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: jobName,
@@ -130,7 +137,7 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(jobName string, imageWithDestin
 		},
 		Spec: batchv1.JobSpec{
 			BackoffLimit:            pointer.Int32(0),
-			TTLSecondsAfterFinished: pointer.Int32(100),
+			TTLSecondsAfterFinished: pointer.Int32(_ttlSecondsAfterFinishedJob),
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
@@ -192,13 +199,14 @@ func (ib *KanikoImageBuilder) watchForJob(ctx context.Context, job *batchv1.Job)
 	for {
 		event := <-rw.ResultChan()
 
-		job, ok := event.Object.(*batchv1.Job)
-		if !ok {
-			return fmt.Errorf("unable to parse Kubernetes Job from Annotation watcher")
-		}
-
+		//nolint:exhaustive // Not all event types needs a specific case
 		switch event.Type {
 		case watch.Added, watch.Modified:
+			job, ok := event.Object.(*batchv1.Job)
+			if !ok {
+				return ErrParsingJob
+			}
+
 			status := ib.getJobStatus(job)
 
 			switch status {
@@ -209,21 +217,9 @@ func (ib *KanikoImageBuilder) watchForJob(ctx context.Context, job *batchv1.Job)
 			default:
 			}
 
-		case watch.Deleted:
-			return errors.New("job unexpectedly deleted")
-
 		case watch.Error:
-			ib.logger.Info("Error attempting to watch Kubernetes Jobs")
+			return ErrErrorEvent
 
-			// This round trip allows us to handle unstructured status
-			errObject := apierrors.FromObject(event.Object)
-			statusErr, ok := errObject.(*apierrors.StatusError)
-			if !ok {
-				ib.logger.Info(fmt.Sprintf("received an error which is not *metav1.Status but %+v", event.Object))
-			}
-
-			status := statusErr.ErrStatus
-			ib.logger.Info("Received an error event", "status", status)
 		default:
 			ib.logger.Info("Unknown event received")
 		}
@@ -236,6 +232,7 @@ func (ib *KanikoImageBuilder) getJobStatus(job *batchv1.Job) jobStatus {
 			return _jobStatusUnknown
 		}
 
+		//nolint:exhaustive // Not all condition types needs a specific case
 		switch condition.Type {
 		case batchv1.JobFailed:
 			return _jobStatusFailed
