@@ -152,3 +152,55 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatusUnexpectedError() {
 	process := <-statusChannel
 	s.Nil(process)
 }
+
+func (s *K8sManagerTestSuite) TestRegisterProcess() {
+	ctx := context.Background()
+
+	const (
+		product = "test-product"
+		version = "test"
+		process = "test-process"
+
+		expectedImageID = "image-id"
+	)
+
+	var file []byte
+
+	s.mockService.EXPECT().RegisterProcess(ctx, &versionpb.RegisterProcessRequest{
+		Product: product,
+		Version: version,
+		Process: process,
+		File:    file,
+	}).Return(&versionpb.RegisterProcessResponse{
+		ImageID: expectedImageID,
+	}, nil)
+
+	ref, err := s.k8sVersionClient.RegisterProcess(ctx, product, version, process, file)
+	s.NoError(err)
+	s.Equal(expectedImageID, ref)
+}
+
+func (s *K8sManagerTestSuite) TestRegisterProcess_ClientError() {
+	ctx := context.Background()
+
+	const (
+		product = "test-product"
+		version = "test"
+		process = "test-process"
+	)
+
+	var (
+		file          []byte
+		expectedError = errors.New("client error")
+	)
+
+	s.mockService.EXPECT().RegisterProcess(ctx, &versionpb.RegisterProcessRequest{
+		Product: product,
+		Version: version,
+		Process: process,
+		File:    file,
+	}).Return(nil, expectedError)
+
+	_, err := s.k8sVersionClient.RegisterProcess(ctx, product, version, process, file)
+	s.ErrorIs(err, expectedError)
+}
