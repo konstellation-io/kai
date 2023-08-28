@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
@@ -20,7 +19,6 @@ var (
 
 // ProductInteractor contains app logic to handle Product entities.
 type ProductInteractor struct {
-	cfg                 *config.Config
 	logger              logr.Logger
 	productRepo         repository.ProductRepo
 	measurementRepo     repository.MeasurementRepo
@@ -33,7 +31,6 @@ type ProductInteractor struct {
 }
 
 type ProductInteractorOpts struct {
-	Cfg                 *config.Config
 	Logger              logr.Logger
 	ProductRepo         repository.ProductRepo
 	MeasurementRepo     repository.MeasurementRepo
@@ -48,7 +45,6 @@ type ProductInteractorOpts struct {
 // NewProductInteractor creates a new ProductInteractor.
 func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 	return &ProductInteractor{
-		ps.Cfg,
 		ps.Logger,
 		ps.ProductRepo,
 		ps.MeasurementRepo,

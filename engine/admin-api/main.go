@@ -115,7 +115,6 @@ func initGraphqlController(
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
 	ps := usecase.ProductInteractorOpts{
-		Cfg:                 cfg,
 		Logger:              logger,
 		ProductRepo:         productRepo,
 		MeasurementRepo:     measurementRepo,

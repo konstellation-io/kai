@@ -11,7 +11,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
@@ -61,12 +60,7 @@ func newProductSuite(t *testing.T) *productSuite {
 		accessControl,
 	)
 
-	cfg := &config.Config{}
-
-	cfg.K8s.Namespace = k8sNamespace
-
 	ps := usecase.ProductInteractorOpts{
-		Cfg:                 cfg,
 		Logger:              logger,
 		ProductRepo:         productRepo,
 		MeasurementRepo:     measurementRepo,
