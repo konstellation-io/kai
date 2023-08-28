@@ -11,6 +11,7 @@ import (
 	internalgrpc "github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/grpc"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/grpc/proto/versionpb"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube/registry"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -53,10 +54,12 @@ func initGrpcServer(logger logr.Logger) (*grpc.Server, error) {
 	s := grpc.NewServer()
 
 	k8sContainerService := kube.NewK8sContainerService(logger, client)
+	imageBuilder := registry.NewKanikoImageBuilder(logger, client)
 	starter := usecase.NewVersionStarter(logger, k8sContainerService)
 	stopper := usecase.NewVersionStopper(logger, k8sContainerService)
+	processRegister := usecase.NewProcessRegister(logger, imageBuilder)
 
-	versionService := internalgrpc.NewVersionService(logger, starter, stopper)
+	versionService := internalgrpc.NewVersionService(logger, starter, stopper, processRegister)
 
 	versionpb.RegisterVersionServiceServer(s, versionService)
 	reflection.Register(s)

@@ -29,6 +29,7 @@ type Params struct {
 	VersionInteractor      *usecase.VersionInteractor
 	MetricsInteractor      *usecase.MetricsInteractor
 	ServerInfoGetter       *usecase.ServerInfoGetter
+	ProcessService         *usecase.ProcessService
 }
 
 func NewHTTPHandler(params Params) http.Handler {

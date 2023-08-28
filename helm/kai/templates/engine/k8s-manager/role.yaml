@@ -14,12 +14,20 @@ rules:
       - pods
       - secrets
       - services
+      - jobs
+      - pods/log
     verbs:
       - "*"
   - apiGroups:
       - apps
     resources:
       - deployments
+    verbs:
+      - "*"
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
     verbs:
       - "*"
   - apiGroups:

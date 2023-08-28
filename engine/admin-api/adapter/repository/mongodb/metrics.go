@@ -27,8 +27,8 @@ func NewMetricMongoDBRepo(cfg *config.Config, logger logging.Logger, client *mon
 }
 
 func (m *MetricsMongoDBRepo) GetMetrics(ctx context.Context, startDate, endDate time.Time,
-	runtimeID, versionTag string) ([]entity.ClassificationMetric, error) {
-	database := m.getDatabaseName(runtimeID)
+	productID, versionTag string) ([]entity.ClassificationMetric, error) {
+	database := m.getDatabaseName(productID)
 	collection := m.client.Database(database).Collection(metricsCollectionName)
 
 	var result []entity.ClassificationMetric
@@ -73,7 +73,10 @@ func (m *MetricsMongoDBRepo) CreateIndexes(ctx context.Context, runtimeID string
 
 	_, err := collection.Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{
-			Keys: bson.M{"date": 1, "versionTag": 1},
+			Keys: bson.D{
+				{Key: "date", Value: 1},
+				{Key: "versionTag", Value: 1},
+			},
 		},
 	})
 	if err != nil {

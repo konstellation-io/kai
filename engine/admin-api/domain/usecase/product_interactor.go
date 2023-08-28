@@ -20,27 +20,29 @@ var (
 
 // ProductInteractor contains app logic to handle Product entities.
 type ProductInteractor struct {
-	cfg             *config.Config
-	logger          logging.Logger
-	productRepo     repository.ProductRepo
-	measurementRepo repository.MeasurementRepo
-	versionRepo     repository.VersionRepo
-	metricRepo      repository.MetricRepo
-	processLogRepo  repository.ProcessLogRepository
-	userActivity    UserActivityInteracter
-	accessControl   auth.AccessControl
+	cfg                 *config.Config
+	logger              logging.Logger
+	productRepo         repository.ProductRepo
+	measurementRepo     repository.MeasurementRepo
+	versionRepo         repository.VersionRepo
+	metricRepo          repository.MetricRepo
+	processLogRepo      repository.ProcessLogRepository
+	processRegistryRepo repository.ProcessRegistryRepo
+	userActivity        UserActivityInteracter
+	accessControl       auth.AccessControl
 }
 
 type ProductInteractorOpts struct {
-	Cfg             *config.Config
-	Logger          logging.Logger
-	ProductRepo     repository.ProductRepo
-	MeasurementRepo repository.MeasurementRepo
-	VersionRepo     repository.VersionRepo
-	MetricRepo      repository.MetricRepo
-	ProcessLogRepo  repository.ProcessLogRepository
-	UserActivity    UserActivityInteracter
-	AccessControl   auth.AccessControl
+	Cfg                 *config.Config
+	Logger              logging.Logger
+	ProductRepo         repository.ProductRepo
+	MeasurementRepo     repository.MeasurementRepo
+	VersionRepo         repository.VersionRepo
+	MetricRepo          repository.MetricRepo
+	ProcessLogRepo      repository.ProcessLogRepository
+	ProcessRegistryRepo repository.ProcessRegistryRepo
+	UserActivity        UserActivityInteracter
+	AccessControl       auth.AccessControl
 }
 
 // NewProductInteractor creates a new ProductInteractor.
@@ -53,6 +55,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.VersionRepo,
 		ps.MetricRepo,
 		ps.ProcessLogRepo,
+		ps.ProcessRegistryRepo,
 		ps.UserActivity,
 		ps.AccessControl,
 	}
@@ -137,7 +140,17 @@ func (i *ProductInteractor) createDatabaseIndexes(ctx context.Context, productID
 		return err
 	}
 
-	return i.versionRepo.CreateIndexes(ctx, productID)
+	err = i.versionRepo.CreateIndexes(ctx, productID)
+	if err != nil {
+		return err
+	}
+
+	err = i.processRegistryRepo.CreateIndexes(ctx, productID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Get return product by ID.

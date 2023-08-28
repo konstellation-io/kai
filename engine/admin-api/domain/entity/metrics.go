@@ -34,7 +34,7 @@ type MetricChartData struct {
 
 type ClassificationMetric struct {
 	ID             string `bson:"_id"`
-	VersionID      string `bson:"versionId"`
+	VersionTag     string `bson:"versionTag"`
 	Date           string `bson:"date"`
 	Error          string `bson:"error"`
 	PredictedValue string `bson:"predictedValue"`

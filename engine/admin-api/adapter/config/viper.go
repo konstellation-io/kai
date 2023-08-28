@@ -13,10 +13,16 @@ const (
 )
 
 func InitConfig() error {
+	setDefaultConfig()
+	return loadConfig()
+}
+
+func setDefaultConfig() {
+	viper.SetDefault(CfgFilePathKey, "config.yml")
+}
+
+func loadConfig() error {
 	viper.SetEnvPrefix("KAI")
-
-	viper.SetDefault("CONFIG_FILE_PATH", "config.yml")
-
 	viper.AutomaticEnv()
 
 	viper.SetConfigFile(viper.GetString(CfgFilePathKey))

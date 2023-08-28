@@ -24,3 +24,4 @@ data:
   KAI_KRT_FILES_DOWNLOADER_IMAGE: "{{ .Values.k8sManager.krtFilesDownloader.image.repository }}"
   KAI_KRT_FILES_DOWNLOADER_TAG: "{{ .Values.k8sManager.krtFilesDownloader.image.tag }}"
   KAI_KRT_FILES_DOWNLOADER_PULL_POLICY: "{{ .Values.k8sManager.krtFilesDownloader.image.pullPolicy }}"
+  KAI_REGISTRY_URL: "http://{{ include "registry.fullname" . }}:{{ .Values.registry.service.ports.http }}"

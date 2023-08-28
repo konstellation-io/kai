@@ -6,6 +6,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube/configuration"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube/network"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube/process"
@@ -26,7 +27,7 @@ type K8sContainerService struct {
 var _ service.ContainerService = (*K8sContainerService)(nil)
 
 func NewK8sContainerService(logger logr.Logger, client kubernetes.Interface) *K8sContainerService {
-	namespace := viper.GetString("kubernetes.namespace")
+	namespace := viper.GetString(config.KubeNamespaceKey)
 
 	return &K8sContainerService{
 		logger:    logger,

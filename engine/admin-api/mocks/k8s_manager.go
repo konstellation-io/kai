@@ -57,6 +57,26 @@ func (mr *MockVersionServiceClientMockRecorder) Publish(ctx, in interface{}, opt
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockVersionServiceClient)(nil).Publish), varargs...)
 }
 
+// RegisterProcess mocks base method.
+func (m *MockVersionServiceClient) RegisterProcess(ctx context.Context, in *versionpb.RegisterProcessRequest, opts ...grpc.CallOption) (*versionpb.RegisterProcessResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RegisterProcess", varargs...)
+	ret0, _ := ret[0].(*versionpb.RegisterProcessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterProcess indicates an expected call of RegisterProcess.
+func (mr *MockVersionServiceClientMockRecorder) RegisterProcess(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterProcess", reflect.TypeOf((*MockVersionServiceClient)(nil).RegisterProcess), varargs...)
+}
+
 // Start mocks base method.
 func (m *MockVersionServiceClient) Start(ctx context.Context, in *versionpb.StartRequest, opts ...grpc.CallOption) (*versionpb.Response, error) {
 	m.ctrl.T.Helper()
@@ -296,6 +316,21 @@ func (m *MockVersionServiceServer) Publish(arg0 context.Context, arg1 *versionpb
 func (mr *MockVersionServiceServerMockRecorder) Publish(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockVersionServiceServer)(nil).Publish), arg0, arg1)
+}
+
+// RegisterProcess mocks base method.
+func (m *MockVersionServiceServer) RegisterProcess(arg0 context.Context, arg1 *versionpb.RegisterProcessRequest) (*versionpb.RegisterProcessResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterProcess", arg0, arg1)
+	ret0, _ := ret[0].(*versionpb.RegisterProcessResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterProcess indicates an expected call of RegisterProcess.
+func (mr *MockVersionServiceServerMockRecorder) RegisterProcess(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterProcess", reflect.TypeOf((*MockVersionServiceServer)(nil).RegisterProcess), arg0, arg1)
 }
 
 // Start mocks base method.

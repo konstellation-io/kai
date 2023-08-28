@@ -13,21 +13,24 @@ import (
 
 type VersionService struct {
 	versionpb.UnimplementedVersionServiceServer
-	logger  logr.Logger
-	starter usecase.VersionStarterService
-	stopper usecase.VersionStopperService
+	logger          logr.Logger
+	starter         usecase.VersionStarterService
+	stopper         usecase.VersionStopperService
+	processRegister usecase.ProcessService
 }
 
 func NewVersionService(
 	logger logr.Logger,
 	starter usecase.VersionStarterService,
 	stopper usecase.VersionStopperService,
+	processRegister usecase.ProcessService,
 ) *VersionService {
 	return &VersionService{
 		versionpb.UnimplementedVersionServiceServer{},
 		logger,
 		starter,
 		stopper,
+		processRegister,
 	}
 }
 
@@ -62,4 +65,25 @@ func (v *VersionService) Stop(
 
 	return &versionpb.Response{
 		Message: fmt.Sprintf("Version %q on product %q stopped", req.VersionTag, req.Product)}, nil
+}
+
+func (v *VersionService) RegisterProcess(
+	ctx context.Context,
+	req *versionpb.RegisterProcessRequest,
+) (*versionpb.RegisterProcessResponse, error) {
+	v.logger.Info("Register process request received")
+
+	imageID, err := v.processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
+		Product: req.Product,
+		Version: req.Version,
+		Process: req.Process,
+		File:    req.File,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("registering process: %w", err)
+	}
+
+	return &versionpb.RegisterProcessResponse{
+		ImageID: imageID,
+	}, nil
 }
