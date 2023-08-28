@@ -2,7 +2,6 @@ p, USER, view
 p, USER, edit
 
 p, USER, view_product
-p, USER, create_product
 
 p, USER, create_version
 p, USER, start_version
@@ -19,4 +18,5 @@ p, USER, execute
 
 p, MLE, view_server_info
 
+p, ADMIN, create_product
 p, ADMIN, update_user_grants

@@ -37,10 +37,6 @@ type productSuiteMocks struct {
 	accessControl       *mocks.MockAccessControl
 }
 
-const (
-	k8sNamespace = "kre-test"
-)
-
 func newProductSuite(t *testing.T) *productSuite {
 	ctrl := gomock.NewController(t)
 
@@ -129,7 +125,7 @@ func TestCreateProduct(t *testing.T) {
 		Owner:        user.ID,
 	}
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
@@ -158,7 +154,7 @@ func TestCreateProduct_FailsIfUserHasNotPermission(t *testing.T) {
 
 	grantError := errors.New("grant error")
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(grantError)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(grantError)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 
@@ -178,7 +174,7 @@ func TestCreateProduct_FailsIfProductHasAnInvalidField(t *testing.T) {
 	productName := "lore ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labores"
 	productDescription := "This is a product description"
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 
@@ -204,7 +200,7 @@ func TestCreateProduct_FailsIfProductWithSameIDAlreadyExists(t *testing.T) {
 		Description: "existing-product-description",
 	}
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(existingProduct, nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
@@ -230,7 +226,7 @@ func TestCreateProduct_FailsIfProductWithSameNameAlreadyExists(t *testing.T) {
 		Description: "existing-product-description",
 	}
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(existingProduct, nil)
 
@@ -259,7 +255,7 @@ func TestCreateProduct_FailsIfCreateProductFails(t *testing.T) {
 		CreationDate: time.Time{},
 	}
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().Create(ctx, newProduct).Return(nil, errors.New("create product error"))
@@ -282,7 +278,7 @@ func TestCreateProduct_ErrorCheckingProductIDInRepo(t *testing.T) {
 	productDescription := "This is a product description"
 	repoError := errors.New("repo error")
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, repoError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
@@ -301,7 +297,7 @@ func TestCreateProduct_ErrorCheckingProductNameInRepo(t *testing.T) {
 	productDescription := "This is a product description"
 	repoError := errors.New("repo error")
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, repoError)
 
@@ -329,7 +325,7 @@ func TestCreateProduct_ErrorCreatingDatabase(t *testing.T) {
 
 	expectedError := errors.New("error creating database")
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
@@ -359,7 +355,7 @@ func TestCreateProduct_ErrorCreatingMetricsRepoIndexes(t *testing.T) {
 
 	expectedError := errors.New("error creating collection indexes")
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
@@ -390,15 +386,13 @@ func TestCreateProduct_ErrorCreatingProcessLogRepoIndexes(t *testing.T) {
 
 	expectedError := errors.New("error creating collection indexes")
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
 	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
-	//s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	//s.mocks.processRegistryRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 	require.ErrorIs(t, err, expectedError)
@@ -424,7 +418,7 @@ func TestCreateProduct_ErrorCreatingVersionRepoIndexes(t *testing.T) {
 
 	expectedError := errors.New("error creating versions collection indexes")
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
@@ -432,8 +426,6 @@ func TestCreateProduct_ErrorCreatingVersionRepoIndexes(t *testing.T) {
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
-	//s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	//s.mocks.processRegistryRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 	require.ErrorIs(t, err, expectedError)
@@ -459,7 +451,7 @@ func TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes(t *testing.T) {
 
 	expectedError := errors.New("error creating versions collection indexes")
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateProduct).Return(nil)
+	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)

@@ -65,7 +65,7 @@ func (i *ProductInteractor) CreateProduct(
 	name,
 	description string,
 ) (*entity.Product, error) {
-	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActCreateProduct); err != nil {
+	if err := i.accessControl.CheckRoleGrants(user, auth.ActCreateProduct); err != nil {
 		return nil, err
 	}
 
