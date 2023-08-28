@@ -171,10 +171,6 @@ type ComplexityRoot struct {
 		ProcessedImageID func(childComplexity int) int
 	}
 
-	RegisteredImage struct {
-		ProcessedImageID func(childComplexity int) int
-	}
-
 	ServerInfo struct {
 		Components func(childComplexity int) int
 	}
