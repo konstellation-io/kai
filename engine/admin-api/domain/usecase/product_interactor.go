@@ -5,11 +5,11 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 // ProductInteractor contains app logic to handle Product entities.
 type ProductInteractor struct {
 	cfg                 *config.Config
-	logger              logging.Logger
+	logger              logr.Logger
 	productRepo         repository.ProductRepo
 	measurementRepo     repository.MeasurementRepo
 	versionRepo         repository.VersionRepo
@@ -34,7 +34,7 @@ type ProductInteractor struct {
 
 type ProductInteractorOpts struct {
 	Cfg                 *config.Config
-	Logger              logging.Logger
+	Logger              logr.Logger
 	ProductRepo         repository.ProductRepo
 	MeasurementRepo     repository.MeasurementRepo
 	VersionRepo         repository.VersionRepo

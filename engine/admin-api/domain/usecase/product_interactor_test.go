@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-logr/logr"
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
@@ -25,7 +27,7 @@ type productSuite struct {
 }
 
 type productSuiteMocks struct {
-	logger              *mocks.MockLogger
+	logger              logr.Logger
 	productRepo         *mocks.MockProductRepo
 	measurementRepo     *mocks.MockMeasurementRepo
 	versionRepo         *mocks.MockVersionRepo
@@ -43,7 +45,7 @@ const (
 func newProductSuite(t *testing.T) *productSuite {
 	ctrl := gomock.NewController(t)
 
-	logger := mocks.NewMockLogger(ctrl)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	productRepo := mocks.NewMockProductRepo(ctrl)
 	userActivityRepo := mocks.NewMockUserActivityRepo(ctrl)
 	measurementRepo := mocks.NewMockMeasurementRepo(ctrl)
@@ -52,8 +54,6 @@ func newProductSuite(t *testing.T) *productSuite {
 	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 	processRegistryRepo := mocks.NewMockProcessRegistryRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
-
-	mocks.AddLoggerExpects(logger)
 
 	userActivity := usecase.NewUserActivityInteractor(
 		logger,

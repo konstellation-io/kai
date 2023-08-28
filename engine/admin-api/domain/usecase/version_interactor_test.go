@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 
@@ -48,7 +49,8 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	ctrl := gomock.NewController(s.T())
 
 	cfg := &config.Config{}
-	logger := mocks.NewMockLogger(ctrl)
+	oldLogger := mocks.NewMockLogger(ctrl)
+	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
 	productRepo := mocks.NewMockProductRepo(ctrl)
 	k8sService := mocks.NewMockK8sService(ctrl)
@@ -58,7 +60,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	dashboardService := mocks.NewMockDashboardService(ctrl)
 	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 
-	mocks.AddLoggerExpects(logger)
+	mocks.AddLoggerExpects(oldLogger)
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(
 		logger,
@@ -67,13 +69,13 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	)
 
 	versionInteractor := usecase.NewVersionInteractor(
-		cfg, logger, versionRepo, productRepo, k8sService, natsManagerService,
+		cfg, oldLogger, versionRepo, productRepo, k8sService, natsManagerService,
 		userActivityInteractor, accessControl, dashboardService, processLogRepo)
 
 	s.ctrl = ctrl
 	s.mocks = versionSuiteMocks{
 		cfg,
-		logger,
+		oldLogger,
 		versionRepo,
 		productRepo,
 		k8sService,

@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-logr/logr"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 type UserActivityInteracter interface {
@@ -30,14 +30,14 @@ type UserActivityInteracter interface {
 
 // UserActivityInteractor  contains app logic about UserActivity entities.
 type UserActivityInteractor struct {
-	logger           logging.Logger
+	logger           logr.Logger
 	userActivityRepo repository.UserActivityRepo
 	accessControl    auth.AccessControl
 }
 
 // NewUserActivityInteractor creates a new UserActivityInteractor.
 func NewUserActivityInteractor(
-	logger logging.Logger,
+	logger logr.Logger,
 	userActivityRepo repository.UserActivityRepo,
 	accessControl auth.AccessControl,
 ) UserActivityInteracter {
@@ -83,10 +83,11 @@ func (i *UserActivityInteractor) create(
 	return i.userActivityRepo.Create(userActivity)
 }
 
-func checkUserActivityError(logger logging.Logger, err error) error {
+func checkUserActivityError(logger logr.Logger, err error) error {
+	// TODO: Fix this
 	if err != nil {
 		userActivityErr := fmt.Errorf("error creating userActivity: %w", err)
-		logger.Error(userActivityErr.Error())
+		logger.Error(userActivityErr, "error creating userActivity")
 
 		return userActivityErr
 	}
