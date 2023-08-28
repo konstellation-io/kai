@@ -17,6 +17,7 @@ const (
 	IsInsideClusterKey   = "kubernetes.isInsideCluster"
 	ImageRegistryURLKey  = "registry.url"
 	ImageBuilderImageKey = "registry.imageBuilder.image"
+	ImageBuilderLogLevel = "registry.imageBuilder.logLevel"
 
 	configType = "yaml"
 
@@ -61,6 +62,7 @@ func setDefaultValues() {
 	viper.SetDefault("networking.trigger.ingressClassName", "")
 
 	viper.SetDefault("registry.imageBuilder.image", "gcr.io/kaniko-project/executor:latest")
+	viper.SetDefault("registry.imageBuilder.logLevel", "error")
 
 	viper.SetDefault("kubernetes.isInsideCluster", true)
 	viper.SetDefault(KubeNamespaceKey, "kai")

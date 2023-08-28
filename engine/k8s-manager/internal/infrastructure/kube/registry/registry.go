@@ -148,7 +148,7 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination, 
 							Args: []string{
 								"--context=tar:///sources/file.tar.gz",
 								"--insecure",
-								"--verbosity=error",
+								fmt.Sprintf("--verbosity=%s", viper.GetString(config.ImageBuilderLogLevel)),
 								fmt.Sprintf("--destination=%s", imageWithDestination),
 							},
 							VolumeMounts: []corev1.VolumeMount{
