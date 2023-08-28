@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -21,9 +22,10 @@ import (
 )
 
 var (
-	productID      = "productID"
-	ownerID        = "ownerID"
-	processVersion = "v1.0.0"
+	productID          = "productID"
+	ownerID            = "ownerID"
+	processVersion     = "v1.0.0"
+	testRepoUploadDate = time.Now().Add(-time.Hour).Truncate(time.Millisecond).UTC()
 )
 
 type ProcessRegistryRepositoryTestSuite struct {
@@ -100,7 +102,7 @@ func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 		Version:    processVersion,
 		Type:       "trigger",
 		Image:      "process_image",
-		UploadDate: testUploadDate,
+		UploadDate: testRepoUploadDate,
 		Owner:      ownerID,
 	}
 
@@ -127,7 +129,7 @@ func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
 		Version:    processVersion,
 		Type:       "trigger",
 		Image:      "test_trigger_image",
-		UploadDate: testUploadDate,
+		UploadDate: testRepoUploadDate,
 		Owner:      ownerID,
 	}
 
@@ -137,7 +139,7 @@ func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
 		Version:    processVersion,
 		Type:       "trigger",
 		Image:      "test_trigger_image_2",
-		UploadDate: testUploadDate,
+		UploadDate: testRepoUploadDate,
 		Owner:      ownerID,
 	}
 
@@ -147,7 +149,7 @@ func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
 		Version:    processVersion,
 		Type:       "task",
 		Image:      "test_task_image",
-		UploadDate: testUploadDate,
+		UploadDate: testRepoUploadDate,
 		Owner:      ownerID,
 	}
 

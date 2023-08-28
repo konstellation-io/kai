@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	userID         = "admin"
-	testUploadDate = time.Now().Add(-time.Hour).Truncate(time.Millisecond).UTC()
+	userID               = "admin"
+	testMapperUploadDate = time.Now().Add(-time.Hour).Truncate(time.Millisecond).UTC()
 )
 
 var domainProcessRegistry = &entity.ProcessRegistry{
@@ -22,7 +22,7 @@ var domainProcessRegistry = &entity.ProcessRegistry{
 	Version:    "1.0.0",
 	Type:       "trigger",
 	Image:      "test_image",
-	UploadDate: testUploadDate,
+	UploadDate: testMapperUploadDate,
 	Owner:      userID,
 }
 
@@ -32,7 +32,7 @@ var DTOProcessRegistry = &processRegistryDTO{
 	Version:    "1.0.0",
 	Type:       "trigger",
 	Image:      "test_image",
-	UploadDate: testUploadDate,
+	UploadDate: testMapperUploadDate,
 	Owner:      userID,
 }
 
