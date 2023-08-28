@@ -19,6 +19,7 @@ import (
 
 var (
 	ErrInvalidProcessReference = errors.New("invalid process reference")
+	ErrInvalidProcessType      = errors.New("invalid process type")
 )
 
 type ProcessService struct {
@@ -96,10 +97,12 @@ func (ps *ProcessService) RegisterProcess(
 
 func (ps *ProcessService) getProcessID(processRef string) string {
 	split := strings.Split(processRef, "/")
+
 	if len(split) != 2 {
-		ps.logger.Error(fmt.Errorf("invalid process ref: %s", processRef), "defaulting to use whole processRef")
+		ps.logger.Error(ErrInvalidProcessReference, "%q, defaulting to use whole process reference", processRef)
 		return processRef
 	}
+
 	return split[1]
 }
 
@@ -111,7 +114,7 @@ func (ps *ProcessService) ListByProductWithTypeFilter(
 	ps.logger.Info("Retrieving process for product %q with process type filter %q", productID, processType)
 
 	if processType != "" && !entity.ProcessType(processType).IsValid() {
-		return nil, fmt.Errorf("invalid process type: %s", processType)
+		return nil, fmt.Errorf("%w: %s", ErrInvalidProcessType, processType)
 	}
 
 	return ps.processRegistryRepository.ListByProductWithTypeFilter(ctx, productID, processType)

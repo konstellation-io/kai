@@ -110,7 +110,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 		Version:    version,
 		Type:       processType,
 		Image:      mockedRef,
-		UploadDate: time.Now(),
+		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
 		Owner:      userID,
 	}
 	customMatcher := newprocessRegistryMatcher(expectedRegisteredProcess)
@@ -175,7 +175,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 		Version:    version,
 		Type:       processType,
 		Image:      mockedRef,
-		UploadDate: time.Now(),
+		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
 		Owner:      userID,
 	}
 	customMatcher := newprocessRegistryMatcher(expectedRegisteredProcess)
@@ -189,6 +189,35 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 	s.Require().Error(err)
 
 	s.Empty(returnedRef)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_InvalidProcessRef() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+	expectedBytes, err := os.ReadFile(testFileAddr)
+	s.Require().NoError(err)
+
+	invalidRef := "invalid reference"
+	expectedRegisteredProcess := &entity.ProcessRegistry{
+		ID:         invalidRef,
+		Name:       processName,
+		Version:    version,
+		Type:       processType,
+		Image:      invalidRef,
+		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
+		Owner:      userID,
+	}
+	customMatcher := newprocessRegistryMatcher(expectedRegisteredProcess)
+
+	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return(invalidRef, nil)
+	s.processRegistryRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
+
+	_, err = s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, processName, processType, testFile,
+	)
+	s.Require().NoError(err)
 }
 
 func (s *ProcessServiceTestSuite) TestListByProduct_WithTypeFilter() {
