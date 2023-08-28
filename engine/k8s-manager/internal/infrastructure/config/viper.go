@@ -61,8 +61,8 @@ func setDefaultValues() {
 	viper.SetDefault("networking.trigger.requestTimeout", _defaultRequestTimeout)
 	viper.SetDefault("networking.trigger.ingressClassName", "")
 
-	viper.SetDefault("registry.imageBuilder.image", "gcr.io/kaniko-project/executor:latest")
-	viper.SetDefault("registry.imageBuilder.logLevel", "error")
+	viper.SetDefault(ImageBuilderImageKey, "gcr.io/kaniko-project/executor:latest")
+	viper.SetDefault(ImageBuilderLogLevel, "error")
 
 	viper.SetDefault("kubernetes.isInsideCluster", true)
 	viper.SetDefault(KubeNamespaceKey, "kai")

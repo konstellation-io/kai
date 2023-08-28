@@ -38,6 +38,7 @@ func TestBuildImage_SucceedJob(t *testing.T) {
 
 	viper.Set(config.KubeNamespaceKey, _namespace)
 	viper.Set(config.ImageRegistryURLKey, fmt.Sprintf("http://%s", _registryHost))
+	viper.Set(config.ImageBuilderLogLevel, "error")
 
 	imageBuilder := registry.NewKanikoImageBuilder(logger, clientset)
 
@@ -96,6 +97,7 @@ func TestBuildImage_FailedJob(t *testing.T) {
 
 	viper.Set(config.KubeNamespaceKey, _namespace)
 	viper.Set(config.ImageRegistryURLKey, fmt.Sprintf("http://%s", _registryHost))
+	viper.Set(config.ImageBuilderLogLevel, "error")
 
 	imageBuilder := registry.NewKanikoImageBuilder(logger, clientset)
 
@@ -155,6 +157,7 @@ func TestBuildImage_UnknownEvent(t *testing.T) {
 
 	viper.Set(config.KubeNamespaceKey, _namespace)
 	viper.Set(config.ImageRegistryURLKey, fmt.Sprintf("http://%s", _registryHost))
+	viper.Set(config.ImageBuilderLogLevel, "error")
 
 	imageBuilder := registry.NewKanikoImageBuilder(logger, clientset)
 
@@ -210,6 +213,7 @@ func TestBuildImage_DeletedJob(t *testing.T) {
 
 	viper.Set(config.KubeNamespaceKey, _namespace)
 	viper.Set(config.ImageRegistryURLKey, fmt.Sprintf("http://%s", _registryHost))
+	viper.Set(config.ImageBuilderLogLevel, "error")
 
 	imageBuilder := registry.NewKanikoImageBuilder(logger, clientset)
 
