@@ -42,5 +42,4 @@ type ImageBuilder interface {
 type ContainerService interface {
 	ContainerStarter
 	ContainerStopper
-	//ImageBuilder
 }

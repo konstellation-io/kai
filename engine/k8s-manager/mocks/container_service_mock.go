@@ -295,50 +295,6 @@ func (_c *ContainerServiceMock_DeleteProcesses_Call) RunAndReturn(run func(conte
 	return _c
 }
 
-// ProcessRegister provides a mock function with given fields: ctx, name, file
-func (_m *ContainerServiceMock) ProcessRegister(ctx context.Context, name string, file []byte) error {
-	ret := _m.Called(ctx, name, file)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) error); ok {
-		r0 = rf(ctx, name, file)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// ContainerServiceMock_ProcessRegister_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ProcessRegister'
-type ContainerServiceMock_ProcessRegister_Call struct {
-	*mock.Call
-}
-
-// ProcessRegister is a helper method to define mock.On call
-//   - ctx context.Context
-//   - name string
-//   - file []byte
-func (_e *ContainerServiceMock_Expecter) ProcessRegister(ctx interface{}, name interface{}, file interface{}) *ContainerServiceMock_ProcessRegister_Call {
-	return &ContainerServiceMock_ProcessRegister_Call{Call: _e.mock.On("ProcessRegister", ctx, name, file)}
-}
-
-func (_c *ContainerServiceMock_ProcessRegister_Call) Run(run func(ctx context.Context, name string, file []byte)) *ContainerServiceMock_ProcessRegister_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].([]byte))
-	})
-	return _c
-}
-
-func (_c *ContainerServiceMock_ProcessRegister_Call) Return(_a0 error) *ContainerServiceMock_ProcessRegister_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *ContainerServiceMock_ProcessRegister_Call) RunAndReturn(run func(context.Context, string, []byte) error) *ContainerServiceMock_ProcessRegister_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // NewContainerServiceMock creates a new instance of ContainerServiceMock. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewContainerServiceMock(t interface {
