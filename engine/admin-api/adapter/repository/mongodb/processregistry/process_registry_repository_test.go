@@ -116,9 +116,6 @@ func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 	var processRegistryDTO processRegistryDTO
 	err = collection.FindOne(context.Background(), filter).Decode(&processRegistryDTO)
 	s.Require().NoError(err)
-
-	fmt.Println(testProcessRegistry.UploadDate)
-	fmt.Println(processRegistryDTO.UploadDate)
 }
 
 func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
