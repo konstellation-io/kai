@@ -14,9 +14,7 @@ const (
 
 func InitConfig() error {
 	setDefaultConfig()
-
 	return loadConfig()
-
 }
 
 func setDefaultConfig() {

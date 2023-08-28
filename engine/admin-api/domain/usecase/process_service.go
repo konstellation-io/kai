@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,18 +15,17 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 )
 
+//go:generate mockgen -source=${GOFILE} -destination=../../mocks/${GOFILE} -package=mocks
+
+var (
+	ErrInvalidProcessReference = errors.New("invalid process reference")
+)
+
 type ProcessService struct {
-	logger logr.Logger
-	//processRegistry   ProcessRegistry
+	logger                    logr.Logger
 	processRegistryRepository repository.ProcessRegistryRepo
 	processRegistry           service.K8sService
 }
-
-//go:generate mockgen -source=${GOFILE} -destination=../../mocks/${GOFILE} -package=mocks
-
-//type ProcessRegistry interface {
-//	RegisterProcess(ctx context.Context, product, version, process string, src io.Reader) (string, error)
-//}
 
 type ProcessMetadata struct {
 	Dockerfile string
@@ -33,13 +33,11 @@ type ProcessMetadata struct {
 
 func NewProcessService(
 	logger logr.Logger,
-	//processRegistry ProcessRegistry,
 	k8sService service.K8sService,
 	processRegistryRepository repository.ProcessRegistryRepo,
 ) *ProcessService {
 	return &ProcessService{
-		logger: logger,
-		//processRegistry: processRegistry,
+		logger:                    logger,
 		processRegistry:           k8sService,
 		processRegistryRepository: processRegistryRepository,
 	}
@@ -58,7 +56,7 @@ func (ps *ProcessService) RegisterProcess(
 		return "", fmt.Errorf("creating temp file for process: %w", err)
 	}
 	defer tmpFile.Close()
-	//defer os.Remove(tmpFile.Name())
+	defer os.Remove(tmpFile.Name())
 
 	_, err = io.Copy(tmpFile, sources)
 	if err != nil {

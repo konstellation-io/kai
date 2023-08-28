@@ -58,14 +58,14 @@ func (mr *MockVersionServiceClientMockRecorder) Publish(ctx, in interface{}, opt
 }
 
 // RegisterProcess mocks base method.
-func (m *MockVersionServiceClient) RegisterProcess(ctx context.Context, in *versionpb.RegisterProcessRequest, opts ...grpc.CallOption) (*versionpb.Response, error) {
+func (m *MockVersionServiceClient) RegisterProcess(ctx context.Context, in *versionpb.RegisterProcessRequest, opts ...grpc.CallOption) (*versionpb.RegisterProcessResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "RegisterProcess", varargs...)
-	ret0, _ := ret[0].(*versionpb.Response)
+	ret0, _ := ret[0].(*versionpb.RegisterProcessResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -319,10 +319,10 @@ func (mr *MockVersionServiceServerMockRecorder) Publish(arg0, arg1 interface{}) 
 }
 
 // RegisterProcess mocks base method.
-func (m *MockVersionServiceServer) RegisterProcess(arg0 context.Context, arg1 *versionpb.RegisterProcessRequest) (*versionpb.Response, error) {
+func (m *MockVersionServiceServer) RegisterProcess(arg0 context.Context, arg1 *versionpb.RegisterProcessRequest) (*versionpb.RegisterProcessResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterProcess", arg0, arg1)
-	ret0, _ := ret[0].(*versionpb.Response)
+	ret0, _ := ret[0].(*versionpb.RegisterProcessResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

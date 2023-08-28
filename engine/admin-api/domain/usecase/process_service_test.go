@@ -140,7 +140,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessNoFileError() {
 	s.Empty(returnedRef)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcessK8sManagerError() {
+func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
 	ctx := context.Background()
 
 	testFile, err := os.Open(testFileAddr)
@@ -160,7 +160,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessK8sManagerError() {
 	s.Empty(returnedRef)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcessRepositoryError() {
+func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 	ctx := context.Background()
 
 	testFile, err := os.Open(testFileAddr)
@@ -191,7 +191,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcessRepositoryError() {
 	s.Empty(returnedRef)
 }
 
-func (s *ProcessServiceTestSuite) TestListByProductWithTypeFilter() {
+func (s *ProcessServiceTestSuite) TestListByProduct_WithTypeFilter() {
 	ctx := context.Background()
 
 	typeFilter := "trigger"

@@ -23,17 +23,27 @@ func (_m *ProcessServiceMock) EXPECT() *ProcessServiceMock_Expecter {
 }
 
 // RegisterProcess provides a mock function with given fields: ctx, params
-func (_m *ProcessServiceMock) RegisterProcess(ctx context.Context, params usecase.RegisterProcessParams) error {
+func (_m *ProcessServiceMock) RegisterProcess(ctx context.Context, params usecase.RegisterProcessParams) (string, error) {
 	ret := _m.Called(ctx, params)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.RegisterProcessParams) error); ok {
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.RegisterProcessParams) (string, error)); ok {
+		return rf(ctx, params)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.RegisterProcessParams) string); ok {
 		r0 = rf(ctx, params)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(string)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, usecase.RegisterProcessParams) error); ok {
+		r1 = rf(ctx, params)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ProcessServiceMock_RegisterProcess_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegisterProcess'
@@ -55,12 +65,12 @@ func (_c *ProcessServiceMock_RegisterProcess_Call) Run(run func(ctx context.Cont
 	return _c
 }
 
-func (_c *ProcessServiceMock_RegisterProcess_Call) Return(_a0 error) *ProcessServiceMock_RegisterProcess_Call {
-	_c.Call.Return(_a0)
+func (_c *ProcessServiceMock_RegisterProcess_Call) Return(_a0 string, _a1 error) *ProcessServiceMock_RegisterProcess_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ProcessServiceMock_RegisterProcess_Call) RunAndReturn(run func(context.Context, usecase.RegisterProcessParams) error) *ProcessServiceMock_RegisterProcess_Call {
+func (_c *ProcessServiceMock_RegisterProcess_Call) RunAndReturn(run func(context.Context, usecase.RegisterProcessParams) (string, error)) *ProcessServiceMock_RegisterProcess_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -33,6 +33,7 @@ type ContainerStopper interface {
 	DeleteNetwork(ctx context.Context, product, version string) error
 }
 
+//go:generate mockery --name ImageBuilder --output ../../../mocks --filename image_builder_mock.go --structname ImageBuilderMock
 type ImageBuilder interface {
 	BuildImage(ctx context.Context, name string, file []byte) (string, error)
 }
