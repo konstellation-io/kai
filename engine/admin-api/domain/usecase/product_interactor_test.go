@@ -25,15 +25,15 @@ type productSuite struct {
 }
 
 type productSuiteMocks struct {
-	logger              *mocks.MockLogger
-	productRepo         *mocks.MockProductRepo
-	measurementRepo     *mocks.MockMeasurementRepo
-	versionRepo         *mocks.MockVersionRepo
-	metricRepo          *mocks.MockMetricRepo
-	processLogRepo      *mocks.MockProcessLogRepository
-	processRegistryRepo *mocks.MockProcessRegistryRepo
-	userActivityRepo    *mocks.MockUserActivityRepo
-	accessControl       *mocks.MockAccessControl
+	logger                *mocks.MockLogger
+	productRepo           *mocks.MockProductRepo
+	measurementRepo       *mocks.MockMeasurementRepo
+	versionRepo           *mocks.MockVersionRepo
+	metricRepo            *mocks.MockMetricRepo
+	processLogRepo        *mocks.MockProcessLogRepository
+	registeredProcessRepo *mocks.MockRegisteredProcessRepo
+	userActivityRepo      *mocks.MockUserActivityRepo
+	accessControl         *mocks.MockAccessControl
 }
 
 const (
@@ -50,7 +50,7 @@ func newProductSuite(t *testing.T) *productSuite {
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
 	metricRepo := mocks.NewMockMetricRepo(ctrl)
 	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
-	processRegistryRepo := mocks.NewMockProcessRegistryRepo(ctrl)
+	registeredProcessRepo := mocks.NewMockRegisteredProcessRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
 
 	mocks.AddLoggerExpects(logger)
@@ -66,16 +66,16 @@ func newProductSuite(t *testing.T) *productSuite {
 	cfg.K8s.Namespace = k8sNamespace
 
 	ps := usecase.ProductInteractorOpts{
-		Cfg:                 cfg,
-		Logger:              logger,
-		ProductRepo:         productRepo,
-		MeasurementRepo:     measurementRepo,
-		VersionRepo:         versionRepo,
-		MetricRepo:          metricRepo,
-		ProcessLogRepo:      processLogRepo,
-		ProcessRegistryRepo: processRegistryRepo,
-		UserActivity:        userActivity,
-		AccessControl:       accessControl,
+		Cfg:             cfg,
+		Logger:          logger,
+		ProductRepo:     productRepo,
+		MeasurementRepo: measurementRepo,
+		VersionRepo:     versionRepo,
+		MetricRepo:      metricRepo,
+		ProcessLogRepo:  processLogRepo,
+		ProcessRepo:     registeredProcessRepo,
+		UserActivity:    userActivity,
+		AccessControl:   accessControl,
 	}
 	productInteractor := usecase.NewProductInteractor(&ps)
 
@@ -89,7 +89,7 @@ func newProductSuite(t *testing.T) *productSuite {
 			versionRepo,
 			metricRepo,
 			processLogRepo,
-			processRegistryRepo,
+			registeredProcessRepo,
 			userActivityRepo,
 			accessControl,
 		},
@@ -143,7 +143,7 @@ func TestCreateProduct(t *testing.T) {
 	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processRegistryRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.mocks.registeredProcessRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 
@@ -404,7 +404,7 @@ func TestCreateProduct_ErrorCreatingProcessLogRepoIndexes(t *testing.T) {
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 	//s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	//s.mocks.processRegistryRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	//s.mocks.registeredProcessRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 	require.ErrorIs(t, err, expectedError)
@@ -439,13 +439,13 @@ func TestCreateProduct_ErrorCreatingVersionRepoIndexes(t *testing.T) {
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 	//s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	//s.mocks.processRegistryRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	//s.mocks.registeredProcessRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 	require.ErrorIs(t, err, expectedError)
 }
 
-func TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes(t *testing.T) {
+func TestCreateProduct_ErrorCreatingRegisteredProcessRepoIndexes(t *testing.T) {
 	s := newProductSuite(t)
 	defer s.ctrl.Finish()
 
@@ -473,7 +473,7 @@ func TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes(t *testing.T) {
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processRegistryRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
+	s.mocks.registeredProcessRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productID, productName, productDescription)
 	require.ErrorIs(t, err, expectedError)

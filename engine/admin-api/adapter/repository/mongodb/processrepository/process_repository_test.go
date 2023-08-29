@@ -1,6 +1,6 @@
 //go:build integration
 
-package processregistry
+package processrepository
 
 import (
 	"context"
@@ -28,19 +28,19 @@ var (
 	testRepoUploadDate = time.Now().Add(-time.Hour).Truncate(time.Millisecond).UTC()
 )
 
-type ProcessRegistryRepositoryTestSuite struct {
+type RegisteredProcessRepositoryTestSuite struct {
 	suite.Suite
-	cfg                 *config.Config
-	mongoDBContainer    testcontainers.Container
-	mongoClient         *mongo.Client
-	processRegistryRepo *ProcessRegistryRepoMongoDB
+	cfg                   *config.Config
+	mongoDBContainer      testcontainers.Container
+	mongoClient           *mongo.Client
+	registeredProcessRepo *RegisteredProcessRepoMongoDB
 }
 
 func TestGocloakTestSuite(t *testing.T) {
-	suite.Run(t, new(ProcessRegistryRepositoryTestSuite))
+	suite.Run(t, new(RegisteredProcessRepositoryTestSuite))
 }
 
-func (s *ProcessRegistryRepositoryTestSuite) SetupSuite() {
+func (s *RegisteredProcessRepositoryTestSuite) SetupSuite() {
 	ctx := context.Background()
 	cfg := &config.Config{}
 	logger := simplelogger.New(simplelogger.LevelInfo)
@@ -76,27 +76,27 @@ func (s *ProcessRegistryRepositoryTestSuite) SetupSuite() {
 	s.cfg = cfg
 	s.mongoDBContainer = mongoDBContainer
 	s.mongoClient = client
-	s.processRegistryRepo = NewProcessRegistryRepoMongoDB(cfg, logger, client)
+	s.registeredProcessRepo = New(cfg, logger, client)
 
-	err = s.processRegistryRepo.CreateIndexes(context.Background(), productID)
+	err = s.registeredProcessRepo.CreateIndexes(context.Background(), productID)
 	s.Require().NoError(err)
 }
 
-func (s *ProcessRegistryRepositoryTestSuite) TearDownSuite() {
+func (s *RegisteredProcessRepositoryTestSuite) TearDownSuite() {
 	s.Require().NoError(s.mongoDBContainer.Terminate(context.Background()))
 }
 
-func (s *ProcessRegistryRepositoryTestSuite) TearDownTest() {
+func (s *RegisteredProcessRepositoryTestSuite) TearDownTest() {
 	filter := bson.D{}
 
 	_, err := s.mongoClient.Database(productID).
-		Collection(processRegistryCollectionName).
+		Collection(registeredProcessesCollectionName).
 		DeleteMany(context.Background(), filter)
 	s.Require().NoError(err)
 }
 
-func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
-	testProcessRegistry := &entity.ProcessRegistry{
+func (s *RegisteredProcessRepositoryTestSuite) TestCreate() {
+	testRegisteredProcess := &entity.RegisteredProcess{
 		ID:         "process_id",
 		Name:       "test_trigger",
 		Version:    processVersion,
@@ -106,24 +106,24 @@ func (s *ProcessRegistryRepositoryTestSuite) TestCreate() {
 		Owner:      ownerID,
 	}
 
-	createdProcessRegistry, err := s.processRegistryRepo.Create(productID, testProcessRegistry)
+	createdRegisteredProcess, err := s.registeredProcessRepo.Create(productID, testRegisteredProcess)
 	s.Require().NoError(err)
 
-	s.Equal(testProcessRegistry, createdProcessRegistry)
+	s.Equal(testRegisteredProcess, createdRegisteredProcess)
 
 	// Check if the version is created in the DB
-	collection := s.mongoClient.Database(productID).Collection(processRegistryCollectionName)
-	filter := bson.M{"_id": createdProcessRegistry.ID}
+	collection := s.mongoClient.Database(productID).Collection(registeredProcessesCollectionName)
+	filter := bson.M{"_id": createdRegisteredProcess.ID}
 
-	var processRegistryDTO processRegistryDTO
-	err = collection.FindOne(context.Background(), filter).Decode(&processRegistryDTO)
+	var registeredProcessDTO registeredProcessDTO
+	err = collection.FindOne(context.Background(), filter).Decode(&registeredProcessDTO)
 	s.Require().NoError(err)
 }
 
-func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
+func (s *RegisteredProcessRepositoryTestSuite) TestListByProductAndType() {
 	ctx := context.Background()
 
-	testTriggerProcess := &entity.ProcessRegistry{
+	testTriggerProcess := &entity.RegisteredProcess{
 		ID:         "test_trigger_id",
 		Name:       "test_trigger",
 		Version:    processVersion,
@@ -133,7 +133,7 @@ func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
 		Owner:      ownerID,
 	}
 
-	testTriggerProcess2 := &entity.ProcessRegistry{
+	testTriggerProcess2 := &entity.RegisteredProcess{
 		ID:         "test_trigger_id_2",
 		Name:       "test_trigger_2",
 		Version:    processVersion,
@@ -143,7 +143,7 @@ func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
 		Owner:      ownerID,
 	}
 
-	testTaskProcess := &entity.ProcessRegistry{
+	testTaskProcess := &entity.RegisteredProcess{
 		ID:         "test_task_id",
 		Name:       "test_task",
 		Version:    processVersion,
@@ -153,34 +153,34 @@ func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithTypeFilter() {
 		Owner:      ownerID,
 	}
 
-	processRegistries := []*entity.ProcessRegistry{
+	registeredProcesses := []*entity.RegisteredProcess{
 		testTriggerProcess,
 		testTriggerProcess2,
 		testTaskProcess,
 	}
 
-	for _, p := range processRegistries {
-		_, err := s.processRegistryRepo.Create(productID, p)
+	for _, p := range registeredProcesses {
+		_, err := s.registeredProcessRepo.Create(productID, p)
 		s.Require().NoError(err)
 	}
 
-	processRegistries, err := s.processRegistryRepo.ListByProductWithTypeFilter(ctx, productID, "task")
+	registeredProcesses, err := s.registeredProcessRepo.ListByProductAndType(ctx, productID, "task")
 	s.Require().NoError(err)
 
-	s.Require().Len(processRegistries, 1)
-	s.Equal(testTaskProcess, processRegistries[0])
+	s.Require().Len(registeredProcesses, 1)
+	s.Equal(testTaskProcess, registeredProcesses[0])
 
-	processRegistries, err = s.processRegistryRepo.ListByProductWithTypeFilter(ctx, productID, "")
+	registeredProcesses, err = s.registeredProcessRepo.ListByProductAndType(ctx, productID, "")
 	s.Require().NoError(err)
 
-	s.Require().Len(processRegistries, 3)
+	s.Require().Len(registeredProcesses, 3)
 }
 
-func (s *ProcessRegistryRepositoryTestSuite) TestListByProductWithUnexistingProduct() {
+func (s *RegisteredProcessRepositoryTestSuite) TestListByProductWithUnexistingProduct() {
 	ctx := context.Background()
 
-	processRegistries, err := s.processRegistryRepo.ListByProductWithTypeFilter(ctx, "unexisting", "task")
+	registeredProcesses, err := s.registeredProcessRepo.ListByProductAndType(ctx, "unexisting", "task")
 	s.Require().NoError(err)
 
-	s.Empty(processRegistries)
+	s.Empty(registeredProcesses)
 }

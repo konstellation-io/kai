@@ -210,7 +210,7 @@ func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*enti
 	return r.versionInteractor.ListVersionsByProduct(ctx, loggedUser, productID)
 }
 
-func (r *queryResolver) ProcessRegistries(ctx context.Context, productID string, processType *string) ([]*entity.ProcessRegistry, error) {
+func (r *queryResolver) RegisteredProcesses(ctx context.Context, productID string, processType *string) ([]*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
 	var processTypeFilter string
@@ -218,7 +218,7 @@ func (r *queryResolver) ProcessRegistries(ctx context.Context, productID string,
 		processTypeFilter = *processType
 	}
 
-	return r.processService.ListByProductWithTypeFilter(ctx, loggedUser, productID, processTypeFilter)
+	return r.processService.ListByProductAndType(ctx, loggedUser, productID, processTypeFilter)
 }
 
 func (r *queryResolver) UserActivityList(
@@ -331,7 +331,7 @@ func (r *versionResolver) PublicationAuthor(_ context.Context, obj *entity.Versi
 	return obj.PublicationAuthor, nil
 }
 
-func (r *processRegistryResolver) UploadDate(_ context.Context, obj *entity.ProcessRegistry) (string, error) {
+func (r *registeredProcessResolver) UploadDate(_ context.Context, obj *entity.RegisteredProcess) (string, error) {
 	return obj.UploadDate.Format(time.RFC3339), nil
 }
 
@@ -353,8 +353,10 @@ func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityRes
 // Version returns VersionResolver implementation.
 func (r *Resolver) Version() VersionResolver { return &versionResolver{r} }
 
-// ProcessRegistry returns ProcessRegistryResolver implementation.
-func (r *Resolver) ProcessRegistry() ProcessRegistryResolver { return &processRegistryResolver{r} }
+// RegisteredProcess returns RegisteredProcessResolver implementation.
+func (r *Resolver) RegisteredProcess() RegisteredProcessResolver {
+	return &registeredProcessResolver{r}
+}
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
@@ -362,4 +364,4 @@ type productResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userActivityResolver struct{ *Resolver }
 type versionResolver struct{ *Resolver }
-type processRegistryResolver struct{ *Resolver }
+type registeredProcessResolver struct{ *Resolver }

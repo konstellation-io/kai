@@ -2,7 +2,7 @@ package entity
 
 import "time"
 
-type ProcessRegistry struct {
+type RegisteredProcess struct {
 	ID         string
 	Name       string
 	Version    string

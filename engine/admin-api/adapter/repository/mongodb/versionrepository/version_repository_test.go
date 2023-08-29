@@ -1,6 +1,6 @@
 //go:build integration
 
-package version
+package versionrepository
 
 import (
 	"context"
@@ -75,7 +75,7 @@ func (s *VersionRepositoryTestSuite) SetupSuite() {
 	s.cfg = cfg
 	s.mongoDBContainer = mongoDBContainer
 	s.mongoClient = client
-	s.versionRepo = NewVersionRepoMongoDB(cfg, logger, client)
+	s.versionRepo = New(cfg, logger, client)
 
 	err = s.versionRepo.CreateIndexes(context.Background(), productID)
 	s.Require().NoError(err)

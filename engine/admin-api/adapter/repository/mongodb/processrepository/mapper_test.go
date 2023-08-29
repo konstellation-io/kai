@@ -1,6 +1,6 @@
 //go:build unit
 
-package processregistry
+package processrepository
 
 import (
 	"testing"
@@ -16,7 +16,7 @@ var (
 	testMapperUploadDate = time.Now().Add(-time.Hour).Truncate(time.Millisecond).UTC()
 )
 
-var domainProcessRegistry = &entity.ProcessRegistry{
+var domainRegisteredProcess = &entity.RegisteredProcess{
 	ID:         "id_process",
 	Name:       "test_trigger",
 	Version:    "1.0.0",
@@ -26,7 +26,7 @@ var domainProcessRegistry = &entity.ProcessRegistry{
 	Owner:      userID,
 }
 
-var DTOProcessRegistry = &processRegistryDTO{
+var DTORegisteredProcess = &registeredProcessDTO{
 	ID:         "id_process",
 	Name:       "test_trigger",
 	Version:    "1.0.0",
@@ -37,11 +37,11 @@ var DTOProcessRegistry = &processRegistryDTO{
 }
 
 func TestMapDTOToEntity(t *testing.T) {
-	obtainedDomainProcessRegistry := mapDTOToEntity(DTOProcessRegistry)
-	assert.Equal(t, domainProcessRegistry, obtainedDomainProcessRegistry)
+	obtainedDomainRegisteredProcess := mapDTOToEntity(DTORegisteredProcess)
+	assert.Equal(t, domainRegisteredProcess, obtainedDomainRegisteredProcess)
 }
 
 func TestMapEntityToDTO(t *testing.T) {
-	obtainedDTOProcessRegistry := mapEntityToDTO(domainProcessRegistry)
-	assert.Equal(t, DTOProcessRegistry, obtainedDTOProcessRegistry)
+	obtainedDTORegisteredProcess := mapEntityToDTO(domainRegisteredProcess)
+	assert.Equal(t, DTORegisteredProcess, obtainedDTORegisteredProcess)
 }

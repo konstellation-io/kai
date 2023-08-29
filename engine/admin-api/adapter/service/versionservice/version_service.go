@@ -1,4 +1,4 @@
-package k8smanager
+package versionservice
 
 import (
 	"context"
@@ -16,18 +16,18 @@ import (
 
 //go:generate mockgen -source=../proto/versionpb/version_grpc.pb.go -destination=../../../mocks/${GOFILE} -package=mocks
 
-const _requestTimeout = 1 * time.Minute
+const _requestTimeout = 5 * time.Minute // TODO: move this to viper config
 
-type K8sVersionClient struct {
+type K8sVersionService struct {
 	cfg    *config.Config
 	client versionpb.VersionServiceClient
 	logger logging.Logger
 }
 
-var _ service.K8sService = (*K8sVersionClient)(nil)
+var _ service.VersionService = (*K8sVersionService)(nil)
 
-func NewK8sVersionClient(cfg *config.Config, logger logging.Logger, client versionpb.VersionServiceClient) (*K8sVersionClient, error) {
-	return &K8sVersionClient{
+func New(cfg *config.Config, logger logging.Logger, client versionpb.VersionServiceClient) (*K8sVersionService, error) {
+	return &K8sVersionService{
 		cfg,
 		client,
 		logger,
@@ -35,7 +35,7 @@ func NewK8sVersionClient(cfg *config.Config, logger logging.Logger, client versi
 }
 
 // Start creates the version resources in k8s.
-func (k *K8sVersionClient) Start(
+func (k *K8sVersionService) Start(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
@@ -58,7 +58,7 @@ func (k *K8sVersionClient) Start(
 	return err
 }
 
-func (k *K8sVersionClient) Stop(ctx context.Context, productID string, version *entity.Version) error {
+func (k *K8sVersionService) Stop(ctx context.Context, productID string, version *entity.Version) error {
 	req := versionpb.StopRequest{
 		Product:    productID,
 		VersionTag: version.Tag,
@@ -72,7 +72,7 @@ func (k *K8sVersionClient) Stop(ctx context.Context, productID string, version *
 	return nil
 }
 
-func (k *K8sVersionClient) Unpublish(ctx context.Context, productID string, version *entity.Version) error {
+func (k *K8sVersionService) Unpublish(ctx context.Context, productID string, version *entity.Version) error {
 	req := versionpb.UnpublishRequest{
 		Product:    productID,
 		VersionTag: version.Tag,
@@ -86,7 +86,7 @@ func (k *K8sVersionClient) Unpublish(ctx context.Context, productID string, vers
 	return err
 }
 
-func (k *K8sVersionClient) Publish(ctx context.Context, productID string, version *entity.Version) error {
+func (k *K8sVersionService) Publish(ctx context.Context, productID string, version *entity.Version) error {
 	req := versionpb.PublishRequest{
 		Product:    productID,
 		VersionTag: version.Tag,
@@ -100,7 +100,7 @@ func (k *K8sVersionClient) Publish(ctx context.Context, productID string, versio
 	return err
 }
 
-func (k *K8sVersionClient) WatchProcessStatus(ctx context.Context, productID, versionTag string) (<-chan *entity.Process, error) {
+func (k *K8sVersionService) WatchProcessStatus(ctx context.Context, productID, versionTag string) (<-chan *entity.Process, error) {
 	stream, err := k.client.WatchProcessStatus(ctx, &versionpb.ProcessStatusRequest{
 		VersionTag: versionTag,
 		ProductId:  productID,
@@ -153,7 +153,7 @@ func (k *K8sVersionClient) WatchProcessStatus(ctx context.Context, productID, ve
 	return ch, nil
 }
 
-func (k *K8sVersionClient) RegisterProcess(ctx context.Context, product, version, process string, file []byte) (string, error) {
+func (k *K8sVersionService) RegisterProcess(ctx context.Context, product, version, process string, file []byte) (string, error) {
 	res, err := k.client.RegisterProcess(ctx, &versionpb.RegisterProcessRequest{
 		Product: product,
 		Version: version,

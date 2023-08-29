@@ -23,9 +23,9 @@ var (
 )
 
 type ProcessService struct {
-	logger                    logr.Logger
-	processRegistryRepository repository.ProcessRegistryRepo
-	processRegistry           service.K8sService
+	logger            logr.Logger
+	processRepository repository.ProcessRepository
+	versionService    service.VersionService
 }
 
 type ProcessMetadata struct {
@@ -34,13 +34,13 @@ type ProcessMetadata struct {
 
 func NewProcessService(
 	logger logr.Logger,
-	k8sService service.K8sService,
-	processRegistryRepository repository.ProcessRegistryRepo,
+	k8sService service.VersionService,
+	processRepository repository.ProcessRepository,
 ) *ProcessService {
 	return &ProcessService{
-		logger:                    logger,
-		processRegistry:           k8sService,
-		processRegistryRepository: processRegistryRepository,
+		logger:            logger,
+		versionService:    k8sService,
+		processRepository: processRepository,
 	}
 }
 
@@ -69,13 +69,13 @@ func (ps *ProcessService) RegisterProcess(
 		return "", fmt.Errorf("opening process compressed file: %w", err)
 	}
 
-	processRef, err := ps.processRegistry.RegisterProcess(ctx, product, version, process, compressedFile)
+	processRef, err := ps.versionService.RegisterProcess(ctx, product, version, process, compressedFile)
 	if err != nil {
 		return "", fmt.Errorf("registering process: %w", err)
 	}
 
 	processID := ps.getProcessID(processRef)
-	registeredProcess := &entity.ProcessRegistry{
+	registeredProcess := &entity.RegisteredProcess{
 		ID:         processID,
 		Name:       process,
 		Version:    version,
@@ -85,12 +85,12 @@ func (ps *ProcessService) RegisterProcess(
 		Owner:      user.ID,
 	}
 
-	_, err = ps.processRegistryRepository.Create(product, registeredProcess)
+	_, err = ps.processRepository.Create(product, registeredProcess)
 	if err != nil {
 		return "", fmt.Errorf("saving process registry in db: %w", err)
 	}
 
-	ps.logger.Info("Registered process", "processRef", processRef)
+	ps.logger.Info("Registered process with ID:", processID)
 
 	return processID, nil
 }
@@ -106,16 +106,21 @@ func (ps *ProcessService) getProcessID(processRef string) string {
 	return split[1]
 }
 
-func (ps *ProcessService) ListByProductWithTypeFilter(
+func (ps *ProcessService) ListByProductAndType(
 	ctx context.Context,
 	user *entity.User,
 	productID, processType string,
-) ([]*entity.ProcessRegistry, error) {
-	ps.logger.Info("Retrieving process for product %q with process type filter %q", productID, processType)
+) ([]*entity.RegisteredProcess, error) {
+	log := fmt.Sprintf("Retrieving process for product %q", productID)
+	if processType != "" {
+		log = fmt.Sprintf("%s with process type filter %q", log, processType)
+	}
+
+	ps.logger.Info(log)
 
 	if processType != "" && !entity.ProcessType(processType).IsValid() {
 		return nil, fmt.Errorf("%w: %s", ErrInvalidProcessType, processType)
 	}
 
-	return ps.processRegistryRepository.ListByProductWithTypeFilter(ctx, productID, processType)
+	return ps.processRepository.ListByProductAndType(ctx, productID, processType)
 }

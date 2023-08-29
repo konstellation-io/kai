@@ -1,4 +1,4 @@
-package version
+package versionrepository
 
 import (
 	"context"
@@ -28,7 +28,7 @@ type VersionRepoMongoDB struct {
 	client *mongo.Client
 }
 
-func NewVersionRepoMongoDB(
+func New(
 	cfg *config.Config,
 	logger logging.Logger,
 	client *mongo.Client,

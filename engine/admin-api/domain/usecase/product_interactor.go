@@ -20,29 +20,29 @@ var (
 
 // ProductInteractor contains app logic to handle Product entities.
 type ProductInteractor struct {
-	cfg                 *config.Config
-	logger              logging.Logger
-	productRepo         repository.ProductRepo
-	measurementRepo     repository.MeasurementRepo
-	versionRepo         repository.VersionRepo
-	metricRepo          repository.MetricRepo
-	processLogRepo      repository.ProcessLogRepository
-	processRegistryRepo repository.ProcessRegistryRepo
-	userActivity        UserActivityInteracter
-	accessControl       auth.AccessControl
+	cfg             *config.Config
+	logger          logging.Logger
+	productRepo     repository.ProductRepo
+	measurementRepo repository.MeasurementRepo
+	versionRepo     repository.VersionRepo
+	metricRepo      repository.MetricRepo
+	processLogRepo  repository.ProcessLogRepository
+	processRepo     repository.ProcessRepository
+	userActivity    UserActivityInteracter
+	accessControl   auth.AccessControl
 }
 
 type ProductInteractorOpts struct {
-	Cfg                 *config.Config
-	Logger              logging.Logger
-	ProductRepo         repository.ProductRepo
-	MeasurementRepo     repository.MeasurementRepo
-	VersionRepo         repository.VersionRepo
-	MetricRepo          repository.MetricRepo
-	ProcessLogRepo      repository.ProcessLogRepository
-	ProcessRegistryRepo repository.ProcessRegistryRepo
-	UserActivity        UserActivityInteracter
-	AccessControl       auth.AccessControl
+	Cfg             *config.Config
+	Logger          logging.Logger
+	ProductRepo     repository.ProductRepo
+	MeasurementRepo repository.MeasurementRepo
+	VersionRepo     repository.VersionRepo
+	MetricRepo      repository.MetricRepo
+	ProcessLogRepo  repository.ProcessLogRepository
+	ProcessRepo     repository.ProcessRepository
+	UserActivity    UserActivityInteracter
+	AccessControl   auth.AccessControl
 }
 
 // NewProductInteractor creates a new ProductInteractor.
@@ -55,7 +55,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.VersionRepo,
 		ps.MetricRepo,
 		ps.ProcessLogRepo,
-		ps.ProcessRegistryRepo,
+		ps.ProcessRepo,
 		ps.UserActivity,
 		ps.AccessControl,
 	}
@@ -112,14 +112,14 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	i.logger.Info("Product stored in the database with ID=" + createdProduct.ID)
+	i.logger.Info("Product stored in the database with ID:" + createdProduct.ID)
 
 	err = i.measurementRepo.CreateDatabase(createdProduct.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	i.logger.Info("Measurement database created for product with ID=" + createdProduct.ID)
+	i.logger.Info("Measurement database created for product with ID:" + createdProduct.ID)
 
 	err = i.createDatabaseIndexes(ctx, productID)
 	if err != nil {
@@ -145,7 +145,7 @@ func (i *ProductInteractor) createDatabaseIndexes(ctx context.Context, productID
 		return err
 	}
 
-	err = i.processRegistryRepo.CreateIndexes(ctx, productID)
+	err = i.processRepo.CreateIndexes(ctx, productID)
 	if err != nil {
 		return err
 	}

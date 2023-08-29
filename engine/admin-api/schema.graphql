@@ -5,7 +5,7 @@ type Query {
   products: [Product!]!
   version(name: String!, productID: ID!): Version!
   versions(productID: ID!): [Version!]!
-  processRegistries(productID: ID!, processType: String): [ProcessRegistry]!
+  registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
   userActivityList(
     userEmail: String
     types: [UserActivityType!]
@@ -45,7 +45,7 @@ type Mutation {
   registerProcess(input: RegisterProcessInput!): RegisteredImage!
 }
 
-type ProcessRegistry {
+type RegisteredProcess {
   id: ID!
   name: String!
   version: String!

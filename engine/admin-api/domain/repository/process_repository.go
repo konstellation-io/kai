@@ -8,8 +8,8 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-type ProcessRegistryRepo interface {
+type ProcessRepository interface {
 	CreateIndexes(ctx context.Context, productID string) error
-	Create(productID string, newProcessRegistry *entity.ProcessRegistry) (*entity.ProcessRegistry, error)
-	ListByProductWithTypeFilter(ctx context.Context, productID, processType string) ([]*entity.ProcessRegistry, error)
+	Create(productID string, newRegisteredProcess *entity.RegisteredProcess) (*entity.RegisteredProcess, error)
+	ListByProductAndType(ctx context.Context, productID, processType string) ([]*entity.RegisteredProcess, error)
 }

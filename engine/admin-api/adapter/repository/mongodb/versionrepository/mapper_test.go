@@ -1,6 +1,6 @@
 //go:build unit
 
-package version
+package versionrepository
 
 import (
 	"testing"

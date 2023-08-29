@@ -12,46 +12,46 @@ import (
 	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-// MockProcessRegistryRepo is a mock of ProcessRegistryRepo interface.
-type MockProcessRegistryRepo struct {
+// MockRegisteredProcessRepo is a mock of RegisteredProcessRepo interface.
+type MockRegisteredProcessRepo struct {
 	ctrl     *gomock.Controller
-	recorder *MockProcessRegistryRepoMockRecorder
+	recorder *MockRegisteredProcessRepoMockRecorder
 }
 
-// MockProcessRegistryRepoMockRecorder is the mock recorder for MockProcessRegistryRepo.
-type MockProcessRegistryRepoMockRecorder struct {
-	mock *MockProcessRegistryRepo
+// MockRegisteredProcessRepoMockRecorder is the mock recorder for MockRegisteredProcessRepo.
+type MockRegisteredProcessRepoMockRecorder struct {
+	mock *MockRegisteredProcessRepo
 }
 
-// NewMockProcessRegistryRepo creates a new mock instance.
-func NewMockProcessRegistryRepo(ctrl *gomock.Controller) *MockProcessRegistryRepo {
-	mock := &MockProcessRegistryRepo{ctrl: ctrl}
-	mock.recorder = &MockProcessRegistryRepoMockRecorder{mock}
+// NewMockRegisteredProcessRepo creates a new mock instance.
+func NewMockRegisteredProcessRepo(ctrl *gomock.Controller) *MockRegisteredProcessRepo {
+	mock := &MockRegisteredProcessRepo{ctrl: ctrl}
+	mock.recorder = &MockRegisteredProcessRepoMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockProcessRegistryRepo) EXPECT() *MockProcessRegistryRepoMockRecorder {
+func (m *MockRegisteredProcessRepo) EXPECT() *MockRegisteredProcessRepoMockRecorder {
 	return m.recorder
 }
 
 // Create mocks base method.
-func (m *MockProcessRegistryRepo) Create(productID string, newProcessRegistry *entity.ProcessRegistry) (*entity.ProcessRegistry, error) {
+func (m *MockRegisteredProcessRepo) Create(productID string, newRegisteredProcess *entity.RegisteredProcess) (*entity.RegisteredProcess, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", productID, newProcessRegistry)
-	ret0, _ := ret[0].(*entity.ProcessRegistry)
+	ret := m.ctrl.Call(m, "Create", productID, newRegisteredProcess)
+	ret0, _ := ret[0].(*entity.RegisteredProcess)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockProcessRegistryRepoMockRecorder) Create(productID, newProcessRegistry interface{}) *gomock.Call {
+func (mr *MockRegisteredProcessRepoMockRecorder) Create(productID, newRegisteredProcess interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProcessRegistryRepo)(nil).Create), productID, newProcessRegistry)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRegisteredProcessRepo)(nil).Create), productID, newRegisteredProcess)
 }
 
 // CreateIndexes mocks base method.
-func (m *MockProcessRegistryRepo) CreateIndexes(ctx context.Context, productID string) error {
+func (m *MockRegisteredProcessRepo) CreateIndexes(ctx context.Context, productID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateIndexes", ctx, productID)
 	ret0, _ := ret[0].(error)
@@ -59,22 +59,22 @@ func (m *MockProcessRegistryRepo) CreateIndexes(ctx context.Context, productID s
 }
 
 // CreateIndexes indicates an expected call of CreateIndexes.
-func (mr *MockProcessRegistryRepoMockRecorder) CreateIndexes(ctx, productID interface{}) *gomock.Call {
+func (mr *MockRegisteredProcessRepoMockRecorder) CreateIndexes(ctx, productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockProcessRegistryRepo)(nil).CreateIndexes), ctx, productID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockRegisteredProcessRepo)(nil).CreateIndexes), ctx, productID)
 }
 
-// ListByProductWithTypeFilter mocks base method.
-func (m *MockProcessRegistryRepo) ListByProductWithTypeFilter(ctx context.Context, productID, processType string) ([]*entity.ProcessRegistry, error) {
+// ListByProductAndType mocks base method.
+func (m *MockRegisteredProcessRepo) ListByProductAndType(ctx context.Context, productID, processType string) ([]*entity.RegisteredProcess, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListByProductWithTypeFilter", ctx, productID, processType)
-	ret0, _ := ret[0].([]*entity.ProcessRegistry)
+	ret := m.ctrl.Call(m, "ListByProductAndType", ctx, productID, processType)
+	ret0, _ := ret[0].([]*entity.RegisteredProcess)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListByProductWithTypeFilter indicates an expected call of ListByProductWithTypeFilter.
-func (mr *MockProcessRegistryRepoMockRecorder) ListByProductWithTypeFilter(ctx, productID, processType interface{}) *gomock.Call {
+// ListByProductAndType indicates an expected call of ListByProductAndType.
+func (mr *MockRegisteredProcessRepoMockRecorder) ListByProductAndType(ctx, productID, processType interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByProductWithTypeFilter", reflect.TypeOf((*MockProcessRegistryRepo)(nil).ListByProductWithTypeFilter), ctx, productID, processType)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByProductAndType", reflect.TypeOf((*MockRegisteredProcessRepo)(nil).ListByProductAndType), ctx, productID, processType)
 }

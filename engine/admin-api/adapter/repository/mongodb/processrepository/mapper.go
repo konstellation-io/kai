@@ -1,11 +1,11 @@
-package processregistry
+package processrepository
 
 import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-func mapDTOToEntity(dto *processRegistryDTO) *entity.ProcessRegistry {
-	return &entity.ProcessRegistry{
+func mapDTOToEntity(dto *registeredProcessDTO) *entity.RegisteredProcess {
+	return &entity.RegisteredProcess{
 		ID:         dto.ID,
 		Name:       dto.Name,
 		Version:    dto.Version,
@@ -16,8 +16,8 @@ func mapDTOToEntity(dto *processRegistryDTO) *entity.ProcessRegistry {
 	}
 }
 
-func mapEntityToDTO(processEntity *entity.ProcessRegistry) *processRegistryDTO {
-	return &processRegistryDTO{
+func mapEntityToDTO(processEntity *entity.RegisteredProcess) *registeredProcessDTO {
+	return &registeredProcessDTO{
 		ID:         processEntity.ID,
 		Name:       processEntity.Name,
 		Version:    processEntity.Version,

@@ -1,6 +1,6 @@
 //go:build unit
 
-package k8smanager_test
+package versionservice_test
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/k8smanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
@@ -48,7 +48,7 @@ type StartVersionTestSuite struct {
 	cfg              *config.Config
 	logger           logging.Logger
 	mockService      *mocks.MockVersionServiceClient
-	k8sVersionClient *k8smanager.K8sVersionClient
+	k8sVersionClient *versionservice.K8sVersionService
 }
 
 func TestStartVersionTestSuite(t *testing.T) {
@@ -62,7 +62,7 @@ func (s *StartVersionTestSuite) SetupSuite() {
 	mocks.AddLoggerExpects(logger)
 	service := mocks.NewMockVersionServiceClient(mockController)
 
-	k8sVersionClient, err := k8smanager.NewK8sVersionClient(cfg, logger, service)
+	k8sVersionClient, err := versionservice.New(cfg, logger, service)
 	s.Require().NoError(err)
 
 	s.cfg = cfg
