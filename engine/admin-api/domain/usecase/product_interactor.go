@@ -70,12 +70,12 @@ func (i *ProductInteractor) CreateProduct(
 	}
 
 	// Sanitize input params
-	productID = strings.TrimSpace(productID)
+	//productID = strings.TrimSpace(productID)
 	name = strings.TrimSpace(name)
 	description = strings.TrimSpace(description)
 
 	r := &entity.Product{
-		ID:          productID,
+		ID:          name,
 		Name:        name,
 		Description: description,
 		Owner:       user.ID,
@@ -87,16 +87,16 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	// Check if the Product already exists
-	productFromDB, err := i.productRepo.GetByID(ctx, productID)
-	if productFromDB != nil {
-		return nil, ErrProductDuplicated
-	} else if !errors.Is(err, ErrProductNotFound) {
-		return nil, err
-	}
+	//// Check if the Product already exists
+	//productFromDB, err := i.productRepo.GetByID(ctx, productID)
+	//if productFromDB != nil {
+	//	return nil, ErrProductDuplicated
+	//} else if !errors.Is(err, ErrProductNotFound) {
+	//	return nil, err
+	//}
 
 	// Check if there is another Product with the same name
-	productFromDB, err = i.productRepo.GetByName(ctx, name)
+	productFromDB, err := i.productRepo.GetByName(ctx, name)
 	if productFromDB != nil {
 		return nil, ErrProductDuplicatedName
 	} else if !errors.Is(err, ErrProductNotFound) {
@@ -108,16 +108,16 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	i.logger.Info("Product stored in the database with ID=" + createdProduct.ID)
+	i.logger.Info("Product stored in the database with ID=" + createdProduct.Name)
 
-	err = i.measurementRepo.CreateDatabase(createdProduct.ID)
+	err = i.measurementRepo.CreateDatabase(createdProduct.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	i.logger.Info("Measurement database created for product with ID=" + createdProduct.ID)
+	i.logger.Info("Measurement database created for product with ID=" + createdProduct.Name)
 
-	err = i.createDatabaseIndexes(ctx, productID)
+	err = i.createDatabaseIndexes(ctx, name)
 	if err != nil {
 		return nil, err
 	}
