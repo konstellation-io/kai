@@ -244,7 +244,7 @@ func (s *ProcessServiceTestSuite) TestListByProduct_WithTypeFilter() {
 	s.Equal(expectedRegisteredProcess, returnedRegisteredProcess)
 }
 
-func (s *ProcessServiceTestSuite) TestListByProductWithNoTypeFilter() {
+func (s *ProcessServiceTestSuite) TestListByProduct_NoTypeFilter() {
 	ctx := context.Background()
 
 	typeFilter := ""
@@ -268,10 +268,10 @@ func (s *ProcessServiceTestSuite) TestListByProductWithNoTypeFilter() {
 	s.Equal(expectedRegisteredProcess, returnedRegisteredProcess)
 }
 
-func (s *ProcessServiceTestSuite) TestListByProductWithTypeFilterInvalidFilter() {
+func (s *ProcessServiceTestSuite) TestListByProduct_InvalidTypeFilterFilter() {
 	ctx := context.Background()
 
-	typeFilter := "invlaid"
+	typeFilter := "Kazuma Kiryu"
 
 	_, err := s.processInteractor.ListByProductAndType(ctx, user, productID, typeFilter)
 	s.Require().Error(err)
