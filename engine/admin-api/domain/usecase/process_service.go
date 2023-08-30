@@ -101,6 +101,7 @@ func (ps *ProcessService) getProcessID(processRef string) string {
 		ps.logger.Info(
 			fmt.Sprintf("WARNING: invalid process reference %q, defaulting to use whole process reference", processRef),
 		)
+
 		return processRef
 	}
 
