@@ -56,7 +56,7 @@ func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbCli
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
 	versionMongoRepo := versionrepository.New(cfg, logger, mongodbClient)
 	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, logger, mongodbClient)
-	registeredProcessRepo := processrepository.New(cfg, logger, mongodbClient)
+	processRepo := processrepository.New(cfg, logger, mongodbClient)
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
 
@@ -112,7 +112,7 @@ func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbCli
 		VersionRepo:     versionMongoRepo,
 		MetricRepo:      metricRepo,
 		ProcessLogRepo:  processLogRepo,
-		ProcessRepo:     registeredProcessRepo,
+		ProcessRepo:     processRepo,
 		UserActivity:    userActivityInteractor,
 		AccessControl:   accessControl,
 	}
@@ -154,7 +154,7 @@ func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbCli
 	l := zapr.NewLogger(zapLog)
 	serverInfoGetter := usecase.NewServerInfoGetter(l, accessControl)
 
-	processService := usecase.NewProcessService(l, k8sService, registeredProcessRepo)
+	processService := usecase.NewProcessService(l, k8sService, processRepo)
 
 	return controller.NewGraphQLController(
 		controller.Params{

@@ -28,19 +28,19 @@ var (
 	testRepoUploadDate = time.Now().Add(-time.Hour).Truncate(time.Millisecond).UTC()
 )
 
-type RegisteredProcessRepositoryTestSuite struct {
+type ProcessRepositoryTestSuite struct {
 	suite.Suite
-	cfg                   *config.Config
-	mongoDBContainer      testcontainers.Container
-	mongoClient           *mongo.Client
-	registeredProcessRepo *RegisteredProcessRepoMongoDB
+	cfg              *config.Config
+	mongoDBContainer testcontainers.Container
+	mongoClient      *mongo.Client
+	processRepo      *ProcessRepositoryMongoDB
 }
 
 func TestGocloakTestSuite(t *testing.T) {
-	suite.Run(t, new(RegisteredProcessRepositoryTestSuite))
+	suite.Run(t, new(ProcessRepositoryTestSuite))
 }
 
-func (s *RegisteredProcessRepositoryTestSuite) SetupSuite() {
+func (s *ProcessRepositoryTestSuite) SetupSuite() {
 	ctx := context.Background()
 	cfg := &config.Config{}
 	logger := simplelogger.New(simplelogger.LevelInfo)
@@ -76,17 +76,17 @@ func (s *RegisteredProcessRepositoryTestSuite) SetupSuite() {
 	s.cfg = cfg
 	s.mongoDBContainer = mongoDBContainer
 	s.mongoClient = client
-	s.registeredProcessRepo = New(cfg, logger, client)
+	s.processRepo = New(cfg, logger, client)
 
-	err = s.registeredProcessRepo.CreateIndexes(context.Background(), productID)
+	err = s.processRepo.CreateIndexes(context.Background(), productID)
 	s.Require().NoError(err)
 }
 
-func (s *RegisteredProcessRepositoryTestSuite) TearDownSuite() {
+func (s *ProcessRepositoryTestSuite) TearDownSuite() {
 	s.Require().NoError(s.mongoDBContainer.Terminate(context.Background()))
 }
 
-func (s *RegisteredProcessRepositoryTestSuite) TearDownTest() {
+func (s *ProcessRepositoryTestSuite) TearDownTest() {
 	filter := bson.D{}
 
 	_, err := s.mongoClient.Database(productID).
@@ -95,7 +95,7 @@ func (s *RegisteredProcessRepositoryTestSuite) TearDownTest() {
 	s.Require().NoError(err)
 }
 
-func (s *RegisteredProcessRepositoryTestSuite) TestCreate() {
+func (s *ProcessRepositoryTestSuite) TestCreate() {
 	testRegisteredProcess := &entity.RegisteredProcess{
 		ID:         "process_id",
 		Name:       "test_trigger",
@@ -106,7 +106,7 @@ func (s *RegisteredProcessRepositoryTestSuite) TestCreate() {
 		Owner:      ownerID,
 	}
 
-	createdRegisteredProcess, err := s.registeredProcessRepo.Create(productID, testRegisteredProcess)
+	createdRegisteredProcess, err := s.processRepo.Create(productID, testRegisteredProcess)
 	s.Require().NoError(err)
 
 	s.Equal(testRegisteredProcess, createdRegisteredProcess)
@@ -120,7 +120,7 @@ func (s *RegisteredProcessRepositoryTestSuite) TestCreate() {
 	s.Require().NoError(err)
 }
 
-func (s *RegisteredProcessRepositoryTestSuite) TestListByProductAndType() {
+func (s *ProcessRepositoryTestSuite) TestListByProductAndType() {
 	ctx := context.Background()
 
 	testTriggerProcess := &entity.RegisteredProcess{
@@ -160,26 +160,26 @@ func (s *RegisteredProcessRepositoryTestSuite) TestListByProductAndType() {
 	}
 
 	for _, p := range registeredProcesses {
-		_, err := s.registeredProcessRepo.Create(productID, p)
+		_, err := s.processRepo.Create(productID, p)
 		s.Require().NoError(err)
 	}
 
-	registeredProcesses, err := s.registeredProcessRepo.ListByProductAndType(ctx, productID, "task")
+	registeredProcesses, err := s.processRepo.ListByProductAndType(ctx, productID, "task")
 	s.Require().NoError(err)
 
 	s.Require().Len(registeredProcesses, 1)
 	s.Equal(testTaskProcess, registeredProcesses[0])
 
-	registeredProcesses, err = s.registeredProcessRepo.ListByProductAndType(ctx, productID, "")
+	registeredProcesses, err = s.processRepo.ListByProductAndType(ctx, productID, "")
 	s.Require().NoError(err)
 
 	s.Require().Len(registeredProcesses, 3)
 }
 
-func (s *RegisteredProcessRepositoryTestSuite) TestListByProductWithUnexistingProduct() {
+func (s *ProcessRepositoryTestSuite) TestListByProductWithUnexistingProduct() {
 	ctx := context.Background()
 
-	registeredProcesses, err := s.registeredProcessRepo.ListByProductAndType(ctx, "unexisting", "task")
+	registeredProcesses, err := s.processRepo.ListByProductAndType(ctx, "unexisting", "task")
 	s.Require().NoError(err)
 
 	s.Empty(registeredProcesses)

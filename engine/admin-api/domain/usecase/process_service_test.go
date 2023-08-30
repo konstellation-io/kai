@@ -45,10 +45,10 @@ func (m registeredProcessMatcher) Matches(actual interface{}) bool {
 
 type ProcessServiceTestSuite struct {
 	suite.Suite
-	ctrl                  *gomock.Controller
-	registeredProcessRepo *mocks.MockRegisteredProcessRepo
-	k8sService            *mocks.MockK8sService
-	processInteractor     *usecase.ProcessService
+	ctrl              *gomock.Controller
+	processRepo       *mocks.MockProcessRepository
+	versionService    *mocks.MockVersionService
+	processInteractor *usecase.ProcessService
 }
 
 const (
@@ -78,9 +78,9 @@ func TestProcessTestSuite(t *testing.T) {
 func (s *ProcessServiceTestSuite) SetupSuite() {
 	logger := zapr.NewLogger(zap.NewNop())
 	s.ctrl = gomock.NewController(s.T())
-	s.registeredProcessRepo = mocks.NewMockRegisteredProcessRepo(s.ctrl)
-	s.k8sService = mocks.NewMockK8sService(s.ctrl)
-	s.processInteractor = usecase.NewProcessService(logger, s.k8sService, s.registeredProcessRepo)
+	s.processRepo = mocks.NewMockProcessRepository(s.ctrl)
+	s.versionService = mocks.NewMockVersionService(s.ctrl)
+	s.processInteractor = usecase.NewProcessService(logger, s.versionService, s.processRepo)
 
 	monkey.Patch(time.Now, func() time.Time {
 		return time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -115,8 +115,8 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	}
 	customMatcher := newregisteredProcessMatcher(expectedRegisteredProcess)
 
-	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return(mockedRef, nil)
-	s.registeredProcessRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
+	s.versionService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return(mockedRef, nil)
+	s.processRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
 
 	returnedID, err := s.processInteractor.RegisterProcess(
 		ctx, user, productID, version, processName, processType, testFile,
@@ -148,7 +148,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
 	expectedBytes, err := os.ReadFile(testFileAddr)
 	s.Require().NoError(err)
 
-	s.k8sService.EXPECT().
+	s.versionService.EXPECT().
 		RegisterProcess(ctx, productID, version, processName, expectedBytes).
 		Return("", fmt.Errorf("mocked error"))
 
@@ -180,8 +180,8 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 	}
 	customMatcher := newregisteredProcessMatcher(expectedRegisteredProcess)
 
-	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return(mockedRef, nil)
-	s.registeredProcessRepo.EXPECT().Create(productID, customMatcher).Return(nil, fmt.Errorf("mocked error"))
+	s.versionService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return(mockedRef, nil)
+	s.processRepo.EXPECT().Create(productID, customMatcher).Return(nil, fmt.Errorf("mocked error"))
 
 	returnedRef, err := s.processInteractor.RegisterProcess(
 		ctx, user, productID, version, processName, processType, testFile,
@@ -211,8 +211,8 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_InvalidProcessRef() {
 	}
 	customMatcher := newregisteredProcessMatcher(expectedRegisteredProcess)
 
-	s.k8sService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return(invalidRef, nil)
-	s.registeredProcessRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
+	s.versionService.EXPECT().RegisterProcess(ctx, productID, version, processName, expectedBytes).Return(invalidRef, nil)
+	s.processRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
 
 	_, err = s.processInteractor.RegisterProcess(
 		ctx, user, productID, version, processName, processType, testFile,
@@ -236,7 +236,7 @@ func (s *ProcessServiceTestSuite) TestListByProduct_WithTypeFilter() {
 		},
 	}
 
-	s.registeredProcessRepo.EXPECT().ListByProductAndType(ctx, productID, typeFilter).Return(expectedRegisteredProcess, nil)
+	s.processRepo.EXPECT().ListByProductAndType(ctx, productID, typeFilter).Return(expectedRegisteredProcess, nil)
 
 	returnedRegisteredProcess, err := s.processInteractor.ListByProductAndType(ctx, user, productID, typeFilter)
 	s.Require().NoError(err)
@@ -260,7 +260,7 @@ func (s *ProcessServiceTestSuite) TestListByProductWithNoTypeFilter() {
 		},
 	}
 
-	s.registeredProcessRepo.EXPECT().ListByProductAndType(ctx, productID, typeFilter).Return(expectedRegisteredProcess, nil)
+	s.processRepo.EXPECT().ListByProductAndType(ctx, productID, typeFilter).Return(expectedRegisteredProcess, nil)
 
 	returnedRegisteredProcess, err := s.processInteractor.ListByProductAndType(ctx, user, productID, "")
 	s.Require().NoError(err)

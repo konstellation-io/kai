@@ -14,7 +14,7 @@ import (
 
 const registeredProcessesCollectionName = "registered_processes"
 
-type RegisteredProcessRepoMongoDB struct {
+type ProcessRepositoryMongoDB struct {
 	cfg    *config.Config
 	logger logging.Logger
 	client *mongo.Client
@@ -24,17 +24,15 @@ func New(
 	cfg *config.Config,
 	logger logging.Logger,
 	client *mongo.Client,
-) *RegisteredProcessRepoMongoDB {
-	registeredProcessRepo := &RegisteredProcessRepoMongoDB{
+) *ProcessRepositoryMongoDB {
+	return &ProcessRepositoryMongoDB{
 		cfg,
 		logger,
 		client,
 	}
-
-	return registeredProcessRepo
 }
 
-func (r *RegisteredProcessRepoMongoDB) CreateIndexes(ctx context.Context, productID string) error {
+func (r *ProcessRepositoryMongoDB) CreateIndexes(ctx context.Context, productID string) error {
 	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
 	r.logger.Infof("MongoDB creating indexes for %s collection...", registeredProcessesCollectionName)
 
@@ -53,7 +51,7 @@ func (r *RegisteredProcessRepoMongoDB) CreateIndexes(ctx context.Context, produc
 	return err
 }
 
-func (r *RegisteredProcessRepoMongoDB) Create(
+func (r *ProcessRepositoryMongoDB) Create(
 	productID string,
 	newRegisteredProcess *entity.RegisteredProcess,
 ) (*entity.RegisteredProcess, error) {
@@ -73,7 +71,7 @@ func (r *RegisteredProcessRepoMongoDB) Create(
 	return savedRegisteredProcess, nil
 }
 
-func (r *RegisteredProcessRepoMongoDB) ListByProductAndType(
+func (r *ProcessRepositoryMongoDB) ListByProductAndType(
 	ctx context.Context,
 	productID, processType string,
 ) ([]*entity.RegisteredProcess, error) {
