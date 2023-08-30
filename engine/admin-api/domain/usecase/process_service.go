@@ -18,8 +18,7 @@ import (
 //go:generate mockgen -source=${GOFILE} -destination=../../mocks/${GOFILE} -package=mocks
 
 var (
-	ErrInvalidProcessReference = errors.New("invalid process reference")
-	ErrInvalidProcessType      = errors.New("invalid process type")
+	ErrInvalidProcessType = errors.New("invalid process type")
 )
 
 type ProcessService struct {
