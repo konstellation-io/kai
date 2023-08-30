@@ -99,7 +99,9 @@ func (ps *ProcessService) getProcessID(processRef string) string {
 	split := strings.Split(processRef, "/")
 
 	if len(split) != 2 {
-		ps.logger.Error(ErrInvalidProcessReference, "%q, defaulting to use whole process reference", processRef)
+		ps.logger.Info(
+			fmt.Sprintf("WARNING: invalid process reference %q, defaulting to use whole process reference", processRef),
+		)
 		return processRef
 	}
 
