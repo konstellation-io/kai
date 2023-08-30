@@ -21,17 +21,17 @@ import (
 )
 
 type registeredProcessMatcher struct {
-	expectedregisteredProcess *entity.RegisteredProcess
+	expectedRegisteredProcess *entity.RegisteredProcess
 }
 
 func newregisteredProcessMatcher(expectedStreamConfig *entity.RegisteredProcess) *registeredProcessMatcher {
 	return &registeredProcessMatcher{
-		expectedregisteredProcess: expectedStreamConfig,
+		expectedRegisteredProcess: expectedStreamConfig,
 	}
 }
 
 func (m registeredProcessMatcher) String() string {
-	return fmt.Sprintf("is equal to %v", m.expectedregisteredProcess)
+	return fmt.Sprintf("is equal to %v", m.expectedRegisteredProcess)
 }
 
 func (m registeredProcessMatcher) Matches(actual interface{}) bool {
@@ -40,7 +40,7 @@ func (m registeredProcessMatcher) Matches(actual interface{}) bool {
 		return false
 	}
 
-	return reflect.DeepEqual(actualCfg, m.expectedregisteredProcess)
+	return reflect.DeepEqual(actualCfg, m.expectedRegisteredProcess)
 }
 
 type ProcessServiceTestSuite struct {
