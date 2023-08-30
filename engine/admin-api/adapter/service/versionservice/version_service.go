@@ -16,7 +16,10 @@ import (
 
 //go:generate mockgen -source=../proto/versionpb/version_grpc.pb.go -destination=../../../mocks/${GOFILE} -package=mocks
 
-const _requestTimeout = 5 * time.Minute // TODO: move this to viper config
+// TODO: move this to viper config
+//
+//nolint:godox // To be done.
+const _requestTimeout = 5 * time.Minute
 
 type K8sVersionService struct {
 	cfg    *config.Config

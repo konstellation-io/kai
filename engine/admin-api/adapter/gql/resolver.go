@@ -210,7 +210,9 @@ func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*enti
 	return r.versionInteractor.ListVersionsByProduct(ctx, loggedUser, productID)
 }
 
-func (r *queryResolver) RegisteredProcesses(ctx context.Context, productID string, processType *string) ([]*entity.RegisteredProcess, error) {
+func (r *queryResolver) RegisteredProcesses(
+	ctx context.Context, productID string, processType *string,
+) ([]*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
 	var processTypeFilter string
