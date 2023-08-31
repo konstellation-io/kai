@@ -1,4 +1,4 @@
-package k8smanager
+package versionservice
 
 import (
 	"fmt"

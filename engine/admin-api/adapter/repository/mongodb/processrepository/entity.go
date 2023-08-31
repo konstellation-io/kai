@@ -1,8 +1,8 @@
-package processregistry
+package processrepository
 
 import "time"
 
-type processRegistryDTO struct {
+type registeredProcessDTO struct {
 	ID         string    `bson:"_id"`
 	Name       string    `bson:"name"`
 	Version    string    `bson:"version"`

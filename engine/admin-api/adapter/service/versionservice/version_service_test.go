@@ -1,6 +1,6 @@
 //go:build unit
 
-package k8smanager_test
+package versionservice_test
 
 import (
 	"context"
@@ -10,34 +10,34 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/k8smanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/stretchr/testify/suite"
 )
 
-type K8sManagerTestSuite struct {
+type VersionServiceTestSuite struct {
 	suite.Suite
 	cfg              *config.Config
 	logger           logging.Logger
 	mockService      *mocks.MockVersionServiceClient
-	k8sVersionClient *k8smanager.K8sVersionClient
+	k8sVersionClient *versionservice.K8sVersionService
 }
 
 func TestK8sManagerTestSuite(t *testing.T) {
-	suite.Run(t, new(K8sManagerTestSuite))
+	suite.Run(t, new(VersionServiceTestSuite))
 }
 
-func (s *K8sManagerTestSuite) SetupSuite() {
+func (s *VersionServiceTestSuite) SetupSuite() {
 	mockController := gomock.NewController(s.T())
 	cfg := &config.Config{}
 	logger := mocks.NewMockLogger(mockController)
 	mocks.AddLoggerExpects(logger)
 	service := mocks.NewMockVersionServiceClient(mockController)
 
-	k8sVersionClient, err := k8smanager.NewK8sVersionClient(cfg, logger, service)
+	k8sVersionClient, err := versionservice.New(cfg, logger, service)
 	s.Require().NoError(err)
 
 	s.cfg = cfg
@@ -46,7 +46,7 @@ func (s *K8sManagerTestSuite) SetupSuite() {
 	s.k8sVersionClient = k8sVersionClient
 }
 
-func (s *K8sManagerTestSuite) TestPublish() {
+func (s *VersionServiceTestSuite) TestPublish() {
 	ctx := context.Background()
 
 	req := &versionpb.PublishRequest{
@@ -60,7 +60,7 @@ func (s *K8sManagerTestSuite) TestPublish() {
 	s.Require().NoError(err)
 }
 
-func (s *K8sManagerTestSuite) TestUnpublish() {
+func (s *VersionServiceTestSuite) TestUnpublish() {
 	ctx := context.Background()
 
 	req := &versionpb.UnpublishRequest{
@@ -74,7 +74,7 @@ func (s *K8sManagerTestSuite) TestUnpublish() {
 	s.Require().NoError(err)
 }
 
-func (s *K8sManagerTestSuite) TestWatchProcessStatus() {
+func (s *VersionServiceTestSuite) TestWatchProcessStatus() {
 	ctx := context.Background()
 
 	req := &versionpb.ProcessStatusRequest{
@@ -105,7 +105,7 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatus() {
 	s.Nil(process)
 }
 
-func (s *K8sManagerTestSuite) TestWatchProcessStatusManagerError() {
+func (s *VersionServiceTestSuite) TestWatchProcessStatusManagerError() {
 	ctx := context.Background()
 
 	s.mockService.EXPECT().WatchProcessStatus(ctx, gomock.Any()).Return(nil, errors.New("mocked error"))
@@ -115,7 +115,7 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatusManagerError() {
 	s.Nil(statusChannel)
 }
 
-func (s *K8sManagerTestSuite) TestWatchProcessStatusContextCancelled() {
+func (s *VersionServiceTestSuite) TestWatchProcessStatusContextCancelled() {
 	ctx := context.Background()
 	cancelContext, cancel := context.WithCancel(ctx)
 
@@ -135,7 +135,7 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatusContextCancelled() {
 	s.Nil(process)
 }
 
-func (s *K8sManagerTestSuite) TestWatchProcessStatusUnexpectedError() {
+func (s *VersionServiceTestSuite) TestWatchProcessStatusUnexpectedError() {
 	ctx := context.Background()
 
 	processStatusResponse := &versionpb.ProcessStatusResponse{}
@@ -153,7 +153,7 @@ func (s *K8sManagerTestSuite) TestWatchProcessStatusUnexpectedError() {
 	s.Nil(process)
 }
 
-func (s *K8sManagerTestSuite) TestRegisterProcess() {
+func (s *VersionServiceTestSuite) TestRegisterProcess() {
 	ctx := context.Background()
 
 	const (
@@ -180,7 +180,7 @@ func (s *K8sManagerTestSuite) TestRegisterProcess() {
 	s.Equal(expectedImageID, ref)
 }
 
-func (s *K8sManagerTestSuite) TestRegisterProcess_ClientError() {
+func (s *VersionServiceTestSuite) TestRegisterProcess_ClientError() {
 	ctx := context.Background()
 
 	const (

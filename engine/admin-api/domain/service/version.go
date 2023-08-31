@@ -8,7 +8,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-type K8sService interface {
+type VersionService interface {
 	Start(ctx context.Context, productID string, version *entity.Version, versionConfig *entity.VersionConfig) error
 	Stop(ctx context.Context, productID string, version *entity.Version) error
 	Publish(ctx context.Context, productID string, version *entity.Version) error

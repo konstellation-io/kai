@@ -1,6 +1,6 @@
 //go:build integration
 
-package version
+package versionrepository
 
 import (
 	"context"
@@ -68,14 +68,14 @@ func (s *VersionRepositoryTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	port := p.Int()
-	uri := fmt.Sprintf("mongodb://%v:%v@%v:%v/", "root", "root", host, port)
+	uri := fmt.Sprintf("mongodb://%v:%v@%v:%v/", "root", "root", host, port) //NOSONAR not used in secure contexts
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 	s.Require().NoError(err)
 
 	s.cfg = cfg
 	s.mongoDBContainer = mongoDBContainer
 	s.mongoClient = client
-	s.versionRepo = NewVersionRepoMongoDB(cfg, logger, client)
+	s.versionRepo = New(cfg, logger, client)
 
 	err = s.versionRepo.CreateIndexes(context.Background(), productID)
 	s.Require().NoError(err)
