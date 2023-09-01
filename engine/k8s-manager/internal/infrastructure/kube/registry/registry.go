@@ -31,9 +31,10 @@ const (
 )
 
 var (
-	ErrFailedImageBuild = errors.New("error building image")
-	ErrParsingJob       = errors.New("unable to parse Kubernetes Job from Annotation watcher")
-	ErrErrorEvent       = errors.New("error event received")
+	ErrFailedImageBuild       = errors.New("error building image")
+	ErrParsingJob             = errors.New("unable to parse Kubernetes Job from Annotation watcher")
+	ErrErrorEvent             = errors.New("error event received")
+	ErrUnexpectedContextClose = errors.New("unexpected context close")
 )
 
 type KanikoImageBuilder struct {
@@ -195,9 +196,8 @@ func (ib *KanikoImageBuilder) watchForJob(ctx context.Context, job *batchv1.Job)
 		case <-rw.Done():
 			return nil
 		case <-wCtx.Done():
-			return errors.New("unexpected context close")
+			return ErrUnexpectedContextClose
 		}
-
 	}
 }
 
@@ -227,7 +227,6 @@ func (ib *KanikoImageBuilder) handleJobEvent(event watch.Event) (bool, error) {
 	default:
 		ib.logger.Info("Unknown event received")
 		return false, nil
-
 	}
 }
 
