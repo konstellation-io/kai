@@ -83,9 +83,24 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterProcessInput) (*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	return r.processService.RegisterProcess(
+	v, notifyCh, err := r.processService.RegisterProcess(
 		ctx, loggedUser, input.ProductID, input.Version, input.ProcessID, input.ProcessType, input.File.File,
 	)
+
+	go r.notifyRegisteredProcessStatus(notifyCh)
+
+	return v, err
+}
+
+func (r *mutationResolver) notifyRegisteredProcessStatus(notifyCh chan *entity.RegisteredProcess) {
+	for registeredProcess := range notifyCh {
+		switch registeredProcess.Status {
+		case entity.RegisterProcessStatusCreated:
+			r.logger.Info(fmt.Sprintf("Process successfully registered with ID: %q", registeredProcess.ID))
+		case entity.RegisterProcessStatusFailed:
+			r.logger.Error(fmt.Sprintf("Error registering process with ID: %q - %s", registeredProcess.ID, registeredProcess.Logs))
+		}
+	}
 }
 
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {

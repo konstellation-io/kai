@@ -95,15 +95,15 @@ func (mr *MockProcessRepositoryMockRecorder) ListByProductAndType(ctx, productID
 }
 
 // Update mocks base method.
-func (m *MockProcessRepository) Update(productID string, newRegisteredProcess *entity.RegisteredProcess) error {
+func (m *MockProcessRepository) Update(ctx context.Context, productID string, newRegisteredProcess *entity.RegisteredProcess) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", productID, newRegisteredProcess)
+	ret := m.ctrl.Call(m, "Update", ctx, productID, newRegisteredProcess)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockProcessRepositoryMockRecorder) Update(productID, newRegisteredProcess interface{}) *gomock.Call {
+func (mr *MockProcessRepositoryMockRecorder) Update(ctx, productID, newRegisteredProcess interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProcessRepository)(nil).Update), productID, newRegisteredProcess)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProcessRepository)(nil).Update), ctx, productID, newRegisteredProcess)
 }

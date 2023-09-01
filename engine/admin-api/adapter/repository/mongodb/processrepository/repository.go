@@ -114,12 +114,11 @@ func (r *ProcessRepositoryMongoDB) ListByProductAndType(
 	return registeredProcesses, nil
 }
 
-// TODO: add context
-func (r *ProcessRepositoryMongoDB) Update(productID string, process *entity.RegisteredProcess) error {
+func (r *ProcessRepositoryMongoDB) Update(ctx context.Context, productID string, process *entity.RegisteredProcess) error {
 	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
 
 	versionDTO := mapEntityToDTO(process)
-	updateResult, err := collection.ReplaceOne(context.Background(), bson.M{"_id": process.ID}, versionDTO)
+	updateResult, err := collection.ReplaceOne(ctx, bson.M{"_id": process.ID}, versionDTO)
 
 	if updateResult.ModifiedCount == 0 {
 		return apperrors.ErrVersionNotFound
@@ -128,7 +127,7 @@ func (r *ProcessRepositoryMongoDB) Update(productID string, process *entity.Regi
 	return err
 }
 
-func (r *ProcessRepositoryMongoDB) GetByID(ctx context.Context, productID string, imageID string) (*entity.RegisteredProcess, error) {
+func (r *ProcessRepositoryMongoDB) GetByID(ctx context.Context, productID, imageID string) (*entity.RegisteredProcess, error) {
 	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
 
 	res := collection.FindOne(ctx, bson.M{"_id": imageID})
@@ -141,6 +140,7 @@ func (r *ProcessRepositoryMongoDB) GetByID(ctx context.Context, productID string
 	}
 
 	var registeredProcess registeredProcessDTO
+
 	err := res.Decode(&registeredProcess)
 	if err != nil {
 		return nil, err

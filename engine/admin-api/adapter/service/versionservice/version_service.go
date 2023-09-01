@@ -156,7 +156,7 @@ func (k *K8sVersionService) WatchProcessStatus(ctx context.Context, productID, v
 	return ch, nil
 }
 
-func (k *K8sVersionService) RegisterProcess(ctx context.Context, processID string, processImage string, file []byte) (string, error) {
+func (k *K8sVersionService) RegisterProcess(ctx context.Context, processID, processImage string, file []byte) (string, error) {
 	res, err := k.client.RegisterProcess(ctx, &versionpb.RegisterProcessRequest{
 		ProcessId:    processID,
 		ProcessImage: processImage,
