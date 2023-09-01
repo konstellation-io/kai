@@ -2,14 +2,17 @@ package processrepository
 
 import (
 	"context"
+	"errors"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	apperrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const registeredProcessesCollectionName = "registered_processes"
@@ -19,6 +22,8 @@ type ProcessRepositoryMongoDB struct {
 	logger logging.Logger
 	client *mongo.Client
 }
+
+var _ repository.ProcessRepository = (*ProcessRepositoryMongoDB)(nil)
 
 func New(
 	cfg *config.Config,
@@ -107,4 +112,39 @@ func (r *ProcessRepositoryMongoDB) ListByProductAndType(
 	}
 
 	return registeredProcesses, nil
+}
+
+// TODO: add context
+func (r *ProcessRepositoryMongoDB) Update(productID string, process *entity.RegisteredProcess) error {
+	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
+
+	versionDTO := mapEntityToDTO(process)
+	updateResult, err := collection.ReplaceOne(context.Background(), bson.M{"_id": process.ID}, versionDTO)
+
+	if updateResult.ModifiedCount == 0 {
+		return apperrors.ErrVersionNotFound
+	}
+
+	return err
+}
+
+func (r *ProcessRepositoryMongoDB) GetByID(ctx context.Context, productID string, imageID string) (*entity.RegisteredProcess, error) {
+	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
+
+	res := collection.FindOne(ctx, bson.M{"_id": imageID})
+	if res.Err() != nil {
+		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
+			return nil, usecase.ErrRegisteredProcessNotFound
+		}
+
+		return nil, res.Err()
+	}
+
+	var registeredProcess registeredProcessDTO
+	err := res.Decode(&registeredProcess)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapDTOToEntity(&registeredProcess), nil
 }

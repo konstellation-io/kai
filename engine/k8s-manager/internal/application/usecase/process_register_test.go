@@ -39,7 +39,7 @@ func TestRegisterProcess(t *testing.T) {
 		Product: product,
 		Version: version,
 		Process: process,
-		File:    nil,
+		Sources: nil,
 	})
 	assert.NoError(t, err)
 
@@ -73,7 +73,7 @@ func TestRegisterProcess_ErrorBuildingImage(t *testing.T) {
 		Product: product,
 		Version: version,
 		Process: process,
-		File:    nil,
+		Sources: nil,
 	})
 	assert.ErrorIs(t, err, expectedError)
 }

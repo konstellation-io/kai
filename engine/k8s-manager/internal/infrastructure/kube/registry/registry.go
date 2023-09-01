@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
 	"regexp"
 
 	"github.com/go-logr/logr"
@@ -51,16 +50,11 @@ func NewKanikoImageBuilder(logger logr.Logger, client kubernetes.Interface) *Kan
 	}
 }
 
-func (ib *KanikoImageBuilder) BuildImage(ctx context.Context, imageName string, sources []byte) (string, error) {
-	jobName := ib.getJobNameForImage(imageName)
+func (ib *KanikoImageBuilder) BuildImage(ctx context.Context, processID, processImage string, sources []byte) (string, error) {
+	jobName := ib.getJobNameForImage(processID)
 	jobConfigName := fmt.Sprintf("%s-config", jobName)
 
-	imageWithDestination, err := ib.getImageWithDestination(imageName)
-	if err != nil {
-		return "", err
-	}
-
-	job := ib.getImageBuilderJob(jobName, imageWithDestination, jobConfigName)
+	job := ib.getImageBuilderJob(jobName, processImage, jobConfigName)
 
 	createdJob, err := ib.client.BatchV1().Jobs(ib.namespace).Create(ctx, job, metav1.CreateOptions{})
 	if err != nil {
@@ -91,21 +85,12 @@ func (ib *KanikoImageBuilder) BuildImage(ctx context.Context, imageName string, 
 		return "", err
 	}
 
-	return imageWithDestination, nil
+	return processImage, nil
 }
 
 func (ib *KanikoImageBuilder) getJobNameForImage(imageName string) string {
 	normalizedImageName := regexp.MustCompile(`[^a-zA-Z0-9 ]+`).ReplaceAllString(imageName, "-")
 	return fmt.Sprintf("image-builder-%s", normalizedImageName)
-}
-
-func (ib *KanikoImageBuilder) getImageWithDestination(imageName string) (string, error) {
-	registryURL, err := url.Parse(viper.GetString(config.ImageRegistryURLKey))
-	if err != nil {
-		return "", fmt.Errorf("parsing registry url: %w", err)
-	}
-
-	return fmt.Sprintf("%s/%s", registryURL.Host, imageName), nil
 }
 
 func (ib *KanikoImageBuilder) getJobConfigMap(jobConfigName string, createdJob *batchv1.Job, sources []byte) *corev1.ConfigMap {
@@ -197,32 +182,52 @@ func (ib *KanikoImageBuilder) watchForJob(ctx context.Context, job *batchv1.Job)
 	defer rw.Stop()
 
 	for {
-		event := <-rw.ResultChan()
-
-		//nolint:exhaustive // Not all event types needs a specific case
-		switch event.Type {
-		case watch.Added, watch.Modified:
-			job, ok := event.Object.(*batchv1.Job)
-			if !ok {
-				return ErrParsingJob
+		select {
+		case event := <-rw.ResultChan():
+			done, err := ib.handleJobEvent(event)
+			if err != nil {
+				return err
 			}
 
-			status := ib.getJobStatus(job)
-
-			switch status {
-			case _jobStatusFailed:
-				return ErrFailedImageBuild
-			case _jobStatusComplete:
+			if done {
 				return nil
-			default:
 			}
-
-		case watch.Error:
-			return ErrErrorEvent
-
-		default:
-			ib.logger.Info("Unknown event received")
+		case <-rw.Done():
+			return nil
+		case <-wCtx.Done():
+			return errors.New("unexpected context close")
 		}
+
+	}
+}
+
+func (ib *KanikoImageBuilder) handleJobEvent(event watch.Event) (bool, error) {
+	//nolint:exhaustive // Not all event types needs a specific case
+	switch event.Type {
+	case watch.Added, watch.Modified:
+		job, ok := event.Object.(*batchv1.Job)
+		if !ok {
+			return true, ErrParsingJob
+		}
+
+		status := ib.getJobStatus(job)
+
+		switch status {
+		case _jobStatusFailed:
+			return true, ErrFailedImageBuild
+		case _jobStatusComplete:
+			return true, nil
+		default:
+			return false, nil
+		}
+
+	case watch.Error:
+		return true, ErrErrorEvent
+
+	default:
+		ib.logger.Info("Unknown event received")
+		return false, nil
+
 	}
 }
 

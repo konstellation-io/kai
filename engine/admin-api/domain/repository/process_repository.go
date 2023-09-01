@@ -12,4 +12,6 @@ type ProcessRepository interface {
 	CreateIndexes(ctx context.Context, productID string) error
 	Create(productID string, newRegisteredProcess *entity.RegisteredProcess) (*entity.RegisteredProcess, error)
 	ListByProductAndType(ctx context.Context, productID, processType string) ([]*entity.RegisteredProcess, error)
+	Update(productID string, newRegisteredProcess *entity.RegisteredProcess) error
+	GetByID(ctx context.Context, productID string, imageID string) (*entity.RegisteredProcess, error)
 }

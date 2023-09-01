@@ -27,3 +27,5 @@ data:
   KEYCLOAK_MASTER_REALM: "master"
   KEYCLOAK_REALM: "{{ .Values.keycloak.realmName }}"
   KEYCLOAK_ADMIN_CLIENT_ID: "{{ .Values.keycloak.adminApi.oidcClient.clientId }}"
+  # REGISTRY
+  KAI_REGISTRY_URL: "http://{{ include "registry.fullname" . }}:{{ .Values.registry.service.ports.http }}"

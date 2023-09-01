@@ -47,7 +47,7 @@ func TestBuildImage_SucceedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, []byte{})
+		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, "", []byte{})
 		require.NoError(t, err)
 		require.Equal(t, expectedImageRef, imageRef)
 		wg.Done()
@@ -106,7 +106,7 @@ func TestBuildImage_FailedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		_, err := imageBuilder.BuildImage(ctx, _imageName, []byte{})
+		_, err := imageBuilder.BuildImage(ctx, _imageName, "", []byte{})
 		require.ErrorIs(t, err, registry.ErrFailedImageBuild)
 		wg.Done()
 	}()
@@ -166,7 +166,7 @@ func TestBuildImage_UnknownEvent(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, []byte{})
+		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, "", []byte{})
 		require.NoError(t, err)
 		require.Equal(t, expectedImageRef, imageRef)
 		wg.Done()
@@ -222,7 +222,7 @@ func TestBuildImage_DeletedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		_, err := imageBuilder.BuildImage(ctx, _imageName, []byte{})
+		_, err := imageBuilder.BuildImage(ctx, _imageName, "", []byte{})
 		require.ErrorIs(t, err, registry.ErrErrorEvent)
 		wg.Done()
 	}()

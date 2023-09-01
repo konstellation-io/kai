@@ -10,6 +10,7 @@ const (
 	ComponentsKey = "components"
 
 	CfgFilePathKey = "CONFIG_FILE_PATH"
+	RegistryURLKey = "registry.url"
 )
 
 func InitConfig() error {
@@ -23,6 +24,9 @@ func setDefaultConfig() {
 
 func loadConfig() error {
 	viper.SetEnvPrefix("KAI")
+
+	viper.RegisterAlias(RegistryURLKey, "REGISTRY_URL")
+
 	viper.AutomaticEnv()
 
 	viper.SetConfigFile(viper.GetString(CfgFilePathKey))

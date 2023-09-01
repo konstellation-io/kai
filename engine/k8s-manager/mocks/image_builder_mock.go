@@ -22,22 +22,22 @@ func (_m *ImageBuilderMock) EXPECT() *ImageBuilderMock_Expecter {
 }
 
 // BuildImage provides a mock function with given fields: ctx, name, file
-func (_m *ImageBuilderMock) BuildImage(ctx context.Context, name string, file []byte) (string, error) {
-	ret := _m.Called(ctx, name, file)
+func (_m *ImageBuilderMock) BuildImage(ctx context.Context, processID, processImage string, file []byte) (string, error) {
+	ret := _m.Called(ctx, processID, file)
 
 	var r0 string
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) (string, error)); ok {
-		return rf(ctx, name, file)
+		return rf(ctx, processID, file)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) string); ok {
-		r0 = rf(ctx, name, file)
+		r0 = rf(ctx, processID, file)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string, []byte) error); ok {
-		r1 = rf(ctx, name, file)
+		r1 = rf(ctx, processID, file)
 	} else {
 		r1 = ret.Error(1)
 	}
