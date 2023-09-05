@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"regexp"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -15,6 +16,9 @@ var (
 	ErrProductNotFound       = errors.New("error product not found")
 	ErrProductDuplicated     = errors.New("there is already a product with the same id")
 	ErrProductDuplicatedName = errors.New("there is already a product with the same name")
+
+	_whiteSpacesRE     = regexp.MustCompile(" +")
+	_validCharactersRE = regexp.MustCompile("[^a-z0-9-]")
 )
 
 // ProductInteractor contains app logic to handle Product entities.
@@ -70,9 +74,11 @@ func (i *ProductInteractor) CreateProduct(
 	}
 
 	// Sanitize input params
-	//productID = strings.TrimSpace(productID)
+	productID = i.generateProductID(name)
 	name = strings.TrimSpace(name)
 	description = strings.TrimSpace(description)
+
+	i.logger.Info("Creating product", "name", name, "id", productID)
 
 	r := &entity.Product{
 		ID:          name,
@@ -87,16 +93,16 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	//// Check if the Product already exists
-	//productFromDB, err := i.productRepo.GetByID(ctx, productID)
-	//if productFromDB != nil {
-	//	return nil, ErrProductDuplicated
-	//} else if !errors.Is(err, ErrProductNotFound) {
-	//	return nil, err
-	//}
+	// Check if the Product already exists
+	productFromDB, err := i.productRepo.GetByID(ctx, productID)
+	if productFromDB != nil {
+		return nil, ErrProductDuplicated
+	} else if !errors.Is(err, ErrProductNotFound) {
+		return nil, err
+	}
 
 	// Check if there is another Product with the same name
-	productFromDB, err := i.productRepo.GetByName(ctx, name)
+	productFromDB, err = i.productRepo.GetByName(ctx, name)
 	if productFromDB != nil {
 		return nil, ErrProductDuplicatedName
 	} else if !errors.Is(err, ErrProductNotFound) {
@@ -176,4 +182,13 @@ func (i *ProductInteractor) FindAll(ctx context.Context, user *entity.User) ([]*
 	visibleProducts := i.accessControl.GetUserProducts(user)
 
 	return i.productRepo.FindByIDs(ctx, visibleProducts)
+}
+
+func (i *ProductInteractor) generateProductID(name string) string {
+	id := strings.TrimSpace(name)
+	id = strings.ToLower(id)
+	id = _whiteSpacesRE.ReplaceAllString(id, "_")
+	id = _validCharactersRE.ReplaceAllString(id, "")
+
+	return id
 }
