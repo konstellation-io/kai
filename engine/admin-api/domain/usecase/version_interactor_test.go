@@ -26,7 +26,7 @@ type versionSuiteMocks struct {
 	logger           *mocks.MockLogger
 	versionRepo      *mocks.MockVersionRepo
 	productRepo      *mocks.MockProductRepo
-	k8sService       *mocks.MockK8sService
+	versionService   *mocks.MockVersionService
 	userActivityRepo *mocks.MockUserActivityRepo
 	accessControl    *mocks.MockAccessControl
 	dashboardService *mocks.MockDashboardService
@@ -53,7 +53,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
 	productRepo := mocks.NewMockProductRepo(ctrl)
-	k8sService := mocks.NewMockK8sService(ctrl)
+	verisonService := mocks.NewMockVersionService(ctrl)
 	natsManagerService := mocks.NewMockNatsManagerService(ctrl)
 	userActivityRepo := mocks.NewMockUserActivityRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
@@ -69,7 +69,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	)
 
 	versionInteractor := usecase.NewVersionInteractor(
-		cfg, oldLogger, versionRepo, productRepo, k8sService, natsManagerService,
+		cfg, oldLogger, versionRepo, productRepo, verisonService, natsManagerService,
 		userActivityInteractor, accessControl, dashboardService, processLogRepo)
 
 	s.ctrl = ctrl
@@ -78,7 +78,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 		oldLogger,
 		versionRepo,
 		productRepo,
-		k8sService,
+		verisonService,
 		userActivityRepo,
 		accessControl,
 		dashboardService,

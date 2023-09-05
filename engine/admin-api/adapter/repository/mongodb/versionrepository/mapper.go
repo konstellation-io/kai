@@ -1,4 +1,4 @@
-package version
+package versionrepository
 
 import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"

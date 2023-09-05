@@ -5,6 +5,7 @@ type Query {
   products: [Product!]!
   version(name: String!, productID: ID!): Version!
   versions(productID: ID!): [Version!]!
+  registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
   userActivityList(
     userEmail: String
     types: [UserActivityType!]
@@ -42,6 +43,16 @@ type Mutation {
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
   registerProcess(input: RegisterProcessInput!): RegisteredImage!
+}
+
+type RegisteredProcess {
+  id: ID!
+  name: String!
+  version: String!
+  type: String!
+  image: String!
+  uploadDate: String!
+  owner: String!
 }
 
 type RegisteredImage {

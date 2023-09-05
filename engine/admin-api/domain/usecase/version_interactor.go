@@ -25,7 +25,7 @@ type VersionInteractor struct {
 	logger                 logging.Logger
 	versionRepo            repository.VersionRepo
 	productRepo            repository.ProductRepo
-	k8sService             service.K8sService
+	k8sService             service.VersionService
 	natsManagerService     service.NatsManagerService
 	userActivityInteractor UserActivityInteracter
 	accessControl          auth.AccessControl
@@ -39,7 +39,7 @@ func NewVersionInteractor(
 	logger logging.Logger,
 	versionRepo repository.VersionRepo,
 	productRepo repository.ProductRepo,
-	k8sService service.K8sService,
+	k8sService service.VersionService,
 	natsManagerService service.NatsManagerService,
 	userActivityInteractor UserActivityInteracter,
 	accessControl auth.AccessControl,

@@ -10,12 +10,13 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processregistry"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/version"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/k8smanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
@@ -64,9 +65,9 @@ func initGraphqlController(
 ) *controller.GraphQLController {
 	productRepo := mongodb.NewProductRepoMongoDB(cfg, oldLogger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, oldLogger, mongodbClient)
-	versionMongoRepo := version.NewVersionRepoMongoDB(cfg, oldLogger, mongodbClient)
+	versionMongoRepo := versionrepository.New(cfg, oldLogger, mongodbClient)
 	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, oldLogger, mongodbClient)
-	processRegistryRepo := processregistry.NewProcessRegistryRepoMongoDB(cfg, oldLogger, mongodbClient)
+	processRepo := processrepository.New(cfg, logger, mongodbClient)
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, oldLogger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, oldLogger)
 
@@ -77,7 +78,7 @@ func initGraphqlController(
 
 	k8sManagerClient := versionpb.NewVersionServiceClient(ccK8sManager)
 
-	k8sService, err := k8smanager.NewK8sVersionClient(cfg, oldLogger, k8sManagerClient)
+	k8sService, err := versionservice.New(cfg, oldLogger, k8sManagerClient)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,6 +123,7 @@ func initGraphqlController(
 		MetricRepo:          metricRepo,
 		ProcessLogRepo:      processLogRepo,
 		ProcessRegistryRepo: processRegistryRepo,
+		ProcessRepo:     processRepo,
 		UserActivity:        userActivityInteractor,
 		AccessControl:       accessControl,
 	}
@@ -158,6 +160,8 @@ func initGraphqlController(
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
 
 	processService := usecase.NewProcessService(logger, k8sService, processRegistryRepo)
+
+	processService := usecase.NewProcessService(l, k8sService, processRepo)
 
 	return controller.NewGraphQLController(
 		controller.Params{

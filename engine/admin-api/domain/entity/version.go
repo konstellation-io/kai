@@ -101,6 +101,18 @@ const (
 	ProcessTypeExit    ProcessType = "exit"
 )
 
+func (pt ProcessType) IsValid() bool {
+	var processTypeMap = map[string]ProcessType{
+		string(ProcessTypeTrigger): ProcessTypeTrigger,
+		string(ProcessTypeTask):    ProcessTypeTask,
+		string(ProcessTypeExit):    ProcessTypeExit,
+	}
+
+	_, ok := processTypeMap[string(pt)]
+
+	return ok
+}
+
 func (pt ProcessType) String() string {
 	return string(pt)
 }
