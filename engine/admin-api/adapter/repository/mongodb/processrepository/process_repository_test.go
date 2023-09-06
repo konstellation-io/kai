@@ -184,3 +184,57 @@ func (s *ProcessRepositoryTestSuite) TestListByProductWithUnexistingProduct() {
 
 	s.Empty(registeredProcesses)
 }
+
+func (s *ProcessRepositoryTestSuite) TestUpdate() {
+	ctx := context.Background()
+
+	testRegisteredProcess := &entity.RegisteredProcess{
+		ID:         "process_id",
+		Name:       "test_trigger",
+		Version:    processVersion,
+		Type:       "trigger",
+		Image:      "process_image",
+		UploadDate: testRepoUploadDate,
+		Owner:      ownerID,
+	}
+
+	createdRegisteredProcess, err := s.processRepo.Create(productID, testRegisteredProcess)
+	s.Require().NoError(err)
+
+	createdRegisteredProcess.Image = "new_process_image"
+
+	err = s.processRepo.Update(ctx, productID, createdRegisteredProcess)
+	s.Require().NoError(err)
+
+	// Check if the version is updated in the DB
+	collection := s.mongoClient.Database(productID).Collection(registeredProcessesCollectionName)
+	filter := bson.M{"_id": createdRegisteredProcess.ID}
+
+	var registeredProcessDTO registeredProcessDTO
+	err = collection.FindOne(context.Background(), filter).Decode(&registeredProcessDTO)
+	s.Require().NoError(err)
+	s.Equal(createdRegisteredProcess, mapDTOToEntity(&registeredProcessDTO))
+}
+
+func (s *ProcessRepositoryTestSuite) TestGetByID() {
+	ctx := context.Background()
+
+	testRegisteredProcess := &entity.RegisteredProcess{
+		ID:         "process_id",
+		Name:       "test_trigger",
+		Version:    processVersion,
+		Type:       "trigger",
+		Image:      "process_image",
+		UploadDate: testRepoUploadDate,
+		Owner:      ownerID,
+	}
+
+	createdRegisteredProcess, err := s.processRepo.Create(productID, testRegisteredProcess)
+	s.Require().NoError(err)
+
+	registeredProcess, err := s.processRepo.GetByID(ctx, productID, createdRegisteredProcess.ID)
+	s.Require().NoError(err)
+
+	s.Equal(createdRegisteredProcess, registeredProcess)
+
+}
