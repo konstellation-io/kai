@@ -190,6 +190,24 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndFai
 	s.Equal(entity.RegisterProcessStatusCreated, registeredProcess.Status)
 }
 
+func (s *ProcessServiceTestSuite) TestRegisterProcess_GetByIDFails() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+
+	alreadyRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
+
+	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(
+		nil, fmt.Errorf("all your base are belong to us"),
+	)
+
+	_, _, err = s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, processName, processType, testFile,
+	)
+	s.Require().Error(err)
+}
+
 func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndNotFailed() {
 	ctx := context.Background()
 

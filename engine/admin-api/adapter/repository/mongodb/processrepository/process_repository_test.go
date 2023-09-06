@@ -18,6 +18,7 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
@@ -236,5 +237,13 @@ func (s *ProcessRepositoryTestSuite) TestGetByID() {
 	s.Require().NoError(err)
 
 	s.Equal(createdRegisteredProcess, registeredProcess)
+}
 
+func (s *ProcessRepositoryTestSuite) TestGetByID_NoResults() {
+	ctx := context.Background()
+
+	_, err := s.processRepo.GetByID(ctx, productID, "nonexistent")
+	s.Require().Error(err)
+
+	s.ErrorIs(err, usecase.ErrRegisteredProcessNotFound)
 }
