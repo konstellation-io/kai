@@ -4,6 +4,7 @@ package grpc_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/go-logr/logr"
@@ -158,4 +159,48 @@ func (s *VersionServiceTestSuite) TestStop() {
 	res, err := s.versionGRPCService.Stop(ctx, req)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), res)
+}
+
+func (s *VersionServiceTestSuite) TestRegisterProcess() {
+	ctx := context.Background()
+
+	req := &versionpb.RegisterProcessRequest{
+		ProcessId:    "test-process",
+		ProcessImage: "test-image",
+		File:         []byte("test-sources"),
+	}
+
+	expectedParams := usecase.RegisterProcessParams{
+		ProcessID:    req.ProcessId,
+		ProcessImage: req.ProcessImage,
+		Sources:      req.File,
+	}
+
+	s.processServiceMock.EXPECT().RegisterProcess(ctx, expectedParams).Return("test-image-id", nil)
+
+	res, err := s.versionGRPCService.RegisterProcess(ctx, req)
+	require.NoError(s.T(), err)
+	require.NotNil(s.T(), res)
+	require.Equal(s.T(), "test-image-id", res.ImageId)
+}
+
+func (s *VersionServiceTestSuite) TestRegisterProcess_Error() {
+	ctx := context.Background()
+
+	req := &versionpb.RegisterProcessRequest{
+		ProcessId:    "test-process",
+		ProcessImage: "test-image",
+		File:         []byte("test-sources"),
+	}
+
+	expectedParams := usecase.RegisterProcessParams{
+		ProcessID:    req.ProcessId,
+		ProcessImage: req.ProcessImage,
+		Sources:      req.File,
+	}
+
+	s.processServiceMock.EXPECT().RegisterProcess(ctx, expectedParams).Return("", fmt.Errorf("test error"))
+
+	_, err := s.versionGRPCService.RegisterProcess(ctx, req)
+	require.Error(s.T(), err)
 }
