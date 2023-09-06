@@ -14,6 +14,7 @@ import (
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube/registry"
 	"github.com/sebdah/goldie/v2"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	batchv1 "k8s.io/api/batch/v1"
@@ -49,9 +50,9 @@ func TestBuildImage_SucceedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, "", []byte{})
+		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, expectedImageRef, []byte{})
 		require.NoError(t, err)
-		require.Equal(t, expectedImageRef, imageRef)
+		assert.Equal(t, expectedImageRef, imageRef)
 		wg.Done()
 	}()
 
