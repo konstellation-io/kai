@@ -82,7 +82,7 @@ func (s *ProcessServiceTestSuite) getRegisteredProcessID(product string, process
 	return fmt.Sprintf("%s_%s:%s", product, process, version)
 }
 
-func (s *ProcessServiceTestSuite) getTestProcess() *entity.RegisteredProcess {
+func (s *ProcessServiceTestSuite) getTestProcess(status string) *entity.RegisteredProcess {
 	var (
 		expectedProcessID    = s.getRegisteredProcessID(productID, processName, version)
 		expectedProcessImage = s.getRegisteredProcessImage(s.registryHost, expectedProcessID)
@@ -96,6 +96,7 @@ func (s *ProcessServiceTestSuite) getTestProcess() *entity.RegisteredProcess {
 		Image:      expectedProcessImage,
 		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
 		Owner:      userID,
+		Status:     status,
 	}
 }
 
@@ -135,12 +136,10 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	expectedBytes, err := os.ReadFile(testFileAddr)
 	s.Require().NoError(err)
 
-	expectedRegisteredProcess := s.getTestProcess()
-	expectedRegisteredProcess.Status = entity.RegisterProcessStatusCreating
+	expectedRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
 	customMatcher := newregisteredProcessMatcher(expectedRegisteredProcess)
 
-	expectedUpdatedProcess := s.getTestProcess()
-	expectedUpdatedProcess.Status = entity.RegisterProcessStatusCreated
+	expectedUpdatedProcess := s.getTestProcess(entity.RegisterProcessStatusCreated)
 	customMatcherUpdate := newregisteredProcessMatcher(expectedUpdatedProcess)
 
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, usecase.ErrRegisteredProcessNotFound)
@@ -148,29 +147,79 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	s.versionService.EXPECT().RegisterProcess(gomock.Any(), expectedRegisteredProcess.ID, expectedRegisteredProcess.Image, expectedBytes).Return("", nil)
 	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(nil)
 
-	returnedID, notifyCh, err := s.processInteractor.RegisterProcess(
+	returnedProcess, notifyCh, err := s.processInteractor.RegisterProcess(
 		ctx, user, productID, version, processName, processType, testFile,
 	)
 	s.Require().NoError(err)
 
-	s.Equal(expectedRegisteredProcess, returnedID)
+	s.Equal(expectedRegisteredProcess, returnedProcess)
 
 	registeredProcess := <-notifyCh
 	s.Equal(entity.RegisterProcessStatusCreated, registeredProcess.Status)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcessNoFileError() {
+func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndFailed() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+	expectedBytes, err := os.ReadFile(testFileAddr)
+	s.Require().NoError(err)
+
+	alreadyRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusFailed)
+
+	expectedCreatingProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
+	customMatcherCreating := newregisteredProcessMatcher(expectedCreatingProcess)
+
+	expectedUpdatedProcess := s.getTestProcess(entity.RegisterProcessStatusCreated)
+	customMatcherUpdate := newregisteredProcessMatcher(expectedUpdatedProcess)
+
+	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(alreadyRegisteredProcess, nil)
+	s.processRepo.EXPECT().Update(ctx, productID, customMatcherCreating).Return(nil).Times(1)
+	s.versionService.EXPECT().RegisterProcess(gomock.Any(), alreadyRegisteredProcess.ID, alreadyRegisteredProcess.Image, expectedBytes).Return("", nil)
+	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(nil).Times(1)
+
+	returnedProcess, notifyCh, err := s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, processName, processType, testFile,
+	)
+	s.Require().NoError(err)
+
+	s.Equal(expectedCreatingProcess, returnedProcess)
+
+	registeredProcess := <-notifyCh
+	s.Equal(entity.RegisterProcessStatusCreated, registeredProcess.Status)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndNotFailed() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+
+	alreadyRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
+
+	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(
+		alreadyRegisteredProcess, nil,
+	)
+
+	_, _, err = s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, processName, processType, testFile,
+	)
+	s.Require().Error(err)
+
+	s.ErrorIs(err, usecase.ErrProcessAlreadyRegistered)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_NoFileError() {
 	ctx := context.Background()
 
 	testFile, err := os.Open("no-file")
 	s.Require().Error(err)
 
-	expectedRegisteredProcess := s.getTestProcess()
-	expectedRegisteredProcess.Status = entity.RegisterProcessStatusCreating
+	expectedRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
 	customMatcher := newregisteredProcessMatcher(expectedRegisteredProcess)
 
-	expectedUpdatedProcess := s.getTestProcess()
-	expectedUpdatedProcess.Status = entity.RegisterProcessStatusFailed
+	expectedUpdatedProcess := s.getTestProcess(entity.RegisterProcessStatusFailed)
 	expectedUpdatedProcess.Logs = "copying temp file for version: invalid argument"
 	customMatcherUpdate := newregisteredProcessMatcher(expectedUpdatedProcess)
 
@@ -197,12 +246,10 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
 	expectedBytes, err := os.ReadFile(testFileAddr)
 	s.Require().NoError(err)
 
-	expectedRegisteredProcess := s.getTestProcess()
-	expectedRegisteredProcess.Status = entity.RegisterProcessStatusCreating
+	expectedRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
 	customMatcher := newregisteredProcessMatcher(expectedRegisteredProcess)
 
-	expectedUpdatedProcess := s.getTestProcess()
-	expectedUpdatedProcess.Status = entity.RegisterProcessStatusFailed
+	expectedUpdatedProcess := s.getTestProcess(entity.RegisterProcessStatusFailed)
 	expectedUpdatedProcess.Logs = "registering process: mocked error"
 	customMatcherUpdate := newregisteredProcessMatcher(expectedUpdatedProcess)
 
@@ -230,8 +277,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 	testFile, err := os.Open(testFileAddr)
 	s.Require().NoError(err)
 
-	expectedRegisteredProcess := s.getTestProcess()
-	expectedRegisteredProcess.Status = entity.RegisterProcessStatusCreating
+	expectedRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
 	customMatcher := newregisteredProcessMatcher(expectedRegisteredProcess)
 
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, usecase.ErrRegisteredProcessNotFound)
