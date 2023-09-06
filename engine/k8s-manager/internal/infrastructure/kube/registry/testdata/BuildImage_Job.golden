@@ -91,7 +91,7 @@ spec:
                     - --context=tar:///sources/file.tar.gz
                     - --insecure
                     - --verbosity=error
-                    - --destination=
+                    - --destination=test.local/test-image:v1.0.0
                   workingdir: ""
                   ports: []
                   envfrom: []
