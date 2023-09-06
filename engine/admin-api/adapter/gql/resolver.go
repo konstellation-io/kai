@@ -56,7 +56,7 @@ func NewGraphQLResolver(params Params) *Resolver {
 func (r *mutationResolver) CreateProduct(ctx context.Context, input CreateProductInput) (*entity.Product, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	product, err := r.productInteractor.CreateProduct(ctx, loggedUser, input.ID, input.Name, input.Description)
+	product, err := r.productInteractor.CreateProduct(ctx, loggedUser, input.Name, input.Description)
 	if err != nil {
 		return nil, err
 	}

@@ -65,7 +65,6 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 func (i *ProductInteractor) CreateProduct(
 	ctx context.Context,
 	user *entity.User,
-	productID,
 	name,
 	description string,
 ) (*entity.Product, error) {
@@ -74,7 +73,7 @@ func (i *ProductInteractor) CreateProduct(
 	}
 
 	// Sanitize input params
-	productID = i.generateProductID(name)
+	productID := i.generateProductID(name)
 	name = strings.TrimSpace(name)
 	description = strings.TrimSpace(description)
 
@@ -187,7 +186,7 @@ func (i *ProductInteractor) FindAll(ctx context.Context, user *entity.User) ([]*
 func (i *ProductInteractor) generateProductID(name string) string {
 	id := strings.TrimSpace(name)
 	id = strings.ToLower(id)
-	id = _whiteSpacesRE.ReplaceAllString(id, "_")
+	id = _whiteSpacesRE.ReplaceAllString(id, "-")
 	id = _validCharactersRE.ReplaceAllString(id, "")
 
 	return id
