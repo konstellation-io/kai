@@ -327,6 +327,36 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 	s.Require().Error(err)
 }
 
+func (s *ProcessServiceTestSuite) TestRegisterProcess_UpdateError() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+	expectedBytes, err := os.ReadFile(testFileAddr)
+	s.Require().NoError(err)
+
+	expectedRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
+	customMatcher := newregisteredProcessMatcher(expectedRegisteredProcess)
+
+	expectedUpdatedProcess := s.getTestProcess(entity.RegisterProcessStatusCreated)
+	customMatcherUpdate := newregisteredProcessMatcher(expectedUpdatedProcess)
+
+	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, usecase.ErrRegisteredProcessNotFound)
+	s.processRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
+	s.versionService.EXPECT().RegisterProcess(gomock.Any(), expectedRegisteredProcess.ID, expectedRegisteredProcess.Image, expectedBytes).Return("", nil)
+	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(fmt.Errorf("listen to Death Grips"))
+
+	returnedProcess, notifyCh, err := s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, processName, processType, testFile,
+	)
+	s.Require().NoError(err)
+
+	s.Equal(expectedRegisteredProcess, returnedProcess)
+
+	registeredProcess := <-notifyCh
+	s.Equal(entity.RegisterProcessStatusFailed, registeredProcess.Status)
+}
+
 func (s *ProcessServiceTestSuite) TestListByProduct_WithTypeFilter() {
 	ctx := context.Background()
 
