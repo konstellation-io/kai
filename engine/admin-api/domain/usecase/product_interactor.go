@@ -23,29 +23,27 @@ var (
 
 // ProductInteractor contains app logic to handle Product entities.
 type ProductInteractor struct {
-	logger              logr.Logger
-	productRepo         repository.ProductRepo
-	measurementRepo     repository.MeasurementRepo
-	versionRepo         repository.VersionRepo
-	metricRepo          repository.MetricRepo
-	processLogRepo      repository.ProcessLogRepository
-	processRegistryRepo repository.ProcessRegistryRepo
+	logger          logr.Logger
+	productRepo     repository.ProductRepo
+	measurementRepo repository.MeasurementRepo
+	versionRepo     repository.VersionRepo
+	metricRepo      repository.MetricRepo
+	processLogRepo  repository.ProcessLogRepository
 	processRepo     repository.ProcessRepository
-	userActivity        UserActivityInteracter
-	accessControl       auth.AccessControl
+	userActivity    UserActivityInteracter
+	accessControl   auth.AccessControl
 }
 
 type ProductInteractorOpts struct {
-	Logger              logr.Logger
-	ProductRepo         repository.ProductRepo
-	MeasurementRepo     repository.MeasurementRepo
-	VersionRepo         repository.VersionRepo
-	MetricRepo          repository.MetricRepo
-	ProcessLogRepo      repository.ProcessLogRepository
-	ProcessRegistryRepo repository.ProcessRegistryRepo
+	Logger          logr.Logger
+	ProductRepo     repository.ProductRepo
+	MeasurementRepo repository.MeasurementRepo
+	VersionRepo     repository.VersionRepo
+	MetricRepo      repository.MetricRepo
+	ProcessLogRepo  repository.ProcessLogRepository
 	ProcessRepo     repository.ProcessRepository
-	UserActivity        UserActivityInteracter
-	AccessControl       auth.AccessControl
+	UserActivity    UserActivityInteracter
+	AccessControl   auth.AccessControl
 }
 
 // NewProductInteractor creates a new ProductInteractor.

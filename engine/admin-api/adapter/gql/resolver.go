@@ -58,7 +58,6 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, input CreateProduc
 
 	product, err := r.productInteractor.CreateProduct(ctx, loggedUser, input.ID, input.Name, input.Description)
 	if err != nil {
-		r.logger.Error("Error creating product: " + err.Error())
 		return nil, err
 	}
 

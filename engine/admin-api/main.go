@@ -9,7 +9,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processregistry"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
@@ -67,7 +66,7 @@ func initGraphqlController(
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, oldLogger, mongodbClient)
 	versionMongoRepo := versionrepository.New(cfg, oldLogger, mongodbClient)
 	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, oldLogger, mongodbClient)
-	processRepo := processrepository.New(cfg, logger, mongodbClient)
+	processRepo := processrepository.New(cfg, oldLogger, mongodbClient)
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, oldLogger, mongodbClient)
 	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, oldLogger)
 
@@ -116,16 +115,15 @@ func initGraphqlController(
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
 	ps := usecase.ProductInteractorOpts{
-		Logger:              logger,
-		ProductRepo:         productRepo,
-		MeasurementRepo:     measurementRepo,
-		VersionRepo:         versionMongoRepo,
-		MetricRepo:          metricRepo,
-		ProcessLogRepo:      processLogRepo,
-		ProcessRegistryRepo: processRegistryRepo,
+		Logger:          logger,
+		ProductRepo:     productRepo,
+		MeasurementRepo: measurementRepo,
+		VersionRepo:     versionMongoRepo,
+		MetricRepo:      metricRepo,
+		ProcessLogRepo:  processLogRepo,
 		ProcessRepo:     processRepo,
-		UserActivity:        userActivityInteractor,
-		AccessControl:       accessControl,
+		UserActivity:    userActivityInteractor,
+		AccessControl:   accessControl,
 	}
 	productInteractor := usecase.NewProductInteractor(&ps)
 
@@ -159,9 +157,7 @@ func initGraphqlController(
 
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
 
-	processService := usecase.NewProcessService(logger, k8sService, processRegistryRepo)
-
-	processService := usecase.NewProcessService(l, k8sService, processRepo)
+	processService := usecase.NewProcessService(logger, k8sService, processRepo)
 
 	return controller.NewGraphQLController(
 		controller.Params{
