@@ -188,7 +188,7 @@ func (s *VersionServiceTestSuite) TestRegisterProcess_Error() {
 	ctx := context.Background()
 
 	req := &versionpb.RegisterProcessRequest{
-		ProcessId:    "test-process",
+		ProcessId:    "test-process-error",
 		ProcessImage: "test-image",
 		File:         []byte("test-sources"),
 	}
