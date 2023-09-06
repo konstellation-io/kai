@@ -158,7 +158,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	s.Equal(entity.RegisterProcessStatusCreated, registeredProcess.Status)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndFailed() {
+func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFailedStatus() {
 	ctx := context.Background()
 
 	testFile, err := os.Open(testFileAddr)
@@ -226,6 +226,26 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndNot
 	s.Require().Error(err)
 
 	s.ErrorIs(err, usecase.ErrProcessAlreadyRegistered)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFailedStatus_UpdateError() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+
+	alreadyRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusFailed)
+
+	expectedCreatingProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
+	customMatcherCreating := newregisteredProcessMatcher(expectedCreatingProcess)
+
+	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(alreadyRegisteredProcess, nil)
+	s.processRepo.EXPECT().Update(ctx, productID, customMatcherCreating).Return(fmt.Errorf("doctor maligno"))
+
+	_, _, err = s.processInteractor.RegisterProcess(
+		ctx, user, productID, version, processName, processType, testFile,
+	)
+	s.Require().Error(err)
 }
 
 func (s *ProcessServiceTestSuite) TestRegisterProcess_NoFileError() {
