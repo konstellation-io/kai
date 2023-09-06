@@ -148,6 +148,7 @@ func (ps *ProcessService) uploadProcessToRegistry(
 	err = ps.processRepository.Update(ctx, product, registeredProcess)
 	if err != nil {
 		ps.logger.Error(err, "Error updating registered process")
+
 		registeredProcess.Status = entity.RegisterProcessStatusFailed
 		registeredProcess.Logs = err.Error()
 	}
