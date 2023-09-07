@@ -147,10 +147,8 @@ func (ps *ProcessService) uploadProcessToRegistry(
 
 	err = ps.processRepository.Update(ctx, product, registeredProcess)
 	if err != nil {
-		ps.logger.Error(err, "Error updating registered process")
-
-		registeredProcess.Status = entity.RegisterProcessStatusFailed
-		registeredProcess.Logs = err.Error()
+		ps.updatedRegisteredProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("updating process in db: %w", err))
+		return
 	}
 
 	notifyStatusCh <- registeredProcess
@@ -163,12 +161,13 @@ func (ps *ProcessService) updatedRegisteredProcessError(
 	notifyStatusCh chan *entity.RegisteredProcess,
 	registerError error,
 ) {
+	ps.logger.Error(registerError, "error uploading process to registry", "process ID", registeredProcess.ID)
 	registeredProcess.Status = entity.RegisterProcessStatusFailed
 	registeredProcess.Logs = registerError.Error()
 
 	err := ps.processRepository.Update(ctx, product, registeredProcess)
 	if err != nil {
-		ps.logger.Error(err, "Error updating registered process", "process ID", registeredProcess.ID)
+		ps.logger.Error(err, "error updating registered process", "process ID", registeredProcess.ID)
 	}
 
 	notifyStatusCh <- registeredProcess
