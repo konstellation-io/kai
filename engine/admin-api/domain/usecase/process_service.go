@@ -119,7 +119,7 @@ func (ps *ProcessService) uploadProcessToRegistry(
 
 	tmpFile, err := os.CreateTemp("", "process-compress-*.tar.gz")
 	if err != nil {
-		ps.updatedRegisteredProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("creating temp file for process: %w", err))
+		ps.uploadingProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("creating temp file for process: %w", err))
 		return
 	}
 	defer tmpFile.Close()
@@ -127,19 +127,19 @@ func (ps *ProcessService) uploadProcessToRegistry(
 
 	_, err = io.Copy(tmpFile, sources)
 	if err != nil {
-		ps.updatedRegisteredProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("copying temp file for version: %w", err))
+		ps.uploadingProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("copying temp file for version: %w", err))
 		return
 	}
 
 	compressedFile, err := os.ReadFile(tmpFile.Name())
 	if err != nil {
-		ps.updatedRegisteredProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("opening process compressed file: %w", err))
+		ps.uploadingProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("opening process compressed file: %w", err))
 		return
 	}
 
 	_, err = ps.versionService.RegisterProcess(ctx, registeredProcess.ID, registeredProcess.Image, compressedFile)
 	if err != nil {
-		ps.updatedRegisteredProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("registering process: %w", err))
+		ps.uploadingProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("registering process: %w", err))
 		return
 	}
 
@@ -147,14 +147,16 @@ func (ps *ProcessService) uploadProcessToRegistry(
 
 	err = ps.processRepository.Update(ctx, product, registeredProcess)
 	if err != nil {
-		ps.updatedRegisteredProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("updating process in db: %w", err))
-		return
+		ps.logger.Error(err, "error updating registered process")
+
+		registeredProcess.Status = entity.RegisterProcessStatusFailed
+		registeredProcess.Logs = err.Error()
 	}
 
 	notifyStatusCh <- registeredProcess
 }
 
-func (ps *ProcessService) updatedRegisteredProcessError(
+func (ps *ProcessService) uploadingProcessError(
 	ctx context.Context,
 	product string,
 	registeredProcess *entity.RegisteredProcess,
