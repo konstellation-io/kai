@@ -76,7 +76,7 @@ func (ps *ProcessService) RegisterProcess(
 		Type:       processType,
 		Image:      processImage,
 		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
-		Owner:      user.ID,
+		Owner:      user.Email,
 		Status:     entity.RegisterProcessStatusCreating,
 	}
 

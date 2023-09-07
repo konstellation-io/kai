@@ -8,6 +8,8 @@ import (
 type CustomClaims struct {
 	ProductGrants entity.ProductGrants `json:"product_roles"`
 	RealmAccess   RealmAccess          `json:"realm_access"`
+	Name          string               `json:"preferred_username"`
+	Email         string               `json:"email"`
 	jwt.RegisteredClaims
 }
 

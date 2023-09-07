@@ -33,5 +33,7 @@ func (p *Parser) GetUser(accessToken string) (*entity.User, error) {
 		ID:            claims.Subject,
 		ProductGrants: claims.ProductGrants,
 		Roles:         claims.RealmAccess.Roles,
+		Name:          claims.Name,
+		Email:         claims.Email,
 	}, nil
 }
