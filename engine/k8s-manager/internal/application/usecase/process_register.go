@@ -27,16 +27,13 @@ func NewProcessRegister(logger logr.Logger, imageRegistry service.ImageBuilder) 
 }
 
 type RegisterProcessParams struct {
-	Product string
-	Version string
-	Process string
-	File    []byte
+	ProcessID    string
+	ProcessImage string
+	Sources      []byte
 }
 
 func (pr *ProcessRegister) RegisterProcess(ctx context.Context, params RegisterProcessParams) (string, error) {
-	imageName := fmt.Sprintf("%s_%s:%s", params.Product, params.Process, params.Version)
-
-	imageID, err := pr.imageBuilder.BuildImage(ctx, imageName, params.File)
+	imageID, err := pr.imageBuilder.BuildImage(ctx, params.ProcessID, params.ProcessImage, params.Sources)
 	if err != nil {
 		return "", fmt.Errorf("building image: %w", err)
 	}

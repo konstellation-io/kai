@@ -157,36 +157,31 @@ func (s *VersionServiceTestSuite) TestRegisterProcess() {
 	ctx := context.Background()
 
 	const (
-		product = "test-product"
-		version = "test"
-		process = "test-process"
-
-		expectedImageID = "image-id"
+		expectedProcessID    = "test-process-id"
+		expectedProcessImage = "test-process-image"
 	)
 
 	var file []byte
 
 	s.mockService.EXPECT().RegisterProcess(ctx, &versionpb.RegisterProcessRequest{
-		Product: product,
-		Version: version,
-		Process: process,
-		File:    file,
+		ProcessId:    expectedProcessID,
+		ProcessImage: expectedProcessImage,
+		File:         file,
 	}).Return(&versionpb.RegisterProcessResponse{
-		ImageID: expectedImageID,
+		ImageId: expectedProcessID,
 	}, nil)
 
-	ref, err := s.k8sVersionClient.RegisterProcess(ctx, product, version, process, file)
+	ref, err := s.k8sVersionClient.RegisterProcess(ctx, expectedProcessID, expectedProcessImage, file)
 	s.NoError(err)
-	s.Equal(expectedImageID, ref)
+	s.Equal(expectedProcessID, ref)
 }
 
 func (s *VersionServiceTestSuite) TestRegisterProcess_ClientError() {
 	ctx := context.Background()
 
 	const (
-		product = "test-product"
-		version = "test"
-		process = "test-process"
+		expectedProcessID    = "test-process-id"
+		expectedProcessImage = "test-process-image"
 	)
 
 	var (
@@ -195,12 +190,11 @@ func (s *VersionServiceTestSuite) TestRegisterProcess_ClientError() {
 	)
 
 	s.mockService.EXPECT().RegisterProcess(ctx, &versionpb.RegisterProcessRequest{
-		Product: product,
-		Version: version,
-		Process: process,
-		File:    file,
+		ProcessId:    expectedProcessID,
+		ProcessImage: expectedProcessImage,
+		File:         file,
 	}).Return(nil, expectedError)
 
-	_, err := s.k8sVersionClient.RegisterProcess(ctx, product, version, process, file)
+	_, err := s.k8sVersionClient.RegisterProcess(ctx, expectedProcessID, expectedProcessImage, file)
 	s.ErrorIs(err, expectedError)
 }

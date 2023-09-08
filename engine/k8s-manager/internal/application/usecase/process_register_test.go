@@ -11,7 +11,6 @@ import (
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/usecase"
 	"github.com/konstellation-io/kai/engine/k8s-manager/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestRegisterProcess(t *testing.T) {
@@ -20,30 +19,28 @@ func TestRegisterProcess(t *testing.T) {
 		imageBuilder    = mocks.NewImageBuilderMock(t)
 		processRegister = usecase.NewProcessRegister(logger, imageBuilder)
 		ctx             = context.Background()
+		source          = []byte("test-source")
 	)
 
 	const (
-		product = "test-product"
-		version = "v1.0.0"
-		process = "test-process"
-
-		expectedImageRef = "test-product_test-process:v1.0.0"
+		product      = "test-product"
+		processID    = "test-product_test-process:v1.0.0"
+		processImage = "process-image"
 	)
 
 	imageBuilder.EXPECT().
-		BuildImage(ctx, expectedImageRef, mock.Anything).
-		Return(expectedImageRef, nil).
+		BuildImage(ctx, processID, processImage, source).
+		Return(processImage, nil).
 		Once()
 
-	imageRef, err := processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
-		Product: product,
-		Version: version,
-		Process: process,
-		File:    nil,
+	imageID, err := processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
+		ProcessID:    processID,
+		ProcessImage: processImage,
+		Sources:      source,
 	})
 	assert.NoError(t, err)
 
-	assert.Equal(t, expectedImageRef, imageRef)
+	assert.Equal(t, processImage, imageID)
 }
 
 func TestRegisterProcess_ErrorBuildingImage(t *testing.T) {
@@ -52,28 +49,26 @@ func TestRegisterProcess_ErrorBuildingImage(t *testing.T) {
 		imageBuilder    = mocks.NewImageBuilderMock(t)
 		processRegister = usecase.NewProcessRegister(logger, imageBuilder)
 		ctx             = context.Background()
+		source          = []byte("test-source")
 	)
 
 	const (
-		product = "test-product"
-		version = "v1.0.0"
-		process = "test-process"
-
-		expectedImageRef = "test-product_test-process:v1.0.0"
+		product      = "test-product"
+		processID    = "test-product_test-process:v1.0.0"
+		processImage = "process-image"
 	)
 
 	expectedError := errors.New("error building image")
 
 	imageBuilder.EXPECT().
-		BuildImage(ctx, expectedImageRef, mock.Anything).
+		BuildImage(ctx, processID, processImage, source).
 		Return("", expectedError).
 		Once()
 
 	_, err := processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
-		Product: product,
-		Version: version,
-		Process: process,
-		File:    nil,
+		ProcessID:    processID,
+		ProcessImage: processImage,
+		Sources:      source,
 	})
 	assert.ErrorIs(t, err, expectedError)
 }
