@@ -40,7 +40,7 @@ func NewUserActivityInteractor(
 	logger logr.Logger,
 	userActivityRepo repository.UserActivityRepo,
 	accessControl auth.AccessControl,
-) UserActivityInteracter {
+) *UserActivityInteractor {
 	return &UserActivityInteractor{
 		logger,
 		userActivityRepo,
@@ -180,6 +180,7 @@ func (i *UserActivityInteractor) RegisterUpdateProductGrants(
 		userID,
 		entity.UserActivityTypeUpdateProductGrants,
 		[]*entity.UserActivityVar{
+			{Key: "USER_ID", Value: userID},
 			{Key: "TARGET_USER_ID", Value: targetUserID},
 			{Key: "PRODUCT", Value: product},
 			{Key: "NEW_PRODUCT_GRANTS", Value: strings.Join(productGrants, ",")},
