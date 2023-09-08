@@ -37,10 +37,6 @@ type RegisterProcessInput struct {
 	ProcessType string         `json:"processType"`
 }
 
-type RegisteredImage struct {
-	ProcessedImageID string `json:"processedImageID"`
-}
-
 type RevokeUserProductGrantsInput struct {
 	TargetID string  `json:"targetID"`
 	Product  string  `json:"product"`

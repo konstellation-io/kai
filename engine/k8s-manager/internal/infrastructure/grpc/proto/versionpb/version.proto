@@ -87,14 +87,13 @@ message ProcessStatusResponse {
 }
 
 message RegisterProcessRequest {
-  string product = 1;
-  string version = 2;
-  string process = 3;
-  bytes file = 4;
+  string process_id = 1;
+  string process_image = 2;
+  bytes file = 3;
 }
 
 message RegisterProcessResponse {
-  string ImageID = 1;
+  string image_id = 1;
 }
 
 service VersionService {

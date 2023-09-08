@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/usecase"
-
 	"github.com/go-logr/logr"
-
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/usecase"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/grpc/proto/versionpb"
 )
 
@@ -74,16 +72,15 @@ func (v *VersionService) RegisterProcess(
 	v.logger.Info("Register process request received")
 
 	imageID, err := v.processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
-		Product: req.Product,
-		Version: req.Version,
-		Process: req.Process,
-		File:    req.File,
+		ProcessID:    req.ProcessId,
+		ProcessImage: req.ProcessImage,
+		Sources:      req.File,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("registering process: %w", err)
 	}
 
 	return &versionpb.RegisterProcessResponse{
-		ImageID: imageID,
+		ImageId: imageID,
 	}, nil
 }

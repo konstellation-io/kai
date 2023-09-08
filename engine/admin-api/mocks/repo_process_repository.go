@@ -64,6 +64,21 @@ func (mr *MockProcessRepositoryMockRecorder) CreateIndexes(ctx, productID interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockProcessRepository)(nil).CreateIndexes), ctx, productID)
 }
 
+// GetByID mocks base method.
+func (m *MockProcessRepository) GetByID(ctx context.Context, productID, imageID string) (*entity.RegisteredProcess, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByID", ctx, productID, imageID)
+	ret0, _ := ret[0].(*entity.RegisteredProcess)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByID indicates an expected call of GetByID.
+func (mr *MockProcessRepositoryMockRecorder) GetByID(ctx, productID, imageID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProcessRepository)(nil).GetByID), ctx, productID, imageID)
+}
+
 // ListByProductAndType mocks base method.
 func (m *MockProcessRepository) ListByProductAndType(ctx context.Context, productID, processType string) ([]*entity.RegisteredProcess, error) {
 	m.ctrl.T.Helper()
@@ -77,4 +92,18 @@ func (m *MockProcessRepository) ListByProductAndType(ctx context.Context, produc
 func (mr *MockProcessRepositoryMockRecorder) ListByProductAndType(ctx, productID, processType interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByProductAndType", reflect.TypeOf((*MockProcessRepository)(nil).ListByProductAndType), ctx, productID, processType)
+}
+
+// Update mocks base method.
+func (m *MockProcessRepository) Update(ctx context.Context, productID string, newRegisteredProcess *entity.RegisteredProcess) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, productID, newRegisteredProcess)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockProcessRepositoryMockRecorder) Update(ctx, productID, newRegisteredProcess interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProcessRepository)(nil).Update), ctx, productID, newRegisteredProcess)
 }

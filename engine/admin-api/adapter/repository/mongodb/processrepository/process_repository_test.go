@@ -18,6 +18,7 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
@@ -183,4 +184,66 @@ func (s *ProcessRepositoryTestSuite) TestListByProductWithUnexistingProduct() {
 	s.Require().NoError(err)
 
 	s.Empty(registeredProcesses)
+}
+
+func (s *ProcessRepositoryTestSuite) TestUpdate() {
+	ctx := context.Background()
+
+	testRegisteredProcess := &entity.RegisteredProcess{
+		ID:         "process_id",
+		Name:       "test_trigger",
+		Version:    processVersion,
+		Type:       "trigger",
+		Image:      "process_image",
+		UploadDate: testRepoUploadDate,
+		Owner:      ownerID,
+	}
+
+	createdRegisteredProcess, err := s.processRepo.Create(productID, testRegisteredProcess)
+	s.Require().NoError(err)
+
+	createdRegisteredProcess.Image = "new_process_image"
+
+	err = s.processRepo.Update(ctx, productID, createdRegisteredProcess)
+	s.Require().NoError(err)
+
+	// Check if the version is updated in the DB
+	collection := s.mongoClient.Database(productID).Collection(registeredProcessesCollectionName)
+	filter := bson.M{"_id": createdRegisteredProcess.ID}
+
+	var registeredProcessDTO registeredProcessDTO
+	err = collection.FindOne(context.Background(), filter).Decode(&registeredProcessDTO)
+	s.Require().NoError(err)
+	s.Equal(createdRegisteredProcess, mapDTOToEntity(&registeredProcessDTO))
+}
+
+func (s *ProcessRepositoryTestSuite) TestGetByID() {
+	ctx := context.Background()
+
+	testRegisteredProcess := &entity.RegisteredProcess{
+		ID:         "process_id",
+		Name:       "test_trigger",
+		Version:    processVersion,
+		Type:       "trigger",
+		Image:      "process_image",
+		UploadDate: testRepoUploadDate,
+		Owner:      ownerID,
+	}
+
+	createdRegisteredProcess, err := s.processRepo.Create(productID, testRegisteredProcess)
+	s.Require().NoError(err)
+
+	registeredProcess, err := s.processRepo.GetByID(ctx, productID, createdRegisteredProcess.ID)
+	s.Require().NoError(err)
+
+	s.Equal(createdRegisteredProcess, registeredProcess)
+}
+
+func (s *ProcessRepositoryTestSuite) TestGetByID_NoResults() {
+	ctx := context.Background()
+
+	_, err := s.processRepo.GetByID(ctx, productID, "nonexistent")
+	s.Require().Error(err)
+
+	s.ErrorIs(err, usecase.ErrRegisteredProcessNotFound)
 }

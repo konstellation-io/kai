@@ -51,3 +51,8 @@ models:
     fields:
       status:
         resolver: true
+  RegisteredProcess:
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.RegisteredProcess
+    fields:
+      uploadDate:
+        resolver: true

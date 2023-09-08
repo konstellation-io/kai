@@ -24,6 +24,8 @@ var domainRegisteredProcess = &entity.RegisteredProcess{
 	Image:      "test_image",
 	UploadDate: testMapperUploadDate,
 	Owner:      userID,
+	Status:     entity.RegisterProcessStatusCreated,
+	Logs:       "Some logs",
 }
 
 var DTORegisteredProcess = &registeredProcessDTO{
@@ -34,6 +36,8 @@ var DTORegisteredProcess = &registeredProcessDTO{
 	Image:      "test_image",
 	UploadDate: testMapperUploadDate,
 	Owner:      userID,
+	Status:     entity.RegisterProcessStatusCreated,
+	Logs:       "Some logs",
 }
 
 func TestMapDTOToEntity(t *testing.T) {

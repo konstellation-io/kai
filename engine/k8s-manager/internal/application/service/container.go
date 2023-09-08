@@ -35,7 +35,7 @@ type ContainerStopper interface {
 
 //go:generate mockery --name ImageBuilder --output ../../../mocks --filename image_builder_mock.go --structname ImageBuilderMock
 type ImageBuilder interface {
-	BuildImage(ctx context.Context, name string, file []byte) (string, error)
+	BuildImage(ctx context.Context, processID, processImage string, sources []byte) (string, error)
 }
 
 //go:generate mockery --name ContainerService --output ../../../mocks --filename container_service_mock.go --structname ContainerServiceMock

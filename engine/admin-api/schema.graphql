@@ -42,7 +42,7 @@ type Mutation {
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
-  registerProcess(input: RegisterProcessInput!): RegisteredImage!
+  registerProcess(input: RegisterProcessInput!): RegisteredProcess!
 }
 
 type RegisteredProcess {
@@ -53,10 +53,7 @@ type RegisteredProcess {
   image: String!
   uploadDate: String!
   owner: String!
-}
-
-type RegisteredImage {
-  processedImageID: ID!
+  status: String!
 }
 
 type User {

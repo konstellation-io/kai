@@ -1,3 +1,5 @@
+//go:build integration
+
 package registry_test
 
 import (
@@ -12,6 +14,7 @@ import (
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube/registry"
 	"github.com/sebdah/goldie/v2"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	batchv1 "k8s.io/api/batch/v1"
@@ -27,14 +30,16 @@ const (
 	_imageName    = "test-image:v1.0.0"
 )
 
+var (
+	_expectedImageRef = fmt.Sprintf("%s/%s", _registryHost, _imageName)
+)
+
 func TestBuildImage_SucceedJob(t *testing.T) {
 	var (
 		logger    = testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 		clientset = fake.NewSimpleClientset()
 		ctx       = context.Background()
 	)
-
-	expectedImageRef := fmt.Sprintf("%s/%s", _registryHost, _imageName)
 
 	viper.Set(config.KubeNamespaceKey, _namespace)
 	viper.Set(config.ImageRegistryURLKey, fmt.Sprintf("http://%s", _registryHost))
@@ -47,9 +52,9 @@ func TestBuildImage_SucceedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, []byte{})
+		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, _expectedImageRef, []byte{})
 		require.NoError(t, err)
-		require.Equal(t, expectedImageRef, imageRef)
+		assert.Equal(t, _expectedImageRef, imageRef)
 		wg.Done()
 	}()
 
@@ -106,7 +111,7 @@ func TestBuildImage_FailedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		_, err := imageBuilder.BuildImage(ctx, _imageName, []byte{})
+		_, err := imageBuilder.BuildImage(ctx, _imageName, _expectedImageRef, []byte{})
 		require.ErrorIs(t, err, registry.ErrFailedImageBuild)
 		wg.Done()
 	}()
@@ -153,8 +158,6 @@ func TestBuildImage_UnknownEvent(t *testing.T) {
 		ctx       = context.Background()
 	)
 
-	expectedImageRef := fmt.Sprintf("%s/%s", _registryHost, _imageName)
-
 	viper.Set(config.KubeNamespaceKey, _namespace)
 	viper.Set(config.ImageRegistryURLKey, fmt.Sprintf("http://%s", _registryHost))
 	viper.Set(config.ImageBuilderLogLevel, "error")
@@ -166,9 +169,9 @@ func TestBuildImage_UnknownEvent(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, []byte{})
+		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, _expectedImageRef, []byte{})
 		require.NoError(t, err)
-		require.Equal(t, expectedImageRef, imageRef)
+		assert.Equal(t, _expectedImageRef, imageRef)
 		wg.Done()
 	}()
 
@@ -222,7 +225,7 @@ func TestBuildImage_DeletedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		_, err := imageBuilder.BuildImage(ctx, _imageName, []byte{})
+		_, err := imageBuilder.BuildImage(ctx, _imageName, _expectedImageRef, []byte{})
 		require.ErrorIs(t, err, registry.ErrErrorEvent)
 		wg.Done()
 	}()
