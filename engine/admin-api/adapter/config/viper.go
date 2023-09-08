@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -9,8 +10,9 @@ import (
 const (
 	ComponentsKey = "components"
 
-	CfgFilePathKey = "CONFIG_FILE_PATH"
-	RegistryURLKey = "registry.url"
+	CfgFilePathKey          = "CONFIG_FILE_PATH"
+	RegistryURLKey          = "registry.url"
+	VersionStatusTimeoutKey = "application.versionStatusTimeout"
 )
 
 func InitConfig() error {
@@ -20,6 +22,7 @@ func InitConfig() error {
 
 func setDefaultConfig() {
 	viper.SetDefault(CfgFilePathKey, "config.yml")
+	viper.SetDefault(VersionStatusTimeoutKey, 20*time.Minute)
 }
 
 func loadConfig() error {

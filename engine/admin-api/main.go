@@ -136,8 +136,7 @@ func initGraphqlController(
 
 	chronografDashboard := service.CreateDashboardService(cfg, oldLogger)
 	versionInteractor := usecase.NewVersionInteractor(
-		cfg,
-		oldLogger,
+		logger,
 		versionMongoRepo,
 		productRepo,
 		k8sService,
