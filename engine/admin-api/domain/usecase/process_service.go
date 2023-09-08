@@ -175,9 +175,6 @@ func (ps *ProcessService) uploadingProcessError(
 	notifyStatusCh <- registeredProcess
 }
 
-// TODO: move this to viper config
-//
-//nolint:godox // To be done.
 func (ps *ProcessService) ListByProductAndType(
 	ctx context.Context,
 	user *entity.User,
