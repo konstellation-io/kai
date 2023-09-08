@@ -13,3 +13,6 @@ CHANGELOG.md
 changelog.old
 .nyx-state.json
 .nyx-summary.txt
+
+.ci/CHANGELOG
+scripts/helmfile/helmfile.lock
