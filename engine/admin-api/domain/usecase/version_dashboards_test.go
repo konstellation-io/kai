@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/go-logr/logr"
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,15 +21,14 @@ type versionDashboardsSuite struct {
 }
 
 type versionDashboardsSuiteMocks struct {
-	logger           *mocks.MockLogger
+	logger           logr.Logger
 	dashboardService *mocks.MockDashboardService
 }
 
 func newVersionDashboardsSuite(t *testing.T) *versionDashboardsSuite {
 	ctrl := gomock.NewController(t)
 
-	cfg := &config.Config{}
-	logger := mocks.NewMockLogger(ctrl)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	dashboardService := mocks.NewMockDashboardService(ctrl)
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
 	runtimeRepo := mocks.NewMockProductRepo(ctrl)
@@ -38,9 +38,7 @@ func newVersionDashboardsSuite(t *testing.T) *versionDashboardsSuite {
 	accessControl := mocks.NewMockAccessControl(ctrl)
 	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 
-	mocks.AddLoggerExpects(logger)
-
-	versionInteractor := NewVersionInteractor(cfg, logger, versionRepo, runtimeRepo, versionService,
+	versionInteractor := NewVersionInteractor(logger, versionRepo, runtimeRepo, versionService,
 		natsManagerService, userActivityInteractor, accessControl, dashboardService, processLogRepo)
 
 	return &versionDashboardsSuite{ctrl: ctrl,

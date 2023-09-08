@@ -9,13 +9,13 @@ import (
 
 	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
@@ -68,8 +68,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 		accessControl,
 	)
 
-	versionInteractor := usecase.NewVersionInteractor(
-		cfg, oldLogger, versionRepo, productRepo, verisonService, natsManagerService,
+	versionInteractor := usecase.NewVersionInteractor(logger, versionRepo, productRepo, verisonService, natsManagerService,
 		userActivityInteractor, accessControl, dashboardService, processLogRepo)
 
 	s.ctrl = ctrl
