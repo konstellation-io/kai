@@ -57,6 +57,7 @@ type ProcessServiceTestSuite struct {
 
 const (
 	userID       = "userID"
+	userEmail    = "test@email.com"
 	productID    = "productID"
 	version      = "v1.0.0"
 	processName  = "test-process"
@@ -71,6 +72,7 @@ var (
 		ProductGrants: entity.ProductGrants{
 			productID: {"admin"},
 		},
+		Email: userEmail,
 	}
 )
 
@@ -95,7 +97,7 @@ func (s *ProcessServiceTestSuite) getTestProcess(status string) *entity.Register
 		Type:       processType,
 		Image:      expectedProcessImage,
 		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
-		Owner:      userID,
+		Owner:      userEmail,
 		Status:     status,
 	}
 }
