@@ -15,4 +15,4 @@ changelog.old
 .nyx-summary.txt
 
 .ci/CHANGELOG
-scritps/helmfile/helmfile.lock
+scripts/helmfile/helmfile.lock
