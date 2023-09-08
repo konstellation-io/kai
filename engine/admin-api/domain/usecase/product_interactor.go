@@ -3,25 +3,27 @@ package usecase
 import (
 	"context"
 	"errors"
+	"regexp"
 	"strings"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 var (
 	ErrProductNotFound       = errors.New("error product not found")
 	ErrProductDuplicated     = errors.New("there is already a product with the same id")
 	ErrProductDuplicatedName = errors.New("there is already a product with the same name")
+
+	_whiteSpacesRE     = regexp.MustCompile(" +")
+	_validCharactersRE = regexp.MustCompile("[^a-z0-9-]")
 )
 
 // ProductInteractor contains app logic to handle Product entities.
 type ProductInteractor struct {
-	cfg             *config.Config
-	logger          logging.Logger
+	logger          logr.Logger
 	productRepo     repository.ProductRepo
 	measurementRepo repository.MeasurementRepo
 	versionRepo     repository.VersionRepo
@@ -33,8 +35,7 @@ type ProductInteractor struct {
 }
 
 type ProductInteractorOpts struct {
-	Cfg             *config.Config
-	Logger          logging.Logger
+	Logger          logr.Logger
 	ProductRepo     repository.ProductRepo
 	MeasurementRepo repository.MeasurementRepo
 	VersionRepo     repository.VersionRepo
@@ -48,7 +49,6 @@ type ProductInteractorOpts struct {
 // NewProductInteractor creates a new ProductInteractor.
 func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 	return &ProductInteractor{
-		ps.Cfg,
 		ps.Logger,
 		ps.ProductRepo,
 		ps.MeasurementRepo,
@@ -65,18 +65,19 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 func (i *ProductInteractor) CreateProduct(
 	ctx context.Context,
 	user *entity.User,
-	productID,
 	name,
 	description string,
 ) (*entity.Product, error) {
-	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActCreateProduct); err != nil {
+	if err := i.accessControl.CheckRoleGrants(user, auth.ActCreateProduct); err != nil {
 		return nil, err
 	}
 
 	// Sanitize input params
-	productID = strings.TrimSpace(productID)
+	productID := i.generateProductID(name)
 	name = strings.TrimSpace(name)
 	description = strings.TrimSpace(description)
+
+	i.logger.Info("Creating product", "name", name, "id", productID)
 
 	r := &entity.Product{
 		ID:          productID,
@@ -112,16 +113,16 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	i.logger.Info("Product stored in the database with ID:" + createdProduct.ID)
+	i.logger.Info("Product stored in the database with ID:" + createdProduct.Name)
 
-	err = i.measurementRepo.CreateDatabase(createdProduct.ID)
+	err = i.measurementRepo.CreateDatabase(createdProduct.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	i.logger.Info("Measurement database created for product with ID:" + createdProduct.ID)
+	i.logger.Info("Measurement database created for product with ID:" + createdProduct.Name)
 
-	err = i.createDatabaseIndexes(ctx, productID)
+	err = i.createDatabaseIndexes(ctx, name)
 	if err != nil {
 		return nil, err
 	}
@@ -180,4 +181,13 @@ func (i *ProductInteractor) FindAll(ctx context.Context, user *entity.User) ([]*
 	visibleProducts := i.accessControl.GetUserProducts(user)
 
 	return i.productRepo.FindByIDs(ctx, visibleProducts)
+}
+
+func (i *ProductInteractor) generateProductID(name string) string {
+	id := strings.TrimSpace(name)
+	id = strings.ToLower(id)
+	id = _whiteSpacesRE.ReplaceAllString(id, "-")
+	id = _validCharactersRE.ReplaceAllString(id, "")
+
+	return id
 }

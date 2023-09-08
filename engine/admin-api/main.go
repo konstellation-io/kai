@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/casbinauth"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -33,32 +34,41 @@ func main() {
 		log.Fatal(err)
 	}
 
-	logger := logging.NewLogger(cfg.LogLevel)
+	oldLogger := logging.NewLogger(cfg.LogLevel)
 
-	db := mongodb.NewMongoDB(cfg, logger)
+	zapLog, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logger := zapr.NewLogger(zapLog)
+
+	db := mongodb.NewMongoDB(cfg, oldLogger)
 
 	mongodbClient := db.Connect()
 	defer db.Disconnect()
 
-	graphqlController := initGraphqlController(cfg, logger, mongodbClient)
+	graphqlController := initGraphqlController(cfg, oldLogger, logger, mongodbClient)
 
 	app := http.NewApp(
 		cfg,
-		logger,
+		oldLogger,
 		graphqlController,
 	)
 
 	app.Start()
 }
 
-func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) *controller.GraphQLController {
-	productRepo := mongodb.NewProductRepoMongoDB(cfg, logger, mongodbClient)
-	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
-	versionMongoRepo := versionrepository.New(cfg, logger, mongodbClient)
-	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, logger, mongodbClient)
-	processRepo := processrepository.New(cfg, logger, mongodbClient)
-	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
-	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
+func initGraphqlController(
+	cfg *config.Config, oldLogger logging.Logger, logger logr.Logger, mongodbClient *mongo.Client,
+) *controller.GraphQLController {
+	productRepo := mongodb.NewProductRepoMongoDB(cfg, oldLogger, mongodbClient)
+	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, oldLogger, mongodbClient)
+	versionMongoRepo := versionrepository.New(cfg, oldLogger, mongodbClient)
+	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, oldLogger, mongodbClient)
+	processRepo := processrepository.New(cfg, oldLogger, mongodbClient)
+	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, oldLogger, mongodbClient)
+	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, oldLogger)
 
 	ccK8sManager, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -67,7 +77,7 @@ func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbCli
 
 	k8sManagerClient := versionpb.NewVersionServiceClient(ccK8sManager)
 
-	k8sService, err := versionservice.New(cfg, logger, k8sManagerClient)
+	k8sService, err := versionservice.New(cfg, oldLogger, k8sManagerClient)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -79,12 +89,12 @@ func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbCli
 
 	natsManagerClient := natspb.NewNatsManagerServiceClient(ccNatsManager)
 
-	natsManagerService, err := natsmanager.NewNatsManagerClient(cfg, logger, natsManagerClient)
+	natsManagerService, err := natsmanager.NewNatsManagerClient(cfg, oldLogger, natsManagerClient)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	accessControl, err := casbinauth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
+	accessControl, err := casbinauth.NewCasbinAccessControl(oldLogger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -105,7 +115,6 @@ func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbCli
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
 	ps := usecase.ProductInteractorOpts{
-		Cfg:             cfg,
 		Logger:          logger,
 		ProductRepo:     productRepo,
 		MeasurementRepo: measurementRepo,
@@ -119,16 +128,16 @@ func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbCli
 	productInteractor := usecase.NewProductInteractor(&ps)
 
 	userInteractor := usecase.NewUserInteractor(
-		logger,
+		oldLogger,
 		accessControl,
 		userActivityInteractor,
 		gocloakUserRegistry,
 	)
 
-	chronografDashboard := service.CreateDashboardService(cfg, logger)
+	chronografDashboard := service.CreateDashboardService(cfg, oldLogger)
 	versionInteractor := usecase.NewVersionInteractor(
 		cfg,
-		logger,
+		oldLogger,
 		versionMongoRepo,
 		productRepo,
 		k8sService,
@@ -140,25 +149,19 @@ func initGraphqlController(cfg *config.Config, logger logging.Logger, mongodbCli
 	)
 
 	metricsInteractor := usecase.NewMetricsInteractor(
-		logger,
+		oldLogger,
 		productRepo,
 		accessControl,
 		metricRepo,
 	)
 
-	zapLog, err := zap.NewDevelopment()
-	if err != nil {
-		log.Fatal(err)
-	}
+	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
 
-	l := zapr.NewLogger(zapLog)
-	serverInfoGetter := usecase.NewServerInfoGetter(l, accessControl)
-
-	processService := usecase.NewProcessService(l, k8sService, processRepo)
+	processService := usecase.NewProcessService(logger, k8sService, processRepo)
 
 	return controller.NewGraphQLController(
 		controller.Params{
-			Logger:                 logger,
+			Logger:                 oldLogger,
 			Cfg:                    cfg,
 			ProductInteractor:      productInteractor,
 			UserInteractor:         userInteractor,
