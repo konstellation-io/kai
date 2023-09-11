@@ -18,8 +18,9 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
+	logging2 "github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -34,7 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	oldLogger := logging.NewLogger(cfg.LogLevel)
+	oldLogger := logging2.NewLogger(cfg.LogLevel)
 
 	zapLog, err := zap.NewDevelopment()
 	if err != nil {
@@ -60,7 +61,7 @@ func main() {
 }
 
 func initGraphqlController(
-	cfg *config.Config, oldLogger logging.Logger, logger logr.Logger, mongodbClient *mongo.Client,
+	cfg *config.Config, oldLogger logging2.Logger, logger logr.Logger, mongodbClient *mongo.Client,
 ) *controller.GraphQLController {
 	productRepo := mongodb.NewProductRepoMongoDB(cfg, oldLogger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, oldLogger, mongodbClient)
@@ -135,9 +136,8 @@ func initGraphqlController(
 	)
 
 	chronografDashboard := service.CreateDashboardService(cfg, oldLogger)
-	versionInteractor := usecase.NewVersionInteractor(
-		cfg,
-		oldLogger,
+	versionInteractor := version.NewHandler(
+		logger,
 		versionMongoRepo,
 		productRepo,
 		k8sService,

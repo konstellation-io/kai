@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	apperrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -19,7 +20,6 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	apperrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
 	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 

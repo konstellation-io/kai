@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/stretchr/testify/assert"
 )
 

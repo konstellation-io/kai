@@ -1,6 +1,6 @@
 //go:build unit
 
-package usecase_test
+package version_test
 
 import (
 	"context"
@@ -9,14 +9,15 @@ import (
 
 	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/krt"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+	"github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/krt"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
@@ -36,7 +37,7 @@ type VersionInteractorSuite struct {
 	suite.Suite
 	ctrl              *gomock.Controller
 	mocks             versionSuiteMocks
-	versionInteractor *usecase.VersionInteractor
+	versionInteractor *version.Handler
 	ctx               context.Context
 }
 
@@ -68,8 +69,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 		accessControl,
 	)
 
-	versionInteractor := usecase.NewVersionInteractor(
-		cfg, oldLogger, versionRepo, productRepo, verisonService, natsManagerService,
+	versionInteractor := version.NewHandler(logger, versionRepo, productRepo, verisonService, natsManagerService,
 		userActivityInteractor, accessControl, dashboardService, processLogRepo)
 
 	s.ctrl = ctrl
@@ -183,7 +183,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion() {
 
 	testVersion := s.getTestVersion()
 
-	file, err := os.Open("../../testdata/classificator_krt.yaml")
+	file, err := os.Open("../../../testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
@@ -214,7 +214,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfVersionTagIsDuplica
 
 	testVersion := s.getTestVersion()
 
-	file, err := os.Open("../../testdata/classificator_krt.yaml")
+	file, err := os.Open("../../../testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
@@ -230,7 +230,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfProductNotFound() {
 
 	user := testhelpers.NewUserBuilder().Build()
 
-	file, err := os.Open("../../testdata/classificator_krt.yaml")
+	file, err := os.Open("../../../testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
@@ -249,7 +249,7 @@ func (s *VersionInteractorSuite) TestCreateNewVersion_FailsIfKrtIsInvalid() {
 		ID: productID,
 	}
 
-	file, err := os.Open("../../testdata/invalid_krt.yaml")
+	file, err := os.Open("./testdata/invalid_krt.yaml")
 	s.Require().NoError(err)
 
 	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)

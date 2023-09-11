@@ -3,12 +3,12 @@ package processregistry
 import (
 	"context"
 
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 const processRegistryCollectionName = "process_registry"

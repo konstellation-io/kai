@@ -5,7 +5,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	kaimiddleware "github.com/konstellation-io/kai/engine/admin-api/delivery/http/middleware"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )

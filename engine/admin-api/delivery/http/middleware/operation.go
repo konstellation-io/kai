@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/labstack/echo"
 )
 

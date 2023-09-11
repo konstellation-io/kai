@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/labstack/echo"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/gql"
@@ -11,7 +13,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 //go:generate mockgen -source=${GOFILE} -destination=../../../mocks/controller_${GOFILE} -package=mocks
@@ -29,7 +30,7 @@ type GraphQLController struct {
 	productInteractor      *usecase.ProductInteractor
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
-	versionInteractor      *usecase.VersionInteractor
+	versionInteractor      *version.Handler
 	metricsInteractor      *usecase.MetricsInteractor
 	serverInfoGetter       *usecase.ServerInfoGetter
 	processService         *usecase.ProcessService
@@ -41,7 +42,7 @@ type Params struct {
 	ProductInteractor      *usecase.ProductInteractor
 	UserInteractor         *usecase.UserInteractor
 	UserActivityInteractor usecase.UserActivityInteracter
-	VersionInteractor      *usecase.VersionInteractor
+	VersionInteractor      *version.Handler
 	MetricsInteractor      *usecase.MetricsInteractor
 	ServerInfoGetter       *usecase.ServerInfoGetter
 	ProcessService         *usecase.ProcessService
