@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"testing"
 
-	auth2 "github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUnauthorizedError_Error(t *testing.T) {
-	err := auth2.UnauthorizedError{
+	err := auth.UnauthorizedError{
 		Product: "product-01",
-		Action:  auth2.ActViewProduct,
+		Action:  auth.ActViewProduct,
 	}
 
 	stringFormat := "you don't have authorization to %s in product %s"
@@ -22,8 +22,8 @@ func TestUnauthorizedError_Error(t *testing.T) {
 }
 
 func TestUnauthorizedError_Error_WithoutProduct(t *testing.T) {
-	err := auth2.UnauthorizedError{
-		Action: auth2.ActViewServerInfo,
+	err := auth.UnauthorizedError{
+		Action: auth.ActViewServerInfo,
 	}
 
 	stringFormat := "you don't have authorization to %s"
@@ -33,8 +33,8 @@ func TestUnauthorizedError_Error_WithoutProduct(t *testing.T) {
 }
 
 func TestUnauthorizedError_Error_WithError(t *testing.T) {
-	err := auth2.UnauthorizedError{
-		Action: auth2.ActViewServerInfo,
+	err := auth.UnauthorizedError{
+		Action: auth.ActViewServerInfo,
 		Err:    errors.New("wrapped error"),
 	}
 

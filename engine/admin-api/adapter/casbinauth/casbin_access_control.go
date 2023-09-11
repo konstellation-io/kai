@@ -2,7 +2,7 @@ package casbinauth
 
 import (
 	"github.com/casbin/casbin/v2"
-	auth2 "github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
@@ -18,7 +18,7 @@ type Opts struct {
 
 func defaultOpts() Opts {
 	return Opts{
-		adminRole: auth2.DefaultAdminRole,
+		adminRole: auth.DefaultAdminRole,
 	}
 }
 
@@ -62,7 +62,7 @@ func NewCasbinAccessControl(
 	return accessController, nil
 }
 
-func (a *CasbinAccessControl) CheckRoleGrants(user *entity.User, action auth2.Action) error {
+func (a *CasbinAccessControl) CheckRoleGrants(user *entity.User, action auth.Action) error {
 	err := a.checkGrants(user, _defaultResource, action)
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func (a *CasbinAccessControl) CheckRoleGrants(user *entity.User, action auth2.Ac
 func (a *CasbinAccessControl) CheckProductGrants(
 	user *entity.User,
 	product string,
-	action auth2.Action,
+	action auth.Action,
 ) error {
 	err := a.checkGrants(user, product, action)
 	if err != nil {
@@ -102,7 +102,7 @@ func (a *CasbinAccessControl) GetUserProducts(user *entity.User) []string {
 	visibleProducts := make([]string, 0, len(user.ProductGrants))
 
 	for prod := range user.ProductGrants {
-		if err := a.CheckProductGrants(user, prod, auth2.ActViewProduct); err == nil {
+		if err := a.CheckProductGrants(user, prod, auth.ActViewProduct); err == nil {
 			visibleProducts = append(visibleProducts, prod)
 		}
 	}
@@ -119,7 +119,7 @@ func (a *CasbinAccessControl) addCustomFunctions() {
 func (a *CasbinAccessControl) checkGrants(
 	user *entity.User,
 	product string,
-	action auth2.Action,
+	action auth.Action,
 ) error {
 	if !action.IsValid() {
 		return ErrInvalidAccessControlAction
@@ -141,7 +141,7 @@ func (a *CasbinAccessControl) checkGrants(
 		}
 	}
 
-	return auth2.UnauthorizedError{
+	return auth.UnauthorizedError{
 		Product: product,
 		Action:  action,
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/casbinauth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	auth2 "github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 	"github.com/stretchr/testify/assert"
@@ -26,41 +26,41 @@ func TestCheckAdminGrants(t *testing.T) {
 	testCases := []struct {
 		name          string
 		user          *entity.User
-		act           auth2.Action
+		act           auth.Action
 		expectedError error
 	}{
 		{
 			name:          "user with ADMIN role can update user roles",
-			user:          testhelpers.NewUserBuilder().WithRoles([]string{auth2.DefaultAdminRole}).Build(),
-			act:           auth2.ActUpdateUserGrants,
+			user:          testhelpers.NewUserBuilder().WithRoles([]string{auth.DefaultAdminRole}).Build(),
+			act:           auth.ActUpdateUserGrants,
 			expectedError: nil,
 		},
 		{
 			name: "user without ADMIN role can't update user roles",
 			user: testhelpers.NewUserBuilder().WithRoles([]string{}).Build(),
-			act:  auth2.ActUpdateUserGrants,
-			expectedError: auth2.UnauthorizedError{
-				Action: auth2.ActUpdateUserGrants,
+			act:  auth.ActUpdateUserGrants,
+			expectedError: auth.UnauthorizedError{
+				Action: auth.ActUpdateUserGrants,
 			},
 		},
 		{
 			name:          "user with ADMIN role can view server info",
 			user:          testhelpers.NewUserBuilder().WithRoles([]string{"ADMIN"}).Build(),
-			act:           auth2.ActViewServerInfo,
+			act:           auth.ActViewServerInfo,
 			expectedError: nil,
 		},
 		{
 			name:          "user with MLE role can view server info",
 			user:          testhelpers.NewUserBuilder().WithRoles([]string{"MLE"}).Build(),
-			act:           auth2.ActViewServerInfo,
+			act:           auth.ActViewServerInfo,
 			expectedError: nil,
 		},
 		{
 			name: "an user who is neither ADMIN or MLE can't view server info",
 			user: testhelpers.NewUserBuilder().WithRoles([]string{"USER"}).Build(),
-			act:  auth2.ActViewServerInfo,
-			expectedError: auth2.UnauthorizedError{
-				Action: auth2.ActViewServerInfo,
+			act:  auth.ActViewServerInfo,
+			expectedError: auth.UnauthorizedError{
+				Action: auth.ActViewServerInfo,
 			},
 		},
 	}
