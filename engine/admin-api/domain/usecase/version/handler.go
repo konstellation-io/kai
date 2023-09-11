@@ -21,27 +21,29 @@ type Handler struct {
 	processLogRepo         repository.ProcessLogRepository
 }
 
+type HanlderParams struct {
+	Logger                 logr.Logger
+	VersionRepo            repository.VersionRepo
+	ProductRepo            repository.ProductRepo
+	K8sService             service.VersionService
+	NatsManagerService     service.NatsManagerService
+	UserActivityInteractor usecase.UserActivityInteracter
+	AccessControl          auth.AccessControl
+	DashboardService       service.DashboardService
+	ProcessLogRepo         repository.ProcessLogRepository
+}
+
 // NewHandler creates a new interactor.
-func NewHandler(
-	logger logr.Logger,
-	versionRepo repository.VersionRepo,
-	productRepo repository.ProductRepo,
-	k8sService service.VersionService,
-	natsManagerService service.NatsManagerService,
-	userActivityInteractor usecase.UserActivityInteracter,
-	accessControl auth.AccessControl,
-	dashboardService service.DashboardService,
-	processLogRepo repository.ProcessLogRepository,
-) *Handler {
+func NewHandler(p HanlderParams) *Handler {
 	return &Handler{
-		logger,
-		versionRepo,
-		productRepo,
-		k8sService,
-		natsManagerService,
-		userActivityInteractor,
-		accessControl,
-		dashboardService,
-		processLogRepo,
+		p.Logger,
+		p.VersionRepo,
+		p.ProductRepo,
+		p.K8sService,
+		p.NatsManagerService,
+		p.UserActivityInteractor,
+		p.AccessControl,
+		p.DashboardService,
+		p.ProcessLogRepo,
 	}
 }
