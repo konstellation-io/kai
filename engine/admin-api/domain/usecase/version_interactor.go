@@ -20,6 +20,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	// ErrVersionDuplicated error.
+	ErrVersionDuplicated = errors.New("error version duplicated")
+)
+
 // VersionInteractor contains app logic about Version entities.
 type VersionInteractor struct {
 	logger                 logr.Logger
@@ -38,7 +43,7 @@ func NewVersionInteractor(
 	logger logr.Logger,
 	versionRepo repository.VersionRepo,
 	productRepo repository.ProductRepo,
-	k8sService service.VersionService,
+	versionService service.VersionService,
 	natsManagerService service.NatsManagerService,
 	userActivityInteractor UserActivityInteracter,
 	accessControl auth.AccessControl,
@@ -49,7 +54,7 @@ func NewVersionInteractor(
 		logger,
 		versionRepo,
 		productRepo,
-		k8sService,
+		versionService,
 		natsManagerService,
 		userActivityInteractor,
 		accessControl,
@@ -101,36 +106,36 @@ func (i *VersionInteractor) Create(
 	user *entity.User,
 	productID string,
 	krtFile io.Reader,
-) (*entity.Version, chan *entity.Version, error) {
+) (*entity.Version, error) {
 	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActCreateVersion); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	product, err := i.productRepo.GetByID(ctx, productID)
+	_, err := i.productRepo.GetByID(ctx, productID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error product repo GetById: %w", err)
+		return nil, fmt.Errorf("getting product from repo: %w", err)
 	}
 
 	tmpDir, err := os.MkdirTemp("", "version")
 	if err != nil {
-		return nil, nil, fmt.Errorf("error creating temp dir for version: %w", err)
+		return nil, fmt.Errorf("error creating temp dir for version: %w", err)
 	}
 
 	i.logger.Info("Created temp dir to extract the KRT files at " + tmpDir)
 
 	tmpKrtFile, err := i.copyStreamToTempFile(krtFile)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error creating temp krt file for version: %w", err)
+		return nil, fmt.Errorf("error creating temp krt file for version: %w", err)
 	}
 
 	krtYml, err := krt.ParseFile(tmpKrtFile.Name())
 	if err != nil {
-		return nil, nil, internalerrors.ParsingKRTFileError(err)
+		return nil, internalerrors.ParsingKRTFileError(err)
 	}
 
 	err = krtYml.Validate()
 	if err != nil {
-		return nil, nil, internalerrors.NewErrInvalidKRT(
+		return nil, internalerrors.NewErrInvalidKRT(
 			"invalid KRT file",
 			err,
 		)
@@ -138,9 +143,9 @@ func (i *VersionInteractor) Create(
 
 	_, err = i.versionRepo.GetByTag(ctx, productID, krtYml.Version)
 	if err != nil && !internalerrors.Is(err, internalerrors.ErrVersionNotFound) {
-		return nil, nil, fmt.Errorf("error version repo GetByTag: %w", err)
+		return nil, fmt.Errorf("getting version by tag: %w", err)
 	} else if err == nil {
-		return nil, nil, internalerrors.ErrVersionDuplicated
+		return nil, ErrVersionDuplicated
 	}
 
 	versionCreated, err := i.versionRepo.Create(
@@ -148,20 +153,23 @@ func (i *VersionInteractor) Create(
 		productID,
 		krt.MapKrtYamlToVersion(krtYml),
 	)
-
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	i.logger.Info("Version created")
+	i.logger.Info("Version successfully created", "tag", versionCreated.Tag)
 
-	notifyStatusCh := make(chan *entity.Version, 1)
+	i.versionRepo.UploadKRTYamlFile(productID, versionCreated, tmpKrtFile.Name())
+	if err != nil {
+		return nil, fmt.Errorf("uploading krt.yaml file: %w", err)
+	}
 
-	go i.completeVersionCreation(
-		user.ID, tmpKrtFile, tmpDir, product, versionCreated, notifyStatusCh,
-	)
+	err = i.versionRepo.SetStatus(ctx, productID, versionCreated.ID, entity.VersionStatusCreated)
+	if err != nil {
+		return nil, fmt.Errorf("setting version status to CREATED: %w", err)
+	}
 
-	return versionCreated, notifyStatusCh, nil
+	return versionCreated, nil
 }
 
 func (i *VersionInteractor) completeVersionCreation(
@@ -244,7 +252,7 @@ func (i *VersionInteractor) saveKRTDashboards(
 	return contentErrors
 }
 
-// Start create the resources of the given Version.
+// Start create the resources of the given Version
 func (i *VersionInteractor) Start(
 	ctx context.Context,
 	user *entity.User,

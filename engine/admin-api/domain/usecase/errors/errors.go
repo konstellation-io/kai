@@ -13,9 +13,6 @@ var (
 	// ErrVersionNotFound error.
 	ErrVersionNotFound = errors.New("error version not found")
 
-	// ErrVersionDuplicated error.
-	ErrVersionDuplicated = errors.New("error version duplicated")
-
 	// ErrInvalidVersionStatusBeforeStarting error.
 	ErrInvalidVersionStatusBeforeStarting = errors.New("the version must be stopped before starting")
 
