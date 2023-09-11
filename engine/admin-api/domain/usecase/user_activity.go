@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
 )
 
 type UserActivityInteracter interface {

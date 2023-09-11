@@ -11,13 +11,14 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/gorilla/websocket"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 type Params struct {
@@ -26,7 +27,7 @@ type Params struct {
 	ProductInteractor      *usecase.ProductInteractor
 	UserInteractor         *usecase.UserInteractor
 	UserActivityInteractor usecase.UserActivityInteracter
-	VersionInteractor      *usecase.VersionInteractor
+	VersionInteractor      *version.Handler
 	MetricsInteractor      *usecase.MetricsInteractor
 	ServerInfoGetter       *usecase.ServerInfoGetter
 	ProcessService         *usecase.ProcessService

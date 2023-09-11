@@ -6,7 +6,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/spf13/viper"
 )
 

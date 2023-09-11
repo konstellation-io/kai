@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	apperrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -16,8 +18,6 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	apperrors "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/errors"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 const versionsCollectionName = "versions"

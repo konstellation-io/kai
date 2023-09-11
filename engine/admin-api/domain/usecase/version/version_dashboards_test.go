@@ -1,6 +1,6 @@
 //go:build unit
 
-package usecase
+package version
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 
 type versionDashboardsSuite struct {
 	ctrl              *gomock.Controller
-	versionInteractor *VersionInteractor
+	versionInteractor *Handler
 	mocks             versionDashboardsSuiteMocks
 }
 
@@ -38,7 +38,7 @@ func newVersionDashboardsSuite(t *testing.T) *versionDashboardsSuite {
 	accessControl := mocks.NewMockAccessControl(ctrl)
 	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 
-	versionInteractor := NewVersionInteractor(logger, versionRepo, runtimeRepo, versionService,
+	versionInteractor := NewHandler(logger, versionRepo, runtimeRepo, versionService,
 		natsManagerService, userActivityInteractor, accessControl, dashboardService, processLogRepo)
 
 	return &versionDashboardsSuite{ctrl: ctrl,
@@ -56,7 +56,7 @@ func TestStoreDashboard(t *testing.T) {
 
 	version := "test"
 	runtimeID := "test-runtime-id"
-	dashboardsFolder := "../../testdata/dashboards"
+	dashboardsFolder := "testdata/dashboards"
 	dashboardPath := fmt.Sprintf("%s/models.json", dashboardsFolder)
 	s.mocks.dashboardService.EXPECT().Create(context.Background(), runtimeID, version, dashboardPath).Return(nil)
 
