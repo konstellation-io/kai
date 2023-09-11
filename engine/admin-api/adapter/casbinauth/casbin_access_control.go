@@ -2,10 +2,10 @@ package casbinauth
 
 import (
 	"github.com/casbin/casbin/v2"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 const _defaultResource = ""

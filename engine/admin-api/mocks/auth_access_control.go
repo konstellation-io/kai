@@ -9,7 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	auth "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	auth "github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
 // MockAccessControl is a mock of AccessControl interface.

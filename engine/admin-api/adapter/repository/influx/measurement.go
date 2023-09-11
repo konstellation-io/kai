@@ -6,7 +6,7 @@ import (
 	"net/url"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 )
 
 const queryEndpoint = "/query"

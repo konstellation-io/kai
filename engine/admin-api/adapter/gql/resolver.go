@@ -10,8 +10,9 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 )
 
 //nolint:gochecknoglobals // needs to be global to be used in the resolver
@@ -30,7 +31,7 @@ type Resolver struct {
 	productInteractor      *usecase.ProductInteractor
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
-	versionInteractor      *usecase.VersionInteractor
+	versionInteractor      *version.Handler
 	metricsInteractor      *usecase.MetricsInteractor
 	serverInfoGetter       *usecase.ServerInfoGetter
 	processService         *usecase.ProcessService
@@ -67,7 +68,14 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, input CreateProduc
 func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	return r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
+	newVersion, notifyCh, err := r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
+	if err != nil {
+		return nil, err
+	}
+
+	go r.notifyVersionStatus(notifyCh)
+
+	return newVersion, nil
 }
 
 func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterProcessInput) (*entity.RegisteredProcess, error) {

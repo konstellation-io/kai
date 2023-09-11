@@ -1,4 +1,4 @@
-package usecase
+package version
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"path"
 )
 
-func (i *VersionInteractor) storeDashboards(ctx context.Context, dashboardsFolder, product, version string) []error {
-	i.logger.Info("Storing dashboards", "product", product, "version", version)
+func (h *Handler) storeDashboards(ctx context.Context, dashboardsFolder, product, version string) []error {
+	h.logger.Info("Storing dashboards", "product", product, "version", version)
 
 	var errors []error = nil
 
@@ -20,7 +20,7 @@ func (i *VersionInteractor) storeDashboards(ctx context.Context, dashboardsFolde
 	for _, dashboard := range d {
 		dashboardPath := path.Join(dashboardsFolder, dashboard.Name())
 
-		err = i.dashboardService.Create(ctx, product, version, dashboardPath)
+		err = h.dashboardService.Create(ctx, product, version, dashboardPath)
 		if err != nil {
 			errors = append([]error{fmt.Errorf("error creating dashboard: %w", err)}, errors...)
 			continue
