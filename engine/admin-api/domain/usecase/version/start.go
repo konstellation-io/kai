@@ -13,6 +13,7 @@ import (
 
 var (
 	ErrUpdatingVersionStatus = fmt.Errorf("error updating version status")
+	ErrUpdatingVersionErrors = fmt.Errorf("error updating version errors")
 )
 
 // Start a previously created Version.
@@ -106,9 +107,6 @@ func (h *Handler) startAndNotify(
 		return
 	}
 
-	vers.Status = entity.VersionStatusStarted
-	notifyStatusCh <- vers
-
 	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarted)
 	if err != nil {
 		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
@@ -118,15 +116,15 @@ func (h *Handler) startAndNotify(
 			"newStatus", entity.VersionStatusStarted,
 		)
 	}
+
+	vers.Status = entity.VersionStatusStarted
+	notifyStatusCh <- vers
 }
 
 func (h *Handler) handleStartError(
-	ctx context.Context, productID string, vers *entity.Version, notifyStatusCh chan *entity.Version, startErr error,
+	ctx context.Context, productID string, vers *entity.Version,
+	notifyStatusCh chan *entity.Version, startErr error,
 ) {
-	vers.Status = entity.VersionStatusError
-	vers.Errors = append(vers.Errors, startErr.Error())
-	notifyStatusCh <- vers
-
 	err := h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusError)
 	if err != nil {
 		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
@@ -136,4 +134,19 @@ func (h *Handler) handleStartError(
 			"newStatus", entity.VersionStatusError,
 		)
 	}
+
+	errs := []string{startErr.Error()}
+	_, err = h.versionRepo.SetErrors(ctx, productID, vers, errs)
+	if err != nil {
+		h.logger.Error(ErrUpdatingVersionStatus, "ERROR",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"previousStatus", vers.Status,
+			"newStatus", entity.VersionStatusError,
+		)
+	}
+
+	vers.Status = entity.VersionStatusError
+	vers.Errors = append(vers.Errors, startErr.Error())
+	notifyStatusCh <- vers
 }

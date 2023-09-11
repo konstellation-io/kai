@@ -54,7 +54,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
 	productRepo := mocks.NewMockProductRepo(ctrl)
-	verisonService := mocks.NewMockVersionService(ctrl)
+	versionService := mocks.NewMockVersionService(ctrl)
 	natsManagerService := mocks.NewMockNatsManagerService(ctrl)
 	userActivityRepo := mocks.NewMockUserActivityRepo(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
@@ -69,8 +69,17 @@ func (s *VersionInteractorSuite) SetupSuite() {
 		accessControl,
 	)
 
-	versionInteractor := version.NewHandler(logger, versionRepo, productRepo, verisonService, natsManagerService,
-		userActivityInteractor, accessControl, dashboardService, processLogRepo)
+	versionInteractor := version.NewHandler(version.HandlerParams{
+		Logger:                 logger,
+		VersionRepo:            versionRepo,
+		ProductRepo:            productRepo,
+		K8sService:             versionService,
+		NatsManagerService:     natsManagerService,
+		UserActivityInteractor: userActivityInteractor,
+		AccessControl:          accessControl,
+		DashboardService:       dashboardService,
+		ProcessLogRepo:         processLogRepo,
+	})
 
 	s.ctrl = ctrl
 	s.mocks = versionSuiteMocks{
@@ -78,7 +87,7 @@ func (s *VersionInteractorSuite) SetupSuite() {
 		oldLogger,
 		versionRepo,
 		productRepo,
-		verisonService,
+		versionService,
 		userActivityRepo,
 		accessControl,
 		dashboardService,

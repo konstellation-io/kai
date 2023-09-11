@@ -137,7 +137,7 @@ func initGraphqlController(
 
 	chronografDashboard := service.CreateDashboardService(cfg, oldLogger)
 
-	handlerParams := version.HanlderParams{
+	handlerParams := version.HandlerParams{
 		Logger:                 logger,
 		VersionRepo:            versionMongoRepo,
 		ProductRepo:            productRepo,

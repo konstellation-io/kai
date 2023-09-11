@@ -21,7 +21,7 @@ type Handler struct {
 	processLogRepo         repository.ProcessLogRepository
 }
 
-type HanlderParams struct {
+type HandlerParams struct {
 	Logger                 logr.Logger
 	VersionRepo            repository.VersionRepo
 	ProductRepo            repository.ProductRepo
@@ -34,7 +34,7 @@ type HanlderParams struct {
 }
 
 // NewHandler creates a new interactor.
-func NewHandler(p HanlderParams) *Handler {
+func NewHandler(p HandlerParams) *Handler {
 	return &Handler{
 		p.Logger,
 		p.VersionRepo,
