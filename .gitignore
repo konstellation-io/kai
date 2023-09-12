@@ -16,3 +16,4 @@ changelog.old
 
 .ci/CHANGELOG
 scripts/helmfile/helmfile.lock
+.DS_Store

@@ -33,6 +33,7 @@ func (n *NatsService) dtoToProcesses(processesDTO []*natspb.Process) []entity.Pr
 				Scope: n.dtoToObjectStoreScope(processDTO.ObjectStore.Scope),
 			}
 		}
+
 		processes = append(processes, process)
 	}
 
@@ -45,6 +46,8 @@ func (n *NatsService) dtoToObjectStoreScope(scope natspb.ObjectStoreScope) entit
 		return entity.ObjStoreScopeProject
 	case natspb.ObjectStoreScope_SCOPE_WORKFLOW:
 		return entity.ObjStoreScopeWorkflow
+	case natspb.ObjectStoreScope_SCOPE_UNDEFINED:
+		return entity.ObjStoreScopeUndefined
 	default:
 		return entity.ObjStoreScopeUndefined
 	}

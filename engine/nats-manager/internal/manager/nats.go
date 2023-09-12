@@ -1,7 +1,6 @@
 package manager
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -29,8 +28,8 @@ func (m *NatsManager) CreateStreams(
 	versionTag string,
 	workflows []entity.Workflow,
 ) (entity.WorkflowsStreamsConfig, error) {
-	if len(workflows) <= 0 {
-		return nil, errors.New("no workflows defined")
+	if len(workflows) == 0 {
+		return nil, internal.ErrNoWorkflowsDefined
 	}
 
 	workflowsStreamsConfig := entity.WorkflowsStreamsConfig{}
@@ -60,8 +59,8 @@ func (m *NatsManager) CreateObjectStores(
 	versionTag string,
 	workflows []entity.Workflow,
 ) (entity.WorkflowsObjectStoresConfig, error) {
-	if len(workflows) <= 0 {
-		return nil, fmt.Errorf("no workflows defined")
+	if len(workflows) == 0 {
+		return nil, internal.ErrNoWorkflowsDefined
 	}
 
 	if err := m.validateWorkflows(workflows); err != nil {
@@ -74,20 +73,23 @@ func (m *NatsManager) CreateObjectStores(
 		processesObjectStoresConfig := entity.ProcessesObjectStoresConfig{}
 
 		for _, process := range workflow.Processes {
-			if process.ObjectStore != nil {
-				objectStore, err := m.getObjectStoreName(productID, versionTag, workflow.Name, process.ObjectStore)
-				if err != nil {
-					return nil, err
-				}
-
-				err = m.client.CreateObjectStore(objectStore)
-				if err != nil {
-					return nil, fmt.Errorf("error creating object store %q: %w", objectStore, err)
-				}
-
-				processesObjectStoresConfig[process.Name] = objectStore
+			if process.ObjectStore == nil {
+				continue
 			}
+
+			objectStore, err := m.getObjectStoreName(productID, versionTag, workflow.Name, process.ObjectStore)
+			if err != nil {
+				return nil, err
+			}
+
+			err = m.client.CreateObjectStore(objectStore)
+			if err != nil {
+				return nil, fmt.Errorf("error creating object store %q: %w", objectStore, err)
+			}
+
+			processesObjectStoresConfig[process.Name] = objectStore
 		}
+
 		workflowsObjectStoresConfig[workflow.Name] = &entity.WorkflowObjectStoresConfig{
 			Processes: processesObjectStoresConfig,
 		}
@@ -103,12 +105,14 @@ func (m *NatsManager) DeleteStreams(productID, versionTag string) error {
 	if err != nil {
 		return fmt.Errorf("error getting streams: %w", err)
 	}
+
 	for _, stream := range allStreams {
 		err := m.client.DeleteStream(stream)
 		if err != nil {
 			return fmt.Errorf("error deleting stream %q: %w", stream, err)
 		}
 	}
+
 	return nil
 }
 
@@ -118,6 +122,8 @@ func (m *NatsManager) getObjectStoreName(productID, versionTag, workflowName str
 		return m.joinWithUnderscores(productID, versionTag, objectStore.Name), nil
 	case entity.ObjStoreScopeWorkflow:
 		return m.joinWithUnderscores(productID, versionTag, workflowName, objectStore.Name), nil
+	case entity.ObjStoreScopeUndefined:
+		return "", internal.ErrInvalidObjectStoreScope
 	default:
 		return "", internal.ErrInvalidObjectStoreScope
 	}
@@ -153,7 +159,7 @@ func (m *NatsManager) CreateKeyValueStores(
 	versionTag string,
 	workflows []entity.Workflow,
 ) (*entity.VersionKeyValueStores, error) {
-	if len(workflows) <= 0 {
+	if len(workflows) == 0 {
 		return nil, internal.ErrNoWorkflowsDefined
 	}
 
@@ -185,6 +191,7 @@ func (m *NatsManager) CreateKeyValueStores(
 		}
 
 		processesKeyValueStores := map[string]string{}
+
 		for _, process := range workflow.Processes {
 			// create key-value store for process
 			processKeyValueStore, err := m.getKeyValueStoreName(productID, versionTag, workflow.Name, process.Name, entity.KVScopeProcess)
@@ -217,6 +224,7 @@ func (m *NatsManager) getKeyValueStoreName(
 	keyValueStore entity.KeyValueStoreScope,
 ) (string, error) {
 	version = strings.ReplaceAll(version, ".", "_")
+
 	switch keyValueStore {
 	case entity.KVScopeProject:
 		return fmt.Sprintf("key-store_%s_%s", product, version), nil
@@ -237,6 +245,7 @@ func (m *NatsManager) getProcessesStreamConfig(stream string, processes []entity
 			Subscriptions: m.getSubjectsToSubscribe(stream, process.Subscriptions),
 		}
 	}
+
 	return processesConfig
 }
 
@@ -246,9 +255,11 @@ func (m *NatsManager) getSubjectName(stream, process string) string {
 
 func (m *NatsManager) getSubjectsToSubscribe(stream string, subscriptions []string) []string {
 	subjectsToSubscribe := make([]string, 0, len(subscriptions))
+
 	for _, processToSubscribe := range subscriptions {
 		subjectsToSubscribe = append(subjectsToSubscribe, m.getSubjectName(stream, processToSubscribe))
 	}
+
 	return subjectsToSubscribe
 }
 
@@ -258,6 +269,7 @@ func (m *NatsManager) validateWorkflows(workflows []entity.Workflow) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
