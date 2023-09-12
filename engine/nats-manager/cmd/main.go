@@ -28,6 +28,7 @@ func main() {
 	}
 
 	logger.Info("Connecting to NATS...")
+
 	js, err := nats.InitJetStreamConnection(cfg.NatsStreaming.URL)
 	if err != nil {
 		log.Fatal(err)
@@ -43,6 +44,7 @@ func main() {
 	reflection.Register(grpcServer)
 
 	logger.Infof("Server listening on port: %s", port)
+
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}

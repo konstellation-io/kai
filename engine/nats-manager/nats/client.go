@@ -49,6 +49,7 @@ func (n *NatsClient) CreateStream(streamConfig *entity.StreamConfig) error {
 	}
 
 	_, err := n.js.AddStream(streamCfg)
+
 	return err
 }
 
@@ -109,12 +110,14 @@ func (n *NatsClient) CreateKeyValueStore(keyValueStore string) error {
 func (n *NatsClient) DeleteStream(stream string) error {
 	n.logger.Infof("Deleting stream %q", stream)
 	err := n.js.DeleteStream(stream)
+
 	return err
 }
 
 func (n *NatsClient) DeleteObjectStore(objectStore string) error {
 	n.logger.Infof("Deleting object store %q", objectStore)
 	err := n.js.DeleteObjectStore(objectStore)
+
 	return err
 }
 
