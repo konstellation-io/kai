@@ -14,6 +14,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 type versionMatcher struct {
@@ -52,6 +53,8 @@ type VersionUsecaseTestSuite struct {
 	accessControl          *mocks.MockAccessControl
 	dashboardService       *mocks.MockDashboardService
 	processLogRepo         *mocks.MockProcessLogRepository
+
+	observedLogs *observer.ObservedLogs
 }
 
 const (
@@ -76,7 +79,10 @@ func TestVersionUsecaseTestSuite(t *testing.T) {
 }
 
 func (s *VersionUsecaseTestSuite) SetupSuite() {
-	logger := zapr.NewLogger(zap.NewNop())
+	observedZapCore, observedLogs := observer.New(zap.InfoLevel)
+	observedLogger := zap.New(observedZapCore)
+	logger := zapr.NewLogger(observedLogger)
+	s.observedLogs = observedLogs
 
 	s.ctrl = gomock.NewController(s.T())
 	s.versionRepo = mocks.NewMockVersionRepo(s.ctrl)
@@ -103,4 +109,5 @@ func (s *VersionUsecaseTestSuite) SetupSuite() {
 
 func (s *VersionUsecaseTestSuite) TearDownTest() {
 	s.ctrl.Finish()
+	s.observedLogs.TakeAll()
 }

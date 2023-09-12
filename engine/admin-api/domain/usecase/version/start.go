@@ -11,9 +11,18 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	CommentUserNotAuthorized          = "user not authorized"
+	CommentVersionNotFound            = "version not found"
+	CommentInvalidVersionStatus       = "invalid version status before starting"
+	CommentErrorCreatingNATSResources = "error creating NATS resources"
+	CommentErrorStartingVersion       = "error starting version"
+)
+
 var (
-	ErrUpdatingVersionStatus = fmt.Errorf("error updating version status")
-	ErrUpdatingVersionErrors = fmt.Errorf("error updating version errors")
+	ErrUpdatingVersionStatus   = fmt.Errorf("error updating version status")
+	ErrUpdatingVersionErrors   = fmt.Errorf("error updating version errors")
+	ErrRegisteringUserActivity = fmt.Errorf("error registering user activity")
 )
 
 // Start a previously created Version.
@@ -27,25 +36,26 @@ func (h *Handler) Start(
 	h.logger.Info("Starting version", "userID", user.ID, "versionTag", versionTag, "productID", productID)
 
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
+		v := &entity.Version{Tag: versionTag}
+		h.registerStartActionFailed(user.ID, productID, v, CommentUserNotAuthorized)
 		return nil, nil, err
 	}
 
 	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
+		v := &entity.Version{Tag: versionTag}
+		h.registerStartActionFailed(user.ID, productID, v, CommentVersionNotFound)
 		return nil, nil, err
 	}
 
 	if !vers.CanBeStarted() {
+		h.registerStartActionFailed(user.ID, productID, vers, CommentInvalidVersionStatus)
 		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStarting
-	}
-
-	err = h.userActivityInteractor.RegisterStartAction(user.ID, productID, vers, comment)
-	if err != nil {
-		return nil, nil, err
 	}
 
 	versionCfg, err := h.getVersionConfig(ctx, productID, vers)
 	if err != nil {
+		h.registerStartActionFailed(user.ID, productID, vers, CommentErrorCreatingNATSResources)
 		return nil, nil, err
 	}
 
@@ -63,9 +73,20 @@ func (h *Handler) Start(
 
 	notifyStatusCh := make(chan *entity.Version, 1)
 
-	go h.startAndNotify(productID, vers, versionCfg, notifyStatusCh)
+	go h.startAndNotify(user.ID, productID, comment, vers, versionCfg, notifyStatusCh)
 
 	return vers, notifyStatusCh, nil
+}
+
+func (h *Handler) registerStartActionFailed(userID, productID string, vers *entity.Version, comment string) {
+	err := h.userActivityInteractor.RegisterStartAction(userID, productID, vers, comment)
+	if err != nil {
+		h.logger.Error(ErrRegisteringUserActivity, "ERROR",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"comment", comment,
+		)
+	}
 }
 
 func (h *Handler) getVersionConfig(ctx context.Context, productID string, vers *entity.Version) (*entity.VersionConfig, error) {
@@ -90,7 +111,9 @@ func (h *Handler) getVersionConfig(ctx context.Context, productID string, vers *
 }
 
 func (h *Handler) startAndNotify(
+	userID string,
 	productID string,
+	comment string,
 	vers *entity.Version,
 	versionConfig *entity.VersionConfig,
 	notifyStatusCh chan *entity.Version,
@@ -103,7 +126,8 @@ func (h *Handler) startAndNotify(
 
 	err := h.k8sService.Start(ctx, productID, vers, versionConfig)
 	if err != nil {
-		h.handleStartError(ctx, productID, vers, notifyStatusCh, err)
+		h.registerStartActionFailed(userID, productID, vers, CommentErrorStartingVersion)
+		h.handleVersionServiceStartError(ctx, productID, vers, notifyStatusCh, err)
 		return
 	}
 
@@ -117,11 +141,20 @@ func (h *Handler) startAndNotify(
 		)
 	}
 
+	err = h.userActivityInteractor.RegisterStartAction(userID, productID, vers, comment)
+	if err != nil {
+		h.logger.Error(ErrRegisteringUserActivity, "ERROR",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"comment", comment,
+		)
+	}
+
 	vers.Status = entity.VersionStatusStarted
 	notifyStatusCh <- vers
 }
 
-func (h *Handler) handleStartError(
+func (h *Handler) handleVersionServiceStartError(
 	ctx context.Context, productID string, vers *entity.Version,
 	notifyStatusCh chan *entity.Version, startErr error,
 ) {
@@ -138,7 +171,7 @@ func (h *Handler) handleStartError(
 	errs := []string{startErr.Error()}
 	_, err = h.versionRepo.SetErrors(ctx, productID, vers, errs)
 	if err != nil {
-		h.logger.Error(ErrUpdatingVersionStatus, "ERROR",
+		h.logger.Error(ErrUpdatingVersionErrors, "ERROR",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"previousStatus", vers.Status,
