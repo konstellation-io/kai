@@ -38,6 +38,7 @@ func (h *Handler) Start(
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
 		v := &entity.Version{Tag: versionTag}
 		h.registerStartActionFailed(user.ID, productID, v, CommentUserNotAuthorized)
+
 		return nil, nil, err
 	}
 
@@ -45,6 +46,7 @@ func (h *Handler) Start(
 	if err != nil {
 		v := &entity.Version{Tag: versionTag}
 		h.registerStartActionFailed(user.ID, productID, v, CommentVersionNotFound)
+
 		return nil, nil, err
 	}
 
@@ -128,6 +130,7 @@ func (h *Handler) startAndNotify(
 	if err != nil {
 		h.registerStartActionFailed(userID, productID, vers, CommentErrorStartingVersion)
 		h.handleVersionServiceStartError(ctx, productID, vers, notifyStatusCh, err)
+
 		return
 	}
 

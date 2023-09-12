@@ -118,7 +118,10 @@ func (h *Handler) completeVersionCreation(
 		contentErrors = append(contentErrors, internalerrors.ErrStoringKRTFile)
 	}
 
-	if len(contentErrors) > 0 { // TODO fix me
+	// TODO: fix me
+	//
+	//nolint:godox // To be done.
+	if len(contentErrors) > 0 {
 		h.setStatusError(ctx, product.ID, versionCreated, contentErrors[0], notifyStatusCh)
 		return
 	}
