@@ -62,6 +62,7 @@ func (n *NatsService) CreateObjectStores(
 		n.logger.Errorf("Error creating object store: %s", err)
 		return nil, err
 	}
+
 	return &natspb.CreateObjectStoresResponse{
 		Workflows: n.mapWorkflowsObjStoreToDTO(objectStores),
 	}, nil
@@ -114,5 +115,6 @@ func (n *NatsService) CreateKeyValueStores(
 		n.logger.Errorf("Error creating object store: %s", err)
 		return nil, err
 	}
+
 	return n.mapKeyValueStoresToDTO(keyValueStores), nil
 }

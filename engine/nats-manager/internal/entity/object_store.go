@@ -29,6 +29,8 @@ func (o *ObjectStore) Validate() error {
 	switch o.Scope {
 	case ObjStoreScopeProject, ObjStoreScopeWorkflow:
 		return nil
+	case ObjStoreScopeUndefined:
+		return internal.ErrInvalidObjectStoreScope
 	default:
 		return internal.ErrInvalidObjectStoreScope
 	}
