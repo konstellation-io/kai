@@ -14,8 +14,6 @@ import (
 	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
-// TODO Quitar el handler_test y mover los tests al test que toque
-
 func (s *VersionUsecaseTestSuite) TestStart_OK() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
