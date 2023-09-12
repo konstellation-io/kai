@@ -16,6 +16,9 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
+const KRT_PATH = "../../../testdata/classificator_krt.yaml"
+const PRODUCT_ID = "product-1"
+
 func (s *VersionUsecaseTestSuite) getTestVersion() *entity.Version {
 	commonObjectStore := &entity.ProcessObjectStore{
 		Name:  "emails",
@@ -99,7 +102,7 @@ func (s *VersionUsecaseTestSuite) getTestVersion() *entity.Version {
 
 func (s *VersionUsecaseTestSuite) TestCreateNewVersion() {
 	user := testhelpers.NewUserBuilder().Build()
-	productID := "product-1"
+	productID := PRODUCT_ID
 	ctx := context.Background()
 	product := &entity.Product{
 		ID: productID,
@@ -107,7 +110,7 @@ func (s *VersionUsecaseTestSuite) TestCreateNewVersion() {
 
 	testVersion := s.getTestVersion()
 
-	file, err := os.Open("../../../testdata/classificator_krt.yaml")
+	file, err := os.Open(KRT_PATH)
 	s.Require().NoError(err)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
@@ -128,7 +131,7 @@ func (s *VersionUsecaseTestSuite) TestCreateNewVersion() {
 }
 
 func (s *VersionUsecaseTestSuite) TestCreateNewVersion_FailsIfVersionTagIsDuplicated() {
-	productID := "product-1"
+	productID := PRODUCT_ID
 	user := testhelpers.NewUserBuilder().Build()
 	ctx := context.Background()
 	product := &entity.Product{
@@ -137,7 +140,7 @@ func (s *VersionUsecaseTestSuite) TestCreateNewVersion_FailsIfVersionTagIsDuplic
 
 	testVersion := s.getTestVersion()
 
-	file, err := os.Open("../../../testdata/classificator_krt.yaml")
+	file, err := os.Open(KRT_PATH)
 	s.Require().NoError(err)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
@@ -149,10 +152,10 @@ func (s *VersionUsecaseTestSuite) TestCreateNewVersion_FailsIfVersionTagIsDuplic
 }
 
 func (s *VersionUsecaseTestSuite) TestCreateNewVersion_FailsIfProductNotFound() {
-	productID := "product-1"
+	productID := PRODUCT_ID
 	user := testhelpers.NewUserBuilder().Build()
 	ctx := context.Background()
-	file, err := os.Open("../../../testdata/classificator_krt.yaml")
+	file, err := os.Open(KRT_PATH)
 	s.Require().NoError(err)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
@@ -163,7 +166,7 @@ func (s *VersionUsecaseTestSuite) TestCreateNewVersion_FailsIfProductNotFound() 
 }
 
 func (s *VersionUsecaseTestSuite) TestCreateNewVersion_FailsIfKrtIsInvalid() {
-	productID := "product-1"
+	productID := PRODUCT_ID
 	user := testhelpers.NewUserBuilder().Build()
 	ctx := context.Background()
 	product := &entity.Product{
