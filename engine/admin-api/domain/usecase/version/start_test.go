@@ -14,8 +14,7 @@ import (
 	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
-// TODO refactorizar set errors para solo guardar un mensaje de error
-// Quitar el handler_test y mover los tests al test que toque
+// TODO Quitar el handler_test y mover los tests al test que toque
 
 func (s *VersionUsecaseTestSuite) TestStart_OK() {
 	// GIVEN a valid user and version
@@ -293,7 +292,7 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorVersionServiceStart() {
 	// GIVEN set status and set errors fail
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusError).
 		Return(fmt.Errorf("the concept of love"))
-	s.versionRepo.EXPECT().SetErrors(gomock.Any(), productID, vers, []string{errStartingVersion}).
+	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStartingVersion).
 		Return(nil, fmt.Errorf("bomb rush crew"))
 
 	// WHEN starting the version
@@ -307,7 +306,7 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorVersionServiceStart() {
 	// THEN the version status when the go rutine ends is error
 	versionStatus := <-notifyChn
 	s.Equal(entity.VersionStatusError, versionStatus.Status)
-	s.Equal([]string{errStartingVersion}, versionStatus.Errors)
+	s.Equal(errStartingVersion, versionStatus.Error)
 
 	// THEN both set status and set errors are logged
 	s.Require().Len(s.observedLogs.All(), 3)

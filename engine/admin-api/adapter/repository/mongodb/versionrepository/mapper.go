@@ -19,7 +19,7 @@ func mapDTOToEntity(dto *versionDTO) *entity.Version {
 		PublicationAuthor: dto.PublicationAuthor,
 
 		Status: entity.VersionStatus(dto.Status),
-		Errors: dto.Errors,
+		Error: dto.Error,
 	}
 }
 
@@ -140,7 +140,7 @@ func mapEntityToDTO(versionEntity *entity.Version) *versionDTO {
 
 		Status: versionEntity.Status.String(),
 
-		Errors: versionEntity.Errors,
+		Error: versionEntity.Error,
 	}
 }
 

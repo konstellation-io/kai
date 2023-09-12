@@ -5,7 +5,6 @@ package gql
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -123,8 +122,7 @@ func (r *mutationResolver) notifyVersionStartStatus(notifyCh chan *entity.Versio
 		case entity.VersionStatusStarted:
 			r.logger.Infof("Version successfully started with ID: %q", startingVersion.ID)
 		case entity.VersionStatusError:
-			errors := strings.Join(startingVersion.Errors, ", ")
-			r.logger.Errorf("Error starting version with ID: %q - %s", startingVersion.ID, errors)
+			r.logger.Errorf("Error starting version with ID: %q - %s", startingVersion.ID, startingVersion.Error)
 		default:
 		}
 	}

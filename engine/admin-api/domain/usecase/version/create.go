@@ -118,8 +118,8 @@ func (h *Handler) completeVersionCreation(
 		contentErrors = append(contentErrors, internalerrors.ErrStoringKRTFile)
 	}
 
-	if len(contentErrors) > 0 {
-		h.setStatusError(ctx, product.ID, versionCreated, contentErrors, notifyStatusCh)
+	if len(contentErrors) > 0 { // TODO fix me
+		h.setStatusError(ctx, product.ID, versionCreated, contentErrors[0], notifyStatusCh)
 		return
 	}
 
@@ -167,21 +167,12 @@ func (h *Handler) setStatusError(
 	ctx context.Context,
 	productID string,
 	vers *entity.Version,
-	errs []error,
+	err error,
 	notifyCh chan *entity.Version,
 ) {
-	errorMessages := make([]string, len(errs))
+	h.logger.Error(err, "Error found in version", "version tag", vers.Tag)
 
-	var jointErrors error
-
-	for idx, err := range errs {
-		errorMessages[idx] = err.Error()
-		jointErrors = errors.Join(jointErrors, err)
-	}
-
-	h.logger.Error(jointErrors, "Errors found in version", "version tag", vers.Tag)
-
-	versionWithError, err := h.versionRepo.SetErrors(ctx, productID, vers, errorMessages)
+	versionWithError, err := h.versionRepo.SetError(ctx, productID, vers, err.Error())
 	if err != nil {
 		h.logger.Error(err, "Error saving version error state")
 	}

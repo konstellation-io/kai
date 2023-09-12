@@ -124,19 +124,19 @@ func (mr *MockVersionRepoMockRecorder) ListVersionsByProduct(ctx, productID inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVersionsByProduct", reflect.TypeOf((*MockVersionRepo)(nil).ListVersionsByProduct), ctx, productID)
 }
 
-// SetErrors mocks base method.
-func (m *MockVersionRepo) SetErrors(ctx context.Context, productID string, version *entity.Version, errorMessages []string) (*entity.Version, error) {
+// SetError mocks base method.
+func (m *MockVersionRepo) SetError(ctx context.Context, productID string, version *entity.Version, errorMessage string) (*entity.Version, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetErrors", ctx, productID, version, errorMessages)
+	ret := m.ctrl.Call(m, "SetError", ctx, productID, version, errorMessage)
 	ret0, _ := ret[0].(*entity.Version)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// SetErrors indicates an expected call of SetErrors.
-func (mr *MockVersionRepoMockRecorder) SetErrors(ctx, productID, version, errorMessages interface{}) *gomock.Call {
+// SetError indicates an expected call of SetError.
+func (mr *MockVersionRepoMockRecorder) SetError(ctx, productID, version, errorMessage interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetErrors", reflect.TypeOf((*MockVersionRepo)(nil).SetErrors), ctx, productID, version, errorMessages)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetError", reflect.TypeOf((*MockVersionRepo)(nil).SetError), ctx, productID, version, errorMessage)
 }
 
 // SetStatus mocks base method.

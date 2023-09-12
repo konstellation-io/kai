@@ -246,7 +246,7 @@ func (s *VersionRepositoryTestSuite) TestSetStatusNotFound() {
 	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
 }
 
-func (s *VersionRepositoryTestSuite) TestSetErrors() {
+func (s *VersionRepositoryTestSuite) TestSetError() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
 	}
@@ -254,17 +254,17 @@ func (s *VersionRepositoryTestSuite) TestSetErrors() {
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
 
-	_, err = s.versionRepo.SetErrors(context.Background(), productID, createdVer, []string{"error1", "error2"})
+	_, err = s.versionRepo.SetError(context.Background(), productID, createdVer, "error1")
 	s.Require().NoError(err)
 
 	updatedVer, err := s.versionRepo.GetByID(productID, createdVer.ID)
 	s.Require().NoError(err)
 
-	s.Equal([]string{"error1", "error2"}, updatedVer.Errors)
+	s.Equal("error1", updatedVer.Error)
 }
 
-func (s *VersionRepositoryTestSuite) TestSetErrorsNotFound() {
-	_, err := s.versionRepo.SetErrors(context.Background(), productID, &entity.Version{ID: "notfound"}, []string{"error1", "error2"})
+func (s *VersionRepositoryTestSuite) TestSetErrorNotFound() {
+	_, err := s.versionRepo.SetError(context.Background(), productID, &entity.Version{ID: "notfound"}, "error1")
 	s.Require().Error(err)
 	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
 }

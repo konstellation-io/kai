@@ -168,8 +168,7 @@ func (h *Handler) handleVersionServiceStartError(
 		)
 	}
 
-	errs := []string{startErr.Error()}
-	_, err = h.versionRepo.SetErrors(ctx, productID, vers, errs)
+	_, err = h.versionRepo.SetError(ctx, productID, vers, startErr.Error())
 	if err != nil {
 		h.logger.Error(ErrUpdatingVersionErrors, "ERROR",
 			"productID", productID,
@@ -180,6 +179,6 @@ func (h *Handler) handleVersionServiceStartError(
 	}
 
 	vers.Status = entity.VersionStatusError
-	vers.Errors = append(vers.Errors, startErr.Error())
+	vers.Error = startErr.Error()
 	notifyStatusCh <- vers
 }

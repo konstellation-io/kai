@@ -23,7 +23,7 @@ type Version struct {
 	PublicationAuthor *string
 
 	Status VersionStatus
-	Errors []string
+	Error string
 }
 
 type VersionStatus string

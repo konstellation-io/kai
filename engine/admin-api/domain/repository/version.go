@@ -16,7 +16,7 @@ type VersionRepo interface {
 	ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error)
 	Update(productID string, version *entity.Version) error
 	SetStatus(ctx context.Context, productID, versionID string, status entity.VersionStatus) error
-	SetErrors(ctx context.Context, productID string, version *entity.Version, errorMessages []string) (*entity.Version, error)
+	SetError(ctx context.Context, productID string, version *entity.Version, errorMessage string) (*entity.Version, error)
 	UploadKRTYamlFile(productID string, version *entity.Version, file string) error
 	ClearPublishedVersion(ctx context.Context, productID string) (*entity.Version, error)
 }
