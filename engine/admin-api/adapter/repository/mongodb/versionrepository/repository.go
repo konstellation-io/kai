@@ -162,7 +162,7 @@ func (r *VersionRepoMongoDB) SetStatus(
 	result, err := collection.UpdateOne(
 		ctx,
 		bson.M{"_id": versionID},
-		bson.M{"$set": bson.M{"status": status}},
+		bson.M{"$set": bson.M{"status": status, "error": ""}},
 	)
 	if err != nil {
 		return err

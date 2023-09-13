@@ -3,6 +3,7 @@ package version
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
@@ -21,7 +22,7 @@ const (
 
 var (
 	ErrUpdatingVersionStatus   = fmt.Errorf("error updating version status")
-	ErrUpdatingVersionErrors   = fmt.Errorf("error updating version errors")
+	ErrUpdatingVersionError    = fmt.Errorf("error updating version error")
 	ErrRegisteringUserActivity = fmt.Errorf("error registering user activity")
 )
 
@@ -126,6 +127,8 @@ func (h *Handler) startAndNotify(
 		close(notifyStatusCh)
 	}()
 
+	vers.Tag = strings.ReplaceAll(vers.Tag, ".", "-")
+
 	err := h.k8sService.Start(ctx, productID, vers, versionConfig)
 	if err != nil {
 		h.registerStartActionFailed(userID, productID, vers, CommentErrorStartingVersion)
@@ -161,23 +164,12 @@ func (h *Handler) handleVersionServiceStartError(
 	ctx context.Context, productID string, vers *entity.Version,
 	notifyStatusCh chan *entity.Version, startErr error,
 ) {
-	err := h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusError)
+	_, err := h.versionRepo.SetError(ctx, productID, vers, startErr.Error())
 	if err != nil {
-		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
+		h.logger.Error(ErrUpdatingVersionError, "ERROR",
 			"productID", productID,
 			"versionTag", vers.Tag,
-			"previousStatus", vers.Status,
-			"newStatus", entity.VersionStatusError,
-		)
-	}
-
-	_, err = h.versionRepo.SetError(ctx, productID, vers, startErr.Error())
-	if err != nil {
-		h.logger.Error(ErrUpdatingVersionErrors, "ERROR",
-			"productID", productID,
-			"versionTag", vers.Tag,
-			"previousStatus", vers.Status,
-			"newStatus", entity.VersionStatusError,
+			"versionError", startErr.Error(),
 		)
 	}
 

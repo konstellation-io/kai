@@ -287,9 +287,8 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorVersionServiceStart() {
 		Return(fmt.Errorf(errStartingVersion))
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, version.CommentErrorStartingVersion).Return(nil)
 
-	// GIVEN set status and set errors fail
-	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusError).
-		Return(fmt.Errorf("the concept of love"))
+	// GIVEN set status
+
 	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStartingVersion).
 		Return(nil, fmt.Errorf("bomb rush crew"))
 
@@ -306,10 +305,8 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorVersionServiceStart() {
 	s.Equal(entity.VersionStatusError, versionStatus.Status)
 	s.Equal(errStartingVersion, versionStatus.Error)
 
-	// THEN both set status and set errors are logged
-	s.Require().Len(s.observedLogs.All(), 3)
+	// THEN set error is logged
+	s.Require().Len(s.observedLogs.All(), 2)
 	log1 := s.observedLogs.All()[1]
-	s.Equal(log1.ContextMap()["error"], version.ErrUpdatingVersionStatus.Error())
-	log2 := s.observedLogs.All()[2]
-	s.Equal(log2.ContextMap()["error"], version.ErrUpdatingVersionErrors.Error())
+	s.Equal(log1.ContextMap()["error"], version.ErrUpdatingVersionError.Error())
 }
