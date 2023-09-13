@@ -117,6 +117,8 @@ func (m *NatsManager) DeleteStreams(productID, versionTag string) error {
 }
 
 func (m *NatsManager) getObjectStoreName(productID, versionTag, workflowName string, objectStore *entity.ObjectStore) (string, error) {
+	versionTag = strings.ReplaceAll(versionTag, ".", "_")
+
 	switch objectStore.Scope {
 	case entity.ObjStoreScopeProject:
 		return m.joinWithUnderscores(productID, versionTag, objectStore.Name), nil
@@ -220,18 +222,18 @@ func (m *NatsManager) CreateKeyValueStores(
 }
 
 func (m *NatsManager) getKeyValueStoreName(
-	product, version, workflow, process string,
+	product, versionTag, workflow, process string,
 	keyValueStore entity.KeyValueStoreScope,
 ) (string, error) {
-	version = strings.ReplaceAll(version, ".", "_")
+	versionTag = strings.ReplaceAll(versionTag, ".", "_")
 
 	switch keyValueStore {
 	case entity.KVScopeProject:
-		return fmt.Sprintf("key-store_%s_%s", product, version), nil
+		return fmt.Sprintf("key-store_%s_%s", product, versionTag), nil
 	case entity.KVScopeWorkflow:
-		return fmt.Sprintf("key-store_%s_%s_%s", product, version, workflow), nil
+		return fmt.Sprintf("key-store_%s_%s_%s", product, versionTag, workflow), nil
 	case entity.KVScopeProcess:
-		return fmt.Sprintf("key-store_%s_%s_%s_%s", product, version, workflow, process), nil
+		return fmt.Sprintf("key-store_%s_%s_%s_%s", product, versionTag, workflow, process), nil
 	default:
 		return "", internal.ErrInvalidKeyValueStoreScope
 	}
