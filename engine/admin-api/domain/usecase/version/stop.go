@@ -19,76 +19,105 @@ func (h *Handler) Stop(
 	versionTag string,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
+	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStopVersion); err != nil {
+		v := &entity.Version{Tag: versionTag}
+		h.registerActionFailed(user.ID, productID, v, CommentUserNotAuthorized, "stop")
+
 		return nil, nil, err
 	}
 
-	h.logger.Info(fmt.Sprintf("The user %q is stopping version %q on product %q", user.ID, versionTag, productID))
-
-	v, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
+	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
+		v := &entity.Version{Tag: versionTag}
+		h.registerActionFailed(user.ID, productID, v, CommentVersionNotFound, "stop")
+
 		return nil, nil, err
 	}
 
-	if !v.CanBeStopped() {
+	if !vers.CanBeStopped() {
+		h.registerActionFailed(user.ID, productID, vers, CommentInvalidVersionStatus, "stop")
 		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStopping
 	}
 
-	err = h.versionRepo.SetStatus(ctx, productID, v.ID, entity.VersionStatusStopping)
+	err = h.deleteNatsResources(ctx, productID, vers)
 	if err != nil {
+		h.registerActionFailed(user.ID, productID, vers, CommentErrorDeletingNATSResources, "stop")
 		return nil, nil, err
+	}
+
+	vers.Status = entity.VersionStatusStopping
+
+	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopping)
+	if err != nil {
+		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"previousStatus", vers.Status,
+			"newStatus", entity.VersionStatusStopping,
+		)
 	}
 
 	notifyStatusCh := make(chan *entity.Version, 1)
 
-	// Notify intermediate state
-	v.Status = entity.VersionStatusStopping
-	notifyStatusCh <- v
+	go h.stopAndNotify(user.ID, productID, comment, vers, notifyStatusCh)
 
-	err = h.userActivityInteractor.RegisterStopAction(user.ID, productID, v, comment)
+	return vers, notifyStatusCh, nil
+}
+
+func (h *Handler) deleteNatsResources(ctx context.Context, productID string, vers *entity.Version) error {
+	err := h.natsManagerService.DeleteStreams(ctx, productID, vers.Tag)
 	if err != nil {
-		return nil, nil, err
+		return fmt.Errorf("error deleting stream for version %q: %w", vers.Tag, err)
 	}
 
-	err = h.natsManagerService.DeleteStreams(ctx, productID, versionTag)
+	err = h.natsManagerService.DeleteObjectStores(ctx, productID, vers.Tag)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error stopping version %q: %w", versionTag, err)
+		return fmt.Errorf("error deleting object stores for version %q: %w", vers.Tag, err)
 	}
 
-	err = h.natsManagerService.DeleteObjectStores(ctx, productID, versionTag)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error stopping version %q: %w", versionTag, err)
-	}
-
-	go h.stopAndNotify(productID, v, notifyStatusCh)
-
-	return v, notifyStatusCh, nil
+	return nil
 }
 
 func (h *Handler) stopAndNotify(
+	userID string,
 	productID string,
+	comment string,
 	vers *entity.Version,
 	notifyStatusCh chan *entity.Version,
 ) {
-	// WARNING: This function doesn't handle error because there is no  ERROR status defined for a Version
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration(config.VersionStatusTimeoutKey))
 	defer func() {
 		cancel()
 		close(notifyStatusCh)
-		h.logger.V(0).Info("[versionInteractor.stopAndNotify] channel closed")
 	}()
 
 	err := h.k8sService.Stop(ctx, productID, vers)
 	if err != nil {
-		h.logger.Error(err, "[versionInteractor.stopAndNotify] error stopping version", "version tag", vers.Tag)
+		h.registerActionFailed(userID, productID, vers, CommentErrorStoppingVersion, "stop")
+		h.handleVersionServiceActionError(ctx, productID, vers, notifyStatusCh, err)
+
+		return
 	}
 
 	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopped)
 	if err != nil {
-		h.logger.Error(err, "[versionInteractor.stopAndNotify] error stopping version", "version tag", vers.Tag)
+		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"previousStatus", vers.Status,
+			"newStatus", entity.VersionStatusStopped,
+		)
+	}
+
+	err = h.userActivityInteractor.RegisterStopAction(userID, productID, vers, comment)
+	if err != nil {
+		h.logger.Error(ErrRegisteringUserActivity, "ERROR",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"comment", comment,
+		)
 	}
 
 	vers.Status = entity.VersionStatusStopped
 	notifyStatusCh <- vers
-	h.logger.Info("[versionInteractor.stopAndNotify] version stopped", "version tag", vers.Tag)
 }
