@@ -31,15 +31,24 @@ func newVersionDashboardsSuite(t *testing.T) *versionDashboardsSuite {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	dashboardService := mocks.NewMockDashboardService(ctrl)
 	versionRepo := mocks.NewMockVersionRepo(ctrl)
-	runtimeRepo := mocks.NewMockProductRepo(ctrl)
+	productRepo := mocks.NewMockProductRepo(ctrl)
 	versionService := mocks.NewMockVersionService(ctrl)
 	natsManagerService := mocks.NewMockNatsManagerService(ctrl)
 	userActivityInteractor := mocks.NewMockUserActivityInteracter(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
 	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 
-	versionInteractor := NewHandler(logger, versionRepo, runtimeRepo, versionService,
-		natsManagerService, userActivityInteractor, accessControl, dashboardService, processLogRepo)
+	versionInteractor := NewHandler(HandlerParams{
+		Logger:                 logger,
+		VersionRepo:            versionRepo,
+		ProductRepo:            productRepo,
+		K8sService:             versionService,
+		NatsManagerService:     natsManagerService,
+		UserActivityInteractor: userActivityInteractor,
+		AccessControl:          accessControl,
+		DashboardService:       dashboardService,
+		ProcessLogRepo:         processLogRepo,
+	})
 
 	return &versionDashboardsSuite{ctrl: ctrl,
 		versionInteractor: versionInteractor,

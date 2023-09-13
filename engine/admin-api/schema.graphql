@@ -152,7 +152,7 @@ type Version {
   publicationDate: String
   publicationAuthor: String
   status: VersionStatus!
-  errors: [String]
+  error: String
 }
 
 enum VersionStatus {

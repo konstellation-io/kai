@@ -136,17 +136,19 @@ func initGraphqlController(
 	)
 
 	chronografDashboard := service.CreateDashboardService(cfg, oldLogger)
-	versionInteractor := version.NewHandler(
-		logger,
-		versionMongoRepo,
-		productRepo,
-		k8sService,
-		natsManagerService,
-		userActivityInteractor,
-		accessControl,
-		chronografDashboard,
-		processLogRepo,
-	)
+
+	handlerParams := version.HandlerParams{
+		Logger:                 logger,
+		VersionRepo:            versionMongoRepo,
+		ProductRepo:            productRepo,
+		K8sService:             k8sService,
+		NatsManagerService:     natsManagerService,
+		UserActivityInteractor: userActivityInteractor,
+		AccessControl:          accessControl,
+		DashboardService:       chronografDashboard,
+		ProcessLogRepo:         processLogRepo,
+	}
+	versionInteractor := version.NewHandler(handlerParams)
 
 	metricsInteractor := usecase.NewMetricsInteractor(
 		oldLogger,

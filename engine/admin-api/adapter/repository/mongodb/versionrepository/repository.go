@@ -162,7 +162,7 @@ func (r *VersionRepoMongoDB) SetStatus(
 	result, err := collection.UpdateOne(
 		ctx,
 		bson.M{"_id": versionID},
-		bson.M{"$set": bson.M{"status": status}},
+		bson.M{"$set": bson.M{"status": status, "error": ""}},
 	)
 	if err != nil {
 		return err
@@ -175,20 +175,20 @@ func (r *VersionRepoMongoDB) SetStatus(
 	return nil
 }
 
-func (r *VersionRepoMongoDB) SetErrors(
+func (r *VersionRepoMongoDB) SetError(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
-	errorMessages []string,
+	errorMessage string,
 ) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
 	versionDTO := mapEntityToDTO(version)
 
 	versionDTO.Status = entity.VersionStatusError.String()
-	versionDTO.Errors = errorMessages
+	versionDTO.Error = errorMessage
 
-	elem := bson.M{"$set": bson.M{"status": versionDTO.Status, "errors": versionDTO.Errors}}
+	elem := bson.M{"$set": bson.M{"status": versionDTO.Status, "error": versionDTO.Error}}
 
 	result, err := collection.UpdateOne(ctx, bson.M{"_id": versionDTO.ID}, elem)
 	if err != nil {
