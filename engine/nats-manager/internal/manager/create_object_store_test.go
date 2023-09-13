@@ -27,6 +27,8 @@ func TestCreateObjectStore(t *testing.T) {
 	testWorkflowName := "test-workflow"
 	testObjectStore := "test-object-store"
 
+	cleanedVersionTag := "v1_0_0"
+
 	tests := []struct {
 		name                 string
 		workflows            []entity.Workflow
@@ -45,7 +47,7 @@ func TestCreateObjectStore(t *testing.T) {
 					).
 					Build(),
 			},
-			expectedObjectStores: []string{fmt.Sprintf("%s_%s_%s", testProductID, testVersionTag, testObjectStore)},
+			expectedObjectStores: []string{fmt.Sprintf("%s_%s_%s", testProductID, cleanedVersionTag, testObjectStore)},
 		},
 		{
 			name: "Object store with workflow scope",
@@ -61,7 +63,7 @@ func TestCreateObjectStore(t *testing.T) {
 					Build(),
 			},
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowName, testObjectStore),
+				fmt.Sprintf("%s_%s_%s_%s", testProductID, cleanedVersionTag, testWorkflowName, testObjectStore),
 			},
 		},
 		{
@@ -127,8 +129,8 @@ func TestCreateObjectStore(t *testing.T) {
 					Build(),
 			},
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowName, testObjectStore),
-				fmt.Sprintf("%s_%s_another-workflow_%s", testProductID, testVersionTag, testObjectStore),
+				fmt.Sprintf("%s_%s_%s_%s", testProductID, cleanedVersionTag, testWorkflowName, testObjectStore),
+				fmt.Sprintf("%s_%s_another-workflow_%s", testProductID, cleanedVersionTag, testObjectStore),
 			},
 		},
 		{
@@ -154,8 +156,8 @@ func TestCreateObjectStore(t *testing.T) {
 					Build(),
 			},
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s", testProductID, testVersionTag, testObjectStore),
-				fmt.Sprintf("%s_%s_%s", testProductID, testVersionTag, testObjectStore),
+				fmt.Sprintf("%s_%s_%s", testProductID, cleanedVersionTag, testObjectStore),
+				fmt.Sprintf("%s_%s_%s", testProductID, cleanedVersionTag, testObjectStore),
 			},
 		},
 		{
@@ -181,8 +183,8 @@ func TestCreateObjectStore(t *testing.T) {
 					Build(),
 			},
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s", testProductID, testVersionTag, testObjectStore),
-				fmt.Sprintf("%s_%s_another-object-store", testProductID, testVersionTag),
+				fmt.Sprintf("%s_%s_%s", testProductID, cleanedVersionTag, testObjectStore),
+				fmt.Sprintf("%s_%s_another-object-store", testProductID, cleanedVersionTag),
 			},
 		},
 		{
@@ -211,8 +213,8 @@ func TestCreateObjectStore(t *testing.T) {
 					Build(),
 			},
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowName, testObjectStore),
-				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowName, testObjectStore),
+				fmt.Sprintf("%s_%s_%s_%s", testProductID, cleanedVersionTag, testWorkflowName, testObjectStore),
+				fmt.Sprintf("%s_%s_%s_%s", testProductID, cleanedVersionTag, testWorkflowName, testObjectStore),
 			},
 		},
 		{
@@ -241,8 +243,8 @@ func TestCreateObjectStore(t *testing.T) {
 					Build(),
 			},
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowName, testObjectStore),
-				fmt.Sprintf("%s_%s_%s_another-object-store", testProductID, testVersionTag, testWorkflowName),
+				fmt.Sprintf("%s_%s_%s_%s", testProductID, cleanedVersionTag, testWorkflowName, testObjectStore),
+				fmt.Sprintf("%s_%s_%s_another-object-store", testProductID, cleanedVersionTag, testWorkflowName),
 			},
 		},
 		{
@@ -271,8 +273,8 @@ func TestCreateObjectStore(t *testing.T) {
 					Build(),
 			},
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s", testProductID, testVersionTag, testObjectStore),
-				fmt.Sprintf("%s_%s_%s", testProductID, testVersionTag, testObjectStore),
+				fmt.Sprintf("%s_%s_%s", testProductID, cleanedVersionTag, testObjectStore),
+				fmt.Sprintf("%s_%s_%s", testProductID, cleanedVersionTag, testObjectStore),
 			},
 		},
 		{
@@ -301,8 +303,8 @@ func TestCreateObjectStore(t *testing.T) {
 					Build(),
 			},
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s", testProductID, testVersionTag, testObjectStore),
-				fmt.Sprintf("%s_%s_another-object-store", testProductID, testVersionTag),
+				fmt.Sprintf("%s_%s_%s", testProductID, cleanedVersionTag, testObjectStore),
+				fmt.Sprintf("%s_%s_another-object-store", testProductID, cleanedVersionTag),
 			},
 		},
 		{
@@ -314,7 +316,7 @@ func TestCreateObjectStore(t *testing.T) {
 						Scope: entity.ObjStoreScopeWorkflow,
 					}).Build()},
 			expectedObjectStores: []string{
-				fmt.Sprintf("%s_%s_%s_%s", testProductID, testVersionTag, testWorkflowName, testObjectStore),
+				fmt.Sprintf("%s_%s_%s_%s", testProductID, cleanedVersionTag, testWorkflowName, testObjectStore),
 			},
 			expectedError: fmt.Errorf("nats client error"),
 		},
