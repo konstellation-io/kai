@@ -34,7 +34,7 @@ func (s *VersionUsecaseTestSuite) TestStart_OK() {
 
 	expectedVersionConfig := &entity.VersionConfig{}
 
-	// go rutine expecected calls
+	// go rutine expected to be called
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStarted).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, "testing").Return(nil)
