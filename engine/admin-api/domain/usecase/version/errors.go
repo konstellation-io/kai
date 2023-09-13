@@ -8,13 +8,14 @@ import (
 )
 
 const (
-	CommentUserNotAuthorized          = "user not authorized"
-	CommentVersionNotFound            = "version not found"
-	CommentInvalidVersionStatus       = "invalid version status before starting"
-	CommentErrorCreatingNATSResources = "error creating NATS resources"
-	CommentErrorDeletingNATSResources = "error deleting NATS resources"
-	CommentErrorStartingVersion       = "error starting version"
-	CommentErrorStoppingVersion       = "error stopping version"
+	CommentUserNotAuthorized                  = "user not authorized"
+	CommentVersionNotFound                    = "version not found"
+	CommentInvalidVersionStatusBeforeStarting = "invalid version status before starting"
+	CommentInvalidVersionStatusBeforeStopping = "invalid version status before stopping"
+	CommentErrorCreatingNATSResources         = "error creating NATS resources"
+	CommentErrorDeletingNATSResources         = "error deleting NATS resources"
+	CommentErrorStartingVersion               = "error starting version"
+	CommentErrorStoppingVersion               = "error stopping version"
 )
 
 var (

@@ -18,7 +18,7 @@ func (s *VersionUsecaseTestSuite) TestStop_OK() {
 	vers := utils.InitTestVersion().
 		WithVersionID(versionID).
 		WithTag(versionTag).
-		WithStatus(entity.VersionStatusStopped).
+		WithStatus(entity.VersionStatusStarted).
 		GetVersion()
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)

@@ -101,7 +101,7 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorInvalidVersionStatus() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.CommentInvalidVersionStatus).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.CommentInvalidVersionStatusBeforeStarting).Return(nil)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")

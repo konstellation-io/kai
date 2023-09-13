@@ -35,7 +35,7 @@ func (h *Handler) Stop(
 	}
 
 	if !vers.CanBeStopped() {
-		h.registerActionFailed(user.ID, productID, vers, CommentInvalidVersionStatus, "stop")
+		h.registerActionFailed(user.ID, productID, vers, CommentInvalidVersionStatusBeforeStopping, "stop")
 		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStopping
 	}
 

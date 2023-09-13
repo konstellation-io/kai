@@ -38,7 +38,7 @@ func (h *Handler) Start(
 	}
 
 	if !vers.CanBeStarted() {
-		h.registerActionFailed(user.ID, productID, vers, CommentInvalidVersionStatus, "start")
+		h.registerActionFailed(user.ID, productID, vers, CommentInvalidVersionStatusBeforeStarting, "start")
 		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStarting
 	}
 
