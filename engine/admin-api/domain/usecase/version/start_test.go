@@ -71,7 +71,7 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorUserNotAuthorized() {
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_ErrorNonExistingVersion() {
+func (s *VersionUsecaseTestSuite) TestStart_ErrorVersionNotFound() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
 	user := s.getTestUser()
@@ -84,6 +84,8 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorNonExistingVersion() {
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, expectedVer.Tag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 }
 
@@ -105,6 +107,8 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorInvalidVersionStatus() {
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 	s.ErrorIs(err, internalerrors.ErrInvalidVersionStatusBeforeStarting)
 }
@@ -129,6 +133,8 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorGetVersionConfig_CreateStreams(
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 }
 
@@ -153,6 +159,8 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorGetVersionConfig_CreateObjectSt
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 }
 
@@ -178,6 +186,8 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorGetVersionConfig_CreateKeyValue
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 }
 
@@ -204,7 +214,7 @@ func (s *VersionUsecaseTestSuite) TestStart_CheckNonBlockingErrorLogging() {
 
 	expectedVersionConfig := &entity.VersionConfig{}
 
-	// go rutine expecected calls
+	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).Return(nil)
 	// GIVEN second set status errors
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStarted).
@@ -282,7 +292,7 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorVersionServiceStart() {
 
 	expectedVersionConfig := &entity.VersionConfig{}
 
-	// go rutine expecected calls
+	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).
 		Return(fmt.Errorf(errStartingVersion))
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, version.CommentErrorStartingVersion).Return(nil)
