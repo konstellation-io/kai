@@ -79,32 +79,6 @@ func (h *Handler) Create(
 	return versionCreated, nil
 }
 
-func (h *Handler) setStatusError(
-	ctx context.Context,
-	productID string,
-	vers *entity.Version,
-	errs []error,
-	notifyCh chan *entity.Version,
-) {
-	errorMessages := make([]string, len(errs))
-
-	var jointErrors error
-
-	for idx, err := range errs {
-		errorMessages[idx] = err.Error()
-		jointErrors = errors.Join(jointErrors, err)
-	}
-
-	h.logger.Error(jointErrors, "Errors found in version", "version tag", vers.Tag)
-
-	versionWithError, err := h.versionRepo.SetErrors(ctx, productID, vers, errorMessages)
-	if err != nil {
-		h.logger.Error(err, "Error saving version error state")
-	}
-
-	notifyCh <- versionWithError
-}
-
 func (h *Handler) copyStreamToTempFile(krtFile io.Reader) (*os.File, error) {
 	tmpFile, err := os.CreateTemp("", "version")
 
