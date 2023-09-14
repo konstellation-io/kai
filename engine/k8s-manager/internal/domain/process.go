@@ -1,6 +1,6 @@
 package domain
 
-//nolint:maligned
+//nolint:maligned // it's a struct
 type Process struct {
 	Name          string
 	Image         string
