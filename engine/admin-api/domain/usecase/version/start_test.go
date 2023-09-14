@@ -298,7 +298,6 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorVersionServiceStart() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, version.CommentErrorStartingVersion).Return(nil)
 
 	// GIVEN set status
-
 	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStartingVersion).
 		Return(nil, fmt.Errorf("bomb rush crew"))
 
