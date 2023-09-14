@@ -166,17 +166,3 @@ func (mr *MockVersionRepoMockRecorder) Update(productID, version interface{}) *g
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockVersionRepo)(nil).Update), productID, version)
 }
-
-// UploadKRTYamlFile mocks base method.
-func (m *MockVersionRepo) UploadKRTYamlFile(productID string, version *entity.Version, file string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadKRTYamlFile", productID, version, file)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UploadKRTYamlFile indicates an expected call of UploadKRTYamlFile.
-func (mr *MockVersionRepoMockRecorder) UploadKRTYamlFile(productID, version, file interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadKRTYamlFile", reflect.TypeOf((*MockVersionRepo)(nil).UploadKRTYamlFile), productID, version, file)
-}

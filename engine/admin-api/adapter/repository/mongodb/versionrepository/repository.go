@@ -3,13 +3,10 @@ package versionrepository
 import (
 	"context"
 	"errors"
-	"fmt"
-	"os"
 	"time"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
-	apperrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
-	"go.mongodb.org/mongo-driver/mongo/gridfs"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -68,7 +65,7 @@ func (r *VersionRepoMongoDB) Create(userID, productID string, newVersion *entity
 	versionDTO.ID = primitive.NewObjectID().Hex()
 	versionDTO.CreationDate = time.Now().UTC()
 	versionDTO.CreationAuthor = userID
-	versionDTO.Status = entity.VersionStatusCreating.String()
+	versionDTO.Status = entity.VersionStatusCreated.String()
 
 	res, err := collection.InsertOne(context.Background(), versionDTO)
 	if err != nil {
@@ -90,7 +87,7 @@ func (r *VersionRepoMongoDB) GetByID(productID, versionID string) (*entity.Versi
 
 	err := collection.FindOne(context.Background(), filter).Decode(versionDTO)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, apperrors.ErrVersionNotFound
+		return nil, version.ErrVersionNotFound
 	}
 
 	return mapDTOToEntity(versionDTO), err
@@ -104,20 +101,20 @@ func (r *VersionRepoMongoDB) GetByTag(ctx context.Context, productID, tag string
 
 	err := collection.FindOne(ctx, filter).Decode(versionDTO)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, apperrors.ErrVersionNotFound
+		return nil, version.ErrVersionNotFound
 	}
 
 	return mapDTOToEntity(versionDTO), err
 }
 
-func (r *VersionRepoMongoDB) Update(productID string, version *entity.Version) error {
+func (r *VersionRepoMongoDB) Update(productID string, updatedVersion *entity.Version) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	versionDTO := mapEntityToDTO(version)
-	updateResult, err := collection.ReplaceOne(context.Background(), bson.M{"_id": version.ID}, versionDTO)
+	versionDTO := mapEntityToDTO(updatedVersion)
+	updateResult, err := collection.ReplaceOne(context.Background(), bson.M{"_id": updatedVersion.ID}, versionDTO)
 
 	if updateResult.ModifiedCount == 0 {
-		return apperrors.ErrVersionNotFound
+		return version.ErrVersionNotFound
 	}
 
 	return err
@@ -154,14 +151,14 @@ func (r *VersionRepoMongoDB) ListVersionsByProduct(ctx context.Context, productI
 func (r *VersionRepoMongoDB) SetStatus(
 	ctx context.Context,
 	productID string,
-	versionID string,
+	versionTag string,
 	status entity.VersionStatus,
 ) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
 	result, err := collection.UpdateOne(
 		ctx,
-		bson.M{"_id": versionID},
+		bson.M{"tag": versionTag},
 		bson.M{"$set": bson.M{"status": status}},
 	)
 	if err != nil {
@@ -169,7 +166,7 @@ func (r *VersionRepoMongoDB) SetStatus(
 	}
 
 	if result.ModifiedCount == 0 {
-		return apperrors.ErrVersionNotFound
+		return version.ErrVersionNotFound
 	}
 
 	return nil
@@ -178,65 +175,28 @@ func (r *VersionRepoMongoDB) SetStatus(
 func (r *VersionRepoMongoDB) SetErrors(
 	ctx context.Context,
 	productID string,
-	version *entity.Version,
+	versionFailed *entity.Version,
 	errorMessages []string,
 ) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	versionDTO := mapEntityToDTO(version)
+	versionDTO := mapEntityToDTO(versionFailed)
 
 	versionDTO.Status = entity.VersionStatusError.String()
 	versionDTO.Errors = errorMessages
 
 	elem := bson.M{"$set": bson.M{"status": versionDTO.Status, "errors": versionDTO.Errors}}
 
-	result, err := collection.UpdateOne(ctx, bson.M{"_id": versionDTO.ID}, elem)
+	result, err := collection.UpdateOne(ctx, bson.M{"tag": versionDTO.Tag}, elem)
 	if err != nil {
 		return nil, err
 	}
 
 	if result.ModifiedCount == 0 {
-		return nil, apperrors.ErrVersionNotFound
+		return nil, version.ErrVersionNotFound
 	}
 
 	return mapDTOToEntity(versionDTO), nil
-}
-
-func (r *VersionRepoMongoDB) UploadKRTYamlFile(productID string, version *entity.Version, file string) error {
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return fmt.Errorf("reading KRT file at %s: %w", file, err)
-	}
-
-	bucket, err := gridfs.NewBucket(
-		r.client.Database(productID),
-		options.GridFSBucket().SetName(r.cfg.MongoDB.KRTBucket),
-	)
-	if err != nil {
-		return fmt.Errorf("creating bucket %q to store KRT files: %w", r.cfg.MongoDB.DBName, err)
-	}
-
-	versionDTO := mapEntityToDTO(version)
-
-	filename := fmt.Sprintf("%s-%s.yaml", productID, versionDTO.Tag)
-
-	uploadStream, err := bucket.OpenUploadStreamWithID(
-		versionDTO.ID,
-		filename,
-	)
-	if err != nil {
-		return fmt.Errorf("opening KRT upload stream: %w", err)
-	}
-	defer uploadStream.Close()
-
-	fileSize, err := uploadStream.Write(data)
-	if err != nil {
-		return fmt.Errorf("writing into the KRT upload stream: %w", err)
-	}
-
-	r.logger.Infof("Uploaded %d bytes of %q to GridFS successfully", filename, fileSize)
-
-	return nil
 }
 
 func (r *VersionRepoMongoDB) ClearPublishedVersion(ctx context.Context, productID string) (*entity.Version, error) {
@@ -270,7 +230,3 @@ func (r *VersionRepoMongoDB) ClearPublishedVersion(ctx context.Context, productI
 
 	return mapDTOToEntity(oldPublishedVersion), nil
 }
-
-// TODO: Delete version method.
-//
-//nolint:godox // To be done.

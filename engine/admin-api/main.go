@@ -135,7 +135,6 @@ func initGraphqlController(
 		gocloakUserRegistry,
 	)
 
-	chronografDashboard := service.CreateDashboardService(cfg, oldLogger)
 	versionInteractor := version.NewHandler(
 		logger,
 		versionMongoRepo,
@@ -144,7 +143,6 @@ func initGraphqlController(
 		natsManagerService,
 		userActivityInteractor,
 		accessControl,
-		chronografDashboard,
 		processLogRepo,
 	)
 

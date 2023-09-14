@@ -17,7 +17,6 @@ type Handler struct {
 	natsManagerService     service.NatsManagerService
 	userActivityInteractor usecase.UserActivityInteracter
 	accessControl          auth.AccessControl
-	dashboardService       service.DashboardService
 	processLogRepo         repository.ProcessLogRepository
 }
 
@@ -30,7 +29,6 @@ func NewHandler(
 	natsManagerService service.NatsManagerService,
 	userActivityInteractor usecase.UserActivityInteracter,
 	accessControl auth.AccessControl,
-	dashboardService service.DashboardService,
 	processLogRepo repository.ProcessLogRepository,
 ) *Handler {
 	return &Handler{
@@ -41,7 +39,6 @@ func NewHandler(
 		natsManagerService,
 		userActivityInteractor,
 		accessControl,
-		dashboardService,
 		processLogRepo,
 	}
 }
