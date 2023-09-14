@@ -156,20 +156,16 @@ func (r *VersionRepoMongoDB) SetStatus(
 ) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	result, err := collection.UpdateOne(
+	res := collection.FindOneAndUpdate(
 		ctx,
 		bson.M{"tag": versionTag},
 		bson.M{"$set": bson.M{"status": status}},
 	)
-	if err != nil {
-		return err
-	}
-
-	if result.ModifiedCount == 0 {
+	if errors.Is(res.Err(), mongo.ErrNoDocuments) {
 		return version.ErrVersionNotFound
 	}
 
-	return nil
+	return res.Err()
 }
 
 func (r *VersionRepoMongoDB) SetErrors(
