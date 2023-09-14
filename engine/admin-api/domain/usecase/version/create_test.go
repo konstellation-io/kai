@@ -77,8 +77,8 @@ func (s *createVersionSuite) TestCreateVersion() {
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, expectedVersion.Tag).Return(nil, version.ErrVersionNotFound)
-	s.versionRepo.EXPECT().Create(user.ID, product.ID, expectedVersion).Return(expectedVersion, nil)
-	s.userActivity.EXPECT().RegisterCreateAction(user.ID, product.ID, expectedVersion).Return(nil)
+	s.versionRepo.EXPECT().Create(user.Email, product.ID, expectedVersion).Return(expectedVersion, nil)
+	s.userActivity.EXPECT().RegisterCreateAction(user.Email, product.ID, expectedVersion).Return(nil)
 
 	createdVersion, err := s.handler.Create(ctx, user, product.ID, file)
 	s.Require().NoError(err)
@@ -151,7 +151,7 @@ func (s *createVersionSuite) TestCreateVersion_FailsIfThereIsAnErrorCreatingInRe
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, newVersion.Tag).Return(nil, version.ErrVersionNotFound)
-	s.versionRepo.EXPECT().Create(user.ID, product.ID, newVersion).Return(nil, expectedError)
+	s.versionRepo.EXPECT().Create(user.Email, product.ID, newVersion).Return(nil, expectedError)
 
 	_, err = s.handler.Create(ctx, user, product.ID, file)
 	s.Require().ErrorIs(err, expectedError)

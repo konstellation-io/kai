@@ -51,18 +51,18 @@ func (mr *MockVersionRepoMockRecorder) ClearPublishedVersion(ctx, productID inte
 }
 
 // Create mocks base method.
-func (m *MockVersionRepo) Create(userID, productID string, version *entity.Version) (*entity.Version, error) {
+func (m *MockVersionRepo) Create(userEmail, productID string, version *entity.Version) (*entity.Version, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", userID, productID, version)
+	ret := m.ctrl.Call(m, "Create", userEmail, productID, version)
 	ret0, _ := ret[0].(*entity.Version)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockVersionRepoMockRecorder) Create(userID, productID, version interface{}) *gomock.Call {
+func (mr *MockVersionRepoMockRecorder) Create(userEmail, productID, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockVersionRepo)(nil).Create), userID, productID, version)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockVersionRepo)(nil).Create), userEmail, productID, version)
 }
 
 // CreateIndexes mocks base method.
