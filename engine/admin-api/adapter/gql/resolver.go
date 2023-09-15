@@ -68,14 +68,7 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, input CreateProduc
 func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	newVersion, notifyCh, err := r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
-	if err != nil {
-		return nil, err
-	}
-
-	go r.notifyVersionStatus(notifyCh)
-
-	return newVersion, nil
+	return r.versionInteractor.Create(ctx, loggedUser, input.ProductID, input.File.File)
 }
 
 func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterProcessInput) (*entity.RegisteredProcess, error) {

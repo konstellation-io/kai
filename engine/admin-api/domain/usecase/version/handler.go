@@ -17,7 +17,6 @@ type Handler struct {
 	natsManagerService     service.NatsManagerService
 	userActivityInteractor usecase.UserActivityInteracter
 	accessControl          auth.AccessControl
-	dashboardService       service.DashboardService
 	processLogRepo         repository.ProcessLogRepository
 }
 
@@ -29,21 +28,19 @@ type HandlerParams struct {
 	NatsManagerService     service.NatsManagerService
 	UserActivityInteractor usecase.UserActivityInteracter
 	AccessControl          auth.AccessControl
-	DashboardService       service.DashboardService
 	ProcessLogRepo         repository.ProcessLogRepository
 }
 
 // NewHandler creates a new interactor.
-func NewHandler(p HandlerParams) *Handler {
+func NewHandler(params *HandlerParams) *Handler {
 	return &Handler{
-		p.Logger,
-		p.VersionRepo,
-		p.ProductRepo,
-		p.K8sService,
-		p.NatsManagerService,
-		p.UserActivityInteractor,
-		p.AccessControl,
-		p.DashboardService,
-		p.ProcessLogRepo,
+		params.Logger,
+		params.VersionRepo,
+		params.ProductRepo,
+		params.K8sService,
+		params.NatsManagerService,
+		params.UserActivityInteractor,
+		params.AccessControl,
+		params.ProcessLogRepo,
 	}
 }

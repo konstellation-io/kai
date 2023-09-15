@@ -9,7 +9,6 @@ type ProcessBuilder struct {
 func NewProcessBuilder() *ProcessBuilder {
 	return &ProcessBuilder{
 		entity.Process{
-			ID:            "test-process-id",
 			Name:          "test-process-name",
 			Type:          entity.ProcessTypeTask,
 			Image:         "test-process-image",

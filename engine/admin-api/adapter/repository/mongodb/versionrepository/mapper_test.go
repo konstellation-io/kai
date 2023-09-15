@@ -40,7 +40,6 @@ var domainVersion = &entity.Version{
 
 	Workflows: []entity.Workflow{
 		{
-			ID:   "id_workflow",
 			Name: "workflow1",
 			Type: entity.WorkflowTypeTraining,
 			Config: []entity.ConfigurationVariable{
@@ -51,7 +50,6 @@ var domainVersion = &entity.Version{
 			},
 			Processes: []entity.Process{
 				{
-					ID:       "id_process_1",
 					Name:     "process1",
 					Type:     entity.ProcessTypeTrigger,
 					Image:    "image1",
@@ -90,7 +88,6 @@ var domainVersion = &entity.Version{
 					},
 				},
 				{
-					ID:            "id_process_2",
 					Name:          "process2",
 					Type:          entity.ProcessTypeTask,
 					Image:         "image2",
@@ -99,7 +96,6 @@ var domainVersion = &entity.Version{
 					Subscriptions: []string{"subscription3", "subscription4"},
 				},
 				{
-					ID:            "id_process_3",
 					Name:          "process3",
 					Type:          entity.ProcessTypeExit,
 					Image:         "image3",
@@ -133,7 +129,6 @@ var DTOVersion = &versionDTO{
 
 	Workflows: []workflowDTO{
 		{
-			ID:   "id_workflow",
 			Name: "workflow1",
 			Type: entity.WorkflowTypeTraining.String(),
 			Config: []configurationVariableDTO{
@@ -144,7 +139,6 @@ var DTOVersion = &versionDTO{
 			},
 			Processes: []processDTO{
 				{
-					ID:       "id_process_1",
 					Name:     "process1",
 					Type:     entity.ProcessTypeTrigger.String(),
 					Image:    "image1",
@@ -183,7 +177,6 @@ var DTOVersion = &versionDTO{
 					},
 				},
 				{
-					ID:            "id_process_2",
 					Name:          "process2",
 					Type:          entity.ProcessTypeTask.String(),
 					Image:         "image2",
@@ -192,7 +185,6 @@ var DTOVersion = &versionDTO{
 					Subscriptions: []string{"subscription3", "subscription4"},
 				},
 				{
-					ID:            "id_process_3",
 					Name:          "process3",
 					Type:          entity.ProcessTypeExit.String(),
 					Image:         "image3",

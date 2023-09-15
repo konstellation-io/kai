@@ -9,7 +9,6 @@ type WorkflowBuilder struct {
 func NewWorkflowBuilder() *WorkflowBuilder {
 	return &WorkflowBuilder{
 		entity.Workflow{
-			ID:   "test-workflow-id",
 			Name: "test-workflow-name",
 			Type: entity.WorkflowTypeData,
 			Processes: []entity.Process{

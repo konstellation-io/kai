@@ -40,7 +40,7 @@ func (m versionMatcher) Matches(actual interface{}) bool {
 	return reflect.DeepEqual(actualCfg, m.expectedVersion)
 }
 
-type VersionUsecaseTestSuite struct {
+type versionSuite struct {
 	suite.Suite
 	handler *version.Handler
 
@@ -64,7 +64,7 @@ const (
 	versionTag = "v1.0.0"
 )
 
-func (s *VersionUsecaseTestSuite) getTestUser() *entity.User {
+func (s *versionSuite) getTestUser() *entity.User {
 	return &entity.User{
 		ID:    userID,
 		Roles: []string{"admin"},
@@ -74,11 +74,11 @@ func (s *VersionUsecaseTestSuite) getTestUser() *entity.User {
 	}
 }
 
-func TestVersionUsecaseTestSuite(t *testing.T) {
-	suite.Run(t, new(VersionUsecaseTestSuite))
+func TestVersionSuite(t *testing.T) {
+	suite.Run(t, new(versionSuite))
 }
 
-func (s *VersionUsecaseTestSuite) SetupSuite() {
+func (s *versionSuite) SetupSuite() {
 	observedZapCore, observedLogs := observer.New(zap.InfoLevel)
 	observedLogger := zap.New(observedZapCore)
 	logger := zapr.NewLogger(observedLogger)
@@ -94,7 +94,7 @@ func (s *VersionUsecaseTestSuite) SetupSuite() {
 	s.dashboardService = mocks.NewMockDashboardService(s.ctrl)
 	s.processLogRepo = mocks.NewMockProcessLogRepository(s.ctrl)
 
-	s.handler = version.NewHandler(version.HandlerParams{
+	s.handler = version.NewHandler(&version.HandlerParams{
 		Logger:                 logger,
 		VersionRepo:            s.versionRepo,
 		ProductRepo:            s.productRepo,
@@ -102,12 +102,10 @@ func (s *VersionUsecaseTestSuite) SetupSuite() {
 		NatsManagerService:     s.natsManagerService,
 		UserActivityInteractor: s.userActivityInteractor,
 		AccessControl:          s.accessControl,
-		DashboardService:       s.dashboardService,
 		ProcessLogRepo:         s.processLogRepo,
 	})
 }
 
-func (s *VersionUsecaseTestSuite) TearDownTest() {
-	s.ctrl.Finish()
+func (s *versionSuite) TearDownTest() {
 	s.observedLogs.TakeAll()
 }

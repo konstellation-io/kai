@@ -9,16 +9,15 @@ import (
 )
 
 type VersionRepo interface {
-	Create(userID, productID string, version *entity.Version) (*entity.Version, error)
+	Create(userEmail, productID string, version *entity.Version) (*entity.Version, error)
 	CreateIndexes(ctx context.Context, productID string) error
 	GetByID(productID, versionID string) (*entity.Version, error)
 	GetByTag(ctx context.Context, productID, tag string) (*entity.Version, error)
 	ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error)
 	Update(productID string, version *entity.Version) error
-	UploadKRTYamlFile(productID string, version *entity.Version, file string) error
 	ClearPublishedVersion(ctx context.Context, productID string) (*entity.Version, error)
 
-	// SetStatus updates the status and deletes de error message of the version.
+	// SetStatus updates the status and deletes the error message of the version.
 	SetStatus(ctx context.Context, productID, versionID string, status entity.VersionStatus) error
 	// SetError sets the error message of the version and updates the status to Error.
 	SetError(ctx context.Context, productID string, version *entity.Version, errorMessage string) (*entity.Version, error)
