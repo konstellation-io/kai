@@ -29,8 +29,8 @@ func (s *VersionUsecaseTestSuite) TestStop_OK() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, vers.Tag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, vers.Tag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopping).Return(nil)
 
 	// go rutine expected to be called
@@ -39,7 +39,7 @@ func (s *VersionUsecaseTestSuite) TestStop_OK() {
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, vers, TEST_COMMENT).Return(nil)
 
 	// WHEN stopping the version
-	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, vers.Tag, TEST_COMMENT)
+	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
 	s.NoError(err)
 
 	// THEN the version status is stopping
@@ -105,7 +105,7 @@ func (s *VersionUsecaseTestSuite) TestStop_ErrorInvalidVersionStatus() {
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.CommentInvalidVersionStatusBeforeStopping).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, vers.Tag, TEST_COMMENT)
+	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
 
 	// THEN an error is returned
 	s.Error(err)
@@ -126,11 +126,11 @@ func (s *VersionUsecaseTestSuite) TestDeleteNatsResources_ErrorDeletingStreams()
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, vers.Tag).Return(fmt.Errorf("error deleting streams"))
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(fmt.Errorf("error deleting streams"))
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.CommentErrorDeletingNATSResources).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, vers.Tag, TEST_COMMENT)
+	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
 
 	// THEN an error is returned
 	s.Error(err)
@@ -150,12 +150,12 @@ func (s *VersionUsecaseTestSuite) TestDeleteNatsResources_ErrorDeletingObjectSto
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, vers.Tag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, vers.Tag).Return(fmt.Errorf("error deleting object stores"))
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(fmt.Errorf("error deleting object stores"))
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.CommentErrorDeletingNATSResources).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, vers.Tag, TEST_COMMENT)
+	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
 
 	// THEN an error is returned
 	s.Error(err)
@@ -174,8 +174,8 @@ func (s *VersionUsecaseTestSuite) TestStop_CheckNonBlockingErrorLogging() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, vers.Tag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, vers.Tag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
 
 	// GIVEN first set status errors
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopping).
@@ -191,7 +191,7 @@ func (s *VersionUsecaseTestSuite) TestStop_CheckNonBlockingErrorLogging() {
 		Return(fmt.Errorf("this is the end"))
 
 	// WHEN stopping the version
-	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, vers.Tag, TEST_COMMENT)
+	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
 	s.NoError(err)
 
 	// THEN the version status first is stopping
@@ -254,8 +254,8 @@ func (s *VersionUsecaseTestSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, vers.Tag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, vers.Tag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopping).Return(nil)
 
 	// go rutine expected to be called
@@ -268,7 +268,7 @@ func (s *VersionUsecaseTestSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	)
 
 	// WHEN stopping the version
-	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, vers.Tag, TEST_COMMENT)
+	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
 	s.NoError(err)
 
 	// THEN the version status is stopping
