@@ -55,7 +55,6 @@ func newMetricsSuite(t *testing.T) *metricsSuite {
 //nolint:funlen // test code
 func TestMetricsInteractor_CalculateMetrics(t *testing.T) {
 	s := newMetricsSuite(t)
-	defer s.ctrl.Finish()
 
 	rows := []entity.ClassificationMetric{
 		{
@@ -174,7 +173,6 @@ func TestMetricsInteractor_CalculateMetrics(t *testing.T) {
 
 func TestMetricsInteractor_GetSuccessVsFailsChartWithOneMetric(t *testing.T) {
 	s := newMetricsSuite(t)
-	defer s.ctrl.Finish()
 
 	metrics := []entity.ClassificationMetric{
 		{
@@ -198,7 +196,6 @@ func TestMetricsInteractor_GetSuccessVsFailsChartWithOneMetric(t *testing.T) {
 
 func TestMetricsInteractor_GetSuccessVsFailsChartWithSmallInterval(t *testing.T) {
 	s := newMetricsSuite(t)
-	defer s.ctrl.Finish()
 
 	metrics := []entity.ClassificationMetric{
 		{
@@ -249,7 +246,6 @@ func TestMetricsInteractor_GetSuccessVsFailsChartWithSmallInterval(t *testing.T)
 
 func TestMetricsInteractor_GetSuccessVsFailsChartWithNoTruncatedTime(t *testing.T) {
 	s := newMetricsSuite(t)
-	defer s.ctrl.Finish()
 
 	metrics := []entity.ClassificationMetric{
 		{
@@ -312,7 +308,6 @@ func TestMetricsInteractor_GetSuccessVsFailsChartWithNoTruncatedTime(t *testing.
 
 func TestMetricsInteractor_GetSuccessVsFailsChartWithLongInterval(t *testing.T) {
 	s := newMetricsSuite(t)
-	defer s.ctrl.Finish()
 
 	metrics := []entity.ClassificationMetric{
 		{
@@ -395,7 +390,6 @@ func TestMetricsInteractor_GetSuccessVsFailsChartWithLongInterval(t *testing.T) 
 
 func TestMetricsInteractor_GetSuccessVsFailsChartWithUnordered(t *testing.T) {
 	s := newMetricsSuite(t)
-	defer s.ctrl.Finish()
 
 	metrics := []entity.ClassificationMetric{
 		{
