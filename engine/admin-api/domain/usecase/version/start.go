@@ -8,7 +8,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/spf13/viper"
 )
 
@@ -24,7 +23,7 @@ func (h *Handler) Start(
 
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, CommentUserNotAuthorized, "start")
+		h.registerActionFailed(user.ID, productID, v, ErrUserNotAuthorized, "start")
 
 		return nil, nil, err
 	}
@@ -32,14 +31,32 @@ func (h *Handler) Start(
 	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, CommentVersionNotFound, "start")
+		h.registerActionFailed(user.ID, productID, v, ErrVersionNotFound, "start")
 
 		return nil, nil, err
 	}
 
 	if !vers.CanBeStarted() {
-		h.registerActionFailed(user.ID, productID, vers, CommentInvalidVersionStatusBeforeStarting, "start")
-		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStarting
+		h.registerActionFailed(user.ID, productID, vers, ErrVersionCannotBeStarted, "start")
+		return nil, nil, ErrVersionCannotBeStarted
+	}
+
+	versionCfg, err := h.getVersionConfig(ctx, productID, vers)
+	if err != nil {
+		h.registerActionFailed(user.ID, productID, vers, ErrCreatingNATSResources, "start")
+		return nil, nil, err
+	}
+
+	vers.Status = entity.VersionStatusStarting
+
+	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarting)
+	if err != nil {
+		h.logger.Error(err, "Error updating version status",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"previousStatus", vers.Status,
+			"newStatus", entity.VersionStatusStarting,
+		)
 	}
 
 	versionCfg, err := h.getVersionConfig(ctx, productID, vers)
@@ -106,7 +123,7 @@ func (h *Handler) startAndNotify(
 
 	err := h.k8sService.Start(ctx, productID, vers, versionConfig)
 	if err != nil {
-		h.registerActionFailed(userID, productID, vers, CommentErrorStartingVersion, "start")
+		h.registerActionFailed(userID, productID, vers, ErrStartingVersion, "start")
 		h.handleVersionServiceActionError(ctx, productID, vers, notifyStatusCh, err)
 
 		return
@@ -114,7 +131,7 @@ func (h *Handler) startAndNotify(
 
 	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarted)
 	if err != nil {
-		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
+		h.logger.Error(err, "Error updating version status",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"previousStatus", vers.Status,
@@ -124,7 +141,7 @@ func (h *Handler) startAndNotify(
 
 	err = h.userActivityInteractor.RegisterStartAction(userID, productID, vers, comment)
 	if err != nil {
-		h.logger.Error(ErrRegisteringUserActivity, "ERROR",
+		h.logger.Error(err, "Error registering user activity",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"comment", comment,

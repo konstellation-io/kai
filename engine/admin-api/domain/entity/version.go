@@ -29,7 +29,6 @@ type Version struct {
 type VersionStatus string
 
 const (
-	VersionStatusCreating  VersionStatus = "CREATING"
 	VersionStatusCreated   VersionStatus = "CREATED"
 	VersionStatusStarting  VersionStatus = "STARTING"
 	VersionStatusStarted   VersionStatus = "STARTED"
@@ -41,15 +40,6 @@ const (
 
 func (e VersionStatus) String() string {
 	return string(e)
-}
-
-func (v Version) PublishedOrStarted() bool {
-	switch v.Status {
-	case VersionStatusStarted, VersionStatusPublished:
-		return true
-	default:
-		return false
-	}
 }
 
 func (v Version) CanBeStarted() bool {
@@ -66,7 +56,6 @@ func (v Version) CanBeStopped() bool {
 }
 
 type Workflow struct {
-	ID        string
 	Name      string
 	Type      WorkflowType
 	Config    []ConfigurationVariable
@@ -88,7 +77,6 @@ func (wt WorkflowType) String() string {
 }
 
 type Process struct {
-	ID             string
 	Name           string
 	Type           ProcessType
 	Image          string

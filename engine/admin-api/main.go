@@ -135,20 +135,18 @@ func initGraphqlController(
 		gocloakUserRegistry,
 	)
 
-	chronografDashboard := service.CreateDashboardService(cfg, oldLogger)
-
-	handlerParams := version.HandlerParams{
-		Logger:                 logger,
-		VersionRepo:            versionMongoRepo,
-		ProductRepo:            productRepo,
-		K8sService:             k8sService,
-		NatsManagerService:     natsManagerService,
-		UserActivityInteractor: userActivityInteractor,
-		AccessControl:          accessControl,
-		DashboardService:       chronografDashboard,
-		ProcessLogRepo:         processLogRepo,
-	}
-	versionInteractor := version.NewHandler(handlerParams)
+	versionInteractor := version.NewHandler(
+		&version.HandlerParams{
+			Logger:                 logger,
+			VersionRepo:            versionMongoRepo,
+			ProductRepo:            productRepo,
+			K8sService:             k8sService,
+			NatsManagerService:     natsManagerService,
+			UserActivityInteractor: userActivityInteractor,
+			AccessControl:          accessControl,
+			ProcessLogRepo:         processLogRepo,
+		},
+	)
 
 	metricsInteractor := usecase.NewMetricsInteractor(
 		oldLogger,

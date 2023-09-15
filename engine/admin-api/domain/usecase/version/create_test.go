@@ -4,29 +4,138 @@ package version_test
 
 import (
 	"context"
+	"errors"
 	"os"
 
-	"github.com/golang/mock/gomock"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/krt"
-	"github.com/konstellation-io/kai/engine/admin-api/internal/errors"
-
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-const KRT_PATH = "../../../testdata/classificator_krt.yaml"
-const PRODUCT_ID = "product-1"
+func (s *versionSuite) TestCreateVersion() {
+	var (
+		ctx             = context.Background()
+		user            = testhelpers.NewUserBuilder().Build()
+		expectedVersion = getClassificatorVersion()
+		product         = &entity.Product{
+			ID: "test-product",
+		}
+	)
 
-func (s *VersionUsecaseTestSuite) getTestVersion() *entity.Version {
-	commonObjectStore := &entity.ProcessObjectStore{
-		Name:  "emails",
-		Scope: "workflow",
-	}
+	file, err := os.Open("./testdata/classificator_krt.yaml")
+	s.Require().NoError(err)
 
+	defer file.Close()
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, expectedVersion.Tag).Return(nil, version.ErrVersionNotFound)
+	s.versionRepo.EXPECT().Create(user.Email, product.ID, expectedVersion).Return(expectedVersion, nil)
+	s.userActivityInteractor.EXPECT().RegisterCreateAction(user.Email, product.ID, expectedVersion).Return(nil)
+
+	createdVersion, err := s.handler.Create(ctx, user, product.ID, file)
+	s.Require().NoError(err)
+
+	s.Assert().Equal(expectedVersion, createdVersion)
+}
+
+func (s *versionSuite) TestCreateVersion_FailsIfUserIsNotAuthorized() {
+	var (
+		ctx     = context.Background()
+		user    = testhelpers.NewUserBuilder().Build()
+		product = &entity.Product{
+			ID: "test-product",
+		}
+	)
+
+	file, err := os.Open("./testdata/classificator_krt.yaml")
+	s.Require().NoError(err)
+
+	defer file.Close()
+
+	expectedError := errors.New("unauthorized")
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(expectedError)
+
+	_, err = s.handler.Create(ctx, user, product.ID, file)
+	s.Require().ErrorIs(err, expectedError)
+}
+
+func (s *versionSuite) TestCreateVersion_FailsIfProductNotFound() {
+	var (
+		ctx     = context.Background()
+		user    = testhelpers.NewUserBuilder().Build()
+		product = &entity.Product{
+			ID: "test-product",
+		}
+	)
+
+	file, err := os.Open("./testdata/classificator_krt.yaml")
+	s.Require().NoError(err)
+
+	defer file.Close()
+
+	expectedError := errors.New("product not found")
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(nil, expectedError)
+
+	_, err = s.handler.Create(ctx, user, product.ID, file)
+	s.Require().ErrorIs(err, expectedError)
+}
+
+func (s *versionSuite) TestCreateVersion_FailsIfThereIsAnErrorCreatingInRepo() {
+	var (
+		ctx        = context.Background()
+		user       = testhelpers.NewUserBuilder().Build()
+		newVersion = getClassificatorVersion()
+		product    = &entity.Product{
+			ID: "test-product",
+		}
+	)
+
+	file, err := os.Open("./testdata/classificator_krt.yaml")
+	s.Require().NoError(err)
+
+	defer file.Close()
+
+	expectedError := errors.New("error creating version")
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, newVersion.Tag).Return(nil, version.ErrVersionNotFound)
+	s.versionRepo.EXPECT().Create(user.Email, product.ID, newVersion).Return(nil, expectedError)
+
+	_, err = s.handler.Create(ctx, user, product.ID, file)
+	s.Require().ErrorIs(err, expectedError)
+}
+
+func (s *versionSuite) TestCreateVersion_FailsIfVersionTagIsDuplicated() {
+	var (
+		ctx        = context.Background()
+		user       = testhelpers.NewUserBuilder().Build()
+		newVersion = getClassificatorVersion()
+		product    = &entity.Product{
+			ID: "test-product",
+		}
+	)
+
+	file, err := os.Open("./testdata/classificator_krt.yaml")
+	s.Require().NoError(err)
+
+	defer file.Close()
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, newVersion.Tag).Return(newVersion, nil)
+
+	_, err = s.handler.Create(ctx, user, product.ID, file)
+	s.Require().ErrorIs(err, version.ErrVersionDuplicated)
+}
+
+func getClassificatorVersion() *entity.Version {
 	return &entity.Version{
-		ID:          "", // ID to be given after create
 		Tag:         "v1.0.0",
 		Description: "Email classificator for branching features.",
 		Config: []entity.ConfigurationVariable{
@@ -34,153 +143,110 @@ func (s *VersionUsecaseTestSuite) getTestVersion() *entity.Version {
 				Key:   "keyA",
 				Value: "value1",
 			},
-			{
-				Key:   "keyB",
-				Value: "value2",
-			},
 		},
 		Workflows: []entity.Workflow{
 			{
 				Name: "go-classificator",
-				Type: "data",
+				Type: entity.WorkflowTypeData,
 				Config: []entity.ConfigurationVariable{
 					{
 						Key:   "keyA",
 						Value: "value1",
 					},
-					{
-						Key:   "keyB",
-						Value: "value2",
-					},
 				},
 				Processes: []entity.Process{
 					{
 						Name:          "entrypoint",
-						Type:          "trigger",
+						Type:          entity.ProcessTypeTrigger,
 						Image:         "konstellation/kai-grpc-trigger:latest",
-						Replicas:      krt.DefaultNumberOfReplicas,
-						GPU:           krt.DefaultGPUValue,
 						Subscriptions: []string{"exitpoint"},
+						Replicas:      int32(1),
 						Networking: &entity.ProcessNetworking{
 							TargetPort:      9000,
 							DestinationPort: 9000,
 							Protocol:        "TCP",
 						},
+						ResourceLimits: &entity.ProcessResourceLimits{
+							CPU: &entity.ResourceLimit{
+								Request: "100m",
+								Limit:   "200m",
+							},
+							Memory: &entity.ResourceLimit{
+								Request: "100Mi",
+								Limit:   "200Mi",
+							},
+						},
+						Status: entity.RegisterProcessStatusCreated,
 					},
 					{
 						Name:          "etl",
-						Type:          "task",
+						Type:          entity.ProcessTypeTask,
 						Image:         "konstellation/kai-etl-task:latest",
-						Replicas:      krt.DefaultNumberOfReplicas,
-						GPU:           krt.DefaultGPUValue,
-						ObjectStore:   commonObjectStore,
 						Subscriptions: []string{"entrypoint"},
+						Replicas:      int32(1),
+						ObjectStore: &entity.ProcessObjectStore{
+							Name:  "emails",
+							Scope: "workflow",
+						},
+						ResourceLimits: &entity.ProcessResourceLimits{
+							CPU: &entity.ResourceLimit{
+								Request: "100m",
+								Limit:   "200m",
+							},
+							Memory: &entity.ResourceLimit{
+								Request: "100Mi",
+								Limit:   "200Mi",
+							},
+						},
+						Status: entity.RegisterProcessStatusCreated,
 					},
 					{
 						Name:          "email-classificator",
-						Type:          "task",
+						Type:          entity.ProcessTypeTask,
 						Image:         "konstellation/kai-ec-task:latest",
-						Replicas:      krt.DefaultNumberOfReplicas,
-						GPU:           krt.DefaultGPUValue,
-						ObjectStore:   commonObjectStore,
 						Subscriptions: []string{"etl"},
+						Replicas:      int32(1),
+						ObjectStore: &entity.ProcessObjectStore{
+							Name:  "emails",
+							Scope: "workflow",
+						},
+						ResourceLimits: &entity.ProcessResourceLimits{
+							CPU: &entity.ResourceLimit{
+								Request: "100m",
+								Limit:   "200m",
+							},
+							Memory: &entity.ResourceLimit{
+								Request: "100Mi",
+								Limit:   "200Mi",
+							},
+						},
+						Status: entity.RegisterProcessStatusCreated,
 					},
 					{
 						Name:          "exitpoint",
-						Type:          "exit",
+						Type:          entity.ProcessTypeExit,
 						Image:         "konstellation/kai-exitpoint:latest",
-						Replicas:      krt.DefaultNumberOfReplicas,
-						GPU:           krt.DefaultGPUValue,
-						ObjectStore:   commonObjectStore,
-						Subscriptions: []string{"etl", "stats-storer"},
+						Subscriptions: []string{"etl", "email-classificator"},
+						Replicas:      int32(1),
+						ObjectStore: &entity.ProcessObjectStore{
+							Name:  "emails",
+							Scope: "workflow",
+						},
+						ResourceLimits: &entity.ProcessResourceLimits{
+							CPU: &entity.ResourceLimit{
+								Request: "100m",
+								Limit:   "200m",
+							},
+							Memory: &entity.ResourceLimit{
+								Request: "100Mi",
+								Limit:   "200Mi",
+							},
+						},
+						Status: entity.RegisterProcessStatusCreated,
 					},
 				},
 			},
 		},
+		Status: entity.VersionStatusCreated,
 	}
-}
-
-func (s *VersionUsecaseTestSuite) TestCreateNewVersion() {
-	user := testhelpers.NewUserBuilder().Build()
-	productID := PRODUCT_ID
-	ctx := context.Background()
-	product := &entity.Product{
-		ID: productID,
-	}
-
-	testVersion := s.getTestVersion()
-
-	file, err := os.Open(KRT_PATH)
-	s.Require().NoError(err)
-
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, testVersion.Tag).Return(nil, errors.ErrVersionNotFound)
-	s.versionRepo.EXPECT().Create(user.ID, productID, gomock.Any()).Return(testVersion, nil)
-	s.versionRepo.EXPECT().UploadKRTYamlFile(productID, testVersion, gomock.Any()).Return(nil)
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, testVersion.ID, entity.VersionStatusCreated).Return(nil)
-	s.userActivityInteractor.EXPECT().RegisterCreateAction(user.ID, productID, testVersion).Return(nil)
-
-	_, statusCh, err := s.handler.Create(ctx, user, productID, file)
-	s.Require().NoError(err)
-
-	actual := <-statusCh
-	expected := testVersion
-	expected.Status = entity.VersionStatusCreated
-	s.Equal(expected, actual)
-}
-
-func (s *VersionUsecaseTestSuite) TestCreateNewVersion_FailsIfVersionTagIsDuplicated() {
-	productID := PRODUCT_ID
-	user := testhelpers.NewUserBuilder().Build()
-	ctx := context.Background()
-	product := &entity.Product{
-		ID: productID,
-	}
-
-	testVersion := s.getTestVersion()
-
-	file, err := os.Open(KRT_PATH)
-	s.Require().NoError(err)
-
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, testVersion.Tag).Return(testVersion, nil)
-
-	_, _, err = s.handler.Create(context.Background(), user, productID, file)
-	s.ErrorIs(err, errors.ErrVersionDuplicated)
-}
-
-func (s *VersionUsecaseTestSuite) TestCreateNewVersion_FailsIfProductNotFound() {
-	productID := PRODUCT_ID
-	user := testhelpers.NewUserBuilder().Build()
-	ctx := context.Background()
-	file, err := os.Open(KRT_PATH)
-	s.Require().NoError(err)
-
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-
-	_, _, err = s.handler.Create(context.Background(), user, productID, file)
-	s.ErrorIs(err, usecase.ErrProductNotFound)
-}
-
-func (s *VersionUsecaseTestSuite) TestCreateNewVersion_FailsIfKrtIsInvalid() {
-	productID := PRODUCT_ID
-	user := testhelpers.NewUserBuilder().Build()
-	ctx := context.Background()
-	product := &entity.Product{
-		ID: productID,
-	}
-
-	file, err := os.Open("./testdata/invalid_krt.yaml")
-	s.Require().NoError(err)
-
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActCreateVersion)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(product, nil)
-
-	_, _, err = s.handler.Create(context.Background(), user, productID, file)
-
-	invalidKrtErr := &errors.KRTValidationError{}
-	s.True(s.ErrorAs(err, invalidKrtErr))
 }

@@ -146,7 +146,6 @@ func (k *K8sVersionService) WatchProcessStatus(ctx context.Context, productID, v
 			}
 
 			ch <- &entity.Process{
-				ID:     msg.ProcessId,
 				Name:   msg.Name,
 				Status: status,
 			}

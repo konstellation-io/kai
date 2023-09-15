@@ -3,6 +3,7 @@ package process
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
@@ -106,5 +107,7 @@ func (kp *KubeProcess) createProcessDeployment(
 }
 
 func getFullProcessIdentifier(product, version, workflow, process string) string {
-	return fmt.Sprintf("%s-%s-%s-%s", product, version, workflow, process)
+	fullName := fmt.Sprintf("%s-%s-%s-%s", product, version, workflow, process)
+
+	return strings.ReplaceAll(fullName, ".", "-")
 }

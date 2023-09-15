@@ -15,9 +15,8 @@ workflows:
         image: konstellation/kai-grpc-trigger:latest
         networking:
           targetPort: 9000
-          targetProtocol: TCP
           destinationPort: 9000
-          destinationProtocol: TCP
+          protocol: TCP
         resourceLimits:
           CPU:
             request: 100m

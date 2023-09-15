@@ -10,7 +10,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	apperrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -121,7 +121,7 @@ func (r *ProcessRepositoryMongoDB) Update(ctx context.Context, productID string,
 	updateResult, err := collection.ReplaceOne(ctx, bson.M{"_id": process.ID}, versionDTO)
 
 	if updateResult.ModifiedCount == 0 {
-		return apperrors.ErrVersionNotFound
+		return version.ErrVersionNotFound
 	}
 
 	return err

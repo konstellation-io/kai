@@ -3,13 +3,13 @@
 package version_test
 
 import (
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version/utils"
+	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-func (s *VersionUsecaseTestSuite) TestGetByID() {
+func (s *versionSuite) TestGetByID() {
 	// GIVEN a productID and an ID
 	productID := "product-1"
-	testVersion := utils.InitTestVersion().WithVersionID("test-ID").GetVersion()
+	testVersion := testhelpers.NewVersionBuilder().WithID("test-ID").Build()
 
 	s.versionRepo.EXPECT().GetByID(productID, testVersion.ID).Return(testVersion, nil)
 
