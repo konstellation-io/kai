@@ -16,10 +16,4 @@ var (
 
 	// ErrInvalidVersionStatusBeforeUnpublishing error.
 	ErrInvalidVersionStatusBeforeUnpublishing = errors.New("the version must be published before unpublishing")
-
-	// ErrCreatingDashboard error.
-	ErrCreatingDashboard = errors.New("error creating dashboard")
-
-	// ErrStoringKRTFile error.
-	ErrStoringKRTFile = errors.New("error storing KRT file")
 )

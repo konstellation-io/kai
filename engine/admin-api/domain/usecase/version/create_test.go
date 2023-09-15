@@ -22,10 +22,9 @@ import (
 type createVersionSuite struct {
 	suite.Suite
 
-	logger      logr.Logger
-	versionRepo *mocks.MockVersionRepo
-	productRepo *mocks.MockProductRepo
-	//versionService   *mocks.MockVersionService
+	logger        logr.Logger
+	versionRepo   *mocks.MockVersionRepo
+	productRepo   *mocks.MockProductRepo
 	userActivity  *mocks.MockUserActivityInteracter
 	accessControl *mocks.MockAccessControl
 	handler       *version.Handler
@@ -194,7 +193,6 @@ func getClassificatorVersion() *entity.Version {
 			{
 				Name: "go-classificator",
 				Type: entity.WorkflowTypeData,
-				//Stream:    "",
 				Config: []entity.ConfigurationVariable{
 					{
 						Key:   "keyA",
