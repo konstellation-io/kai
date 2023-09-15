@@ -6,59 +6,14 @@ import (
 	"context"
 	"errors"
 	"os"
-	"testing"
 
-	"github.com/go-logr/logr"
-	"github.com/go-logr/logr/testr"
-	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
-	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
-	"github.com/stretchr/testify/suite"
 )
 
-type createVersionSuite struct {
-	suite.Suite
-
-	logger        logr.Logger
-	versionRepo   *mocks.MockVersionRepo
-	productRepo   *mocks.MockProductRepo
-	userActivity  *mocks.MockUserActivityInteracter
-	accessControl *mocks.MockAccessControl
-	handler       *version.Handler
-}
-
-func TestCreateVersionSuite(t *testing.T) {
-	suite.Run(t, new(createVersionSuite))
-}
-
-func (s *createVersionSuite) SetupSuite() {
-	ctrl := gomock.NewController(s.T())
-
-	s.logger = testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
-	s.versionRepo = mocks.NewMockVersionRepo(ctrl)
-	s.productRepo = mocks.NewMockProductRepo(ctrl)
-	s.userActivity = mocks.NewMockUserActivityInteracter(ctrl)
-	s.accessControl = mocks.NewMockAccessControl(ctrl)
-
-	natsManagerService := mocks.NewMockNatsManagerService(ctrl)
-	versionService := mocks.NewMockVersionService(ctrl)
-	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
-
-	s.handler = version.NewHandler(
-		s.logger,
-		s.versionRepo,
-		s.productRepo,
-		versionService,
-		natsManagerService,
-		s.userActivity,
-		s.accessControl,
-		processLogRepo)
-}
-
-func (s *createVersionSuite) TestCreateVersion() {
+func (s *versionSuite) TestCreateVersion() {
 	var (
 		ctx             = context.Background()
 		user            = testhelpers.NewUserBuilder().Build()
@@ -68,7 +23,7 @@ func (s *createVersionSuite) TestCreateVersion() {
 		}
 	)
 
-	file, err := os.Open("../../../testdata/classificator_krt.yaml")
+	file, err := os.Open("./testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	defer file.Close()
@@ -77,7 +32,7 @@ func (s *createVersionSuite) TestCreateVersion() {
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, expectedVersion.Tag).Return(nil, version.ErrVersionNotFound)
 	s.versionRepo.EXPECT().Create(user.Email, product.ID, expectedVersion).Return(expectedVersion, nil)
-	s.userActivity.EXPECT().RegisterCreateAction(user.Email, product.ID, expectedVersion).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterCreateAction(user.Email, product.ID, expectedVersion).Return(nil)
 
 	createdVersion, err := s.handler.Create(ctx, user, product.ID, file)
 	s.Require().NoError(err)
@@ -85,7 +40,7 @@ func (s *createVersionSuite) TestCreateVersion() {
 	s.Assert().Equal(expectedVersion, createdVersion)
 }
 
-func (s *createVersionSuite) TestCreateVersion_FailsIfUserIsNotAuthorized() {
+func (s *versionSuite) TestCreateVersion_FailsIfUserIsNotAuthorized() {
 	var (
 		ctx     = context.Background()
 		user    = testhelpers.NewUserBuilder().Build()
@@ -94,7 +49,7 @@ func (s *createVersionSuite) TestCreateVersion_FailsIfUserIsNotAuthorized() {
 		}
 	)
 
-	file, err := os.Open("../../../testdata/classificator_krt.yaml")
+	file, err := os.Open("./testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	defer file.Close()
@@ -107,7 +62,7 @@ func (s *createVersionSuite) TestCreateVersion_FailsIfUserIsNotAuthorized() {
 	s.Require().ErrorIs(err, expectedError)
 }
 
-func (s *createVersionSuite) TestCreateVersion_FailsIfProductNotFound() {
+func (s *versionSuite) TestCreateVersion_FailsIfProductNotFound() {
 	var (
 		ctx     = context.Background()
 		user    = testhelpers.NewUserBuilder().Build()
@@ -116,7 +71,7 @@ func (s *createVersionSuite) TestCreateVersion_FailsIfProductNotFound() {
 		}
 	)
 
-	file, err := os.Open("../../../testdata/classificator_krt.yaml")
+	file, err := os.Open("./testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	defer file.Close()
@@ -130,7 +85,7 @@ func (s *createVersionSuite) TestCreateVersion_FailsIfProductNotFound() {
 	s.Require().ErrorIs(err, expectedError)
 }
 
-func (s *createVersionSuite) TestCreateVersion_FailsIfThereIsAnErrorCreatingInRepo() {
+func (s *versionSuite) TestCreateVersion_FailsIfThereIsAnErrorCreatingInRepo() {
 	var (
 		ctx        = context.Background()
 		user       = testhelpers.NewUserBuilder().Build()
@@ -140,7 +95,7 @@ func (s *createVersionSuite) TestCreateVersion_FailsIfThereIsAnErrorCreatingInRe
 		}
 	)
 
-	file, err := os.Open("../../../testdata/classificator_krt.yaml")
+	file, err := os.Open("./testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	defer file.Close()
@@ -156,7 +111,7 @@ func (s *createVersionSuite) TestCreateVersion_FailsIfThereIsAnErrorCreatingInRe
 	s.Require().ErrorIs(err, expectedError)
 }
 
-func (s *createVersionSuite) TestCreateVersion_FailsIfVersionTagIsDuplicated() {
+func (s *versionSuite) TestCreateVersion_FailsIfVersionTagIsDuplicated() {
 	var (
 		ctx        = context.Background()
 		user       = testhelpers.NewUserBuilder().Build()
@@ -166,7 +121,7 @@ func (s *createVersionSuite) TestCreateVersion_FailsIfVersionTagIsDuplicated() {
 		}
 	)
 
-	file, err := os.Open("../../../testdata/classificator_krt.yaml")
+	file, err := os.Open("./testdata/classificator_krt.yaml")
 	s.Require().NoError(err)
 
 	defer file.Close()
