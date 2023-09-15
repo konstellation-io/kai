@@ -42,15 +42,6 @@ func (e VersionStatus) String() string {
 	return string(e)
 }
 
-func (v Version) PublishedOrStarted() bool {
-	switch v.Status {
-	case VersionStatusStarted, VersionStatusPublished:
-		return true
-	default:
-		return false
-	}
-}
-
 func (v Version) CanBeStarted() bool {
 	switch v.Status {
 	case VersionStatusCreated, VersionStatusStopped, VersionStatusError:

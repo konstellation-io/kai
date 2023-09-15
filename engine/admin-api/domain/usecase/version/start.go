@@ -12,20 +12,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	CommentUserNotAuthorized          = "user not authorized"
-	CommentVersionNotFound            = "version not found"
-	CommentInvalidVersionStatus       = "invalid version status before starting"
-	CommentErrorCreatingNATSResources = "error creating NATS resources"
-	CommentErrorStartingVersion       = "error starting version"
-)
-
-var (
-	ErrUpdatingVersionStatus   = fmt.Errorf("error updating version status")
-	ErrUpdatingVersionError    = fmt.Errorf("error updating version error")
-	ErrRegisteringUserActivity = fmt.Errorf("error registering user activity")
-)
-
 // Start a previously created Version.
 func (h *Handler) Start(
 	ctx context.Context,
@@ -38,7 +24,7 @@ func (h *Handler) Start(
 
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerStartActionFailed(user.ID, productID, v, CommentUserNotAuthorized)
+		h.registerStartActionFailed(user.ID, productID, v, ErrUserNotAuthorized)
 
 		return nil, nil, err
 	}
@@ -46,19 +32,19 @@ func (h *Handler) Start(
 	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerStartActionFailed(user.ID, productID, v, CommentVersionNotFound)
+		h.registerStartActionFailed(user.ID, productID, v, ErrVersionNotFound)
 
 		return nil, nil, err
 	}
 
 	if !vers.CanBeStarted() {
-		h.registerStartActionFailed(user.ID, productID, vers, CommentInvalidVersionStatus)
+		h.registerStartActionFailed(user.ID, productID, vers, ErrInvalidVersionStatus)
 		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStarting
 	}
 
 	versionCfg, err := h.getVersionConfig(ctx, productID, vers)
 	if err != nil {
-		h.registerStartActionFailed(user.ID, productID, vers, CommentErrorCreatingNATSResources)
+		h.registerStartActionFailed(user.ID, productID, vers, ErrCreatingNATSResources)
 		return nil, nil, err
 	}
 
@@ -66,7 +52,7 @@ func (h *Handler) Start(
 
 	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarting)
 	if err != nil {
-		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
+		h.logger.Error(err, "Error updating version status",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"previousStatus", vers.Status,
@@ -81,13 +67,13 @@ func (h *Handler) Start(
 	return vers, notifyStatusCh, nil
 }
 
-func (h *Handler) registerStartActionFailed(userID, productID string, vers *entity.Version, comment string) {
-	err := h.userActivityInteractor.RegisterStartAction(userID, productID, vers, comment)
+func (h *Handler) registerStartActionFailed(userID, productID string, vers *entity.Version, incomingErr error) {
+	err := h.userActivityInteractor.RegisterStartAction(userID, productID, vers, incomingErr.Error())
 	if err != nil {
-		h.logger.Error(ErrRegisteringUserActivity, "ERROR",
+		h.logger.Error(err, "Error registering user activity",
 			"productID", productID,
 			"versionTag", vers.Tag,
-			"comment", comment,
+			"error", incomingErr.Error(),
 		)
 	}
 }
@@ -131,7 +117,7 @@ func (h *Handler) startAndNotify(
 
 	err := h.k8sService.Start(ctx, productID, vers, versionConfig)
 	if err != nil {
-		h.registerStartActionFailed(userID, productID, vers, CommentErrorStartingVersion)
+		h.registerStartActionFailed(userID, productID, vers, ErrStartingVersion)
 		h.handleVersionServiceStartError(ctx, productID, vers, notifyStatusCh, err)
 
 		return
@@ -139,7 +125,7 @@ func (h *Handler) startAndNotify(
 
 	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarted)
 	if err != nil {
-		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
+		h.logger.Error(err, "Error updating version status",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"previousStatus", vers.Status,
@@ -149,7 +135,7 @@ func (h *Handler) startAndNotify(
 
 	err = h.userActivityInteractor.RegisterStartAction(userID, productID, vers, comment)
 	if err != nil {
-		h.logger.Error(ErrRegisteringUserActivity, "ERROR",
+		h.logger.Error(err, "Error registering user activity",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"comment", comment,
@@ -166,7 +152,7 @@ func (h *Handler) handleVersionServiceStartError(
 ) {
 	_, err := h.versionRepo.SetError(ctx, productID, vers, startErr.Error())
 	if err != nil {
-		h.logger.Error(ErrUpdatingVersionError, "ERROR",
+		h.logger.Error(err, "Error updating version error",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"versionError", startErr.Error(),
