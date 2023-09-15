@@ -258,25 +258,6 @@ func (s *VersionRepositoryTestSuite) TestSetStatusWithPreviousError() {
 	s.Empty(updatedVer.Error)
 }
 
-func (s *VersionRepositoryTestSuite) TestSetStatusWithPreviousError() {
-	testVersion := &entity.Version{
-		Tag:   versionTag,
-		Error: "dummy error",
-	}
-
-	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
-	s.Require().NoError(err)
-
-	err = s.versionRepo.SetStatus(context.Background(), productID, createdVer.ID, entity.VersionStatusCreated)
-	s.Require().NoError(err)
-
-	updatedVer, err := s.versionRepo.GetByID(productID, createdVer.ID)
-	s.Require().NoError(err)
-
-	s.Equal(entity.VersionStatusCreated, updatedVer.Status)
-	s.Empty(updatedVer.Error)
-}
-
 func (s *VersionRepositoryTestSuite) TestSetStatusNotFound() {
 	err := s.versionRepo.SetStatus(context.Background(), productID, "notfound", entity.VersionStatusCreated)
 	s.Assert().ErrorIs(err, version.ErrVersionNotFound)
