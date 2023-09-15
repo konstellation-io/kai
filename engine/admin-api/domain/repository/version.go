@@ -15,7 +15,10 @@ type VersionRepo interface {
 	GetByTag(ctx context.Context, productID, tag string) (*entity.Version, error)
 	ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error)
 	Update(productID string, version *entity.Version) error
-	SetStatus(ctx context.Context, productID, versionID string, status entity.VersionStatus) error
-	SetErrors(ctx context.Context, productID string, version *entity.Version, errorMessages []string) (*entity.Version, error)
 	ClearPublishedVersion(ctx context.Context, productID string) (*entity.Version, error)
+
+	// SetStatus updates the status and deletes the error message of the version.
+	SetStatus(ctx context.Context, productID, versionID string, status entity.VersionStatus) error
+	// SetError sets the error message of the version and updates the status to Error.
+	SetError(ctx context.Context, productID string, version *entity.Version, errorMessage string) (*entity.Version, error)
 }

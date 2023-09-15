@@ -159,7 +159,7 @@ func (r *VersionRepoMongoDB) SetStatus(
 	res := collection.FindOneAndUpdate(
 		ctx,
 		bson.M{"tag": versionTag},
-		bson.M{"$set": bson.M{"status": status}},
+		bson.M{"$set": bson.M{"status": status, "error": ""}},
 	)
 	if errors.Is(res.Err(), mongo.ErrNoDocuments) {
 		return version.ErrVersionNotFound
@@ -168,20 +168,20 @@ func (r *VersionRepoMongoDB) SetStatus(
 	return res.Err()
 }
 
-func (r *VersionRepoMongoDB) SetErrors(
+func (r *VersionRepoMongoDB) SetError(
 	ctx context.Context,
 	productID string,
 	versionFailed *entity.Version,
-	errorMessages []string,
+	errorMessage string,
 ) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
 	versionDTO := mapEntityToDTO(versionFailed)
 
 	versionDTO.Status = entity.VersionStatusError.String()
-	versionDTO.Errors = errorMessages
+	versionDTO.Error = errorMessage
 
-	elem := bson.M{"$set": bson.M{"status": versionDTO.Status, "errors": versionDTO.Errors}}
+	elem := bson.M{"$set": bson.M{"status": versionDTO.Status, "error": versionDTO.Error}}
 
 	result, err := collection.UpdateOne(ctx, bson.M{"tag": versionDTO.Tag}, elem)
 	if err != nil {

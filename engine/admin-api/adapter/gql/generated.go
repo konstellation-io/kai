@@ -197,7 +197,7 @@ type ComplexityRoot struct {
 		CreationAuthor    func(childComplexity int) int
 		CreationDate      func(childComplexity int) int
 		Description       func(childComplexity int) int
-		Errors            func(childComplexity int) int
+		Error             func(childComplexity int) int
 		ID                func(childComplexity int) int
 		PublicationAuthor func(childComplexity int) int
 		PublicationDate   func(childComplexity int) int
@@ -984,12 +984,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Version.Description(childComplexity), true
 
-	case "Version.errors":
-		if e.complexity.Version.Errors == nil {
+	case "Version.error":
+		if e.complexity.Version.Error == nil {
 			break
 		}
 
-		return e.complexity.Version.Errors(childComplexity), true
+		return e.complexity.Version.Error(childComplexity), true
 
 	case "Version.id":
 		if e.complexity.Version.ID == nil {
@@ -1347,7 +1347,7 @@ type Version {
   publicationDate: String
   publicationAuthor: String
   status: VersionStatus!
-  errors: [String]
+  error: String
 }
 
 enum VersionStatus {
@@ -3166,8 +3166,8 @@ func (ec *executionContext) fieldContext_Mutation_createVersion(ctx context.Cont
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -3245,8 +3245,8 @@ func (ec *executionContext) fieldContext_Mutation_startVersion(ctx context.Conte
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -3324,8 +3324,8 @@ func (ec *executionContext) fieldContext_Mutation_stopVersion(ctx context.Contex
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -3403,8 +3403,8 @@ func (ec *executionContext) fieldContext_Mutation_publishVersion(ctx context.Con
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -3482,8 +3482,8 @@ func (ec *executionContext) fieldContext_Mutation_unpublishVersion(ctx context.C
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -4755,8 +4755,8 @@ func (ec *executionContext) fieldContext_Product_publishedVersion(ctx context.Co
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -5050,8 +5050,8 @@ func (ec *executionContext) fieldContext_Query_version(ctx context.Context, fiel
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -5129,8 +5129,8 @@ func (ec *executionContext) fieldContext_Query_versions(ctx context.Context, fie
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -6879,8 +6879,8 @@ func (ec *executionContext) fieldContext_Version_status(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Version_errors(ctx context.Context, field graphql.CollectedField, obj *entity.Version) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Version_errors(ctx, field)
+func (ec *executionContext) _Version_error(ctx context.Context, field graphql.CollectedField, obj *entity.Version) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Version_error(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6893,7 +6893,7 @@ func (ec *executionContext) _Version_errors(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Errors, nil
+		return obj.Error, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6902,12 +6902,12 @@ func (ec *executionContext) _Version_errors(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚕstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Version_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Version_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Version",
 		Field:      field,
@@ -11099,8 +11099,8 @@ func (ec *executionContext) _Version(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "errors":
-			out.Values[i] = ec._Version_errors(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._Version_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12824,38 +12824,6 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalString(v)
 	return res
-}
-
-func (ec *executionContext) unmarshalOString2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOString2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOString2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalOString2string(ctx, sel, v[i])
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {

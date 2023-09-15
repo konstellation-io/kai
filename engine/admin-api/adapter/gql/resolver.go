@@ -74,22 +74,23 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterProcessInput) (*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, notifyCh, err := r.processService.RegisterProcess(
+	p, notifyCh, err := r.processService.RegisterProcess(
 		ctx, loggedUser, input.ProductID, input.Version, input.ProcessID, input.ProcessType, input.File.File,
 	)
 
 	go r.notifyRegisteredProcessStatus(notifyCh)
 
-	return v, err
+	return p, err
 }
 
 func (r *mutationResolver) notifyRegisteredProcessStatus(notifyCh chan *entity.RegisteredProcess) {
 	for registeredProcess := range notifyCh {
 		switch registeredProcess.Status {
 		case entity.RegisterProcessStatusCreated:
-			r.logger.Info(fmt.Sprintf("Process successfully registered with ID: %q", registeredProcess.ID))
+			r.logger.Infof("Process successfully registered with ID: %q", registeredProcess.ID)
 		case entity.RegisterProcessStatusFailed:
-			r.logger.Error(fmt.Sprintf("Error registering process with ID: %q - %s", registeredProcess.ID, registeredProcess.Logs))
+			r.logger.Errorf("Error registering process with ID: %q - %s", registeredProcess.ID, registeredProcess.Logs)
+		default:
 		}
 	}
 }
@@ -103,9 +104,21 @@ func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionI
 		return nil, err
 	}
 
-	go r.notifyVersionStatus(notifyCh)
+	go r.notifyVersionStartStatus(notifyCh)
 
 	return v, err
+}
+
+func (r *mutationResolver) notifyVersionStartStatus(notifyCh chan *entity.Version) {
+	for startingVersion := range notifyCh {
+		switch startingVersion.Status {
+		case entity.VersionStatusStarted:
+			r.logger.Infof("Version successfully started with ID: %q", startingVersion.ID)
+		case entity.VersionStatusError:
+			r.logger.Errorf("Error starting version with ID: %q - %s", startingVersion.ID, startingVersion.Error)
+		default:
+		}
+	}
 }
 
 func (r *mutationResolver) StopVersion(ctx context.Context, input StopVersionInput) (*entity.Version, error) {

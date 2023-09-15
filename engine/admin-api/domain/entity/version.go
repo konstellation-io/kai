@@ -23,7 +23,7 @@ type Version struct {
 	PublicationAuthor *string
 
 	Status VersionStatus
-	Errors []string
+	Error  string
 }
 
 type VersionStatus string
@@ -42,12 +42,13 @@ func (e VersionStatus) String() string {
 	return string(e)
 }
 
-func (v Version) PublishedOrStarted() bool {
-	return v.Status == VersionStatusStarted || v.Status == VersionStatusPublished
-}
-
 func (v Version) CanBeStarted() bool {
-	return v.Status == VersionStatusCreated || v.Status == VersionStatusStopped
+	switch v.Status {
+	case VersionStatusCreated, VersionStatusStopped, VersionStatusError:
+		return true
+	default:
+		return false
+	}
 }
 
 func (v Version) CanBeStopped() bool {

@@ -24,7 +24,7 @@ type versionDTO struct {
 
 	Status string `bson:"status"`
 
-	Errors []string `bson:"errors"`
+	Error string `bson:"error"`
 }
 
 type workflowDTO struct {
