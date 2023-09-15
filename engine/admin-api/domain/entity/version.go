@@ -29,7 +29,6 @@ type Version struct {
 type VersionStatus string
 
 const (
-	VersionStatusCreating  VersionStatus = "CREATING"
 	VersionStatusCreated   VersionStatus = "CREATED"
 	VersionStatusStarting  VersionStatus = "STARTING"
 	VersionStatusStarted   VersionStatus = "STARTED"
@@ -56,7 +55,6 @@ func (v Version) CanBeStopped() bool {
 }
 
 type Workflow struct {
-	ID        string
 	Name      string
 	Type      WorkflowType
 	Config    []ConfigurationVariable
@@ -78,7 +76,6 @@ func (wt WorkflowType) String() string {
 }
 
 type Process struct {
-	ID             string
 	Name           string
 	Type           ProcessType
 	Image          string

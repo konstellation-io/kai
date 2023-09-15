@@ -112,7 +112,6 @@ type ComplexityRoot struct {
 	Process struct {
 		Config        func(childComplexity int) int
 		GPU           func(childComplexity int) int
-		ID            func(childComplexity int) int
 		Image         func(childComplexity int) int
 		Name          func(childComplexity int) int
 		Replicas      func(childComplexity int) int
@@ -209,7 +208,6 @@ type ComplexityRoot struct {
 
 	Workflow struct {
 		Config    func(childComplexity int) int
-		ID        func(childComplexity int) int
 		Name      func(childComplexity int) int
 		Processes func(childComplexity int) int
 		Type      func(childComplexity int) int
@@ -560,13 +558,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Process.GPU(childComplexity), true
-
-	case "Process.id":
-		if e.complexity.Process.ID == nil {
-			break
-		}
-
-		return e.complexity.Process.ID(childComplexity), true
 
 	case "Process.image":
 		if e.complexity.Process.Image == nil {
@@ -1049,13 +1040,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Workflow.Config(childComplexity), true
 
-	case "Workflow.id":
-		if e.complexity.Workflow.ID == nil {
-			break
-		}
-
-		return e.complexity.Workflow.ID(childComplexity), true
-
 	case "Workflow.name":
 		if e.complexity.Workflow.Name == nil {
 			break
@@ -1378,7 +1362,6 @@ enum VersionStatus {
 }
 
 type Workflow {
-  id: ID!
   name: String!
   type: WorkflowType!
   config: [ConfigurationVariable]
@@ -1393,7 +1376,6 @@ enum WorkflowType {
 }
 
 type Process {
-  id: ID!
   name: String!
   type: ProcessType!
   image: String!
@@ -3707,50 +3689,6 @@ func (ec *executionContext) fieldContext_Mutation_registerProcess(ctx context.Co
 	if fc.Args, err = ec.field_Mutation_registerProcess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Process_id(ctx context.Context, field graphql.CollectedField, obj *entity.Process) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Process_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Process_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Process",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
 	}
 	return fc, nil
 }
@@ -6712,8 +6650,6 @@ func (ec *executionContext) fieldContext_Version_workflows(ctx context.Context, 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Workflow_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Workflow_name(ctx, field)
 			case "type":
@@ -6984,50 +6920,6 @@ func (ec *executionContext) fieldContext_Version_errors(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Workflow_id(ctx context.Context, field graphql.CollectedField, obj *entity.Workflow) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Workflow_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Workflow_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Workflow",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Workflow_name(ctx context.Context, field graphql.CollectedField, obj *entity.Workflow) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Workflow_name(ctx, field)
 	if err != nil {
@@ -7202,8 +7094,6 @@ func (ec *executionContext) fieldContext_Workflow_processes(ctx context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Process_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Process_name(ctx, field)
 			case "type":
@@ -10034,11 +9924,6 @@ func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Process")
-		case "id":
-			out.Values[i] = ec._Process_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "name":
 			out.Values[i] = ec._Process_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -11250,11 +11135,6 @@ func (ec *executionContext) _Workflow(ctx context.Context, sel ast.SelectionSet,
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Workflow")
-		case "id":
-			out.Values[i] = ec._Workflow_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "name":
 			out.Values[i] = ec._Workflow_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

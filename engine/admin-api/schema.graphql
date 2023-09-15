@@ -167,7 +167,6 @@ enum VersionStatus {
 }
 
 type Workflow {
-  id: ID!
   name: String!
   type: WorkflowType!
   config: [ConfigurationVariable]
@@ -182,7 +181,6 @@ enum WorkflowType {
 }
 
 type Process {
-  id: ID!
   name: String!
   type: ProcessType!
   image: String!
