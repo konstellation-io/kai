@@ -3,12 +3,10 @@ package version
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/spf13/viper"
 )
 
@@ -38,8 +36,8 @@ func (h *Handler) Start(
 	}
 
 	if !vers.CanBeStarted() {
-		h.registerStartActionFailed(user.ID, productID, vers, ErrInvalidVersionStatus)
-		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStarting
+		h.registerStartActionFailed(user.ID, productID, vers, ErrVersionCannotBeStarted)
+		return nil, nil, ErrVersionCannotBeStarted
 	}
 
 	versionCfg, err := h.getVersionConfig(ctx, productID, vers)
@@ -112,8 +110,6 @@ func (h *Handler) startAndNotify(
 		cancel()
 		close(notifyStatusCh)
 	}()
-
-	vers.Tag = strings.ReplaceAll(vers.Tag, ".", "-")
 
 	err := h.k8sService.Start(ctx, productID, vers, versionConfig)
 	if err != nil {

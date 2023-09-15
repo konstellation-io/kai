@@ -248,7 +248,7 @@ func (s *VersionRepositoryTestSuite) TestSetStatusWithPreviousError() {
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
 
-	err = s.versionRepo.SetStatus(context.Background(), productID, createdVer.ID, entity.VersionStatusCreated)
+	err = s.versionRepo.SetStatus(context.Background(), productID, createdVer.Tag, entity.VersionStatusCreated)
 	s.Require().NoError(err)
 
 	updatedVer, err := s.versionRepo.GetByID(productID, createdVer.ID)

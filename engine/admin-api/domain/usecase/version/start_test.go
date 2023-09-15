@@ -11,7 +11,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
@@ -106,12 +105,12 @@ func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrInvalidVersionStatus.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrVersionCannotBeStarted.Error()).Return(nil)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
 	s.Error(err)
-	s.ErrorIs(err, internalerrors.ErrInvalidVersionStatusBeforeStarting)
+	s.ErrorIs(err, version.ErrVersionCannotBeStarted)
 }
 
 func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {

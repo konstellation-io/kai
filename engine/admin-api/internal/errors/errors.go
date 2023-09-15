@@ -5,9 +5,6 @@ import (
 )
 
 var (
-	// ErrInvalidVersionStatusBeforeStarting error.
-	ErrInvalidVersionStatusBeforeStarting = errors.New("the version must be stopped before starting")
-
 	// ErrInvalidVersionStatusBeforeStopping error.
 	ErrInvalidVersionStatusBeforeStopping = errors.New("the version must be started before stopping")
 

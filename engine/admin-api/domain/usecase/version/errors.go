@@ -6,13 +6,13 @@ import (
 )
 
 var (
-	ErrParsingKRTFile        = errors.New("error parsing KRT file")
-	ErrVersionNotFound       = errors.New("error version not found")
-	ErrVersionDuplicated     = errors.New("error version duplicated")
-	ErrUserNotAuthorized     = errors.New("error user not authorized")
-	ErrInvalidVersionStatus  = errors.New("error invalid version status before starting")
-	ErrCreatingNATSResources = errors.New("error creating NATS resources")
-	ErrStartingVersion       = errors.New("error starting version")
+	ErrParsingKRTFile         = errors.New("error parsing KRT file")
+	ErrVersionNotFound        = errors.New("error version not found")
+	ErrVersionDuplicated      = errors.New("error version duplicated")
+	ErrUserNotAuthorized      = errors.New("error user not authorized")
+	ErrVersionCannotBeStarted = errors.New("error version cannot be started, status must be 'created', 'stopped' or 'failed'")
+	ErrCreatingNATSResources  = errors.New("error creating NATS resources")
+	ErrStartingVersion        = errors.New("error starting version")
 )
 
 func ParsingKRTFileError(err error) error {
