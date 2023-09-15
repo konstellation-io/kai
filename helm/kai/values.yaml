@@ -676,3 +676,32 @@ registry:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
+minio:
+  # -- Enable MinIO persistent storage
+  enabled: true
+  # -- Sets minio mode
+  mode: standalone
+  # -- Internal port number for MinIO S3 API container
+  minioAPIPort: "9000"
+  # -- Internal port number for MinIO Browser Console container
+  minioConsolePort: "9001"
+  # -- Sets Root user
+  # @default -- Randomly generated value
+  rootUser: ""
+  # -- Sets Root password
+  # @default -- Randomly generated value
+  rootPassword: ""
+  # -- Use an exising secret for root user and password
+  existingSecret: ""
+  persistence:
+    # -- Enables persistent storage using PVC
+    enabled: true
+    # -- Storage class name
+    storageClass: ""
+    # -- Access mode for the volume
+    volumeName: ""
+    # -- Access mode for the volume
+    accessMode: ReadWriteOnce
+    # -- Storage size
+    size: 500Gi
