@@ -59,24 +59,6 @@ func (h *Handler) Start(
 		)
 	}
 
-	versionCfg, err = h.getVersionConfig(ctx, productID, vers)
-	if err != nil {
-		h.registerActionFailed(user.ID, productID, vers, ErrCreatingNATSResources, "start")
-		return nil, nil, err
-	}
-
-	vers.Status = entity.VersionStatusStarting
-
-	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarting)
-	if err != nil {
-		h.logger.Error(err, "Error updating version status",
-			"productID", productID,
-			"versionTag", vers.Tag,
-			"previousStatus", vers.Status,
-			"newStatus", entity.VersionStatusStarting,
-		)
-	}
-
 	notifyStatusCh := make(chan *entity.Version, 1)
 
 	go h.startAndNotify(user.ID, productID, comment, vers, versionCfg, notifyStatusCh)
