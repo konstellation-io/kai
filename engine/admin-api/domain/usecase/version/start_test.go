@@ -14,8 +14,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-const _testingComment string = "testing"
-
 func (s *versionSuite) TestStart_OK() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
@@ -39,10 +37,10 @@ func (s *versionSuite) TestStart_OK() {
 	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStarted).Return(nil)
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, _testingComment).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, "testing").Return(nil)
 
 	// WHEN starting the version
-	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, vers.Tag, _testingComment)
+	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status first is starting
@@ -67,7 +65,7 @@ func (s *versionSuite) TestStart_ErrorUserNotAuthorized() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(badUser.ID, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, badUser, productID, expectedVer.Tag, _testingComment)
+	_, _, err := s.handler.Start(ctx, badUser, productID, expectedVer.Tag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -88,7 +86,7 @@ func (s *versionSuite) TestStart_ErrorNonExistingVersion() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrVersionNotFound.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, user, productID, expectedVer.Tag, _testingComment)
+	_, _, err := s.handler.Start(ctx, user, productID, expectedVer.Tag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -112,7 +110,7 @@ func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrVersionCannotBeStarted.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, _testingComment)
+	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -140,7 +138,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, _testingComment)
+	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -169,7 +167,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, _testingComment)
+	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -199,7 +197,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, _testingComment)
+	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -239,11 +237,11 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStarted).
 		Return(setStatusErrStarted)
 	// GIVEN register start action errors
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, _testingComment).
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, "testing").
 		Return(registerActionErr)
 
 	// WHEN starting the version
-	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, vers.Tag, _testingComment)
+	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status first is starting
@@ -279,7 +277,7 @@ func (s *versionSuite) TestStart_ErrorUserNotAuthorized_ErrorRegisterAction() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(badUser.ID, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(regiserActionErr)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, badUser, productID, expectedVer.Tag, _testingComment)
+	_, _, err := s.handler.Start(ctx, badUser, productID, expectedVer.Tag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -322,7 +320,7 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStartingVersion).Return(nil, setErrorErr)
 
 	// WHEN starting the version
-	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, vers.Tag, _testingComment)
+	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status first is starting

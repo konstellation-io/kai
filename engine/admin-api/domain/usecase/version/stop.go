@@ -23,7 +23,7 @@ func (h *Handler) Stop(
 
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStopVersion); err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, CommentUserNotAuthorized, "stop")
+		h.registerActionFailed(user.ID, productID, v, ErrUserNotAuthorized, "stop")
 
 		return nil, nil, err
 	}
@@ -31,19 +31,19 @@ func (h *Handler) Stop(
 	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, CommentVersionNotFound, "stop")
+		h.registerActionFailed(user.ID, productID, v, ErrVersionNotFound, "stop")
 
 		return nil, nil, err
 	}
 
 	if !vers.CanBeStopped() {
-		h.registerActionFailed(user.ID, productID, vers, CommentInvalidVersionStatusBeforeStopping, "stop")
+		h.registerActionFailed(user.ID, productID, vers, ErrVersionCannotBeStopped, "stop")
 		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStopping
 	}
 
 	err = h.deleteNatsResources(ctx, productID, vers)
 	if err != nil {
-		h.registerActionFailed(user.ID, productID, vers, CommentErrorDeletingNATSResources, "stop")
+		h.registerActionFailed(user.ID, productID, vers, ErrDeletingNATSResources, "stop")
 		return nil, nil, err
 	}
 
@@ -51,7 +51,7 @@ func (h *Handler) Stop(
 
 	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopping)
 	if err != nil {
-		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
+		h.logger.Error(err, "Error updating version status",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"previousStatus", vers.Status,
@@ -95,7 +95,7 @@ func (h *Handler) stopAndNotify(
 
 	err := h.k8sService.Stop(ctx, productID, vers)
 	if err != nil {
-		h.registerActionFailed(userID, productID, vers, CommentErrorStoppingVersion, "stop")
+		h.registerActionFailed(userID, productID, vers, ErrStoppingVersion, "stop")
 		h.handleVersionServiceActionError(ctx, productID, vers, notifyStatusCh, err)
 
 		return
@@ -103,7 +103,7 @@ func (h *Handler) stopAndNotify(
 
 	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopped)
 	if err != nil {
-		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
+		h.logger.Error(err, "Error updating version status",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"previousStatus", vers.Status,
@@ -113,7 +113,7 @@ func (h *Handler) stopAndNotify(
 
 	err = h.userActivityInteractor.RegisterStopAction(userID, productID, vers, comment)
 	if err != nil {
-		h.logger.Error(ErrRegisteringUserActivity, "ERROR",
+		h.logger.Error(err, "Error registering user activity",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"comment", comment,

@@ -59,9 +59,9 @@ func (h *Handler) Start(
 		)
 	}
 
-	versionCfg, err := h.getVersionConfig(ctx, productID, vers)
+	versionCfg, err = h.getVersionConfig(ctx, productID, vers)
 	if err != nil {
-		h.registerActionFailed(user.ID, productID, vers, CommentErrorCreatingNATSResources, "start")
+		h.registerActionFailed(user.ID, productID, vers, ErrCreatingNATSResources, "start")
 		return nil, nil, err
 	}
 
@@ -69,7 +69,7 @@ func (h *Handler) Start(
 
 	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarting)
 	if err != nil {
-		h.logger.Error(ErrUpdatingVersionStatus, "CRITICAL",
+		h.logger.Error(err, "Error updating version status",
 			"productID", productID,
 			"versionTag", vers.Tag,
 			"previousStatus", vers.Status,

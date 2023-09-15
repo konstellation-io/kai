@@ -4,6 +4,7 @@ package version_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/golang/mock/gomock"
@@ -14,9 +15,7 @@ import (
 	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
-const TEST_COMMENT = "test comment"
-
-func (s *VersionUsecaseTestSuite) TestStop_OK() {
+func (s *versionSuite) TestStop_OK() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
 	user := s.getTestUser()
@@ -36,10 +35,10 @@ func (s *VersionUsecaseTestSuite) TestStop_OK() {
 	// go rutine expected to be called
 	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStopped).Return(nil)
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, vers, TEST_COMMENT).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, vers, "testing").Return(nil)
 
 	// WHEN stopping the version
-	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
+	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status is stopping
@@ -51,7 +50,7 @@ func (s *VersionUsecaseTestSuite) TestStop_OK() {
 	s.Equal(entity.VersionStatusStopped, versionStatus.Status)
 }
 
-func (s *VersionUsecaseTestSuite) TestStop_ErrorUserNotAuthorized() {
+func (s *versionSuite) TestStop_ErrorUserNotAuthorized() {
 	// GIVEN an unauthorized user and a version
 	ctx := context.Background()
 	badUser := s.getTestUser()
@@ -61,16 +60,16 @@ func (s *VersionUsecaseTestSuite) TestStop_ErrorUserNotAuthorized() {
 	s.accessControl.EXPECT().CheckProductGrants(badUser, productID, auth.ActStopVersion).Return(
 		fmt.Errorf("git good"),
 	)
-	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.ID, productID, versionMatcher, version.CommentUserNotAuthorized).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.ID, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, badUser, productID, expectedVer.Tag, TEST_COMMENT)
+	_, _, err := s.handler.Stop(ctx, badUser, productID, expectedVer.Tag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestStop_ErrorVersionNotFound() {
+func (s *versionSuite) TestStop_ErrorVersionNotFound() {
 	// GIVEN a valid user and a version not found
 	ctx := context.Background()
 	user := s.getTestUser()
@@ -79,16 +78,16 @@ func (s *VersionUsecaseTestSuite) TestStop_ErrorVersionNotFound() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, expectedVer.Tag).Return(nil, fmt.Errorf("no version found"))
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.CommentVersionNotFound).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.ErrVersionNotFound.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, expectedVer.Tag, TEST_COMMENT)
+	_, _, err := s.handler.Stop(ctx, user, productID, expectedVer.Tag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestStop_ErrorInvalidVersionStatus() {
+func (s *versionSuite) TestStop_ErrorInvalidVersionStatus() {
 	// GIVEN a valid user and an invalid version
 	ctx := context.Background()
 	user := s.getTestUser()
@@ -102,17 +101,17 @@ func (s *VersionUsecaseTestSuite) TestStop_ErrorInvalidVersionStatus() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.CommentInvalidVersionStatusBeforeStopping).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.ErrVersionCannotBeStopped.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
+	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
 	s.ErrorIs(err, internalerrors.ErrInvalidVersionStatusBeforeStopping)
 }
 
-func (s *VersionUsecaseTestSuite) TestDeleteNatsResources_ErrorDeletingStreams() {
+func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingStreams() {
 	// GIVEN a valid user and a version
 	ctx := context.Background()
 	user := s.getTestUser()
@@ -127,16 +126,16 @@ func (s *VersionUsecaseTestSuite) TestDeleteNatsResources_ErrorDeletingStreams()
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(fmt.Errorf("error deleting streams"))
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.CommentErrorDeletingNATSResources).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.ErrDeletingNATSResources.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
+	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestDeleteNatsResources_ErrorDeletingObjectStores() {
+func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingObjectStores() {
 	// GIVEN a valid user and a version
 	ctx := context.Background()
 	user := s.getTestUser()
@@ -152,16 +151,16 @@ func (s *VersionUsecaseTestSuite) TestDeleteNatsResources_ErrorDeletingObjectSto
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(fmt.Errorf("error deleting object stores"))
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.CommentErrorDeletingNATSResources).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.ErrDeletingNATSResources.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
+	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestStop_CheckNonBlockingErrorLogging() {
+func (s *versionSuite) TestStop_CheckNonBlockingErrorLogging() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
 	user := s.getTestUser()
@@ -171,6 +170,10 @@ func (s *VersionUsecaseTestSuite) TestStop_CheckNonBlockingErrorLogging() {
 		WithStatus(entity.VersionStatusStarted).
 		GetVersion()
 
+	setStatusErrStarting := errors.New("set status error")
+	setStatusErrStarted := errors.New("not again")
+	registerActionErr := errors.New("this is the end")
+
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
@@ -179,19 +182,19 @@ func (s *VersionUsecaseTestSuite) TestStop_CheckNonBlockingErrorLogging() {
 
 	// GIVEN first set status errors
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopping).
-		Return(fmt.Errorf("set status error"))
+		Return(setStatusErrStarting)
 
 	// go rutine expected calls
 	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(nil)
 	// GIVEN second set status errors
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStopped).
-		Return(fmt.Errorf("not again"))
+		Return(setStatusErrStarted)
 	// GIVEN register stop action errors
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, vers, TEST_COMMENT).
-		Return(fmt.Errorf("this is the end"))
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, vers, "testing").
+		Return(registerActionErr)
 
 	// WHEN stopping the version
-	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
+	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status first is stopping
@@ -206,30 +209,33 @@ func (s *VersionUsecaseTestSuite) TestStop_CheckNonBlockingErrorLogging() {
 	s.Require().Len(s.observedLogs.All(), 4)
 	print(s.observedLogs.All())
 	log1 := s.observedLogs.All()[1]
-	s.Equal(log1.ContextMap()["error"], version.ErrUpdatingVersionStatus.Error())
+	s.Equal(log1.ContextMap()["error"], setStatusErrStarting.Error())
 	log2 := s.observedLogs.All()[2]
-	s.Equal(log2.ContextMap()["error"], version.ErrUpdatingVersionStatus.Error())
+	s.Equal(log2.ContextMap()["error"], setStatusErrStarted.Error())
 	log3 := s.observedLogs.All()[3]
-	s.Equal(log3.ContextMap()["error"], version.ErrRegisteringUserActivity.Error())
+	s.Equal(log3.ContextMap()["error"], registerActionErr.Error())
 }
 
-func (s *VersionUsecaseTestSuite) TestStop_ErrorUserNotAuthorized_ErrorRegisterAction() {
+func (s *versionSuite) TestStop_ErrorUserNotAuthorized_ErrorRegisterAction() {
 	// GIVEN an unauthorized user and a version
 	ctx := context.Background()
 	badUser := s.getTestUser()
 	expectedVer := &entity.Version{Tag: versionTag}
 	versionMatcher := newVersionMatcher(expectedVer)
 
+	customErr := errors.New("oh no")
+	regiserActionErr := errors.New("a bad day")
+
 	s.accessControl.EXPECT().CheckProductGrants(badUser, productID, auth.ActStopVersion).Return(
-		fmt.Errorf("oh no"),
+		customErr,
 	)
 	// Given error registering action
-	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.ID, productID, versionMatcher, version.CommentUserNotAuthorized).Return(
-		fmt.Errorf("a bad day"),
+	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.ID, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(
+		regiserActionErr,
 	)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, badUser, productID, expectedVer.Tag, TEST_COMMENT)
+	_, _, err := s.handler.Stop(ctx, badUser, productID, expectedVer.Tag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -237,10 +243,10 @@ func (s *VersionUsecaseTestSuite) TestStop_ErrorUserNotAuthorized_ErrorRegisterA
 	// THEN failed registered action is logged
 	s.Require().Len(s.observedLogs.All(), 2)
 	log1 := s.observedLogs.All()[1]
-	s.Equal(log1.ContextMap()["error"], version.ErrRegisteringUserActivity.Error())
+	s.Equal(log1.ContextMap()["error"], regiserActionErr.Error())
 }
 
-func (s *VersionUsecaseTestSuite) TestStopAndNotify_ErrorVersionServiceStop() {
+func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
 	user := s.getTestUser()
@@ -250,6 +256,7 @@ func (s *VersionUsecaseTestSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 		WithStatus(entity.VersionStatusStarted).
 		GetVersion()
 	errStoppingVersion := "error stopping version"
+	setErrorErr := errors.New("error setting error")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
@@ -260,15 +267,15 @@ func (s *VersionUsecaseTestSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 
 	// go rutine expected to be called
 	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(fmt.Errorf(errStoppingVersion))
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, vers, version.CommentErrorStoppingVersion).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, vers, version.ErrStoppingVersion.Error()).Return(nil)
 
 	// Given set status
 	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStoppingVersion).Return(
-		nil, fmt.Errorf("error setting error"),
+		nil, setErrorErr,
 	)
 
 	// WHEN stopping the version
-	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, TEST_COMMENT)
+	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status is stopping
@@ -283,5 +290,5 @@ func (s *VersionUsecaseTestSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	// THEN set error is logged
 	s.Require().Len(s.observedLogs.All(), 2)
 	log1 := s.observedLogs.All()[1]
-	s.Equal(log1.ContextMap()["error"], version.ErrUpdatingVersionError.Error())
+	s.Equal(log1.ContextMap()["error"], setErrorErr.Error())
 }

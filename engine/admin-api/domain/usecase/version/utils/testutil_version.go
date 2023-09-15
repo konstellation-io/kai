@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/krt"
+	"github.com/konstellation-io/krt/pkg/krt"
 )
 
 type TestVersion struct {
