@@ -19,8 +19,23 @@ func NewVersionBuilder() *VersionBuilder {
 	}
 }
 
-func (vb *VersionBuilder) Build() entity.Version {
-	return vb.version
+func (vb *VersionBuilder) Build() *entity.Version {
+	return &vb.version
+}
+
+func (v *VersionBuilder) WithID(versionID string) *VersionBuilder {
+	v.version.ID = versionID
+	return v
+}
+
+func (v *VersionBuilder) WithTag(tag string) *VersionBuilder {
+	v.version.Tag = tag
+	return v
+}
+
+func (v *VersionBuilder) WithStatus(status entity.VersionStatus) *VersionBuilder {
+	v.version.Status = status
+	return v
 }
 
 func (vb *VersionBuilder) WithWorkflows(workflows []entity.Workflow) *VersionBuilder {

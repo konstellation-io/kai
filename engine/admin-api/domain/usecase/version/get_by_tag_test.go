@@ -5,14 +5,14 @@ package version_test
 import (
 	"context"
 
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version/utils"
+	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-func (s *VersionUsecaseTestSuite) TestGetByTag() {
+func (s *versionSuite) TestGetByTag() {
 	// GIVEN a productID and a version tag
 	productID := "product-1"
 	ctx := context.Background()
-	testVersion := utils.InitTestVersion().WithTag("test-tag").GetVersion()
+	testVersion := testhelpers.NewVersionBuilder().WithTag("test-tag").Build()
 
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, testVersion.Tag).Return(testVersion, nil)
 

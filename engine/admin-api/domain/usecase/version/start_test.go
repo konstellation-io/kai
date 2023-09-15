@@ -10,19 +10,19 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version/utils"
 	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
+	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-func (s *VersionUsecaseTestSuite) TestStart_OK() {
+func (s *versionSuite) TestStart_OK() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
-		GetVersion()
+		Build()
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
@@ -52,7 +52,7 @@ func (s *VersionUsecaseTestSuite) TestStart_OK() {
 	s.Equal(entity.VersionStatusStarted, versionStatus.Status)
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_ErrorUserNotAuthorized() {
+func (s *versionSuite) TestStart_ErrorUserNotAuthorized() {
 	// GIVEN an unauthorized user and a version
 	ctx := context.Background()
 	badUser := s.getTestUser()
@@ -71,7 +71,7 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorUserNotAuthorized() {
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_ErrorNonExistingVersion() {
+func (s *versionSuite) TestStart_ErrorNonExistingVersion() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
 	user := s.getTestUser()
@@ -87,15 +87,15 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorNonExistingVersion() {
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_ErrorInvalidVersionStatus() {
+func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
-		GetVersion()
+		Build()
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
@@ -109,15 +109,15 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorInvalidVersionStatus() {
 	s.ErrorIs(err, internalerrors.ErrInvalidVersionStatusBeforeStarting)
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
+func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
-		GetVersion()
+		Build()
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
@@ -132,15 +132,15 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorGetVersionConfig_CreateStreams(
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
+func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
-		GetVersion()
+		Build()
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
@@ -156,15 +156,15 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorGetVersionConfig_CreateObjectSt
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
+func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
-		GetVersion()
+		Build()
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
@@ -181,15 +181,15 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorGetVersionConfig_CreateKeyValue
 	s.Error(err)
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_CheckNonBlockingErrorLogging() {
+func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
-		GetVersion()
+		Build()
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
@@ -235,7 +235,7 @@ func (s *VersionUsecaseTestSuite) TestStart_CheckNonBlockingErrorLogging() {
 	s.Equal(log3.ContextMap()["error"], version.ErrRegisteringUserActivity.Error())
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_ErrorUserNotAuthorized_ErrorRegisterAction() {
+func (s *versionSuite) TestStart_ErrorUserNotAuthorized_ErrorRegisterAction() {
 	// GIVEN an unauthorized user and a version
 	ctx := context.Background()
 	badUser := s.getTestUser()
@@ -261,15 +261,15 @@ func (s *VersionUsecaseTestSuite) TestStart_ErrorUserNotAuthorized_ErrorRegister
 	s.Equal(log1.ContextMap()["error"], version.ErrRegisteringUserActivity.Error())
 }
 
-func (s *VersionUsecaseTestSuite) TestStart_ErrorVersionServiceStart() {
+func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
-		GetVersion()
+		Build()
 	errStartingVersion := "error starting version"
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)

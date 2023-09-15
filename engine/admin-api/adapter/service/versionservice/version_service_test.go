@@ -56,7 +56,7 @@ func (s *VersionServiceTestSuite) TestPublish() {
 
 	s.mockService.EXPECT().Publish(gomock.Any(), req).Return(&versionpb.Response{Message: "ok"}, nil)
 
-	err := s.k8sVersionClient.Publish(ctx, productID, &version)
+	err := s.k8sVersionClient.Publish(ctx, productID, version)
 	s.Require().NoError(err)
 }
 
@@ -70,7 +70,7 @@ func (s *VersionServiceTestSuite) TestUnpublish() {
 
 	s.mockService.EXPECT().Unpublish(gomock.Any(), req).Return(&versionpb.Response{Message: "ok"}, nil)
 
-	err := s.k8sVersionClient.Unpublish(ctx, productID, &version)
+	err := s.k8sVersionClient.Unpublish(ctx, productID, version)
 	s.Require().NoError(err)
 }
 
