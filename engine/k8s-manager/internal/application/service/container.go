@@ -21,6 +21,11 @@ type CreateNetworkParams struct {
 	Process  *domain.Process
 }
 
+type PublishNetworkParams struct {
+	Product string
+	Version string
+}
+
 type ContainerStarter interface {
 	CreateProcess(ctx context.Context, params CreateProcessParams) error
 	CreateNetwork(ctx context.Context, params CreateNetworkParams) error
@@ -33,6 +38,10 @@ type ContainerStopper interface {
 	DeleteNetwork(ctx context.Context, product, version string) error
 }
 
+type ContainerPublisher interface {
+	PublishNetwork(ctx context.Context, params PublishNetworkParams) error
+}
+
 //go:generate mockery --name ImageBuilder --output ../../../mocks --filename image_builder_mock.go --structname ImageBuilderMock
 type ImageBuilder interface {
 	BuildImage(ctx context.Context, processID, processImage string, sources []byte) (string, error)
@@ -42,4 +51,5 @@ type ImageBuilder interface {
 type ContainerService interface {
 	ContainerStarter
 	ContainerStopper
+	ContainerPublisher
 }
