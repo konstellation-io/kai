@@ -3,7 +3,6 @@ package version
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
@@ -100,8 +99,6 @@ func (h *Handler) startAndNotify(
 		cancel()
 		close(notifyStatusCh)
 	}()
-
-	vers.Tag = strings.ReplaceAll(vers.Tag, ".", "-")
 
 	err := h.k8sService.Start(ctx, productID, vers, versionConfig)
 	if err != nil {
