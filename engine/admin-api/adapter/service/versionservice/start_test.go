@@ -110,7 +110,7 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = s.getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(version)
 
 		workflowStreamCfg = versionConfig.StreamsConfig.Workflows[workflow.Name]
 		processStreamCfg  = workflowStreamCfg.Processes[process.Name]
@@ -166,7 +166,7 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 	customMatcher := newStartRequestMatcher(req)
 	s.mockService.EXPECT().Start(ctx, customMatcher).Return(&versionpb.Response{Message: "ok"}, nil)
 
-	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Require().NoError(err)
 }
 
@@ -176,14 +176,14 @@ func (s *StartVersionTestSuite) TestStartVersion_ClientError() {
 	var (
 		productID     = "test-product"
 		version       = testhelpers.NewVersionBuilder().Build()
-		versionConfig = s.getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(version)
 	)
 
 	expectedError := errors.New("client error")
 
 	s.mockService.EXPECT().Start(gomock.Any(), gomock.Any()).Return(nil, expectedError)
 
-	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, expectedError)
 }
 
@@ -223,13 +223,13 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFoun
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = s.getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(version)
 	)
 
 	// override default workflow to empty map
 	versionConfig.StreamsConfig.Workflows = map[string]entity.WorkflowStreamConfig{}
 
-	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowStreamNotFound)
 }
 
@@ -249,13 +249,13 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowKeyValue
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = s.getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(version)
 	)
 
 	// override default workflow config to empty map
 	versionConfig.KeyValueStoresConfig.Workflows = entity.WorkflowsKeyValueStoresConfig{}
 
-	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowKVStoreNotFound)
 }
 
@@ -275,13 +275,13 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowObjectSt
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = s.getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(version)
 	)
 
 	// override default workflow config to empty map
 	versionConfig.ObjectStoresConfig.Workflows = map[string]entity.WorkflowObjectStoresConfig{}
 
-	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowObjectStoreNotFound)
 }
 
@@ -301,7 +301,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_ProcessStreamNotFo
 			WithWorkflows([]entity.Workflow{workflow}).
 			Build()
 
-		versionConfig = s.getConfigForVersion(&version)
+		versionConfig = s.getConfigForVersion(version)
 	)
 
 	// override default workflow config to empty map
@@ -310,7 +310,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_ProcessStreamNotFo
 		Processes: map[string]entity.ProcessStreamConfig{},
 	}
 
-	err := s.k8sVersionClient.Start(ctx, productID, &version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrProcessStreamNotFound)
 }
 

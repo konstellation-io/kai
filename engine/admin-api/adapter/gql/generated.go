@@ -112,7 +112,6 @@ type ComplexityRoot struct {
 	Process struct {
 		Config        func(childComplexity int) int
 		GPU           func(childComplexity int) int
-		ID            func(childComplexity int) int
 		Image         func(childComplexity int) int
 		Name          func(childComplexity int) int
 		Replicas      func(childComplexity int) int
@@ -198,7 +197,7 @@ type ComplexityRoot struct {
 		CreationAuthor    func(childComplexity int) int
 		CreationDate      func(childComplexity int) int
 		Description       func(childComplexity int) int
-		Errors            func(childComplexity int) int
+		Error             func(childComplexity int) int
 		ID                func(childComplexity int) int
 		PublicationAuthor func(childComplexity int) int
 		PublicationDate   func(childComplexity int) int
@@ -209,7 +208,6 @@ type ComplexityRoot struct {
 
 	Workflow struct {
 		Config    func(childComplexity int) int
-		ID        func(childComplexity int) int
 		Name      func(childComplexity int) int
 		Processes func(childComplexity int) int
 		Type      func(childComplexity int) int
@@ -560,13 +558,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Process.GPU(childComplexity), true
-
-	case "Process.id":
-		if e.complexity.Process.ID == nil {
-			break
-		}
-
-		return e.complexity.Process.ID(childComplexity), true
 
 	case "Process.image":
 		if e.complexity.Process.Image == nil {
@@ -993,12 +984,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Version.Description(childComplexity), true
 
-	case "Version.errors":
-		if e.complexity.Version.Errors == nil {
+	case "Version.error":
+		if e.complexity.Version.Error == nil {
 			break
 		}
 
-		return e.complexity.Version.Errors(childComplexity), true
+		return e.complexity.Version.Error(childComplexity), true
 
 	case "Version.id":
 		if e.complexity.Version.ID == nil {
@@ -1048,13 +1039,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Workflow.Config(childComplexity), true
-
-	case "Workflow.id":
-		if e.complexity.Workflow.ID == nil {
-			break
-		}
-
-		return e.complexity.Workflow.ID(childComplexity), true
 
 	case "Workflow.name":
 		if e.complexity.Workflow.Name == nil {
@@ -1363,7 +1347,7 @@ type Version {
   publicationDate: String
   publicationAuthor: String
   status: VersionStatus!
-  errors: [String]
+  error: String
 }
 
 enum VersionStatus {
@@ -1378,7 +1362,6 @@ enum VersionStatus {
 }
 
 type Workflow {
-  id: ID!
   name: String!
   type: WorkflowType!
   config: [ConfigurationVariable]
@@ -1393,7 +1376,6 @@ enum WorkflowType {
 }
 
 type Process {
-  id: ID!
   name: String!
   type: ProcessType!
   image: String!
@@ -3184,8 +3166,8 @@ func (ec *executionContext) fieldContext_Mutation_createVersion(ctx context.Cont
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -3263,8 +3245,8 @@ func (ec *executionContext) fieldContext_Mutation_startVersion(ctx context.Conte
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -3342,8 +3324,8 @@ func (ec *executionContext) fieldContext_Mutation_stopVersion(ctx context.Contex
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -3421,8 +3403,8 @@ func (ec *executionContext) fieldContext_Mutation_publishVersion(ctx context.Con
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -3500,8 +3482,8 @@ func (ec *executionContext) fieldContext_Mutation_unpublishVersion(ctx context.C
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -3707,50 +3689,6 @@ func (ec *executionContext) fieldContext_Mutation_registerProcess(ctx context.Co
 	if fc.Args, err = ec.field_Mutation_registerProcess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Process_id(ctx context.Context, field graphql.CollectedField, obj *entity.Process) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Process_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Process_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Process",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
 	}
 	return fc, nil
 }
@@ -4817,8 +4755,8 @@ func (ec *executionContext) fieldContext_Product_publishedVersion(ctx context.Co
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -5112,8 +5050,8 @@ func (ec *executionContext) fieldContext_Query_version(ctx context.Context, fiel
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -5191,8 +5129,8 @@ func (ec *executionContext) fieldContext_Query_versions(ctx context.Context, fie
 				return ec.fieldContext_Version_publicationAuthor(ctx, field)
 			case "status":
 				return ec.fieldContext_Version_status(ctx, field)
-			case "errors":
-				return ec.fieldContext_Version_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_Version_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Version", field.Name)
 		},
@@ -6712,8 +6650,6 @@ func (ec *executionContext) fieldContext_Version_workflows(ctx context.Context, 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Workflow_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Workflow_name(ctx, field)
 			case "type":
@@ -6943,8 +6879,8 @@ func (ec *executionContext) fieldContext_Version_status(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Version_errors(ctx context.Context, field graphql.CollectedField, obj *entity.Version) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Version_errors(ctx, field)
+func (ec *executionContext) _Version_error(ctx context.Context, field graphql.CollectedField, obj *entity.Version) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Version_error(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6957,7 +6893,7 @@ func (ec *executionContext) _Version_errors(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Errors, nil
+		return obj.Error, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6966,12 +6902,12 @@ func (ec *executionContext) _Version_errors(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚕstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Version_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Version_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Version",
 		Field:      field,
@@ -6979,50 +6915,6 @@ func (ec *executionContext) fieldContext_Version_errors(ctx context.Context, fie
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Workflow_id(ctx context.Context, field graphql.CollectedField, obj *entity.Workflow) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Workflow_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Workflow_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Workflow",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7202,8 +7094,6 @@ func (ec *executionContext) fieldContext_Workflow_processes(ctx context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Process_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Process_name(ctx, field)
 			case "type":
@@ -10034,11 +9924,6 @@ func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Process")
-		case "id":
-			out.Values[i] = ec._Process_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "name":
 			out.Values[i] = ec._Process_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -11214,8 +11099,8 @@ func (ec *executionContext) _Version(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "errors":
-			out.Values[i] = ec._Version_errors(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._Version_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11250,11 +11135,6 @@ func (ec *executionContext) _Workflow(ctx context.Context, sel ast.SelectionSet,
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Workflow")
-		case "id":
-			out.Values[i] = ec._Workflow_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "name":
 			out.Values[i] = ec._Workflow_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -12944,38 +12824,6 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalString(v)
 	return res
-}
-
-func (ec *executionContext) unmarshalOString2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOString2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOString2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalOString2string(ctx, sel, v[i])
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {

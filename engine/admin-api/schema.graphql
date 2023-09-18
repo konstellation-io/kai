@@ -152,7 +152,7 @@ type Version {
   publicationDate: String
   publicationAuthor: String
   status: VersionStatus!
-  errors: [String]
+  error: String
 }
 
 enum VersionStatus {
@@ -167,7 +167,6 @@ enum VersionStatus {
 }
 
 type Workflow {
-  id: ID!
   name: String!
   type: WorkflowType!
   config: [ConfigurationVariable]
@@ -182,7 +181,6 @@ enum WorkflowType {
 }
 
 type Process {
-  id: ID!
   name: String!
   type: ProcessType!
   image: String!
