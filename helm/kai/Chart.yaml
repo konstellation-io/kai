@@ -11,3 +11,7 @@ dependencies:
     version: "1.4.6"
     repository: https://helm.influxdata.com/
     condition: kapacitor.enabled
+  - name: minio
+    version: "5.0.13"
+    repository: https://charts.min.io/
+    condition: minio.enabled

@@ -639,7 +639,7 @@ registry:
     # -- Whether to enable persistence
     enabled: true
     # -- Storage class name
-    storageClass: "sandard"
+    storageClass: "standard"
     # -- Access mode for the volume
     accessMode: ReadWriteOnce
     # -- Storage size
@@ -676,3 +676,47 @@ registry:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
+## The following values are only a small set of options. For a full list see
+## the official MinIO chart at https://github.com/minio/minio/tree/master/helm/minio
+##
+minio:
+  # -- Enable MinIO persistent storage
+  enabled: true
+  # -- Sets minio mode
+  mode: standalone
+  # -- Internal port number for MinIO S3 API container
+  minioAPIPort: "9000"
+  # -- Internal port number for MinIO Browser Console container
+  minioConsolePort: "9001"
+  # -- Sets Root user
+  # @default -- Randomly generated value
+  rootUser: ""
+  # -- Sets Root password
+  # @default -- Randomly generated value
+  rootPassword: ""
+  # -- Use an exising secret for root user and password
+  existingSecret: ""
+  persistence:
+    # -- Enables persistent storage using PVC
+    enabled: true
+    # -- Storage class name
+    storageClass: ""
+    # -- Access mode for the volume
+    accessMode: ReadWriteOnce
+    # -- Storage size
+    size: 10Gi
+  ingress:
+    # -- Enable ingress for MinIO API
+    enabled: true
+    # -- The name of the ingress class to use
+    ingressClassName: kong
+    # -- Ingress labels
+    labels: {}
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hostnames
+    hosts:
+      - s3.kai.local
+    # -- Ingress TLS configuration
+    tls: []
