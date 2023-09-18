@@ -34,13 +34,13 @@ func (s *versionSuite) TestStart_OK() {
 
 	expectedVersionConfig := &entity.VersionConfig{}
 
-	// go rutine expecected calls
+	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, "testing").Return(nil)
 
 	// WHEN starting the version
-	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status first is starting
@@ -87,6 +87,8 @@ func (s *versionSuite) TestStart_ErrorNonExistingVersion() {
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, expectedVer.Tag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 	s.ErrorIs(err, customErr)
 }
@@ -108,7 +110,9 @@ func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrVersionCannotBeStarted.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 	s.ErrorIs(err, version.ErrVersionCannotBeStarted)
 }
@@ -134,7 +138,9 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 	s.ErrorIs(err, customErr)
 }
@@ -161,7 +167,9 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 	s.ErrorIs(err, customErr)
 }
@@ -189,7 +197,9 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
 
 	// WHEN starting the version
-	_, _, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
+
+	// THEN an error is returned
 	s.Error(err)
 	s.ErrorIs(err, customErr)
 }
@@ -221,7 +231,7 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 
 	expectedVersionConfig := &entity.VersionConfig{}
 
-	// go rutine expecected calls
+	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).Return(nil)
 	// GIVEN second set status errors
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).
@@ -231,7 +241,7 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 		Return(registerActionErr)
 
 	// WHEN starting the version
-	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status first is starting
@@ -301,17 +311,16 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 
 	expectedVersionConfig := &entity.VersionConfig{}
 
-	// go rutine expecected calls
+	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).
 		Return(fmt.Errorf(errStartingVersion))
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, version.ErrStartingVersion.Error()).Return(nil)
 
 	// GIVEN set status
-
 	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStartingVersion).Return(nil, setErrorErr)
 
 	// WHEN starting the version
-	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status first is starting
