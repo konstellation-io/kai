@@ -639,7 +639,7 @@ registry:
     # -- Whether to enable persistence
     enabled: true
     # -- Storage class name
-    storageClass: "sandard"
+    storageClass: "standard"
     # -- Access mode for the volume
     accessMode: ReadWriteOnce
     # -- Storage size
@@ -677,6 +677,9 @@ registry:
   #   value: "value"
   #   effect: "NoSchedule"
 
+## The following values are only a small set of options. For a full list see
+## the official MinIO chart at https://github.com/minio/minio/tree/master/helm/minio
+##
 minio:
   # -- Enable MinIO persistent storage
   enabled: true

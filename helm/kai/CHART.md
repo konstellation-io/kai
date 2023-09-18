@@ -205,5 +205,5 @@
 | registry.storage.enabled | bool | `true` | Whether to enable persistence |
 | registry.storage.path | string | `"/var/lib/registry"` | Persistent volume mount point. This will define Registry app workdir too. |
 | registry.storage.size | string | `"10Gi"` | Storage size |
-| registry.storage.storageClass | string | `"sandard"` | Storage class name |
+| registry.storage.storageClass | string | `"standard"` | Storage class name |
 | registry.tolerations | list | `[]` | Tolerations for use with node taints |
