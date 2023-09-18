@@ -682,7 +682,7 @@ registry:
 ##
 minio:
   # -- Enable MinIO persistent storage
-  enabled: false
+  enabled: true
   # -- Sets minio mode
   mode: standalone
   # -- Internal port number for MinIO S3 API container
@@ -708,3 +708,17 @@ minio:
     accessMode: ReadWriteOnce
     # -- Storage size
     size: 500Gi
+  ingress:
+    # -- Enable ingress for MinIO API
+    enabled: true
+    # -- The name of the ingress class to use
+    ingressClassName: kong
+    # -- Ingress labels
+    labels: {}
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hostnames
+    hosts:
+      - s3.kai.local
+    # -- Ingress TLS configuration
+    tls: []
