@@ -682,7 +682,7 @@ registry:
 ##
 minio:
   # -- Enable MinIO persistent storage
-  enabled: true
+  enabled: false
   # -- Sets minio mode
   mode: standalone
   # -- Internal port number for MinIO S3 API container

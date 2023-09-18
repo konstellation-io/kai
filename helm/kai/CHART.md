@@ -125,7 +125,7 @@
 | keycloak.serviceAccount.name | string | `""` |  |
 | keycloak.tls.enabled | bool | `false` | Whether to enable TLS |
 | keycloak.tolerations | list | `[]` | Assign custom tolerations to the Keycloak pods |
-| minio.enabled | bool | `true` | Enable MinIO persistent storage |
+| minio.enabled | bool | `false` | Enable MinIO persistent storage |
 | minio.existingSecret | string | `""` | Use an exising secret for root user and password |
 | minio.minioAPIPort | string | `"9000"` | Internal port number for MinIO S3 API container |
 | minio.minioConsolePort | string | `"9001"` | Internal port number for MinIO Browser Console container |
