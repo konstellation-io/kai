@@ -703,8 +703,6 @@ minio:
     # -- Storage class name
     storageClass: ""
     # -- Access mode for the volume
-    volumeName: ""
-    # -- Access mode for the volume
     accessMode: ReadWriteOnce
     # -- Storage size
     size: 10Gi

@@ -140,7 +140,6 @@
 | minio.persistence.enabled | bool | `true` | Enables persistent storage using PVC |
 | minio.persistence.size | string | `"10Gi"` | Storage size |
 | minio.persistence.storageClass | string | `""` | Storage class name |
-| minio.persistence.volumeName | string | `""` | Access mode for the volume |
 | minio.rootPassword | string | Randomly generated value | Sets Root password |
 | minio.rootUser | string | Randomly generated value | Sets Root user |
 | mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods |
