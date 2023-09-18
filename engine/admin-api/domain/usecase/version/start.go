@@ -49,7 +49,7 @@ func (h *Handler) Start(
 
 	vers.Status = entity.VersionStatusStarting
 
-	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarting)
+	err = h.versionRepo.SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting)
 	if err != nil {
 		h.logger.Error(err, "Error updating version status",
 			"productID", productID,
@@ -111,7 +111,7 @@ func (h *Handler) startAndNotify(
 		return
 	}
 
-	err = h.versionRepo.SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarted)
+	err = h.versionRepo.SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarted)
 	if err != nil {
 		h.logger.Error(err, "Error updating version status",
 			"productID", productID,

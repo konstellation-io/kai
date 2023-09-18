@@ -30,13 +30,13 @@ func (s *versionSuite) TestStart_OK() {
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateKeyValueStores(ctx, productID, vers).Return(nil, nil)
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarting).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).Return(nil)
 
 	expectedVersionConfig := &entity.VersionConfig{}
 
 	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).Return(nil)
-	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStarted).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, "testing").Return(nil)
 
 	// WHEN starting the version
@@ -226,7 +226,7 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 	s.natsManagerService.EXPECT().CreateKeyValueStores(ctx, productID, vers).Return(nil, nil)
 
 	// GIVEN first set status errors
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarting).
+	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).
 		Return(setStatusErrStarting)
 
 	expectedVersionConfig := &entity.VersionConfig{}
@@ -234,7 +234,7 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).Return(nil)
 	// GIVEN second set status errors
-	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStarted).
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).
 		Return(setStatusErrStarted)
 	// GIVEN register start action errors
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, "testing").
@@ -307,7 +307,7 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateKeyValueStores(ctx, productID, vers).Return(nil, nil)
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStarting).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).Return(nil)
 
 	expectedVersionConfig := &entity.VersionConfig{}
 

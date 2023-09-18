@@ -140,17 +140,17 @@ func (mr *MockVersionRepoMockRecorder) SetError(ctx, productID, version, errorMe
 }
 
 // SetStatus mocks base method.
-func (m *MockVersionRepo) SetStatus(ctx context.Context, productID, versionID string, status entity.VersionStatus) error {
+func (m *MockVersionRepo) SetStatus(ctx context.Context, productID, versionTag string, status entity.VersionStatus) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetStatus", ctx, productID, versionID, status)
+	ret := m.ctrl.Call(m, "SetStatus", ctx, productID, versionTag, status)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetStatus indicates an expected call of SetStatus.
-func (mr *MockVersionRepoMockRecorder) SetStatus(ctx, productID, versionID, status interface{}) *gomock.Call {
+func (mr *MockVersionRepoMockRecorder) SetStatus(ctx, productID, versionTag, status interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStatus", reflect.TypeOf((*MockVersionRepo)(nil).SetStatus), ctx, productID, versionID, status)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStatus", reflect.TypeOf((*MockVersionRepo)(nil).SetStatus), ctx, productID, versionTag, status)
 }
 
 // Update mocks base method.
