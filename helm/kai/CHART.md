@@ -138,7 +138,7 @@
 | minio.mode | string | `"standalone"` | Sets minio mode |
 | minio.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
 | minio.persistence.enabled | bool | `true` | Enables persistent storage using PVC |
-| minio.persistence.size | string | `"500Gi"` | Storage size |
+| minio.persistence.size | string | `"10Gi"` | Storage size |
 | minio.persistence.storageClass | string | `""` | Storage class name |
 | minio.persistence.volumeName | string | `""` | Access mode for the volume |
 | minio.rootPassword | string | Randomly generated value | Sets Root password |

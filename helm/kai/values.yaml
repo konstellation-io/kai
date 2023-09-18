@@ -707,7 +707,7 @@ minio:
     # -- Access mode for the volume
     accessMode: ReadWriteOnce
     # -- Storage size
-    size: 500Gi
+    size: 10Gi
   ingress:
     # -- Enable ingress for MinIO API
     enabled: true
