@@ -30,11 +30,11 @@ func (s *versionSuite) TestStop_OK() {
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopping).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStopping).Return(nil)
 
 	// go rutine expected to be called
 	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(nil)
-	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStopped).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStopped).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, vers, "testing").Return(nil)
 
 	// WHEN stopping the version
@@ -181,13 +181,13 @@ func (s *versionSuite) TestStop_CheckNonBlockingErrorLogging() {
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
 
 	// GIVEN first set status errors
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopping).
+	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStopping).
 		Return(setStatusErrStarting)
 
 	// go rutine expected calls
 	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(nil)
 	// GIVEN second set status errors
-	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.ID, entity.VersionStatusStopped).
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStopped).
 		Return(setStatusErrStarted)
 	// GIVEN register stop action errors
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, vers, "testing").
@@ -263,7 +263,7 @@ func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.ID, entity.VersionStatusStopping).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStopping).Return(nil)
 
 	// go rutine expected to be called
 	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(fmt.Errorf(errStoppingVersion))
