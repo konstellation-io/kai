@@ -11,19 +11,19 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version/utils"
 	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
+	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
 func (s *versionSuite) TestStop_OK() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
-		GetVersion()
+		Build()
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
@@ -91,11 +91,11 @@ func (s *versionSuite) TestStop_ErrorInvalidVersionStatus() {
 	// GIVEN a valid user and an invalid version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStopped).
-		GetVersion()
+		Build()
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
@@ -115,11 +115,11 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingStreams() {
 	// GIVEN a valid user and a version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
-		GetVersion()
+		Build()
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
@@ -139,11 +139,11 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingObjectStores() {
 	// GIVEN a valid user and a version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
-		GetVersion()
+		Build()
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
@@ -164,11 +164,11 @@ func (s *versionSuite) TestStop_CheckNonBlockingErrorLogging() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
-		GetVersion()
+		Build()
 
 	setStatusErrStarting := errors.New("set status error")
 	setStatusErrStarted := errors.New("not again")
@@ -250,11 +250,11 @@ func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
 	user := s.getTestUser()
-	vers := utils.InitTestVersion().
-		WithVersionID(versionID).
+	vers := testhelpers.NewVersionBuilder().
+		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
-		GetVersion()
+		Build()
 	errStoppingVersion := "error stopping version"
 	setErrorErr := errors.New("error setting error")
 
