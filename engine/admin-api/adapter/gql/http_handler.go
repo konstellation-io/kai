@@ -14,7 +14,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -70,7 +69,7 @@ func NewHTTPHandler(params Params) http.Handler {
 func errorPresenter(ctx context.Context, e error) *gqlerror.Error {
 	err := graphql.DefaultErrorPresenter(ctx, e)
 
-	var errInvalidKRT internalerrors.KRTValidationError
+	var errInvalidKRT version.KRTValidationError
 	if errors.As(err, &errInvalidKRT) {
 		return &gqlerror.Error{
 			Message: errInvalidKRT.Error(),

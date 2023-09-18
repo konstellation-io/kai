@@ -8,14 +8,13 @@ import (
 	"fmt"
 	"testing"
 
-	apperrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -105,7 +104,7 @@ func (s *VersionRepositoryTestSuite) TestCreate() {
 	s.NotEmpty(createdVer.ID)
 	s.NotEmpty(createdVer.CreationDate)
 	s.Equal(creatorID, createdVer.CreationAuthor)
-	s.Equal(entity.VersionStatusCreating, createdVer.Status)
+	s.Equal(entity.VersionStatusCreated, createdVer.Status)
 
 	// Check if the version is created in the DB
 	collection := s.mongoClient.Database(productID).Collection(versionsCollectionName)
@@ -149,7 +148,7 @@ func (s *VersionRepositoryTestSuite) TestGetByID() {
 func (s *VersionRepositoryTestSuite) TestGetByIDNotFound() {
 	_, err := s.versionRepo.GetByID(productID, "notfound")
 	s.Require().Error(err)
-	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
+	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
 
 func (s *VersionRepositoryTestSuite) TestGetByTag() {
@@ -169,7 +168,7 @@ func (s *VersionRepositoryTestSuite) TestGetByTag() {
 func (s *VersionRepositoryTestSuite) TestGetByTagNotFound() {
 	_, err := s.versionRepo.GetByTag(context.Background(), productID, "notfound")
 	s.Require().Error(err)
-	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
+	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
 
 func (s *VersionRepositoryTestSuite) TestUpdate() {
@@ -198,7 +197,7 @@ func (s *VersionRepositoryTestSuite) TestUpdateNotFound() {
 
 	err := s.versionRepo.Update(productID, testVersion)
 	s.Require().Error(err)
-	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
+	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
 
 func (s *VersionRepositoryTestSuite) TestListVersionsByProduct() {
@@ -231,22 +230,40 @@ func (s *VersionRepositoryTestSuite) TestSetStatus() {
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
 
-	err = s.versionRepo.SetStatus(context.Background(), productID, createdVer.ID, entity.VersionStatusCreated)
+	err = s.versionRepo.SetStatus(context.Background(), productID, createdVer.Tag, entity.VersionStatusCreated)
+	s.Require().NoError(err)
+
+	updatedVer, err := s.versionRepo.GetByTag(context.Background(), productID, createdVer.Tag)
+	s.Require().NoError(err)
+
+	s.Equal(entity.VersionStatusCreated, updatedVer.Status)
+}
+
+func (s *VersionRepositoryTestSuite) TestSetStatusWithPreviousError() {
+	testVersion := &entity.Version{
+		Tag:   versionTag,
+		Error: "dummy error",
+	}
+
+	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
+	s.Require().NoError(err)
+
+	err = s.versionRepo.SetStatus(context.Background(), productID, createdVer.Tag, entity.VersionStatusCreated)
 	s.Require().NoError(err)
 
 	updatedVer, err := s.versionRepo.GetByID(productID, createdVer.ID)
 	s.Require().NoError(err)
 
 	s.Equal(entity.VersionStatusCreated, updatedVer.Status)
+	s.Empty(updatedVer.Error)
 }
 
 func (s *VersionRepositoryTestSuite) TestSetStatusNotFound() {
 	err := s.versionRepo.SetStatus(context.Background(), productID, "notfound", entity.VersionStatusCreated)
-	s.Require().Error(err)
-	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
+	s.Assert().ErrorIs(err, version.ErrVersionNotFound)
 }
 
-func (s *VersionRepositoryTestSuite) TestSetErrors() {
+func (s *VersionRepositoryTestSuite) TestSetError() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
 	}
@@ -254,55 +271,19 @@ func (s *VersionRepositoryTestSuite) TestSetErrors() {
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
 
-	_, err = s.versionRepo.SetErrors(context.Background(), productID, createdVer, []string{"error1", "error2"})
+	_, err = s.versionRepo.SetError(context.Background(), productID, createdVer, "error1")
 	s.Require().NoError(err)
 
 	updatedVer, err := s.versionRepo.GetByID(productID, createdVer.ID)
 	s.Require().NoError(err)
 
-	s.Equal([]string{"error1", "error2"}, updatedVer.Errors)
+	s.Equal("error1", updatedVer.Error)
 }
 
-func (s *VersionRepositoryTestSuite) TestSetErrorsNotFound() {
-	_, err := s.versionRepo.SetErrors(context.Background(), productID, &entity.Version{ID: "notfound"}, []string{"error1", "error2"})
+func (s *VersionRepositoryTestSuite) TestSetErrorNotFound() {
+	_, err := s.versionRepo.SetError(context.Background(), productID, &entity.Version{ID: "notfound"}, "error1")
 	s.Require().Error(err)
-	s.True(errors.Is(err, apperrors.ErrVersionNotFound))
-}
-
-func (s *VersionRepositoryTestSuite) TestUploadKRTYamlFile() {
-	testVersion := &entity.Version{
-		Tag: versionTag,
-	}
-
-	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
-	s.Require().NoError(err)
-
-	err = s.versionRepo.UploadKRTYamlFile(productID, createdVer, "../../../../testdata/classificator_krt.yaml")
-	s.Require().NoError(err)
-
-	bucket, err := gridfs.NewBucket(
-		s.mongoClient.Database(productID),
-		options.GridFSBucket().SetName(s.cfg.MongoDB.KRTBucket),
-	)
-
-	filter := bson.M{"_id": createdVer.ID}
-	cursor, err := bucket.Find(filter)
-	s.Require().NoError(err)
-
-	defer func() {
-		err := cursor.Close(context.TODO())
-		s.Require().NoError(err)
-	}()
-
-	type gridfsFile struct {
-		Name   string `bson:"filename"`
-		Length int64  `bson:"length"`
-	}
-	var foundFiles []gridfsFile
-	err = cursor.All(context.TODO(), &foundFiles)
-	s.Require().NoError(err)
-
-	s.Len(foundFiles, 1)
+	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
 
 func (s *VersionRepositoryTestSuite) TestClearPublishedVersion() {
@@ -313,7 +294,7 @@ func (s *VersionRepositoryTestSuite) TestClearPublishedVersion() {
 	createdVersion, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
 
-	err = s.versionRepo.SetStatus(context.Background(), productID, createdVersion.ID, entity.VersionStatusPublished)
+	err = s.versionRepo.SetStatus(context.Background(), productID, createdVersion.Tag, entity.VersionStatusPublished)
 	s.Require().NoError(err)
 
 	oldPublishedVErsion, err := s.versionRepo.ClearPublishedVersion(context.Background(), productID)

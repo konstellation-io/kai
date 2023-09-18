@@ -3,6 +3,7 @@ package network
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 
@@ -52,5 +53,7 @@ func (kn KubeNetwork) getNetworkLabels(product, version, workflow, process strin
 }
 
 func (kn KubeNetwork) getServiceName(product, version, workflow, process string) string {
-	return fmt.Sprintf("%s-%s-%s-%s", product, version, workflow, process)
+	fullName := fmt.Sprintf("%s-%s-%s-%s", product, version, workflow, process)
+
+	return strings.ReplaceAll(fullName, ".", "-")
 }

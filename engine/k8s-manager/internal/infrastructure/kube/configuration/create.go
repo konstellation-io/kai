@@ -3,6 +3,7 @@ package configuration
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 	"github.com/spf13/viper"
@@ -41,7 +42,9 @@ func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, vers
 }
 
 func (kc KubeConfiguration) getFullProcessIdentifier(product, version, workflow, process string) string {
-	return fmt.Sprintf("%s-%s-%s-%s", product, version, workflow, process)
+	fullName := fmt.Sprintf("%s-%s-%s-%s", product, version, workflow, process)
+
+	return strings.ReplaceAll(fullName, ".", "-")
 }
 
 func (kc KubeConfiguration) getProcessConfig(

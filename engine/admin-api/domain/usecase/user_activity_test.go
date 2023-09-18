@@ -186,7 +186,7 @@ func (s *userActivitySuite) TestRegisterCreateAction() {
 
 	s.userActivityRepo.EXPECT().Create(customMatcher).Return(nil)
 
-	err := s.userActivity.RegisterCreateAction(userID, productID, &version)
+	err := s.userActivity.RegisterCreateAction(userID, productID, version)
 	s.Assert().NoError(err)
 }
 
@@ -214,7 +214,7 @@ func (s *userActivitySuite) TestRegisterStartAction() {
 
 	s.userActivityRepo.EXPECT().Create(customMatcher).Return(nil)
 
-	err := s.userActivity.RegisterStartAction(userID, productID, &version, comment)
+	err := s.userActivity.RegisterStartAction(userID, productID, version, comment)
 	s.Assert().NoError(err)
 }
 
@@ -242,7 +242,7 @@ func (s *userActivitySuite) TestRegisterStopAction() {
 
 	s.userActivityRepo.EXPECT().Create(customMatcher).Return(nil)
 
-	err := s.userActivity.RegisterStopAction(userID, productID, &version, comment)
+	err := s.userActivity.RegisterStopAction(userID, productID, version, comment)
 	s.Assert().NoError(err)
 }
 
@@ -273,7 +273,7 @@ func (s *userActivitySuite) TestRegisterPublishAction() {
 
 	s.userActivityRepo.EXPECT().Create(customMatcher).Return(nil)
 
-	err := s.userActivity.RegisterPublishAction(userID, productID, &newVersion, &previousVersion, comment)
+	err := s.userActivity.RegisterPublishAction(userID, productID, newVersion, previousVersion, comment)
 	s.Assert().NoError(err)
 }
 
@@ -301,7 +301,7 @@ func (s *userActivitySuite) TestRegisterUnpublishAction() {
 
 	s.userActivityRepo.EXPECT().Create(customMatcher).Return(nil)
 
-	err := s.userActivity.RegisterUnpublishAction(userID, productID, &version, comment)
+	err := s.userActivity.RegisterUnpublishAction(userID, productID, version, comment)
 	s.Assert().NoError(err)
 }
 

@@ -20,7 +20,7 @@ type UserActivityInteracter interface {
 	Get(ctx context.Context, user *entity.User, userEmail *string, types []entity.UserActivityType,
 		versionIDs []string, fromDate *string, toDate *string, lastID *string) ([]*entity.UserActivity, error)
 	RegisterCreateProduct(userID string, product *entity.Product) error
-	RegisterCreateAction(userID, productID string, version *entity.Version) error
+	RegisterCreateAction(userEmail, productID string, version *entity.Version) error
 	RegisterStartAction(userID, productID string, version *entity.Version, comment string) error
 	RegisterStopAction(userID, productID string, version *entity.Version, comment string) error
 	RegisterPublishAction(userID, productID string, version *entity.Version, prev *entity.Version, comment string) error

@@ -19,7 +19,7 @@ func mapDTOToEntity(dto *versionDTO) *entity.Version {
 		PublicationAuthor: dto.PublicationAuthor,
 
 		Status: entity.VersionStatus(dto.Status),
-		Errors: dto.Errors,
+		Error:  dto.Error,
 	}
 }
 
@@ -28,7 +28,6 @@ func mapDTOToEntityWorkflows(dtos []workflowDTO) []entity.Workflow {
 
 	for idx, dto := range dtos {
 		workflows[idx] = entity.Workflow{
-			ID:        dto.ID,
 			Name:      dto.Name,
 			Type:      entity.WorkflowType(dto.Type),
 			Config:    mapDTOConfigToEntityConfig(dto.Config),
@@ -44,7 +43,6 @@ func mapDTOToEntityProcesses(dtos []processDTO) []entity.Process {
 
 	for idx, dto := range dtos {
 		processes[idx] = entity.Process{
-			ID:             dto.ID,
 			Name:           dto.Name,
 			Type:           entity.ProcessType(dto.Type),
 			Image:          dto.Image,
@@ -140,7 +138,7 @@ func mapEntityToDTO(versionEntity *entity.Version) *versionDTO {
 
 		Status: versionEntity.Status.String(),
 
-		Errors: versionEntity.Errors,
+		Error: versionEntity.Error,
 	}
 }
 
@@ -150,7 +148,6 @@ func mapEntityToDTOWorkflows(workflows []entity.Workflow) []workflowDTO {
 
 	for _, workflow := range workflows {
 		dtos[idx] = workflowDTO{
-			ID:        workflow.ID,
 			Name:      workflow.Name,
 			Type:      workflow.Type.String(),
 			Config:    mapEntityConfigToDTOConfig(workflow.Config),
@@ -168,7 +165,6 @@ func mapEntityToDTOProcesses(processes []entity.Process) []processDTO {
 
 	for _, process := range processes {
 		dtos[idx] = processDTO{
-			ID:             process.ID,
 			Name:           process.Name,
 			Type:           process.Type.String(),
 			Image:          process.Image,
