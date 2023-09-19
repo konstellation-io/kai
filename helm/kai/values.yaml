@@ -696,6 +696,10 @@ minio:
   rootPassword: ""
   # -- Use an exising secret for root user and password
   existingSecret: ""
+  # -- Sets pods resources
+  resources:
+    requests:
+      memory: 256Mi
   persistence:
     # -- Enables persistent storage using PVC
     enabled: true
