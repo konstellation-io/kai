@@ -10,7 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -62,35 +61,18 @@ func (r *VersionRepoMongoDB) Create(userID, productID string, newVersion *entity
 
 	versionDTO := mapEntityToDTO(newVersion)
 
-	versionDTO.ID = primitive.NewObjectID().Hex()
 	versionDTO.CreationDate = time.Now().UTC()
 	versionDTO.CreationAuthor = userID
 	versionDTO.Status = entity.VersionStatusCreated.String()
 
-	res, err := collection.InsertOne(context.Background(), versionDTO)
+	_, err := collection.InsertOne(context.Background(), versionDTO)
 	if err != nil {
 		return nil, err
 	}
 
-	versionDTO.ID = res.InsertedID.(string)
-
 	savedVersion := mapDTOToEntity(versionDTO)
 
 	return savedVersion, nil
-}
-
-func (r *VersionRepoMongoDB) GetByID(productID, versionID string) (*entity.Version, error) {
-	collection := r.client.Database(productID).Collection(versionsCollectionName)
-
-	versionDTO := &versionDTO{}
-	filter := bson.M{"_id": versionID}
-
-	err := collection.FindOne(context.Background(), filter).Decode(versionDTO)
-	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, version.ErrVersionNotFound
-	}
-
-	return mapDTOToEntity(versionDTO), err
 }
 
 func (r *VersionRepoMongoDB) GetByTag(ctx context.Context, productID, tag string) (*entity.Version, error) {
@@ -111,7 +93,7 @@ func (r *VersionRepoMongoDB) Update(productID string, updatedVersion *entity.Ver
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
 	versionDTO := mapEntityToDTO(updatedVersion)
-	updateResult, err := collection.ReplaceOne(context.Background(), bson.M{"_id": updatedVersion.ID}, versionDTO)
+	updateResult, err := collection.ReplaceOne(context.Background(), bson.M{"tag": updatedVersion.Tag}, versionDTO)
 
 	if updateResult.ModifiedCount == 0 {
 		return version.ErrVersionNotFound
@@ -193,36 +175,4 @@ func (r *VersionRepoMongoDB) SetError(
 	}
 
 	return mapDTOToEntity(versionDTO), nil
-}
-
-func (r *VersionRepoMongoDB) ClearPublishedVersion(ctx context.Context, productID string) (*entity.Version, error) {
-	collection := r.client.Database(productID).Collection(versionsCollectionName)
-
-	oldPublishedVersion := &versionDTO{}
-
-	filter := bson.M{"status": entity.VersionStatusPublished}
-
-	upd := bson.M{
-		"$set": bson.M{
-			"status":            entity.VersionStatusStarted,
-			"publicationDate":   nil,
-			"publicationAuthor": nil,
-		},
-	}
-
-	upsert := true
-	after := options.After
-	opt := &options.FindOneAndUpdateOptions{
-		ReturnDocument: &after,
-		Upsert:         &upsert,
-	}
-
-	result := collection.FindOneAndUpdate(ctx, filter, upd, opt)
-	err := result.Decode(oldPublishedVersion)
-
-	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, err
-	}
-
-	return mapDTOToEntity(oldPublishedVersion), nil
 }

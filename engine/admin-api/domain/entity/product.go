@@ -17,7 +17,6 @@ type Product struct {
 	Description      string    `bson:"description" validate:"required,lte=500"`
 	CreationDate     time.Time `bson:"creationDate"`
 	Owner            string    `bson:"owner"`
-	PublishedVersion string    `bson:"publishedVersion"`
 }
 
 func (r *Product) Validate() error {

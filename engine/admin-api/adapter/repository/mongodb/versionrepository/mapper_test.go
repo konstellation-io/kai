@@ -18,7 +18,6 @@ var (
 )
 
 var domainVersion = &entity.Version{
-	ID:          "id_version",
 	Tag:         "1.0.0",
 	Description: "test description",
 	Config: []entity.ConfigurationVariable{
@@ -107,7 +106,6 @@ var domainVersion = &entity.Version{
 }
 
 var DTOVersion = &versionDTO{
-	ID:          "id_version",
 	Tag:         "1.0.0",
 	Description: "test description",
 	Config: []configurationVariableDTO{
