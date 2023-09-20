@@ -126,10 +126,6 @@ func (s *ProcessServiceTestSuite) TearDownSuite() {
 	monkey.UnpatchAll()
 }
 
-func (s *ProcessServiceTestSuite) TearDownTest() {
-	s.ctrl.Finish()
-}
-
 func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	ctx := context.Background()
 

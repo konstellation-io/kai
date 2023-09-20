@@ -38,11 +38,6 @@ func (h *Handler) Publish(
 		return nil, err
 	}
 
-	previousPublishedVersion, err := h.versionRepo.ClearPublishedVersion(ctx, productID)
-	if err != nil {
-		return nil, fmt.Errorf("error unpublishing previous version: %w", err)
-	}
-
 	now := time.Now()
 	v.PublicationDate = &now
 	v.PublicationAuthor = &user.ID
@@ -53,7 +48,7 @@ func (h *Handler) Publish(
 		return nil, err
 	}
 
-	err = h.userActivityInteractor.RegisterPublishAction(user.ID, productID, v, previousPublishedVersion, comment)
+	err = h.userActivityInteractor.RegisterPublishAction(user.ID, productID, v, comment)
 	if err != nil {
 		return nil, err
 	}

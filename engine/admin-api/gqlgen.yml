@@ -20,8 +20,6 @@ models:
         resolver: true
       creationAuthor:
         resolver: true
-      publishedVersion:
-        resolver: true
       measurementsUrl:
         resolver: true
       databaseUrl:

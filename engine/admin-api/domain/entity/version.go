@@ -10,7 +10,6 @@ type ConfigurationVariable struct {
 }
 
 type Version struct {
-	ID          string
 	Tag         string
 	Description string
 	Config      []ConfigurationVariable

@@ -88,7 +88,6 @@ func newProductSuite(t *testing.T) *productSuite {
 
 func TestGet(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	productID := "product1"
 	expectedProduct := &entity.Product{
@@ -109,7 +108,6 @@ func TestGet(t *testing.T) {
 
 func TestCreateProduct(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -143,7 +141,6 @@ func TestCreateProduct(t *testing.T) {
 
 func TestCreateProduct_FailsIfUserHasNotPermission(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -163,7 +160,6 @@ func TestCreateProduct_FailsIfUserHasNotPermission(t *testing.T) {
 
 func TestCreateProduct_FailsIfProductHasAnInvalidField(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -182,7 +178,6 @@ func TestCreateProduct_FailsIfProductHasAnInvalidField(t *testing.T) {
 
 func TestCreateProduct_FailsIfProductWithSameIDAlreadyExists(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -209,7 +204,6 @@ func TestCreateProduct_FailsIfProductWithSameIDAlreadyExists(t *testing.T) {
 
 func TestCreateProduct_FailsIfProductWithSameNameAlreadyExists(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
@@ -237,7 +231,6 @@ func TestCreateProduct_FailsIfProductWithSameNameAlreadyExists(t *testing.T) {
 
 func TestCreateProduct_FailsIfCreateProductFails(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -268,7 +261,6 @@ func TestCreateProduct_FailsIfCreateProductFails(t *testing.T) {
 
 func TestCreateProduct_ErrorCheckingProductIDInRepo(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -287,7 +279,6 @@ func TestCreateProduct_ErrorCheckingProductIDInRepo(t *testing.T) {
 
 func TestCreateProduct_ErrorCheckingProductNameInRepo(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -307,7 +298,6 @@ func TestCreateProduct_ErrorCheckingProductNameInRepo(t *testing.T) {
 
 func TestCreateProduct_ErrorCreatingDatabase(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -337,7 +327,6 @@ func TestCreateProduct_ErrorCreatingDatabase(t *testing.T) {
 
 func TestCreateProduct_ErrorCreatingMetricsRepoIndexes(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -368,7 +357,6 @@ func TestCreateProduct_ErrorCreatingMetricsRepoIndexes(t *testing.T) {
 
 func TestCreateProduct_ErrorCreatingProcessLogRepoIndexes(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -400,7 +388,6 @@ func TestCreateProduct_ErrorCreatingProcessLogRepoIndexes(t *testing.T) {
 
 func TestCreateProduct_ErrorCreatingVersionRepoIndexes(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -433,7 +420,6 @@ func TestCreateProduct_ErrorCreatingVersionRepoIndexes(t *testing.T) {
 
 func TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -467,7 +453,6 @@ func TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes(t *testing.T) {
 
 func TestGetByID(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -493,7 +478,6 @@ func TestGetByID(t *testing.T) {
 
 func TestFindAll(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
@@ -532,7 +516,6 @@ func TestFindAll(t *testing.T) {
 
 func TestFindAll_AdminUser(t *testing.T) {
 	s := newProductSuite(t)
-	defer s.ctrl.Finish()
 
 	ctx := context.Background()
 
