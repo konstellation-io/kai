@@ -17,7 +17,7 @@ func (h *Handler) WatchProcessStatus(
 		return nil, err
 	}
 
-	v, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
+	v, err := h.versionRepo.GetByVersion(ctx, productID, versionTag)
 	if err != nil {
 		return nil, err
 	}

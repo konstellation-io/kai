@@ -93,7 +93,7 @@ func (r *VersionRepoMongoDB) GetByID(productID, versionID string) (*entity.Versi
 	return mapDTOToEntity(versionDTO), err
 }
 
-func (r *VersionRepoMongoDB) GetByTag(ctx context.Context, productID, tag string) (*entity.Version, error) {
+func (r *VersionRepoMongoDB) GetByVersion(ctx context.Context, productID, tag string) (*entity.Version, error) {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
 	versionDTO := &versionDTO{}

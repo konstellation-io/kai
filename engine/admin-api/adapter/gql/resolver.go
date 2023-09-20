@@ -214,7 +214,7 @@ func (r *queryResolver) Products(ctx context.Context) ([]*entity.Product, error)
 
 func (r *queryResolver) Version(ctx context.Context, tag, productID string) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.GetByTag(ctx, loggedUser, productID, tag)
+	return r.versionInteractor.GetByVersion(ctx, loggedUser, productID, tag)
 }
 
 func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*entity.Version, error) {

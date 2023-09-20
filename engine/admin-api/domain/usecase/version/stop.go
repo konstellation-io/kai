@@ -28,7 +28,7 @@ func (h *Handler) Stop(
 		return nil, nil, err
 	}
 
-	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
+	vers, err := h.versionRepo.GetByVersion(ctx, productID, versionTag)
 	if err != nil {
 		v := &entity.Version{Tag: versionTag}
 		h.registerActionFailed(user.ID, productID, v, ErrVersionNotFound, "stop")

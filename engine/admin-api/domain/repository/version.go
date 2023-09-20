@@ -12,7 +12,7 @@ type VersionRepo interface {
 	Create(userEmail, productID string, version *entity.Version) (*entity.Version, error)
 	CreateIndexes(ctx context.Context, productID string) error
 	GetByID(productID, versionID string) (*entity.Version, error)
-	GetByTag(ctx context.Context, productID, tag string) (*entity.Version, error)
+	GetByVersion(ctx context.Context, productID, tag string) (*entity.Version, error)
 	ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error)
 	Update(productID string, version *entity.Version) error
 	ClearPublishedVersion(ctx context.Context, productID string) (*entity.Version, error)

@@ -26,7 +26,7 @@ func (s *versionSuite) TestStop_OK() {
 		Build()
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
@@ -77,7 +77,7 @@ func (s *versionSuite) TestStop_ErrorVersionNotFound() {
 	versionMatcher := newVersionMatcher(expectedVer)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, expectedVer.Tag).Return(nil, fmt.Errorf("no version found"))
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, expectedVer.Tag).Return(nil, fmt.Errorf("no version found"))
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.ErrVersionNotFound.Error()).Return(nil)
 
 	// WHEN stopping the version
@@ -99,7 +99,7 @@ func (s *versionSuite) TestStop_ErrorInvalidVersionStatus() {
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.ErrVersionCannotBeStopped.Error()).Return(nil)
 
@@ -123,7 +123,7 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingStreams() {
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(fmt.Errorf("error deleting streams"))
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.ID, productID, versionMatcher, version.ErrDeletingNATSResources.Error()).Return(nil)
@@ -147,7 +147,7 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingObjectStores() {
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(fmt.Errorf("error deleting object stores"))
@@ -175,7 +175,7 @@ func (s *versionSuite) TestStop_CheckNonBlockingErrorLogging() {
 	registerActionErr := errors.New("this is the end")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
@@ -259,7 +259,7 @@ func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	setErrorErr := errors.New("error setting error")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)

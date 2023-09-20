@@ -151,7 +151,7 @@ func (s *VersionRepositoryTestSuite) TestGetByIDNotFound() {
 	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
 
-func (s *VersionRepositoryTestSuite) TestGetByTag() {
+func (s *VersionRepositoryTestSuite) TestGetByVersion() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
 	}
@@ -159,14 +159,14 @@ func (s *VersionRepositoryTestSuite) TestGetByTag() {
 	_, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
 
-	ver, err := s.versionRepo.GetByTag(context.Background(), productID, testVersion.Tag)
+	ver, err := s.versionRepo.GetByVersion(context.Background(), productID, testVersion.Tag)
 	s.Require().NoError(err)
 
 	s.Equal(testVersion.Tag, ver.Tag)
 }
 
-func (s *VersionRepositoryTestSuite) TestGetByTagNotFound() {
-	_, err := s.versionRepo.GetByTag(context.Background(), productID, "notfound")
+func (s *VersionRepositoryTestSuite) TestGetByVersionNotFound() {
+	_, err := s.versionRepo.GetByVersion(context.Background(), productID, "notfound")
 	s.Require().Error(err)
 	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
@@ -233,7 +233,7 @@ func (s *VersionRepositoryTestSuite) TestSetStatus() {
 	err = s.versionRepo.SetStatus(context.Background(), productID, createdVer.Tag, entity.VersionStatusCreated)
 	s.Require().NoError(err)
 
-	updatedVer, err := s.versionRepo.GetByTag(context.Background(), productID, createdVer.Tag)
+	updatedVer, err := s.versionRepo.GetByVersion(context.Background(), productID, createdVer.Tag)
 	s.Require().NoError(err)
 
 	s.Equal(entity.VersionStatusCreated, updatedVer.Status)

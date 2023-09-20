@@ -30,7 +30,7 @@ func (s *versionSuite) TestCreateVersion() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, expectedVersion.Tag).Return(nil, version.ErrVersionNotFound)
+	s.versionRepo.EXPECT().GetByVersion(ctx, product.ID, expectedVersion.Tag).Return(nil, version.ErrVersionNotFound)
 	s.versionRepo.EXPECT().Create(user.Email, product.ID, expectedVersion).Return(expectedVersion, nil)
 	s.userActivityInteractor.EXPECT().RegisterCreateAction(user.Email, product.ID, expectedVersion).Return(nil)
 
@@ -104,7 +104,7 @@ func (s *versionSuite) TestCreateVersion_FailsIfThereIsAnErrorCreatingInRepo() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, newVersion.Tag).Return(nil, version.ErrVersionNotFound)
+	s.versionRepo.EXPECT().GetByVersion(ctx, product.ID, newVersion.Tag).Return(nil, version.ErrVersionNotFound)
 	s.versionRepo.EXPECT().Create(user.Email, product.ID, newVersion).Return(nil, expectedError)
 
 	_, err = s.handler.Create(ctx, user, product.ID, file)
@@ -128,7 +128,7 @@ func (s *versionSuite) TestCreateVersion_FailsIfVersionTagIsDuplicated() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, newVersion.Tag).Return(newVersion, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, product.ID, newVersion.Tag).Return(newVersion, nil)
 
 	_, err = s.handler.Create(ctx, user, product.ID, file)
 	s.Require().ErrorIs(err, version.ErrVersionDuplicated)

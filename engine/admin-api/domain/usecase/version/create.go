@@ -53,9 +53,9 @@ func (h *Handler) Create(
 		)
 	}
 
-	_, err = h.versionRepo.GetByTag(ctx, productID, krtYml.Version)
+	_, err = h.versionRepo.GetByVersion(ctx, productID, krtYml.Version)
 	if err != nil && !errors.Is(err, ErrVersionNotFound) {
-		return nil, fmt.Errorf("error version repo GetByTag: %w", err)
+		return nil, fmt.Errorf("error version repo GetByVersion: %w", err)
 	} else if err == nil {
 		return nil, ErrVersionDuplicated
 	}

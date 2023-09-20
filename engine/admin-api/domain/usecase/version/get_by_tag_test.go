@@ -8,15 +8,15 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-func (s *versionSuite) TestGetByTag() {
+func (s *versionSuite) TestGetByVersion() {
 	// GIVEN a productID and a version tag
 	productID := "product-1"
 	ctx := context.Background()
 	testVersion := testhelpers.NewVersionBuilder().WithTag("test-tag").Build()
 
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, testVersion.Tag).Return(testVersion, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, testVersion.Tag).Return(testVersion, nil)
 
-	actual, err := s.versionRepo.GetByTag(ctx, productID, testVersion.Tag)
+	actual, err := s.versionRepo.GetByVersion(ctx, productID, testVersion.Tag)
 	s.Require().NoError(err)
 
 	s.Equal(testVersion, actual)

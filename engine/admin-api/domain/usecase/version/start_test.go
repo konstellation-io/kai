@@ -25,7 +25,7 @@ func (s *versionSuite) TestStart_OK() {
 		Build()
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, nil)
@@ -82,7 +82,7 @@ func (s *versionSuite) TestStart_ErrorNonExistingVersion() {
 	customErr := errors.New("24h cinderella")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(nil, customErr)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(nil, customErr)
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrVersionNotFound.Error()).Return(nil)
 
 	// WHEN starting the version
@@ -105,7 +105,7 @@ func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 	versionMatcher := newVersionMatcher(vers)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrVersionCannotBeStarted.Error()).Return(nil)
 
@@ -131,7 +131,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 	customErr := errors.New("brother Nishiki")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, customErr)
 
@@ -159,7 +159,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 	customErr := errors.New("Majima constructions")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, customErr)
@@ -188,7 +188,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
 	customErr := errors.New("dame da ne")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, nil)
@@ -219,7 +219,7 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 	registerActionErr := errors.New("this is sparta remix")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, nil)
@@ -302,7 +302,7 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	setErrorErr := errors.New("bomb rush crew")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByVersion(ctx, productID, versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, nil)

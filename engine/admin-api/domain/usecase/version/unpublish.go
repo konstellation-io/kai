@@ -23,7 +23,7 @@ func (h *Handler) Unpublish(
 
 	h.logger.Info(fmt.Sprintf("The user %s is unpublishing version %s on product %s", user.ID, versionTag, productID))
 
-	v, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
+	v, err := h.versionRepo.GetByVersion(ctx, productID, versionTag)
 	if err != nil {
 		return nil, err
 	}
