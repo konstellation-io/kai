@@ -101,14 +101,14 @@ func (s *VersionRepositoryTestSuite) TestCreate() {
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
 
-	s.NotEmpty(createdVer.ID)
+	s.NotEmpty(createdVer.Tag)
 	s.NotEmpty(createdVer.CreationDate)
 	s.Equal(creatorID, createdVer.CreationAuthor)
 	s.Equal(entity.VersionStatusCreated, createdVer.Status)
 
 	// Check if the version is created in the DB
 	collection := s.mongoClient.Database(productID).Collection(versionsCollectionName)
-	filter := bson.M{"_id": createdVer.ID}
+	filter := bson.M{"tag": createdVer.Tag}
 
 	var versionDTO versionDTO
 	err = collection.FindOne(context.Background(), filter).Decode(&versionDTO)
@@ -129,26 +129,6 @@ func (s *VersionRepositoryTestSuite) TestCreateDuplicateTagError() {
 
 	_, err = s.versionRepo.Create(creatorID, productID, duplicatedVersion)
 	s.Require().Error(err)
-}
-
-func (s *VersionRepositoryTestSuite) TestGetByID() {
-	testVersion := &entity.Version{
-		Tag: versionTag,
-	}
-
-	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
-	s.Require().NoError(err)
-
-	ver, err := s.versionRepo.GetByID(productID, createdVer.ID)
-	s.Require().NoError(err)
-
-	s.Equal(testVersion.Tag, ver.Tag)
-}
-
-func (s *VersionRepositoryTestSuite) TestGetByIDNotFound() {
-	_, err := s.versionRepo.GetByID(productID, "notfound")
-	s.Require().Error(err)
-	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
 
 func (s *VersionRepositoryTestSuite) TestGetByTag() {
@@ -175,6 +155,7 @@ func (s *VersionRepositoryTestSuite) TestUpdate() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
 	}
+	ctx := context.Background()
 
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
@@ -184,7 +165,7 @@ func (s *VersionRepositoryTestSuite) TestUpdate() {
 	err = s.versionRepo.Update(productID, createdVer)
 	s.Require().NoError(err)
 
-	updatedVer, err := s.versionRepo.GetByID(productID, createdVer.ID)
+	updatedVer, err := s.versionRepo.GetByTag(ctx, productID, createdVer.Tag)
 	s.Require().NoError(err)
 
 	s.Equal(createdVer.Description, updatedVer.Description)
@@ -244,6 +225,7 @@ func (s *VersionRepositoryTestSuite) TestSetStatusWithPreviousError() {
 		Tag:   versionTag,
 		Error: "dummy error",
 	}
+	ctx := context.Background()
 
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
@@ -251,7 +233,7 @@ func (s *VersionRepositoryTestSuite) TestSetStatusWithPreviousError() {
 	err = s.versionRepo.SetStatus(context.Background(), productID, createdVer.Tag, entity.VersionStatusCreated)
 	s.Require().NoError(err)
 
-	updatedVer, err := s.versionRepo.GetByID(productID, createdVer.ID)
+	updatedVer, err := s.versionRepo.GetByTag(ctx, productID, createdVer.Tag)
 	s.Require().NoError(err)
 
 	s.Equal(entity.VersionStatusCreated, updatedVer.Status)
@@ -267,6 +249,7 @@ func (s *VersionRepositoryTestSuite) TestSetError() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
 	}
+	ctx := context.Background()
 
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
@@ -274,32 +257,14 @@ func (s *VersionRepositoryTestSuite) TestSetError() {
 	_, err = s.versionRepo.SetError(context.Background(), productID, createdVer, "error1")
 	s.Require().NoError(err)
 
-	updatedVer, err := s.versionRepo.GetByID(productID, createdVer.ID)
+	updatedVer, err := s.versionRepo.GetByTag(ctx, productID, createdVer.Tag)
 	s.Require().NoError(err)
 
 	s.Equal("error1", updatedVer.Error)
 }
 
 func (s *VersionRepositoryTestSuite) TestSetErrorNotFound() {
-	_, err := s.versionRepo.SetError(context.Background(), productID, &entity.Version{ID: "notfound"}, "error1")
+	_, err := s.versionRepo.SetError(context.Background(), productID, &entity.Version{Tag: "notfound"}, "error1")
 	s.Require().Error(err)
 	s.True(errors.Is(err, version.ErrVersionNotFound))
-}
-
-func (s *VersionRepositoryTestSuite) TestClearPublishedVersion() {
-	testVersion := &entity.Version{
-		Tag: versionTag,
-	}
-
-	createdVersion, err := s.versionRepo.Create(creatorID, productID, testVersion)
-	s.Require().NoError(err)
-
-	err = s.versionRepo.SetStatus(context.Background(), productID, createdVersion.Tag, entity.VersionStatusPublished)
-	s.Require().NoError(err)
-
-	oldPublishedVErsion, err := s.versionRepo.ClearPublishedVersion(context.Background(), productID)
-	s.Require().NoError(err)
-
-	s.Equal(testVersion.Tag, oldPublishedVErsion.Tag)
-	s.Equal(entity.VersionStatusStarted, oldPublishedVErsion.Status)
 }

@@ -177,7 +177,6 @@ func (s *userActivitySuite) TestRegisterCreateAction() {
 		Type:   entity.UserActivityTypeCreateVersion,
 		Vars: []*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: version.ID},
 			{Key: "VERSION_TAG", Value: version.Tag},
 		},
 	}
@@ -204,7 +203,6 @@ func (s *userActivitySuite) TestRegisterStartAction() {
 		Type:   entity.UserActivityTypeStartVersion,
 		Vars: []*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: version.ID},
 			{Key: "VERSION_TAG", Value: version.Tag},
 			{Key: "COMMENT", Value: comment},
 		},
@@ -232,7 +230,6 @@ func (s *userActivitySuite) TestRegisterStopAction() {
 		Type:   entity.UserActivityTypeStopVersion,
 		Vars: []*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: version.ID},
 			{Key: "VERSION_TAG", Value: version.Tag},
 			{Key: "COMMENT", Value: comment},
 		},
@@ -254,17 +251,13 @@ func (s *userActivitySuite) TestRegisterPublishAction() {
 	)
 
 	newVersion := testhelpers.NewVersionBuilder().Build()
-	previousVersion := testhelpers.NewVersionBuilder().Build()
 
 	expectedUserActivity := entity.UserActivity{
 		UserID: userID,
 		Type:   entity.UserActivityTypePublishVersion,
 		Vars: []*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: newVersion.ID},
 			{Key: "VERSION_TAG", Value: newVersion.Tag},
-			{Key: "OLD_PUBLISHED_VERSION_ID", Value: previousVersion.ID},
-			{Key: "OLD_PUBLISHED_VERSION_TAG", Value: previousVersion.Tag},
 			{Key: "COMMENT", Value: comment},
 		},
 	}
@@ -273,7 +266,7 @@ func (s *userActivitySuite) TestRegisterPublishAction() {
 
 	s.userActivityRepo.EXPECT().Create(customMatcher).Return(nil)
 
-	err := s.userActivity.RegisterPublishAction(userID, productID, newVersion, previousVersion, comment)
+	err := s.userActivity.RegisterPublishAction(userID, productID, newVersion, comment)
 	s.Assert().NoError(err)
 }
 
@@ -291,7 +284,6 @@ func (s *userActivitySuite) TestRegisterUnpublishAction() {
 		Type:   entity.UserActivityTypeUnpublishVersion,
 		Vars: []*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: version.ID},
 			{Key: "VERSION_TAG", Value: version.Tag},
 			{Key: "COMMENT", Value: comment},
 		},

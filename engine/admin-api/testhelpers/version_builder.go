@@ -9,7 +9,6 @@ type VersionBuilder struct {
 func NewVersionBuilder() *VersionBuilder {
 	return &VersionBuilder{
 		version: &entity.Version{
-			ID:          "version-id",
 			Tag:         "v1.0.0",
 			Description: "test description",
 			Workflows: []entity.Workflow{
@@ -21,11 +20,6 @@ func NewVersionBuilder() *VersionBuilder {
 
 func (vb *VersionBuilder) Build() *entity.Version {
 	return vb.version
-}
-
-func (vb *VersionBuilder) WithID(versionID string) *VersionBuilder {
-	vb.version.ID = versionID
-	return vb
 }
 
 func (vb *VersionBuilder) WithTag(tag string) *VersionBuilder {
