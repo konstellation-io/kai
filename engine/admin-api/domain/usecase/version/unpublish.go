@@ -2,7 +2,6 @@ package version
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
@@ -51,12 +50,21 @@ func (h *Handler) Unpublish(
 
 	err = h.versionRepo.Update(productID, vers)
 	if err != nil {
-		return nil, fmt.Errorf("error updating version %q: %w", vers.Tag, err)
+		h.logger.Error(err, "Error updating version status",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"previousStatus", vers.Status,
+			"newStatus", entity.VersionStatusStarted,
+		)
 	}
 
 	err = h.userActivityInteractor.RegisterUnpublishAction(user.ID, productID, vers, comment)
 	if err != nil {
-		return nil, fmt.Errorf("error registering unpublish action: %w", err)
+		h.logger.Error(err, "Error registering user activity",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"comment", comment,
+		)
 	}
 
 	return vers, nil

@@ -109,12 +109,12 @@ func (s *versionSuite) TestUnpublish_ErrorUnpublishingVersion() {
 		WithStatus(entity.VersionStatusPublished).
 		Build()
 	versionMatcher := newVersionMatcher(vers)
-	unpubError := errors.New("unpublish error in k8s service")
+	unpubErr := errors.New("unpublish error in k8s service")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(unpubError)
+	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(unpubErr)
 
 	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.ID, productID, versionMatcher, version.ErrUnpublishingVersion.Error()).Return(nil)
 
@@ -126,54 +126,33 @@ func (s *versionSuite) TestUnpublish_ErrorUnpublishingVersion() {
 	assert.ErrorIs(s.T(), err, version.ErrUnpublishingVersion)
 }
 
-func (s *versionSuite) TestUnpublish_ErrorUpdatingVersionStatus() {
-	// GIVEN a valid user and a published version, but error during status update
+func (s *versionSuite) TestUnpublish_CheckNonBlockingErrorLogging() {
+	// GIVEN a valid user and a published version, but error during unpublishing
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusPublished).
 		Build()
-	updateError := errors.New("unpublish error updating version info")
-	expectedErr := fmt.Errorf("error updating version %q: %w", versionTag, updateError)
+
+	setStatusErr := errors.New("error updating version status")
+	registerActionErr := errors.New("error registering unpublish action")
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
 	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(nil)
-
-	s.versionRepo.EXPECT().Update(productID, vers).Return(updateError)
-
-	// WHEN unpublishing the version
-	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
-
-	// THEN an error is returned
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), expectedErr, err)
-}
-
-func (s *versionSuite) TestUnpublish_ErrorRegisteringUnpublishAction() {
-	// GIVEN a valid user and a published version, but error during action registration
-	ctx := context.Background()
-	user := s.getTestUser()
-	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
-		WithStatus(entity.VersionStatusPublished).
-		Build()
-	registerActionError := errors.New("unpublish error registering action")
-	expectedErr := fmt.Errorf("error registering unpublish action: %w", registerActionError)
-
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
-	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(nil)
-	s.versionRepo.EXPECT().Update(productID, vers).Return(nil)
-
-	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.ID, productID, vers, "unpublishing").Return(registerActionError)
+	s.versionRepo.EXPECT().Update(productID, vers).Return(setStatusErr)
+	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.ID, productID, vers, "unpublishing").Return(registerActionErr)
 
 	// WHEN unpublishing the version
 	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
+	s.NoError(err)
 
-	// THEN an error is returned
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), expectedErr, err)
+	s.Require().Len(s.observedLogs.All(), 3)
+	print(s.observedLogs.All())
+	log1 := s.observedLogs.All()[1]
+	s.Equal(log1.ContextMap()["error"], setStatusErr.Error())
+	log2 := s.observedLogs.All()[2]
+	s.Equal(log2.ContextMap()["error"], registerActionErr.Error())
 }
