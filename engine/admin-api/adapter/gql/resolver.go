@@ -113,9 +113,9 @@ func (r *mutationResolver) notifyVersionStartStatus(notifyCh chan *entity.Versio
 	for startingVersion := range notifyCh {
 		switch startingVersion.Status {
 		case entity.VersionStatusStarted:
-			r.logger.Infof("Version successfully started with ID: %q", startingVersion.ID)
+			r.logger.Infof("Version successfully started with Tag: %q", startingVersion.Tag)
 		case entity.VersionStatusError:
-			r.logger.Errorf("Error starting version with ID: %q - %s", startingVersion.ID, startingVersion.Error)
+			r.logger.Errorf("Error starting version with Tag: %q - %s", startingVersion.Tag, startingVersion.Error)
 		default:
 		}
 	}
@@ -212,7 +212,7 @@ func (r *queryResolver) Products(ctx context.Context) ([]*entity.Product, error)
 	return r.productInteractor.FindAll(ctx, loggedUser)
 }
 
-func (r *queryResolver) Version(ctx context.Context, tag, productID string) (*entity.Version, error) {
+func (r *queryResolver) Version(ctx context.Context, productID, tag string) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 	return r.versionInteractor.GetByTag(ctx, loggedUser, productID, tag)
 }
@@ -283,14 +283,6 @@ func (r *productResolver) CreationAuthor(_ context.Context, product *entity.Prod
 
 func (r *productResolver) CreationDate(_ context.Context, obj *entity.Product) (string, error) {
 	return obj.CreationDate.Format(time.RFC3339), nil
-}
-
-func (r *productResolver) PublishedVersion(_ context.Context, obj *entity.Product) (*entity.Version, error) {
-	if obj.PublishedVersion != "" {
-		return r.versionInteractor.GetByID(obj.ID, obj.PublishedVersion)
-	}
-
-	return nil, nil
 }
 
 func (r *productResolver) MeasurementsURL(_ context.Context, _ *entity.Product) (string, error) {

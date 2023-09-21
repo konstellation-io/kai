@@ -79,17 +79,17 @@ func (mr *MockUserActivityInteracterMockRecorder) RegisterCreateProduct(userID, 
 }
 
 // RegisterPublishAction mocks base method.
-func (m *MockUserActivityInteracter) RegisterPublishAction(userID, productID string, version, prev *entity.Version, comment string) error {
+func (m *MockUserActivityInteracter) RegisterPublishAction(userID, productID string, version *entity.Version, comment string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterPublishAction", userID, productID, version, prev, comment)
+	ret := m.ctrl.Call(m, "RegisterPublishAction", userID, productID, version, comment)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RegisterPublishAction indicates an expected call of RegisterPublishAction.
-func (mr *MockUserActivityInteracterMockRecorder) RegisterPublishAction(userID, productID, version, prev, comment interface{}) *gomock.Call {
+func (mr *MockUserActivityInteracterMockRecorder) RegisterPublishAction(userID, productID, version, comment interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterPublishAction", reflect.TypeOf((*MockUserActivityInteracter)(nil).RegisterPublishAction), userID, productID, version, prev, comment)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterPublishAction", reflect.TypeOf((*MockUserActivityInteracter)(nil).RegisterPublishAction), userID, productID, version, comment)
 }
 
 // RegisterStartAction mocks base method.
