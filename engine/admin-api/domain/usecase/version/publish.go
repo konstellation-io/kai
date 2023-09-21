@@ -2,7 +2,6 @@ package version
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
