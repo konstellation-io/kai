@@ -80,8 +80,8 @@ func (h *Handler) deleteNatsResources(ctx context.Context, productID string, ver
 }
 
 func (h *Handler) stopAndNotify(
-	userID string,
-	productID string,
+	userID,
+	productID,
 	comment string,
 	vers *entity.Version,
 	notifyStatusCh chan *entity.Version,

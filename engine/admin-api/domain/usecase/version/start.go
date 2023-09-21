@@ -87,8 +87,8 @@ func (h *Handler) getVersionConfig(ctx context.Context, productID string, vers *
 }
 
 func (h *Handler) startAndNotify(
-	userID string,
-	productID string,
+	userID,
+	productID,
 	comment string,
 	vers *entity.Version,
 	versionConfig *entity.VersionConfig,

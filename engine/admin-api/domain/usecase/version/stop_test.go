@@ -218,14 +218,14 @@ func (s *versionSuite) TestStop_ErrorUserNotAuthorized_ErrorRegisterAction() {
 	versionMatcher := newVersionMatcher(expectedVer)
 
 	customErr := errors.New("oh no")
-	regiserActionErr := errors.New("a bad day")
+	registerActionErr := errors.New("a bad day")
 
 	s.accessControl.EXPECT().CheckProductGrants(badUser, productID, auth.ActStopVersion).Return(
 		customErr,
 	)
 	// Given error registering action
 	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.ID, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(
-		regiserActionErr,
+		registerActionErr,
 	)
 
 	// WHEN stopping the version
@@ -237,7 +237,7 @@ func (s *versionSuite) TestStop_ErrorUserNotAuthorized_ErrorRegisterAction() {
 	// THEN failed registered action is logged
 	s.Require().Len(s.observedLogs.All(), 2)
 	log1 := s.observedLogs.All()[1]
-	s.Equal(log1.ContextMap()["error"], regiserActionErr.Error())
+	s.Equal(log1.ContextMap()["error"], registerActionErr.Error())
 }
 
 func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
