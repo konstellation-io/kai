@@ -108,20 +108,22 @@ func (s *versionSuite) TestUnpublish_ErrorUnpublishingVersion() {
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusPublished).
 		Build()
+	versionMatcher := newVersionMatcher(vers)
 	unpubError := errors.New("unpublish error in k8s service")
-	expectedErr := fmt.Errorf("error unpublishing version %q: %w", versionTag, unpubError)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
 	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(unpubError)
 
+	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.ID, productID, versionMatcher, version.ErrUnpublishingVersion.Error()).Return(nil)
+
 	// WHEN unpublishing the version
 	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
 
 	// THEN an error is returned
 	assert.Error(s.T(), err)
-	assert.Equal(s.T(), expectedErr, err)
+	assert.ErrorIs(s.T(), err, version.ErrUnpublishingVersion)
 }
 
 func (s *versionSuite) TestUnpublish_ErrorUpdatingVersionStatus() {

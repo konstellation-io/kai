@@ -21,6 +21,7 @@ var (
 	ErrDeletingNATSResources      = errors.New("error deleting NATS resources")
 	ErrStartingVersion            = errors.New("error starting version")
 	ErrStoppingVersion            = errors.New("error stopping version")
+	ErrUnpublishingVersion        = errors.New("error unpublishing version")
 )
 
 func ParsingKRTFileError(err error) error {

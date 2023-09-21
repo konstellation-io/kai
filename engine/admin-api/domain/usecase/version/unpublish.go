@@ -40,7 +40,9 @@ func (h *Handler) Unpublish(
 
 	err = h.k8sService.Unpublish(ctx, productID, vers)
 	if err != nil {
-		return nil, fmt.Errorf("error unpublishing version %q: %w", vers.Tag, err)
+		h.registerActionFailed(user.ID, productID, vers, ErrUnpublishingVersion, "unpublish")
+
+		return nil, ErrUnpublishingVersion
 	}
 
 	vers.PublicationAuthor = nil
