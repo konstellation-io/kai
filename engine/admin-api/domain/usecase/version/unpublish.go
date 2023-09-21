@@ -6,7 +6,6 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
 // Unpublish set a Version as not published on DB and K8s.
@@ -17,39 +16,46 @@ func (h *Handler) Unpublish(
 	versionTag,
 	comment string,
 ) (*entity.Version, error) {
+	h.logger.Info("Unpublishing version", "userID", user.ID, "versionTag", versionTag, "productID", productID)
+
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActUnpublishVersion); err != nil {
+		v := &entity.Version{Tag: versionTag}
+		h.registerActionFailed(user.ID, productID, v, ErrUserNotAuthorized, "unpublish")
+
 		return nil, err
 	}
 
-	h.logger.Info(fmt.Sprintf("The user %s is unpublishing version %s on product %s", user.ID, versionTag, productID))
-
-	v, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
+	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
+		v := &entity.Version{Tag: versionTag}
+		h.registerActionFailed(user.ID, productID, v, ErrVersionNotFound, "unpublish")
+
 		return nil, err
 	}
 
-	if v.Status != entity.VersionStatusPublished {
-		return nil, internalerrors.ErrInvalidVersionStatusBeforeUnpublishing
+	if vers.Status != entity.VersionStatusPublished {
+		h.registerActionFailed(user.ID, productID, vers, ErrVersionCannotBeUnpublished, "unpublish")
+		return nil, ErrVersionCannotBeUnpublished
 	}
 
-	err = h.k8sService.Unpublish(ctx, productID, v)
+	err = h.k8sService.Unpublish(ctx, productID, vers)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error unpublishing version %q: %w", vers.Tag, err)
 	}
 
-	v.PublicationAuthor = nil
-	v.PublicationDate = nil
-	v.Status = entity.VersionStatusStarted
+	vers.PublicationAuthor = nil
+	vers.PublicationDate = nil
+	vers.Status = entity.VersionStatusStarted
 
-	err = h.versionRepo.Update(productID, v)
+	err = h.versionRepo.Update(productID, vers)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error updating version %q: %w", vers.Tag, err)
 	}
 
-	err = h.userActivityInteractor.RegisterUnpublishAction(user.ID, productID, v, comment)
+	err = h.userActivityInteractor.RegisterUnpublishAction(user.ID, productID, vers, comment)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error registering unpublish action: %w", err)
 	}
 
-	return v, nil
+	return vers, nil
 }
