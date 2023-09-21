@@ -7,7 +7,6 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
 // Publish set a Version as published on DB and K8s.
@@ -18,11 +17,11 @@ func (h *Handler) Publish(
 	versionTag,
 	comment string,
 ) (*entity.Version, error) {
+	h.logger.Info("Publishing version", "userID", user.ID, "versionTag", versionTag, "productID", productID)
+
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActPublishVersion); err != nil {
 		return nil, err
 	}
-
-	h.logger.Info(fmt.Sprintf("The user %s is publishing version %s on product %s", user.ID, versionTag, productID))
 
 	v, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
@@ -30,7 +29,7 @@ func (h *Handler) Publish(
 	}
 
 	if v.Status != entity.VersionStatusStarted {
-		return nil, internalerrors.ErrInvalidVersionStatusBeforePublishing
+		return nil, ErrVersionCannotBePublished
 	}
 
 	err = h.k8sService.Publish(ctx, productID, v)

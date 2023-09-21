@@ -11,7 +11,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
@@ -108,7 +107,7 @@ func (s *versionSuite) TestStop_ErrorInvalidVersionStatus() {
 
 	// THEN an error is returned
 	s.Error(err)
-	s.ErrorIs(err, internalerrors.ErrInvalidVersionStatusBeforeStopping)
+	s.ErrorIs(err, version.ErrVersionCannotBeStopped)
 }
 
 func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingStreams() {

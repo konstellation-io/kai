@@ -14,8 +14,8 @@ import (
 func (h *Handler) Start(
 	ctx context.Context,
 	user *entity.User,
-	productID string,
-	versionTag string,
+	productID,
+	versionTag,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
 	h.logger.Info("Starting version", "userID", user.ID, "versionTag", versionTag, "productID", productID)

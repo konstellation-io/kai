@@ -7,7 +7,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/spf13/viper"
 )
 
@@ -15,8 +14,8 @@ import (
 func (h *Handler) Stop(
 	ctx context.Context,
 	user *entity.User,
-	productID string,
-	versionTag string,
+	productID,
+	versionTag,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
 	h.logger.Info("Stopping version", "userID", user.ID, "versionTag", versionTag, "productID", productID)
@@ -38,7 +37,7 @@ func (h *Handler) Stop(
 
 	if !vers.CanBeStopped() {
 		h.registerActionFailed(user.ID, productID, vers, ErrVersionCannotBeStopped, "stop")
-		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStopping
+		return nil, nil, ErrVersionCannotBeStopped
 	}
 
 	err = h.deleteNatsResources(ctx, productID, vers)
