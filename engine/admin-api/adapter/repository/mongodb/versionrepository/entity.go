@@ -10,7 +10,6 @@ type configurationVariableDTO struct {
 }
 
 type versionDTO struct {
-	ID          string                     `bson:"_id"`
 	Tag         string                     `bson:"tag"`
 	Description string                     `bson:"description"`
 	Config      []configurationVariableDTO `bson:"config,omitempty"`

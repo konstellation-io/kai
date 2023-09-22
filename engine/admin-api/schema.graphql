@@ -3,7 +3,7 @@ scalar Upload
 type Query {
   product(id: ID!): Product!
   products: [Product!]!
-  version(name: String!, productID: ID!): Version!
+  version(productID: ID!, tag: String!): Version!
   versions(productID: ID!): [Version!]!
   registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
   userActivityList(
@@ -136,13 +136,11 @@ type Product {
   measurementsUrl: String!
   databaseUrl: String!
   entrypointAddress: String!
-  publishedVersion: Version
   creationAuthor: String!
   creationDate: String!
 }
 
 type Version {
-  id: ID!
   tag: String!
   description: String!
   config: [ConfigurationVariable]

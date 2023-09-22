@@ -20,7 +20,6 @@ func (s *versionSuite) TestStop_OK() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
@@ -92,7 +91,6 @@ func (s *versionSuite) TestStop_ErrorInvalidVersionStatus() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStopped).
 		Build()
@@ -116,7 +114,6 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingStreams() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
@@ -140,7 +137,6 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingObjectStores() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
@@ -165,7 +161,6 @@ func (s *versionSuite) TestStop_CheckNonBlockingErrorLogging() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
@@ -251,7 +246,6 @@ func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()

@@ -60,7 +60,6 @@ type versionSuite struct {
 const (
 	userID     = "userID"
 	productID  = "productID"
-	versionID  = "versionID"
 	versionTag = "v1.0.0"
 )
 

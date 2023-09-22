@@ -19,7 +19,6 @@ func (s *versionSuite) TestStart_OK() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
 		Build()
@@ -98,7 +97,6 @@ func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
@@ -122,7 +120,6 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
 		Build()
@@ -150,7 +147,6 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
 		Build()
@@ -179,7 +175,6 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
 		Build()
@@ -209,7 +204,6 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
 		Build()
@@ -294,7 +288,6 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	ctx := context.Background()
 	user := s.getTestUser()
 	vers := testhelpers.NewVersionBuilder().
-		WithID(versionID).
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
 		Build()
