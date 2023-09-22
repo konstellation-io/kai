@@ -31,7 +31,7 @@ releases:
   - name: kong
     <<: *default
     chart: kong/kong
-    version: 2.27.0
+    version: 2.22.0
     namespace: kong
     wait: false
 
