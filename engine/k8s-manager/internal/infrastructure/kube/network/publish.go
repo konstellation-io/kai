@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	_apiVersion  = "networking.k8s.io/v1"
-	_kindIngress = "Ingress"
+	_apiVersion              = "networking.k8s.io/v1"
+	_kindIngress             = "Ingress"
+	_kontStripPathAnnotation = "konghq.com/strip-path"
 )
 
 func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.PublishNetworkParams) (map[string]string, error) {
@@ -93,6 +94,9 @@ func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.Publish
 				"product": params.Product,
 				"version": params.Version,
 				"type":    "network",
+			},
+			Annotations: map[string]string{
+				_kontStripPathAnnotation: "true",
 			},
 		},
 		Spec: ingressSpec,

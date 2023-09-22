@@ -25,7 +25,8 @@ items:
             product: test-product
             type: network
             version: v1.0.0
-        annotations: {}
+        annotations:
+            konghq.com/strip-path: "true"
         ownerreferences: []
         finalizers: []
         zzz_deprecatedclustername: ""
