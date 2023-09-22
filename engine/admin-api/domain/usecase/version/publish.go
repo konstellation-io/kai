@@ -6,7 +6,6 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
 // Publish set a Version as published on DB and K8s.
@@ -29,7 +28,7 @@ func (h *Handler) Publish(
 	}
 
 	if v.Status != entity.VersionStatusStarted {
-		return nil, internalerrors.ErrInvalidVersionStatusBeforePublishing
+		return nil, ErrVersionCannotBePublished
 	}
 
 	triggerURLs, err := h.k8sService.Publish(ctx, productID, v.Tag)
@@ -39,17 +38,25 @@ func (h *Handler) Publish(
 
 	now := time.Now()
 	v.PublicationDate = &now
-	v.PublicationAuthor = &user.ID
+	v.PublicationAuthor = &user.Email
 	v.Status = entity.VersionStatusPublished
 
 	err = h.versionRepo.Update(productID, v)
 	if err != nil {
-		return nil, err
+		h.logger.Error(err, "Error updating version status",
+			"user", user.Email,
+			"product", productID,
+			"version", versionTag,
+		)
 	}
 
-	err = h.userActivityInteractor.RegisterPublishAction(user.ID, productID, v, comment)
+	err = h.userActivityInteractor.RegisterPublishAction(user.Email, productID, v, comment)
 	if err != nil {
-		return nil, err
+		h.logger.Error(err, "Error registering publish action",
+			"user", user.Email,
+			"product", productID,
+			"version", versionTag,
+		)
 	}
 
 	return triggerURLs, nil

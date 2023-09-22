@@ -13,6 +13,7 @@ func NewUserBuilder() *UserBuilder {
 	return &UserBuilder{
 		user: &entity.User{
 			ID:            faker.UUIDHyphenated(),
+			Email:         faker.Email(),
 			Roles:         []string{"USER"},
 			ProductGrants: nil,
 		},
