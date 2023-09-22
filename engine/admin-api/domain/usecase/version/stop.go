@@ -18,31 +18,31 @@ func (h *Handler) Stop(
 	versionTag,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	h.logger.Info("Stopping version", "userID", user.ID, "versionTag", versionTag, "productID", productID)
-
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStopVersion); err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, ErrUserNotAuthorized, "stop")
+		h.registerActionFailed(user.Email, productID, v, ErrUserNotAuthorized, StopAction)
 
 		return nil, nil, err
 	}
 
+	h.logger.Info("Stopping version", "userEmail", user.Email, "versionTag", versionTag, "productID", productID)
+
 	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, ErrVersionNotFound, "stop")
+		h.registerActionFailed(user.Email, productID, v, ErrVersionNotFound, StopAction)
 
 		return nil, nil, err
 	}
 
 	if !vers.CanBeStopped() {
-		h.registerActionFailed(user.ID, productID, vers, ErrVersionCannotBeStopped, "stop")
+		h.registerActionFailed(user.Email, productID, vers, ErrVersionCannotBeStopped, StopAction)
 		return nil, nil, ErrVersionCannotBeStopped
 	}
 
 	err = h.deleteNatsResources(ctx, productID, vers)
 	if err != nil {
-		h.registerActionFailed(user.ID, productID, vers, ErrDeletingNATSResources, "stop")
+		h.registerActionFailed(user.Email, productID, vers, ErrDeletingNATSResources, StopAction)
 		return nil, nil, err
 	}
 
@@ -60,7 +60,7 @@ func (h *Handler) Stop(
 
 	notifyStatusCh := make(chan *entity.Version, 1)
 
-	go h.stopAndNotify(user.ID, productID, comment, vers, notifyStatusCh)
+	go h.stopAndNotify(user.Email, productID, comment, vers, notifyStatusCh)
 
 	return vers, notifyStatusCh, nil
 }
@@ -80,7 +80,7 @@ func (h *Handler) deleteNatsResources(ctx context.Context, productID string, ver
 }
 
 func (h *Handler) stopAndNotify(
-	userID,
+	userEmail,
 	productID,
 	comment string,
 	vers *entity.Version,
@@ -94,7 +94,7 @@ func (h *Handler) stopAndNotify(
 
 	err := h.k8sService.Stop(ctx, productID, vers)
 	if err != nil {
-		h.registerActionFailed(userID, productID, vers, ErrStoppingVersion, "stop")
+		h.registerActionFailed(userEmail, productID, vers, ErrStoppingVersion, StopAction)
 		h.handleVersionServiceActionError(ctx, productID, vers, notifyStatusCh, err)
 
 		return
@@ -110,7 +110,7 @@ func (h *Handler) stopAndNotify(
 		)
 	}
 
-	err = h.userActivityInteractor.RegisterStopAction(userID, productID, vers, comment)
+	err = h.userActivityInteractor.RegisterStopAction(userEmail, productID, vers, comment)
 	if err != nil {
 		h.logger.Error(err, "Error registering user activity",
 			"productID", productID,

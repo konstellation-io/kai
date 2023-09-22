@@ -17,7 +17,7 @@ import (
 func (s *versionSuite) TestStart_OK() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
-	user := s.getTestUser()
+	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
@@ -36,7 +36,7 @@ func (s *versionSuite) TestStart_OK() {
 	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).Return(nil)
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, "testing").Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, vers, "testing").Return(nil)
 
 	// WHEN starting the version
 	startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
@@ -54,14 +54,14 @@ func (s *versionSuite) TestStart_OK() {
 func (s *versionSuite) TestStart_ErrorUserNotAuthorized() {
 	// GIVEN an unauthorized user and a version
 	ctx := context.Background()
-	badUser := s.getTestUser()
+	badUser := testhelpers.NewUserBuilder().Build()
 	expectedVer := &entity.Version{Tag: versionTag}
 	versionMatcher := newVersionMatcher(expectedVer)
 
 	customErr := errors.New("git good")
 
 	s.accessControl.EXPECT().CheckProductGrants(badUser, productID, auth.ActStartVersion).Return(customErr)
-	s.userActivityInteractor.EXPECT().RegisterStartAction(badUser.ID, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(badUser.Email, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(nil)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, badUser, productID, expectedVer.Tag, "testing")
@@ -74,7 +74,7 @@ func (s *versionSuite) TestStart_ErrorUserNotAuthorized() {
 func (s *versionSuite) TestStart_ErrorNonExistingVersion() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
-	user := s.getTestUser()
+	user := testhelpers.NewUserBuilder().Build()
 	expectedVer := &entity.Version{Tag: versionTag}
 	versionMatcher := newVersionMatcher(expectedVer)
 
@@ -82,7 +82,7 @@ func (s *versionSuite) TestStart_ErrorNonExistingVersion() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(nil, customErr)
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrVersionNotFound.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, versionMatcher, version.ErrVersionNotFound.Error()).Return(nil)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, expectedVer.Tag, "testing")
@@ -95,7 +95,7 @@ func (s *versionSuite) TestStart_ErrorNonExistingVersion() {
 func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
-	user := s.getTestUser()
+	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusStarted).
@@ -105,7 +105,7 @@ func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrVersionCannotBeStarted.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, versionMatcher, version.ErrVersionCannotBeStarted.Error()).Return(nil)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
@@ -118,7 +118,7 @@ func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
-	user := s.getTestUser()
+	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
@@ -132,7 +132,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, customErr)
 
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
@@ -145,7 +145,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
-	user := s.getTestUser()
+	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
@@ -160,7 +160,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, customErr)
 
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
@@ -173,7 +173,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
 	// GIVEN a valid user and a non existent version
 	ctx := context.Background()
-	user := s.getTestUser()
+	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
@@ -189,7 +189,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateKeyValueStores(ctx, productID, vers).Return(nil, customErr)
 
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
@@ -202,7 +202,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
 func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
-	user := s.getTestUser()
+	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
@@ -231,7 +231,7 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).
 		Return(setStatusErrStarted)
 	// GIVEN register start action errors
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, "testing").
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, vers, "testing").
 		Return(registerActionErr)
 
 	// WHEN starting the version
@@ -259,7 +259,7 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 func (s *versionSuite) TestStart_ErrorUserNotAuthorized_ErrorRegisterAction() {
 	// GIVEN an unauthorized user and a version
 	ctx := context.Background()
-	badUser := s.getTestUser()
+	badUser := testhelpers.NewUserBuilder().Build()
 	expectedVer := &entity.Version{Tag: versionTag}
 	versionMatcher := newVersionMatcher(expectedVer)
 
@@ -268,7 +268,7 @@ func (s *versionSuite) TestStart_ErrorUserNotAuthorized_ErrorRegisterAction() {
 
 	s.accessControl.EXPECT().CheckProductGrants(badUser, productID, auth.ActStartVersion).Return(customErr)
 	// GIVEN error registering action
-	s.userActivityInteractor.EXPECT().RegisterStartAction(badUser.ID, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(regiserActionErr)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(badUser.Email, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(regiserActionErr)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, badUser, productID, expectedVer.Tag, "testing")
@@ -278,15 +278,15 @@ func (s *versionSuite) TestStart_ErrorUserNotAuthorized_ErrorRegisterAction() {
 	s.ErrorIs(err, customErr)
 
 	// THEN failed registered action is logged
-	s.Require().Len(s.observedLogs.All(), 2)
-	log1 := s.observedLogs.All()[1]
+	s.Require().Len(s.observedLogs.All(), 1)
+	log1 := s.observedLogs.All()[0]
 	s.Equal(log1.ContextMap()["error"], regiserActionErr.Error())
 }
 
 func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
-	user := s.getTestUser()
+	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).
@@ -307,7 +307,7 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	// go rutine expected calls
 	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, expectedVersionConfig).
 		Return(fmt.Errorf(errStartingVersion))
-	s.userActivityInteractor.EXPECT().RegisterStartAction(user.ID, productID, vers, version.ErrStartingVersion.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, vers, version.ErrStartingVersion.Error()).Return(nil)
 
 	// GIVEN set status
 	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStartingVersion).Return(nil, setErrorErr)

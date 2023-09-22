@@ -15,32 +15,23 @@ func (h *Handler) Unpublish(
 	versionTag,
 	comment string,
 ) (*entity.Version, error) {
-	h.logger.Info("Unpublishing version", "userID", user.ID, "versionTag", versionTag, "productID", productID)
-
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActUnpublishVersion); err != nil {
-		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, ErrUserNotAuthorized, "unpublish")
-
 		return nil, err
 	}
 
+	h.logger.Info("Unpublishing version", "userEmail", user.Email, "versionTag", versionTag, "productID", productID)
+
 	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
-		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, ErrVersionNotFound, "unpublish")
-
 		return nil, err
 	}
 
 	if vers.Status != entity.VersionStatusPublished {
-		h.registerActionFailed(user.ID, productID, vers, ErrVersionCannotBeUnpublished, "unpublish")
 		return nil, ErrVersionCannotBeUnpublished
 	}
 
 	err = h.k8sService.Unpublish(ctx, productID, vers)
 	if err != nil {
-		h.registerActionFailed(user.ID, productID, vers, ErrUnpublishingVersion, "unpublish")
-
 		return nil, ErrUnpublishingVersion
 	}
 
@@ -58,7 +49,7 @@ func (h *Handler) Unpublish(
 		)
 	}
 
-	err = h.userActivityInteractor.RegisterUnpublishAction(user.ID, productID, vers, comment)
+	err = h.userActivityInteractor.RegisterUnpublishAction(user.Email, productID, vers, comment)
 	if err != nil {
 		h.logger.Error(err, "Error registering user activity",
 			"productID", productID,

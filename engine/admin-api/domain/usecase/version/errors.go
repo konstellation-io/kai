@@ -8,6 +8,11 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
+const (
+	StartAction = iota
+	StopAction
+)
+
 var (
 	ErrParsingKRTFile             = errors.New("error parsing KRT file")
 	ErrVersionNotFound            = errors.New("error version not found")
@@ -48,16 +53,14 @@ func NewErrInvalidKRT(msg string, errs error) KRTValidationError {
 	}
 }
 
-func (h *Handler) registerActionFailed(userID, productID string, vers *entity.Version, incomingErr error, action string) {
+func (h *Handler) registerActionFailed(userEmail, productID string, vers *entity.Version, incomingErr error, action int) {
 	var err error
 
 	switch action {
-	case "start":
-		err = h.userActivityInteractor.RegisterStartAction(userID, productID, vers, incomingErr.Error())
-	case "stop":
-		err = h.userActivityInteractor.RegisterStopAction(userID, productID, vers, incomingErr.Error())
-	case "unpublish":
-		err = h.userActivityInteractor.RegisterUnpublishAction(userID, productID, vers, incomingErr.Error())
+	case StartAction:
+		err = h.userActivityInteractor.RegisterStartAction(userEmail, productID, vers, incomingErr.Error())
+	case StopAction:
+		err = h.userActivityInteractor.RegisterStopAction(userEmail, productID, vers, incomingErr.Error())
 	}
 
 	if err != nil {

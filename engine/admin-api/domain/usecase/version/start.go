@@ -18,31 +18,31 @@ func (h *Handler) Start(
 	versionTag,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	h.logger.Info("Starting version", "userID", user.ID, "versionTag", versionTag, "productID", productID)
-
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, ErrUserNotAuthorized, "start")
+		h.registerActionFailed(user.Email, productID, v, ErrUserNotAuthorized, StartAction)
 
 		return nil, nil, err
 	}
 
+	h.logger.Info("Starting version", "userEmail", user.Email, "versionTag", versionTag, "productID", productID)
+
 	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, ErrVersionNotFound, "start")
+		h.registerActionFailed(user.Email, productID, v, ErrVersionNotFound, StartAction)
 
 		return nil, nil, err
 	}
 
 	if !vers.CanBeStarted() {
-		h.registerActionFailed(user.ID, productID, vers, ErrVersionCannotBeStarted, "start")
+		h.registerActionFailed(user.Email, productID, vers, ErrVersionCannotBeStarted, StartAction)
 		return nil, nil, ErrVersionCannotBeStarted
 	}
 
 	versionCfg, err := h.getVersionConfig(ctx, productID, vers)
 	if err != nil {
-		h.registerActionFailed(user.ID, productID, vers, ErrCreatingNATSResources, "start")
+		h.registerActionFailed(user.Email, productID, vers, ErrCreatingNATSResources, StartAction)
 		return nil, nil, err
 	}
 
@@ -60,7 +60,7 @@ func (h *Handler) Start(
 
 	notifyStatusCh := make(chan *entity.Version, 1)
 
-	go h.startAndNotify(user.ID, productID, comment, vers, versionCfg, notifyStatusCh)
+	go h.startAndNotify(user.Email, productID, comment, vers, versionCfg, notifyStatusCh)
 
 	return vers, notifyStatusCh, nil
 }
@@ -87,7 +87,7 @@ func (h *Handler) getVersionConfig(ctx context.Context, productID string, vers *
 }
 
 func (h *Handler) startAndNotify(
-	userID,
+	userEmail,
 	productID,
 	comment string,
 	vers *entity.Version,
@@ -102,7 +102,7 @@ func (h *Handler) startAndNotify(
 
 	err := h.k8sService.Start(ctx, productID, vers, versionConfig)
 	if err != nil {
-		h.registerActionFailed(userID, productID, vers, ErrStartingVersion, "start")
+		h.registerActionFailed(userEmail, productID, vers, ErrStartingVersion, StartAction)
 		h.handleVersionServiceActionError(ctx, productID, vers, notifyStatusCh, err)
 
 		return
@@ -118,7 +118,7 @@ func (h *Handler) startAndNotify(
 		)
 	}
 
-	err = h.userActivityInteractor.RegisterStartAction(userID, productID, vers, comment)
+	err = h.userActivityInteractor.RegisterStartAction(userEmail, productID, vers, comment)
 	if err != nil {
 		h.logger.Error(err, "Error registering user activity",
 			"productID", productID,

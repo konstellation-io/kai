@@ -23,6 +23,8 @@ func (h *Handler) Create(
 		return nil, err
 	}
 
+	h.logger.Info("Creating version", "userEmail", user.Email, "productID", productID)
+
 	_, err := h.productRepo.GetByID(ctx, productID)
 	if err != nil {
 		return nil, fmt.Errorf("error product repo GetById: %w", err)
@@ -74,7 +76,7 @@ func (h *Handler) Create(
 		return nil, fmt.Errorf("registering create version action: %w", err)
 	}
 
-	h.logger.Info("Version created")
+	h.logger.Info("Version created", "version", versionCreated.Tag, "productID", productID)
 
 	return versionCreated, nil
 }

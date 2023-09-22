@@ -58,20 +58,9 @@ type versionSuite struct {
 }
 
 const (
-	userID     = "userID"
 	productID  = "productID"
 	versionTag = "v1.0.0"
 )
-
-func (s *versionSuite) getTestUser() *entity.User {
-	return &entity.User{
-		ID:    userID,
-		Roles: []string{"admin"},
-		ProductGrants: entity.ProductGrants{
-			productID: {"admin"},
-		},
-	}
-}
 
 func TestVersionSuite(t *testing.T) {
 	suite.Run(t, new(versionSuite))
