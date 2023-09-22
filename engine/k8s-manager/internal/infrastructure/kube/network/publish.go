@@ -34,6 +34,7 @@ func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.Publish
 	networkURLs := make(map[string]string, len(res.Items))
 
 	pathType := networkingv1.PathTypePrefix
+
 	for _, svc := range res.Items {
 		triggerPath := fmt.Sprintf("/%s-%s", svc.Labels["workflow"], svc.Labels["process"])
 		networkURLs[svc.Name] = fmt.Sprintf("%s%s", triggerHost, triggerPath)
