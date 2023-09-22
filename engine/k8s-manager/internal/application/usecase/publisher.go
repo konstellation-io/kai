@@ -19,6 +19,8 @@ func NewVersionPublisher(logger logr.Logger, networkPublisher service.ContainerP
 }
 
 func (vp *VersionPublisher) PublishVersion(ctx context.Context, product, version string) (map[string]string, error) {
+	vp.logger.Info("Publishing version", "product", product, "version", version)
+
 	return vp.networkPublisher.PublishNetwork(ctx, service.PublishNetworkParams{
 		Product: product,
 		Version: version,
