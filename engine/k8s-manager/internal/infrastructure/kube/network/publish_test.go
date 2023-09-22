@@ -94,11 +94,6 @@ func (s *publishNetworkSuite) TestPublish() {
 	})
 	s.Require().NoError(err)
 
-	res, err = s.clientset.NetworkingV1().Ingresses(s.namespace).List(ctx, metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("product=%s,version=%s", product, version),
-	})
-	s.Require().NoError(err)
-
 	ingressesYaml, err := yaml.Marshal(res)
 	require.NoError(s.T(), err)
 
@@ -148,11 +143,6 @@ func (s *publishNetworkSuite) TestPublish_WithTLS() {
 	s.Assert().Equal(expectedPublishedURLs, publishedURLs)
 
 	res, err := s.clientset.NetworkingV1().Ingresses(s.namespace).List(ctx, metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("product=%s,version=%s", product, version),
-	})
-	s.Require().NoError(err)
-
-	res, err = s.clientset.NetworkingV1().Ingresses(s.namespace).List(ctx, metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("product=%s,version=%s", product, version),
 	})
 	s.Require().NoError(err)
@@ -207,11 +197,6 @@ func (s *publishNetworkSuite) TestPublish_WithTLS_WithTLSSecret() {
 	s.Assert().Equal(expectedPublishedURLs, publishedURLs)
 
 	res, err := s.clientset.NetworkingV1().Ingresses(s.namespace).List(ctx, metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("product=%s,version=%s", product, version),
-	})
-	s.Require().NoError(err)
-
-	res, err = s.clientset.NetworkingV1().Ingresses(s.namespace).List(ctx, metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("product=%s,version=%s", product, version),
 	})
 	s.Require().NoError(err)
