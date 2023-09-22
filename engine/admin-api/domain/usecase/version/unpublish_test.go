@@ -11,7 +11,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
-	"github.com/stretchr/testify/assert"
 )
 
 func (s *versionSuite) TestUnpublish_OK() {
@@ -34,10 +33,10 @@ func (s *versionSuite) TestUnpublish_OK() {
 	unpublishedVer, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
 
 	// THEN the version status is started, publication fields are cleared, and it's not published
-	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), entity.VersionStatusStarted, unpublishedVer.Status)
-	assert.Nil(s.T(), unpublishedVer.PublicationAuthor)
-	assert.Nil(s.T(), unpublishedVer.PublicationDate)
+	s.NoError(err)
+	s.Equal(entity.VersionStatusStarted, unpublishedVer.Status)
+	s.Nil(unpublishedVer.PublicationAuthor)
+	s.Nil(unpublishedVer.PublicationDate)
 }
 
 func (s *versionSuite) TestUnpublish_ErrorUserNotAuthorized() {
@@ -56,7 +55,7 @@ func (s *versionSuite) TestUnpublish_ErrorUserNotAuthorized() {
 	_, err := s.handler.Unpublish(ctx, badUser, productID, expectedVer.Tag, "unpublishing")
 
 	// THEN an error is returned
-	assert.Error(s.T(), err)
+	s.Error(err)
 }
 
 func (s *versionSuite) TestUnpublish_ErrorVersionNotFound() {
@@ -74,7 +73,7 @@ func (s *versionSuite) TestUnpublish_ErrorVersionNotFound() {
 	_, err := s.handler.Unpublish(ctx, user, productID, expectedVer.Tag, "unpublishing")
 
 	// THEN an error is returned
-	assert.Error(s.T(), err)
+	s.Error(err)
 }
 
 func (s *versionSuite) TestUnpublish_ErrorVersionCannotBeUnpublished() {
@@ -96,8 +95,8 @@ func (s *versionSuite) TestUnpublish_ErrorVersionCannotBeUnpublished() {
 	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
 
 	// THEN an error is returned
-	assert.Error(s.T(), err)
-	assert.ErrorIs(s.T(), err, version.ErrVersionCannotBeUnpublished)
+	s.Error(err)
+	s.ErrorIs(err, version.ErrVersionCannotBeUnpublished)
 }
 
 func (s *versionSuite) TestUnpublish_ErrorUnpublishingVersion() {
@@ -122,8 +121,8 @@ func (s *versionSuite) TestUnpublish_ErrorUnpublishingVersion() {
 	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
 
 	// THEN an error is returned
-	assert.Error(s.T(), err)
-	assert.ErrorIs(s.T(), err, version.ErrUnpublishingVersion)
+	s.Error(err)
+	s.ErrorIs(err, version.ErrUnpublishingVersion)
 }
 
 func (s *versionSuite) TestUnpublish_CheckNonBlockingErrorLogging() {
