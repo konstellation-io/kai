@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
@@ -41,7 +41,7 @@ func TestCreateNetwork(t *testing.T) {
 
 	params := service.CreateNetworkParams{
 		Product:  "test-product",
-		Version:  "v1.0.0",
+		Version:  "metav1.0.0",
 		Workflow: "test-workflow",
 		Process:  process,
 	}
@@ -50,7 +50,7 @@ func TestCreateNetwork(t *testing.T) {
 	err := svc.CreateNetwork(ctx, params)
 	require.NoError(t, err)
 
-	s, err := clientset.CoreV1().Services(_namespace).List(ctx, v1.ListOptions{})
+	s, err := clientset.CoreV1().Services(_namespace).List(ctx, metav1.ListOptions{})
 	require.NoError(t, err)
 
 	serviceYaml, err := yaml.Marshal(s)
@@ -86,7 +86,7 @@ func TestCreateNetwork_ClientError(t *testing.T) {
 
 	params := service.CreateNetworkParams{
 		Product:  "test-product",
-		Version:  "v1.0.0",
+		Version:  "metav1.0.0",
 		Workflow: "test-workflow",
 		Process:  process,
 	}
@@ -114,7 +114,7 @@ func TestDeleteNetwork(t *testing.T) {
 
 	params := service.CreateNetworkParams{
 		Product:  "test-product",
-		Version:  "v1.0.0",
+		Version:  "metav1.0.0",
 		Workflow: "test-workflow",
 		Process:  process,
 	}
@@ -125,7 +125,7 @@ func TestDeleteNetwork(t *testing.T) {
 	err = svc.DeleteNetwork(ctx, params.Product, params.Version)
 	assert.NoError(t, err)
 
-	svcs, err := clientset.CoreV1().Services(_namespace).List(ctx, v1.ListOptions{})
+	svcs, err := clientset.CoreV1().Services(_namespace).List(ctx, metav1.ListOptions{})
 	require.NoError(t, err)
 	assert.Empty(t, svcs.Items)
 }
@@ -178,7 +178,7 @@ func TestDelete_ClientErrorDeletingSomeService(t *testing.T) {
 
 	params := service.CreateNetworkParams{
 		Product:  "test-product",
-		Version:  "v1.0.0",
+		Version:  "metav1.0.0",
 		Workflow: "test-workflow",
 		Process:  process,
 	}

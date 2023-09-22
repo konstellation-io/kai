@@ -3,25 +3,24 @@ package usecase
 import (
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
-	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 	"golang.org/x/net/context"
 )
 
 type VersionPublisher struct {
 	logger           logr.Logger
-	networkPublisher service.NetworkPublisher
+	networkPublisher service.ContainerPublisher
 }
 
-func NewVersionPublisher(logger logr.Logger, networkPublisher service.NetworkPublisher) VersionPublisherService {
+func NewVersionPublisher(logger logr.Logger, networkPublisher service.ContainerPublisher) VersionPublisherService {
 	return &VersionPublisher{
 		logger,
 		networkPublisher,
 	}
 }
 
-func (vp *VersionPublisher) PublishVersion(ctx context.Context, version domain.Version) error {
+func (vp *VersionPublisher) PublishVersion(ctx context.Context, product, version string) (map[string]string, error) {
 	return vp.networkPublisher.PublishNetwork(ctx, service.PublishNetworkParams{
-		Product: version.Product,
-		Version: version.Tag,
+		Product: product,
+		Version: version,
 	})
 }

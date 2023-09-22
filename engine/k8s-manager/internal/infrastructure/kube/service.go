@@ -62,3 +62,7 @@ func (k *K8sContainerService) CreateNetwork(ctx context.Context, params service.
 func (k *K8sContainerService) DeleteNetwork(ctx context.Context, product, version string) error {
 	return k.networkService.DeleteNetwork(ctx, product, version)
 }
+
+func (k *K8sContainerService) PublishNetwork(ctx context.Context, params service.PublishNetworkParams) (map[string]string, error) {
+	return k.networkService.PublishNetwork(ctx, params)
+}

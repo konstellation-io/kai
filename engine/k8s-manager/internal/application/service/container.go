@@ -39,7 +39,7 @@ type ContainerStopper interface {
 }
 
 type ContainerPublisher interface {
-	PublishNetwork(ctx context.Context, params PublishNetworkParams) error
+	PublishNetwork(ctx context.Context, params PublishNetworkParams) (map[string]string, error)
 }
 
 //go:generate mockery --name ImageBuilder --output ../../../mocks --filename image_builder_mock.go --structname ImageBuilderMock

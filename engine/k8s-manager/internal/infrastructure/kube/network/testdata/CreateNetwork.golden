@@ -11,7 +11,7 @@ items:
         kind: ""
         apiversion: ""
       objectmeta:
-        name: test-product-v1-0-0-test-workflow-test-process
+        name: test-product-metav1-0-0-test-workflow-test-process
         generatename: ""
         namespace: test
         selflink: ""
@@ -25,7 +25,7 @@ items:
             process: test-process
             product: test-product
             type: network
-            version: v1.0.0
+            version: metav1.0.0
             workflow: test-workflow
         annotations: {}
         ownerreferences: []
@@ -34,7 +34,7 @@ items:
         managedfields: []
       spec:
         ports:
-            - name: ""
+            - name: trigger
               protocol: TCP
               appprotocol: null
               port: 80
@@ -43,7 +43,11 @@ items:
                 intval: 80
                 strval: ""
               nodeport: 0
-        selector: {}
+        selector:
+            process: test-process
+            product: test-product
+            version: metav1.0.0
+            workflow: test-workflow
         clusterip: ""
         clusterips: []
         type: ClusterIP
