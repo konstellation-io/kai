@@ -68,6 +68,22 @@ func (s *VersionServiceTestSuite) TestPublish() {
 	s.Assert().Equal(expectedURLs, actualURLs)
 }
 
+func (s *VersionServiceTestSuite) TestPublish_ClientError() {
+	ctx := context.Background()
+
+	req := &versionpb.PublishRequest{
+		Product:    productID,
+		VersionTag: version.Tag,
+	}
+
+	expectedError := errors.New("k8s error")
+
+	s.mockService.EXPECT().Publish(gomock.Any(), req).Return(nil, expectedError)
+
+	_, err := s.k8sVersionClient.Publish(ctx, productID, version.Tag)
+	s.Require().ErrorIs(err, expectedError)
+}
+
 func (s *VersionServiceTestSuite) TestUnpublish() {
 	ctx := context.Background()
 
