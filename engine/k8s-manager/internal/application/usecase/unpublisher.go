@@ -20,5 +20,7 @@ func NewVersionUnpublisher(logger logr.Logger, networkUnpublisher service.Contai
 }
 
 func (vp *VersionUnpublisher) UnpublishVersion(ctx context.Context, product, version string) error {
+	vp.logger.Info("Unpublishing version", "product", product, "version", version)
+
 	return vp.networkUnpublisher.UnpublishNetwork(ctx, product, version)
 }
