@@ -95,7 +95,6 @@ func (s *versionSuite) TestUnpublish_ErrorVersionCannotBeUnpublished() {
 	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
 
 	// THEN an error is returned
-	s.Error(err)
 	s.ErrorIs(err, version.ErrVersionCannotBeUnpublished)
 }
 
@@ -121,7 +120,6 @@ func (s *versionSuite) TestUnpublish_ErrorUnpublishingVersion() {
 	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
 
 	// THEN an error is returned
-	s.Error(err)
 	s.ErrorIs(err, version.ErrUnpublishingVersion)
 }
 
