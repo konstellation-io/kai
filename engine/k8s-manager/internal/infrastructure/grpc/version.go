@@ -15,6 +15,7 @@ type VersionService struct {
 	starter         usecase.VersionStarterService
 	stopper         usecase.VersionStopperService
 	publisher       usecase.VersionPublisherService
+	unpublisher     usecase.VersionUnpublisherService
 	processRegister usecase.ProcessService
 }
 
@@ -23,6 +24,7 @@ func NewVersionService(
 	starter usecase.VersionStarterService,
 	stopper usecase.VersionStopperService,
 	publisher usecase.VersionPublisherService,
+	unpublisher usecase.VersionUnpublisherService,
 	processRegister usecase.ProcessService,
 ) *VersionService {
 	return &VersionService{
@@ -31,6 +33,7 @@ func NewVersionService(
 		starter,
 		stopper,
 		publisher,
+		unpublisher,
 		processRegister,
 	}
 }
@@ -103,5 +106,21 @@ func (v *VersionService) Publish(
 
 	return &versionpb.PublishResponse{
 		NetworkUrls: networkURLs,
+	}, nil
+}
+
+func (v *VersionService) Unpublish(
+	ctx context.Context,
+	req *versionpb.UnpublishRequest,
+) (*versionpb.Response, error) {
+	v.logger.Info("Unpublish request received")
+
+	err := v.unpublisher.UnpublishVersion(ctx, req.Product, req.VersionTag)
+	if err != nil {
+		return nil, fmt.Errorf("unpublishing version: %w", err)
+	}
+
+	return &versionpb.Response{
+		Message: fmt.Sprintf("Version %q on product %q unpublished", req.VersionTag, req.Product),
 	}, nil
 }

@@ -41,6 +41,7 @@ func (s *VersionServiceTestSuite) SetupSuite() {
 		s.versionServiceMock,
 		s.versionServiceMock,
 		s.versionServiceMock,
+		s.versionServiceMock,
 		s.processServiceMock,
 	)
 
