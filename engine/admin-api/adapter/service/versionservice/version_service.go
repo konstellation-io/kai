@@ -170,15 +170,3 @@ func (k *K8sVersionService) RegisterProcess(ctx context.Context, processID, proc
 
 	return res.ImageId, nil
 }
-
-func (k *K8sVersionService) PublishVersion(ctx context.Context, product, version string) (map[string]string, error) {
-	res, err := k.client.Publish(ctx, &versionpb.PublishRequest{
-		Product:    product,
-		VersionTag: version,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return res.NetworkUrls, nil
-}
