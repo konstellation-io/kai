@@ -34,11 +34,11 @@ func (s *VersionServiceTestSuite) SetupSuite() {
 	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 
 	s.versionServiceMock = mocks.NewVersionServiceMock(s.T())
-
 	s.processServiceMock = mocks.NewProcessServiceMock(s.T())
 
 	s.versionGRPCService = grpc.NewVersionService(
 		logger,
+		s.versionServiceMock,
 		s.versionServiceMock,
 		s.versionServiceMock,
 		s.processServiceMock,

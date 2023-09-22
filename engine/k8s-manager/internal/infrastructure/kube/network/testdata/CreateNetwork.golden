@@ -34,7 +34,7 @@ items:
         managedfields: []
       spec:
         ports:
-            - name: ""
+            - name: trigger
               protocol: TCP
               appprotocol: null
               port: 80
@@ -43,7 +43,11 @@ items:
                 intval: 80
                 strval: ""
               nodeport: 0
-        selector: {}
+        selector:
+            process: test-process
+            product: test-product
+            version: v1.0.0
+            workflow: test-workflow
         clusterip: ""
         clusterips: []
         type: ClusterIP

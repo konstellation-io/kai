@@ -14,6 +14,7 @@ type VersionService struct {
 	logger          logr.Logger
 	starter         usecase.VersionStarterService
 	stopper         usecase.VersionStopperService
+	publisher       usecase.VersionPublisherService
 	processRegister usecase.ProcessService
 }
 
@@ -21,6 +22,7 @@ func NewVersionService(
 	logger logr.Logger,
 	starter usecase.VersionStarterService,
 	stopper usecase.VersionStopperService,
+	publisher usecase.VersionPublisherService,
 	processRegister usecase.ProcessService,
 ) *VersionService {
 	return &VersionService{
@@ -28,6 +30,7 @@ func NewVersionService(
 		logger,
 		starter,
 		stopper,
+		publisher,
 		processRegister,
 	}
 }
@@ -82,5 +85,23 @@ func (v *VersionService) RegisterProcess(
 
 	return &versionpb.RegisterProcessResponse{
 		ImageId: imageID,
+	}, nil
+}
+
+func (v *VersionService) Publish(
+	ctx context.Context,
+	req *versionpb.PublishRequest,
+) (*versionpb.PublishResponse, error) {
+	v.logger.Info("Register process request received")
+
+	networkURLs, err := v.publisher.PublishVersion(ctx, req.Product, req.VersionTag)
+	if err != nil {
+		return nil, fmt.Errorf("registering process: %w", err)
+	}
+
+	fmt.Println(networkURLs)
+
+	return &versionpb.PublishResponse{
+		NetworkUrls: networkURLs,
 	}, nil
 }

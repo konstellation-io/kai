@@ -18,6 +18,10 @@ const (
 	ImageRegistryURLKey  = "registry.url"
 	ImageBuilderImageKey = "registry.imageBuilder.image"
 	ImageBuilderLogLevel = "registry.imageBuilder.logLevel"
+	BaseDomainNameKey    = "baseDomainName"
+	IngressClassNameKey  = "networking.trigger.ingressClassName"
+	TLSIsEnabledKey      = "networking.trigger.tls.isEnabled"
+	TLSSecretNameKey     = "networking.trigger.tls.secretName"
 
 	configType = "yaml"
 
@@ -45,6 +49,8 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias("nats.url", "NATS_URL")
 	viper.RegisterAlias(ImageRegistryURLKey, "REGISTRY_URL")
 	viper.RegisterAlias(KubeNamespaceKey, "KUBERNETES_NAMESPACE")
+	viper.RegisterAlias(BaseDomainNameKey, "BASE_DOMAIN_NAME")
+	viper.RegisterAlias(IngressClassNameKey, "INGRESS_CLASS_NAME")
 
 	viper.AutomaticEnv()
 
@@ -56,16 +62,16 @@ func Init(configFilePath string) error {
 func setDefaultValues() {
 	viper.SetDefault("releaseName", "kai")
 	viper.SetDefault("server.port", _defaultServerPort)
-	viper.SetDefault("networking.trigger.tls.isEnabled", false)
-	viper.SetDefault("networking.trigger.tls.secretName", "")
+	viper.SetDefault(TLSIsEnabledKey, false)
+	viper.SetDefault(TLSSecretNameKey, "")
 	viper.SetDefault("networking.trigger.requestTimeout", _defaultRequestTimeout)
-	viper.SetDefault("networking.trigger.ingressClassName", "")
+	viper.SetDefault("networking.trigger.ingressClassName", "kong")
 
 	viper.SetDefault(ImageBuilderImageKey, "gcr.io/kaniko-project/executor:latest")
 	viper.SetDefault(ImageBuilderLogLevel, "error")
 
 	viper.SetDefault("kubernetes.isInsideCluster", true)
-	viper.SetDefault(KubeNamespaceKey, "kai")
+	viper.SetDefault(KubeNamespaceKey, "kai.local")
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {

@@ -53,7 +53,6 @@ message StopRequest {
 message PublishRequest {
   string product = 1;
   string version_tag = 2;
-  repeated string workflows = 3;
 }
 
 message UnpublishRequest {
@@ -96,10 +95,14 @@ message RegisterProcessResponse {
   string image_id = 1;
 }
 
+message PublishResponse {
+  map<string, string> network_urls = 1;
+}
+
 service VersionService {
   rpc Start (StartRequest) returns (Response);
   rpc Stop (StopRequest) returns (Response);
-  rpc Publish (PublishRequest) returns (Response);
+  rpc Publish (PublishRequest) returns (PublishResponse);
   rpc Unpublish (UnpublishRequest) returns (Response);
   rpc WatchProcessStatus (ProcessStatusRequest) returns (stream ProcessStatusResponse);
   rpc RegisterProcess (RegisterProcessRequest) returns (RegisterProcessResponse);

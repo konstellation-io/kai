@@ -9,16 +9,17 @@ import (
 )
 
 var (
-	ErrParsingKRTFile         = errors.New("error parsing KRT file")
-	ErrVersionNotFound        = errors.New("error version not found")
-	ErrVersionDuplicated      = errors.New("error version duplicated")
-	ErrUserNotAuthorized      = errors.New("error user not authorized")
-	ErrVersionCannotBeStarted = errors.New("error version cannot be started, status must be 'created', 'stopped' or 'failed'")
-	ErrVersionCannotBeStopped = errors.New("error version cannot be stopped, status must be 'started'")
-	ErrCreatingNATSResources  = errors.New("error creating NATS resources")
-	ErrDeletingNATSResources  = errors.New("error deleting NATS resources")
-	ErrStartingVersion        = errors.New("error starting version")
-	ErrStoppingVersion        = errors.New("error stopping version")
+	ErrParsingKRTFile           = errors.New("error parsing KRT file")
+	ErrVersionNotFound          = errors.New("error version not found")
+	ErrVersionDuplicated        = errors.New("error version duplicated")
+	ErrUserNotAuthorized        = errors.New("error user not authorized")
+	ErrVersionCannotBeStarted   = errors.New("error version cannot be started, status must be 'created', 'stopped' or 'failed'")
+	ErrVersionCannotBeStopped   = errors.New("error version cannot be stopped, status must be 'started'")
+	ErrCreatingNATSResources    = errors.New("error creating NATS resources")
+	ErrDeletingNATSResources    = errors.New("error deleting NATS resources")
+	ErrStartingVersion          = errors.New("error starting version")
+	ErrStoppingVersion          = errors.New("error stopping version")
+	ErrVersionCannotBePublished = errors.New("error publishing version, status must be 'started'")
 )
 
 func ParsingKRTFileError(err error) error {

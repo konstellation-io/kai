@@ -36,17 +36,18 @@ func (m *MockVersionService) EXPECT() *MockVersionServiceMockRecorder {
 }
 
 // Publish mocks base method.
-func (m *MockVersionService) Publish(ctx context.Context, productID string, version *entity.Version) error {
+func (m *MockVersionService) Publish(ctx context.Context, productID, versionTag string) (map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Publish", ctx, productID, version)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "Publish", ctx, productID, versionTag)
+	ret0, _ := ret[0].(map[string]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Publish indicates an expected call of Publish.
-func (mr *MockVersionServiceMockRecorder) Publish(ctx, productID, version interface{}) *gomock.Call {
+func (mr *MockVersionServiceMockRecorder) Publish(ctx, productID, versionTag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockVersionService)(nil).Publish), ctx, productID, version)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockVersionService)(nil).Publish), ctx, productID, versionTag)
 }
 
 // RegisterProcess mocks base method.
