@@ -24,6 +24,62 @@ func (_m *VersionServiceMock) EXPECT() *VersionServiceMock_Expecter {
 	return &VersionServiceMock_Expecter{mock: &_m.Mock}
 }
 
+// PublishVersion provides a mock function with given fields: ctx, product, version
+func (_m *VersionServiceMock) PublishVersion(ctx context.Context, product string, version string) (map[string]string, error) {
+	ret := _m.Called(ctx, product, version)
+
+	var r0 map[string]string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (map[string]string, error)); ok {
+		return rf(ctx, product, version)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) map[string]string); ok {
+		r0 = rf(ctx, product, version)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]string)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, product, version)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VersionServiceMock_PublishVersion_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PublishVersion'
+type VersionServiceMock_PublishVersion_Call struct {
+	*mock.Call
+}
+
+// PublishVersion is a helper method to define mock.On call
+//   - ctx context.Context
+//   - product string
+//   - version string
+func (_e *VersionServiceMock_Expecter) PublishVersion(ctx interface{}, product interface{}, version interface{}) *VersionServiceMock_PublishVersion_Call {
+	return &VersionServiceMock_PublishVersion_Call{Call: _e.mock.On("PublishVersion", ctx, product, version)}
+}
+
+func (_c *VersionServiceMock_PublishVersion_Call) Run(run func(ctx context.Context, product string, version string)) *VersionServiceMock_PublishVersion_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *VersionServiceMock_PublishVersion_Call) Return(_a0 map[string]string, _a1 error) *VersionServiceMock_PublishVersion_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *VersionServiceMock_PublishVersion_Call) RunAndReturn(run func(context.Context, string, string) (map[string]string, error)) *VersionServiceMock_PublishVersion_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // StartVersion provides a mock function with given fields: ctx, version
 func (_m *VersionServiceMock) StartVersion(ctx context.Context, version domain.Version) error {
 	ret := _m.Called(ctx, version)

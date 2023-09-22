@@ -15,12 +15,12 @@ func (h *Handler) Publish(
 	productID,
 	versionTag,
 	comment string,
-) (*entity.Version, error) {
-	h.logger.Info("Publishing version", "userID", user.ID, "versionTag", versionTag, "productID", productID)
-
+) (map[string]string, error) {
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActPublishVersion); err != nil {
 		return nil, err
 	}
+
+	h.logger.Info("Publishing version", "user", user.Email, "product", productID, "version", versionTag)
 
 	v, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
@@ -31,25 +31,33 @@ func (h *Handler) Publish(
 		return nil, ErrVersionCannotBePublished
 	}
 
-	err = h.k8sService.Publish(ctx, productID, v)
+	triggerURLs, err := h.k8sService.Publish(ctx, productID, v.Tag)
 	if err != nil {
 		return nil, err
 	}
 
 	now := time.Now()
 	v.PublicationDate = &now
-	v.PublicationAuthor = &user.ID
+	v.PublicationAuthor = &user.Email
 	v.Status = entity.VersionStatusPublished
 
 	err = h.versionRepo.Update(productID, v)
 	if err != nil {
-		return nil, err
+		h.logger.Error(err, "Error updating version status",
+			"user", user.Email,
+			"product", productID,
+			"version", versionTag,
+		)
 	}
 
-	err = h.userActivityInteractor.RegisterPublishAction(user.ID, productID, v, comment)
+	err = h.userActivityInteractor.RegisterPublishAction(user.Email, productID, v, comment)
 	if err != nil {
-		return nil, err
+		h.logger.Error(err, "Error registering publish action",
+			"user", user.Email,
+			"product", productID,
+			"version", versionTag,
+		)
 	}
 
-	return v, nil
+	return triggerURLs, nil
 }
