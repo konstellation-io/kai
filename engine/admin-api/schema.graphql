@@ -38,11 +38,16 @@ type Mutation {
   createVersion(input: CreateVersionInput!): Version!
   startVersion(input: StartVersionInput!): Version!
   stopVersion(input: StopVersionInput!): Version!
-  publishVersion(input: PublishVersionInput!): Version!
+  publishVersion(input: PublishVersionInput!): [PublishedTrigger!]!
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
   registerProcess(input: RegisterProcessInput!): RegisteredProcess!
+}
+
+type PublishedTrigger {
+  trigger: String!
+  url: String!
 }
 
 type RegisteredProcess {

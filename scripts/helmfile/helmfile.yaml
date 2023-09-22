@@ -44,7 +44,7 @@ releases:
     chart: bedag/raw
     needs:
     - kai/mongodb-operator
-  
+
   - name: cnpg
     <<: *default
     chart: cnpg/cloudnative-pg

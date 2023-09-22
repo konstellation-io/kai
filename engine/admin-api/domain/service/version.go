@@ -11,7 +11,7 @@ import (
 type VersionService interface {
 	Start(ctx context.Context, productID string, version *entity.Version, versionConfig *entity.VersionConfig) error
 	Stop(ctx context.Context, productID string, version *entity.Version) error
-	Publish(ctx context.Context, productID string, version *entity.Version) error
+	Publish(ctx context.Context, productID, versionTag string) (map[string]string, error)
 	Unpublish(ctx context.Context, productID string, version *entity.Version) error
 	WatchProcessStatus(ctx context.Context, productID, versionTag string) (<-chan *entity.Process, error)
 	RegisterProcess(ctx context.Context, processID, processImage string, file []byte) (string, error)

@@ -12,6 +12,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+const (
+	_servicePortName = "trigger"
+)
+
 func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNetworkParams) error {
 	kn.logger.Info("Creating network service",
 		"product", params.Product,
@@ -28,9 +32,11 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 			Labels: kn.getNetworkLabels(params.Product, params.Version, params.Workflow, params.Process.Name),
 		},
 		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeClusterIP,
+			Selector: kn.getSelector(params.Product, params.Version, params.Workflow, params.Process.Name),
+			Type:     corev1.ServiceTypeClusterIP,
 			Ports: []corev1.ServicePort{
 				{
+					Name:       _servicePortName,
 					Protocol:   corev1.Protocol(networking.Protocol),
 					TargetPort: intstr.FromInt(networking.TargetPort),
 					Port:       int32(networking.SourcePort),
@@ -40,6 +46,15 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 	}, metav1.CreateOptions{})
 
 	return err
+}
+
+func (kn KubeNetwork) getSelector(product, version, workflow, process string) map[string]string {
+	return map[string]string{
+		"product":  product,
+		"version":  version,
+		"workflow": workflow,
+		"process":  process,
+	}
 }
 
 func (kn KubeNetwork) getNetworkLabels(product, version, workflow, process string) map[string]string {

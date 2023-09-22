@@ -38,14 +38,14 @@ func (m *MockVersionServiceClient) EXPECT() *MockVersionServiceClientMockRecorde
 }
 
 // Publish mocks base method.
-func (m *MockVersionServiceClient) Publish(ctx context.Context, in *versionpb.PublishRequest, opts ...grpc.CallOption) (*versionpb.Response, error) {
+func (m *MockVersionServiceClient) Publish(ctx context.Context, in *versionpb.PublishRequest, opts ...grpc.CallOption) (*versionpb.PublishResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "Publish", varargs...)
-	ret0, _ := ret[0].(*versionpb.Response)
+	ret0, _ := ret[0].(*versionpb.PublishResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -304,10 +304,10 @@ func (m *MockVersionServiceServer) EXPECT() *MockVersionServiceServerMockRecorde
 }
 
 // Publish mocks base method.
-func (m *MockVersionServiceServer) Publish(arg0 context.Context, arg1 *versionpb.PublishRequest) (*versionpb.Response, error) {
+func (m *MockVersionServiceServer) Publish(arg0 context.Context, arg1 *versionpb.PublishRequest) (*versionpb.PublishResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Publish", arg0, arg1)
-	ret0, _ := ret[0].(*versionpb.Response)
+	ret0, _ := ret[0].(*versionpb.PublishResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

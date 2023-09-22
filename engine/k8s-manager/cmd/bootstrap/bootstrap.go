@@ -57,9 +57,10 @@ func initGrpcServer(logger logr.Logger) (*grpc.Server, error) {
 	imageBuilder := registry.NewKanikoImageBuilder(logger, client)
 	starter := usecase.NewVersionStarter(logger, k8sContainerService)
 	stopper := usecase.NewVersionStopper(logger, k8sContainerService)
+	publisher := usecase.NewVersionPublisher(logger, k8sContainerService)
 	processRegister := usecase.NewProcessRegister(logger, imageBuilder)
 
-	versionService := internalgrpc.NewVersionService(logger, starter, stopper, processRegister)
+	versionService := internalgrpc.NewVersionService(logger, starter, stopper, publisher, processRegister)
 
 	versionpb.RegisterVersionServiceServer(s, versionService)
 	reflection.Register(s)
