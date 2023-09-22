@@ -41,7 +41,7 @@ func TestCreateNetwork(t *testing.T) {
 
 	params := service.CreateNetworkParams{
 		Product:  "test-product",
-		Version:  "metav1.0.0",
+		Version:  "v1.0.0",
 		Workflow: "test-workflow",
 		Process:  process,
 	}
@@ -86,7 +86,7 @@ func TestCreateNetwork_ClientError(t *testing.T) {
 
 	params := service.CreateNetworkParams{
 		Product:  "test-product",
-		Version:  "metav1.0.0",
+		Version:  "v1.0.0",
 		Workflow: "test-workflow",
 		Process:  process,
 	}
@@ -114,7 +114,7 @@ func TestDeleteNetwork(t *testing.T) {
 
 	params := service.CreateNetworkParams{
 		Product:  "test-product",
-		Version:  "metav1.0.0",
+		Version:  "v1.0.0",
 		Workflow: "test-workflow",
 		Process:  process,
 	}
@@ -178,7 +178,7 @@ func TestDelete_ClientErrorDeletingSomeService(t *testing.T) {
 
 	params := service.CreateNetworkParams{
 		Product:  "test-product",
-		Version:  "metav1.0.0",
+		Version:  "v1.0.0",
 		Workflow: "test-workflow",
 		Process:  process,
 	}

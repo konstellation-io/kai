@@ -11,7 +11,7 @@ items:
         kind: ""
         apiversion: ""
       objectmeta:
-        name: test-product-metav1-0-0-test-workflow-test-process
+        name: test-product-v1-0-0-test-workflow-test-process
         generatename: ""
         namespace: test
         selflink: ""
@@ -25,7 +25,7 @@ items:
             process: test-process
             product: test-product
             type: network
-            version: metav1.0.0
+            version: v1.0.0
             workflow: test-workflow
         annotations: {}
         ownerreferences: []
@@ -46,7 +46,7 @@ items:
         selector:
             process: test-process
             product: test-product
-            version: metav1.0.0
+            version: v1.0.0
             workflow: test-workflow
         clusterip: ""
         clusterips: []
