@@ -28,6 +28,7 @@ func (tb *TokenBuilder) Build() string {
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject: tb.user.ID,
 		},
+		Email:         tb.user.Email,
 		ProductGrants: tb.user.ProductGrants,
 		RealmAccess: token.RealmAccess{
 			Roles: tb.user.Roles,
