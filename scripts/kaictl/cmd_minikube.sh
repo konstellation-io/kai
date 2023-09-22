@@ -27,7 +27,7 @@ minikube_start() {
     ;;
     Stopped)
       echo_check "Restarting minikube profile"
-      minikube start -p "$MINIKUBE_PROFILE" --kubernetes-version="$MINIKUBE_KUBERNETES_VERSION"
+      minikube start -p "$MINIKUBE_PROFILE" --kubernetes-version="$MINIKUBE_KUBERNETES_VERSION" --insecure-registry="$MINIKUBE_INSECURE_REGISTRY_CIDR"
     ;;
     *)
       echo_wait "Creating new minikube profile"
@@ -37,7 +37,7 @@ minikube_start() {
         --kubernetes-version="$MINIKUBE_KUBERNETES_VERSION" \
         --disk-size="$MINIKUBE_DISK_SIZE" \
         --driver="$MINIKUBE_DRIVER" \
-        #--extra-config=apiserver.authorization-mode=RBAC
+        --insecure-registry="$MINIKUBE_INSECURE_REGISTRY_CIDR"
 
       run minikube addons enable registry -p "$MINIKUBE_PROFILE"
       run minikube addons enable storage-provisioner -p "$MINIKUBE_PROFILE"

@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "registry.fullname" . }}
+  annotations:
+    konghq.com/strip-path: "false"
+    {{- with .Values.registry.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "registry.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.registry.ingress.className }}
+  ingressClassName: {{ .Values.registry.ingress.className }}
+  {{- end }}
+  {{- if .Values.registry.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.registry.host }}
+      secretName: {{ .Values.registry.host }}-tls
+  {{- end }}
+  rules:
+    - host: {{ .Values.registry.host }}
+      http:
+        paths:
+          - path: "/"
+            {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ include "registry.fullname" . }}
+                port:
+                  name: http
+              {{- else }}
+              serviceName: {{ include "registry.fullname" . }}
+              servicePort: http
+              {{- end }}

@@ -75,9 +75,9 @@ adminApi:
   # -- Hostname
   host: api.kai.local
   ingress:
-    ## This Chart has been developed using Nginx Ingress Controller by default.
+    ## This Chart has been developed using Kong Ingress Controller by default.
     ## Using the following default annotations ensures its correct operation.
-    ## Ref: https://kubernetes.github.io/ingress-nginx/
+    ## Ref: https://kubernetes.github.io/ingress-Kong/
     ##
 
     # -- The name of the ingress class to use
@@ -304,9 +304,9 @@ keycloak:
     # -- Whether to enable TLS
     enabled: false
   ingress:
-    ## This Chart has been developed using Nginx Ingress Controller by default.
+    ## This Chart has been developed using Kong Ingress Controller by default.
     ## Using the following default annotations ensures its correct operation.
-    ## Ref: https://kubernetes.github.io/ingress-nginx/
+    ## Ref: https://kubernetes.github.io/ingress-Kong/
     ##
 
     # -- The name of the ingress class to use
@@ -635,6 +635,13 @@ registry:
     name: ""
     # -- The name of the secret key that contains the registry config file
     key: ""
+  auth:
+    # -- Registry username
+    # @default -- user
+    user: ""
+    # -- Registry password
+    # @default -- password
+    password: ""
   storage:
     # -- Whether to enable persistence
     enabled: true
@@ -653,6 +660,17 @@ registry:
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
+  tls:
+    # -- Whether to enable TLS
+    enabled: false
+  # -- Hostname
+  host: registry.kai.local
+  ingress:
+    # -- The name of the ingress class to use
+    className: kong
+    # -- Ingress annotations
+    # @default -- See `adminApi.ingress.annotations` in [values.yaml](./values.yaml)
+    annotations: {}
   nodeSelector: {}
   # -- Assign custom affinity rules to the pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
@@ -676,6 +694,13 @@ registry:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
+  # -- Extra volumes for the registry deployment
+  extraVolumes: []
+
+  # -- Extra volume mounts for the registry deployment
+  extraVolumeMounts: []
+
 ## The following values are only a small set of options. For a full list see
 ## the official MinIO chart at https://github.com/minio/minio/tree/master/helm/minio
 ##

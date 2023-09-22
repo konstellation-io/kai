@@ -321,3 +321,17 @@ Registry serviceaccount name
     {{ default "default" .Values.registry.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Registry user
+*/}}
+{{- define "registry.auth.user" -}}
+    {{ default "user" .Values.registry.auth.user }}
+{{- end -}}
+
+{{/*
+Registry password
+*/}}
+{{- define "registry.auth.password" -}}
+    {{ default "password" .Values.registry.auth.password }}
+{{- end -}}
