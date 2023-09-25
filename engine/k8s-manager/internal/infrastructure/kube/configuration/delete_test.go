@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/go-logr/logr/testr"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/testhelpers"
 	"github.com/spf13/viper"
@@ -24,7 +25,7 @@ func TestDeleteConfiguration(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 
@@ -38,7 +39,7 @@ func TestDeleteConfiguration_ClientError(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	expectedErr := errors.New("error deleting configmaps")
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/testhelpers"
 
@@ -27,7 +28,7 @@ func TestStartProcess(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 
@@ -60,7 +61,7 @@ func TestStartProcess_WithNetwork(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 
@@ -99,7 +100,7 @@ func TestStartProcess_WithResourceLimits(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 
@@ -142,7 +143,7 @@ func TestStartProcess_WithResourceLimits(t *testing.T) {
 func TestStartProcess_WithMoreReplicas(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 	svc := kube.NewK8sContainerService(logger, clientset)
 
 	ctx := context.Background()
@@ -175,7 +176,7 @@ func TestStartProcess_WithMoreReplicas(t *testing.T) {
 func TestStartProcess_WithGpuEnabled(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 	svc := kube.NewK8sContainerService(logger, clientset)
 
 	ctx := context.Background()
@@ -208,7 +209,7 @@ func TestStartProcess_WithGpuEnabled(t *testing.T) {
 func TestStartProcess_ClientError(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	namespace := "test"
-	viper.Set("kubernetes.namespace", namespace)
+	viper.Set(config.KubeNamespaceKey, namespace)
 	clientset := fake.NewSimpleClientset()
 
 	expectedError := errors.New("kubernetes client error")

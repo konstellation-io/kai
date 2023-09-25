@@ -7,6 +7,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/testhelpers"
 
@@ -26,7 +27,7 @@ func TestConfigCreation(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	version := testhelpers.NewVersionBuilder().Build()
 
@@ -48,7 +49,7 @@ func TestConfigCreation(t *testing.T) {
 
 func TestConfigCreation_ClientError(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	clientset := fake.NewSimpleClientset()
 	clientError := errors.New("error creating confimap")
