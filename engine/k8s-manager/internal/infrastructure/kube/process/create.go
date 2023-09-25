@@ -7,7 +7,6 @@ import (
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
-	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,13 +45,6 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 
 	processIdentifier := getFullProcessIdentifier(spec.Product, spec.Version, spec.Workflow, spec.Process.Name)
 
-	var initContainers []corev1.Container
-	if viper.GetBool("krtFilesDownloader.enabled") {
-		initContainers = []corev1.Container{
-			getKrtFilesDownloaderContainer(spec),
-		}
-	}
-
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      processIdentifier,
@@ -69,11 +61,10 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
-					Containers:     kp.getContainers(configMapName, spec),
-					InitContainers: initContainers,
-					NodeSelector:   kp.getNodeSelector(spec.Process.EnableGpu),
-					Tolerations:    kp.getTolerations(spec.Process.EnableGpu),
-					Volumes:        GetVolumes(configMapName, processIdentifier),
+					Containers:   kp.getContainers(configMapName, spec),
+					NodeSelector: kp.getNodeSelector(spec.Process.EnableGpu),
+					Tolerations:  kp.getTolerations(spec.Process.EnableGpu),
+					Volumes:      GetVolumes(configMapName, processIdentifier),
 				},
 			},
 		},

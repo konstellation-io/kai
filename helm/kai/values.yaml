@@ -134,14 +134,6 @@ k8sManager:
     name: ""
     # -- The Service Account annotations
     annotations: {}
-  krtFilesDownloader:
-    image:
-      # -- Image repository
-      repository: konstellation/krt-files-downloader
-      # -- Image tag
-      tag: latest
-      # -- Image pull policy
-      pullPolicy: Always
   generatedEntrypoints:
     # -- Whether to enable tls
     tls: false

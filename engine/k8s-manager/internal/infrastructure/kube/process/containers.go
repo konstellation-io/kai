@@ -39,11 +39,6 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 				MountPath: viper.GetString("configPath"),
 			},
 			{
-				Name:      "krt-base-path",
-				ReadOnly:  true,
-				MountPath: viper.GetString("krtFiles.path"),
-			},
-			{
 				Name:      "app-log-volume",
 				ReadOnly:  true,
 				MountPath: "/app/logs",
@@ -62,36 +57,6 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 	}
 
 	return container
-}
-
-func getKrtFilesDownloaderContainer(spec *processSpec) corev1.Container {
-	image := fmt.Sprintf("%s:%s", viper.Get("krtFilesDownloader.image"), viper.Get("krtFilesDownloader.tag"))
-
-	return corev1.Container{
-		Name:  "krt-files-downloader",
-		Image: image,
-		Env: []corev1.EnvVar{
-			{
-				Name:  "KAI_PRODUCT_ID",
-				Value: spec.Product,
-			},
-			{
-				Name:  "KAI_VERSION_TAG",
-				Value: spec.Version,
-			},
-			{
-				Name:  "KAI_PROCESS_NAME",
-				Value: spec.Process.Name,
-			},
-		},
-		VolumeMounts: []corev1.VolumeMount{
-			{
-				Name:      "krt-base-path",
-				ReadOnly:  false,
-				MountPath: "krt-files",
-			},
-		},
-	}
 }
 
 func getFluentBitContainer(spec *processSpec) corev1.Container {

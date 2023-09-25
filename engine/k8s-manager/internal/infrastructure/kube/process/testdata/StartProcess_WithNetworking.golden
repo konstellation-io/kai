@@ -67,39 +67,6 @@ items:
                 managedfields: []
             spec:
                 volumes:
-                    - name: krt-base-path
-                      volumesource:
-                        hostpath: null
-                        emptydir:
-                            medium: ""
-                            sizelimit: null
-                        gcepersistentdisk: null
-                        awselasticblockstore: null
-                        gitrepo: null
-                        secret: null
-                        nfs: null
-                        iscsi: null
-                        glusterfs: null
-                        persistentvolumeclaim: null
-                        rbd: null
-                        flexvolume: null
-                        cinder: null
-                        cephfs: null
-                        flocker: null
-                        downwardapi: null
-                        fc: null
-                        azurefile: null
-                        configmap: null
-                        vspherevolume: null
-                        quobyte: null
-                        azuredisk: null
-                        photonpersistentdisk: null
-                        projected: null
-                        portworxvolume: null
-                        scaleio: null
-                        storageos: null
-                        csi: null
-                        ephemeral: null
                     - name: version-conf-files
                       volumesource:
                         hostpath: null
@@ -279,12 +246,6 @@ items:
                                 format: BinarySI
                       volumemounts:
                         - name: version-conf-files
-                          readonly: true
-                          mountpath: ""
-                          subpath: ""
-                          mountpropagation: null
-                          subpathexpr: ""
-                        - name: krt-base-path
                           readonly: true
                           mountpath: ""
                           subpath: ""
