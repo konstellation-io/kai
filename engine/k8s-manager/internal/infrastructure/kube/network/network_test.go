@@ -19,6 +19,7 @@ import (
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/testhelpers"
 )
@@ -28,7 +29,7 @@ const _namespace = "test"
 func TestCreateNetwork(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 	process := testhelpers.NewProcessBuilder().
@@ -65,7 +66,7 @@ func TestCreateNetwork_ClientError(t *testing.T) {
 	clientset := fake.NewSimpleClientset()
 	ctx := context.Background()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	expectedErr := errors.New("error creating service")
 
@@ -100,7 +101,7 @@ func TestDeleteNetwork(t *testing.T) {
 	clientset := fake.NewSimpleClientset()
 	ctx := context.Background()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 
@@ -134,7 +135,7 @@ func TestDelete_ClientErrorListingServices(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	expectedErr := errors.New("error listing services")
 	testhelpers.SetMockCall(clientset, testhelpers.MockCallParams{
@@ -157,7 +158,7 @@ func TestDelete_ClientErrorDeletingSomeService(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes.namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	expectedErr := errors.New("error deleting service")
 	testhelpers.SetMockCall(clientset, testhelpers.MockCallParams{

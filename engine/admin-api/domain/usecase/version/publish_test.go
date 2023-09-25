@@ -80,7 +80,7 @@ func (s *versionSuite) TestPublish_ErrorVersionNotFound() {
 func (s *versionSuite) TestPublish_ErrorVersionCannotBePublished() {
 	// GIVEN a valid user and a version that cannot be unpublished
 	ctx := context.Background()
-	user := s.getTestUser()
+	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
 		WithTag(versionTag).
 		WithStatus(entity.VersionStatusCreated).

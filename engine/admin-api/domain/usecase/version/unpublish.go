@@ -2,11 +2,9 @@ package version
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
 // Unpublish set a Version as not published on DB and K8s.
@@ -21,35 +19,44 @@ func (h *Handler) Unpublish(
 		return nil, err
 	}
 
-	h.logger.Info(fmt.Sprintf("The user %s is unpublishing version %s on product %s", user.ID, versionTag, productID))
+	h.logger.Info("Unpublishing version", "userEmail", user.Email, "versionTag", versionTag, "productID", productID)
 
-	v, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
+	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		return nil, err
 	}
 
-	if v.Status != entity.VersionStatusPublished {
-		return nil, internalerrors.ErrInvalidVersionStatusBeforeUnpublishing
+	if vers.Status != entity.VersionStatusPublished {
+		return nil, ErrVersionCannotBeUnpublished
 	}
 
-	err = h.k8sService.Unpublish(ctx, productID, v)
+	err = h.k8sService.Unpublish(ctx, productID, vers)
 	if err != nil {
-		return nil, err
+		return nil, ErrUnpublishingVersion
 	}
 
-	v.PublicationAuthor = nil
-	v.PublicationDate = nil
-	v.Status = entity.VersionStatusStarted
+	vers.PublicationAuthor = nil
+	vers.PublicationDate = nil
+	vers.Status = entity.VersionStatusStarted
 
-	err = h.versionRepo.Update(productID, v)
+	err = h.versionRepo.Update(productID, vers)
 	if err != nil {
-		return nil, err
+		h.logger.Error(err, "Error updating version status",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"previousStatus", vers.Status,
+			"newStatus", entity.VersionStatusStarted,
+		)
 	}
 
-	err = h.userActivityInteractor.RegisterUnpublishAction(user.ID, productID, v, comment)
+	err = h.userActivityInteractor.RegisterUnpublishAction(user.Email, productID, vers, comment)
 	if err != nil {
-		return nil, err
+		h.logger.Error(err, "Error registering user activity",
+			"productID", productID,
+			"versionTag", vers.Tag,
+			"comment", comment,
+		)
 	}
 
-	return v, nil
+	return vers, nil
 }

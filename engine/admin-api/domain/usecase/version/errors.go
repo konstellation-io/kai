@@ -8,18 +8,25 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
+const (
+	StartAction = iota
+	StopAction
+)
+
 var (
-	ErrParsingKRTFile           = errors.New("error parsing KRT file")
-	ErrVersionNotFound          = errors.New("error version not found")
-	ErrVersionDuplicated        = errors.New("error version duplicated")
-	ErrUserNotAuthorized        = errors.New("error user not authorized")
-	ErrVersionCannotBeStarted   = errors.New("error version cannot be started, status must be 'created', 'stopped' or 'failed'")
-	ErrVersionCannotBeStopped   = errors.New("error version cannot be stopped, status must be 'started'")
-	ErrCreatingNATSResources    = errors.New("error creating NATS resources")
-	ErrDeletingNATSResources    = errors.New("error deleting NATS resources")
-	ErrStartingVersion          = errors.New("error starting version")
-	ErrStoppingVersion          = errors.New("error stopping version")
-	ErrVersionCannotBePublished = errors.New("error publishing version, status must be 'started'")
+	ErrParsingKRTFile             = errors.New("error parsing KRT file")
+	ErrVersionNotFound            = errors.New("error version not found")
+	ErrVersionDuplicated          = errors.New("error version duplicated")
+	ErrUserNotAuthorized          = errors.New("error user not authorized")
+	ErrVersionCannotBeStarted     = errors.New("error version cannot be started, status must be 'created', 'stopped' or 'failed'")
+	ErrVersionCannotBeStopped     = errors.New("error version cannot be stopped, status must be 'started'")
+	ErrVersionCannotBePublished   = errors.New("error publishing version, status must be 'started'")
+	ErrVersionCannotBeUnpublished = errors.New("error unpublishing version, status must be 'published'")
+	ErrCreatingNATSResources      = errors.New("error creating NATS resources")
+	ErrDeletingNATSResources      = errors.New("error deleting NATS resources")
+	ErrStartingVersion            = errors.New("error starting version")
+	ErrStoppingVersion            = errors.New("error stopping version")
+	ErrUnpublishingVersion        = errors.New("error unpublishing version")
 )
 
 func ParsingKRTFileError(err error) error {
@@ -46,12 +53,14 @@ func NewErrInvalidKRT(msg string, errs error) KRTValidationError {
 	}
 }
 
-func (h *Handler) registerActionFailed(userID, productID string, vers *entity.Version, incomingErr error, action string) {
+func (h *Handler) registerActionFailed(userEmail, productID string, vers *entity.Version, incomingErr error, action int) {
 	var err error
-	if action == "start" {
-		err = h.userActivityInteractor.RegisterStartAction(userID, productID, vers, incomingErr.Error())
-	} else if action == "stop" {
-		err = h.userActivityInteractor.RegisterStopAction(userID, productID, vers, incomingErr.Error())
+
+	switch action {
+	case StartAction:
+		err = h.userActivityInteractor.RegisterStartAction(userEmail, productID, vers, incomingErr.Error())
+	case StopAction:
+		err = h.userActivityInteractor.RegisterStopAction(userEmail, productID, vers, incomingErr.Error())
 	}
 
 	if err != nil {

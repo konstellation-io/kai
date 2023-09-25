@@ -7,7 +7,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 	"github.com/spf13/viper"
 )
 
@@ -15,35 +14,35 @@ import (
 func (h *Handler) Stop(
 	ctx context.Context,
 	user *entity.User,
-	productID string,
-	versionTag string,
+	productID,
+	versionTag,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	h.logger.Info("Stopping version", "userID", user.ID, "versionTag", versionTag, "productID", productID)
-
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStopVersion); err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, ErrUserNotAuthorized, "stop")
+		h.registerActionFailed(user.Email, productID, v, ErrUserNotAuthorized, StopAction)
 
 		return nil, nil, err
 	}
 
+	h.logger.Info("Stopping version", "userEmail", user.Email, "versionTag", versionTag, "productID", productID)
+
 	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
 		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.ID, productID, v, ErrVersionNotFound, "stop")
+		h.registerActionFailed(user.Email, productID, v, ErrVersionNotFound, StopAction)
 
 		return nil, nil, err
 	}
 
 	if !vers.CanBeStopped() {
-		h.registerActionFailed(user.ID, productID, vers, ErrVersionCannotBeStopped, "stop")
-		return nil, nil, internalerrors.ErrInvalidVersionStatusBeforeStopping
+		h.registerActionFailed(user.Email, productID, vers, ErrVersionCannotBeStopped, StopAction)
+		return nil, nil, ErrVersionCannotBeStopped
 	}
 
 	err = h.deleteNatsResources(ctx, productID, vers)
 	if err != nil {
-		h.registerActionFailed(user.ID, productID, vers, ErrDeletingNATSResources, "stop")
+		h.registerActionFailed(user.Email, productID, vers, ErrDeletingNATSResources, StopAction)
 		return nil, nil, err
 	}
 
@@ -61,7 +60,7 @@ func (h *Handler) Stop(
 
 	notifyStatusCh := make(chan *entity.Version, 1)
 
-	go h.stopAndNotify(user.ID, productID, comment, vers, notifyStatusCh)
+	go h.stopAndNotify(user.Email, productID, comment, vers, notifyStatusCh)
 
 	return vers, notifyStatusCh, nil
 }
@@ -81,8 +80,8 @@ func (h *Handler) deleteNatsResources(ctx context.Context, productID string, ver
 }
 
 func (h *Handler) stopAndNotify(
-	userID string,
-	productID string,
+	userEmail,
+	productID,
 	comment string,
 	vers *entity.Version,
 	notifyStatusCh chan *entity.Version,
@@ -95,7 +94,7 @@ func (h *Handler) stopAndNotify(
 
 	err := h.k8sService.Stop(ctx, productID, vers)
 	if err != nil {
-		h.registerActionFailed(userID, productID, vers, ErrStoppingVersion, "stop")
+		h.registerActionFailed(userEmail, productID, vers, ErrStoppingVersion, StopAction)
 		h.handleVersionServiceActionError(ctx, productID, vers, notifyStatusCh, err)
 
 		return
@@ -111,7 +110,7 @@ func (h *Handler) stopAndNotify(
 		)
 	}
 
-	err = h.userActivityInteractor.RegisterStopAction(userID, productID, vers, comment)
+	err = h.userActivityInteractor.RegisterStopAction(userEmail, productID, vers, comment)
 	if err != nil {
 		h.logger.Error(err, "Error registering user activity",
 			"productID", productID,

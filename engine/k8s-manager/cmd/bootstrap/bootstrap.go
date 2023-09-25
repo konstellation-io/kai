@@ -58,9 +58,10 @@ func initGrpcServer(logger logr.Logger) (*grpc.Server, error) {
 	starter := usecase.NewVersionStarter(logger, k8sContainerService)
 	stopper := usecase.NewVersionStopper(logger, k8sContainerService)
 	publisher := usecase.NewVersionPublisher(logger, k8sContainerService)
+	unpublisher := usecase.NewVersionUnpublisher(logger, k8sContainerService)
 	processRegister := usecase.NewProcessRegister(logger, imageBuilder)
 
-	versionService := internalgrpc.NewVersionService(logger, starter, stopper, publisher, processRegister)
+	versionService := internalgrpc.NewVersionService(logger, starter, stopper, publisher, unpublisher, processRegister)
 
 	versionpb.RegisterVersionServiceServer(s, versionService)
 	reflection.Register(s)

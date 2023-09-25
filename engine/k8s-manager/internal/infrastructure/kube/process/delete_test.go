@@ -9,6 +9,7 @@ import (
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/go-logr/logr/testr"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/testhelpers"
 	"github.com/spf13/viper"
@@ -20,7 +21,7 @@ func TestDeleteProcess(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes._namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	product := faker.UUIDHyphenated()
 	version := faker.UUIDHyphenated()
@@ -46,7 +47,7 @@ func TestDeleteProcess_DeleteDeploymentsError(t *testing.T) {
 		Err:      deleteDeploymentsErr,
 	})
 
-	viper.Set("kubernetes._namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	product := faker.UUIDHyphenated()
 	version := faker.UUIDHyphenated()
@@ -63,7 +64,7 @@ func TestDeleteProcess_DeletePodsError(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set("kubernetes._namespace", _namespace)
+	viper.Set(config.KubeNamespaceKey, _namespace)
 
 	deletePodsErr := errors.New("error deleting pods")
 	testhelpers.SetMockCall(clientset, testhelpers.MockCallParams{
