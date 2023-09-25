@@ -12,7 +12,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: {{ include (print $.Template.BasePath "/engine/registry/secret.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/engine/registry/config-secret.yaml") . | sha256sum }}
+        checksum/htpasswd: {{ include (print $.Template.BasePath "/engine/registry/htpasswd-secret.yaml") . | sha256sum }}
       {{- with .Values.registry.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -39,14 +40,18 @@ spec:
           resources:
             {{- toYaml .Values.registry.resources | nindent 12 }}
           volumeMounts:
-            {{- if or .Values.registry.config .Values.registry.configSecret.name }}
             - name: config
               mountPath: /etc/docker/registry/config.yml
               subPath: config.yml
-            {{- end }}
             {{- if .Values.registry.storage.enabled }}
             - name: registry-storage
               mountPath: {{ .Values.registry.storage.path }}
+            {{- end }}
+            - name: registry-htpasswd
+              mountPath: /etc/docker/registry/htpasswd
+              subPath: htpasswd
+            {{- if .Values.registry.extraVolumeMounts }}
+              {{- toYaml .Values.registry.extraVolumeMounts | nindent 12 }}
             {{- end }}
       {{- with .Values.registry.nodeSelector }}
       nodeSelector:
@@ -61,16 +66,14 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        {{- if .Values.registry.configSecret.name }}
         - name: config
           secret:
+        {{- if .Values.registry.configSecret.name }}
             secretName: {{ .Values.registry.configSecret.name }}
             items:
               - key: {{ .Values.registry.configSecret.key }}
                 path: config.yml
-        {{- else if .Values.registry.config }}
-        - name: config
-          secret:
+        {{- else }}
             secretName: {{ include "registry.fullname" . }}
         {{- end }}
         {{- if .Values.registry.storage.enabled }}
@@ -78,3 +81,9 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "registry.fullname" . }}
         {{- end }}
+        {{- if .Values.registry.extraVolumes }}
+          {{- toYaml .Values.registry.extraVolumes | nindent 8 }}
+        {{- end }}
+        - name: registry-htpasswd
+          secret:
+            secretName: {{ include "registry.fullname" . }}-htpasswd

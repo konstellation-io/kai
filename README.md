@@ -195,6 +195,14 @@ $ ./kaictl.sh dev
 
 It will install everything in the namespace specified in your development `.kaictl.conf` file.
 
+### Internal registry
+
+As part of **KAI** server we deploy a Docker registry that is published via _ingress_ using http, which is consider insecure. 
+
+Due Kubernetes does not trust on insecure registries, if you want to perform local development or to run this on other insecure environments you need to configure your cluster to accept this registry hostname to be accepted. (check `.Values.registry.host` value in the chart's [values.yaml](./helm/kai/values.yaml) file).
+
+To configure this for local develpment just update the value of the `MINIKUBE_INSECURE_REGISTRY_CIDR` environment variable inside the `.kaictl.conf` file to fit your local CIDR. If you created a previous **KAI** development environment you will need to destroy it and recreate again.
+
 ### Hosts Configuration
 
 Remember to edit your `/etc/hosts`, see `./kaictl.sh dev` output for more details.
