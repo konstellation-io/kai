@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type VersionServiceClient interface {
 	Start(ctx context.Context, in *StartRequest, opts ...grpc.CallOption) (*Response, error)
 	Stop(ctx context.Context, in *StopRequest, opts ...grpc.CallOption) (*Response, error)
-	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*Response, error)
+	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
 	Unpublish(ctx context.Context, in *UnpublishRequest, opts ...grpc.CallOption) (*Response, error)
 	WatchProcessStatus(ctx context.Context, in *ProcessStatusRequest, opts ...grpc.CallOption) (VersionService_WatchProcessStatusClient, error)
 	RegisterProcess(ctx context.Context, in *RegisterProcessRequest, opts ...grpc.CallOption) (*RegisterProcessResponse, error)
@@ -56,8 +56,8 @@ func (c *versionServiceClient) Stop(ctx context.Context, in *StopRequest, opts .
 	return out, nil
 }
 
-func (c *versionServiceClient) Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *versionServiceClient) Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error) {
+	out := new(PublishResponse)
 	err := c.cc.Invoke(ctx, "/version.VersionService/Publish", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -121,7 +121,7 @@ func (c *versionServiceClient) RegisterProcess(ctx context.Context, in *Register
 type VersionServiceServer interface {
 	Start(context.Context, *StartRequest) (*Response, error)
 	Stop(context.Context, *StopRequest) (*Response, error)
-	Publish(context.Context, *PublishRequest) (*Response, error)
+	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
 	Unpublish(context.Context, *UnpublishRequest) (*Response, error)
 	WatchProcessStatus(*ProcessStatusRequest, VersionService_WatchProcessStatusServer) error
 	RegisterProcess(context.Context, *RegisterProcessRequest) (*RegisterProcessResponse, error)
@@ -138,7 +138,7 @@ func (UnimplementedVersionServiceServer) Start(context.Context, *StartRequest) (
 func (UnimplementedVersionServiceServer) Stop(context.Context, *StopRequest) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
 }
-func (UnimplementedVersionServiceServer) Publish(context.Context, *PublishRequest) (*Response, error) {
+func (UnimplementedVersionServiceServer) Publish(context.Context, *PublishRequest) (*PublishResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Publish not implemented")
 }
 func (UnimplementedVersionServiceServer) Unpublish(context.Context, *UnpublishRequest) (*Response, error) {

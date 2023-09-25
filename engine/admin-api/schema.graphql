@@ -3,7 +3,7 @@ scalar Upload
 type Query {
   product(id: ID!): Product!
   products: [Product!]!
-  version(name: String!, productID: ID!): Version!
+  version(productID: ID!, tag: String!): Version!
   versions(productID: ID!): [Version!]!
   registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
   userActivityList(
@@ -38,11 +38,16 @@ type Mutation {
   createVersion(input: CreateVersionInput!): Version!
   startVersion(input: StartVersionInput!): Version!
   stopVersion(input: StopVersionInput!): Version!
-  publishVersion(input: PublishVersionInput!): Version!
+  publishVersion(input: PublishVersionInput!): [PublishedTrigger!]!
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
   registerProcess(input: RegisterProcessInput!): RegisteredProcess!
+}
+
+type PublishedTrigger {
+  trigger: String!
+  url: String!
 }
 
 type RegisteredProcess {
@@ -136,13 +141,11 @@ type Product {
   measurementsUrl: String!
   databaseUrl: String!
   entrypointAddress: String!
-  publishedVersion: Version
   creationAuthor: String!
   creationDate: String!
 }
 
 type Version {
-  id: ID!
   tag: String!
   description: String!
   config: [ConfigurationVariable]

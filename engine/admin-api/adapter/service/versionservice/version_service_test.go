@@ -54,10 +54,34 @@ func (s *VersionServiceTestSuite) TestPublish() {
 		VersionTag: version.Tag,
 	}
 
-	s.mockService.EXPECT().Publish(gomock.Any(), req).Return(&versionpb.Response{Message: "ok"}, nil)
+	expectedURLs := map[string]string{
+		"test-trigger": "test-url",
+	}
 
-	err := s.k8sVersionClient.Publish(ctx, productID, version)
+	s.mockService.EXPECT().Publish(gomock.Any(), req).Return(&versionpb.PublishResponse{
+		NetworkUrls: expectedURLs,
+	}, nil)
+
+	actualURLs, err := s.k8sVersionClient.Publish(ctx, productID, version.Tag)
 	s.Require().NoError(err)
+
+	s.Assert().Equal(expectedURLs, actualURLs)
+}
+
+func (s *VersionServiceTestSuite) TestPublish_ClientError() {
+	ctx := context.Background()
+
+	req := &versionpb.PublishRequest{
+		Product:    productID,
+		VersionTag: version.Tag,
+	}
+
+	expectedError := errors.New("k8s error")
+
+	s.mockService.EXPECT().Publish(gomock.Any(), req).Return(nil, expectedError)
+
+	_, err := s.k8sVersionClient.Publish(ctx, productID, version.Tag)
+	s.Require().ErrorIs(err, expectedError)
 }
 
 func (s *VersionServiceTestSuite) TestUnpublish() {

@@ -2,12 +2,10 @@ package version
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	internalerrors "github.com/konstellation-io/kai/engine/admin-api/internal/errors"
 )
 
 // Publish set a Version as published on DB and K8s.
@@ -17,12 +15,12 @@ func (h *Handler) Publish(
 	productID,
 	versionTag,
 	comment string,
-) (*entity.Version, error) {
+) (map[string]string, error) {
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActPublishVersion); err != nil {
 		return nil, err
 	}
 
-	h.logger.Info(fmt.Sprintf("The user %s is publishing version %s on product %s", user.ID, versionTag, productID))
+	h.logger.Info("Publishing version", "user", user.Email, "product", productID, "version", versionTag)
 
 	v, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
@@ -30,33 +28,36 @@ func (h *Handler) Publish(
 	}
 
 	if v.Status != entity.VersionStatusStarted {
-		return nil, internalerrors.ErrInvalidVersionStatusBeforePublishing
+		return nil, ErrVersionCannotBePublished
 	}
 
-	err = h.k8sService.Publish(ctx, productID, v)
+	triggerURLs, err := h.k8sService.Publish(ctx, productID, v.Tag)
 	if err != nil {
 		return nil, err
-	}
-
-	previousPublishedVersion, err := h.versionRepo.ClearPublishedVersion(ctx, productID)
-	if err != nil {
-		return nil, fmt.Errorf("error unpublishing previous version: %w", err)
 	}
 
 	now := time.Now()
 	v.PublicationDate = &now
-	v.PublicationAuthor = &user.ID
+	v.PublicationAuthor = &user.Email
 	v.Status = entity.VersionStatusPublished
 
 	err = h.versionRepo.Update(productID, v)
 	if err != nil {
-		return nil, err
+		h.logger.Error(err, "Error updating version status",
+			"user", user.Email,
+			"product", productID,
+			"version", versionTag,
+		)
 	}
 
-	err = h.userActivityInteractor.RegisterPublishAction(user.ID, productID, v, previousPublishedVersion, comment)
+	err = h.userActivityInteractor.RegisterPublishAction(user.Email, productID, v, comment)
 	if err != nil {
-		return nil, err
+		h.logger.Error(err, "Error registering publish action",
+			"user", user.Email,
+			"product", productID,
+			"version", versionTag,
+		)
 	}
 
-	return v, nil
+	return triggerURLs, nil
 }

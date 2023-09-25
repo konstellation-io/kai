@@ -35,21 +35,6 @@ func (m *MockVersionRepo) EXPECT() *MockVersionRepoMockRecorder {
 	return m.recorder
 }
 
-// ClearPublishedVersion mocks base method.
-func (m *MockVersionRepo) ClearPublishedVersion(ctx context.Context, productID string) (*entity.Version, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ClearPublishedVersion", ctx, productID)
-	ret0, _ := ret[0].(*entity.Version)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ClearPublishedVersion indicates an expected call of ClearPublishedVersion.
-func (mr *MockVersionRepoMockRecorder) ClearPublishedVersion(ctx, productID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClearPublishedVersion", reflect.TypeOf((*MockVersionRepo)(nil).ClearPublishedVersion), ctx, productID)
-}
-
 // Create mocks base method.
 func (m *MockVersionRepo) Create(userEmail, productID string, version *entity.Version) (*entity.Version, error) {
 	m.ctrl.T.Helper()
@@ -77,21 +62,6 @@ func (m *MockVersionRepo) CreateIndexes(ctx context.Context, productID string) e
 func (mr *MockVersionRepoMockRecorder) CreateIndexes(ctx, productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockVersionRepo)(nil).CreateIndexes), ctx, productID)
-}
-
-// GetByID mocks base method.
-func (m *MockVersionRepo) GetByID(productID, versionID string) (*entity.Version, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", productID, versionID)
-	ret0, _ := ret[0].(*entity.Version)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetByID indicates an expected call of GetByID.
-func (mr *MockVersionRepoMockRecorder) GetByID(productID, versionID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockVersionRepo)(nil).GetByID), productID, versionID)
 }
 
 // GetByTag mocks base method.

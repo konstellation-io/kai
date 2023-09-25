@@ -23,7 +23,7 @@ type UserActivityInteracter interface {
 	RegisterCreateAction(userEmail, productID string, version *entity.Version) error
 	RegisterStartAction(userID, productID string, version *entity.Version, comment string) error
 	RegisterStopAction(userID, productID string, version *entity.Version, comment string) error
-	RegisterPublishAction(userID, productID string, version *entity.Version, prev *entity.Version, comment string) error
+	RegisterPublishAction(userID, productID string, version *entity.Version, comment string) error
 	RegisterUnpublishAction(userID, productID string, version *entity.Version, comment string) error
 	RegisterUpdateProductGrants(userID string, targetUserID string, product string, productGrants []string, comment string) error
 }
@@ -95,7 +95,6 @@ func (i *UserActivityInteractor) RegisterCreateAction(
 		entity.UserActivityTypeCreateVersion,
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: version.ID},
 			{Key: "VERSION_TAG", Value: version.Tag},
 		})
 }
@@ -111,7 +110,6 @@ func (i *UserActivityInteractor) RegisterStartAction(
 		entity.UserActivityTypeStartVersion,
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: version.ID},
 			{Key: "VERSION_TAG", Value: version.Tag},
 			{Key: "COMMENT", Value: comment},
 		})
@@ -128,7 +126,6 @@ func (i *UserActivityInteractor) RegisterStopAction(
 		entity.UserActivityTypeStopVersion,
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: version.ID},
 			{Key: "VERSION_TAG", Value: version.Tag},
 			{Key: "COMMENT", Value: comment},
 		})
@@ -136,7 +133,7 @@ func (i *UserActivityInteractor) RegisterStopAction(
 
 func (i *UserActivityInteractor) RegisterPublishAction(
 	userID, productID string,
-	version *entity.Version, prev *entity.Version,
+	version *entity.Version,
 	comment string,
 ) error {
 	return i.create(
@@ -144,10 +141,7 @@ func (i *UserActivityInteractor) RegisterPublishAction(
 		entity.UserActivityTypePublishVersion,
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: version.ID},
 			{Key: "VERSION_TAG", Value: version.Tag},
-			{Key: "OLD_PUBLISHED_VERSION_ID", Value: prev.ID},
-			{Key: "OLD_PUBLISHED_VERSION_TAG", Value: prev.Tag},
 			{Key: "COMMENT", Value: comment},
 		})
 }
@@ -163,7 +157,6 @@ func (i *UserActivityInteractor) RegisterUnpublishAction(
 		entity.UserActivityTypeUnpublishVersion,
 		[]*entity.UserActivityVar{
 			{Key: "PRODUCT_ID", Value: productID},
-			{Key: "VERSION_ID", Value: version.ID},
 			{Key: "VERSION_TAG", Value: version.Tag},
 			{Key: "COMMENT", Value: comment},
 		})
