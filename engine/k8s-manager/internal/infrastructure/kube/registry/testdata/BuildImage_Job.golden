@@ -82,6 +82,44 @@ spec:
                     storageos: null
                     csi: null
                     ephemeral: null
+                - name: registry-auth-secret
+                  volumesource:
+                    hostpath: null
+                    emptydir: null
+                    gcepersistentdisk: null
+                    awselasticblockstore: null
+                    gitrepo: null
+                    secret:
+                        secretname: ""
+                        items:
+                            - key: .dockerconfigjson
+                              path: config.json
+                              mode: null
+                        defaultmode: null
+                        optional: null
+                    nfs: null
+                    iscsi: null
+                    glusterfs: null
+                    persistentvolumeclaim: null
+                    rbd: null
+                    flexvolume: null
+                    cinder: null
+                    cephfs: null
+                    flocker: null
+                    downwardapi: null
+                    fc: null
+                    azurefile: null
+                    configmap: null
+                    vspherevolume: null
+                    quobyte: null
+                    azuredisk: null
+                    photonpersistentdisk: null
+                    projected: null
+                    portworxvolume: null
+                    scaleio: null
+                    storageos: null
+                    csi: null
+                    ephemeral: null
             initcontainers: []
             containers:
                 - name: kaniko
@@ -103,6 +141,12 @@ spec:
                     - name: config
                       readonly: false
                       mountpath: /sources
+                      subpath: ""
+                      mountpropagation: null
+                      subpathexpr: ""
+                    - name: registry-auth-secret
+                      readonly: false
+                      mountpath: /kaniko/.docker
                       subpath: ""
                       mountpropagation: null
                       subpathexpr: ""
