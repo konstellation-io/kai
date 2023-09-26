@@ -11,17 +11,21 @@ import (
 )
 
 const (
-	KubeConfigPathKey    = "kubernetes.kubeConfigPath"
-	KubeNamespaceKey     = "kubernetes.namespace"
-	ServerPortKey        = "server.port"
-	IsInsideClusterKey   = "kubernetes.isInsideCluster"
-	ImageRegistryURLKey  = "registry.url"
-	ImageBuilderImageKey = "registry.imageBuilder.image"
-	ImageBuilderLogLevel = "registry.imageBuilder.logLevel"
-	BaseDomainNameKey    = "baseDomainName"
-	IngressClassNameKey  = "networking.trigger.ingressClassName"
-	TLSIsEnabledKey      = "networking.trigger.tls.isEnabled"
-	TLSSecretNameKey     = "networking.trigger.tls.secretName"
+	KubeConfigPathKey  = "kubernetes.kubeConfigPath"
+	KubeNamespaceKey   = "kubernetes.namespace"
+	ServerPortKey      = "server.port"
+	BaseDomainNameKey  = "baseDomainName"
+	IsInsideClusterKey = "kubernetes.isInsideCluster"
+
+	ImageRegistryURLKey        = "registry.url"
+	ImageRegistryAuthSecretKey = "registry.authSecret"
+	ImageBuilderImageKey       = "registry.imageBuilder.image"
+	ImageBuilderLogLevel       = "registry.imageBuilder.logLevel"
+
+	TriggerRequestTimeoutKey = "networking.trigger.requestTimeout"
+	IngressClassNameKey      = "networking.trigger.ingressClassName"
+	TLSIsEnabledKey          = "networking.trigger.tls.isEnabled"
+	TLSSecretNameKey         = "networking.trigger.tls.secretName"
 
 	configType = "yaml"
 
@@ -51,6 +55,7 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(KubeNamespaceKey, "KUBERNETES_NAMESPACE")
 	viper.RegisterAlias(BaseDomainNameKey, "BASE_DOMAIN_NAME")
 	viper.RegisterAlias(IngressClassNameKey, "INGRESS_CLASS_NAME")
+	viper.RegisterAlias(ImageRegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
 
 	viper.AutomaticEnv()
 
@@ -64,14 +69,14 @@ func setDefaultValues() {
 	viper.SetDefault("server.port", _defaultServerPort)
 	viper.SetDefault(TLSIsEnabledKey, false)
 	viper.SetDefault(TLSSecretNameKey, "")
-	viper.SetDefault("networking.trigger.requestTimeout", _defaultRequestTimeout)
-	viper.SetDefault("networking.trigger.ingressClassName", "kong")
+	viper.SetDefault(TriggerRequestTimeoutKey, _defaultRequestTimeout)
+	viper.SetDefault(IngressClassNameKey, "kong")
 
 	viper.SetDefault(ImageBuilderImageKey, "gcr.io/kaniko-project/executor:latest")
 	viper.SetDefault(ImageBuilderLogLevel, "error")
 
 	viper.SetDefault("kubernetes.isInsideCluster", true)
-	viper.SetDefault(KubeNamespaceKey, "kai.local")
+	viper.SetDefault(KubeNamespaceKey, "kai")
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {

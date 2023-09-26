@@ -11,7 +11,7 @@ const (
 	ComponentsKey = "components"
 
 	CfgFilePathKey          = "CONFIG_FILE_PATH"
-	RegistryURLKey          = "registry.url"
+	RegistryHostKey         = "registry.host"
 	VersionStatusTimeoutKey = "application.versionStatusTimeout"
 )
 
@@ -28,7 +28,7 @@ func setDefaultConfig() {
 func loadConfig() error {
 	viper.SetEnvPrefix("KAI")
 
-	viper.RegisterAlias(RegistryURLKey, "REGISTRY_URL")
+	viper.RegisterAlias(RegistryHostKey, "REGISTRY_HOST")
 
 	viper.AutomaticEnv()
 
