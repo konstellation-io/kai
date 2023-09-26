@@ -59,6 +59,22 @@ config:
       secretName: ""
       # --The name of the secret key that contains the MongoDB connection string.
       secretKey: ""
+  s3:
+    auth:
+      # -- Name of the secret that contains the credentials for S3
+      secretName: ""
+      secretKeys:
+        # -- Name of the key in the secret that contains the access key ID
+        accessKey: ""
+        # -- Name of the key in the secret that contains the secret access key
+        secretKey: ""
+      # -- S3 Access Key ID if no secret is used
+      accessKeyID: ""
+      # -- S3 Secret Access Key if no secret is used
+      secretAccessKey: ""
+    # -- S3 Service endpoint URL
+    endpointURL: ""
+
 adminApi:
   # -- Default application log level
   logLevel: INFO
@@ -732,17 +748,6 @@ minio:
     accessMode: ReadWriteOnce
     # -- Storage size
     size: 10Gi
-  ingress:
-    # -- Enable ingress for MinIO API
-    enabled: true
-    # -- The name of the ingress class to use
-    ingressClassName: kong
-    # -- Ingress labels
-    labels: {}
-    # -- Ingress annotations
-    annotations: {}
-    # -- Ingress hostnames
-    hosts:
-      - s3.kai.local
-    # -- Ingress TLS configuration
-    tls: []
+  service:
+    type: ClusterIP
+    port: "9000"
