@@ -29,6 +29,7 @@ const (
 
 	_ttlSecondsAfterFinishedJob = 100
 
+	//nolint:exhaustive // False positive
 	_registryAuthSecretVolume = "registry-auth-secret"
 	_configVolumeName         = "config"
 )

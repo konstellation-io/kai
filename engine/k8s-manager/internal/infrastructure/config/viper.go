@@ -17,7 +17,8 @@ const (
 	BaseDomainNameKey  = "baseDomainName"
 	IsInsideClusterKey = "kubernetes.isInsideCluster"
 
-	ImageRegistryURLKey        = "registry.url"
+	ImageRegistryURLKey = "registry.url"
+	//nolint:exhaustive // False positive
 	ImageRegistryAuthSecretKey = "registry.authSecret"
 	ImageBuilderImageKey       = "registry.imageBuilder.image"
 	ImageBuilderLogLevel       = "registry.imageBuilder.logLevel"
