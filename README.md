@@ -145,14 +145,17 @@ pre-commit install-hooks
 pre-commit install --hook-type commit-msg
 ```
 
-**Note**: Contributing commits that had not passed the required hooks will be rejected.
+**Note**: *Contributing commits that had not passed the required hooks will be rejected.*
 
 ## Local Environment
 
 ### Requirements
 
 * [Minikube](https://minikube.sigs.k8s.io/docs/start/) >= 1.26
-* [Docker](https://docs.docker.com/get-docker/) >= 18.9, if used as driver for Minikube. Check [this](https://minikube.sigs.k8s.io/docs/drivers/) for a complete list of drivers for Minikube
+* [Docker](https://docs.docker.com/get-docker/) (for Linux) >= 18.9, default driver for Minikube.
+* [Hyperkit](https://minikube.sigs.k8s.io/docs/drivers/hyperkit/) (for MacOS) default driver for Minikube.
+
+  **NOTE**: *You can use a different driver updating `.kaictl.conf`; Check [this](https://minikube.sigs.k8s.io/docs/drivers/) for a complete list of drivers for Minikube*
 
 ### Basic usage
 
@@ -197,7 +200,7 @@ It will install everything in the namespace specified in your development `.kaic
 
 ### Internal registry
 
-As part of **KAI** server we deploy a Docker registry that is published via _ingress_ using http, which is consider insecure. 
+As part of **KAI** server we deploy a Docker registry that is published via _ingress_ using http, which is consider insecure.
 
 Due Kubernetes does not trust on insecure registries, if you want to perform local development or to run this on other insecure environments you need to configure your cluster to accept this registry hostname to be accepted. (check `.Values.registry.host` value in the chart's [values.yaml](./helm/kai/values.yaml) file).
 
@@ -207,8 +210,8 @@ To configure this for local develpment just update the value of the `MINIKUBE_IN
 
 Remember to edit your `/etc/hosts`, see `./kaictl.sh dev` output for more details.
 
-**NOTE**: If you have the [hostctl](https://github.com/guumaster/hostctl) tool installed, updating `/etc/hosts` will be
-done automatically too.
+**NOTE**: *If you have the [hostctl](https://github.com/guumaster/hostctl) tool installed, updating `/etc/hosts` will be
+done automatically too.*
 
 # Versioning lifecycle
 
