@@ -32,7 +32,9 @@ require (
 require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
+	github.com/aws/aws-sdk-go v1.45.17 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
