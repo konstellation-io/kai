@@ -108,14 +108,14 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	err = i.measurementRepo.CreateDatabase(newProduct.ID)
+	err = i.measurementRepo.CreateDatabase(newProduct.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	i.logger.V(0).Info("Measurement database created for product")
 
-	err = i.createDatabaseIndexes(ctx, productID)
+	err = i.createDatabaseIndexes(ctx, name)
 	if err != nil {
 		return nil, err
 	}
