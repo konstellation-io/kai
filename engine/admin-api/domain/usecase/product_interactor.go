@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -32,6 +33,7 @@ type ProductInteractor struct {
 	processRepo     repository.ProcessRepository
 	userActivity    UserActivityInteracter
 	accessControl   auth.AccessControl
+	objectStorage   repository.ObjectStorage
 }
 
 type ProductInteractorOpts struct {
@@ -44,6 +46,7 @@ type ProductInteractorOpts struct {
 	ProcessRepo     repository.ProcessRepository
 	UserActivity    UserActivityInteracter
 	AccessControl   auth.AccessControl
+	ObjectStorage   repository.ObjectStorage
 }
 
 // NewProductInteractor creates a new ProductInteractor.
@@ -58,6 +61,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.ProcessRepo,
 		ps.UserActivity,
 		ps.AccessControl,
+		ps.ObjectStorage,
 	}
 }
 
@@ -106,6 +110,11 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, ErrProductDuplicatedName
 	} else if !errors.Is(err, ErrProductNotFound) {
 		return nil, err
+	}
+
+	err = i.objectStorage.CreateBucket(productID)
+	if err != nil {
+		return nil, fmt.Errorf("creating s3 bucket: %w", err)
 	}
 
 	err = i.measurementRepo.CreateDatabase(newProduct.Name)

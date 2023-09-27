@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"os"
 	"time"
 
@@ -62,12 +61,7 @@ func (ps *ProcessService) RegisterProcess(
 		return nil, nil, err
 	}
 
-	registryURL, err := url.Parse(viper.GetString(config.RegistryURLKey))
-	if err != nil {
-		return nil, nil, fmt.Errorf("parsing registry url: %w", err)
-	}
-
-	processImage := fmt.Sprintf("%s/%s", registryURL.Host, processID)
+	processImage := fmt.Sprintf("%s/%s", viper.GetString(config.RegistryHostKey), processID)
 
 	registeredProcess := &entity.RegisteredProcess{
 		ID:         processID,

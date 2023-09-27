@@ -28,4 +28,10 @@ data:
   KEYCLOAK_REALM: "{{ .Values.keycloak.realmName }}"
   KEYCLOAK_ADMIN_CLIENT_ID: "{{ .Values.keycloak.adminApi.oidcClient.clientId }}"
   # REGISTRY
-  KAI_REGISTRY_URL: "http://{{ include "registry.fullname" . }}:{{ .Values.registry.service.ports.http }}"
+  KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
+  # S3
+  {{- if .Values.minio.enabled }}
+  KAI_S3_ENDPOINT_URL: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
+  {{- else }}
+  KAI_S3_ENDPOINT_URL: {{ .Values.config.s3.endpointURL }}
+  {{- end }}

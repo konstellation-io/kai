@@ -38,4 +38,3 @@ spec:
               serviceName: {{ include "keycloak.fullname" .}}
               servicePort: http
               {{- end }}
-  

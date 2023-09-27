@@ -16,7 +16,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.10"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.14"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -41,6 +41,12 @@
 | config.baseDomainName | string | `"local"` | Base domain name for Admin API and K8S Manager apps |
 | config.mongodb.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | config.mongodb.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
+| config.s3.auth.accessKeyID | string | `""` | S3 Access Key ID if no secret is used |
+| config.s3.auth.secretAccessKey | string | `""` | S3 Secret Access Key if no secret is used |
+| config.s3.auth.secretKeys.accessKey | string | `""` | Name of the key in the secret that contains the access key ID |
+| config.s3.auth.secretKeys.secretKey | string | `""` | Name of the key in the secret that contains the secret access key |
+| config.s3.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
+| config.s3.endpointURL | string | `""` | S3 Service endpoint URL |
 | developmentMode | bool | `false` | Whether to setup developement mode |
 | influxdb.address | string | `"http://kai-influxdb/"` |  |
 | influxdb.affinity | object | `{}` | Assign custom affinity rules to the InfluxDB pods |
@@ -61,7 +67,7 @@
 | k8sManager.generatedEntrypoints.tls | bool | `false` | Whether to enable tls |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.10"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.14"` | Image tag |
 | k8sManager.krtFilesDownloader.image.pullPolicy | string | `"Always"` | Image pull policy |
 | k8sManager.krtFilesDownloader.image.repository | string | `"konstellation/krt-files-downloader"` | Image repository |
 | k8sManager.krtFilesDownloader.image.tag | string | `"latest"` | Image tag |
@@ -140,8 +146,11 @@
 | minio.persistence.enabled | bool | `true` | Enables persistent storage using PVC |
 | minio.persistence.size | string | `"10Gi"` | Storage size |
 | minio.persistence.storageClass | string | `""` | Storage class name |
+| minio.resources | object | `{"requests":{"memory":"256Mi"}}` | Sets pods resources |
 | minio.rootPassword | string | Randomly generated value | Sets Root password |
 | minio.rootUser | string | Randomly generated value | Sets Root user |
+| minio.service.port | string | `"9000"` |  |
+| minio.service.type | string | `"ClusterIP"` |  |
 | mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods |
 | mongoExpress.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | mongoExpress.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
@@ -153,7 +162,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.10"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.14"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -185,18 +194,25 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.10"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.14"` | Image tag |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | registry.affinity | object | `{}` | Assign custom affinity rules to the pods |
+| registry.auth.password | string | password | Registry password |
+| registry.auth.user | string | user | Registry username |
 | registry.config | string | `""` | A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/. |
 | registry.configSecret.key | string | `""` | The name of the secret key that contains the registry config file |
 | registry.configSecret.name | string | `""` | Takes precedence over 'registry.config'. The name of the secret that contains the registry config file. |
 | registry.containerPort | int | `5000` | The container port |
+| registry.extraVolumeMounts | list | `[]` | Extra volume mounts for the registry deployment |
+| registry.extraVolumes | list | `[]` | Extra volumes for the registry deployment |
+| registry.host | string | `"registry.kai.local"` | Hostname |
 | registry.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | registry.image.repository | string | `"registry"` | Image repository |
 | registry.image.tag | string | `"2.8.2"` | Image tag |
 | registry.imagePullSecrets | list | `[]` | Image pull secrets |
-| registry.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| registry.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
+| registry.ingress.className | string | `"kong"` | The name of the ingress class to use |
+| registry.nodeSelector | object | `{}` |  |
 | registry.podAnnotations | object | `{}` | Pod annotations |
 | registry.podSecurityContext | object | `{}` | Pod security context |
 | registry.resources | object | `{}` | Container resources |
@@ -211,4 +227,6 @@
 | registry.storage.path | string | `"/var/lib/registry"` | Persistent volume mount point. This will define Registry app workdir too. |
 | registry.storage.size | string | `"10Gi"` | Storage size |
 | registry.storage.storageClass | string | `"standard"` | Storage class name |
+| registry.tls | object | `{"enabled":false}` | Define which Nodes the Pods are scheduled on. |
+| registry.tls.enabled | bool | `false` | Whether to enable TLS |
 | registry.tolerations | list | `[]` | Tolerations for use with node taints |
