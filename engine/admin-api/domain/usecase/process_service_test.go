@@ -115,7 +115,7 @@ func (s *ProcessServiceTestSuite) SetupSuite() {
 
 	s.registryHost = "test.registry"
 
-	viper.Set(config.RegistryURLKey, "http://"+s.registryHost)
+	viper.Set(config.RegistryHostKey, s.registryHost)
 
 	monkey.Patch(time.Now, func() time.Time {
 		return time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)

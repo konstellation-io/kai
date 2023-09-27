@@ -7,6 +7,7 @@ import (
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -69,6 +70,11 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					ImagePullSecrets: []corev1.LocalObjectReference{
+						{
+							Name: viper.GetString(config.ImageRegistryAuthSecretKey),
+						},
+					},
 					Containers:     kp.getContainers(configMapName, spec),
 					InitContainers: initContainers,
 					NodeSelector:   kp.getNodeSelector(spec.Process.EnableGpu),
