@@ -12,9 +12,9 @@ if [ "$DEBUG" = "1" ]; then
 fi
 
 # Dynamic values
-if [ "$(uname)" == "Linux" ]; then
+if [ "$(uname)" = "Linux" ]; then
   MINIKUBE_DRIVER=docker
-elif [ "$(uname)" == "Darwin" ]; then
+elif [ "$(uname)" = "Darwin" ]; then
   MINIKUBE_DRIVER=hyperkit
 else
   echo "The operating system could not be determined. Using default minikube behavior"
