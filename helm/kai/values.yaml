@@ -751,3 +751,17 @@ minio:
   service:
     type: ClusterIP
     port: "9000"
+  ingress:
+    # -- Enable ingress for MinIO API
+    enabled: true
+    # -- The name of the ingress class to use
+    ingressClassName: kong
+    # -- Ingress labels
+    labels: {}
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hostnames
+    hosts:
+      - s3.kai.local
+    # -- Ingress TLS configuration
+    tls: []

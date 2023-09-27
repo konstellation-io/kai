@@ -133,6 +133,12 @@
 | keycloak.tolerations | list | `[]` | Assign custom tolerations to the Keycloak pods |
 | minio.enabled | bool | `true` | Enable MinIO persistent storage |
 | minio.existingSecret | string | `""` | Use an exising secret for root user and password |
+| minio.ingress.annotations | object | `{}` | Ingress annotations |
+| minio.ingress.enabled | bool | `true` | Enable ingress for MinIO API |
+| minio.ingress.hosts | list | `["s3.kai.local"]` | Ingress hostnames |
+| minio.ingress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
+| minio.ingress.labels | object | `{}` | Ingress labels |
+| minio.ingress.tls | list | `[]` | Ingress TLS configuration |
 | minio.minioAPIPort | string | `"9000"` | Internal port number for MinIO S3 API container |
 | minio.minioConsolePort | string | `"9001"` | Internal port number for MinIO Browser Console container |
 | minio.mode | string | `"standalone"` | Sets minio mode |
