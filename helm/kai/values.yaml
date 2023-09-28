@@ -74,6 +74,9 @@ config:
       secretAccessKey: ""
     # -- S3 Service endpoint URL
     endpointURL: ""
+    # -- The Region in which the buckets are created. This affect to MinIO buckets region if it is enabled
+    # @default -- us-east-1
+    region: ""
 adminApi:
   # -- Default application log level
   logLevel: INFO
