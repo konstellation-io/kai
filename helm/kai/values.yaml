@@ -74,6 +74,9 @@ config:
       secretAccessKey: ""
     # -- S3 Service endpoint URL
     endpointURL: ""
+    # -- The Region in which the buckets are created. This affect to MinIO buckets region if it is enabled
+    # @default -- us-east-1
+    region: ""
 adminApi:
   # -- Default application log level
   logLevel: INFO
@@ -81,7 +84,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.16
+    tag: 0.2.0-develop.19
     # -- Image pull policy
     pullPolicy: IfNotPresent
   tls:
@@ -138,7 +141,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.16
+    tag: 0.2.0-develop.19
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -364,7 +367,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.16
+    tag: 0.2.0-develop.19
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -602,7 +605,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.16
+    tag: 0.2.0-develop.19
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:

@@ -16,7 +16,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.14"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.16"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -47,6 +47,7 @@
 | config.s3.auth.secretKeys.secretKey | string | `""` | Name of the key in the secret that contains the secret access key |
 | config.s3.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
 | config.s3.endpointURL | string | `""` | S3 Service endpoint URL |
+| config.s3.region | string | us-east-1 | The Region in which the buckets are created. This affect to MinIO buckets region if it is enabled |
 | developmentMode | bool | `false` | Whether to setup developement mode |
 | influxdb.address | string | `"http://kai-influxdb/"` |  |
 | influxdb.affinity | object | `{}` | Assign custom affinity rules to the InfluxDB pods |
@@ -67,7 +68,7 @@
 | k8sManager.generatedEntrypoints.tls | bool | `false` | Whether to enable tls |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.14"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.16"` | Image tag |
 | k8sManager.krtFilesDownloader.image.pullPolicy | string | `"Always"` | Image pull policy |
 | k8sManager.krtFilesDownloader.image.repository | string | `"konstellation/krt-files-downloader"` | Image repository |
 | k8sManager.krtFilesDownloader.image.tag | string | `"latest"` | Image tag |
@@ -162,7 +163,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.14"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.16"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -194,7 +195,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.14"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.16"` | Image tag |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | registry.affinity | object | `{}` | Assign custom affinity rules to the pods |
 | registry.auth.password | string | password | Registry password |

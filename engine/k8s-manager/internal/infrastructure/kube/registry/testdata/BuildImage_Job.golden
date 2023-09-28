@@ -127,7 +127,7 @@ spec:
                   command: []
                   args:
                     - --context=tar:///sources/file.tar.gz
-                    - --insecure
+                    - --insecure=
                     - --verbosity=error
                     - --destination=test.local/test-image:v1.0.0
                   workingdir: ""
