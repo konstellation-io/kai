@@ -63,6 +63,13 @@ app.kubernetes.io/name: {{ include "kai.name" . }}-admin-api
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{/*
+Admin API S3 service region
+*/}}
+{{- define "admin-api.s3.region" -}}
+{{- default "us-east-1" .Values.config.s3.region -}}
+{{- end }}
+
 {{/* Fullname suffixed with chronograf */}}
 {{- define "chronograf.fullname" -}}
 {{- printf "%s-chronograf" (include "kai.fullname" .) -}}
