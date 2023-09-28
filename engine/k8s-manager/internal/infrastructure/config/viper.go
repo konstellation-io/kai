@@ -22,6 +22,7 @@ const (
 	ImageRegistryAuthSecretKey = "registry.authSecret"
 	ImageBuilderImageKey       = "registry.imageBuilder.image"
 	ImageBuilderLogLevel       = "registry.imageBuilder.logLevel"
+	ImageRegistryInsecureKey   = "registry.insecure"
 
 	TriggerRequestTimeoutKey = "networking.trigger.requestTimeout"
 	IngressClassNameKey      = "networking.trigger.ingressClassName"
@@ -57,6 +58,7 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(BaseDomainNameKey, "BASE_DOMAIN_NAME")
 	viper.RegisterAlias(IngressClassNameKey, "INGRESS_CLASS_NAME")
 	viper.RegisterAlias(ImageRegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
+	viper.RegisterAlias(ImageRegistryInsecureKey, "REGISTRY_INSECURE")
 
 	viper.AutomaticEnv()
 
