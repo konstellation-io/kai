@@ -137,7 +137,7 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination, 
 							Command: nil,
 							Args: []string{
 								"--context=tar:///sources/file.tar.gz",
-								"--insecure",
+								fmt.Sprintf("--insecure=%s", viper.GetString(config.ImageRegistryInsecureKey)),
 								fmt.Sprintf("--verbosity=%s", viper.GetString(config.ImageBuilderLogLevel)),
 								fmt.Sprintf("--destination=%s", imageWithDestination),
 							},
