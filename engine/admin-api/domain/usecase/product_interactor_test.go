@@ -35,6 +35,7 @@ type productSuiteMocks struct {
 	processRepo      *mocks.MockProcessRepository
 	userActivityRepo *mocks.MockUserActivityRepo
 	accessControl    *mocks.MockAccessControl
+	objectStorage    *mocks.MockObjectStorage
 }
 
 func newProductSuite(t *testing.T) *productSuite {
@@ -49,6 +50,7 @@ func newProductSuite(t *testing.T) *productSuite {
 	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
 	processRepo := mocks.NewMockProcessRepository(ctrl)
 	accessControl := mocks.NewMockAccessControl(ctrl)
+	objectStorage := mocks.NewMockObjectStorage(t)
 
 	userActivity := usecase.NewUserActivityInteractor(
 		logger,
@@ -66,6 +68,7 @@ func newProductSuite(t *testing.T) *productSuite {
 		ProcessRepo:     processRepo,
 		UserActivity:    userActivity,
 		AccessControl:   accessControl,
+		ObjectStorage:   objectStorage,
 	}
 	productInteractor := usecase.NewProductInteractor(&ps)
 
@@ -82,6 +85,7 @@ func newProductSuite(t *testing.T) *productSuite {
 			processRepo,
 			userActivityRepo,
 			accessControl,
+			objectStorage,
 		},
 	}
 }
@@ -126,12 +130,13 @@ func TestCreateProduct(t *testing.T) {
 	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
+	s.mocks.objectStorage.EXPECT().CreateBucket(productID).Return(nil)
 	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
 	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 
@@ -244,6 +249,7 @@ func TestCreateProduct_ErrorCreatingMeasurementsDatabase(t *testing.T) {
 	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.mocks.objectStorage.EXPECT().CreateBucket(productID).Return(nil)
 	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(expectedError)
 	// s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
 
@@ -303,6 +309,7 @@ func TestCreateProduct_ErrorCreatingMetricsRepoIndexes(t *testing.T) {
 	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.mocks.objectStorage.EXPECT().CreateBucket(productID).Return(nil)
 	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 
@@ -325,6 +332,7 @@ func TestCreateProduct_ErrorCreatingProcessLogRepoIndexes(t *testing.T) {
 	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.mocks.objectStorage.EXPECT().CreateBucket(productID).Return(nil)
 	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
@@ -348,6 +356,7 @@ func TestCreateProduct_ErrorCreatingVersionRepoIndexes(t *testing.T) {
 	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.mocks.objectStorage.EXPECT().CreateBucket(productID).Return(nil)
 	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
@@ -372,6 +381,7 @@ func TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes(t *testing.T) {
 	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.mocks.objectStorage.EXPECT().CreateBucket(productID).Return(nil)
 	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
@@ -406,6 +416,7 @@ func TestCreateProduct_FailsIfCreateProductFails(t *testing.T) {
 	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.mocks.objectStorage.EXPECT().CreateBucket(productID).Return(nil)
 	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
 	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
