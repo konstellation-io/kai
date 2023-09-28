@@ -35,3 +35,4 @@ data:
   {{- else }}
   AWS_S3_ENDPOINT_URL: {{ .Values.config.s3.endpointURL }}
   {{- end }}
+  AWS_REGION: "{{ include "admin-api.s3.region" . }}"
