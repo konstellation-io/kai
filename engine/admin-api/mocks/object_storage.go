@@ -17,8 +17,8 @@ func (_m *MockObjectStorage) EXPECT() *MockObjectStorage_Expecter {
 	return &MockObjectStorage_Expecter{mock: &_m.Mock}
 }
 
-// CreateBucket provides a mock function with given fields: name
-func (_m *MockObjectStorage) CreateBucket(name string) error {
+// CreateFolder provides a mock function with given fields: name
+func (_m *MockObjectStorage) CreateFolder(name string) error {
 	ret := _m.Called(name)
 
 	var r0 error
@@ -31,30 +31,30 @@ func (_m *MockObjectStorage) CreateBucket(name string) error {
 	return r0
 }
 
-// MockObjectStorage_CreateBucket_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateBucket'
-type MockObjectStorage_CreateBucket_Call struct {
+// MockObjectStorage_CreateFolder_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateFolder'
+type MockObjectStorage_CreateFolder_Call struct {
 	*mock.Call
 }
 
-// CreateBucket is a helper method to define mock.On call
+// CreateFolder is a helper method to define mock.On call
 //   - name string
-func (_e *MockObjectStorage_Expecter) CreateBucket(name interface{}) *MockObjectStorage_CreateBucket_Call {
-	return &MockObjectStorage_CreateBucket_Call{Call: _e.mock.On("CreateBucket", name)}
+func (_e *MockObjectStorage_Expecter) CreateFolder(name interface{}) *MockObjectStorage_CreateFolder_Call {
+	return &MockObjectStorage_CreateFolder_Call{Call: _e.mock.On("CreateFolder", name)}
 }
 
-func (_c *MockObjectStorage_CreateBucket_Call) Run(run func(name string)) *MockObjectStorage_CreateBucket_Call {
+func (_c *MockObjectStorage_CreateFolder_Call) Run(run func(name string)) *MockObjectStorage_CreateFolder_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(string))
 	})
 	return _c
 }
 
-func (_c *MockObjectStorage_CreateBucket_Call) Return(_a0 error) *MockObjectStorage_CreateBucket_Call {
+func (_c *MockObjectStorage_CreateFolder_Call) Return(_a0 error) *MockObjectStorage_CreateFolder_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockObjectStorage_CreateBucket_Call) RunAndReturn(run func(string) error) *MockObjectStorage_CreateBucket_Call {
+func (_c *MockObjectStorage_CreateFolder_Call) RunAndReturn(run func(string) error) *MockObjectStorage_CreateFolder_Call {
 	_c.Call.Return(run)
 	return _c
 }
