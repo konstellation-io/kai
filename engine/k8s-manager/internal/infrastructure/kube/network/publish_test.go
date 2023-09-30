@@ -60,7 +60,7 @@ func (s *networkSuite) TestPublish() {
 }
 
 func (s *networkSuite) TestPublish_WithTLS() {
-	viper.Set(config.TLSIsEnabledKey, true)
+	viper.Set(config.TriggersTLSEnabledKey, true)
 	ctx := context.Background()
 
 	err := s.service.CreateNetwork(ctx, service.CreateNetworkParams{
@@ -104,7 +104,7 @@ func (s *networkSuite) TestPublish_WithTLS() {
 }
 
 func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
-	viper.Set(config.TLSIsEnabledKey, true)
+	viper.Set(config.TriggersTLSEnabledKey, true)
 	viper.Set(config.TLSSecretNameKey, "test-secret")
 	ctx := context.Background()
 
