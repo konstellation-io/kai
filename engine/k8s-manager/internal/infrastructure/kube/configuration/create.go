@@ -59,7 +59,6 @@ func (kc KubeConfiguration) getProcessConfig(
 			WorkflowName: workflow.Name,
 			ProcessName:  process.Name,
 			ProcessType:  process.Type.ToString(),
-			BasePath:     viper.GetString("krtFiles.path"),
 		},
 		Nats: NatsConfig{
 			URL:           viper.GetString("nats.url"),
