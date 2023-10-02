@@ -60,6 +60,8 @@ config:
       # --The name of the secret key that contains the MongoDB connection string.
       secretKey: ""
   s3:
+    # -- Bucket name. If MinIO is enabled this should be the same as the MinIO bucket name
+    bucketName: "konstellation"
     auth:
       # -- Name of the secret that contains the credentials for S3
       secretName: ""
@@ -759,3 +761,8 @@ minio:
       - s3.kai.local
     # -- Ingress TLS configuration
     tls: []
+  buckets:
+  # -- Default bucket to be created for KAI
+  - name: konstellation
+    policy: none
+    purge: false
