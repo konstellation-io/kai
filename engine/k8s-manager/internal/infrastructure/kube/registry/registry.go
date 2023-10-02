@@ -28,6 +28,10 @@ const (
 	_jobStatusComplete
 
 	_ttlSecondsAfterFinishedJob = 100
+
+	//nolint:gosec // False positive
+	_registryAuthSecretVolume = "registry-auth-secret"
+	_configVolumeName         = "config"
 )
 
 var (
@@ -133,31 +137,57 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination, 
 							Command: nil,
 							Args: []string{
 								"--context=tar:///sources/file.tar.gz",
-								"--insecure",
+								fmt.Sprintf("--insecure=%s", viper.GetString(config.ImageRegistryInsecureKey)),
 								fmt.Sprintf("--verbosity=%s", viper.GetString(config.ImageBuilderLogLevel)),
 								fmt.Sprintf("--destination=%s", imageWithDestination),
 							},
 							VolumeMounts: []corev1.VolumeMount{
 								{
-									Name:      "config",
+									Name:      _configVolumeName,
 									MountPath: "/sources",
+								},
+								{
+									Name:      _registryAuthSecretVolume,
+									MountPath: "/kaniko/.docker",
 								},
 							},
 						},
 					},
 					RestartPolicy: corev1.RestartPolicyNever,
 					Volumes: []corev1.Volume{
-						{
-							Name: "config",
-							VolumeSource: corev1.VolumeSource{
-								HostPath: nil,
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: jobConfigName,
-									},
-								},
-							},
-						},
+						ib.getConfigVolume(jobConfigName),
+						ib.getRegistryAuthVolume(),
+					},
+				},
+			},
+		},
+	}
+}
+
+func (ib *KanikoImageBuilder) getConfigVolume(jobConfigName string) corev1.Volume {
+	return corev1.Volume{
+		Name: _configVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			HostPath: nil,
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: jobConfigName,
+				},
+			},
+		},
+	}
+}
+
+func (ib *KanikoImageBuilder) getRegistryAuthVolume() corev1.Volume {
+	return corev1.Volume{
+		Name: _registryAuthSecretVolume,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: viper.GetString(config.ImageRegistryAuthSecretKey),
+				Items: []corev1.KeyToPath{
+					{
+						Key:  ".dockerconfigjson",
+						Path: "config.json",
 					},
 				},
 			},

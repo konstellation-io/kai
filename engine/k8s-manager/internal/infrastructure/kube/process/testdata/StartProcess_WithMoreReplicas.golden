@@ -279,7 +279,8 @@ items:
                 hostipc: false
                 shareprocessnamespace: null
                 securitycontext: null
-                imagepullsecrets: []
+                imagepullsecrets:
+                    - name: ""
                 hostname: ""
                 subdomain: ""
                 affinity: null

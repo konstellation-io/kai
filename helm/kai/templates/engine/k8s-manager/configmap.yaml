@@ -21,5 +21,6 @@ data:
   {{- end }}
   KAI_NATS_URL: "{{ include "nats.url" . }}"
   KAI_NATS_HOST: "{{ include "nats.host" . }}"
-  KAI_REGISTRY_URL: "http://{{ include "registry.fullname" . }}:{{ .Values.registry.service.ports.http }}"
+  KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
   KAI_REGISTRY_AUTH_SECRET_NAME: "{{ include "registry.auth.secretName" . }}"
+  KAI_REGISTRY_INSECURE: "{{ not .Values.registry.tls.enabled }}"
