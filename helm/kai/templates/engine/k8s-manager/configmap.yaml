@@ -21,9 +21,6 @@ data:
   {{- end }}
   KAI_NATS_URL: "{{ include "nats.url" . }}"
   KAI_NATS_HOST: "{{ include "nats.host" . }}"
-  KAI_KRT_FILES_DOWNLOADER_IMAGE: "{{ .Values.k8sManager.krtFilesDownloader.image.repository }}"
-  KAI_KRT_FILES_DOWNLOADER_TAG: "{{ .Values.k8sManager.krtFilesDownloader.image.tag }}"
-  KAI_KRT_FILES_DOWNLOADER_PULL_POLICY: "{{ .Values.k8sManager.krtFilesDownloader.image.pullPolicy }}"
   KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
   KAI_REGISTRY_AUTH_SECRET_NAME: "{{ include "registry.auth.secretName" . }}"
   KAI_REGISTRY_INSECURE: "{{ not .Values.registry.tls.enabled }}"
