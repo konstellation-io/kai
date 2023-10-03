@@ -10,14 +10,14 @@ data:
   KAI_DEVELOPMENT_MODE: "{{ .Values.developmentMode }}"
   KAI_RELEASE_NAME: "{{ .Release.Name }}"
   KAI_BASE_DOMAIN_NAME: {{ .Values.config.baseDomainName }}
-  KAI_ENTRYPOINTS_REQUEST_TIMEOUT: "30"
-  KAI_ENTRYPOINTS_BASE64_INGRESSES_ANNOTATIONS: {{ .Values.k8sManager.generatedEntrypoints.ingress.annotations | toYaml | b64enc }}
-  KAI_ENTRYPOINTS_TLS: "{{ .Values.k8sManager.generatedEntrypoints.tls }}"
-    {{- if and .Values.k8sManager.generatedEntrypoints.tls .Values.k8sManager.generatedEntrypoints.ingress.tls.secretName }}
-  KAI_ENTRYPOINTS_TLS_CERT_SECRET_NAME: {{ .Values.k8sManager.generatedEntrypoints.ingress.tls.secretName }}
+  KAI_TRIGGERS_REQUEST_TIMEOUT: "30"
+  KAI_TRIGGERS_BASE64_INGRESSES_ANNOTATIONS: {{ .Values.k8sManager.triggers.ingress.annotations | toYaml | b64enc }}
+  KAI_TRIGGERS_TLS_ENABLED: "{{ .Values.k8sManager.triggers.tls }}"
+    {{- if and .Values.k8sManager.triggers.tls .Values.k8sManager.triggers.ingress.tls.secretName }}
+  KAI_TRIGGERS_TLS_CERT_SECRET_NAME: {{ .Values.k8sManager.triggers.ingress.tls.secretName }}
   {{- end }}
-  {{- if .Values.k8sManager.generatedEntrypoints.ingress.className }}
-  KAI_ENTRYPOINTS_INGRESS_CLASS_NAME: {{ .Values.k8sManager.generatedEntrypoints.ingress.className }}
+  {{- if .Values.k8sManager.triggers.ingress.className }}
+  KAI_TRIGGERS_INGRESS_CLASS_NAME: {{ .Values.k8sManager.triggers.ingress.className }}
   {{- end }}
   KAI_NATS_URL: "{{ include "nats.url" . }}"
   KAI_NATS_HOST: "{{ include "nats.host" . }}"

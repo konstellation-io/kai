@@ -24,10 +24,11 @@ const (
 	ImageBuilderLogLevel       = "registry.imageBuilder.logLevel"
 	ImageRegistryInsecureKey   = "registry.insecure"
 
-	TriggerRequestTimeoutKey = "networking.trigger.requestTimeout"
-	IngressClassNameKey      = "networking.trigger.ingressClassName"
-	TLSIsEnabledKey          = "networking.trigger.tls.isEnabled"
-	TLSSecretNameKey         = "networking.trigger.tls.secretName"
+	TriggersRequestTimeoutKey         = "networking.trigger.requestTimeout"
+	TriggersB64IngressesAnnotaionsKey = "networking.trigger.b64Annotations"
+	TriggersIngressClassNameKey       = "networking.trigger.ingressClassName"
+	TriggersTLSEnabledKey             = "networking.trigger.tls.isEnabled"
+	TLSSecretNameKey                  = "networking.trigger.tls.secretName"
 
 	configType = "yaml"
 
@@ -56,9 +57,15 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(ImageRegistryURLKey, "REGISTRY_URL")
 	viper.RegisterAlias(KubeNamespaceKey, "KUBERNETES_NAMESPACE")
 	viper.RegisterAlias(BaseDomainNameKey, "BASE_DOMAIN_NAME")
-	viper.RegisterAlias(IngressClassNameKey, "INGRESS_CLASS_NAME")
 	viper.RegisterAlias(ImageRegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
 	viper.RegisterAlias(ImageRegistryInsecureKey, "REGISTRY_INSECURE")
+	viper.RegisterAlias(ImageBuilderImageKey, "IMAGE_BUILDER_IMAGE")
+
+	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_ENABLED")
+	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_CERT_SECRET_NAME")
+	viper.RegisterAlias(TriggersIngressClassNameKey, "TRIGGERS_INGRESS_CLASS_NAME")
+	viper.RegisterAlias(TriggersRequestTimeoutKey, "TRIGGERS_REQUEST_TIMEOUT")
+	viper.RegisterAlias(TriggersB64IngressesAnnotaionsKey, "TRIGGERS_BASE64_INGRESSES_ANNOTATIONS")
 
 	viper.AutomaticEnv()
 
@@ -70,10 +77,10 @@ func Init(configFilePath string) error {
 func setDefaultValues() {
 	viper.SetDefault("releaseName", "kai")
 	viper.SetDefault("server.port", _defaultServerPort)
-	viper.SetDefault(TLSIsEnabledKey, false)
+	viper.SetDefault(TriggersTLSEnabledKey, false)
 	viper.SetDefault(TLSSecretNameKey, "")
-	viper.SetDefault(TriggerRequestTimeoutKey, _defaultRequestTimeout)
-	viper.SetDefault(IngressClassNameKey, "kong")
+	viper.SetDefault(TriggersRequestTimeoutKey, _defaultRequestTimeout)
+	viper.SetDefault(TriggersIngressClassNameKey, "kong")
 
 	viper.SetDefault(ImageBuilderImageKey, "gcr.io/kaniko-project/executor:latest")
 	viper.SetDefault(ImageBuilderLogLevel, "error")
