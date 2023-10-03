@@ -13,6 +13,8 @@ const (
 	CfgFilePathKey          = "CONFIG_FILE_PATH"
 	RegistryHostKey         = "registry.host"
 	VersionStatusTimeoutKey = "application.versionStatusTimeout"
+	S3EndpointKey           = "s3.endpoint"
+	S3BucketKey             = "s3.bucket"
 )
 
 func InitConfig() error {
@@ -23,12 +25,15 @@ func InitConfig() error {
 func setDefaultConfig() {
 	viper.SetDefault(CfgFilePathKey, "config.yml")
 	viper.SetDefault(VersionStatusTimeoutKey, 20*time.Minute)
+	viper.SetDefault(S3BucketKey, "kai")
 }
 
 func loadConfig() error {
 	viper.SetEnvPrefix("KAI")
 
 	viper.RegisterAlias(RegistryHostKey, "REGISTRY_HOST")
+	viper.RegisterAlias(S3EndpointKey, "S3_ENDPOINT_URL")
+	viper.RegisterAlias(S3BucketKey, "S3_BUCKET")
 
 	viper.AutomaticEnv()
 

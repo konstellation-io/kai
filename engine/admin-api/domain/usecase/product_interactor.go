@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -32,6 +33,7 @@ type ProductInteractor struct {
 	processRepo     repository.ProcessRepository
 	userActivity    UserActivityInteracter
 	accessControl   auth.AccessControl
+	objectStorage   repository.ObjectStorage
 }
 
 type ProductInteractorOpts struct {
@@ -44,6 +46,7 @@ type ProductInteractorOpts struct {
 	ProcessRepo     repository.ProcessRepository
 	UserActivity    UserActivityInteracter
 	AccessControl   auth.AccessControl
+	ObjectStorage   repository.ObjectStorage
 }
 
 // NewProductInteractor creates a new ProductInteractor.
@@ -58,6 +61,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.ProcessRepo,
 		ps.UserActivity,
 		ps.AccessControl,
+		ps.ObjectStorage,
 	}
 }
 
@@ -77,9 +81,9 @@ func (i *ProductInteractor) CreateProduct(
 	name = strings.TrimSpace(name)
 	description = strings.TrimSpace(description)
 
-	i.logger.Info("Creating product", "name", name, "id", productID)
+	i.logger.Info("Creating product", "name", name, "ID", productID)
 
-	r := &entity.Product{
+	newProduct := &entity.Product{
 		ID:          productID,
 		Name:        name,
 		Description: description,
@@ -87,7 +91,7 @@ func (i *ProductInteractor) CreateProduct(
 	}
 
 	// Validation
-	err := r.Validate()
+	err := newProduct.Validate()
 	if err != nil {
 		return nil, err
 	}
@@ -108,24 +112,29 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	createdProduct, err := i.productRepo.Create(ctx, r)
+	err = i.objectStorage.CreateFolder(productID)
+	if err != nil {
+		return nil, fmt.Errorf("creating s3 bucket: %w", err)
+	}
+
+	err = i.measurementRepo.CreateDatabase(newProduct.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	i.logger.Info("Product stored in the database with ID:" + createdProduct.Name)
-
-	err = i.measurementRepo.CreateDatabase(createdProduct.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	i.logger.Info("Measurement database created for product with ID:" + createdProduct.Name)
+	i.logger.V(0).Info("Measurement database created for product")
 
 	err = i.createDatabaseIndexes(ctx, name)
 	if err != nil {
 		return nil, err
 	}
+
+	createdProduct, err := i.productRepo.Create(ctx, newProduct)
+	if err != nil {
+		return nil, err
+	}
+
+	i.logger.Info("Product stored in the database", "name", createdProduct.Name, "ID", createdProduct.ID)
 
 	return createdProduct, nil
 }
