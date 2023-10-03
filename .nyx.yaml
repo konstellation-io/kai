@@ -1,8 +1,18 @@
---- 
+---
 # starting from the "simple" preset gives us:
 # - the Conventional Commits convention
 # - the "mainline" and "internal" release types (that we override here)
 preset: "simple"
+commitMessageConventions:
+  enabled:
+    - conventionalCommits
+  items:
+    conventionalCommits:
+      expression: "(?m)^(?<type>[a-zA-Z0-9_]+)(!)?(\\((?<scope>[a-zA-Z0-9 -]+)\\))?:( (?<title>.+))$(?s).*"
+      bumpExpressions:
+        major: "(?s)(?m)^[a-zA-Z0-9_]+(!: .*|.*^(BREAKING( |-)CHANGE: )).*"
+        minor: "(?s)(?m)^feat(!{0})(\\([a-zA-Z0-9 -]+\\))?: (?!.*^(BREAKING( |-)CHANGE: )).*"
+        patch: "(?s)(?m)^fix(!{0})(\\([a-zA-Z0-9 -]+\\))?: (?!.*^(BREAKING( |-)CHANGE: )).*"
 git:
   remotes:
     origin:
@@ -16,17 +26,17 @@ changelog:
     "Added": "^feat$"
     "Fixed": "^fix$"
     "Changed": "^(chore|perf|style|docs)$"
-releaseTypes: 
-  enabled: 
+releaseTypes:
+  enabled:
     - mainline
     - integration
     - hotfix
     - release
     - maintenance
     - internal
-  publicationServices: 
+  publicationServices:
     - github
-  items: 
+  items:
     # "mainline" overrides the release type with the same name from the preset
     mainline:
       description: "{{#fileContent}}CHANGELOG.md{{/fileContent}}"
@@ -35,7 +45,7 @@ releaseTypes:
       gitPush: "true"
       gitTag: "true"
       matchBranches: "^main$"
-      matchEnvironmentVariables: 
+      matchEnvironmentVariables:
         CI: "^true$"                 # only match this release type when running on CI servers
       matchWorkspaceStatus: "CLEAN"  # only match this release type when the repository is clean
       publish: "true"
@@ -48,11 +58,10 @@ releaseTypes:
       gitPush: "true"
       gitTag: "true"
       matchBranches: "^develop$"
-      matchEnvironmentVariables: 
+      matchEnvironmentVariables:
         CI: "^true$"                 # only match this release type when running on CI servers
       matchWorkspaceStatus: "CLEAN"  # only match this release type when the repository is clean
       publish: "false"
-      
     hotfix:
       description: "{{#fileContent}}CHANGELOG.md{{/fileContent}}"
       collapseVersions: true
@@ -62,7 +71,7 @@ releaseTypes:
       gitPush: "true"
       gitTag: "true"
       matchBranches: "^hotfix((-|\\/)[0-9a-zA-Z-_]+)?$"
-      matchEnvironmentVariables: 
+      matchEnvironmentVariables:
         CI: "^true$"                 # only match this release type when running on CI servers
       matchWorkspaceStatus: "CLEAN"  # only match this release type when the repository is clean
       publish: "false"
@@ -75,7 +84,7 @@ releaseTypes:
       gitPush: "true"
       gitTag: "true"
       matchBranches: "^release(-|/)({{configuration.releasePrefix}})?([0-9|x]\\d*)(\\.([0-9|x]\\d*)(\\.([0-9|x]\\d*))?)?$"
-      matchEnvironmentVariables: 
+      matchEnvironmentVariables:
         CI: "^true$"                 # only match this release type when running on CI servers
       matchWorkspaceStatus: "CLEAN"  # only match this release type when the repository is clean
       publish: "false"
@@ -87,7 +96,7 @@ releaseTypes:
       gitPush: "true"
       gitTag: "true"
       matchBranches: "^[a-zA-Z]*([0-9|x]\\d*)(\\.([0-9|x]\\d*)(\\.([0-9|x]\\d*))?)?$"
-      matchEnvironmentVariables: 
+      matchEnvironmentVariables:
         CI: "^true$"                 # only match this release type when running on CI servers
       matchWorkspaceStatus: "CLEAN"  # only match this release type when the repository is clean
       publish: "true"
@@ -99,7 +108,7 @@ releaseTypes:
       collapsedVersionQualifier: "internal"
       gitPush: "false"
       gitTag: "false"
-      identifiers: 
+      identifiers:
         -
           qualifier: "{{#sanitizeLower}}{{branch}}{{/sanitizeLower}}"
           position: "BUILD"
@@ -110,10 +119,10 @@ releaseTypes:
           qualifier: "{{#timestampYYYYMMDDHHMMSS}}{{timestamp}}{{/timestampYYYYMMDDHHMMSS}}"
           position: "BUILD"
       publish: "false"
-services: 
-  github: 
+services:
+  github:
     type: "GITHUB"
-    options: 
+    options:
       # The GH_TOKEN variable is fetched from the "secrets" context and passed as an environment variable.
       # See:
       # - https://docs.github.com/en/actions/security-guides/automatic-token-authentication
