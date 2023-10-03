@@ -33,7 +33,7 @@ func loadConfig() error {
 
 	viper.RegisterAlias(RegistryHostKey, "REGISTRY_HOST")
 	viper.RegisterAlias(S3EndpointKey, "S3_ENDPOINT_URL")
-	viper.RegisterAlias(S3EndpointKey, "S3_BUCKET")
+	viper.RegisterAlias(S3BucketKey, "S3_BUCKET")
 
 	viper.AutomaticEnv()
 
