@@ -60,6 +60,8 @@ config:
       # --The name of the secret key that contains the MongoDB connection string.
       secretKey: ""
   s3:
+    # -- Bucket name. If MinIO is enabled this should be the same as the MinIO bucket name
+    bucketName: "konstellation"
     auth:
       # -- Name of the secret that contains the credentials for S3
       secretName: ""
@@ -84,7 +86,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.19
+    tag: 0.2.0-develop.21
     # -- Image pull policy
     pullPolicy: IfNotPresent
   tls:
@@ -141,7 +143,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.19
+    tag: 0.2.0-develop.21
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -152,14 +154,6 @@ k8sManager:
     name: ""
     # -- The Service Account annotations
     annotations: {}
-  krtFilesDownloader:
-    image:
-      # -- Image repository
-      repository: konstellation/krt-files-downloader
-      # -- Image tag
-      tag: latest
-      # -- Image pull policy
-      pullPolicy: Always
   generatedEntrypoints:
     # -- Whether to enable tls
     tls: false
@@ -367,7 +361,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.19
+    tag: 0.2.0-develop.21
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -605,7 +599,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.19
+    tag: 0.2.0-develop.21
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
@@ -767,3 +761,8 @@ minio:
       - s3.kai.local
     # -- Ingress TLS configuration
     tls: []
+  buckets:
+    # -- Default bucket to be created for KAI
+    - name: konstellation
+      policy: none
+      purge: false

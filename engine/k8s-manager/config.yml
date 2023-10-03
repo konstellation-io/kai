@@ -3,13 +3,8 @@ kubernetes:
 baseDomainName: "local"
 server:
   port: "50051"
-krtFilesDownloader:
-  image: konstellation/krt-files-downloader
-  tag: latest
 nats:
   url: "kai-local-nats:4222"
-krtFiles:
-  path: /krt-files
 fluentbit:
   image: fluent/fluent-bit
   tag: 1.3
