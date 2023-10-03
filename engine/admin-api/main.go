@@ -11,6 +11,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
@@ -115,6 +116,13 @@ func initGraphqlController(
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
+	s3client, err := objectstorage.NewS3Client()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s3ObjectStorage := objectstorage.NewS3ObjectStorage(logger, s3client)
+
 	ps := usecase.ProductInteractorOpts{
 		Logger:          logger,
 		ProductRepo:     productRepo,
@@ -125,6 +133,7 @@ func initGraphqlController(
 		ProcessRepo:     processRepo,
 		UserActivity:    userActivityInteractor,
 		AccessControl:   accessControl,
+		ObjectStorage:   s3ObjectStorage,
 	}
 	productInteractor := usecase.NewProductInteractor(&ps)
 

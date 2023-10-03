@@ -22,9 +22,11 @@ import (
 	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
-var productID = "productID"
-var versionTag = "v1.0.0"
-var creatorID = "creatorID"
+const (
+	productID  = "productID"
+	versionTag = "v1.0.0"
+	creatorID  = "creatorID"
+)
 
 type VersionRepositoryTestSuite struct {
 	suite.Suite
@@ -67,7 +69,7 @@ func (s *VersionRepositoryTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	port := p.Int()
-	uri := fmt.Sprintf("mongodb://%v:%v@%v:%v/", "root", "root", host, port) //NOSONAR not used in secure contexts
+	uri := fmt.Sprintf("mongodb://root:root@%v:%v/", host, port) //NOSONAR not used in secure contexts
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 	s.Require().NoError(err)
 

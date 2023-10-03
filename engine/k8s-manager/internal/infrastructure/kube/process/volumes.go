@@ -7,17 +7,10 @@ import (
 const (
 	versionConfFiles = "version-conf-files"
 	appLogsVolume    = "app-log-volume"
-	krtFilesVolume   = "krt-base-path"
 )
 
 func GetVolumes(configRef, configKey string) []corev1.Volume {
 	return []corev1.Volume{
-		{
-			Name: krtFilesVolume,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
-		},
 		{
 			Name: versionConfFiles,
 			VolumeSource: corev1.VolumeSource{

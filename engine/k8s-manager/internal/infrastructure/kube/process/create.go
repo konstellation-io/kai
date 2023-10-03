@@ -47,13 +47,6 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 
 	processIdentifier := getFullProcessIdentifier(spec.Product, spec.Version, spec.Workflow, spec.Process.Name)
 
-	var initContainers []corev1.Container
-	if viper.GetBool("krtFilesDownloader.enabled") {
-		initContainers = []corev1.Container{
-			getKrtFilesDownloaderContainer(spec),
-		}
-	}
-
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      processIdentifier,
@@ -75,11 +68,10 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 							Name: viper.GetString(config.ImageRegistryAuthSecretKey),
 						},
 					},
-					Containers:     kp.getContainers(configMapName, spec),
-					InitContainers: initContainers,
-					NodeSelector:   kp.getNodeSelector(spec.Process.EnableGpu),
-					Tolerations:    kp.getTolerations(spec.Process.EnableGpu),
-					Volumes:        GetVolumes(configMapName, processIdentifier),
+					Containers:   kp.getContainers(configMapName, spec),
+					NodeSelector: kp.getNodeSelector(spec.Process.EnableGpu),
+					Tolerations:  kp.getTolerations(spec.Process.EnableGpu),
+					Volumes:      GetVolumes(configMapName, processIdentifier),
 				},
 			},
 		},

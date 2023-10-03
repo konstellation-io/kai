@@ -16,11 +16,6 @@ cmd_build() {
       BUILD_ALL=0
       shift
     ;;
-    --runners)
-      BUILD_RUNNERS=1
-      BUILD_ALL=0
-      shift
-    ;;
      *)
       shift
       ;;
@@ -39,7 +34,6 @@ show_build_help() {
     options:
       --clean          sends a prune command to remove old docker images and containers. (will keep last 24h).
       --engine         build only engine components (admin-api, k8s-manager, nats-manager, mongo-writer).
-      --runners        build only runners (kai-entrypoint, kai-py, kai-go, krt-files-downloader).
 
     $(help_global_options)
 "
@@ -52,11 +46,6 @@ build_docker_images() {
   fi
 
   setup_env
-
-  # Runners
-  if [ "$BUILD_RUNNERS" = "1" ] || [ "$BUILD_ALL" = "1" ]; then
-    build_runners
-  fi
 }
 
 setup_env() {
@@ -75,10 +64,6 @@ build_engine() {
   build_image kai-k8s-manager engine/k8s-manager
   build_image kai-nats-manager engine/nats-manager
   build_image kai-mongo-writer engine/mongo-writer
-}
-
-build_runners() {
-  build_image krt-files-downloader runners/krt-files-downloader
 }
 
 build_image() {
