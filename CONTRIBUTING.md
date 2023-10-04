@@ -1,28 +1,4 @@
-<!-----
-
-Yay, no errors, warnings, or alerts!
-
-Conversion time: 0.546 seconds.
-
-
-Using this Markdown file:
-
-1. Paste this output into your source file.
-2. See the notes and action items below regarding this conversion run.
-3. Check the rendered output (headings, lists, code blocks, tables) for proper
-   formatting and use a linkchecker before you publish this page.
-
-Conversion notes:
-
-* Docs to Markdown version 1.0β34
-* Tue Oct 03 2023 06:33:21 GMT-0700 (PDT)
-* Source doc: Documento sin título
------>
-
-
 The Git Flow workflow is a branching model designed for efficient collaboration and release management in software development projects. It provides a structured approach to organizing branches and streamlines the process of feature development, bug fixing, and release management.
-
- 
 
 
 ## Branches
