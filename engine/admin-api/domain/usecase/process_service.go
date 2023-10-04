@@ -75,9 +75,12 @@ func (ps *ProcessService) RegisterProcess(
 	}
 
 	processExists := existingProcess != nil
+
 	if processExists {
+		isLatest := version == "latest"
 		processStatusIsFailed := existingProcess.Status == entity.RegisterProcessStatusFailed
-		if !processStatusIsFailed {
+
+		if !processStatusIsFailed && !isLatest {
 			return nil, nil, ErrProcessAlreadyRegistered
 		}
 
