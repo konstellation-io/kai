@@ -11,6 +11,10 @@ import (
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 )
 
+const (
+	_keyValueStorePrefix = "key-store_"
+)
+
 type NatsManager struct {
 	logger logging.Logger
 	client interfaces.NatsClient
@@ -154,89 +158,6 @@ func (m *NatsManager) DeleteObjectStores(productID, versionTag string) error {
 func (m *NatsManager) getStreamName(productID, versionTag, workflowID string) string {
 	versionTag = strings.ReplaceAll(versionTag, ".", "_")
 	return m.joinWithUnderscores(productID, versionTag, workflowID)
-}
-
-func (m *NatsManager) CreateKeyValueStores(
-	productID,
-	versionTag string,
-	workflows []entity.Workflow,
-) (*entity.VersionKeyValueStores, error) {
-	if len(workflows) == 0 {
-		return nil, internal.ErrNoWorkflowsDefined
-	}
-
-	m.logger.Info("Creating key-value stores")
-
-	// create key-value store for project
-	productKeyValueStore, err := m.getKeyValueStoreName(productID, versionTag, "", "", entity.KVScopeProject)
-	if err != nil {
-		return nil, err
-	}
-
-	err = m.client.CreateKeyValueStore(productKeyValueStore)
-	if err != nil {
-		return nil, fmt.Errorf("create product key-value store %q: %w", productKeyValueStore, err)
-	}
-
-	workflowsKeyValueStores := map[string]*entity.WorkflowKeyValueStores{}
-
-	for _, workflow := range workflows {
-		// create key-value store for workflow
-		workflowKeyValueStore, err := m.getKeyValueStoreName(productID, versionTag, workflow.Name, "", entity.KVScopeWorkflow)
-		if err != nil {
-			return nil, err
-		}
-
-		err = m.client.CreateKeyValueStore(workflowKeyValueStore)
-		if err != nil {
-			return nil, fmt.Errorf("create workflow key-value store %q: %w", workflowKeyValueStore, err)
-		}
-
-		processesKeyValueStores := map[string]string{}
-
-		for _, process := range workflow.Processes {
-			// create key-value store for process
-			processKeyValueStore, err := m.getKeyValueStoreName(productID, versionTag, workflow.Name, process.Name, entity.KVScopeProcess)
-			if err != nil {
-				return nil, err
-			}
-
-			err = m.client.CreateKeyValueStore(processKeyValueStore)
-			if err != nil {
-				return nil, fmt.Errorf("create process key-value store %q: %w", processKeyValueStore, err)
-			}
-
-			processesKeyValueStores[process.Name] = processKeyValueStore
-		}
-
-		workflowsKeyValueStores[workflow.Name] = &entity.WorkflowKeyValueStores{
-			WorkflowStore: workflowKeyValueStore,
-			Processes:     processesKeyValueStores,
-		}
-	}
-
-	return &entity.VersionKeyValueStores{
-		ProjectStore:    productKeyValueStore,
-		WorkflowsStores: workflowsKeyValueStores,
-	}, nil
-}
-
-func (m *NatsManager) getKeyValueStoreName(
-	product, versionTag, workflow, process string,
-	keyValueStore entity.KeyValueStoreScope,
-) (string, error) {
-	versionTag = strings.ReplaceAll(versionTag, ".", "_")
-
-	switch keyValueStore {
-	case entity.KVScopeProject:
-		return fmt.Sprintf("key-store_%s_%s", product, versionTag), nil
-	case entity.KVScopeWorkflow:
-		return fmt.Sprintf("key-store_%s_%s_%s", product, versionTag, workflow), nil
-	case entity.KVScopeProcess:
-		return fmt.Sprintf("key-store_%s_%s_%s_%s", product, versionTag, workflow, process), nil
-	default:
-		return "", internal.ErrInvalidKeyValueStoreScope
-	}
 }
 
 func (m *NatsManager) getProcessesStreamConfig(stream string, processes []entity.Process) entity.ProcessesStreamConfig {
