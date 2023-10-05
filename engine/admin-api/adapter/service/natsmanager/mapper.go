@@ -5,7 +5,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-func (n *NatsManagerClient) mapWorkflowsToDTO(workflows []entity.Workflow) []*natspb.Workflow {
+func (n *Client) mapWorkflowsToDTO(workflows []entity.Workflow) []*natspb.Workflow {
 	workflowsDTO := make([]*natspb.Workflow, 0, len(workflows))
 
 	for _, w := range workflows {
@@ -36,7 +36,7 @@ func (n *NatsManagerClient) mapWorkflowsToDTO(workflows []entity.Workflow) []*na
 	return workflowsDTO
 }
 
-func (n *NatsManagerClient) mapDTOToVersionStreamConfig(
+func (n *Client) mapDTOToVersionStreamConfig(
 	workflowsDTO map[string]*natspb.WorkflowStreamConfig,
 ) *entity.VersionStreamsConfig {
 	workflows := make(map[string]entity.WorkflowStreamConfig, len(workflowsDTO))
@@ -53,7 +53,7 @@ func (n *NatsManagerClient) mapDTOToVersionStreamConfig(
 	}
 }
 
-func (n *NatsManagerClient) mapDTOToProcessesStreamConfig(
+func (n *Client) mapDTOToProcessesStreamConfig(
 	processes map[string]*natspb.ProcessStreamConfig,
 ) map[string]entity.ProcessStreamConfig {
 	processesStreamCfg := map[string]entity.ProcessStreamConfig{}
@@ -68,7 +68,7 @@ func (n *NatsManagerClient) mapDTOToProcessesStreamConfig(
 	return processesStreamCfg
 }
 
-func (n *NatsManagerClient) mapDTOToVersionObjectStoreConfig(
+func (n *Client) mapDTOToVersionObjectStoreConfig(
 	workflowsDTO map[string]*natspb.WorkflowObjectStoreConfig,
 ) *entity.VersionObjectStoresConfig {
 	workflows := make(map[string]entity.WorkflowObjectStoresConfig, len(workflowsDTO))
@@ -84,7 +84,7 @@ func (n *NatsManagerClient) mapDTOToVersionObjectStoreConfig(
 	}
 }
 
-func (n *NatsManagerClient) mapDTOToVersionKeyValueStoreConfig(
+func (n *Client) mapDTOToVersionKeyValueStoreConfig(
 	projectKeyValueStore string,
 	workflows map[string]*natspb.WorkflowKeyValueStoreConfig,
 ) *entity.KeyValueStoresConfig {

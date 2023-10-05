@@ -8,7 +8,7 @@ import (
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 )
 
-func (m *NatsManager) CreateKeyValueStores(
+func (m *NatsManager) CreateVersionKeyValueStores(
 	productID,
 	versionTag string,
 	workflows []entity.Workflow,
@@ -19,7 +19,7 @@ func (m *NatsManager) CreateKeyValueStores(
 
 	m.logger.Info("Creating key-value stores")
 
-	productKeyValueStore := m.getProductKeyValueStoreName(productID, versionTag)
+	productKeyValueStore := m.getVersionKeyValueStoreName(productID, versionTag)
 
 	err := m.client.CreateKeyValueStore(productKeyValueStore)
 	if err != nil {
@@ -61,7 +61,24 @@ func (m *NatsManager) CreateKeyValueStores(
 	}, nil
 }
 
-func (m *NatsManager) getProductKeyValueStoreName(product, versionTag string) string {
+func (m *NatsManager) CreateGlobalKeyValueStore(product string) (string, error) {
+	m.logger.Infof("Creating global key-value store for product %q", product)
+
+	keyValueStoreName := m.getProductKeyValueStoreName(product)
+
+	err := m.client.CreateKeyValueStore(keyValueStoreName)
+	if err != nil {
+		return "", fmt.Errorf("creating global key-value store: %w", err)
+	}
+
+	return keyValueStoreName, nil
+}
+
+func (m *NatsManager) getProductKeyValueStoreName(product string) string {
+	return m.replaceInvalidCharacters(fmt.Sprintf("%s%s", _keyValueStorePrefix, product))
+}
+
+func (m *NatsManager) getVersionKeyValueStoreName(product, versionTag string) string {
 	return m.replaceInvalidCharacters(fmt.Sprintf("%s%s_%s", _keyValueStorePrefix, product, versionTag))
 }
 

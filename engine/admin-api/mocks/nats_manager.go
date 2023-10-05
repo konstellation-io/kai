@@ -43,7 +43,7 @@ func (m *MockNatsManagerServiceClient) CreateKeyValueStores(ctx context.Context,
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "CreateKeyValueStores", varargs...)
+	ret := m.ctrl.Call(m, "CreateVersionKeyValueStores", varargs...)
 	ret0, _ := ret[0].(*natspb.CreateKeyValueStoreResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -53,7 +53,7 @@ func (m *MockNatsManagerServiceClient) CreateKeyValueStores(ctx context.Context,
 func (mr *MockNatsManagerServiceClientMockRecorder) CreateKeyValueStores(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).CreateKeyValueStores), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVersionKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).CreateKeyValueStores), varargs...)
 }
 
 // CreateObjectStores mocks base method.
@@ -162,7 +162,7 @@ func (m *MockNatsManagerServiceServer) EXPECT() *MockNatsManagerServiceServerMoc
 // CreateKeyValueStores mocks base method.
 func (m *MockNatsManagerServiceServer) CreateKeyValueStores(arg0 context.Context, arg1 *natspb.CreateKeyValueStoresRequest) (*natspb.CreateKeyValueStoreResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateKeyValueStores", arg0, arg1)
+	ret := m.ctrl.Call(m, "CreateVersionKeyValueStores", arg0, arg1)
 	ret0, _ := ret[0].(*natspb.CreateKeyValueStoreResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -171,7 +171,7 @@ func (m *MockNatsManagerServiceServer) CreateKeyValueStores(arg0 context.Context
 // CreateKeyValueStores indicates an expected call of CreateKeyValueStores.
 func (mr *MockNatsManagerServiceServerMockRecorder) CreateKeyValueStores(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).CreateKeyValueStores), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVersionKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).CreateKeyValueStores), arg0, arg1)
 }
 
 // CreateObjectStores mocks base method.

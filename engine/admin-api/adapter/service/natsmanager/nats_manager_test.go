@@ -63,7 +63,7 @@ type NatsManagerTestSuite struct {
 	cfg               *config.Config
 	logger            logging.Logger
 	mockService       *mocks.MockNatsManagerServiceClient
-	natsManagerClient *natsmanager.NatsManagerClient
+	natsManagerClient *natsmanager.Client
 }
 
 func TestNatsManagerTestSuite(t *testing.T) {
@@ -77,7 +77,7 @@ func (s *NatsManagerTestSuite) SetupSuite() {
 	mocks.AddLoggerExpects(logger)
 	service := mocks.NewMockNatsManagerServiceClient(mockController)
 
-	k8sVersionClient, err := natsmanager.NewNatsManagerClient(cfg, logger, service)
+	k8sVersionClient, err := natsmanager.NewClient(cfg, logger, service)
 	s.Require().NoError(err)
 
 	s.cfg = cfg

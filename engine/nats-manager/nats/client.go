@@ -109,16 +109,12 @@ func (n *NatsClient) CreateKeyValueStore(keyValueStore string) error {
 
 func (n *NatsClient) DeleteStream(stream string) error {
 	n.logger.Infof("Deleting stream %q", stream)
-	err := n.js.DeleteStream(stream)
-
-	return err
+	return n.js.DeleteStream(stream)
 }
 
 func (n *NatsClient) DeleteObjectStore(objectStore string) error {
 	n.logger.Infof("Deleting object store %q", objectStore)
-	err := n.js.DeleteObjectStore(objectStore)
-
-	return err
+	return n.js.DeleteObjectStore(objectStore)
 }
 
 // GetStreamNames returns the list of streams' names.

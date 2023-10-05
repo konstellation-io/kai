@@ -56,10 +56,14 @@ message CreateObjectStoresRequest {
   repeated Workflow workflows = 3;
 }
 
-message CreateKeyValueStoresRequest {
+message CreateVersionKeyValueStoresRequest {
   string product_id = 1;
   string version_tag = 2;
   repeated Workflow workflows = 3;
+}
+
+message CreateGlobalKeyValueStoreRequest {
+  string product_id = 1;
 }
 
 message DeleteStreamsRequest {
@@ -83,9 +87,27 @@ message CreateObjectStoresResponse {
 message DeleteResponse {
   string message = 1;
 }
-message CreateKeyValueStoreResponse {
-  string keyValueStore = 1;
+
+message CreateVersionKeyValueStoreResponse {
+  string key_value_store = 1;
   map<string, WorkflowKeyValueStoreConfig> workflows = 2;
+}
+
+message CreateGlobalKeyValueStoreResponse {
+  string global_key_value_store = 1;
+}
+
+message UpdateKeyValueConfigurationRequest {
+  repeated KeyValueConfiguration key_value_stores_config = 1;
+}
+
+message KeyValueConfiguration {
+  string key_value_store = 1;
+  map<string, string> configuration = 2;
+}
+
+message UpdateKeyValueConfigurationResponse {
+  string message = 1;
 }
 
 service NatsManagerService {
@@ -93,5 +115,7 @@ service NatsManagerService {
   rpc CreateObjectStores (CreateObjectStoresRequest) returns (CreateObjectStoresResponse);
   rpc DeleteStreams (DeleteStreamsRequest) returns (DeleteResponse);
   rpc DeleteObjectStores (DeleteObjectStoresRequest) returns (DeleteResponse);
-  rpc CreateKeyValueStores (CreateKeyValueStoresRequest) returns (CreateKeyValueStoreResponse);
+  rpc CreateVersionKeyValueStores (CreateVersionKeyValueStoresRequest) returns (CreateVersionKeyValueStoreResponse);
+  rpc CreateGlobalKeyValueStore (CreateGlobalKeyValueStoreRequest) returns (CreateGlobalKeyValueStoreResponse);
+  rpc UpdateKeyValueConfiguration(UpdateKeyValueConfigurationRequest) returns (UpdateKeyValueConfigurationResponse);
 };
