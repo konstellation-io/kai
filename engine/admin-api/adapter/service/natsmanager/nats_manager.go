@@ -67,7 +67,7 @@ func (n *Client) CreateObjectStores(
 }
 
 // CreateKeyValueStores calls nats-manager to create NATS Key Value Stores for given version.
-func (n *Client) CreateKeyValueStores(
+func (n *Client) CreateVersionKeyValueStores(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
@@ -112,6 +112,37 @@ func (n *Client) DeleteObjectStores(ctx context.Context, productID, versionTag s
 	if err != nil {
 		return fmt.Errorf("error deleting version %q NATS object stores: %w", versionTag, err)
 	}
+
+	return nil
+}
+
+func (n *Client) CreateGlobalKeyValueStore(ctx context.Context, product string) (string, error) {
+	req := natspb.CreateGlobalKeyValueStoreRequest{
+		ProductId: product,
+	}
+
+	res, err := n.client.CreateGlobalKeyValueStore(ctx, &req)
+	if err != nil {
+		return "", fmt.Errorf("creating global key-value store: %w", err)
+	}
+
+	return res.GlobalKeyValueStore, err
+}
+
+func (n *Client) UpdateKeyValueConfiguration(ctx context.Context, product string) error {
+	req := natspb.UpdateKeyValueConfigurationRequest{
+		KeyValueStoresConfig: []*natspb.KeyValueConfiguration{},
+	}
+
+	_, err := n.client.UpdateKeyValueConfiguration(ctx, &req)
+	if err != nil {
+		return fmt.Errorf("creating global key-value store: %w", err)
+	}
+
+	return err
+}
+
+func (n *Client) mapKeyValueConfigToDTO() []*natspb.KeyValueConfiguration {
 
 	return nil
 }

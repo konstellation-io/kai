@@ -11,8 +11,6 @@ var (
 )
 
 type VersionConfig struct {
-	KeyValueStore string
-
 	StreamsConfig        *VersionStreamsConfig
 	ObjectStoresConfig   *VersionObjectStoresConfig
 	KeyValueStoresConfig *KeyValueStoresConfig

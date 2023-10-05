@@ -201,7 +201,7 @@ func (s *NatsManagerTestSuite) TestCreateKeyValueStores() {
 
 	s.mockService.EXPECT().CreateKeyValueStores(ctx, req).Return(natsManagerResponse, nil)
 
-	res, err := s.natsManagerClient.CreateKeyValueStores(ctx, productID, testVersion)
+	res, err := s.natsManagerClient.CreateVersionKeyValueStores(ctx, productID, testVersion)
 	s.Require().NoError(err)
 	s.Equal(expectedResponse, res)
 }
@@ -260,7 +260,7 @@ func (s *NatsManagerTestSuite) TestCreateKeyValueStoresManagerError() {
 	s.mockService.EXPECT().CreateKeyValueStores(ctx, gomock.Any()).
 		Return(&natspb.CreateKeyValueStoreResponse{}, errors.New("mocked error"))
 
-	_, err := s.natsManagerClient.CreateKeyValueStores(ctx, productID, testVersion)
+	_, err := s.natsManagerClient.CreateVersionKeyValueStores(ctx, productID, testVersion)
 	s.Error(err)
 }
 

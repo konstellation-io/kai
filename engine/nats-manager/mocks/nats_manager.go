@@ -34,7 +34,7 @@ func (m *MockNatsManager) EXPECT() *MockNatsManagerMockRecorder {
 	return m.recorder
 }
 
-// CreateKeyValueStores mocks base method.
+// CreateVersionKeyValueStores mocks base method.
 func (m *MockNatsManager) CreateVersionKeyValueStores(productID, versionTag string, workflows []entity.Workflow) (*entity.VersionKeyValueStores, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateVersionKeyValueStores", productID, versionTag, workflows)

@@ -9,9 +9,10 @@ import (
 )
 
 type NatsManagerService interface {
-	CreateStreams(ctx context.Context, runtimeID string, version *entity.Version) (*entity.VersionStreamsConfig, error)
-	CreateObjectStores(ctx context.Context, runtimeID string, version *entity.Version) (*entity.VersionObjectStoresConfig, error)
-	DeleteStreams(ctx context.Context, runtimeID string, versionTag string) error
-	DeleteObjectStores(ctx context.Context, runtimeID, versionTag string) error
-	CreateKeyValueStores(ctx context.Context, runtimeID string, version *entity.Version) (*entity.KeyValueStoresConfig, error)
+	CreateStreams(ctx context.Context, product string, version *entity.Version) (*entity.VersionStreamsConfig, error)
+	CreateObjectStores(ctx context.Context, product string, version *entity.Version) (*entity.VersionObjectStoresConfig, error)
+	DeleteStreams(ctx context.Context, product string, versionTag string) error
+	DeleteObjectStores(ctx context.Context, product, versionTag string) error
+	CreateVersionKeyValueStores(ctx context.Context, product string, version *entity.Version) (*entity.KeyValueStoresConfig, error)
+	CreateGlobalKeyValueStore(ctx context.Context, product string) (string, error)
 }

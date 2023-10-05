@@ -134,6 +134,7 @@ func initGraphqlController(
 		UserActivity:    userActivityInteractor,
 		AccessControl:   accessControl,
 		ObjectStorage:   s3ObjectStorage,
+		NatsService:     natsManagerService,
 	}
 	productInteractor := usecase.NewProductInteractor(&ps)
 

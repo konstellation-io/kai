@@ -46,6 +46,14 @@ func (h *Handler) Start(
 		return nil, nil, err
 	}
 
+	// Version kv store
+	kvConfiguration := make([]entity.VersionConfig)
+	versionCfg.KeyValueStoresConfig.KeyValueStore
+
+	vers.Config
+	vers.Workflows[0].Config
+	vers.Workflows[0].Processes[0].Config
+
 	vers.Status = entity.VersionStatusStarting
 
 	err = h.versionRepo.SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting)
@@ -76,7 +84,7 @@ func (h *Handler) getVersionConfig(ctx context.Context, productID string, vers *
 		return nil, fmt.Errorf("error creating objects stores for version %q: %w", vers.Tag, err)
 	}
 
-	kvStoreCfg, err := h.natsManagerService.CreateKeyValueStores(ctx, productID, vers)
+	kvStoreCfg, err := h.natsManagerService.CreateVersionKeyValueStores(ctx, productID, vers)
 	if err != nil {
 		return nil, fmt.Errorf("error creating key-value stores for version %q: %w", vers.Tag, err)
 	}
