@@ -12,7 +12,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 )
 
 type processSpec struct {
@@ -32,29 +31,44 @@ func (kp *KubeProcess) Create(
 		"process", params.Process.Name,
 	)
 
-	deploymentSpec := kp.getDeploymentSpec(params.ConfigName, &processSpec{
+	process := &processSpec{
 		Product:  params.Product,
 		Version:  params.Version,
 		Workflow: params.Workflow,
 		Process:  params.Process,
-	})
+	}
 
-	return kp.createProcessDeployment(ctx, deploymentSpec)
+	createdDeployment, err := kp.createProcessDeployment(ctx, params.ConfigName, process)
+	if err != nil {
+		return fmt.Errorf("creating deployment: %w", err)
+	}
+
+	if params.Process.Replicas > 1 {
+		if err := kp.createAutoscaler(ctx, createdDeployment, params.Process); err != nil {
+			return fmt.Errorf("creating autoscaler: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec) *appsv1.Deployment {
 	labels := kp.getProcessLabels(spec)
 
-	processIdentifier := getFullProcessIdentifier(spec.Product, spec.Version, spec.Workflow, spec.Process.Name)
+	processIdentifier := getDeploymentName(spec.Product, spec.Version, spec.Workflow, spec.Process.Name)
 
 	return &appsv1.Deployment{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Deployment",
+			APIVersion: "apps/v1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      processIdentifier,
 			Namespace: kp.namespace,
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: pointer.Int32(spec.Process.Replicas),
+			//Replicas: pointer.Int32(spec.Process.Replicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},
@@ -95,16 +109,12 @@ func (kp *KubeProcess) getContainers(configmapName string, spec *processSpec) []
 	}
 }
 
-func (kp *KubeProcess) createProcessDeployment(
-	ctx context.Context,
-	deploy *appsv1.Deployment,
-) error {
-	_, err := kp.client.AppsV1().Deployments(kp.namespace).Create(ctx, deploy, metav1.CreateOptions{})
-
-	return err
+func (kp *KubeProcess) createProcessDeployment(ctx context.Context, configMapName string, spec *processSpec) (*appsv1.Deployment, error) {
+	return kp.client.AppsV1().Deployments(kp.namespace).
+		Create(ctx, kp.getDeploymentSpec(configMapName, spec), metav1.CreateOptions{})
 }
 
-func getFullProcessIdentifier(product, version, workflow, process string) string {
+func getDeploymentName(product, version, workflow, process string) string {
 	fullName := fmt.Sprintf("%s-%s-%s-%s", product, version, workflow, process)
 
 	return strings.ReplaceAll(fullName, ".", "-")

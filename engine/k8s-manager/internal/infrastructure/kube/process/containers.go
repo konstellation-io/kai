@@ -80,7 +80,8 @@ func getFluentBitContainer(spec *processSpec) corev1.Container {
 			"/fluent-bit/etc/fluent-bit.conf",
 			"-v",
 		},
-		Env: envVars,
+		Resources: getContainerResources(false, spec.Process.ResourceLimits),
+		Env:       envVars,
 		VolumeMounts: []corev1.VolumeMount{
 			{
 				Name:      _configFilesVolume,

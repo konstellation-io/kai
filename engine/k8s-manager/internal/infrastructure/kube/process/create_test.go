@@ -57,6 +57,48 @@ func TestStartProcess(t *testing.T) {
 	g.Assert(t, "StartProcess", deploymentYaml)
 }
 
+func TestStartProcess_WithHPA(t *testing.T) {
+	var (
+		logger    = testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+		clientset = fake.NewSimpleClientset()
+		svc       = kube.NewK8sContainerService(logger, clientset)
+		ctx       = context.Background()
+	)
+
+	viper.Set(config.KubeNamespaceKey, _namespace)
+
+	process := testhelpers.NewProcessBuilder().
+		WithReplicas(5).
+		Build()
+
+	params := service.CreateProcessParams{
+		ConfigName: "configmap-name",
+		Product:    "test-product",
+		Version:    "v1.0.0",
+		Workflow:   "test-workflow",
+		Process:    process,
+	}
+
+	err := svc.CreateProcess(ctx, params)
+	require.NoError(t, err)
+
+	deployment, err := clientset.AppsV1().Deployments(_namespace).List(ctx, v1.ListOptions{})
+	require.NoError(t, err)
+
+	deploymentYaml, err := yaml.Marshal(deployment)
+	require.NoError(t, err)
+
+	autoscaler, err := clientset.AutoscalingV2().HorizontalPodAutoscalers(_namespace).List(ctx, v1.ListOptions{})
+	require.NoError(t, err)
+
+	autoscalerYaml, err := yaml.Marshal(autoscaler)
+	require.NoError(t, err)
+
+	g := goldie.New(t)
+	g.Assert(t, "StartProcess_WithHPA_Deployment", deploymentYaml)
+	g.Assert(t, "StartProcess_WithHPA_HPA", autoscalerYaml)
+}
+
 func TestStartProcess_WithNetwork(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()

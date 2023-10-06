@@ -1,0 +1,68 @@
+typemeta:
+    kind: ""
+    apiversion: ""
+listmeta:
+    selflink: ""
+    resourceversion: ""
+    continue: ""
+    remainingitemcount: null
+items:
+    - typemeta:
+        kind: ""
+        apiversion: ""
+      objectmeta:
+        name: test-product-v1-0-0-test-workflow-test-process
+        generatename: ""
+        namespace: test
+        selflink: ""
+        uid: ""
+        resourceversion: ""
+        generation: 0
+        creationtimestamp: "0001-01-01T00:00:00Z"
+        deletiontimestamp: null
+        deletiongraceperiodseconds: null
+        labels:
+            process: test-process
+            product: test-product
+            type: task
+            version: v1.0.0
+            workflow: test-workflow
+        annotations: {}
+        ownerreferences:
+            - apiversion: apps/v1
+              kind: Deployment
+              name: test-product-v1-0-0-test-workflow-test-process
+              uid: ""
+              controller: null
+              blockownerdeletion: null
+        finalizers: []
+        zzz_deprecatedclustername: ""
+        managedfields: []
+      spec:
+        scaletargetref:
+            kind: Deployment
+            name: test-product-v1-0-0-test-workflow-test-process
+            apiversion: apps/v1
+        minreplicas: 1
+        maxreplicas: 5
+        metrics:
+            - type: Resource
+              object: null
+              pods: null
+              resource:
+                name: cpu
+                target:
+                    type: Utilization
+                    value: null
+                    averagevalue: null
+                    averageutilization: 80
+              containerresource: null
+              external: null
+        behavior: null
+      status:
+        observedgeneration: null
+        lastscaletime: null
+        currentreplicas: 0
+        desiredreplicas: 0
+        currentmetrics: []
+        conditions: []
