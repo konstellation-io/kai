@@ -578,6 +578,9 @@ influxdb:
 ##
 kapacitor:
   # -- Whether to enable Kapacitor
+  image:
+    # -- Image tag
+    tag: 1.6.5
   enabled: false
   ## If kapacitor enabled, set influxURL=http://<chart_release>-influxdb:8086
   ## Where <chart_release> is the release name by with the chart is deployed

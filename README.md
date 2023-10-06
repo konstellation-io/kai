@@ -1,20 +1,26 @@
-- [KAI (Konstellation AI)](#kai-konstellation-runtime-engine)
+- [KAI (Konstellation AI)](#kai-konstellation-ai)
   - [Engine](#engine)
   - [Runtime](#runtime)
   - [Runners](#runners)
+- [Helm Chart](#helm-chart)
 - [Architecture](#architecture)
   - [Engine](#engine-1)
-  - [Runtime](#runtime-1)
     - [KRT](#krt)
-- [Install](#install)
 - [Development](#development)
   - [Requirements](#requirements)
-  - [Basic usage](#basic-usage)
-  - [Local Environment](#local-environment)
-  - [Versioning lifecycle](#Versioning-lifecycle)
-    - [Alphas](#Alphas)
-    - [Releases](#Releases)
-    - [Fixes](#Fixes)
+  - [Pre-commit hooks setup](#pre-commit-hooks-setup)
+  - [Local Environment (kaictl.sh)](#local-environment-kaictlsh)
+    - [Requirements](#requirements-1)
+      - [Intel based MacOS](#intel-based-macos)
+      - [M1/M2 MacOS](#m1m2-macos)
+    - [Basic usage](#basic-usage)
+    - [Install local environment](#install-local-environment)
+    - [Internal registry](#internal-registry)
+    - [Hosts Configuration](#hosts-configuration)
+- [Versioning lifecycle](#versioning-lifecycle)
+    - [Alphas](#alphas)
+    - [Releases](#releases)
+    - [Fixes](#fixes)
 
 # KAI (Konstellation AI)
 
@@ -147,13 +153,22 @@ pre-commit install --hook-type commit-msg
 
 **Note**: *Contributing commits that had not passed the required hooks will be rejected.*
 
-## Local Environment
+## Local Environment (kaictl.sh)
 
 ### Requirements
 
 * [Minikube](https://minikube.sigs.k8s.io/docs/start/) >= 1.26
 * [Docker](https://docs.docker.com/get-docker/) (for Linux) >= 18.9, default driver for Minikube.
-* [Hyperkit](https://minikube.sigs.k8s.io/docs/drivers/hyperkit/) (for MacOS) default driver for Minikube.
+
+#### Intel based MacOS
+* [Hyperkit](https://minikube.sigs.k8s.io/docs/drivers/hyperkit/) (for Intel based MacOS) default driver for Minikube.
+
+#### M1/M2 MacOS
+For M1/M2 MacOS, install Minikube using the next script, there is no need to install hyperkit, as it is not compatible with the M1/M2 MacOS yet.
+```sh
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-arm64
+sudo install minikube-darwin-arm64 /usr/local/bin/minikube
+```
 
   **NOTE**: *You can use a different driver updating `.kaictl.conf`; Check [this](https://minikube.sigs.k8s.io/docs/drivers/) for a complete list of drivers for Minikube*
 
