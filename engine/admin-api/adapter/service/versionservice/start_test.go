@@ -253,7 +253,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowKeyValue
 	)
 
 	// override default workflow config to empty map
-	versionConfig.KeyValueStoresConfig.Workflows = entity.WorkflowsKeyValueStoresConfig{}
+	versionConfig.KeyValueStoresConfig.Workflows = entity.WorkflowsKeyValueStores{}
 
 	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowKVStoreNotFound)
@@ -344,7 +344,7 @@ func (s *StartVersionTestSuite) getConfigForVersion(version *entity.Version) *en
 		},
 	}
 
-	keyValueStoresConfig := &entity.KeyValueStoresConfig{
+	keyValueStoresConfig := &entity.KeyValueStores{
 		KeyValueStore: "test-product-kv-store",
 		Workflows: map[string]*entity.WorkflowKeyValueStores{
 			workflow.Name: {

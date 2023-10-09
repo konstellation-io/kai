@@ -5,6 +5,8 @@ import (
 )
 
 var (
+	ErrNilVersionStreamConfig      = errors.New("stream config cannot be nil")
+	ErrNilKeyValueStoreConfig      = errors.New("key-value store config cannot be nil")
 	ErrWorkflowStreamNotFound      = errors.New("workflow stream config not found")
 	ErrWorkflowKVStoreNotFound     = errors.New("workflow key-value store config not found")
 	ErrWorkflowObjectStoreNotFound = errors.New("workflow key-value store config not found")
@@ -13,16 +15,25 @@ var (
 type VersionConfig struct {
 	StreamsConfig        *VersionStreamsConfig
 	ObjectStoresConfig   *VersionObjectStoresConfig
-	KeyValueStoresConfig *KeyValueStoresConfig
+	KeyValueStoresConfig *KeyValueStores
 }
 
 func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *VersionObjectStoresConfig,
-	keyValueStoresConfig *KeyValueStoresConfig) *VersionConfig {
+	keyValueStoresConfig *KeyValueStores) (*VersionConfig, error) {
+
+	if streamsConfig == nil {
+		return nil, ErrNilVersionStreamConfig
+	}
+
+	if keyValueStoresConfig == nil {
+		return nil, ErrNilKeyValueStoreConfig
+	}
+
 	return &VersionConfig{
 		StreamsConfig:        streamsConfig,
 		ObjectStoresConfig:   objectStoresConfig,
 		KeyValueStoresConfig: keyValueStoresConfig,
-	}
+	}, nil
 }
 
 func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStreamConfig, error) {

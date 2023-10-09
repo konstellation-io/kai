@@ -87,7 +87,7 @@ func (n *Client) mapDTOToVersionObjectStoreConfig(
 func (n *Client) mapDTOToVersionKeyValueStoreConfig(
 	projectKeyValueStore string,
 	workflows map[string]*natspb.WorkflowKeyValueStoreConfig,
-) *entity.KeyValueStoresConfig {
+) *entity.KeyValueStores {
 	workflowsKVConfig := make(map[string]*entity.WorkflowKeyValueStores, len(workflows))
 
 	for workflow, kvStoreCfg := range workflows {
@@ -97,7 +97,7 @@ func (n *Client) mapDTOToVersionKeyValueStoreConfig(
 		}
 	}
 
-	return &entity.KeyValueStoresConfig{
+	return &entity.KeyValueStores{
 		KeyValueStore: projectKeyValueStore,
 		Workflows:     workflowsKVConfig,
 	}

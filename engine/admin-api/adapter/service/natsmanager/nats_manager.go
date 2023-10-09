@@ -66,12 +66,12 @@ func (n *Client) CreateObjectStores(
 	return n.mapDTOToVersionObjectStoreConfig(res.Workflows), err
 }
 
-// CreateKeyValueStores calls nats-manager to create NATS Key Value Stores for given version.
+// CreateVersionKeyValueStores calls nats-manager to create NATS Key Value Stores for given version.
 func (n *Client) CreateVersionKeyValueStores(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
-) (*entity.KeyValueStoresConfig, error) {
+) (*entity.KeyValueStores, error) {
 	req := natspb.CreateVersionKeyValueStoresRequest{
 		ProductId:  productID,
 		VersionTag: version.Tag,
@@ -129,9 +129,9 @@ func (n *Client) CreateGlobalKeyValueStore(ctx context.Context, product string) 
 	return res.GlobalKeyValueStore, err
 }
 
-func (n *Client) UpdateKeyValueConfiguration(ctx context.Context, product string) error {
+func (n *Client) UpdateKeyValueConfiguration(ctx context.Context, configurations []entity.KeyValueConfiguration) error {
 	req := natspb.UpdateKeyValueConfigurationRequest{
-		KeyValueStoresConfig: []*natspb.KeyValueConfiguration{},
+		KeyValueStoresConfig: n.mapKeyValueConfigToDTO(configurations),
 	}
 
 	_, err := n.client.UpdateKeyValueConfiguration(ctx, &req)
@@ -142,7 +142,25 @@ func (n *Client) UpdateKeyValueConfiguration(ctx context.Context, product string
 	return err
 }
 
-func (n *Client) mapKeyValueConfigToDTO() []*natspb.KeyValueConfiguration {
+func (n *Client) mapKeyValueConfigToDTO(configurations []entity.KeyValueConfiguration) []*natspb.KeyValueConfiguration {
+	dtoConfigurations := make([]*natspb.KeyValueConfiguration, 0, len(configurations))
 
-	return nil
+	for _, configuration := range configurations {
+		dtoConfigurations = append(dtoConfigurations, &natspb.KeyValueConfiguration{
+			KeyValueStore: configuration.Store,
+			Configuration: n.mapConfigurationToDTO(configuration.Configuration),
+		})
+	}
+
+	return dtoConfigurations
+}
+
+func (n *Client) mapConfigurationToDTO(configuration []entity.ConfigurationVariable) map[string]string {
+	configDTO := make(map[string]string, len(configuration))
+
+	for _, cfg := range configuration {
+		configDTO[cfg.Key] = cfg.Value
+	}
+
+	return configDTO
 }

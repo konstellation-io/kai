@@ -40,19 +40,16 @@ func (h *Handler) Start(
 		return nil, nil, ErrVersionCannotBeStarted
 	}
 
-	versionCfg, err := h.getVersionConfig(ctx, productID, vers)
+	versionCfg, err := h.createStreamingResources(ctx, productID, vers)
 	if err != nil {
 		h.registerActionFailed(user.Email, productID, vers, ErrCreatingNATSResources, StartAction)
 		return nil, nil, err
 	}
 
-	// Version kv store
-	kvConfiguration := make([]entity.VersionConfig)
-	versionCfg.KeyValueStoresConfig.KeyValueStore
-
-	vers.Config
-	vers.Workflows[0].Config
-	vers.Workflows[0].Processes[0].Config
+	err = h.updateKeyValueConfigurations(ctx, vers, versionCfg)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	vers.Status = entity.VersionStatusStarting
 
@@ -73,7 +70,58 @@ func (h *Handler) Start(
 	return vers, notifyStatusCh, nil
 }
 
-func (h *Handler) getVersionConfig(ctx context.Context, productID string, vers *entity.Version) (*entity.VersionConfig, error) {
+func (h *Handler) updateKeyValueConfigurations(ctx context.Context, vers *entity.Version, versionCfg *entity.VersionConfig) error {
+	// Version kv store
+	var kvConfigurations []entity.KeyValueConfiguration
+
+	if len(vers.Config) > 0 {
+		kvConfigurations = append(kvConfigurations, entity.KeyValueConfiguration{
+			Store:         versionCfg.KeyValueStoresConfig.KeyValueStore,
+			Configuration: vers.Config,
+		})
+	}
+
+	// Workflows configuration
+	for _, workflow := range vers.Workflows {
+		workflowKVstore, err := versionCfg.KeyValueStoresConfig.GetWorkflowKeyValueStore(workflow.Name)
+		if err != nil {
+			return err
+		}
+
+		if len(workflow.Config) > 0 {
+			kvConfigurations = append(kvConfigurations, entity.KeyValueConfiguration{
+				Store:         workflowKVstore,
+				Configuration: workflow.Config,
+			})
+		}
+
+		// Processes configuration
+		for _, process := range workflow.Processes {
+			processKVStore, err := versionCfg.KeyValueStoresConfig.Workflows[workflow.Name].GetProcessKeyValueStore(process.Name)
+			if err != nil {
+				return err
+			}
+
+			if len(process.Config) > 0 {
+				kvConfigurations = append(kvConfigurations, entity.KeyValueConfiguration{
+					Store:         processKVStore,
+					Configuration: process.Config,
+				})
+			}
+		}
+	}
+
+	if len(kvConfigurations) > 0 {
+		err := h.natsManagerService.UpdateKeyValueConfiguration(ctx, kvConfigurations)
+		if err != nil {
+			return fmt.Errorf("updating key-value configurations: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (h *Handler) createStreamingResources(ctx context.Context, productID string, vers *entity.Version) (*entity.VersionConfig, error) {
 	versionStreamCfg, err := h.natsManagerService.CreateStreams(ctx, productID, vers)
 	if err != nil {
 		return nil, fmt.Errorf("error creating streams for version %q: %w", vers.Tag, err)
@@ -89,9 +137,7 @@ func (h *Handler) getVersionConfig(ctx context.Context, productID string, vers *
 		return nil, fmt.Errorf("error creating key-value stores for version %q: %w", vers.Tag, err)
 	}
 
-	versionCfg := entity.NewVersionConfig(versionStreamCfg, objectStoreCfg, kvStoreCfg)
-
-	return versionCfg, nil
+	return entity.NewVersionConfig(versionStreamCfg, objectStoreCfg, kvStoreCfg)
 }
 
 func (h *Handler) startAndNotify(
