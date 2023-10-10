@@ -112,3 +112,16 @@ func (n *NatsService) mapKeyValueStoresToDTO(stores *entity.VersionKeyValueStore
 		Workflows:     workflowsStores,
 	}
 }
+
+func (n *NatsService) mapDTOToKeyValueStoreConfigurations(dto []*natspb.KeyValueConfiguration) []entity.KeyValueConfiguration {
+	keyValueConfigurations := make([]entity.KeyValueConfiguration, 0, len(dto))
+
+	for _, kvCfgDto := range dto {
+		keyValueConfigurations = append(keyValueConfigurations, entity.KeyValueConfiguration{
+			KeyValueStore: kvCfgDto.KeyValueStore,
+			Configuration: kvCfgDto.Configuration,
+		})
+	}
+
+	return keyValueConfigurations
+}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/interfaces"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 	"github.com/konstellation-io/kai/engine/nats-manager/proto/natspb"
@@ -150,17 +149,4 @@ func (n *NatsService) UpdateKeyValueConfiguration(
 	return &natspb.UpdateKeyValueConfigurationResponse{
 		Message: "Configurations successfully updated!",
 	}, nil
-}
-
-func (n *NatsService) mapDTOToKeyValueStoreConfigurations(dto []*natspb.KeyValueConfiguration) []entity.KeyValueConfiguration {
-	keyValueConfigurations := make([]entity.KeyValueConfiguration, 0, len(dto))
-
-	for _, kvCfgDto := range dto {
-		keyValueConfigurations = append(keyValueConfigurations, entity.KeyValueConfiguration{
-			KeyValueStore: kvCfgDto.KeyValueStore,
-			Configuration: kvCfgDto.Configuration,
-		})
-	}
-
-	return keyValueConfigurations
 }
