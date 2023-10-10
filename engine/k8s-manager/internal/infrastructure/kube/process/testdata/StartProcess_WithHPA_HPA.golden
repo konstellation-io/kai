@@ -46,17 +46,18 @@ items:
         minreplicas: 1
         maxreplicas: 5
         metrics:
-            - type: Resource
+            - type: ContainerResource
               object: null
               pods: null
-              resource:
+              resource: null
+              containerresource:
                 name: cpu
                 target:
                     type: Utilization
                     value: null
                     averagevalue: null
                     averageutilization: 80
-              containerresource: null
+                container: test-process
               external: null
         behavior: null
       status:

@@ -178,16 +178,8 @@ items:
                           value: test-process
                           valuefrom: null
                       resources:
-                        limits:
-                            cpu:
-                                format: DecimalSI
-                            memory:
-                                format: BinarySI
-                        requests:
-                            cpu:
-                                format: DecimalSI
-                            memory:
-                                format: BinarySI
+                        limits: {}
+                        requests: {}
                       volumemounts:
                         - name: version-conf-files
                           readonly: true
