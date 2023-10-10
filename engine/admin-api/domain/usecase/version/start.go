@@ -87,32 +87,12 @@ func (h *Handler) updateKeyValueConfigurations(
 
 	// Workflows configuration
 	for _, workflow := range vers.Workflows {
-		workflowKVstore, err := versionCfg.KeyValueStores.GetWorkflowKeyValueStore(workflow.Name)
+		workflowConfigurations, err := h.getWorkflowConfigurations(versionCfg, workflow)
 		if err != nil {
 			return err
 		}
 
-		if len(workflow.Config) > 0 {
-			kvConfigurations = append(kvConfigurations, entity.KeyValueConfiguration{
-				Store:         workflowKVstore,
-				Configuration: workflow.Config,
-			})
-		}
-
-		// Processes configuration
-		for _, process := range workflow.Processes {
-			processKVStore, err := versionCfg.KeyValueStores.Workflows[workflow.Name].GetProcessKeyValueStore(process.Name)
-			if err != nil {
-				return err
-			}
-
-			if len(process.Config) > 0 {
-				kvConfigurations = append(kvConfigurations, entity.KeyValueConfiguration{
-					Store:         processKVStore,
-					Configuration: process.Config,
-				})
-			}
-		}
+		kvConfigurations = append(kvConfigurations, workflowConfigurations...)
 	}
 
 	if len(kvConfigurations) > 0 {
@@ -123,6 +103,38 @@ func (h *Handler) updateKeyValueConfigurations(
 	}
 
 	return nil
+}
+
+func (h *Handler) getWorkflowConfigurations(versionCfg *entity.VersionStreamingResources, workflow entity.Workflow) ([]entity.KeyValueConfiguration, error) {
+	var workflowConfigurations []entity.KeyValueConfiguration
+
+	workflowKVstore, err := versionCfg.KeyValueStores.GetWorkflowKeyValueStore(workflow.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(workflow.Config) > 0 {
+		workflowConfigurations = append(workflowConfigurations, entity.KeyValueConfiguration{
+			Store:         workflowKVstore,
+			Configuration: workflow.Config,
+		})
+	}
+
+	// Processes configuration
+	for _, process := range workflow.Processes {
+		processKVStore, err := versionCfg.KeyValueStores.Workflows[workflow.Name].GetProcessKeyValueStore(process.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(process.Config) > 0 {
+			workflowConfigurations = append(workflowConfigurations, entity.KeyValueConfiguration{
+				Store:         processKVStore,
+				Configuration: process.Config,
+			})
+		}
+	}
+	return workflowConfigurations, nil
 }
 
 func (h *Handler) createStreamingResources(
