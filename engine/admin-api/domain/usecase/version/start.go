@@ -105,7 +105,10 @@ func (h *Handler) updateKeyValueConfigurations(
 	return nil
 }
 
-func (h *Handler) getWorkflowConfigurations(versionCfg *entity.VersionStreamingResources, workflow entity.Workflow) ([]entity.KeyValueConfiguration, error) {
+func (h *Handler) getWorkflowConfigurations(
+	versionCfg *entity.VersionStreamingResources,
+	workflow entity.Workflow,
+) ([]entity.KeyValueConfiguration, error) {
 	var workflowConfigurations []entity.KeyValueConfiguration
 
 	workflowKVstore, err := versionCfg.KeyValueStores.GetWorkflowKeyValueStore(workflow.Name)
@@ -134,6 +137,7 @@ func (h *Handler) getWorkflowConfigurations(versionCfg *entity.VersionStreamingR
 			})
 		}
 	}
+
 	return workflowConfigurations, nil
 }
 
