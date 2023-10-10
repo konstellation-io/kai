@@ -70,7 +70,11 @@ func (h *Handler) Start(
 	return vers, notifyStatusCh, nil
 }
 
-func (h *Handler) updateKeyValueConfigurations(ctx context.Context, vers *entity.Version, versionCfg *entity.VersionStreamingResources) error {
+func (h *Handler) updateKeyValueConfigurations(
+	ctx context.Context,
+	vers *entity.Version,
+	versionCfg *entity.VersionStreamingResources,
+) error {
 	// Version kv store
 	var kvConfigurations []entity.KeyValueConfiguration
 
@@ -121,7 +125,11 @@ func (h *Handler) updateKeyValueConfigurations(ctx context.Context, vers *entity
 	return nil
 }
 
-func (h *Handler) createStreamingResources(ctx context.Context, productID string, vers *entity.Version) (*entity.VersionStreamingResources, error) {
+func (h *Handler) createStreamingResources(
+	ctx context.Context,
+	productID string,
+	vers *entity.Version,
+) (*entity.VersionStreamingResources, error) {
 	versionStreamCfg, err := h.natsManagerService.CreateStreams(ctx, productID, vers)
 	if err != nil {
 		return nil, fmt.Errorf("error creating streams for version %q: %w", vers.Tag, err)

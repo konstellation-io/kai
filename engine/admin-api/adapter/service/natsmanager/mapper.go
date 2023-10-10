@@ -39,10 +39,10 @@ func (n *Client) mapWorkflowsToDTO(workflows []entity.Workflow) []*natspb.Workfl
 func (n *Client) mapDTOToVersionStreamConfig(
 	workflowsDTO map[string]*natspb.WorkflowStreamConfig,
 ) *entity.VersionStreams {
-	workflows := make(map[string]entity.WorkflowStreamConfig, len(workflowsDTO))
+	workflows := make(map[string]entity.WorkflowStreamResources, len(workflowsDTO))
 
 	for workflow, streamCfg := range workflowsDTO {
-		workflows[workflow] = entity.WorkflowStreamConfig{
+		workflows[workflow] = entity.WorkflowStreamResources{
 			Stream:    streamCfg.Stream,
 			Processes: n.mapDTOToProcessesStreamConfig(streamCfg.Processes),
 		}

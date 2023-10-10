@@ -371,7 +371,7 @@ func (s *versionSuite) getVersionStreamingResources(vers *entity.Version) *entit
 	return &entity.VersionStreamingResources{
 		KeyValueStores: versionKeyValueStores,
 		Streams: &entity.VersionStreams{
-			Workflows: map[string]entity.WorkflowStreamConfig{
+			Workflows: map[string]entity.WorkflowStreamResources{
 				workflow.Name: {
 					Stream: "workflow-stream",
 					Processes: map[string]entity.ProcessStreamConfig{

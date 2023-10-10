@@ -5,15 +5,15 @@ import "errors"
 var ErrProcessStreamNotFound = errors.New("process stream configuration not found")
 
 type VersionStreams struct {
-	Workflows map[string]WorkflowStreamConfig
+	Workflows map[string]WorkflowStreamResources
 }
 
-type WorkflowStreamConfig struct {
+type WorkflowStreamResources struct {
 	Stream    string
 	Processes map[string]ProcessStreamConfig
 }
 
-func (w *WorkflowStreamConfig) GetProcessConfig(process string) (*ProcessStreamConfig, error) {
+func (w *WorkflowStreamResources) GetProcessConfig(process string) (*ProcessStreamConfig, error) {
 	processConfig, ok := w.Processes[process]
 	if !ok {
 		return nil, ErrProcessStreamNotFound

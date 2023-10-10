@@ -35,7 +35,7 @@ func NewVersionConfig(streamsConfig *VersionStreams, objectStoresConfig *Version
 	}, nil
 }
 
-func (v *VersionStreamingResources) GetWorkflowStreamConfig(workflow string) (*WorkflowStreamConfig, error) {
+func (v *VersionStreamingResources) GetWorkflowStream(workflow string) (*WorkflowStreamResources, error) {
 	w, ok := v.Streams.Workflows[workflow]
 	if !ok {
 		return nil, ErrWorkflowStreamNotFound
@@ -44,7 +44,7 @@ func (v *VersionStreamingResources) GetWorkflowStreamConfig(workflow string) (*W
 	return &w, nil
 }
 
-func (v *VersionStreamingResources) GetWorkflowKeyValueStoresConfig(workflow string) (*WorkflowKeyValueStores, error) {
+func (v *VersionStreamingResources) GetWorkflowKeyValueStores(workflow string) (*WorkflowKeyValueStores, error) {
 	w, ok := v.KeyValueStores.Workflows[workflow]
 	if !ok {
 		return nil, ErrWorkflowKVStoreNotFound
@@ -53,7 +53,7 @@ func (v *VersionStreamingResources) GetWorkflowKeyValueStoresConfig(workflow str
 	return w, nil
 }
 
-func (v *VersionStreamingResources) GetWorkflowObjectStoresConfig(workflow string) (*WorkflowObjectStoresConfig, error) {
+func (v *VersionStreamingResources) GetWorkflowObjectStores(workflow string) (*WorkflowObjectStoresConfig, error) {
 	w, ok := v.ObjectStores.Workflows[workflow]
 	if !ok {
 		return nil, ErrWorkflowObjectStoreNotFound

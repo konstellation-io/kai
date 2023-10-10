@@ -110,7 +110,7 @@ func (s *NatsManagerTestSuite) TestCreateStreams() {
 	}
 
 	expctedResponse := &entity.VersionStreams{
-		Workflows: map[string]entity.WorkflowStreamConfig{
+		Workflows: map[string]entity.WorkflowStreamResources{
 			testWorkflow.Name: {
 				Stream: "test-workflow-stream-name",
 				Processes: map[string]entity.ProcessStreamConfig{

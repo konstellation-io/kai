@@ -11,17 +11,17 @@ func mapWorkflowsToDTO(workflows []entity.Workflow, versionConfig *entity.Versio
 	workflowsDTO := make([]*versionpb.Workflow, 0, len(workflows))
 
 	for _, w := range workflows {
-		wStreamCfg, err := versionConfig.GetWorkflowStreamConfig(w.Name)
+		wStreamCfg, err := versionConfig.GetWorkflowStream(w.Name)
 		if err != nil {
 			return nil, fmt.Errorf("get workflows's %q stream config: %w", w.Name, err)
 		}
 
-		wKeyValueCfg, err := versionConfig.GetWorkflowKeyValueStoresConfig(w.Name)
+		wKeyValueCfg, err := versionConfig.GetWorkflowKeyValueStores(w.Name)
 		if err != nil {
 			return nil, fmt.Errorf("get workflow's %q key-value store config: %w", w.Name, err)
 		}
 
-		wObjectStoreCfg, err := versionConfig.GetWorkflowObjectStoresConfig(w.Name)
+		wObjectStoreCfg, err := versionConfig.GetWorkflowObjectStores(w.Name)
 		if err != nil {
 			return nil, fmt.Errorf("get worklfow's %q object store config: %w", w.Name, err)
 		}
@@ -44,7 +44,7 @@ func mapWorkflowsToDTO(workflows []entity.Workflow, versionConfig *entity.Versio
 
 func mapProcessesToDTO(
 	processes []entity.Process,
-	streamConfig *entity.WorkflowStreamConfig,
+	streamConfig *entity.WorkflowStreamResources,
 	kvConfig *entity.WorkflowKeyValueStores,
 	objStoreConfig *entity.WorkflowObjectStoresConfig,
 ) ([]*versionpb.Process, error) {

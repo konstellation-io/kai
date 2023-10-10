@@ -227,7 +227,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFoun
 	)
 
 	// override default workflow to empty map
-	versionConfig.Streams.Workflows = map[string]entity.WorkflowStreamConfig{}
+	versionConfig.Streams.Workflows = map[string]entity.WorkflowStreamResources{}
 
 	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowStreamNotFound)
@@ -305,7 +305,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_ProcessStreamNotFo
 	)
 
 	// override default workflow config to empty map
-	versionConfig.Streams.Workflows[workflow.Name] = entity.WorkflowStreamConfig{
+	versionConfig.Streams.Workflows[workflow.Name] = entity.WorkflowStreamResources{
 		Stream:    "stream",
 		Processes: map[string]entity.ProcessStreamConfig{},
 	}
@@ -321,7 +321,7 @@ func (s *StartVersionTestSuite) getConfigForVersion(version *entity.Version) *en
 	)
 
 	streamConfig := &entity.VersionStreams{
-		Workflows: map[string]entity.WorkflowStreamConfig{
+		Workflows: map[string]entity.WorkflowStreamResources{
 			workflow.Name: {
 				Stream: "test-stream",
 				Processes: map[string]entity.ProcessStreamConfig{
