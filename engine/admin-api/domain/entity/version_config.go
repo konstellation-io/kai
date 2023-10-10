@@ -20,7 +20,6 @@ type VersionConfig struct {
 
 func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *VersionObjectStoresConfig,
 	keyValueStoresConfig *KeyValueStores) (*VersionConfig, error) {
-
 	if streamsConfig == nil {
 		return nil, ErrNilVersionStreamConfig
 	}

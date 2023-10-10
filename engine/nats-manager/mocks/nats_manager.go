@@ -34,19 +34,19 @@ func (m *MockNatsManager) EXPECT() *MockNatsManagerMockRecorder {
 	return m.recorder
 }
 
-// CreateVersionKeyValueStores mocks base method.
-func (m *MockNatsManager) CreateVersionKeyValueStores(productID, versionTag string, workflows []entity.Workflow) (*entity.VersionKeyValueStores, error) {
+// CreateGlobalKeyValueStore mocks base method.
+func (m *MockNatsManager) CreateGlobalKeyValueStore(productID string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateVersionKeyValueStores", productID, versionTag, workflows)
-	ret0, _ := ret[0].(*entity.VersionKeyValueStores)
+	ret := m.ctrl.Call(m, "CreateGlobalKeyValueStore", productID)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateKeyValueStores indicates an expected call of CreateKeyValueStores.
-func (mr *MockNatsManagerMockRecorder) CreateKeyValueStores(productID, versionTag, workflows interface{}) *gomock.Call {
+// CreateGlobalKeyValueStore indicates an expected call of CreateGlobalKeyValueStore.
+func (mr *MockNatsManagerMockRecorder) CreateGlobalKeyValueStore(productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVersionKeyValueStores", reflect.TypeOf((*MockNatsManager)(nil).CreateVersionKeyValueStores), productID, versionTag, workflows)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGlobalKeyValueStore", reflect.TypeOf((*MockNatsManager)(nil).CreateGlobalKeyValueStore), productID)
 }
 
 // CreateObjectStores mocks base method.
@@ -79,6 +79,21 @@ func (mr *MockNatsManagerMockRecorder) CreateStreams(productID, versionTag, work
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStreams", reflect.TypeOf((*MockNatsManager)(nil).CreateStreams), productID, versionTag, workflows)
 }
 
+// CreateVersionKeyValueStores mocks base method.
+func (m *MockNatsManager) CreateVersionKeyValueStores(productID, versionTag string, workflows []entity.Workflow) (*entity.VersionKeyValueStores, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateVersionKeyValueStores", productID, versionTag, workflows)
+	ret0, _ := ret[0].(*entity.VersionKeyValueStores)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateVersionKeyValueStores indicates an expected call of CreateVersionKeyValueStores.
+func (mr *MockNatsManagerMockRecorder) CreateVersionKeyValueStores(productID, versionTag, workflows interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVersionKeyValueStores", reflect.TypeOf((*MockNatsManager)(nil).CreateVersionKeyValueStores), productID, versionTag, workflows)
+}
+
 // DeleteObjectStores mocks base method.
 func (m *MockNatsManager) DeleteObjectStores(productID, versionTag string) error {
 	m.ctrl.T.Helper()
@@ -105,4 +120,18 @@ func (m *MockNatsManager) DeleteStreams(productID, versionTag string) error {
 func (mr *MockNatsManagerMockRecorder) DeleteStreams(productID, versionTag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManager)(nil).DeleteStreams), productID, versionTag)
+}
+
+// UpdateKeyValueStoresConfiguration mocks base method.
+func (m *MockNatsManager) UpdateKeyValueStoresConfiguration(configurations []entity.KeyValueConfiguration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateKeyValueStoresConfiguration", configurations)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateKeyValueStoresConfiguration indicates an expected call of UpdateKeyValueStoresConfiguration.
+func (mr *MockNatsManagerMockRecorder) UpdateKeyValueStoresConfiguration(configurations interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateKeyValueStoresConfiguration", reflect.TypeOf((*MockNatsManager)(nil).UpdateKeyValueStoresConfiguration), configurations)
 }

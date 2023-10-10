@@ -108,7 +108,7 @@ func (n *NatsService) DeleteObjectStores(
 func (n *NatsService) CreateVersionKeyValueStores(
 	_ context.Context,
 	req *natspb.CreateVersionKeyValueStoresRequest,
-) (*natspb.CreateVersionKeyValueStoreResponse, error) {
+) (*natspb.CreateVersionKeyValueStoresResponse, error) {
 	n.logger.Info("CreateVersionKeyValueStores request received")
 
 	keyValueStores, err := n.manager.CreateVersionKeyValueStores(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))

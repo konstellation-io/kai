@@ -97,7 +97,7 @@ func (n *NatsService) mapWorkflowsObjStoreToDTO(
 	return workflowsConfig
 }
 
-func (n *NatsService) mapKeyValueStoresToDTO(stores *entity.VersionKeyValueStores) *natspb.CreateVersionKeyValueStoreResponse {
+func (n *NatsService) mapKeyValueStoresToDTO(stores *entity.VersionKeyValueStores) *natspb.CreateVersionKeyValueStoresResponse {
 	workflowsStores := make(map[string]*natspb.WorkflowKeyValueStoreConfig, len(stores.WorkflowsStores))
 
 	for workflow, storesConfig := range stores.WorkflowsStores {
@@ -107,7 +107,7 @@ func (n *NatsService) mapKeyValueStoresToDTO(stores *entity.VersionKeyValueStore
 		}
 	}
 
-	return &natspb.CreateVersionKeyValueStoreResponse{
+	return &natspb.CreateVersionKeyValueStoresResponse{
 		KeyValueStore: stores.ProjectStore,
 		Workflows:     workflowsStores,
 	}

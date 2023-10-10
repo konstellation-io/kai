@@ -97,14 +97,14 @@ func (mr *MockNatsManagerServiceClientMockRecorder) CreateStreams(ctx, in interf
 }
 
 // CreateVersionKeyValueStores mocks base method.
-func (m *MockNatsManagerServiceClient) CreateVersionKeyValueStores(ctx context.Context, in *natspb.CreateVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*natspb.CreateVersionKeyValueStoreResponse, error) {
+func (m *MockNatsManagerServiceClient) CreateVersionKeyValueStores(ctx context.Context, in *natspb.CreateVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*natspb.CreateVersionKeyValueStoresResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "CreateVersionKeyValueStores", varargs...)
-	ret0, _ := ret[0].(*natspb.CreateVersionKeyValueStoreResponse)
+	ret0, _ := ret[0].(*natspb.CreateVersionKeyValueStoresResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -245,10 +245,10 @@ func (mr *MockNatsManagerServiceServerMockRecorder) CreateStreams(arg0, arg1 int
 }
 
 // CreateVersionKeyValueStores mocks base method.
-func (m *MockNatsManagerServiceServer) CreateVersionKeyValueStores(arg0 context.Context, arg1 *natspb.CreateVersionKeyValueStoresRequest) (*natspb.CreateVersionKeyValueStoreResponse, error) {
+func (m *MockNatsManagerServiceServer) CreateVersionKeyValueStores(arg0 context.Context, arg1 *natspb.CreateVersionKeyValueStoresRequest) (*natspb.CreateVersionKeyValueStoresResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateVersionKeyValueStores", arg0, arg1)
-	ret0, _ := ret[0].(*natspb.CreateVersionKeyValueStoreResponse)
+	ret0, _ := ret[0].(*natspb.CreateVersionKeyValueStoresResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

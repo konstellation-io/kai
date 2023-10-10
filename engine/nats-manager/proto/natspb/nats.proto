@@ -88,7 +88,7 @@ message DeleteResponse {
   string message = 1;
 }
 
-message CreateVersionKeyValueStoreResponse {
+message CreateVersionKeyValueStoresResponse {
   string key_value_store = 1;
   map<string, WorkflowKeyValueStoreConfig> workflows = 2;
 }
@@ -115,7 +115,7 @@ service NatsManagerService {
   rpc CreateObjectStores (CreateObjectStoresRequest) returns (CreateObjectStoresResponse);
   rpc DeleteStreams (DeleteStreamsRequest) returns (DeleteResponse);
   rpc DeleteObjectStores (DeleteObjectStoresRequest) returns (DeleteResponse);
-  rpc CreateVersionKeyValueStores (CreateVersionKeyValueStoresRequest) returns (CreateVersionKeyValueStoreResponse);
+  rpc CreateVersionKeyValueStores (CreateVersionKeyValueStoresRequest) returns (CreateVersionKeyValueStoresResponse);
   rpc CreateGlobalKeyValueStore (CreateGlobalKeyValueStoreRequest) returns (CreateGlobalKeyValueStoreResponse);
   rpc UpdateKeyValueConfiguration(UpdateKeyValueConfigurationRequest) returns (UpdateKeyValueConfigurationResponse);
 };

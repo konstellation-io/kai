@@ -169,13 +169,13 @@ func (s *NatsManagerTestSuite) TestCreateObjectStores() {
 func (s *NatsManagerTestSuite) TestCreateKeyValueStores() {
 	ctx := context.Background()
 
-	req := &natspb.CreateKeyValueStoresRequest{
+	req := &natspb.CreateVersionKeyValueStoresRequest{
 		ProductId:  productID,
 		VersionTag: testVersion.Tag,
 		Workflows:  testReqWorkflows,
 	}
 
-	natsManagerResponse := &natspb.CreateKeyValueStoreResponse{
+	natsManagerResponse := &natspb.CreateVersionKeyValueStoresResponse{
 		KeyValueStore: "v1.0.0-key-value-store-name",
 		Workflows: map[string]*natspb.WorkflowKeyValueStoreConfig{
 			testWorkflow.Name: {
@@ -189,7 +189,7 @@ func (s *NatsManagerTestSuite) TestCreateKeyValueStores() {
 
 	expectedResponse := &entity.KeyValueStores{
 		KeyValueStore: "v1.0.0-key-value-store-name",
-		Workflows: entity.WorkflowsKeyValueStores{
+		Workflows: map[string]*entity.WorkflowKeyValueStores{
 			testWorkflow.Name: {
 				KeyValueStore: "test-workflow-key-value-store-name",
 				Processes: map[string]string{
@@ -199,7 +199,7 @@ func (s *NatsManagerTestSuite) TestCreateKeyValueStores() {
 		},
 	}
 
-	s.mockService.EXPECT().CreateKeyValueStores(ctx, req).Return(natsManagerResponse, nil)
+	s.mockService.EXPECT().CreateVersionKeyValueStores(ctx, req).Return(natsManagerResponse, nil)
 
 	res, err := s.natsManagerClient.CreateVersionKeyValueStores(ctx, productID, testVersion)
 	s.Require().NoError(err)
@@ -257,8 +257,8 @@ func (s *NatsManagerTestSuite) TestCreateObjectStoresManagerError() {
 func (s *NatsManagerTestSuite) TestCreateKeyValueStoresManagerError() {
 	ctx := context.Background()
 
-	s.mockService.EXPECT().CreateKeyValueStores(ctx, gomock.Any()).
-		Return(&natspb.CreateKeyValueStoreResponse{}, errors.New("mocked error"))
+	s.mockService.EXPECT().CreateVersionKeyValueStores(ctx, gomock.Any()).
+		Return(&natspb.CreateVersionKeyValueStoresResponse{}, errors.New("mocked error"))
 
 	_, err := s.natsManagerClient.CreateVersionKeyValueStores(ctx, productID, testVersion)
 	s.Error(err)
