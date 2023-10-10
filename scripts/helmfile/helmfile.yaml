@@ -12,7 +12,6 @@ templates:
     # Valid values are "Error", "Warn", "Info", "Debug". The default is "Error"
     # Use "Debug" to make missing files errors invisible at the default log level(--log-level=INFO)
     missingFileHandler: Warn
-    namespace: kai
     values:
     - "values/{{`{{ .Release.Name }}`}}/values.yaml.gotmpl"
     - "values/{{`{{ .Release.Name }}`}}/values.yaml"
@@ -38,10 +37,12 @@ releases:
   - name: "mongodb-operator"
     <<: *default
     chart: mongodb/community-operator
+    namespace: kai
 
   - name: "mongodb-database"
     <<: *default
     chart: bedag/raw
+    namespace: kai
     needs:
     - kai/mongodb-operator
 
@@ -54,12 +55,14 @@ releases:
   - name: postgres-database
     <<: *default
     chart: bedag/raw
+    namespace: kai
     needs:
     - cnpg-system/cnpg
 
   - name: "{{ requiredEnv "RELEASE_NAME" }}"
     <<: *default
     chart: ../../helm/kai
+    namespace: kai
     needs:
     - kai/mongodb-database
     - kai/postgres-database
