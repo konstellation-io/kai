@@ -40,9 +40,10 @@ func (kp *KubeProcess) createAutoscaler(ctx context.Context, deployment *appsv1.
 			MaxReplicas: process.Replicas,
 			Metrics: []autoscalilngv2.MetricSpec{
 				{
-					Type: autoscalilngv2.ResourceMetricSourceType,
-					Resource: &autoscalilngv2.ResourceMetricSource{
-						Name: corev1.ResourceCPU,
+					Type: autoscalilngv2.ContainerResourceMetricSourceType,
+					ContainerResource: &autoscalilngv2.ContainerResourceMetricSource{
+						Name:      corev1.ResourceCPU,
+						Container: process.Name,
 						Target: autoscalilngv2.MetricTarget{
 							Type:               autoscalilngv2.UtilizationMetricType,
 							AverageUtilization: pointer.Int32(80),
