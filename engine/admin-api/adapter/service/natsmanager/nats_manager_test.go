@@ -109,7 +109,7 @@ func (s *NatsManagerTestSuite) TestCreateStreams() {
 		},
 	}
 
-	expctedResponse := &entity.VersionStreamsConfig{
+	expctedResponse := &entity.VersionStreams{
 		Workflows: map[string]entity.WorkflowStreamConfig{
 			testWorkflow.Name: {
 				Stream: "test-workflow-stream-name",
@@ -149,7 +149,7 @@ func (s *NatsManagerTestSuite) TestCreateObjectStores() {
 		},
 	}
 
-	expectedResponse := &entity.VersionObjectStoresConfig{
+	expectedResponse := &entity.VersionObjectStores{
 		Workflows: map[string]entity.WorkflowObjectStoresConfig{
 			testWorkflow.Name: {
 				Processes: map[string]string{

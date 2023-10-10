@@ -51,10 +51,10 @@ func (mr *MockNatsManagerServiceMockRecorder) CreateGlobalKeyValueStore(ctx, pro
 }
 
 // CreateObjectStores mocks base method.
-func (m *MockNatsManagerService) CreateObjectStores(ctx context.Context, product string, version *entity.Version) (*entity.VersionObjectStoresConfig, error) {
+func (m *MockNatsManagerService) CreateObjectStores(ctx context.Context, product string, version *entity.Version) (*entity.VersionObjectStores, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateObjectStores", ctx, product, version)
-	ret0, _ := ret[0].(*entity.VersionObjectStoresConfig)
+	ret0, _ := ret[0].(*entity.VersionObjectStores)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -66,10 +66,10 @@ func (mr *MockNatsManagerServiceMockRecorder) CreateObjectStores(ctx, product, v
 }
 
 // CreateStreams mocks base method.
-func (m *MockNatsManagerService) CreateStreams(ctx context.Context, product string, version *entity.Version) (*entity.VersionStreamsConfig, error) {
+func (m *MockNatsManagerService) CreateStreams(ctx context.Context, product string, version *entity.Version) (*entity.VersionStreams, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateStreams", ctx, product, version)
-	ret0, _ := ret[0].(*entity.VersionStreamsConfig)
+	ret0, _ := ret[0].(*entity.VersionStreams)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

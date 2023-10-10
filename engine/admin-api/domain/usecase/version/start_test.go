@@ -23,7 +23,7 @@ func (s *versionSuite) TestStart_OK() {
 		Build()
 
 	versionStreamResources := s.getVersionStreamingResources(vers)
-	keyValueStoreResources := versionStreamResources.KeyValueStoresConfig
+	keyValueStoreResources := versionStreamResources.KeyValueStores
 
 	workflow := vers.Workflows[0]
 	process := workflow.Processes[0]
@@ -46,8 +46,8 @@ func (s *versionSuite) TestStart_OK() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(versionStreamResources.StreamsConfig, nil)
-	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(versionStreamResources.ObjectStoresConfig, nil)
+	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(versionStreamResources.Streams, nil)
+	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(versionStreamResources.ObjectStores, nil)
 	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(ctx, productID, vers).Return(keyValueStoreResources, nil)
 	s.natsManagerService.EXPECT().UpdateKeyValueConfiguration(ctx, configurationsToUpdate).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).Return(nil)
@@ -236,9 +236,9 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(versionStreamResources.StreamsConfig, nil)
-	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(versionStreamResources.ObjectStoresConfig, nil)
-	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(ctx, productID, vers).Return(versionStreamResources.KeyValueStoresConfig, nil)
+	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(versionStreamResources.Streams, nil)
+	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(versionStreamResources.ObjectStores, nil)
+	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(ctx, productID, vers).Return(versionStreamResources.KeyValueStores, nil)
 
 	// GIVEN first set status errors
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).
@@ -318,9 +318,9 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(streamResources.StreamsConfig, nil)
-	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(streamResources.ObjectStoresConfig, nil)
-	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(ctx, productID, vers).Return(streamResources.KeyValueStoresConfig, nil)
+	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(streamResources.Streams, nil)
+	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(streamResources.ObjectStores, nil)
+	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(ctx, productID, vers).Return(streamResources.KeyValueStores, nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).Return(nil)
 
 	// go rutine expected calls
@@ -350,7 +350,7 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	s.Equal(log1.ContextMap()["error"], setErrorErr.Error())
 }
 
-func (s *versionSuite) getVersionStreamingResources(vers *entity.Version) *entity.VersionConfig {
+func (s *versionSuite) getVersionStreamingResources(vers *entity.Version) *entity.VersionStreamingResources {
 	s.Require().Greater(len(vers.Workflows), 0)
 	s.Require().Greater(len(vers.Workflows[0].Processes), 0)
 
@@ -368,9 +368,9 @@ func (s *versionSuite) getVersionStreamingResources(vers *entity.Version) *entit
 			},
 		},
 	}
-	return &entity.VersionConfig{
-		KeyValueStoresConfig: versionKeyValueStores,
-		StreamsConfig: &entity.VersionStreamsConfig{
+	return &entity.VersionStreamingResources{
+		KeyValueStores: versionKeyValueStores,
+		Streams: &entity.VersionStreams{
 			Workflows: map[string]entity.WorkflowStreamConfig{
 				workflow.Name: {
 					Stream: "workflow-stream",

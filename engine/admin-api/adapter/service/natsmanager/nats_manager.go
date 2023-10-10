@@ -31,7 +31,7 @@ func (n *Client) CreateStreams(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
-) (*entity.VersionStreamsConfig, error) {
+) (*entity.VersionStreams, error) {
 	req := natspb.CreateStreamsRequest{
 		ProductId:  productID,
 		VersionTag: version.Tag,
@@ -51,7 +51,7 @@ func (n *Client) CreateObjectStores(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
-) (*entity.VersionObjectStoresConfig, error) {
+) (*entity.VersionObjectStores, error) {
 	req := natspb.CreateObjectStoresRequest{
 		ProductId:  productID,
 		VersionTag: version.Tag,

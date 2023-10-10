@@ -1,3 +1,5 @@
+//go:build unit
+
 package entity_test
 
 import (
@@ -9,18 +11,18 @@ import (
 )
 
 func TestNewVersionConfig(t *testing.T) {
-	expected := &entity.VersionConfig{
-		StreamsConfig: &entity.VersionStreamsConfig{
+	expected := &entity.VersionStreamingResources{
+		Streams: &entity.VersionStreams{
 			Workflows: map[string]entity.WorkflowStreamConfig{
 				"workflow-1": {
 					Stream: "stream-1",
 				},
 			},
 		},
-		ObjectStoresConfig: &entity.VersionObjectStoresConfig{
+		ObjectStores: &entity.VersionObjectStores{
 			Workflows: map[string]entity.WorkflowObjectStoresConfig{},
 		},
-		KeyValueStoresConfig: &entity.KeyValueStores{
+		KeyValueStores: &entity.KeyValueStores{
 			KeyValueStore: "versionKVStore",
 			Workflows: map[string]*entity.WorkflowKeyValueStores{
 				"workflow-1": {
@@ -30,14 +32,14 @@ func TestNewVersionConfig(t *testing.T) {
 		},
 	}
 
-	actual, err := entity.NewVersionConfig(expected.StreamsConfig, expected.ObjectStoresConfig, expected.KeyValueStoresConfig)
+	actual, err := entity.NewVersionConfig(expected.Streams, expected.ObjectStores, expected.KeyValueStores)
 	require.NoError(t, err)
 	assert.Equal(t, expected, actual)
 }
 
 func TestNewVersionConfig_ErrorIfStramConfigNil(t *testing.T) {
-	expected := &entity.VersionConfig{
-		KeyValueStoresConfig: &entity.KeyValueStores{
+	expected := &entity.VersionStreamingResources{
+		KeyValueStores: &entity.KeyValueStores{
 			KeyValueStore: "versionKVStore",
 			Workflows: map[string]*entity.WorkflowKeyValueStores{
 				"workflow-1": {
@@ -47,13 +49,13 @@ func TestNewVersionConfig_ErrorIfStramConfigNil(t *testing.T) {
 		},
 	}
 
-	_, err := entity.NewVersionConfig(nil, nil, expected.KeyValueStoresConfig)
+	_, err := entity.NewVersionConfig(nil, nil, expected.KeyValueStores)
 	assert.ErrorIs(t, err, entity.ErrNilVersionStreamConfig)
 }
 
 func TestNewVersionConfig_ErrorIfKeyValueStoreConfigNil(t *testing.T) {
-	expected := &entity.VersionConfig{
-		StreamsConfig: &entity.VersionStreamsConfig{
+	expected := &entity.VersionStreamingResources{
+		Streams: &entity.VersionStreams{
 			Workflows: map[string]entity.WorkflowStreamConfig{
 				"workflow-1": {
 					Stream: "stream-1",
@@ -62,6 +64,6 @@ func TestNewVersionConfig_ErrorIfKeyValueStoreConfigNil(t *testing.T) {
 		},
 	}
 
-	_, err := entity.NewVersionConfig(expected.StreamsConfig, nil, nil)
+	_, err := entity.NewVersionConfig(expected.Streams, nil, nil)
 	assert.ErrorIs(t, err, entity.ErrNilKeyValueStoreConfig)
 }

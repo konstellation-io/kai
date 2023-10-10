@@ -4,7 +4,7 @@ import "errors"
 
 var ErrProcessStreamNotFound = errors.New("process stream configuration not found")
 
-type VersionStreamsConfig struct {
+type VersionStreams struct {
 	Workflows map[string]WorkflowStreamConfig
 }
 

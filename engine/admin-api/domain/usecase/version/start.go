@@ -70,20 +70,20 @@ func (h *Handler) Start(
 	return vers, notifyStatusCh, nil
 }
 
-func (h *Handler) updateKeyValueConfigurations(ctx context.Context, vers *entity.Version, versionCfg *entity.VersionConfig) error {
+func (h *Handler) updateKeyValueConfigurations(ctx context.Context, vers *entity.Version, versionCfg *entity.VersionStreamingResources) error {
 	// Version kv store
 	var kvConfigurations []entity.KeyValueConfiguration
 
 	if len(vers.Config) > 0 {
 		kvConfigurations = append(kvConfigurations, entity.KeyValueConfiguration{
-			Store:         versionCfg.KeyValueStoresConfig.KeyValueStore,
+			Store:         versionCfg.KeyValueStores.KeyValueStore,
 			Configuration: vers.Config,
 		})
 	}
 
 	// Workflows configuration
 	for _, workflow := range vers.Workflows {
-		workflowKVstore, err := versionCfg.KeyValueStoresConfig.GetWorkflowKeyValueStore(workflow.Name)
+		workflowKVstore, err := versionCfg.KeyValueStores.GetWorkflowKeyValueStore(workflow.Name)
 		if err != nil {
 			return err
 		}
@@ -97,7 +97,7 @@ func (h *Handler) updateKeyValueConfigurations(ctx context.Context, vers *entity
 
 		// Processes configuration
 		for _, process := range workflow.Processes {
-			processKVStore, err := versionCfg.KeyValueStoresConfig.Workflows[workflow.Name].GetProcessKeyValueStore(process.Name)
+			processKVStore, err := versionCfg.KeyValueStores.Workflows[workflow.Name].GetProcessKeyValueStore(process.Name)
 			if err != nil {
 				return err
 			}
@@ -121,7 +121,7 @@ func (h *Handler) updateKeyValueConfigurations(ctx context.Context, vers *entity
 	return nil
 }
 
-func (h *Handler) createStreamingResources(ctx context.Context, productID string, vers *entity.Version) (*entity.VersionConfig, error) {
+func (h *Handler) createStreamingResources(ctx context.Context, productID string, vers *entity.Version) (*entity.VersionStreamingResources, error) {
 	versionStreamCfg, err := h.natsManagerService.CreateStreams(ctx, productID, vers)
 	if err != nil {
 		return nil, fmt.Errorf("error creating streams for version %q: %w", vers.Tag, err)
@@ -145,7 +145,7 @@ func (h *Handler) startAndNotify(
 	productID,
 	comment string,
 	vers *entity.Version,
-	versionConfig *entity.VersionConfig,
+	versionConfig *entity.VersionStreamingResources,
 	notifyStatusCh chan *entity.Version,
 ) {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration(config.VersionStatusTimeoutKey))

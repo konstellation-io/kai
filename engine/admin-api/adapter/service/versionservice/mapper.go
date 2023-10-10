@@ -7,7 +7,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-func mapWorkflowsToDTO(workflows []entity.Workflow, versionConfig *entity.VersionConfig) ([]*versionpb.Workflow, error) {
+func mapWorkflowsToDTO(workflows []entity.Workflow, versionConfig *entity.VersionStreamingResources) ([]*versionpb.Workflow, error) {
 	workflowsDTO := make([]*versionpb.Workflow, 0, len(workflows))
 
 	for _, w := range workflows {
