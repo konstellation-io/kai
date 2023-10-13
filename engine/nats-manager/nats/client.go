@@ -2,18 +2,17 @@ package nats
 
 import (
 	"fmt"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
-	"github.com/spf13/viper"
 	"regexp"
 	"time"
+
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
+	"github.com/spf13/viper"
 
 	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 	"github.com/nats-io/nats.go"
 )
-
-const _defaultObjectStoreTTLDays = 5
 
 type NatsClient struct {
 	js     nats.JetStreamContext
@@ -88,7 +87,7 @@ func (n *NatsClient) GetObjectStoreNames(optFilter ...*regexp.Regexp) ([]string,
 func (n *NatsClient) CreateObjectStore(objectStore string) error {
 	n.logger.Infof("Creating object store %q", objectStore)
 
-	defaultTTL := viper.GetInt(config.OBJECT_STORE_DEFAULT_TTL_MIN)
+	defaultTTL := viper.GetInt(config.ObjectStoreDefaultTTLMin)
 
 	_, err := n.js.CreateObjectStore(&nats.ObjectStoreConfig{
 		Bucket:  objectStore,

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"log"
 	"net"
+
+	"github.com/spf13/viper"
 
 	"github.com/konstellation-io/kai/libs/simplelogger"
 	"google.golang.org/grpc"
@@ -23,14 +24,14 @@ func main() {
 
 	config.Initialize()
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", viper.GetInt(config.NATS_MANAGER_PORT)))
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", viper.GetInt(config.NatsManagerPort)))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
 	logger.Info("Connecting to NATS...")
 
-	js, err := nats.InitJetStreamConnection(viper.GetString(config.NATS_URL))
+	js, err := nats.InitJetStreamConnection(viper.GetString(config.NatsURL))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +45,7 @@ func main() {
 	natspb.RegisterNatsManagerServiceServer(grpcServer, natsService)
 	reflection.Register(grpcServer)
 
-	logger.Infof("Server listening on port: %d", viper.GetInt(config.NATS_MANAGER_PORT))
+	logger.Infof("Server listening on port: %d", viper.GetInt(config.NatsManagerPort))
 
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
