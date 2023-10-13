@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/spf13/viper"
 	"log"
 	"net"
 
@@ -19,17 +21,16 @@ func main() {
 	logger := simplelogger.New(simplelogger.LevelDebug)
 	logger.Info("Starting NATS manager")
 
-	cfg := config.NewConfig()
-	port := cfg.Server.Port
+	config.Initialize()
 
-	listener, err := net.Listen("tcp", "0.0.0.0:"+port)
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", viper.GetInt(config.NATS_MANAGER_PORT)))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
 	logger.Info("Connecting to NATS...")
 
-	js, err := nats.InitJetStreamConnection(cfg.NatsStreaming.URL)
+	js, err := nats.InitJetStreamConnection(viper.GetString(config.NATS_URL))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,11 +40,11 @@ func main() {
 	grpcServer := grpc.NewServer()
 
 	natsManager := manager.NewNatsManager(logger, natsClient)
-	natsService := service.NewNatsService(cfg, logger, natsManager)
+	natsService := service.NewNatsService(logger, natsManager)
 	natspb.RegisterNatsManagerServiceServer(grpcServer, natsService)
 	reflection.Register(grpcServer)
 
-	logger.Infof("Server listening on port: %s", port)
+	logger.Infof("Server listening on port: %d", viper.GetInt(config.NATS_MANAGER_PORT))
 
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

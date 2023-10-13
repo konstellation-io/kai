@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/interfaces"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 	"github.com/konstellation-io/kai/engine/nats-manager/proto/natspb"
@@ -12,7 +11,6 @@ import (
 
 // NatsService basic server.
 type NatsService struct {
-	config  *config.Config
 	logger  logging.Logger
 	manager interfaces.NatsManager
 	natspb.UnimplementedNatsManagerServiceServer
@@ -20,12 +18,10 @@ type NatsService struct {
 
 // NewNatsService instantiates the GRPC server implementation.
 func NewNatsService(
-	cfg *config.Config,
 	logger logging.Logger,
 	manager interfaces.NatsManager,
 ) *NatsService {
 	return &NatsService{
-		cfg,
 		logger,
 		manager,
 		natspb.UnimplementedNatsManagerServiceServer{},

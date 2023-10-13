@@ -1,32 +1,26 @@
 package config
 
 import (
-	"github.com/kelseyhightower/envconfig"
+	"github.com/spf13/viper"
 )
 
-// Config holds the configuration values for the application.
-type Config struct {
-	DevelopmentMode bool `yaml:"developmentMode" envconfig:"KRE_DEVELOPMENT_MODE"`
+const (
+	DEVELOPMENT_MODE             = "development_mode"
+	NATS_MANAGER_PORT            = "server.port"
+	NATS_URL                     = "nats.url"
+	OBJECT_STORE_DEFAULT_TTL_MIN = "object_store.default_ttl_min"
+)
 
-	Server struct {
-		Port string `yaml:"port" envconfig:"KRE_NATS_MANAGER_PORT"`
-	} `yaml:"server"`
+func Initialize() {
+	viper.AutomaticEnv()
 
-	NatsStreaming struct {
-		URL string `yaml:"url" envconfig:"KRE_NATS_URL"`
-	} `yaml:"nats_streaming"`
-}
+	viper.RegisterAlias("KRE_DEVELOPMENT_MODE", DEVELOPMENT_MODE)
+	viper.RegisterAlias("KRE_NATS_MANAGER_PORT", NATS_MANAGER_PORT)
+	viper.RegisterAlias("KRE_NATS_URL", NATS_URL)
+	viper.RegisterAlias("KRE_OBJECT_STORE_DEFAULT_TTL", OBJECT_STORE_DEFAULT_TTL_MIN)
 
-// NewConfig will read the config.yml file and override values with env vars.
-func NewConfig() *Config {
-	var err error
-
-	cfg := &Config{}
-
-	err = envconfig.Process("", cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	return cfg
+	viper.SetDefault(DEVELOPMENT_MODE, false)
+	viper.SetDefault(NATS_MANAGER_PORT, 50051)
+	viper.SetDefault(NATS_URL, "localhost:4222")
+	viper.SetDefault(OBJECT_STORE_DEFAULT_TTL_MIN, 5)
 }
