@@ -112,7 +112,7 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	err = i.objectStorage.CreateFolder(productID)
+	err = i.objectStorage.CreateBucket(ctx, productID)
 	if err != nil {
 		return nil, fmt.Errorf("creating s3 bucket: %w", err)
 	}
