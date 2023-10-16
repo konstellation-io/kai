@@ -19,7 +19,7 @@ const (
 	_apiVersion              = "networking.k8s.io/v1"
 	_kindIngress             = "Ingress"
 	_kongStripPathAnnotation = "konghq.com/strip-path"
-	_kongProtocolAnnotation = "konghq.com/protocols"
+	_kongProtocolAnnotation  = "konghq.com/protocols"
 )
 
 func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.PublishNetworkParams) (map[string]string, error) {
@@ -122,7 +122,7 @@ func (kn KubeNetwork) getIngressSpec(triggerHost string, ingressPaths []networki
 }
 
 func (kn KubeNetwork) getIngressAnnotations() (map[string]string, error) {
-	annotations, err := base64.StdEncoding.DecodeString(viper.GetString(config.TriggersB64IngressesAnnotaionsKey))
+	annotations, err := base64.StdEncoding.DecodeString(viper.GetString(config.TriggersB64IngressesAnnotationsKey))
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (kn KubeNetwork) getIngressAnnotations() (map[string]string, error) {
 
 	defaultAnnotations := map[string]string{
 		_kongStripPathAnnotation: "true",
-		_kongProtocolAnnotation: "grpc,grpcs",
+		_kongProtocolAnnotation:  "grpc,grpcs",
 	}
 
 	if annotationsMap == nil {

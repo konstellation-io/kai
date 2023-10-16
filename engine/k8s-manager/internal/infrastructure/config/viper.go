@@ -24,11 +24,11 @@ const (
 	ImageBuilderLogLevel       = "registry.imageBuilder.logLevel"
 	ImageRegistryInsecureKey   = "registry.insecure"
 
-	TriggersRequestTimeoutKey         = "networking.trigger.requestTimeout"
-	TriggersB64IngressesAnnotaionsKey = "networking.trigger.b64Annotations"
-	TriggersIngressClassNameKey       = "networking.trigger.ingressClassName"
-	TriggersTLSEnabledKey             = "networking.trigger.tls.isEnabled"
-	TLSSecretNameKey                  = "networking.trigger.tls.secretName"
+	TriggersRequestTimeoutKey          = "networking.trigger.requestTimeout"
+	TriggersB64IngressesAnnotationsKey = "networking.trigger.b64Annotations"
+	TriggersIngressClassNameKey        = "networking.trigger.ingressClassName"
+	TriggersTLSEnabledKey              = "networking.trigger.tls.isEnabled"
+	TLSSecretNameKey                   = "networking.trigger.tls.secretName"
 
 	configType = "yaml"
 
@@ -65,7 +65,7 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_CERT_SECRET_NAME")
 	viper.RegisterAlias(TriggersIngressClassNameKey, "TRIGGERS_INGRESS_CLASS_NAME")
 	viper.RegisterAlias(TriggersRequestTimeoutKey, "TRIGGERS_REQUEST_TIMEOUT")
-	viper.RegisterAlias(TriggersB64IngressesAnnotaionsKey, "TRIGGERS_BASE64_INGRESSES_ANNOTATIONS")
+	viper.RegisterAlias(TriggersB64IngressesAnnotationsKey, "TRIGGERS_BASE64_INGRESSES_ANNOTATIONS")
 
 	viper.AutomaticEnv()
 
