@@ -26,10 +26,10 @@ items:
             type: network
             version: v1.0.0
         annotations:
+            konghq.com/protocols: grpc,grpcs
             konghq.com/strip-path: "true"
         ownerreferences: []
         finalizers: []
-        zzz_deprecatedclustername: ""
         managedfields: []
       spec:
         ingressclassname: ""
