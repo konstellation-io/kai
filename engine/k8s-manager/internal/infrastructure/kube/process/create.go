@@ -68,7 +68,6 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			//Replicas: pointer.Int32(spec.Process.Replicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},
