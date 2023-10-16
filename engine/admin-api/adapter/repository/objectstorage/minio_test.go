@@ -63,7 +63,6 @@ func (s *ObjectStorageSuite) SetupSuite() {
 	minioEndpoint := fmt.Sprintf("%s:%d", host, port.Int())
 
 	viper.Set(config.MinioEndpointKey, minioEndpoint)
-	//viper.Set(config.S3BucketKey, "kai")
 
 	err = os.Setenv("AWS_REGION", "us-east-1")
 	s.Require().NoError(err)
