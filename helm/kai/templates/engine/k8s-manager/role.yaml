@@ -42,4 +42,10 @@ rules:
       - ingresses
     verbs:
       - "*"
+  - apiGroups:
+      - autoscaling
+    resources:
+      - horizontalpodautoscalers
+    verbs:
+      - "*"
 {{- end }}
