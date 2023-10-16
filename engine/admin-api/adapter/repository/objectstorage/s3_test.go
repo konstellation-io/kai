@@ -8,22 +8,25 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
+	"github.com/minio/minio-go/v7"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
+const (
+	_testBucket = "test-bucket"
+)
+
 type ObjectStorageSuite struct {
 	suite.Suite
 
 	minioContainer  testcontainers.Container
-	client          *s3.S3
+	client          *minio.Client
 	s3ObjectStorage *objectstorage.S3ObjectStorage
 }
 
@@ -57,10 +60,10 @@ func (s *ObjectStorageSuite) SetupSuite() {
 	port, err := minioContainer.MappedPort(ctx, "9000/tcp")
 	s.Require().NoError(err)
 
-	minioEndpoint := fmt.Sprintf("http://%s:%d", host, port.Int())
+	minioEndpoint := fmt.Sprintf("%s:%d", host, port.Int())
 
 	viper.Set(config.S3EndpointKey, minioEndpoint)
-	viper.Set(config.S3BucketKey, "kai")
+	//viper.Set(config.S3BucketKey, "kai")
 
 	err = os.Setenv("AWS_REGION", "us-east-1")
 	s.Require().NoError(err)
@@ -78,11 +81,6 @@ func (s *ObjectStorageSuite) SetupSuite() {
 
 	s3ObjectStorage := objectstorage.NewS3ObjectStorage(logger, client)
 
-	_, err = client.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String(viper.GetString(config.S3BucketKey)),
-	})
-	s.Require().NoError(err)
-
 	s.minioContainer = minioContainer
 	s.client = client
 	s.s3ObjectStorage = s3ObjectStorage
@@ -93,39 +91,26 @@ func (s *ObjectStorageSuite) TearDownSuite() {
 }
 
 func (s *ObjectStorageSuite) TearDownTest() {
-	fmt.Println("tearing down test")
+	ctx := context.Background()
 
-	objects, err := s.client.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(viper.GetString(config.S3BucketKey))})
-	s.Require().NoError(err)
+	//objects := s.client.ListObjects(ctx, _testBucket, minio.ListObjectsOptions{})
+	//
+	//resCh := s.client.RemoveObjectsWithResult(ctx, _testBucket, objects, minio.RemoveObjectsOptions{})
+	//for res := range resCh {
+	//	s.Require().NoError(res.Err)
+	//}
 
-	objectsIdentifiers := make([]*s3.ObjectIdentifier, 0, len(objects.Contents))
-
-	for _, object := range objects.Contents {
-		objectsIdentifiers = append(objectsIdentifiers, &s3.ObjectIdentifier{
-			Key: object.Key,
-		})
-	}
-
-	_, err = s.client.DeleteObjects(&s3.DeleteObjectsInput{
-		Bucket: aws.String(viper.GetString(config.S3BucketKey)),
-		Delete: &s3.Delete{
-			Objects: objectsIdentifiers,
-		},
-	})
+	err := s.client.RemoveBucketWithOptions(ctx, _testBucket, minio.RemoveBucketOptions{ForceDelete: true})
 	s.Require().NoError(err)
 }
 
-func (s *ObjectStorageSuite) TestCreateFolder() {
-	folderName := "test-folder"
+func (s *ObjectStorageSuite) TestCreateBucket() {
+	ctx := context.Background()
 
-	err := s.s3ObjectStorage.CreateFolder(folderName)
+	err := s.s3ObjectStorage.CreateBucket(ctx, _testBucket)
 	s.Assert().NoError(err)
 
-	foundObject, err := s.client.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(viper.GetString(config.S3BucketKey)),
-		Key:    aws.String(folderName + "/"),
-	})
+	bucketExists, err := s.client.BucketExists(ctx, _testBucket)
 	s.Require().NoError(err)
-
-	fmt.Println(foundObject.String())
+	s.Assert().True(bucketExists)
 }
