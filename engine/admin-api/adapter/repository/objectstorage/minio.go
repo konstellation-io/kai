@@ -11,33 +11,33 @@ import (
 	"github.com/spf13/viper"
 )
 
-type S3ObjectStorage struct {
+type MinioObjectStorage struct {
 	logger logr.Logger
 	client *minio.Client
 }
 
-func NewS3ObjectStorage(logger logr.Logger, client *minio.Client) *S3ObjectStorage {
-	return &S3ObjectStorage{
+func NewMinioObjectStorage(logger logr.Logger, client *minio.Client) *MinioObjectStorage {
+	return &MinioObjectStorage{
 		logger: logger,
 		client: client,
 	}
 }
 
-func (os *S3ObjectStorage) CreateBucket(ctx context.Context, bucket string) error {
-	os.logger.Info("Creating bucket in S3", "bucket", bucket)
+func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) error {
+	os.logger.Info("Creating bucket in MinIO", "bucket", bucket)
 
 	err := os.client.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
 	if err != nil {
 		return fmt.Errorf("creating bucket: %w", err)
 	}
 
-	if viper.GetString(config.S3TierKey) != "" {
+	if viper.GetBool(config.MinioTieringEnabledKey) {
 		err = os.client.SetBucketLifecycle(ctx, bucket, &lifecycle.Configuration{
 			Rules: []lifecycle.Rule{
 				{
 					ID: fmt.Sprintf("%s-transition-rule", bucket),
 					Transition: lifecycle.Transition{
-						StorageClass: viper.GetString(config.S3TierKey),
+						StorageClass: viper.GetString(config.MinioTierKey),
 						Days:         0,
 					},
 				},

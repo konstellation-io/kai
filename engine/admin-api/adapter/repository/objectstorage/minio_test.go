@@ -25,9 +25,9 @@ const (
 type ObjectStorageSuite struct {
 	suite.Suite
 
-	minioContainer  testcontainers.Container
-	client          *minio.Client
-	s3ObjectStorage *objectstorage.S3ObjectStorage
+	minioContainer testcontainers.Container
+	client         *minio.Client
+	objectStorage  *objectstorage.MinioObjectStorage
 }
 
 func TestObjectStorageSuite(t *testing.T) {
@@ -62,7 +62,7 @@ func (s *ObjectStorageSuite) SetupSuite() {
 
 	minioEndpoint := fmt.Sprintf("%s:%d", host, port.Int())
 
-	viper.Set(config.S3EndpointKey, minioEndpoint)
+	viper.Set(config.MinioEndpointKey, minioEndpoint)
 	//viper.Set(config.S3BucketKey, "kai")
 
 	err = os.Setenv("AWS_REGION", "us-east-1")
@@ -79,11 +79,11 @@ func (s *ObjectStorageSuite) SetupSuite() {
 
 	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 
-	s3ObjectStorage := objectstorage.NewS3ObjectStorage(logger, client)
+	s3ObjectStorage := objectstorage.NewMinioObjectStorage(logger, client)
 
 	s.minioContainer = minioContainer
 	s.client = client
-	s.s3ObjectStorage = s3ObjectStorage
+	s.objectStorage = s3ObjectStorage
 }
 
 func (s *ObjectStorageSuite) TearDownSuite() {
@@ -93,13 +93,6 @@ func (s *ObjectStorageSuite) TearDownSuite() {
 func (s *ObjectStorageSuite) TearDownTest() {
 	ctx := context.Background()
 
-	//objects := s.client.ListObjects(ctx, _testBucket, minio.ListObjectsOptions{})
-	//
-	//resCh := s.client.RemoveObjectsWithResult(ctx, _testBucket, objects, minio.RemoveObjectsOptions{})
-	//for res := range resCh {
-	//	s.Require().NoError(res.Err)
-	//}
-
 	err := s.client.RemoveBucketWithOptions(ctx, _testBucket, minio.RemoveBucketOptions{ForceDelete: true})
 	s.Require().NoError(err)
 }
@@ -107,7 +100,7 @@ func (s *ObjectStorageSuite) TearDownTest() {
 func (s *ObjectStorageSuite) TestCreateBucket() {
 	ctx := context.Background()
 
-	err := s.s3ObjectStorage.CreateBucket(ctx, _testBucket)
+	err := s.objectStorage.CreateBucket(ctx, _testBucket)
 	s.Assert().NoError(err)
 
 	bucketExists, err := s.client.BucketExists(ctx, _testBucket)

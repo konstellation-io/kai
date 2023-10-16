@@ -10,7 +10,7 @@ import (
 )
 
 func NewS3Client() (*minio.Client, error) {
-	client, err := minio.New(viper.GetString(config.S3EndpointKey), &minio.Options{
+	client, err := minio.New(viper.GetString(config.MinioEndpointKey), &minio.Options{
 		Creds:        credentials.NewEnvAWS(),
 		BucketLookup: minio.BucketLookupPath,
 	})

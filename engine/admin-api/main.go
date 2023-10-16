@@ -121,7 +121,7 @@ func initGraphqlController(
 		log.Fatal(err)
 	}
 
-	s3ObjectStorage := objectstorage.NewS3ObjectStorage(logger, s3client)
+	s3ObjectStorage := objectstorage.NewMinioObjectStorage(logger, s3client)
 
 	ps := usecase.ProductInteractorOpts{
 		Logger:          logger,

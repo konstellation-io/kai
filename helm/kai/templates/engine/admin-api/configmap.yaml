@@ -30,10 +30,5 @@ data:
   # REGISTRY
   KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
   # S3
-  {{- if .Values.minio.enabled }}
-  KAI_S3_ENDPOINT_URL: "{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
-  {{- else }}
-  KAI_S3_ENDPOINT_URL: {{ .Values.config.s3.endpointURL }}
-  {{- end }}
-  KAI_S3_BUCKET: {{ .Values.config.s3.bucketName }}
+  KAI_MINIO_ENDPOINT_URL: "{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
   AWS_REGION: "{{ include "admin-api.s3.region" . }}"

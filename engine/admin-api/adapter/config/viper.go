@@ -13,9 +13,9 @@ const (
 	CfgFilePathKey          = "CONFIG_FILE_PATH"
 	RegistryHostKey         = "registry.host"
 	VersionStatusTimeoutKey = "application.versionStatusTimeout"
-	S3EndpointKey           = "s3.endpoint"
-	S3BucketKey             = "s3.bucket"
-	S3TierKey               = "s3.tier"
+	MinioEndpointKey        = "minio.endpoint"
+	MinioTieringEnabledKey  = "minio.tier"
+	MinioTierKey            = "minio.tier"
 )
 
 func InitConfig() error {
@@ -26,16 +26,16 @@ func InitConfig() error {
 func setDefaultConfig() {
 	viper.SetDefault(CfgFilePathKey, "config.yml")
 	viper.SetDefault(VersionStatusTimeoutKey, 20*time.Minute)
-	viper.SetDefault(S3BucketKey, "kai")
+	viper.SetDefault(MinioTieringEnabledKey, false)
 }
 
 func loadConfig() error {
 	viper.SetEnvPrefix("KAI")
 
 	viper.RegisterAlias(RegistryHostKey, "REGISTRY_HOST")
-	viper.RegisterAlias(S3EndpointKey, "S3_ENDPOINT_URL")
-	viper.RegisterAlias(S3BucketKey, "S3_BUCKET")
-	viper.RegisterAlias(S3BucketKey, "S3_TIER")
+	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT_URL")
+	viper.RegisterAlias(MinioTierKey, "MINIO_TIER")
+	viper.RegisterAlias(MinioTieringEnabledKey, "MINIO_TIERING_ENABLED")
 
 	viper.AutomaticEnv()
 
