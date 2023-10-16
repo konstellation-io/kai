@@ -29,6 +29,7 @@ func TestStartProcess(t *testing.T) {
 	clientset := fake.NewSimpleClientset()
 
 	viper.Set(config.KubeNamespaceKey, _namespace)
+	viper.Set(config.AutoscaleCPUPercentageKey, 80)
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 

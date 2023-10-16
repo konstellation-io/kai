@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
+	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalilngv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
@@ -46,7 +48,7 @@ func (kp *KubeProcess) createAutoscaler(ctx context.Context, deployment *appsv1.
 						Container: process.Name,
 						Target: autoscalilngv2.MetricTarget{
 							Type:               autoscalilngv2.UtilizationMetricType,
-							AverageUtilization: pointer.Int32(80),
+							AverageUtilization: pointer.Int32(viper.GetInt32(config.AutoscaleCPUPercentageKey)),
 						},
 					},
 				},
