@@ -1,6 +1,7 @@
 package objectstorage
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
@@ -49,4 +50,19 @@ func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) e
 	}
 
 	return nil
+}
+
+func (os *MinioObjectStorage) UploadImageSources(ctx context.Context, product, image string, sources []byte) error {
+	os.logger.Info("Uploading image's sources", "product", product, "image", image)
+
+	object := bytes.NewReader(sources)
+
+	_, err := os.client.PutObject(ctx, product, image, object, object.Size(), minio.PutObjectOptions{})
+	return err
+}
+
+func (os *MinioObjectStorage) DeleteImageSources(ctx context.Context, product, image string) error {
+	os.logger.Info("Deleting image's sources", "product", product, "image", image)
+
+	return os.client.RemoveObject(ctx, product, image, minio.RemoveObjectOptions{})
 }
