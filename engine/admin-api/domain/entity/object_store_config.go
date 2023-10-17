@@ -1,6 +1,6 @@
 package entity
 
-type VersionObjectStoresConfig struct {
+type VersionObjectStores struct {
 	Workflows map[string]WorkflowObjectStoresConfig
 }
 

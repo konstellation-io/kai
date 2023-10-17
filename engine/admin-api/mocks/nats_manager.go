@@ -36,24 +36,24 @@ func (m *MockNatsManagerServiceClient) EXPECT() *MockNatsManagerServiceClientMoc
 	return m.recorder
 }
 
-// CreateKeyValueStores mocks base method.
-func (m *MockNatsManagerServiceClient) CreateKeyValueStores(ctx context.Context, in *natspb.CreateKeyValueStoresRequest, opts ...grpc.CallOption) (*natspb.CreateKeyValueStoreResponse, error) {
+// CreateGlobalKeyValueStore mocks base method.
+func (m *MockNatsManagerServiceClient) CreateGlobalKeyValueStore(ctx context.Context, in *natspb.CreateGlobalKeyValueStoreRequest, opts ...grpc.CallOption) (*natspb.CreateGlobalKeyValueStoreResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "CreateKeyValueStores", varargs...)
-	ret0, _ := ret[0].(*natspb.CreateKeyValueStoreResponse)
+	ret := m.ctrl.Call(m, "CreateGlobalKeyValueStore", varargs...)
+	ret0, _ := ret[0].(*natspb.CreateGlobalKeyValueStoreResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateKeyValueStores indicates an expected call of CreateKeyValueStores.
-func (mr *MockNatsManagerServiceClientMockRecorder) CreateKeyValueStores(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// CreateGlobalKeyValueStore indicates an expected call of CreateGlobalKeyValueStore.
+func (mr *MockNatsManagerServiceClientMockRecorder) CreateGlobalKeyValueStore(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).CreateKeyValueStores), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGlobalKeyValueStore", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).CreateGlobalKeyValueStore), varargs...)
 }
 
 // CreateObjectStores mocks base method.
@@ -96,6 +96,26 @@ func (mr *MockNatsManagerServiceClientMockRecorder) CreateStreams(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStreams", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).CreateStreams), varargs...)
 }
 
+// CreateVersionKeyValueStores mocks base method.
+func (m *MockNatsManagerServiceClient) CreateVersionKeyValueStores(ctx context.Context, in *natspb.CreateVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*natspb.CreateVersionKeyValueStoresResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateVersionKeyValueStores", varargs...)
+	ret0, _ := ret[0].(*natspb.CreateVersionKeyValueStoresResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateVersionKeyValueStores indicates an expected call of CreateVersionKeyValueStores.
+func (mr *MockNatsManagerServiceClientMockRecorder) CreateVersionKeyValueStores(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVersionKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).CreateVersionKeyValueStores), varargs...)
+}
+
 // DeleteObjectStores mocks base method.
 func (m *MockNatsManagerServiceClient) DeleteObjectStores(ctx context.Context, in *natspb.DeleteObjectStoresRequest, opts ...grpc.CallOption) (*natspb.DeleteResponse, error) {
 	m.ctrl.T.Helper()
@@ -136,6 +156,26 @@ func (mr *MockNatsManagerServiceClientMockRecorder) DeleteStreams(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).DeleteStreams), varargs...)
 }
 
+// UpdateKeyValueConfiguration mocks base method.
+func (m *MockNatsManagerServiceClient) UpdateKeyValueConfiguration(ctx context.Context, in *natspb.UpdateKeyValueConfigurationRequest, opts ...grpc.CallOption) (*natspb.UpdateKeyValueConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateKeyValueConfiguration", varargs...)
+	ret0, _ := ret[0].(*natspb.UpdateKeyValueConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateKeyValueConfiguration indicates an expected call of UpdateKeyValueConfiguration.
+func (mr *MockNatsManagerServiceClientMockRecorder) UpdateKeyValueConfiguration(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateKeyValueConfiguration", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).UpdateKeyValueConfiguration), varargs...)
+}
+
 // MockNatsManagerServiceServer is a mock of NatsManagerServiceServer interface.
 type MockNatsManagerServiceServer struct {
 	ctrl     *gomock.Controller
@@ -159,19 +199,19 @@ func (m *MockNatsManagerServiceServer) EXPECT() *MockNatsManagerServiceServerMoc
 	return m.recorder
 }
 
-// CreateKeyValueStores mocks base method.
-func (m *MockNatsManagerServiceServer) CreateKeyValueStores(arg0 context.Context, arg1 *natspb.CreateKeyValueStoresRequest) (*natspb.CreateKeyValueStoreResponse, error) {
+// CreateGlobalKeyValueStore mocks base method.
+func (m *MockNatsManagerServiceServer) CreateGlobalKeyValueStore(arg0 context.Context, arg1 *natspb.CreateGlobalKeyValueStoreRequest) (*natspb.CreateGlobalKeyValueStoreResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateKeyValueStores", arg0, arg1)
-	ret0, _ := ret[0].(*natspb.CreateKeyValueStoreResponse)
+	ret := m.ctrl.Call(m, "CreateGlobalKeyValueStore", arg0, arg1)
+	ret0, _ := ret[0].(*natspb.CreateGlobalKeyValueStoreResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateKeyValueStores indicates an expected call of CreateKeyValueStores.
-func (mr *MockNatsManagerServiceServerMockRecorder) CreateKeyValueStores(arg0, arg1 interface{}) *gomock.Call {
+// CreateGlobalKeyValueStore indicates an expected call of CreateGlobalKeyValueStore.
+func (mr *MockNatsManagerServiceServerMockRecorder) CreateGlobalKeyValueStore(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).CreateKeyValueStores), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGlobalKeyValueStore", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).CreateGlobalKeyValueStore), arg0, arg1)
 }
 
 // CreateObjectStores mocks base method.
@@ -204,6 +244,21 @@ func (mr *MockNatsManagerServiceServerMockRecorder) CreateStreams(arg0, arg1 int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStreams", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).CreateStreams), arg0, arg1)
 }
 
+// CreateVersionKeyValueStores mocks base method.
+func (m *MockNatsManagerServiceServer) CreateVersionKeyValueStores(arg0 context.Context, arg1 *natspb.CreateVersionKeyValueStoresRequest) (*natspb.CreateVersionKeyValueStoresResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateVersionKeyValueStores", arg0, arg1)
+	ret0, _ := ret[0].(*natspb.CreateVersionKeyValueStoresResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateVersionKeyValueStores indicates an expected call of CreateVersionKeyValueStores.
+func (mr *MockNatsManagerServiceServerMockRecorder) CreateVersionKeyValueStores(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVersionKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).CreateVersionKeyValueStores), arg0, arg1)
+}
+
 // DeleteObjectStores mocks base method.
 func (m *MockNatsManagerServiceServer) DeleteObjectStores(arg0 context.Context, arg1 *natspb.DeleteObjectStoresRequest) (*natspb.DeleteResponse, error) {
 	m.ctrl.T.Helper()
@@ -232,6 +287,21 @@ func (m *MockNatsManagerServiceServer) DeleteStreams(arg0 context.Context, arg1 
 func (mr *MockNatsManagerServiceServerMockRecorder) DeleteStreams(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).DeleteStreams), arg0, arg1)
+}
+
+// UpdateKeyValueConfiguration mocks base method.
+func (m *MockNatsManagerServiceServer) UpdateKeyValueConfiguration(arg0 context.Context, arg1 *natspb.UpdateKeyValueConfigurationRequest) (*natspb.UpdateKeyValueConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateKeyValueConfiguration", arg0, arg1)
+	ret0, _ := ret[0].(*natspb.UpdateKeyValueConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateKeyValueConfiguration indicates an expected call of UpdateKeyValueConfiguration.
+func (mr *MockNatsManagerServiceServerMockRecorder) UpdateKeyValueConfiguration(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateKeyValueConfiguration", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).UpdateKeyValueConfiguration), arg0, arg1)
 }
 
 // mustEmbedUnimplementedNatsManagerServiceServer mocks base method.

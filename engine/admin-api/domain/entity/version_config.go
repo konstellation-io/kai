@@ -5,30 +5,38 @@ import (
 )
 
 var (
+	ErrNilVersionStreamConfig      = errors.New("stream config cannot be nil")
+	ErrNilKeyValueStoreConfig      = errors.New("key-value store config cannot be nil")
 	ErrWorkflowStreamNotFound      = errors.New("workflow stream config not found")
 	ErrWorkflowKVStoreNotFound     = errors.New("workflow key-value store config not found")
 	ErrWorkflowObjectStoreNotFound = errors.New("workflow key-value store config not found")
 )
 
-type VersionConfig struct {
-	KeyValueStore string
-
-	StreamsConfig        *VersionStreamsConfig
-	ObjectStoresConfig   *VersionObjectStoresConfig
-	KeyValueStoresConfig *KeyValueStoresConfig
+type VersionStreamingResources struct {
+	Streams        *VersionStreams
+	ObjectStores   *VersionObjectStores
+	KeyValueStores *KeyValueStores
 }
 
-func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *VersionObjectStoresConfig,
-	keyValueStoresConfig *KeyValueStoresConfig) *VersionConfig {
-	return &VersionConfig{
-		StreamsConfig:        streamsConfig,
-		ObjectStoresConfig:   objectStoresConfig,
-		KeyValueStoresConfig: keyValueStoresConfig,
+func NewVersionConfig(streamsConfig *VersionStreams, objectStoresConfig *VersionObjectStores,
+	keyValueStoresConfig *KeyValueStores) (*VersionStreamingResources, error) {
+	if streamsConfig == nil {
+		return nil, ErrNilVersionStreamConfig
 	}
+
+	if keyValueStoresConfig == nil {
+		return nil, ErrNilKeyValueStoreConfig
+	}
+
+	return &VersionStreamingResources{
+		Streams:        streamsConfig,
+		ObjectStores:   objectStoresConfig,
+		KeyValueStores: keyValueStoresConfig,
+	}, nil
 }
 
-func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStreamConfig, error) {
-	w, ok := v.StreamsConfig.Workflows[workflow]
+func (v *VersionStreamingResources) GetWorkflowStream(workflow string) (*WorkflowStreamResources, error) {
+	w, ok := v.Streams.Workflows[workflow]
 	if !ok {
 		return nil, ErrWorkflowStreamNotFound
 	}
@@ -36,8 +44,8 @@ func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStrea
 	return &w, nil
 }
 
-func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*WorkflowKeyValueStores, error) {
-	w, ok := v.KeyValueStoresConfig.Workflows[workflow]
+func (v *VersionStreamingResources) GetWorkflowKeyValueStores(workflow string) (*WorkflowKeyValueStores, error) {
+	w, ok := v.KeyValueStores.Workflows[workflow]
 	if !ok {
 		return nil, ErrWorkflowKVStoreNotFound
 	}
@@ -45,8 +53,8 @@ func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*Workf
 	return w, nil
 }
 
-func (v *VersionConfig) GetWorkflowObjectStoresConfig(workflow string) (*WorkflowObjectStoresConfig, error) {
-	w, ok := v.ObjectStoresConfig.Workflows[workflow]
+func (v *VersionStreamingResources) GetWorkflowObjectStores(workflow string) (*WorkflowObjectStoresConfig, error) {
+	w, ok := v.ObjectStores.Workflows[workflow]
 	if !ok {
 		return nil, ErrWorkflowObjectStoreNotFound
 	}
