@@ -1,14 +1,16 @@
 package config
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 )
 
 const (
-	DevelopmentMode          = "development_mode"
-	NatsManagerPort          = "server.port"
-	NatsURL                  = "nats.url"
-	ObjectStoreDefaultTTLMin = "object_store.default_ttl_min"
+	DevelopmentMode           = "development_mode"
+	NatsManagerPort           = "server.port"
+	NatsURL                   = "nats.url"
+	ObjectStoreDefaultTTLDays = "object_store.default_ttl_days"
 )
 
 func Initialize() {
@@ -17,10 +19,10 @@ func Initialize() {
 	viper.RegisterAlias("KAI_DEVELOPMENT_MODE", DevelopmentMode)
 	viper.RegisterAlias("KAI_NATS_MANAGER_PORT", NatsManagerPort)
 	viper.RegisterAlias("KAI_NATS_URL", NatsURL)
-	viper.RegisterAlias("KAI_OBJECT_STORE_DEFAULT_TTL", ObjectStoreDefaultTTLMin)
+	viper.RegisterAlias("KAI_OBJECT_STORE_DEFAULT_TTL", ObjectStoreDefaultTTLDays)
 
 	viper.SetDefault(DevelopmentMode, false)
 	viper.SetDefault(NatsManagerPort, 50051)
 	viper.SetDefault(NatsURL, "localhost:4222")
-	viper.SetDefault(ObjectStoreDefaultTTLMin, 5)
+	viper.SetDefault(ObjectStoreDefaultTTLDays, time.Duration(5*24)*time.Hour)
 }

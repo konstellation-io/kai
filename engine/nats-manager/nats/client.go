@@ -3,7 +3,6 @@ package nats
 import (
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
 	"github.com/spf13/viper"
@@ -87,12 +86,10 @@ func (n *NatsClient) GetObjectStoreNames(optFilter ...*regexp.Regexp) ([]string,
 func (n *NatsClient) CreateObjectStore(objectStore string) error {
 	n.logger.Infof("Creating object store %q", objectStore)
 
-	defaultTTL := viper.GetInt(config.ObjectStoreDefaultTTLMin)
-
 	_, err := n.js.CreateObjectStore(&nats.ObjectStoreConfig{
 		Bucket:  objectStore,
 		Storage: nats.FileStorage,
-		TTL:     time.Duration(defaultTTL*24) * time.Hour,
+		TTL:     viper.GetDuration(config.ObjectStoreDefaultTTLDays),
 	})
 	if err != nil {
 		return fmt.Errorf("error creating the object store: %w", err)
