@@ -1,8 +1,6 @@
 package config
 
 import (
-	"time"
-
 	"github.com/spf13/viper"
 )
 
@@ -24,5 +22,5 @@ func Initialize() {
 	viper.SetDefault(DevelopmentMode, false)
 	viper.SetDefault(NatsManagerPort, 50051)
 	viper.SetDefault(NatsURL, "localhost:4222")
-	viper.SetDefault(ObjectStoreDefaultTTLDays, time.Duration(5*24)*time.Hour)
+	viper.SetDefault(ObjectStoreDefaultTTLDays, 5)
 }
