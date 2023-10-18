@@ -138,28 +138,28 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 minio-config aws S3 Service endpoint URL
 */}}
 {{- define "minio-config.tier.s3.endpointURL" -}}
-{{- default "https://s3.amazonaws.com" .Values.minio.tier.aws.endpointURL -}}
+{{- default "https://s3.amazonaws.com" .Values.config.minio.tier.aws.endpointURL -}}
 {{- end }}
 
 {{/*
 minio-config for remote bucket prefix (path in bucket to object transition)
 */}}
 {{- define "minio-config.tier.s3.remotePrefix" -}}
-{{- default "DATA" .Values.minio.tier.remotePrefix -}}
+{{- default "DATA" .Values.config.minio.tier.remotePrefix -}}
 {{- end }}
 
 {{/*
 minio-config Tier name
 */}}
 {{- define "minio-config.tier.name" -}}
-{{- default "KAI-REMOTE-STORAGE" .Values.minio.tier.name -}}
+{{- default "KAI-REMOTE-STORAGE" .Values.config.minio.tier.name -}}
 {{- end }}
 
 {{/*
 minio-config AWS S3 remote bucket region for Tier
 */}}
 {{- define "minio-config.tier.s3.region" -}}
-{{- default "us-east-1" .Values.minio.tier.aws.region -}}
+{{- default "us-east-1" .Values.config.minio.tier.aws.region -}}
 {{- end }}
 
 {{/*

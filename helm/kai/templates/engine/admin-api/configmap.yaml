@@ -37,9 +37,9 @@ data:
   KAI_MINIO_REGION: {{ include "minio-config.region" . }}
   {{- end }}
   # MinIO Tier
-  KAI_MINIO_TIER_ENABLED: {{ .Values.minio.tier.enabled }}
-  {{- if .Values.minio.tier.name }}
-  KAI_MINIO_TIER_NAME: {{ .Values.minio.tier.name }}
+  KAI_MINIO_TIER_ENABLED: {{ .Values.config.minio.tier.enabled }}
+  {{- if .Values.config.minio.tier.name }}
+  KAI_MINIO_TIER_NAME: {{ .Values.config.minio.tier.name }}
   {{- else }}
   KAI_MINIO_TIER_NAME: {{ include "minio-config.tier.name" . }}
   {{- end }}

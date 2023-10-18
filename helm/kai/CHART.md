@@ -36,10 +36,39 @@
 | chronograf.persistence.size | string | `"2Gi"` | Storage size |
 | chronograf.persistence.storageClass | string | `"standard"` | Storage class name |
 | chronograf.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
-| config | object | `{"admin":{"apiHost":"api.kai.local","corsEnabled":true},"baseDomainName":"local","mongodb":{"connectionString":{"secretKey":"","secretName":""}}}` | Config from kai/helm |
+| config | object | `{"admin":{"apiHost":"api.kai.local","corsEnabled":true},"baseDomainName":"local","minio":{"tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"azure":{"auth":{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}},"enabled":false,"gcp":{"auth":{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}},"name":"","remoteBucketName":"","remotePrefix":""}},"mongodb":{"connectionString":{"secretKey":"","secretName":""}}}` | Config from kai/helm |
 | config.admin.apiHost | string | `"api.kai.local"` | Api Hostname for Admin UI and Admin API |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.baseDomainName | string | `"local"` | Base domain name for Admin API and K8S Manager apps |
+| config.minio | object | `{"tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"azure":{"auth":{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}},"enabled":false,"gcp":{"auth":{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}},"name":"","remoteBucketName":"","remotePrefix":""}}` | MinIO post deploy configuration |
+| config.minio.tier.aws | object | `{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""}` | Transition Objects from MinIO to AWS S3 |
+| config.minio.tier.aws.auth | object | `{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""}` | AWS authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey) |
+| config.minio.tier.aws.auth.accessKeyID | string | `""` | S3 Access Key ID if no secret is used |
+| config.minio.tier.aws.auth.secretAccessKey | string | `""` | S3 Secret Access Key if no secret is used |
+| config.minio.tier.aws.auth.secretKeyNames | object | `{"accessKey":"","secretKey":""}` | Secret reference for AWS access keys |
+| config.minio.tier.aws.auth.secretKeyNames.accessKey | string | `""` | Name of the key in the secret that contains the access key ID |
+| config.minio.tier.aws.auth.secretKeyNames.secretKey | string | `""` | Name of the key in the secret that contains the secret access key |
+| config.minio.tier.aws.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
+| config.minio.tier.aws.endpointURL | string | https://s3.amazonaws.com | S3 Service endpoint URL |
+| config.minio.tier.aws.region | string | us-east-1 | The Region where the remote bucket was created. |
+| config.minio.tier.azure | object | `{"auth":{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}}` | Transition Objects from MinIO to Azure |
+| config.minio.tier.azure.auth | object | `{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}` | Azure authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.account and auth.key) |
+| config.minio.tier.azure.auth.accountKey | string | `""` | Storage Account KEY if no secret is used |
+| config.minio.tier.azure.auth.accountName | string | `""` | Storage Account Name if no secret is used |
+| config.minio.tier.azure.auth.secretKeyNames | object | `{"account":"","key":""}` | Secret reference for Azure Storage Account |
+| config.minio.tier.azure.auth.secretKeyNames.account | string | `""` | Name of the key in the secret that contains the Storage Account Name |
+| config.minio.tier.azure.auth.secretKeyNames.key | string | `""` | Name of the key in the secret that contains the KEY for the specified Storage Account |
+| config.minio.tier.azure.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
+| config.minio.tier.enabled | bool | `false` | Whether to enable MinIO Tiering @default: If is disable MinIO will use only local storage |
+| config.minio.tier.gcp | object | `{"auth":{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}}` | Transition Objects from MinIO to Google Cloud Platform |
+| config.minio.tier.gcp.auth | object | `{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}` | GCP authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.credentials) |
+| config.minio.tier.gcp.auth.credentials | string | `""` | JSON credentials if no secret is used |
+| config.minio.tier.gcp.auth.secretKeyNames | object | `{"credentials":""}` | Secret reference for GCP credentials |
+| config.minio.tier.gcp.auth.secretKeyNames.credentials | string | `""` | Name of the key in the secret that contains JSON credentials |
+| config.minio.tier.gcp.auth.secretName | string | `""` | Name of the secret that contains the credentials for GCP |
+| config.minio.tier.name | string | KAI-REMOTE-STORAGE | Tier name |
+| config.minio.tier.remoteBucketName | string | `""` | Remote storage bucket name (must exist) |
+| config.minio.tier.remotePrefix | string | DATA | Prefix or path in bucket where object transition will happen (will be created if not exist) |
 | config.mongodb.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | config.mongodb.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
 | developmentMode | bool | `false` | Whether to setup developement mode |
@@ -144,34 +173,6 @@
 | minio.rootUser | string | Randomly generated value | Sets Root user |
 | minio.service.port | string | `"9000"` |  |
 | minio.service.type | string | `"ClusterIP"` |  |
-| minio.tier.aws | object | `{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""}` | Transition Objects from MinIO to AWS S3 |
-| minio.tier.aws.auth | object | `{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""}` | AWS authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey) |
-| minio.tier.aws.auth.accessKeyID | string | `""` | S3 Access Key ID if no secret is used |
-| minio.tier.aws.auth.secretAccessKey | string | `""` | S3 Secret Access Key if no secret is used |
-| minio.tier.aws.auth.secretKeyNames | object | `{"accessKey":"","secretKey":""}` | Secret reference for AWS access keys |
-| minio.tier.aws.auth.secretKeyNames.accessKey | string | `""` | Name of the key in the secret that contains the access key ID |
-| minio.tier.aws.auth.secretKeyNames.secretKey | string | `""` | Name of the key in the secret that contains the secret access key |
-| minio.tier.aws.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
-| minio.tier.aws.endpointURL | string | https://s3.amazonaws.com | S3 Service endpoint URL |
-| minio.tier.aws.region | string | us-east-1 | The Region where the remote bucket was created. |
-| minio.tier.azure | object | `{"auth":{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}}` | Transition Objects from MinIO to Azure (not available yet) |
-| minio.tier.azure.auth | object | `{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}` | Azure authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.account and auth.key) |
-| minio.tier.azure.auth.accountKey | string | `""` | Storage Account KEY if no secret is used |
-| minio.tier.azure.auth.accountName | string | `""` | Storage Account Name if no secret is used |
-| minio.tier.azure.auth.secretKeyNames | object | `{"account":"","key":""}` | Secret reference for Azure Storage Account |
-| minio.tier.azure.auth.secretKeyNames.account | string | `""` | Name of the key in the secret that contains the Storage Account Name |
-| minio.tier.azure.auth.secretKeyNames.key | string | `""` | Name of the key in the secret that contains the KEY for the specified Storage Account |
-| minio.tier.azure.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
-| minio.tier.enabled | bool | `false` | Whether to enable MinIO Tiering @default: If is disable MinIO will use only local storage |
-| minio.tier.gcp | object | `{"auth":{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}}` | Transition Objects from MinIO to Google Cloud Platform (not available yet) |
-| minio.tier.gcp.auth | object | `{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}` | GCP authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.credentials) |
-| minio.tier.gcp.auth.credentials | string | `""` | JSON credentials if no secret is used |
-| minio.tier.gcp.auth.secretKeyNames | object | `{"credentials":""}` | Secret reference for GCP credentials |
-| minio.tier.gcp.auth.secretKeyNames.credentials | string | `""` | Name of the key in the secret that contains JSON credentials |
-| minio.tier.gcp.auth.secretName | string | `""` | Name of the secret that contains the credentials for GCP |
-| minio.tier.name | string | KAI-REMOTE-STORAGE | Tier name |
-| minio.tier.remoteBucketName | string | `""` | Remote storage bucket name (must exist) |
-| minio.tier.remotePrefix | string | DATA | Prefix or path in bucket where object transition will happen (will be created if not exist) |
 | mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoExpress.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | mongoExpress.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |

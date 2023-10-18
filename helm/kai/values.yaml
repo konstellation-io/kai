@@ -21,6 +21,75 @@ config:
       secretName: ""
       # --The name of the secret key that contains the MongoDB connection string.
       secretKey: ""
+  # -- MinIO post deploy configuration
+  minio:
+    # Transition Objects from MinIO to remote storage
+    # @default: Only one type of tier can be set, otherwise the deployment will use the first set tier (1.aws 2.gcp 3.azure) ignoring the rest
+    tier:
+      # -- Whether to enable MinIO Tiering
+      # @default: If is disable MinIO will use only local storage
+      enabled: false
+      # -- Tier name
+      # @default -- KAI-REMOTE-STORAGE
+      name: ""
+      # -- Remote storage bucket name (must exist)
+      remoteBucketName: ""
+      # -- Prefix or path in bucket where object transition will happen (will be created if not exist)
+      # @default -- DATA
+      remotePrefix: ""
+      # -- Transition Objects from MinIO to AWS S3
+      aws:
+        # -- The Region where the remote bucket was created.
+        # @default -- us-east-1
+        region: ""
+        # -- S3 Service endpoint URL
+        # @default -- https://s3.amazonaws.com
+        endpointURL: ""
+        # -- AWS authentication config
+        # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey)
+        auth:
+          # -- Name of the secret that contains the credentials for S3
+          secretName: ""
+          # -- Secret reference for AWS access keys
+          secretKeyNames:
+            # -- Name of the key in the secret that contains the access key ID
+            accessKey: ""
+            # -- Name of the key in the secret that contains the secret access key
+            secretKey: ""
+          # -- S3 Access Key ID if no secret is used
+          accessKeyID: ""
+          # -- S3 Secret Access Key if no secret is used
+          secretAccessKey: ""
+      # -- Transition Objects from MinIO to Google Cloud Platform
+      gcp:
+        # -- GCP authentication config
+        # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.credentials)
+        auth:
+          # -- Name of the secret that contains the credentials for GCP
+          secretName: ""
+          # -- Secret reference for GCP credentials
+          secretKeyNames:
+            # -- Name of the key in the secret that contains JSON credentials
+            credentials: ""
+          # -- JSON credentials if no secret is used
+          credentials: ""
+      # -- Transition Objects from MinIO to Azure
+      azure:
+        # -- Azure authentication config
+        # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.account and auth.key)
+        auth:
+          # -- Name of the secret that contains the credentials for S3
+          secretName: ""
+          # -- Secret reference for Azure Storage Account
+          secretKeyNames:
+            # -- Name of the key in the secret that contains the Storage Account Name
+            account: ""
+            # -- Name of the key in the secret that contains the KEY for the specified Storage Account
+            key: ""
+          # -- Storage Account Name if no secret is used
+          accountName: ""
+          # -- Storage Account KEY if no secret is used
+          accountKey: ""
 
 adminApi:
   # -- Default application log level
@@ -42,7 +111,6 @@ adminApi:
     ## Using the following default annotations ensures its correct operation.
     ## Ref: https://kubernetes.github.io/ingress-Kong/
     ##
-
     # -- The name of the ingress class to use
     className: kong
     # -- Ingress annotations
@@ -748,70 +816,3 @@ minio:
       - s3.kai.local
     # -- Ingress TLS configuration
     tls: []
-  # Transition Objects from MinIO to remote storage
-  # @default: Only one type of tier can be set, otherwise the deployment will use the first set tier (1.aws 2.gcp 3.azure) ignoring the rest
-  tier:
-    # -- Whether to enable MinIO Tiering
-    # @default: If is disable MinIO will use only local storage
-    enabled: false
-    # -- Tier name
-    # @default -- KAI-REMOTE-STORAGE
-    name: ""
-    # -- Remote storage bucket name (must exist)
-    remoteBucketName: ""
-    # -- Prefix or path in bucket where object transition will happen (will be created if not exist)
-    # @default -- DATA
-    remotePrefix: ""
-    # -- Transition Objects from MinIO to AWS S3
-    aws:
-      # -- The Region where the remote bucket was created.
-      # @default -- us-east-1
-      region: ""
-      # -- S3 Service endpoint URL
-      # @default -- https://s3.amazonaws.com
-      endpointURL: ""
-      # -- AWS authentication config
-      # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey)
-      auth:
-        # -- Name of the secret that contains the credentials for S3
-        secretName: ""
-        # -- Secret reference for AWS access keys
-        secretKeyNames:
-          # -- Name of the key in the secret that contains the access key ID
-          accessKey: ""
-          # -- Name of the key in the secret that contains the secret access key
-          secretKey: ""
-        # -- S3 Access Key ID if no secret is used
-        accessKeyID: ""
-        # -- S3 Secret Access Key if no secret is used
-        secretAccessKey: ""
-    # -- Transition Objects from MinIO to Google Cloud Platform (not available yet)
-    gcp:
-      # -- GCP authentication config
-      # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.credentials)
-      auth:
-        # -- Name of the secret that contains the credentials for GCP
-        secretName: ""
-        # -- Secret reference for GCP credentials
-        secretKeyNames:
-          # -- Name of the key in the secret that contains JSON credentials
-          credentials: ""
-        # -- JSON credentials if no secret is used
-        credentials: ""
-    # -- Transition Objects from MinIO to Azure (not available yet)
-    azure:
-      # -- Azure authentication config
-      # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.account and auth.key)
-      auth:
-        # -- Name of the secret that contains the credentials for S3
-        secretName: ""
-        # -- Secret reference for Azure Storage Account
-        secretKeyNames:
-          # -- Name of the key in the secret that contains the Storage Account Name
-          account: ""
-          # -- Name of the key in the secret that contains the KEY for the specified Storage Account
-          key: ""
-        # -- Storage Account Name if no secret is used
-        accountName: ""
-        # -- Storage Account KEY if no secret is used
-        accountKey: ""
