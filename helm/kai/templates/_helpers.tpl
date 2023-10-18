@@ -149,6 +149,13 @@ minio-config for remote bucket prefix (path in bucket to object transition)
 {{- end }}
 
 {{/*
+minio-config Tier name
+*/}}
+{{- define "minio-config.tier.name" -}}
+{{- default "KAI-REMOTE-STORAGE" .Values.minio.tier.name -}}
+{{- end }}
+
+{{/*
 minio-config AWS S3 remote bucket region for Tier
 */}}
 {{- define "minio-config.tier.s3.region" -}}

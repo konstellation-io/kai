@@ -162,15 +162,16 @@
 | minio.tier.azure.auth.secretKeyNames.account | string | `""` | Name of the key in the secret that contains the Storage Account Name |
 | minio.tier.azure.auth.secretKeyNames.key | string | `""` | Name of the key in the secret that contains the KEY for the specified Storage Account |
 | minio.tier.azure.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
-| minio.tier.enabled | bool | `false` | Whether to enable MinIO Tiering @default: If is disable MinIO will use local storage |
+| minio.tier.enabled | bool | `false` | Whether to enable MinIO Tiering @default: If is disable MinIO will use only local storage |
 | minio.tier.gcp | object | `{"auth":{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}}` | Transition Objects from MinIO to Google Cloud Platform (not available yet) |
 | minio.tier.gcp.auth | object | `{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}` | GCP authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.credentials) |
 | minio.tier.gcp.auth.credentials | string | `""` | JSON credentials if no secret is used |
 | minio.tier.gcp.auth.secretKeyNames | object | `{"credentials":""}` | Secret reference for GCP credentials |
 | minio.tier.gcp.auth.secretKeyNames.credentials | string | `""` | Name of the key in the secret that contains JSON credentials |
 | minio.tier.gcp.auth.secretName | string | `""` | Name of the secret that contains the credentials for GCP |
+| minio.tier.name | string | KAI-REMOTE-STORAGE | Tier name |
 | minio.tier.remoteBucketName | string | `""` | Remote storage bucket name (must exist) |
-| minio.tier.remotePrefix | string | DATA | Prefix or path in bucket where object transition will happen |
+| minio.tier.remotePrefix | string | DATA | Prefix or path in bucket where object transition will happen (will be created if not exist) |
 | mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoExpress.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | mongoExpress.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |

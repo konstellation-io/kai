@@ -752,11 +752,14 @@ minio:
   # @default: Only one type of tier can be set, otherwise the deployment will use the first set tier (1.aws 2.gcp 3.azure) ignoring the rest
   tier:
     # -- Whether to enable MinIO Tiering
-    # @default: If is disable MinIO will use local storage
+    # @default: If is disable MinIO will use only local storage
     enabled: false
+    # -- Tier name
+    # @default -- KAI-REMOTE-STORAGE
+    name: ""
     # -- Remote storage bucket name (must exist)
     remoteBucketName: ""
-    # -- Prefix or path in bucket where object transition will happen
+    # -- Prefix or path in bucket where object transition will happen (will be created if not exist)
     # @default -- DATA
     remotePrefix: ""
     # -- Transition Objects from MinIO to AWS S3
