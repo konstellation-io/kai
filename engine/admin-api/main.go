@@ -91,7 +91,7 @@ func initGraphqlController(
 
 	natsManagerClient := natspb.NewNatsManagerServiceClient(ccNatsManager)
 
-	natsManagerService, err := natsmanager.NewNatsManagerClient(cfg, oldLogger, natsManagerClient)
+	natsManagerService, err := natsmanager.NewClient(cfg, oldLogger, natsManagerClient)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -134,6 +134,7 @@ func initGraphqlController(
 		UserActivity:    userActivityInteractor,
 		AccessControl:   accessControl,
 		ObjectStorage:   s3ObjectStorage,
+		NatsService:     natsManagerService,
 	}
 	productInteractor := usecase.NewProductInteractor(&ps)
 

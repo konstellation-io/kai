@@ -109,7 +109,7 @@ func TestCreateKVStore(t *testing.T) {
 				client.EXPECT().CreateKeyValueStore(expectedKVStore).Return(nil)
 			}
 
-			workflowsKVCfg, err := natsManager.CreateKeyValueStores(testProductID, testVersionTag, tc.workflows)
+			workflowsKVCfg, err := natsManager.CreateVersionKeyValueStores(testProductID, testVersionTag, tc.workflows)
 			if tc.wantError {
 				assert.ErrorIs(t, err, tc.wantedError)
 				return

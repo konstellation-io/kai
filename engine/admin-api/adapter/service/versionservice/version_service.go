@@ -42,7 +42,7 @@ func (k *K8sVersionService) Start(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
-	versionConfig *entity.VersionConfig,
+	versionConfig *entity.VersionStreamingResources,
 ) error {
 	wf, err := mapWorkflowsToDTO(version.Workflows, versionConfig)
 	if err != nil {
@@ -53,7 +53,7 @@ func (k *K8sVersionService) Start(
 		ProductId:     productID,
 		VersionTag:    version.Tag,
 		Workflows:     wf,
-		KeyValueStore: versionConfig.KeyValueStoresConfig.KeyValueStore,
+		KeyValueStore: versionConfig.KeyValueStores.KeyValueStore,
 	}
 
 	_, err = k.client.Start(ctx, &req)
