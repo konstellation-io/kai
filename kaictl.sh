@@ -15,7 +15,7 @@ fi
 if [ "$(uname)" = "Linux" ]; then
   MINIKUBE_DRIVER=docker
 elif [ "$(uname)" = "Darwin" ]; then
-  MINIKUBE_DRIVER=qemu2
+  MINIKUBE_DRIVER=hyperkit
 else
   echo "The operating system could not be determined. Using default minikube behavior"
 fi
