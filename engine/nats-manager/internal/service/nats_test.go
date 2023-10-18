@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/service"
@@ -58,7 +57,6 @@ var (
 
 type NatsServiceTestSuite struct {
 	suite.Suite
-	cfg             *config.Config
 	logger          logging.Logger
 	natsManagerMock *mocks.MockNatsManager
 	natsService     *service.NatsService
@@ -70,15 +68,13 @@ func TestNatsServiceTestSuite(t *testing.T) {
 
 func (s *NatsServiceTestSuite) SetupSuite() {
 	mockController := gomock.NewController(s.T())
-	cfg := &config.Config{}
 	logger := mocks.NewMockLogger(mockController)
 	mocks.AddLoggerExpects(logger)
 
 	s.natsManagerMock = mocks.NewMockNatsManager(mockController)
 
-	s.natsService = service.NewNatsService(cfg, logger, s.natsManagerMock)
+	s.natsService = service.NewNatsService(logger, s.natsManagerMock)
 
-	s.cfg = cfg
 	s.logger = logger
 }
 
