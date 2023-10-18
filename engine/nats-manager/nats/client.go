@@ -2,10 +2,11 @@ package nats
 
 import (
 	"fmt"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
-	"github.com/spf13/viper"
 	"regexp"
 	"time"
+
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
+	"github.com/spf13/viper"
 
 	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
