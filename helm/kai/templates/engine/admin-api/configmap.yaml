@@ -31,15 +31,7 @@ data:
   KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
   # MinIO
   KAI_MINIO_ENDPOINT_URL: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
-  {{- if .Values.minio.localDefaultRegion }}
-  KAI_MINIO_REGION: {{ .Values.minio.localDefaultRegion }}
-  {{- else }}
   KAI_MINIO_REGION: {{ include "minio-config.region" . }}
-  {{- end }}
   # MinIO Tier
-  KAI_MINIO_TIER_ENABLED: {{ .Values.config.minio.tier.enabled }}
-  {{- if .Values.config.minio.tier.name }}
-  KAI_MINIO_TIER_NAME: {{ .Values.config.minio.tier.name }}
-  {{- else }}
+  KAI_MINIO_TIER_ENABLED: "{{ .Values.config.minio.tier.enabled }}"
   KAI_MINIO_TIER_NAME: {{ include "minio-config.tier.name" . }}
-  {{- end }}

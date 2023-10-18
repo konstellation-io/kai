@@ -21,10 +21,10 @@ spec:
             {{- if or (and .Values.config.minio.tier.aws.auth.secretName .Values.config.minio.tier.aws.auth.secretKeyNames.accessKey .Values.config.minio.tier.aws.auth.secretKeyNames.secretKey) (and .Values.config.minio.tier.aws.auth.accessKeyID .Values.config.minio.tier.aws.auth.secretAccessKey) }}
             - name: SELECTED_TIER
               value: "aws"
-            {{- elif or (and .Values.config.minio.tier.gcp.auth.secretName .Values.config.minio.tier.gcp.auth.secretKeyNames.credentials) (.Values.config.minio.tier.gcp.auth.credentials) }}
+            {{- else if or (and .Values.config.minio.tier.gcp.auth.secretName .Values.config.minio.tier.gcp.auth.secretKeyNames.credentials) (.Values.config.minio.tier.gcp.auth.credentials) }}
             - name: SELECTED_TIER
               value: "gcp"
-            {{- elif or (and .Values.config.minio.tier.azure.auth.secretName .Values.config.minio.tier.azure.auth.secretKeyNames.account .Values.config.minio.tier.azure.auth.secretKeyNames.key) (and .Values.config.minio.tier.azure.auth.accountName .Values.config.minio.tier.azure.auth.accountKey) }}
+            {{- else if or (and .Values.config.minio.tier.azure.auth.secretName .Values.config.minio.tier.azure.auth.secretKeyNames.account .Values.config.minio.tier.azure.auth.secretKeyNames.key) (and .Values.config.minio.tier.azure.auth.accountName .Values.config.minio.tier.azure.auth.accountKey) }}
             - name: SELECTED_TIER
               value: "azure"
             {{- end }}

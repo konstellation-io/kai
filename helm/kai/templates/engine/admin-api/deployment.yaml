@@ -69,12 +69,12 @@ spec:
                 secretKeyRef:
                   name: {{ include "keycloak.secretName" . }}
                   key: {{ include "keycloak.secretPasswordKey" . }}
-            - name: MINIO_ROOT_USER
+            - name: KAI_MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}
                   key: rootUser
-            - name: MINIO_ROOT_PASSWORD
+            - name: KAI_MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}

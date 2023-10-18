@@ -23,6 +23,9 @@ config:
       secretKey: ""
   # -- MinIO post deploy configuration
   minio:
+    # -- Default region (only affect to Minio buckets)
+    # @default -- us-east-1
+    defaultRegion: ""
     # Transition Objects from MinIO to remote storage
     # @default: Only one type of tier can be set, otherwise the deployment will use the first set tier (1.aws 2.gcp 3.azure) ignoring the rest
     tier:
@@ -768,9 +771,6 @@ registry:
 ## the official MinIO chart at https://github.com/minio/minio/tree/master/helm/minio
 ##
 minio:
-  # -- Local default region (only affect to local Minio buckets)
-  # @default -- us-east-1
-  localDefaultRegion: ""
   # -- Sets minio mode
   mode: standalone
   # -- Internal port number for MinIO S3 API container
