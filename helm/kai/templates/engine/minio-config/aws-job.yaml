@@ -1,0 +1,143 @@
+# Job to configure a MinIO Tier (transition objects to external extorage)
+{{- if and .Values.minio.tier.enabled }}
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: {{ include "minio-config.fullname" . }}
+  labels:
+    {{- include "minio-config.labels" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "minio-config.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: minio-client-config
+          image: minio/mc
+          env:
+            # set tier provider
+            {{- if or (and .Values.minio.tier.aws.auth.secretName .Values.minio.tier.aws.auth.secretKeyNames.accessKey .Values.minio.tier.aws.auth.secretKeyNames.secretKey) (and .Values.minio.tier.aws.auth.accessKeyID .Values.minio.tier.aws.auth.secretAccessKey) }}
+            - name: SELECTED_TIER
+              value: "aws"
+            {{- elif or (and .Values.minio.tier.gcp.auth.secretName .Values.minio.tier.gcp.auth.secretKeyNames.credentials) (.Values.minio.tier.gcp.auth.credentials) }}
+            - name: SELECTED_TIER
+              value: "gcp"
+            {{- elif or (and .Values.minio.tier.azure.auth.secretName .Values.minio.tier.azure.auth.secretKeyNames.account .Values.minio.tier.azure.auth.secretKeyNames.key) (and .Values.minio.tier.azure.auth.accountName .Values.minio.tier.azure.auth.accountKey) }}
+            - name: SELECTED_TIER
+              value: "azure"
+            {{- end }}
+
+            # MINIO config
+            - name: KAI_S3_ENDPOINT_URL
+              value: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
+            - name: REMOTE_BUCKET_NAME
+              value: {{ .Values.minio.tier.remoteBucketName }}
+            ## tier (set in values / default)
+            {{- if .Values.minio.tier.aws.remotePrefix }}
+            - name: REMOTE_PREFIX
+              value: "{{ .Values.minio.tier.remotePrefix }}"
+            {{- else }}
+            - name: REMOTE_PREFIX
+              value: "{{ include "minio-config.tier.s3.remotePrefix" . }}"
+            {{- end }}
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootUser
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootPassword
+
+            # AWS config
+            ## in case of existing secret keys
+            {{- if .Values.minio.tier.aws.auth.secretName }}
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.minio.tier.aws.auth.secretName }}
+                  key: {{ .Values.minio.tier.aws.auth.secretKeyNames.accessKey }}
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.minio.tier.aws.auth.secretName }}
+                  key: {{ .Values.minio.tier.aws.auth.secretKeyNames.secretKey }}
+            ## in case of set keys in values.yaml
+            {{- else }}
+            - name: AWS_ACCESS_KEY_ID
+              value: {{ .Values.minio.tier.aws.auth.accessKeyID }}
+            - name: AWS_SECRET_ACCESS_KEY
+              value: {{ .Values.minio.tier.aws.auth.secretAccessKey }}
+            {{- end }}
+            ## endpointURL (set in values / default)
+            {{- if .Values.minio.tier.aws.endpointURL }}
+            - name: AWS_ENDPOINT_URL_S3
+              value: "{{ .Values.minio.tier.aws.endpointURL }}"
+            {{- else }}
+            - name: AWS_ENDPOINT_URL_S3
+              value: "{{ include "minio-config.tier.s3.endpointURL" . }}"
+            {{- end }}
+            ## region (set in values / default)
+            {{- if .Values.minio.tier.aws.region }}
+            - name: AWS_REGION
+              value: "{{ .Values.minio.tier.aws.region }}"
+            {{- else }}
+            - name: AWS_REGION
+              value: "{{ include "minio-config.tier.s3.region" . }}"
+            {{- end }}
+
+            # GCP config
+            ## in case of existing secret keys
+            {{- if .Values.minio.tier.gcp.auth.secretName }}
+            - name: CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.minio.tier.gcp.auth.secretName }}
+                  key: {{ .Values.minio.tier.gcp.auth.secretKeyNames.credentials }}
+            ## in case of set keys in values.yaml
+            {{- else }}
+            - name: CREDENTIALS
+              value: {{ .Values.minio.tier.gcp.auth.credentials }}
+            {{- end }}
+
+            # Azure config
+            ## in case of existing secret keys
+            {{- if .Values.minio.tier.azure.auth.secretName }}
+            - name: ACCOUNT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.minio.tier.azure.auth.secretName }}
+                  key: {{ .Values.minio.tier.azure.auth.secretKeyNames.account }}
+            - name: ACCOUNT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.minio.tier.azure.auth.secretName }}
+                  key: {{ .Values.minio.tier.azure.auth.secretKeyNames.key }}
+            ## in case of set keys in values.yaml
+            {{- else }}
+            - name: ACCOUNT_NAME
+              value: {{ .Values.minio.tier.azure.auth.accountName }}
+            - name: ACCOUNT_KEY
+              value: {{ .Values.minio.tier.azure.auth.accountKey }}
+            {{- end }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              curl --retry 20 --retry-delay 2 -f --retry-all-errors ${KAI_S3_ENDPOINT_URL}/minio/health/live
+              curl -I ${KAI_S3_ENDPOINT_URL}/minio/health/live
+              mc alias set kai-minio $KAI_S3_ENDPOINT_URL $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+              if [ "$SELECTED_TIER" == "aws" ]; then
+                mc ilm tier add s3 kai-minio KONSTELLATION --endpoint $AWS_ENDPOINT_URL_S3 --access-key $AWS_ACCESS_KEY --secret-key $AWS_SECRET_ACCESS_KEY --bucket $REMOTE_BUCKET_NAME --prefix $REMOTE_PREFIX --region $AWS_REGION --force
+              elif [ "$SELECTED_TIER" == "gcp" ]; then
+                echo "$CREDENTIALS" > ./credentials.json
+                mc ilm tier add gcs kai-minio KONSTELLATION --credentials-file ./credentials.json --bucket $REMOTE_BUCKET_NAME --prefix $REMOTE_PREFIX --force
+              elif [ "$SELECTED_TIER" == "azure" ]; then
+                mc ilm tier add azure kai-minio KONSTELLATION --account-name $ACCOUNT_NAME --account-key $ACCOUNT_KEY --bucket $REMOTE_BUCKET_NAME --prefix $REMOTE_PREFIX --force
+              else
+                echo "Minio Tier was enabled, but no specific configuration has been found for any Tier. Please check '.Values.minio.tier' section"
+                exit 1
+{{- end }}

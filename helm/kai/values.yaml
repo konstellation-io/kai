@@ -5,46 +5,8 @@ developmentMode: false
 rbac:
   # -- Whether to create the roles for the services that could use custom Service Accounts
   create: true
-mongoExpress:
-  image:
-    # -- Image repository
-    repository: mongo-express
-    # -- Image tag
-    tag: "0.54.0"
-    # -- Image pull policy
-    pullPolicy: IfNotPresent
-  connectionString:
-    # -- The name of the secret that contains a key with the MongoDB connection string.
-    secretName: ""
-    # --The name of the secret key that contains the MongoDB connection string.
-    secretKey: ""
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-  # -- Assign custom affinity rules to the Mongo Express pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-  # nodeAffinity:
-  #   requiredDuringSchedulingIgnoredDuringExecution:
-  #     nodeSelectorTerms:
-  #     - matchExpressions:
-  #       - key: kubernetes.io/e2e-az-name
-  #         operator: In
-  #         values:
-  #         - e2e-az1
-  #         - e2e-az2
 
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-# Config from kai/helm
+# -- Config from kai/helm
 config:
   # -- Base domain name for Admin API and K8S Manager apps
   baseDomainName: "local"
@@ -59,26 +21,7 @@ config:
       secretName: ""
       # --The name of the secret key that contains the MongoDB connection string.
       secretKey: ""
-  s3:
-    # -- Bucket name. If MinIO is enabled this should be the same as the MinIO bucket name
-    bucketName: "konstellation"
-    auth:
-      # -- Name of the secret that contains the credentials for S3
-      secretName: ""
-      secretKeys:
-        # -- Name of the key in the secret that contains the access key ID
-        accessKey: ""
-        # -- Name of the key in the secret that contains the secret access key
-        secretKey: ""
-      # -- S3 Access Key ID if no secret is used
-      accessKeyID: ""
-      # -- S3 Secret Access Key if no secret is used
-      secretAccessKey: ""
-    # -- S3 Service endpoint URL
-    endpointURL: ""
-    # -- The Region in which the buckets are created. This affect to MinIO buckets region if it is enabled
-    # @default -- us-east-1
-    region: ""
+
 adminApi:
   # -- Default application log level
   logLevel: INFO
@@ -138,6 +81,7 @@ adminApi:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
 k8sManager:
   image:
     # -- Image repository
@@ -194,6 +138,7 @@ k8sManager:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
 keycloak:
   host: "auth.kai.local"
   auth:
@@ -222,7 +167,6 @@ keycloak:
   # -- The name of the realm that will be crated on Keycloak first startup
   realmName: "konstellation"
   # -- The name of the client that will be crated on Keycloak first startup
-
   kong:
     # -- The name of the OIDC Kong plugin that should be installed on Kong ingress controller
     oidcPluginName: "oidc"
@@ -356,6 +300,7 @@ keycloak:
   extraVolumes: []
   # -- Extra volume mounts
   extraVolumeMounts: []
+
 mongoWriter:
   image:
     # -- Image repository
@@ -381,7 +326,6 @@ mongoWriter:
   #         values:
   #         - e2e-az1
   #         - e2e-az2
-
   # -- Tolerations for use with node taints
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
@@ -390,6 +334,46 @@ mongoWriter:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
+mongoExpress:
+  image:
+    # -- Image repository
+    repository: mongo-express
+    # -- Image tag
+    tag: "0.54.0"
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+  connectionString:
+    # -- The name of the secret that contains a key with the MongoDB connection string.
+    secretName: ""
+    # --The name of the secret key that contains the MongoDB connection string.
+    secretKey: ""
+  # -- Define which Nodes the Pods are scheduled on.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+  # -- Assign custom affinity rules to the Mongo Express pods
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/e2e-az-name
+  #         operator: In
+  #         values:
+  #         - e2e-az1
+  #         - e2e-az2
+  # -- Tolerations for use with node taints
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+
 nats:
   image:
     # -- Image repository
@@ -469,7 +453,6 @@ nats:
   #         values:
   #         - e2e-az1
   #         - e2e-az2
-
   # -- Tolerations for use with node taints
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
@@ -478,6 +461,7 @@ nats:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
 chronograf:
   image:
     # -- Image repository
@@ -521,6 +505,7 @@ chronograf:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
 influxdb:
   image:
     # -- Image tag
@@ -565,7 +550,6 @@ influxdb:
   #         values:
   #         - e2e-az1
   #         - e2e-az2
-
   # -- Tolerations for use with node taints
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
@@ -574,8 +558,8 @@ influxdb:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
 ## Using default values from https://github.com/influxdata/helm-charts/blob/master/charts/kapacitor/values.yaml
-##
 kapacitor:
   # -- Whether to enable Kapacitor
   enabled: false
@@ -594,6 +578,7 @@ kapacitor:
     #   storageClass: default
     #   accessMode: ReadWriteOnce
     #   size: 1Gi
+
 natsManager:
   image:
     # -- Image repository
@@ -602,6 +587,7 @@ natsManager:
     tag: 0.2.0-develop.25
     # -- Image pull policy
     pullPolicy: IfNotPresent
+
 registry:
   image:
     # -- Image repository
@@ -697,7 +683,6 @@ registry:
   #         values:
   #         - e2e-az1
   #         - e2e-az2
-
   # -- Tolerations for use with node taints
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
@@ -706,17 +691,18 @@ registry:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
-
   # -- Extra volumes for the registry deployment
   extraVolumes: []
   # -- Extra volume mounts for the registry deployment
   extraVolumeMounts: []
+
 ## The following values are only a small set of options. For a full list see
 ## the official MinIO chart at https://github.com/minio/minio/tree/master/helm/minio
 ##
 minio:
-  # -- Enable MinIO persistent storage
-  enabled: true
+  # -- Local default region (only affect to local Minio buckets)
+  # @default -- us-east-1
+  localDefaultRegion: ""
   # -- Sets minio mode
   mode: standalone
   # -- Internal port number for MinIO S3 API container
@@ -743,6 +729,7 @@ minio:
     # -- Access mode for the volume
     accessMode: ReadWriteOnce
     # -- Storage size
+    # @note: If Tier is enabled, ensure enough space to MinIO have time to transfer objects to external storage and free space in local persistence storage
     size: 10Gi
   service:
     type: ClusterIP
@@ -761,8 +748,67 @@ minio:
       - s3.kai.local
     # -- Ingress TLS configuration
     tls: []
-  buckets:
-    # -- Default bucket to be created for KAI
-    - name: konstellation
-      policy: none
-      purge: false
+  # Transition Objects from MinIO to remote storage
+  # @default: Only one type of tier can be set, otherwise the deployment will use the first set tier (1.aws 2.gcp 3.azure) ignoring the rest
+  tier:
+    # -- Whether to enable MinIO Tiering
+    # @default: If is disable MinIO will use local storage
+    enabled: false
+    # -- Remote storage bucket name (must exist)
+    remoteBucketName: ""
+    # -- Prefix or path in bucket where object transition will happen
+    # @default -- DATA
+    remotePrefix: ""
+    # -- Transition Objects from MinIO to AWS S3
+    aws:
+      # -- The Region where the remote bucket was created.
+      # @default -- us-east-1
+      region: ""
+      # -- S3 Service endpoint URL
+      # @default -- https://s3.amazonaws.com
+      endpointURL: ""
+      # -- AWS authentication config
+      # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey)
+      auth:
+        # -- Name of the secret that contains the credentials for S3
+        secretName: ""
+        # -- Secret reference for AWS access keys
+        secretKeyNames:
+          # -- Name of the key in the secret that contains the access key ID
+          accessKey: ""
+          # -- Name of the key in the secret that contains the secret access key
+          secretKey: ""
+        # -- S3 Access Key ID if no secret is used
+        accessKeyID: ""
+        # -- S3 Secret Access Key if no secret is used
+        secretAccessKey: ""
+    # -- Transition Objects from MinIO to Google Cloud Platform (not available yet)
+    gcp:
+      # -- GCP authentication config
+      # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.credentials)
+      auth:
+        # -- Name of the secret that contains the credentials for GCP
+        secretName: ""
+        # -- Secret reference for GCP credentials
+        secretKeyNames:
+          # -- Name of the key in the secret that contains JSON credentials
+          credentials: ""
+        # -- JSON credentials if no secret is used
+        credentials: ""
+    # -- Transition Objects from MinIO to Azure (not available yet)
+    azure:
+      # -- Azure authentication config
+      # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.account and auth.key)
+      auth:
+        # -- Name of the secret that contains the credentials for S3
+        secretName: ""
+        # -- Secret reference for Azure Storage Account
+        secretKeyNames:
+          # -- Name of the key in the secret that contains the Storage Account Name
+          account: ""
+          # -- Name of the key in the secret that contains the KEY for the specified Storage Account
+          key: ""
+        # -- Storage Account Name if no secret is used
+        accountName: ""
+        # -- Storage Account KEY if no secret is used
+        accountKey: ""

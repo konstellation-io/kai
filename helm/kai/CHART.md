@@ -12,65 +12,58 @@
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| adminApi.affinity | object | `{}` | Assign custom affinity rules to the Admin API pods |
+| adminApi.affinity | object | `{}` | Assign custom affinity rules to the Admin API pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | adminApi.host | string | `"api.kai.local"` | Hostname |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.24"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.25"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
-| adminApi.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| adminApi.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | adminApi.storage.class | string | `"standard"` | Storage class name |
 | adminApi.storage.path | string | `"/admin-api-files"` | Persistent volume mount point. This will define Admin API app workdir too. |
 | adminApi.storage.size | string | `"1Gi"` | Storage class size |
 | adminApi.tls.enabled | bool | `false` | Whether to enable TLS |
-| adminApi.tolerations | list | `[]` | Tolerations for use with node taints |
-| chronograf.affinity | object | `{}` | Assign custom affinity rules to the Chronograf pods |
+| adminApi.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| chronograf.affinity | object | `{}` | Assign custom affinity rules to the Chronograf pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | chronograf.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | chronograf.image.repository | string | `"chronograf"` | Image repository |
 | chronograf.image.tag | string | `"1.8.4"` | Image tag |
-| chronograf.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| chronograf.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | chronograf.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
 | chronograf.persistence.enabled | bool | `true` | Whether to enable persistence |
 | chronograf.persistence.size | string | `"2Gi"` | Storage size |
 | chronograf.persistence.storageClass | string | `"standard"` | Storage class name |
-| chronograf.tolerations | list | `[]` | Tolerations for use with node taints |
+| chronograf.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| config | object | `{"admin":{"apiHost":"api.kai.local","corsEnabled":true},"baseDomainName":"local","mongodb":{"connectionString":{"secretKey":"","secretName":""}}}` | Config from kai/helm |
 | config.admin.apiHost | string | `"api.kai.local"` | Api Hostname for Admin UI and Admin API |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.baseDomainName | string | `"local"` | Base domain name for Admin API and K8S Manager apps |
 | config.mongodb.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | config.mongodb.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
-| config.s3.auth.accessKeyID | string | `""` | S3 Access Key ID if no secret is used |
-| config.s3.auth.secretAccessKey | string | `""` | S3 Secret Access Key if no secret is used |
-| config.s3.auth.secretKeys.accessKey | string | `""` | Name of the key in the secret that contains the access key ID |
-| config.s3.auth.secretKeys.secretKey | string | `""` | Name of the key in the secret that contains the secret access key |
-| config.s3.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
-| config.s3.bucketName | string | `"konstellation"` | Bucket name. If MinIO is enabled this should be the same as the MinIO bucket name |
-| config.s3.endpointURL | string | `""` | S3 Service endpoint URL |
-| config.s3.region | string | us-east-1 | The Region in which the buckets are created. This affect to MinIO buckets region if it is enabled |
 | developmentMode | bool | `false` | Whether to setup developement mode |
 | influxdb.address | string | `"http://kai-influxdb/"` |  |
-| influxdb.affinity | object | `{}` | Assign custom affinity rules to the InfluxDB pods |
+| influxdb.affinity | object | `{}` | Assign custom affinity rules to the InfluxDB pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | influxdb.config.http | object | `{"auth-enabled":false,"enabled":true,"flux-enabled":true}` | [Details](https://docs.influxdata.com/influxdb/v1.8/administration/config/#http) |
 | influxdb.image.tag | string | `"1.8.1"` | Image tag |
 | influxdb.initScripts.enabled | bool | `true` | Boolean flag to enable and disable initscripts. See https://github.com/influxdata/helm-charts/tree/master/charts/influxdb#configure-the-chart for more info |
 | influxdb.initScripts.scripts | object | `{"init.iql":"CREATE DATABASE \"kai\"\n"}` | Init scripts |
-| influxdb.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| influxdb.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | influxdb.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
 | influxdb.persistence.enabled | bool | `true` | Whether to enable persistence. See https://github.com/influxdata/helm-charts/tree/master/charts/influxdb#configure-the-chart for more info |
 | influxdb.persistence.size | string | `"10Gi"` | Storage size |
 | influxdb.persistence.storageClass | string | `"standard"` | Storage class name |
-| influxdb.tolerations | list | `[]` | Tolerations for use with node taints |
-| k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods |
+| influxdb.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.24"` | Image tag |
-| k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| k8sManager.image.tag | string | `"0.2.0-develop.25"` | Image tag |
+| k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
 | k8sManager.serviceAccount.name | string | `""` | The name of the service account. @default: A pre-generated name based on the chart relase fullname sufixed by `-k8s-manager` |
-| k8sManager.tolerations | list | `[]` | Tolerations for use with node taints |
+| k8sManager.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | k8sManager.triggers.ingress.annotations | string | See `entrypoints.ingress.annotations` in [values.yaml](./values.yaml) | The annotations that all the generated ingresses for the entrypoints will have |
 | k8sManager.triggers.ingress.className | string | `"kong"` | The ingressClassName to use for the enypoints' generated ingresses |
 | k8sManager.triggers.ingress.tls.secretName | string | If not defined, every created ingress will use an autogenerated certificate name based on the deployed runtimeId and .Values.config.baseDomainName. | TLS certificate secret name. If defined, wildcard for the current application domain must be used. |
@@ -111,6 +104,7 @@
 | keycloak.ingress.annotations | object | See `keycloak.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | keycloak.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | keycloak.kli.oidcClient.clientId | string | `"kai-kli-oidc"` | The name of the OIDC client in Keycloak for KLI |
+| keycloak.kong | object | `{"oidcClient":{"clientId":"kong-oidc","secret":""},"oidcPluginName":"oidc"}` | The name of the client that will be crated on Keycloak first startup |
 | keycloak.kong.oidcClient.clientId | string | `"kong-oidc"` | The name of the OIDC client in Keycloak for Kong |
 | keycloak.kong.oidcClient.secret | string | `""` | The secret for the OIDC client that will be created on Keycloak first startup |
 | keycloak.kong.oidcPluginName | string | `"oidc"` | The name of the OIDC Kong plugin that should be installed on Kong ingress controller |
@@ -130,8 +124,6 @@
 | keycloak.serviceAccount.name | string | `""` |  |
 | keycloak.tls.enabled | bool | `false` | Whether to enable TLS |
 | keycloak.tolerations | list | `[]` | Assign custom tolerations to the Keycloak pods |
-| minio.buckets[0] | object | `{"name":"konstellation","policy":"none","purge":false}` | Default bucket to be created for KAI |
-| minio.enabled | bool | `true` | Enable MinIO persistent storage |
 | minio.existingSecret | string | `""` | Use an exising secret for root user and password |
 | minio.ingress.annotations | object | `{}` | Ingress annotations |
 | minio.ingress.enabled | bool | `true` | Enable ingress for MinIO API |
@@ -139,34 +131,62 @@
 | minio.ingress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
 | minio.ingress.labels | object | `{}` | Ingress labels |
 | minio.ingress.tls | list | `[]` | Ingress TLS configuration |
+| minio.localDefaultRegion | string | us-east-1 | Local default region (only affect to local Minio buckets) |
 | minio.minioAPIPort | string | `"9000"` | Internal port number for MinIO S3 API container |
 | minio.minioConsolePort | string | `"9001"` | Internal port number for MinIO Browser Console container |
 | minio.mode | string | `"standalone"` | Sets minio mode |
 | minio.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
 | minio.persistence.enabled | bool | `true` | Enables persistent storage using PVC |
-| minio.persistence.size | string | `"10Gi"` | Storage size |
+| minio.persistence.size | string | `"10Gi"` | Storage size @note: If Tier is enabled, ensure enough space to MinIO have time to transfer objects to external storage and free space in local persistence storage |
 | minio.persistence.storageClass | string | `""` | Storage class name |
 | minio.resources | object | `{"requests":{"memory":"256Mi"}}` | Sets pods resources |
 | minio.rootPassword | string | Randomly generated value | Sets Root password |
 | minio.rootUser | string | Randomly generated value | Sets Root user |
 | minio.service.port | string | `"9000"` |  |
 | minio.service.type | string | `"ClusterIP"` |  |
-| mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods |
+| minio.tier.aws | object | `{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""}` | Transition Objects from MinIO to AWS S3 |
+| minio.tier.aws.auth | object | `{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""}` | AWS authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey) |
+| minio.tier.aws.auth.accessKeyID | string | `""` | S3 Access Key ID if no secret is used |
+| minio.tier.aws.auth.secretAccessKey | string | `""` | S3 Secret Access Key if no secret is used |
+| minio.tier.aws.auth.secretKeyNames | object | `{"accessKey":"","secretKey":""}` | Secret reference for AWS access keys |
+| minio.tier.aws.auth.secretKeyNames.accessKey | string | `""` | Name of the key in the secret that contains the access key ID |
+| minio.tier.aws.auth.secretKeyNames.secretKey | string | `""` | Name of the key in the secret that contains the secret access key |
+| minio.tier.aws.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
+| minio.tier.aws.endpointURL | string | https://s3.amazonaws.com | S3 Service endpoint URL |
+| minio.tier.aws.region | string | us-east-1 | The Region where the remote bucket was created. |
+| minio.tier.azure | object | `{"auth":{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}}` | Transition Objects from MinIO to Azure (not available yet) |
+| minio.tier.azure.auth | object | `{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}` | Azure authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.account and auth.key) |
+| minio.tier.azure.auth.accountKey | string | `""` | Storage Account KEY if no secret is used |
+| minio.tier.azure.auth.accountName | string | `""` | Storage Account Name if no secret is used |
+| minio.tier.azure.auth.secretKeyNames | object | `{"account":"","key":""}` | Secret reference for Azure Storage Account |
+| minio.tier.azure.auth.secretKeyNames.account | string | `""` | Name of the key in the secret that contains the Storage Account Name |
+| minio.tier.azure.auth.secretKeyNames.key | string | `""` | Name of the key in the secret that contains the KEY for the specified Storage Account |
+| minio.tier.azure.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
+| minio.tier.enabled | bool | `false` | Whether to enable MinIO Tiering @default: If is disable MinIO will use local storage |
+| minio.tier.gcp | object | `{"auth":{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}}` | Transition Objects from MinIO to Google Cloud Platform (not available yet) |
+| minio.tier.gcp.auth | object | `{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}` | GCP authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.credentials) |
+| minio.tier.gcp.auth.credentials | string | `""` | JSON credentials if no secret is used |
+| minio.tier.gcp.auth.secretKeyNames | object | `{"credentials":""}` | Secret reference for GCP credentials |
+| minio.tier.gcp.auth.secretKeyNames.credentials | string | `""` | Name of the key in the secret that contains JSON credentials |
+| minio.tier.gcp.auth.secretName | string | `""` | Name of the secret that contains the credentials for GCP |
+| minio.tier.remoteBucketName | string | `""` | Remote storage bucket name (must exist) |
+| minio.tier.remotePrefix | string | DATA | Prefix or path in bucket where object transition will happen |
+| mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoExpress.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | mongoExpress.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
 | mongoExpress.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoExpress.image.repository | string | `"mongo-express"` | Image repository |
 | mongoExpress.image.tag | string | `"0.54.0"` | Image tag |
-| mongoExpress.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
-| mongoExpress.tolerations | list | `[]` | Tolerations for use with node taints |
-| mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods |
+| mongoExpress.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| mongoExpress.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.24"` | Image tag |
-| mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
-| mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints |
+| mongoWriter.image.tag | string | `"0.2.0-develop.25"` | Image tag |
+| mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
-| nats.affinity | object | `{}` | Assign custom affinity rules to the NATS pods |
+| nats.affinity | object | `{}` | Assign custom affinity rules to the NATS pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | nats.client.port | int | `4222` | Port for client connections |
 | nats.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | nats.image.repository | string | `"nats"` | Image repository |
@@ -190,13 +210,13 @@
 | nats.logging.debug | bool | `false` | Whether to enable logging debug mode |
 | nats.logging.logtime | bool | `true` | Timestamp log entries |
 | nats.logging.trace | bool | `false` | Whether to enable logging trace mode |
-| nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
-| nats.tolerations | list | `[]` | Tolerations for use with node taints |
+| nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.24"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.25"` | Image tag |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
-| registry.affinity | object | `{}` | Assign custom affinity rules to the pods |
+| registry.affinity | object | `{}` | Assign custom affinity rules to the pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | registry.auth.password | string | password | Registry password |
 | registry.auth.user | string | user | Registry username |
 | registry.config | string | `""` | A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/. |
@@ -227,6 +247,6 @@
 | registry.storage.path | string | `"/var/lib/registry"` | Persistent volume mount point. This will define Registry app workdir too. |
 | registry.storage.size | string | `"10Gi"` | Storage size |
 | registry.storage.storageClass | string | `""` | Storage class name |
-| registry.tls | object | `{"enabled":false}` | Define which Nodes the Pods are scheduled on. |
+| registry.tls | object | `{"enabled":false}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | registry.tls.enabled | bool | `false` | Whether to enable TLS |
-| registry.tolerations | list | `[]` | Tolerations for use with node taints |
+| registry.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
