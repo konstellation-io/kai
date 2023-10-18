@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/interfaces"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 	"github.com/konstellation-io/kai/engine/nats-manager/proto/natspb"
@@ -12,7 +11,6 @@ import (
 
 // NatsService basic server.
 type NatsService struct {
-	config  *config.Config
 	logger  logging.Logger
 	manager interfaces.NatsManager
 	natspb.UnimplementedNatsManagerServiceServer
@@ -20,12 +18,10 @@ type NatsService struct {
 
 // NewNatsService instantiates the GRPC server implementation.
 func NewNatsService(
-	cfg *config.Config,
 	logger logging.Logger,
 	manager interfaces.NatsManager,
 ) *NatsService {
 	return &NatsService{
-		cfg,
 		logger,
 		manager,
 		natspb.UnimplementedNatsManagerServiceServer{},
@@ -104,17 +100,49 @@ func (n *NatsService) DeleteObjectStores(
 	}, nil
 }
 
-func (n *NatsService) CreateKeyValueStores(
+func (n *NatsService) CreateVersionKeyValueStores(
 	_ context.Context,
-	req *natspb.CreateKeyValueStoresRequest,
-) (*natspb.CreateKeyValueStoreResponse, error) {
-	n.logger.Info("CreateKeyValueStores request received")
+	req *natspb.CreateVersionKeyValueStoresRequest,
+) (*natspb.CreateVersionKeyValueStoresResponse, error) {
+	n.logger.Info("CreateVersionKeyValueStores request received")
 
-	keyValueStores, err := n.manager.CreateKeyValueStores(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
+	keyValueStores, err := n.manager.CreateVersionKeyValueStores(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
+	if err != nil {
+		n.logger.Errorf("Error creating version's key-value store: %s", err)
+		return nil, err
+	}
+
+	return n.mapKeyValueStoresToDTO(keyValueStores), nil
+}
+
+func (n *NatsService) CreateGlobalKeyValueStore(
+	_ context.Context,
+	req *natspb.CreateGlobalKeyValueStoreRequest,
+) (*natspb.CreateGlobalKeyValueStoreResponse, error) {
+	n.logger.Info("CreateGlobalKeyValueStore request received")
+
+	keyValueStore, err := n.manager.CreateGlobalKeyValueStore(req.ProductId)
+	if err != nil {
+		n.logger.Errorf("Error creating global key-value store: %s", err)
+		return nil, err
+	}
+
+	return &natspb.CreateGlobalKeyValueStoreResponse{GlobalKeyValueStore: keyValueStore}, nil
+}
+
+func (n *NatsService) UpdateKeyValueConfiguration(
+	_ context.Context,
+	req *natspb.UpdateKeyValueConfigurationRequest,
+) (*natspb.UpdateKeyValueConfigurationResponse, error) {
+	n.logger.Info("CreateGlobalKeyValueStore request received")
+
+	err := n.manager.UpdateKeyValueStoresConfiguration(n.mapDTOToKeyValueStoreConfigurations(req.KeyValueStoresConfig))
 	if err != nil {
 		n.logger.Errorf("Error creating object store: %s", err)
 		return nil, err
 	}
 
-	return n.mapKeyValueStoresToDTO(keyValueStores), nil
+	return &natspb.UpdateKeyValueConfigurationResponse{
+		Message: "Configurations successfully updated!",
+	}, nil
 }

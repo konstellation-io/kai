@@ -66,7 +66,7 @@ func (mr *MockVersionServiceMockRecorder) RegisterProcess(ctx, processID, proces
 }
 
 // Start mocks base method.
-func (m *MockVersionService) Start(ctx context.Context, productID string, version *entity.Version, versionConfig *entity.VersionConfig) error {
+func (m *MockVersionService) Start(ctx context.Context, productID string, version *entity.Version, versionConfig *entity.VersionStreamingResources) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Start", ctx, productID, version, versionConfig)
 	ret0, _ := ret[0].(error)

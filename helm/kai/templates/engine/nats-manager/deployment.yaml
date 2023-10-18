@@ -24,7 +24,7 @@ spec:
             - configMapRef:
                 name: {{ include "nats-manager.fullname" . }}
           env:
-            - name: KRE_NATS_MANAGER_PORT
+            - name: KAI_NATS_MANAGER_PORT
               value: "50051"
             - name: POD_NAMESPACE
               valueFrom:

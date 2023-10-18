@@ -32,7 +32,33 @@ func (vb *VersionBuilder) WithStatus(status entity.VersionStatus) *VersionBuilde
 	return vb
 }
 
+func (vb *VersionBuilder) WithConfig(config []entity.ConfigurationVariable) *VersionBuilder {
+	vb.version.Config = config
+	return vb
+}
+
 func (vb *VersionBuilder) WithWorkflows(workflows []entity.Workflow) *VersionBuilder {
 	vb.version.Workflows = workflows
 	return vb
+}
+
+func NewVersionWithConfigsBuilder() *VersionBuilder {
+	return NewVersionBuilder().
+		WithConfig([]entity.ConfigurationVariable{{
+			Key: "versionConfigurationKey-01", Value: "versionConfigurationValue-01",
+		}}).
+		WithWorkflows([]entity.Workflow{
+			NewWorkflowBuilder().
+				WithConfig([]entity.ConfigurationVariable{{
+					Key: "workflowConfigurationKey-01", Value: "workflowConfigurationValue-01",
+				}}).
+				WithProcesses([]entity.Process{
+					NewProcessBuilder().
+						WithConfig([]entity.ConfigurationVariable{{
+							Key: "processConfigurationKey-01", Value: "processConfigurationValue-01",
+						}}).
+						Build(),
+				}).
+				Build(),
+		})
 }

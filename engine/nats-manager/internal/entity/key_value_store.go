@@ -3,7 +3,8 @@ package entity
 type KeyValueStoreScope string
 
 const (
-	KVScopeProject  KeyValueStoreScope = "project"
+	KVScopeGlobal   KeyValueStoreScope = "global"
+	KVScopeVersion  KeyValueStoreScope = "version"
 	KVScopeWorkflow KeyValueStoreScope = "workflow"
 	KVScopeProcess  KeyValueStoreScope = "process"
 )

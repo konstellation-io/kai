@@ -8,8 +8,8 @@ listmeta:
     remainingitemcount: null
 items:
     - typemeta:
-        kind: ""
-        apiversion: ""
+        kind: Deployment
+        apiversion: apps/v1
       objectmeta:
         name: test-product-v1-0-0-test-workflow-test-process
         generatename: ""
@@ -33,7 +33,7 @@ items:
         zzz_deprecatedclustername: ""
         managedfields: []
       spec:
-        replicas: 1
+        replicas: null
         selector:
             matchlabels:
                 process: test-process
