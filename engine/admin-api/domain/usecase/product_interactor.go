@@ -118,8 +118,15 @@ func (i *ProductInteractor) CreateProduct(
 
 	err = i.objectStorage.CreateBucket(ctx, productID)
 	if err != nil {
-		return nil, fmt.Errorf("creating s3 bucket: %w", err)
+		return nil, fmt.Errorf("creating object storage bucket: %w", err)
 	}
+
+	policyName, err := i.objectStorage.CreateBucketPolicy(ctx, productID)
+	if err != nil {
+		return nil, fmt.Errorf("creating object storage policy: %w", err)
+	}
+
+	_ = policyName
 
 	err = i.measurementRepo.CreateDatabase(newProduct.Name)
 	if err != nil {

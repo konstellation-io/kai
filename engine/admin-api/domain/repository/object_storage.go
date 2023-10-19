@@ -6,4 +6,5 @@ import "context"
 
 type ObjectStorage interface {
 	CreateBucket(ctx context.Context, bucket string) error
+	CreateBucketPolicy(ctx context.Context, bucket string) (string, error)
 }

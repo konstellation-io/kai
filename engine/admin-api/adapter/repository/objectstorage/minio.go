@@ -51,38 +51,40 @@ func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) e
 		}
 	}
 
+	//err = os.client.SetBucketPolicy(ctx, bucket, policyName)
+	//if err != nil {
+	//	return fmt.Errorf("setting bucket's policy: %w", err)
+	//}
+
+	return nil
+}
+
+func (os *MinioObjectStorage) CreateBucketPolicy(ctx context.Context, bucket string) (string, error) {
 	policyName := fmt.Sprintf("%s-policy", bucket)
 
-	err = os.adminClient.AddCannedPolicy(
+	err := os.adminClient.AddCannedPolicy(
 		ctx,
 		policyName,
 		os.getPolicy(bucket),
 	)
 	if err != nil {
-		return fmt.Errorf("creating policy: %w", err)
+		return "", fmt.Errorf("creating policy: %w", err)
 	}
 
-	err = os.client.SetBucketPolicy(ctx, bucket, policyName)
-	if err != nil {
-		return fmt.Errorf("setting bucket's policy: %w", err)
-	}
-
-	return nil
+	return policyName, nil
 }
 
 func (os *MinioObjectStorage) getPolicy(bucket string) []byte {
 	return []byte(
 		fmt.Sprintf(`{
-			"Policy":{
-				"Version":"2012-10-17",
-				"Statement":[
-					{
-						"Effect":"Allow",
-						"Action":["s3:*"],
-						"Resource":["arn:aws:s3:::%s"],
-					}
-				]
-			}
+			"Version":"2012-10-17",
+			"Statement":[
+				{
+					"Effect":"Allow",
+					"Action":["s3:*"],
+					"Resource":["arn:aws:s3:::%s"]
+				}
+			]
 		}`, bucket))
 }
 

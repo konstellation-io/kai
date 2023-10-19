@@ -96,7 +96,7 @@ func (s *ObjectStorageSuite) TearDownTest() {
 	s.Require().NoError(err)
 }
 
-func (s *ObjectStorageSuite) TestCreateBucket() {
+func (s *ObjectStorageSuite) TestCreateBucketWithPolicy() {
 	ctx := context.Background()
 
 	err := s.objectStorage.CreateBucket(ctx, _testBucket)
