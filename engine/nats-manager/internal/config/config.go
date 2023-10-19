@@ -14,10 +14,10 @@ const (
 func Initialize() {
 	viper.AutomaticEnv()
 
-	viper.RegisterAlias("KAI_DEVELOPMENT_MODE", DevelopmentMode)
-	viper.RegisterAlias("KAI_NATS_MANAGER_PORT", NatsManagerPort)
-	viper.RegisterAlias("KAI_NATS_URL", NatsURL)
-	viper.RegisterAlias("KAI_OBJECT_STORE_DEFAULT_TTL", ObjectStoreDefaultTTLDays)
+	viper.RegisterAlias(DevelopmentMode, "KAI_DEVELOPMENT_MODE")
+	viper.RegisterAlias(NatsManagerPort, "KAI_NATS_MANAGER_PORT")
+	viper.RegisterAlias(NatsURL, "KAI_NATS_URL")
+	viper.RegisterAlias(ObjectStoreDefaultTTLDays, "KAI_OBJECT_STORE_DEFAULT_TTL")
 
 	viper.SetDefault(DevelopmentMode, false)
 	viper.SetDefault(NatsManagerPort, 50051)
