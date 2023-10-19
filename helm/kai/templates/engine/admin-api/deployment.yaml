@@ -71,12 +71,12 @@ spec:
                   key: {{ include "keycloak.secretPasswordKey" . }}
         # MinIO enabled
         {{- if .Values.minio.enabled }}
-            - name: AWS_ACCESS_KEY_ID
+            - name: KAI_MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}
                   key: rootUser
-            - name: AWS_SECRET_ACCESS_KEY
+            - name: KAI_MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}
