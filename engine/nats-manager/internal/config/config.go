@@ -23,4 +23,9 @@ func Initialize() {
 	viper.SetDefault(NatsManagerPort, 50051)
 	viper.SetDefault(NatsURL, "localhost:4222")
 	viper.SetDefault(ObjectStoreDefaultTTLDays, 5)
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
 }
