@@ -62,6 +62,36 @@ config:
           accessKeyID: ""
           # -- S3 Secret Access Key if no secret is used
           secretAccessKey: ""
+      # -- Transition Objects from MinIO to Google Cloud Platform
+      gcp:
+        # -- GCP authentication config
+        # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.credentials)
+        auth:
+          # -- Name of the secret that contains the credentials for GCP
+          secretName: ""
+          # -- Secret reference for GCP credentials
+          secretKeyNames:
+            # -- Name of the key in the secret that contains JSON credentials
+            credentials: ""
+          # -- JSON credentials if no secret is used
+          credentials: ""
+      # -- Transition Objects from MinIO to Azure
+      azure:
+        # -- Azure authentication config
+        # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.account and auth.key)
+        auth:
+          # -- Name of the secret that contains the credentials for Azure
+          secretName: ""
+          # -- Secret reference for Azure Storage Account
+          secretKeyNames:
+            # -- Name of the key in the secret that contains the Storage Account Name
+            account: ""
+            # -- Name of the key in the secret that contains the KEY for the specified Storage Account
+            key: ""
+          # -- Storage Account Name if no secret is used
+          accountName: ""
+          # -- Storage Account KEY if no secret is used
+          accountKey: ""
 adminApi:
   # -- Default application log level
   logLevel: INFO

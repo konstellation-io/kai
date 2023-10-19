@@ -16,7 +16,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.28"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.31"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -36,11 +36,11 @@
 | chronograf.persistence.size | string | `"2Gi"` | Storage size |
 | chronograf.persistence.storageClass | string | `"standard"` | Storage class name |
 | chronograf.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
-| config | object | `{"admin":{"apiHost":"api.kai.local","corsEnabled":true},"baseDomainName":"local","minio":{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}},"mongodb":{"connectionString":{"secretKey":"","secretName":""}}}` | Config from kai/helm |
+| config | object | `{"admin":{"apiHost":"api.kai.local","corsEnabled":true},"baseDomainName":"local","minio":{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"azure":{"auth":{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}},"enabled":false,"gcp":{"auth":{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}},"name":"","remoteBucketName":"","remotePrefix":""}},"mongodb":{"connectionString":{"secretKey":"","secretName":""}}}` | Config from kai/helm |
 | config.admin.apiHost | string | `"api.kai.local"` | Api Hostname for Admin UI and Admin API |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.baseDomainName | string | `"local"` | Base domain name for Admin API and K8S Manager apps |
-| config.minio | object | `{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}}` | MinIO post deploy configuration |
+| config.minio | object | `{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"azure":{"auth":{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}},"enabled":false,"gcp":{"auth":{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}},"name":"","remoteBucketName":"","remotePrefix":""}}` | MinIO post deploy configuration |
 | config.minio.defaultRegion | string | us-east-1 | Default region (only affect to Minio buckets) |
 | config.minio.tier.aws | object | `{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""}` | Transition Objects from MinIO to AWS S3 |
 | config.minio.tier.aws.auth | object | `{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""}` | AWS authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey) |
@@ -52,7 +52,21 @@
 | config.minio.tier.aws.auth.secretName | string | `""` | Name of the secret that contains the credentials for S3 |
 | config.minio.tier.aws.endpointURL | string | https://s3.amazonaws.com | S3 Service endpoint URL |
 | config.minio.tier.aws.region | string | us-east-1 | The Region where the remote bucket was created. |
+| config.minio.tier.azure | object | `{"auth":{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}}` | Transition Objects from MinIO to Azure |
+| config.minio.tier.azure.auth | object | `{"accountKey":"","accountName":"","secretKeyNames":{"account":"","key":""},"secretName":""}` | Azure authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.account and auth.key) |
+| config.minio.tier.azure.auth.accountKey | string | `""` | Storage Account KEY if no secret is used |
+| config.minio.tier.azure.auth.accountName | string | `""` | Storage Account Name if no secret is used |
+| config.minio.tier.azure.auth.secretKeyNames | object | `{"account":"","key":""}` | Secret reference for Azure Storage Account |
+| config.minio.tier.azure.auth.secretKeyNames.account | string | `""` | Name of the key in the secret that contains the Storage Account Name |
+| config.minio.tier.azure.auth.secretKeyNames.key | string | `""` | Name of the key in the secret that contains the KEY for the specified Storage Account |
+| config.minio.tier.azure.auth.secretName | string | `""` | Name of the secret that contains the credentials for Azure |
 | config.minio.tier.enabled | bool | `false` | Whether to enable MinIO Tiering @default: If is disable MinIO will use only local storage |
+| config.minio.tier.gcp | object | `{"auth":{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}}` | Transition Objects from MinIO to Google Cloud Platform |
+| config.minio.tier.gcp.auth | object | `{"credentials":"","secretKeyNames":{"credentials":""},"secretName":""}` | GCP authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (auth.credentials) |
+| config.minio.tier.gcp.auth.credentials | string | `""` | JSON credentials if no secret is used |
+| config.minio.tier.gcp.auth.secretKeyNames | object | `{"credentials":""}` | Secret reference for GCP credentials |
+| config.minio.tier.gcp.auth.secretKeyNames.credentials | string | `""` | Name of the key in the secret that contains JSON credentials |
+| config.minio.tier.gcp.auth.secretName | string | `""` | Name of the secret that contains the credentials for GCP |
 | config.minio.tier.name | string | KAI-REMOTE-STORAGE | Tier name |
 | config.minio.tier.remoteBucketName | string | `""` | Remote storage bucket name (must exist) |
 | config.minio.tier.remotePrefix | string | DATA | Prefix or path in bucket where object transition will happen (will be created if not exist) |
@@ -74,7 +88,7 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.28"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.31"` | Image tag |
 | k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
@@ -170,7 +184,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.28"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.31"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -202,7 +216,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.28"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.31"` | Image tag |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | registry.affinity | object | `{}` | Assign custom affinity rules to the pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | registry.auth.password | string | password | Registry password |

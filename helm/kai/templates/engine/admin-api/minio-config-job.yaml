@@ -21,10 +21,17 @@ spec:
         - name: minio-client-config
           image: minio/mc
           env:
+            # TO_DO: validate the conditions with helpers default values
             # Set the tier provider
             {{- if or (and .Values.config.minio.tier.aws.auth.secretName .Values.config.minio.tier.aws.auth.secretKeyNames.accessKey .Values.config.minio.tier.aws.auth.secretKeyNames.secretKey) (and .Values.config.minio.tier.aws.auth.accessKeyID .Values.config.minio.tier.aws.auth.secretAccessKey) }}
             - name: TIER_SELECTED
               value: "aws"
+            {{- else if or (and .Values.config.minio.tier.gcp.auth.secretName .Values.config.minio.tier.gcp.auth.secretKeyNames.credentials) (.Values.config.minio.tier.gcp.auth.credentials) }}
+            - name: TIER_SELECTED
+              value: "gcp"
+            {{- else if or (and .Values.config.minio.tier.azure.auth.secretName .Values.config.minio.tier.azure.auth.secretKeyNames.account .Values.config.minio.tier.azure.auth.secretKeyNames.key) (and .Values.config.minio.tier.azure.auth.accountName .Values.config.minio.tier.azure.auth.accountKey) }}
+            - name: TIER_SELECTED
+              value: "azure"
             {{- end }}
 
             # MINIO config
@@ -63,6 +70,26 @@ spec:
             - name: AWS_REGION
               value: {{ include "minio-config.tier.s3.region" . }}
 
+            # TO_DO: use helpers to define credentials values, also update secret with conditions to create the required authentication secret in funtion of the provider
+            # GCP config
+            - name: CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.minio.tier.gcp.auth.secretName }}
+                  key: {{ .Values.config.minio.tier.gcp.auth.secretKeyNames.credentials }}
+
+            # Azure config
+            - name: ACCOUNT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.minio.tier.azure.auth.secretName }}
+                  key: {{ .Values.config.minio.tier.azure.auth.secretKeyNames.account }}
+            - name: ACCOUNT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.minio.tier.azure.auth.secretName }}
+                  key: {{ .Values.config.minio.tier.azure.auth.secretKeyNames.key }}
+
           command: ["/bin/bash", "-c"]
           args:
             - |
@@ -81,9 +108,30 @@ spec:
                 done
                 echo "All required variables are defined, creating the MinIO tier"
                 mc ilm tier add s3 kai-minio $TIER_NAME --endpoint $AWS_ENDPOINT_URL_S3 --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY --bucket $REMOTE_BUCKET_NAME --prefix $REMOTE_PREFIX --region $AWS_REGION --force
-                echo "Job completed successfully!"
+              elif [ "$TIER_SELECTED" == "gcp" ]; then
+                echo -e "Tier provider selected: [GCP] \nChecking required variables for this tier"
+                variables=("TIER_NAME" "CREDENTIALS" "REMOTE_BUCKET_NAME" "REMOTE_PREFIX")
+                for var in "${variables[@]}"; do
+                  if [ -z "${!var}" ]; then
+                    echo "<ERROR> The variable $var is undefined or empty. Please check \`.Values.config.minio.tier\` section"
+                    exit 1
+                  fi
+                done
+                echo "$CREDENTIALS" > ./credentials.json
+                mc ilm tier add gcs kai-minio $TIER_NAME --credentials-file ./credentials.json --bucket $REMOTE_BUCKET_NAME --prefix $REMOTE_PREFIX --force
+              elif [ "$TIER_SELECTED" == "azure" ]; then
+                echo -e "Tier provider selected: [AZURE] \nChecking required variables for this tier"
+                variables=("TIER_NAME" "ACCOUNT_NAME" "ACCOUNT_KEY" "REMOTE_BUCKET_NAME" "REMOTE_PREFIX")
+                for var in "${variables[@]}"; do
+                  if [ -z "${!var}" ]; then
+                    echo "<ERROR> The variable $var is undefined or empty. Please check \`.Values.config.minio.tier\` section"
+                    exit 1
+                  fi
+                done
+                mc ilm tier add azure kai-minio $TIER_NAME --account-name $ACCOUNT_NAME --account-key $ACCOUNT_KEY --bucket $REMOTE_BUCKET_NAME --prefix $REMOTE_PREFIX --force
               else
                 echo -e "Minio Tier was enabled, but no specific configuration has been found for any Tier. Please check \`.Values.config.minio.tier\` section"
                 exit 1
               fi
+              echo "Job completed successfully!"
 {{- end }}
