@@ -136,35 +136,35 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Minio secret name
+minio-config secret name
 */}}
 {{- define "minio-config.tier.aws.secretName" -}}
 {{ default (include "minio-config.fullname" . ) .Values.config.minio.tier.aws.auth.secretName }}
 {{- end -}}
 
 {{/*
-Minio access key
+minio-config access key
 */}}
 {{- define "minio-config.tier.aws.accessKey" -}}
 {{ default "accessKey" .Values.config.minio.tier.aws.auth.secretKeyNames.accessKey }}
 {{- end -}}
 
 {{/*
-Minio secret key
+minio-config secret key
 */}}
 {{- define "minio-config.tier.aws.secretKey" -}}
 {{ default "secretKey" .Values.config.minio.tier.aws.auth.secretKeyNames.secretKey }}
 {{- end -}}
 
 {{/*
-minio-config aws S3 Service endpoint URL
+minio-config aws S3 endpoint URL
 */}}
 {{- define "minio-config.tier.s3.endpointURL" -}}
 {{- default "https://s3.amazonaws.com" .Values.config.minio.tier.aws.endpointURL -}}
 {{- end }}
 
 {{/*
-minio-config for remote bucket prefix (path in bucket to object transition)
+minio-config remote bucket prefix (path in bucket to object transition)
 */}}
 {{- define "minio-config.tier.s3.remotePrefix" -}}
 {{- default "DATA" .Values.config.minio.tier.remotePrefix -}}

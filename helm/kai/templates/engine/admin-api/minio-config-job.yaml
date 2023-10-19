@@ -7,6 +7,7 @@ metadata:
   labels:
     {{- include "minio-config.labels" . | nindent 4 }}
 spec:
+  manualSelector: true
   selector:
     matchLabels:
       {{- include "minio-config.selectorLabels" . | nindent 6 }}
@@ -20,7 +21,7 @@ spec:
         - name: minio-client-config
           image: minio/mc
           env:
-            # Set tier provider
+            # Set the tier provider
             {{- if or (and .Values.config.minio.tier.aws.auth.secretName .Values.config.minio.tier.aws.auth.secretKeyNames.accessKey .Values.config.minio.tier.aws.auth.secretKeyNames.secretKey) (and .Values.config.minio.tier.aws.auth.accessKeyID .Values.config.minio.tier.aws.auth.secretAccessKey) }}
             - name: TIER_SELECTED
               value: "aws"
@@ -31,13 +32,10 @@ spec:
               value: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
             - name: REMOTE_BUCKET_NAME
               value: {{ .Values.config.minio.tier.remoteBucketName }}
-            ## tier.name (set in values / default)
             - name: TIER_NAME
               value: {{ include "minio-config.tier.name" . }}
-            ## remotePrefix (set in values / default)
             - name: REMOTE_PREFIX
               value: {{ include "minio-config.tier.s3.remotePrefix" . }}
-            ## values from minio subchart
             - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
@@ -48,6 +46,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}
                   key: rootPassword
+
             # AWS config
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
@@ -59,12 +58,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "minio-config.tier.aws.secretName" . }}
                   key: {{ include "minio-config.tier.aws.secretKey" . }}
-            ## endpointURL (set in values / default)
             - name: AWS_ENDPOINT_URL_S3
               value: {{ include "minio-config.tier.s3.endpointURL" . }}
-            ## region (set in values / default)
             - name: AWS_REGION
               value: {{ include "minio-config.tier.s3.region" . }}
+
           command: ["/bin/bash", "-c"]
           args:
             - |
@@ -77,7 +75,7 @@ spec:
                 variables=("TIER_NAME" "AWS_ENDPOINT_URL_S3" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" "REMOTE_BUCKET_NAME" "REMOTE_PREFIX" "AWS_REGION")
                 for var in "${variables[@]}"; do
                   if [ -z "${!var}" ]; then
-                    echo "ERROR: The variable $var is undefined or empty."
+                    echo "<ERROR> The variable $var is undefined or empty. Please check \`.Values.config.minio.tier\` section"
                     exit 1
                   fi
                 done
@@ -85,7 +83,7 @@ spec:
                 mc ilm tier add s3 kai-minio $TIER_NAME --endpoint $AWS_ENDPOINT_URL_S3 --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY --bucket $REMOTE_BUCKET_NAME --prefix $REMOTE_PREFIX --region $AWS_REGION --force
                 echo "Job completed successfully!"
               else
-                echo "Minio Tier was enabled, but no specific configuration has been found for any Tier. Please check '.Values.config.minio.tier' section"
+                echo -e "Minio Tier was enabled, but no specific configuration has been found for any Tier. Please check \`.Values.config.minio.tier\` section"
                 exit 1
               fi
 {{- end }}
