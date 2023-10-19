@@ -116,12 +116,17 @@ func initGraphqlController(
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
-	s3client, err := objectstorage.NewS3Client()
+	minioClient, err := objectstorage.NewMinioClient()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s3ObjectStorage := objectstorage.NewMinioObjectStorage(logger, s3client)
+	minioAdminClient, err := objectstorage.NewAdminMinioClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s3ObjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
 
 	ps := usecase.ProductInteractorOpts{
 		Logger:          logger,

@@ -73,7 +73,7 @@ func (s *ObjectStorageSuite) SetupSuite() {
 	err = os.Setenv("AWS_SECRET_ACCESS_KEY", "minioadmin")
 	s.Require().NoError(err)
 
-	client, err := objectstorage.NewS3Client()
+	client, err := objectstorage.NewMinioClient()
 	s.Require().NoError(err)
 
 	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})

@@ -6,20 +6,23 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 	"github.com/spf13/viper"
 )
 
 type MinioObjectStorage struct {
-	logger logr.Logger
-	client *minio.Client
+	logger      logr.Logger
+	client      *minio.Client
+	adminClient *madmin.AdminClient
 }
 
-func NewMinioObjectStorage(logger logr.Logger, client *minio.Client) *MinioObjectStorage {
+func NewMinioObjectStorage(logger logr.Logger, client *minio.Client, adminClient *madmin.AdminClient) *MinioObjectStorage {
 	return &MinioObjectStorage{
-		logger: logger,
-		client: client,
+		logger:      logger,
+		client:      client,
+		adminClient: adminClient,
 	}
 }
 
@@ -31,22 +34,71 @@ func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) e
 		return fmt.Errorf("creating bucket: %w", err)
 	}
 
-	if viper.GetBool(config.MinioTieringEnabledKey) {
+	if viper.GetBool(config.MinioTierEnabledKey) {
 		err = os.client.SetBucketLifecycle(ctx, bucket, &lifecycle.Configuration{
 			Rules: []lifecycle.Rule{
 				{
 					ID: fmt.Sprintf("%s-transition-rule", bucket),
 					Transition: lifecycle.Transition{
-						StorageClass: viper.GetString(config.MinioTierKey),
+						StorageClass: viper.GetString(config.MinioTierNameKey),
 						Days:         0,
 					},
 				},
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("setting bucket's lifecyle policy: %w", err)
+			return fmt.Errorf("setting bucket's lifecyle: %w", err)
 		}
 	}
 
+	policyName := fmt.Sprintf("%s-policy", bucket)
+
+	err = os.adminClient.AddCannedPolicy(
+		ctx,
+		policyName,
+		os.getPolicy(bucket),
+	)
+	if err != nil {
+		return fmt.Errorf("creating policy: %w", err)
+	}
+
+	err = os.client.SetBucketPolicy(ctx, bucket, policyName)
+	if err != nil {
+		return fmt.Errorf("setting bucket's policy: %w", err)
+	}
+
 	return nil
+}
+
+func (os *MinioObjectStorage) getPolicy(bucket string) []byte {
+	return []byte(
+		fmt.Sprintf(`{
+			"Policy":{
+				"Version":"2012-10-17",
+				"Statement":[
+					{
+						"Effect":"Allow",
+						"Action":["s3:*"],
+						"Resource":["arn:aws:s3:::%s"],
+					}
+				]
+			}
+		}`, bucket))
+}
+
+func (os *MinioObjectStorage) getPolicy2(policyName, bucket string) []byte {
+	return []byte(
+		fmt.Sprintf(`{
+			"PolicyName":"%s",
+			"Policy":{
+				"Version":"2012-10-17",
+				"Statement":[
+					{
+						"Effect":"Allow",
+						"Action":["s3:*"],
+						"Resource":["arn:aws:s3:::%s"],
+					}
+				]
+			}
+		}`, policyName, bucket))
 }
