@@ -12,14 +12,14 @@ import (
 
 //go:generate mockgen -source=../proto/natspb/nats_grpc.pb.go -destination=../../../mocks/${GOFILE} -package=mocks
 
-type NatsManagerClient struct {
+type Client struct {
 	cfg    *config.Config
 	client natspb.NatsManagerServiceClient
 	logger logging.Logger
 }
 
-func NewNatsManagerClient(cfg *config.Config, logger logging.Logger, client natspb.NatsManagerServiceClient) (*NatsManagerClient, error) {
-	return &NatsManagerClient{
+func NewClient(cfg *config.Config, logger logging.Logger, client natspb.NatsManagerServiceClient) (*Client, error) {
+	return &Client{
 		cfg,
 		client,
 		logger,
@@ -27,11 +27,11 @@ func NewNatsManagerClient(cfg *config.Config, logger logging.Logger, client nats
 }
 
 // CreateStreams calls nats-manager to create NATS streams for given version.
-func (n *NatsManagerClient) CreateStreams(
+func (n *Client) CreateStreams(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
-) (*entity.VersionStreamsConfig, error) {
+) (*entity.VersionStreams, error) {
 	req := natspb.CreateStreamsRequest{
 		ProductId:  productID,
 		VersionTag: version.Tag,
@@ -47,11 +47,11 @@ func (n *NatsManagerClient) CreateStreams(
 }
 
 // CreateObjectStores calls nats-manager to create NATS Object Stores for given version.
-func (n *NatsManagerClient) CreateObjectStores(
+func (n *Client) CreateObjectStores(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
-) (*entity.VersionObjectStoresConfig, error) {
+) (*entity.VersionObjectStores, error) {
 	req := natspb.CreateObjectStoresRequest{
 		ProductId:  productID,
 		VersionTag: version.Tag,
@@ -66,19 +66,19 @@ func (n *NatsManagerClient) CreateObjectStores(
 	return n.mapDTOToVersionObjectStoreConfig(res.Workflows), err
 }
 
-// CreateKeyValueStores calls nats-manager to create NATS Key Value Stores for given version.
-func (n *NatsManagerClient) CreateKeyValueStores(
+// CreateVersionKeyValueStores calls nats-manager to create NATS Key Value Stores for given version.
+func (n *Client) CreateVersionKeyValueStores(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
-) (*entity.KeyValueStoresConfig, error) {
-	req := natspb.CreateKeyValueStoresRequest{
+) (*entity.KeyValueStores, error) {
+	req := natspb.CreateVersionKeyValueStoresRequest{
 		ProductId:  productID,
 		VersionTag: version.Tag,
 		Workflows:  n.mapWorkflowsToDTO(version.Workflows),
 	}
 
-	res, err := n.client.CreateKeyValueStores(ctx, &req)
+	res, err := n.client.CreateVersionKeyValueStores(ctx, &req)
 	if err != nil {
 		return nil, fmt.Errorf("error creating key value stores: %w", err)
 	}
@@ -87,7 +87,7 @@ func (n *NatsManagerClient) CreateKeyValueStores(
 }
 
 // DeleteStreams calls nats-manager to delete NATS streams for given version.
-func (n *NatsManagerClient) DeleteStreams(ctx context.Context, productID, versionTag string) error {
+func (n *Client) DeleteStreams(ctx context.Context, productID, versionTag string) error {
 	req := natspb.DeleteStreamsRequest{
 		ProductId:  productID,
 		VersionTag: versionTag,
@@ -102,7 +102,7 @@ func (n *NatsManagerClient) DeleteStreams(ctx context.Context, productID, versio
 }
 
 // DeleteObjectStores calls nats-manager to delete NATS Object Stores for given version.
-func (n *NatsManagerClient) DeleteObjectStores(ctx context.Context, productID, versionTag string) error {
+func (n *Client) DeleteObjectStores(ctx context.Context, productID, versionTag string) error {
 	req := natspb.DeleteObjectStoresRequest{
 		ProductId:  productID,
 		VersionTag: versionTag,

@@ -142,3 +142,17 @@ func (mr *MockNatsClientMockRecorder) GetStreamNames(optFilter ...interface{}) *
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStreamNames", reflect.TypeOf((*MockNatsClient)(nil).GetStreamNames), optFilter...)
 }
+
+// UpdateConfiguration mocks base method.
+func (m *MockNatsClient) UpdateConfiguration(keyValueStore string, keyValueConfig map[string]string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateConfiguration", keyValueStore, keyValueConfig)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateConfiguration indicates an expected call of UpdateConfiguration.
+func (mr *MockNatsClientMockRecorder) UpdateConfiguration(keyValueStore, keyValueConfig interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfiguration", reflect.TypeOf((*MockNatsClient)(nil).UpdateConfiguration), keyValueStore, keyValueConfig)
+}

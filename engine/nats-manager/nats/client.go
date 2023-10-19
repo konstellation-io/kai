@@ -3,6 +3,10 @@ package nats
 import (
 	"fmt"
 	"regexp"
+	"time"
+
+	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
+	"github.com/spf13/viper"
 
 	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
@@ -86,6 +90,7 @@ func (n *NatsClient) CreateObjectStore(objectStore string) error {
 	_, err := n.js.CreateObjectStore(&nats.ObjectStoreConfig{
 		Bucket:  objectStore,
 		Storage: nats.FileStorage,
+		TTL:     time.Duration(viper.GetInt(config.ObjectStoreDefaultTTLDays)*24) * time.Hour,
 	})
 	if err != nil {
 		return fmt.Errorf("error creating the object store: %w", err)
@@ -109,16 +114,12 @@ func (n *NatsClient) CreateKeyValueStore(keyValueStore string) error {
 
 func (n *NatsClient) DeleteStream(stream string) error {
 	n.logger.Infof("Deleting stream %q", stream)
-	err := n.js.DeleteStream(stream)
-
-	return err
+	return n.js.DeleteStream(stream)
 }
 
 func (n *NatsClient) DeleteObjectStore(objectStore string) error {
 	n.logger.Infof("Deleting object store %q", objectStore)
-	err := n.js.DeleteObjectStore(objectStore)
-
-	return err
+	return n.js.DeleteObjectStore(objectStore)
 }
 
 // GetStreamNames returns the list of streams' names.

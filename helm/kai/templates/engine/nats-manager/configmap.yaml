@@ -6,8 +6,8 @@ metadata:
     {{- include "kai.labels" . | nindent 4 }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 data:
-  KRE_DEVELOPMENT_MODE: "{{ .Values.developmentMode }}"
-  KRE_RELEASE_NAME: "{{ .Release.Name }}"
+  KAI_DEVELOPMENT_MODE: "{{ .Values.developmentMode }}"
+  KAI_RELEASE_NAME: "{{ .Release.Name }}"
 
   # NATS Streaming
-  KRE_NATS_URL: "{{ include "nats.url" . }}"
+  KAI_NATS_URL: "{{ include "nats.url" . }}"

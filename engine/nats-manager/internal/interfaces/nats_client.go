@@ -16,4 +16,5 @@ type NatsClient interface {
 	DeleteStream(stream string) error
 	DeleteObjectStore(stream string) error
 	CreateKeyValueStore(keyValueStore string) error
+	UpdateConfiguration(keyValueStore string, keyValueConfig map[string]string) error
 }

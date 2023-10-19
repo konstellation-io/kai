@@ -1,7 +1,7 @@
 developmentMode: {{ requiredEnv "DEVELOPMENT_MODE" }}
 config:
   admin:
-    apiHost: {{ requiredEnv "KRE_ADMIN_API_HOST" | quote }}
+    apiHost: {{ requiredEnv "KAI_ADMIN_API_HOST" | quote }}
   mongodb:
     connectionString:
       secretName: mongodb-database-kai-connection-string
@@ -12,7 +12,7 @@ mongoExpress:
     secretKey: connectionString.standard
 kapacitor:
   enabled: true
-  influxURL: {{ requiredEnv "KRE_INFLUX_URL" | quote }}
+  influxURL: {{ requiredEnv "KAI_INFLUX_URL" | quote }}
 nats:
   limits:
     maxPayload: 8MB

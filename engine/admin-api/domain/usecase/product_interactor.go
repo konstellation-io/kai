@@ -10,6 +10,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
@@ -34,6 +35,7 @@ type ProductInteractor struct {
 	userActivity    UserActivityInteracter
 	accessControl   auth.AccessControl
 	objectStorage   repository.ObjectStorage
+	natsService     service.NatsManagerService
 }
 
 type ProductInteractorOpts struct {
@@ -47,6 +49,7 @@ type ProductInteractorOpts struct {
 	UserActivity    UserActivityInteracter
 	AccessControl   auth.AccessControl
 	ObjectStorage   repository.ObjectStorage
+	NatsService     service.NatsManagerService
 }
 
 // NewProductInteractor creates a new ProductInteractor.
@@ -62,6 +65,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.UserActivity,
 		ps.AccessControl,
 		ps.ObjectStorage,
+		ps.NatsService,
 	}
 }
 
