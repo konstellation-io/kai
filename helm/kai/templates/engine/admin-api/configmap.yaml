@@ -29,11 +29,9 @@ data:
   KEYCLOAK_ADMIN_CLIENT_ID: "{{ .Values.keycloak.adminApi.oidcClient.clientId }}"
   # REGISTRY
   KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
-  # S3
-  {{- if .Values.minio.enabled }}
-  KAI_S3_ENDPOINT_URL: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
-  {{- else }}
-  KAI_S3_ENDPOINT_URL: {{ .Values.config.s3.endpointURL }}
-  {{- end }}
-  KAI_S3_BUCKET: {{ .Values.config.s3.bucketName }}
-  AWS_REGION: "{{ include "admin-api.s3.region" . }}"
+  # MinIO
+  KAI_MINIO_ENDPOINT_URL: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
+  KAI_MINIO_REGION: {{ include "minio-config.region" . }}
+  # MinIO Tier
+  KAI_MINIO_TIER_ENABLED: "{{ .Values.config.minio.tier.enabled }}"
+  KAI_MINIO_TIER_NAME: {{ include "minio-config.tier.name" . }}
