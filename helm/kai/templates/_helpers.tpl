@@ -166,7 +166,7 @@ minio-config AWS S3 remote bucket region for Tier
 minio-config default buckets region
 */}}
 {{- define "minio-config.region" -}}
-{{- default "us-east-1" .Values.minio.defaultRegion -}}
+{{- default "us-east-1" .Values.config.minio.defaultRegion -}}
 {{- end }}
 
 {{/*
