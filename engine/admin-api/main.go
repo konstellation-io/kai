@@ -12,16 +12,17 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/user"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	logging2 "github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -101,15 +102,7 @@ func initGraphqlController(
 		log.Fatal(err)
 	}
 
-	keycloakCfg := service.KeycloakConfig{
-		Realm:         cfg.Keycloak.Realm,
-		MasterRealm:   cfg.Keycloak.MasterRealm,
-		AdminUsername: cfg.Keycloak.AdminUsername,
-		AdminPassword: cfg.Keycloak.AdminPassword,
-		AdminClientID: cfg.Keycloak.AdminClientID,
-	}
-
-	gocloakUserRegistry, err := service.NewGocloakUserRegistry(service.WithClient(cfg.Keycloak.URL), &keycloakCfg)
+	keycloakUserRegistry, err := user.NewKeycloakUserRegistry(user.WithClient(viper.GetString(config.KeycloakURLKey)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -147,7 +140,7 @@ func initGraphqlController(
 		oldLogger,
 		accessControl,
 		userActivityInteractor,
-		gocloakUserRegistry,
+		keycloakUserRegistry,
 	)
 
 	versionInteractor := version.NewHandler(

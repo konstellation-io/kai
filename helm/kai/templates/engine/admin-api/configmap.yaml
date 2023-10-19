@@ -23,10 +23,10 @@ data:
   # Chronograf
   KAI_CHRONOGRAF_ADDRESS: "http://{{ include "chronograf.fullname" . }}"
   # Keycloak
-  KEYCLOAK_BASE_URL: "http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}"
-  KEYCLOAK_MASTER_REALM: "master"
-  KEYCLOAK_REALM: "{{ .Values.keycloak.realmName }}"
-  KEYCLOAK_ADMIN_CLIENT_ID: "{{ .Values.keycloak.adminApi.oidcClient.clientId }}"
+  KAI_KEYCLOAK_BASE_URL: "http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}"
+  KAI_KEYCLOAK_MASTER_REALM: "master"
+  KAI_KEYCLOAK_REALM: "{{ .Values.keycloak.realmName }}"
+  KAI_KEYCLOAK_ADMIN_CLIENT_ID: "{{ .Values.keycloak.adminApi.oidcClient.clientId }}"
   # REGISTRY
   KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
   # S3
