@@ -7,6 +7,9 @@ metadata:
   labels:
     {{- include "minio-config.labels" . | nindent 4 }}
 spec:
+  selector:
+    matchLabels:
+      {{- include "minio-config.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
@@ -29,21 +32,11 @@ spec:
             - name: REMOTE_BUCKET_NAME
               value: {{ .Values.config.minio.tier.remoteBucketName }}
             ## tier.name (set in values / default)
-            {{- if .Values.config.minio.tier.name }}
-            - name: TIER_NAME
-              value: {{ .Values.config.minio.tier.name }}
-            {{- else }}
             - name: TIER_NAME
               value: {{ include "minio-config.tier.name" . }}
-            {{- end }}
             ## remotePrefix (set in values / default)
-            {{- if .Values.config.minio.tier.aws.remotePrefix }}
-            - name: REMOTE_PREFIX
-              value: {{ .Values.config.minio.tier.remotePrefix }}
-            {{- else }}
             - name: REMOTE_PREFIX
               value: {{ include "minio-config.tier.s3.remotePrefix" . }}
-            {{- end }}
             ## values from minio subchart
             - name: MINIO_ROOT_USER
               valueFrom:
@@ -55,44 +48,23 @@ spec:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}
                   key: rootPassword
-
             # AWS config
-            ## in case of existing secret keys
-            {{- if .Values.config.minio.tier.aws.auth.secretName }}
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.config.minio.tier.aws.auth.secretName }}
-                  key: {{ .Values.config.minio.tier.aws.auth.secretKeyNames.accessKey }}
+                  name: {{ include "minio-config.tier.aws.secretName" . }}
+                  key: {{ include "minio-config.tier.aws.accessKey" . }}
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.config.minio.tier.aws.auth.secretName }}
-                  key: {{ .Values.config.minio.tier.aws.auth.secretKeyNames.secretKey }}
-            ## in case of set keys in values.yaml
-            {{- else }}
-            - name: AWS_ACCESS_KEY_ID
-              value: {{ .Values.config.minio.tier.aws.auth.accessKeyID }}
-            - name: AWS_SECRET_ACCESS_KEY
-              value: {{ .Values.config.minio.tier.aws.auth.secretAccessKey }}
-            {{- end }}
+                  name: {{ include "minio-config.tier.aws.secretName" . }}
+                  key: {{ include "minio-config.tier.aws.secretKey" . }}
             ## endpointURL (set in values / default)
-            {{- if .Values.config.minio.tier.aws.endpointURL }}
-            - name: AWS_ENDPOINT_URL_S3
-              value: {{ .Values.config.minio.tier.aws.endpointURL }}
-            {{- else }}
             - name: AWS_ENDPOINT_URL_S3
               value: {{ include "minio-config.tier.s3.endpointURL" . }}
-            {{- end }}
             ## region (set in values / default)
-            {{- if .Values.config.minio.tier.aws.region }}
-            - name: AWS_REGION
-              value: {{ .Values.config.minio.tier.aws.region }}
-            {{- else }}
             - name: AWS_REGION
               value: {{ include "minio-config.tier.s3.region" . }}
-            {{- end }}
-
           command: ["/bin/bash", "-c"]
           args:
             - |

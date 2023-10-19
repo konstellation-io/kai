@@ -124,6 +124,7 @@ minio-config labels
 */}}
 {{- define "minio-config.labels" -}}
 {{ include "kai.labels" . }}
+{{ include "minio-config.selectorLabels" . }}
 {{- end }}
 
 {{/*
@@ -133,6 +134,27 @@ minio-config selector labels
 app.kubernetes.io/name: {{ include "kai.name" . }}-minio-config
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Minio secret name
+*/}}
+{{- define "minio-config.tier.aws.secretName" -}}
+{{ default (include "minio-config.fullname" . ) .Values.config.minio.tier.aws.auth.secretName }}
+{{- end -}}
+
+{{/*
+Minio access key
+*/}}
+{{- define "minio-config.tier.aws.accessKey" -}}
+{{ default "accessKey" .Values.config.minio.tier.aws.auth.secretKeyNames.accessKey }}
+{{- end -}}
+
+{{/*
+Minio secret key
+*/}}
+{{- define "minio-config.tier.aws.secretKey" -}}
+{{ default "secretKey" .Values.config.minio.tier.aws.auth.secretKeyNames.secretKey }}
+{{- end -}}
 
 {{/*
 minio-config aws S3 Service endpoint URL
