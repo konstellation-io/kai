@@ -70,15 +70,6 @@ func TestBuildImage_SucceedJob(t *testing.T) {
 	g := goldie.New(t)
 	g.Assert(t, "BuildImage_Job", jobYaml)
 
-	// Check if the configmap is created
-	configMap, err := clientset.CoreV1().ConfigMaps(_namespace).Get(ctx, "image-builder-test-image-v1-0-0-config", metav1.GetOptions{})
-	require.NoError(t, err)
-
-	configMapYAML, err := yaml.Marshal(configMap)
-	require.NoError(t, err)
-
-	g.Assert(t, "BuildImage_ConfigMap", configMapYAML)
-
 	// Update job status to complete
 	err = updateJobStatus(ctx, clientset, job, &batchv1.JobCondition{
 		Type:   batchv1.JobComplete,
@@ -127,15 +118,6 @@ func TestBuildImage_FailedJob(t *testing.T) {
 
 	g := goldie.New(t)
 	g.Assert(t, "BuildImage_Job", jobYaml)
-
-	// Check if the configmap is created
-	configMap, err := clientset.CoreV1().ConfigMaps(_namespace).Get(ctx, "image-builder-test-image-v1-0-0-config", metav1.GetOptions{})
-	require.NoError(t, err)
-
-	configMapYAML, err := yaml.Marshal(configMap)
-	require.NoError(t, err)
-
-	g.Assert(t, "BuildImage_ConfigMap", configMapYAML)
 
 	// Update job status to failed
 	err = updateJobStatus(ctx, clientset, job, &batchv1.JobCondition{
@@ -187,15 +169,6 @@ func TestBuildImage_UnknownEvent(t *testing.T) {
 	g := goldie.New(t)
 	g.Assert(t, "BuildImage_Job", jobYaml)
 
-	// Check if the configmap is created
-	configMap, err := clientset.CoreV1().ConfigMaps(_namespace).Get(ctx, "image-builder-test-image-v1-0-0-config", metav1.GetOptions{})
-	require.NoError(t, err)
-
-	configMapYAML, err := yaml.Marshal(configMap)
-	require.NoError(t, err)
-
-	g.Assert(t, "BuildImage_ConfigMap", configMapYAML)
-
 	// Update job status to suspended
 	err = updateJobStatus(ctx, clientset, job, &batchv1.JobCondition{
 		Type:   batchv1.JobSuspended,
@@ -241,15 +214,6 @@ func TestBuildImage_DeletedJob(t *testing.T) {
 
 	g := goldie.New(t)
 	g.Assert(t, "BuildImage_Job", jobYaml)
-
-	// Check if the configmap is created
-	configMap, err := clientset.CoreV1().ConfigMaps(_namespace).Get(ctx, "image-builder-test-image-v1-0-0-config", metav1.GetOptions{})
-	require.NoError(t, err)
-
-	configMapYAML, err := yaml.Marshal(configMap)
-	require.NoError(t, err)
-
-	g.Assert(t, "BuildImage_ConfigMap", configMapYAML)
 
 	// Delete job manually
 	err = clientset.BatchV1().Jobs(_namespace).Delete(ctx, job.Name, metav1.DeleteOptions{})

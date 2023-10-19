@@ -34,8 +34,8 @@ func loadConfig() error {
 
 	viper.RegisterAlias(RegistryHostKey, "REGISTRY_HOST")
 	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT_URL")
-	viper.RegisterAlias(MinioTierKey, "MINIO_TIER")
-	viper.RegisterAlias(MinioTieringEnabledKey, "MINIO_TIERING_ENABLED")
+	viper.RegisterAlias(MinioTierKey, "MINIO_TIER_NAME")
+	viper.RegisterAlias(MinioTieringEnabledKey, "MINIO_TIER_ENABLED")
 
 	viper.AutomaticEnv()
 

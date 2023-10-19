@@ -24,6 +24,11 @@ const (
 	ImageBuilderLogLevel       = "registry.imageBuilder.logLevel"
 	ImageRegistryInsecureKey   = "registry.insecure"
 
+	MinioEndpointKey        = "minio.endpoint"
+	MinioAccessKeyIDKey     = "minio.accessKeyID"
+	MinioAccessKeySecretKey = "minio.accessKeySecret"
+	MinioRegionKey          = "minio.regionKey"
+
 	TriggersRequestTimeoutKey         = "networking.trigger.requestTimeout"
 	TriggersB64IngressesAnnotaionsKey = "networking.trigger.b64Annotations"
 	TriggersIngressClassNameKey       = "networking.trigger.ingressClassName"
@@ -59,9 +64,15 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(ImageRegistryURLKey, "REGISTRY_URL")
 	viper.RegisterAlias(KubeNamespaceKey, "KUBERNETES_NAMESPACE")
 	viper.RegisterAlias(BaseDomainNameKey, "BASE_DOMAIN_NAME")
+
 	viper.RegisterAlias(ImageRegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
 	viper.RegisterAlias(ImageRegistryInsecureKey, "REGISTRY_INSECURE")
 	viper.RegisterAlias(ImageBuilderImageKey, "IMAGE_BUILDER_IMAGE")
+
+	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT")
+	viper.RegisterAlias(MinioAccessKeyIDKey, "MINIO_ACCESS_KEY_ID")
+	viper.RegisterAlias(MinioAccessKeySecretKey, "MINIO_ACCESS_KEY_SECRET")
+	viper.RegisterAlias(MinioRegionKey, "MINIO_REGION")
 
 	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_ENABLED")
 	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_CERT_SECRET_NAME")

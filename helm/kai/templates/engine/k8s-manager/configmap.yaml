@@ -24,3 +24,5 @@ data:
   KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
   KAI_REGISTRY_AUTH_SECRET_NAME: "{{ include "registry.auth.secretName" . }}"
   KAI_REGISTRY_INSECURE: "{{ not .Values.registry.tls.enabled }}"
+  # S3
+  KAI_MINIO_ENDPOINT_URL: "{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"

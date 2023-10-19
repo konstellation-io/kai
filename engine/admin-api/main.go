@@ -166,7 +166,7 @@ func initGraphqlController(
 
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
 
-	processService := usecase.NewProcessService(logger, k8sService, processRepo)
+	processService := usecase.NewProcessService(logger, k8sService, processRepo, s3ObjectStorage)
 
 	return controller.NewGraphQLController(
 		controller.Params{

@@ -46,42 +46,6 @@ spec:
             managedfields: []
         spec:
             volumes:
-                - name: config
-                  volumesource:
-                    hostpath: null
-                    emptydir: null
-                    gcepersistentdisk: null
-                    awselasticblockstore: null
-                    gitrepo: null
-                    secret: null
-                    nfs: null
-                    iscsi: null
-                    glusterfs: null
-                    persistentvolumeclaim: null
-                    rbd: null
-                    flexvolume: null
-                    cinder: null
-                    cephfs: null
-                    flocker: null
-                    downwardapi: null
-                    fc: null
-                    azurefile: null
-                    configmap:
-                        localobjectreference:
-                            name: image-builder-test-image-v1-0-0-config
-                        items: []
-                        defaultmode: null
-                        optional: null
-                    vspherevolume: null
-                    quobyte: null
-                    azuredisk: null
-                    photonpersistentdisk: null
-                    projected: null
-                    portworxvolume: null
-                    scaleio: null
-                    storageos: null
-                    csi: null
-                    ephemeral: null
                 - name: registry-auth-secret
                   volumesource:
                     hostpath: null
@@ -126,14 +90,29 @@ spec:
                   image: ""
                   command: []
                   args:
-                    - --context=tar:///sources/file.tar.gz
+                    - --context=s3://demo/test.local/test-image:v1.0.0
                     - --insecure=
                     - --verbosity=error
                     - --destination=test.local/test-image:v1.0.0
                   workingdir: ""
                   ports: []
                   envfrom: []
-                  env: []
+                  env:
+                    - name: S3_ENDPOINT
+                      value: ""
+                      valuefrom: null
+                    - name: AWS_ACCESS_KEY_ID
+                      value: ""
+                      valuefrom: null
+                    - name: AWS_SECRET_ACCESS_KEY
+                      value: ""
+                      valuefrom: null
+                    - name: AWS_REGION
+                      value: ""
+                      valuefrom: null
+                    - name: S3_FORCE_PATH_STYLE
+                      value: "true"
+                      valuefrom: null
                   resources:
                     limits: {}
                     requests: {}
