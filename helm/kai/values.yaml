@@ -770,6 +770,19 @@ minio:
     annotations: {}
     # -- Ingress hostnames
     hosts:
-      - s3.kai.local
+      - storage.kai.local
     # -- Ingress TLS configuration
+    tls: []
+  consoleIngress:
+    # -- Enable ingress for MinIO Web Console
+    enabled: true
+    # -- The name of the ingress class to use
+    ingressClassName: kong
+    # -- Ingress labels
+    labels: {}
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hostnames
+    hosts:
+      - storage-console.kai.local
     tls: []
