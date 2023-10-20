@@ -220,6 +220,13 @@ keycloak:
     oidcClient:
       # -- The name of the OIDC client in Keycloak for the master realm admin
       clientId: "admin-cli"
+  minio:
+    # -- The name of the OIDC client in Keycloak for MinIO
+    oidcClient:
+      # -- The name of the OIDC client in Keycloak for Kong
+      clientId: "minio"
+      # -- The secret for the OIDC client that will be created on Keycloak first startup
+      secret: ""
   config:
     # -- Whether to enable metrics
     metricsEnabled: "false"
@@ -770,6 +777,20 @@ minio:
     annotations: {}
     # -- Ingress hostnames
     hosts:
-      - s3.kai.local
+      - storage.kai.local
+    # -- Ingress TLS configuration
+    tls: []
+  consoleIngress:
+    # -- Enable ingress for MinIO Console
+    enabled: true
+    # -- The name of the ingress class to use
+    ingressClassName: kong
+    # -- Ingress labels
+    labels: {}
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hostnames
+    hosts:
+      - storage-console.kai.local
     # -- Ingress TLS configuration
     tls: []
