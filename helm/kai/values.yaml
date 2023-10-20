@@ -69,7 +69,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.33
+    tag: 0.2.0-develop.34
     # -- Image pull policy
     pullPolicy: IfNotPresent
   tls:
@@ -125,7 +125,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.33
+    tag: 0.2.0-develop.34
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -342,7 +342,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.33
+    tag: 0.2.0-develop.34
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -614,7 +614,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.33
+    tag: 0.2.0-develop.34
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
