@@ -16,7 +16,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.32"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.34"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -74,7 +74,7 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.32"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.34"` | Image tag |
 | k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
@@ -144,11 +144,11 @@
 | keycloak.tls.enabled | bool | `false` | Whether to enable TLS |
 | keycloak.tolerations | list | `[]` | Assign custom tolerations to the Keycloak pods |
 | minio.consoleIngress.annotations | object | `{}` | Ingress annotations |
-| minio.consoleIngress.enabled | bool | `true` | Enable ingress for MinIO Console |
+| minio.consoleIngress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
 | minio.consoleIngress.hosts | list | `["storage-console.kai.local"]` | Ingress hostnames |
 | minio.consoleIngress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
 | minio.consoleIngress.labels | object | `{}` | Ingress labels |
-| minio.consoleIngress.tls | list | `[]` | Ingress TLS configuration |
+| minio.consoleIngress.tls | list | `[]` |  |
 | minio.existingSecret | string | `""` | Use an exising secret for root user and password |
 | minio.ingress.annotations | object | `{}` | Ingress annotations |
 | minio.ingress.enabled | bool | `true` | Enable ingress for MinIO API |
@@ -179,7 +179,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.32"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.34"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -211,7 +211,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.32"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.34"` | Image tag |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | registry.affinity | object | `{}` | Assign custom affinity rules to the pods |
 | registry.auth.password | string | password | Registry password |

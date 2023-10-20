@@ -50,5 +50,6 @@ show_etc_hosts() {
   echo "$INGRESS_IP auth.kai.local"
   echo "$INGRESS_IP storage.kai.local"
   echo "$INGRESS_IP storage-console.kai.local"
+  echo "$INGRESS_IP registry.kai.local"
   echo
 }
