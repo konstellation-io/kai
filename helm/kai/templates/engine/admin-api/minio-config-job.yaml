@@ -93,8 +93,25 @@ spec:
                     fi
                   done
                   echo "All required variables are defined, creating the MinIO tier"
-                  mc ilm tier add s3 kai-minio $TIER_NAME --endpoint $AWS_ENDPOINT_URL_S3 --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY --bucket $REMOTE_BUCKET_NAME --prefix $REMOTE_PREFIX --region $AWS_REGION --force
-                  echo "Tier added successfully!"
+                  mc admin tier ls kai-dev --json  | grep konstellation-storage-int > /dev/null
+                  if [ $? == 0 ]; then
+                    mc ilm tier add s3 kai-minio $TIER_NAME \
+                      --endpoint $AWS_ENDPOINT_URL_S3 \
+                      --access-key $AWS_ACCESS_KEY_ID \
+                      --secret-key $AWS_SECRET_ACCESS_KEY \
+                      --bucket $REMOTE_BUCKET_NAME \
+                      --prefix $REMOTE_PREFIX \
+                      --region $AWS_REGION \
+                      --force
+                    if [ $? == 0 ]; then
+                      echo "Tier added successfully!"
+                    else
+                      echo "Error adding the tier"
+                      exit 1
+                    fi
+                  else
+                    echo "Tier already exists. Nothing to do"
+                  fi
                 else
                   echo -e "Minio Tier was enabled, but no specific configuration has been found for any Tier. Please check \`.Values.config.minio.tier\` section"
                   exit 1
@@ -109,7 +126,8 @@ spec:
                   client_secret="$KAI_OIDC_MINIO_CLIENT_SECRET" \
                   config_url="$KAI_OIDC_MINIO_CLIENT_CONFIG_URL" \
                   display_name="KAI Auth" scopes="openid" \
-                  redirect_uri_dynamic="on"
+                  redirect_uri_dynamic="on" \
+                  claim_name=groups
               else
                 echo "Updating the existing OpenID configuration"
                 mc idp openid update kai-minio KAIAuth \
@@ -117,7 +135,8 @@ spec:
                    client_secret="$KAI_OIDC_MINIO_CLIENT_SECRET" \
                    config_url="$KAI_OIDC_MINIO_CLIENT_CONFIG_URL" \
                    display_name="KAI Auth" scopes="openid" \
-                   redirect_uri_dynamic="on"
+                   redirect_uri_dynamic="on" \
+                   claim_name=groups
               fi
               if [ $? == 0 ]; then
                 echo "OpenID authentication configured successfully! Restarting MiniO server..."
