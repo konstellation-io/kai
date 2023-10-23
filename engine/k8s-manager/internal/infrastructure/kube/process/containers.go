@@ -14,7 +14,7 @@ const _configFilesVolume = "version-conf-files"
 
 func getAppContainer(configMapName string, process *domain.Process) corev1.Container {
 	var pullPolicy corev1.PullPolicy
-	if process.Name == "latest" {
+	if process.Image == "latest" {
 		pullPolicy = corev1.PullAlways
 	} else {
 		pullPolicy = corev1.PullIfNotPresent
