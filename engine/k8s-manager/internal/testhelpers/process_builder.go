@@ -36,6 +36,11 @@ func (pb *ProcessBuilder) WithID(id string) *ProcessBuilder {
 	return pb
 }
 
+func (pb *ProcessBuilder) WithImage(image string) *ProcessBuilder {
+	pb.process.Image = image
+	return pb
+}
+
 func (pb *ProcessBuilder) WithNetworking(networking domain.Networking) *ProcessBuilder {
 	pb.process.Networking = &networking
 	return pb

@@ -280,3 +280,38 @@ func TestStartProcess_ClientError(t *testing.T) {
 	err := svc.CreateProcess(ctx, params)
 	require.Error(t, err)
 }
+
+func TestStartProcess_WithImageLatest(t *testing.T) {
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+	clientset := fake.NewSimpleClientset()
+
+	viper.Set(config.KubeNamespaceKey, _namespace)
+
+	svc := kube.NewK8sContainerService(logger, clientset)
+
+	ctx := context.Background()
+
+	process := testhelpers.NewProcessBuilder().
+		WithImage("latest").
+		Build()
+
+	params := service.CreateProcessParams{
+		ConfigName: "configmap-name",
+		Product:    "test-product",
+		Version:    "v1.0.0",
+		Workflow:   "test-workflow",
+		Process:    process,
+	}
+
+	err := svc.CreateProcess(ctx, params)
+	require.NoError(t, err)
+
+	deployment, err := clientset.AppsV1().Deployments(_namespace).List(ctx, v1.ListOptions{})
+	require.NoError(t, err)
+
+	deploymentYaml, err := yaml.Marshal(deployment)
+	require.NoError(t, err)
+
+	g := goldie.New(t)
+	g.Assert(t, "StartProcess_WithImageLatest", deploymentYaml)
+}
