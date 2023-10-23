@@ -4,7 +4,7 @@
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.min.io/ | minio | 5.0.13 |
+| https://charts.min.io/ | minio | 5.0.14 |
 | https://helm.influxdata.com/ | influxdb | 4.8.1 |
 | https://helm.influxdata.com/ | kapacitor | 1.4.6 |
 
@@ -148,14 +148,20 @@
 | minio.consoleIngress.hosts | list | `["storage-console.kai.local"]` | Ingress hostnames |
 | minio.consoleIngress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
 | minio.consoleIngress.labels | object | `{}` | Ingress labels |
-| minio.consoleIngress.tls | list | `[]` |  |
+| minio.consoleIngress.tls | list | `[]` | Ingress TLS configuration |
 | minio.existingSecret | string | `""` | Use an exising secret for root user and password |
+| minio.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
+| minio.image.repository | string | `"quay.io/minio/minio"` | Image repository |
+| minio.image.tag | string | `"RELEASE.2023-09-30T07-02-29Z"` | Image tag |
 | minio.ingress.annotations | object | `{}` | Ingress annotations |
 | minio.ingress.enabled | bool | `true` | Enable ingress for MinIO API |
 | minio.ingress.hosts | list | `["storage.kai.local"]` | Ingress hostnames |
 | minio.ingress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
 | minio.ingress.labels | object | `{}` | Ingress labels |
 | minio.ingress.tls | list | `[]` | Ingress TLS configuration |
+| minio.mcImage.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
+| minio.mcImage.repository | string | `"quay.io/minio/mc"` | Image repository |
+| minio.mcImage.tag | string | `"RELEASE.2023-09-29T16-41-22Z"` | Image tag |
 | minio.minioAPIPort | string | `"9000"` | Internal port number for MinIO S3 API container |
 | minio.minioConsolePort | string | `"9001"` | Internal port number for MinIO Browser Console container |
 | minio.mode | string | `"standalone"` | Sets minio mode |
@@ -166,8 +172,8 @@
 | minio.resources | object | `{"requests":{"memory":"256Mi"}}` | Sets pods resources |
 | minio.rootPassword | string | Randomly generated value | Sets Root password |
 | minio.rootUser | string | Randomly generated value | Sets Root user |
-| minio.service.port | string | `"9000"` |  |
-| minio.service.type | string | `"ClusterIP"` |  |
+| minio.service.port | string | `"9000"` | Internal port number for MinIO S3 API service |
+| minio.service.type | string | `"ClusterIP"` | Service type |
 | mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods |
 | mongoExpress.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | mongoExpress.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |

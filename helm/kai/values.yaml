@@ -735,6 +735,20 @@ registry:
 ## the official MinIO chart at https://github.com/minio/minio/tree/master/helm/minio
 ##
 minio:
+  image:
+    # -- Image repository
+    repository: quay.io/minio/minio
+    # -- Image tag
+    tag: RELEASE.2023-09-30T07-02-29Z
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+  mcImage:
+    # -- Image repository
+    repository: quay.io/minio/mc
+    # -- Image tag
+    tag: RELEASE.2023-09-29T16-41-22Z
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
   # -- Sets minio mode
   mode: standalone
   # -- Internal port number for MinIO S3 API container
@@ -764,7 +778,9 @@ minio:
     # @note: If Tier is enabled, ensure enough space to MinIO have time to transfer objects to external storage and free space in local persistence storage
     size: 10Gi
   service:
+    # -- Service type
     type: ClusterIP
+    # -- Internal port number for MinIO S3 API service
     port: "9000"
   ingress:
     # -- Enable ingress for MinIO API
@@ -792,4 +808,5 @@ minio:
     # -- Ingress hostnames
     hosts:
       - storage-console.kai.local
+    # -- Ingress TLS configuration
     tls: []
