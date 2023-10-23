@@ -13,10 +13,17 @@ import (
 const _configFilesVolume = "version-conf-files"
 
 func getAppContainer(configMapName string, process *domain.Process) corev1.Container {
+	var pullPolicy corev1.PullPolicy
+	if process.Name == "latest" {
+		pullPolicy = corev1.PullAlways
+	} else {
+		pullPolicy = corev1.PullIfNotPresent
+	}
+
 	container := corev1.Container{
 		Name:            process.Name,
 		Image:           process.Image,
-		ImagePullPolicy: corev1.PullIfNotPresent,
+		ImagePullPolicy: pullPolicy,
 		Env: []corev1.EnvVar{
 			{
 				Name:  "KAI_APP_CONFIG_PATH",
