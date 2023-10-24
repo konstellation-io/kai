@@ -35,9 +35,9 @@
 | chronograf.persistence.size | string | `"2Gi"` | Storage size |
 | chronograf.persistence.storageClass | string | `"standard"` | Storage class name |
 | chronograf.tolerations | list | `[]` | Tolerations for use with node taints |
-| config | object | `{"admin":{"corsEnabled":true},"baseDomainName":"local","minio":{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}},"mongodb":{"connectionString":{"secretKey":"","secretName":""}},"tls":{"certSecretName":"","enabled":false}}` | Config from kai/helm |
+| config | object | `{"admin":{"corsEnabled":true},"baseDomainName":"kai.local","minio":{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}},"mongodb":{"connectionString":{"secretKey":"","secretName":""}},"tls":{"certSecretName":"","enabled":false}}` | Config from kai/helm |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
-| config.baseDomainName | string | `"local"` | Base domain name for Admin API and K8S Manager apps |
+| config.baseDomainName | string | `"kai.local"` | Base domain name for Admin API and K8S Manager apps |
 | config.minio | object | `{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}}` | MinIO post deploy configuration |
 | config.minio.defaultRegion | string | us-east-1 | Default region (only affect to Minio buckets) |
 | config.minio.tier.aws | object | `{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""}` | Transition Objects from MinIO to AWS S3 |

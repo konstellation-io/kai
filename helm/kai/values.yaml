@@ -8,7 +8,7 @@ rbac:
 # -- Config from kai/helm
 config:
   # -- Base domain name for Admin API and K8S Manager apps
-  baseDomainName: "local"
+  baseDomainName: "kai.local"
   tls:
     # -- Whether to enable TLS
     enabled: false
