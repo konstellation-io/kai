@@ -38,7 +38,8 @@ func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) e
 		err = os.client.SetBucketLifecycle(ctx, bucket, &lifecycle.Configuration{
 			Rules: []lifecycle.Rule{
 				{
-					ID: fmt.Sprintf("%s-transition-rule", bucket),
+					ID:     fmt.Sprintf("%s-transition-rule", bucket),
+					Status: minio.Enabled,
 					Transition: lifecycle.Transition{
 						StorageClass: viper.GetString(config.MinioTierNameKey),
 						Days:         0,
@@ -50,11 +51,6 @@ func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) e
 			return fmt.Errorf("setting bucket's lifecyle: %w", err)
 		}
 	}
-
-	//err = os.client.SetBucketPolicy(ctx, bucket, policyName)
-	//if err != nil {
-	//	return fmt.Errorf("setting bucket's policy: %w", err)
-	//}
 
 	return nil
 }
@@ -86,21 +82,4 @@ func (os *MinioObjectStorage) getPolicy(bucket string) []byte {
 				}
 			]
 		}`, bucket))
-}
-
-func (os *MinioObjectStorage) getPolicy2(policyName, bucket string) []byte {
-	return []byte(
-		fmt.Sprintf(`{
-			"PolicyName":"%s",
-			"Policy":{
-				"Version":"2012-10-17",
-				"Statement":[
-					{
-						"Effect":"Allow",
-						"Action":["s3:*"],
-						"Resource":["arn:aws:s3:::%s"],
-					}
-				]
-			}
-		}`, policyName, bucket))
 }

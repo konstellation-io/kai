@@ -12,11 +12,12 @@ var (
 )
 
 type Product struct {
-	ID           string    `bson:"_id" validate:"required"`
-	Name         string    `bson:"name" validate:"required,lte=40"`
-	Description  string    `bson:"description" validate:"required,lte=500"`
-	CreationDate time.Time `bson:"creationDate"`
-	Owner        string    `bson:"owner"`
+	ID            string    `bson:"_id" validate:"required"`
+	Name          string    `bson:"name" validate:"required,lte=40"`
+	Description   string    `bson:"description" validate:"required,lte=500"`
+	CreationDate  time.Time `bson:"creationDate"`
+	Owner         string    `bson:"owner"`
+	MinioPassword string    `bson:"minioPassword"`
 }
 
 func (r *Product) Validate() error {

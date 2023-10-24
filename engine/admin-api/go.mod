@@ -19,6 +19,8 @@ require (
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/minio/madmin-go/v3 v3.0.27
 	github.com/minio/minio-go/v7 v7.0.63
+	github.com/sebdah/goldie/v2 v2.5.3
+	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	github.com/testcontainers/testcontainers-go v0.23.0
@@ -54,6 +56,7 @@ require (
 	github.com/prometheus/prom2json v1.3.3 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/secure-io/sio-go v0.3.1 // indirect
+	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.1 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect

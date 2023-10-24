@@ -10,11 +10,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-const (
-	updateUserProductGrantsWrapper = "update user product grants"
-	revokeUserProductGrantsWrapper = "revoke user product grants"
-)
-
 type UserInteractor struct {
 	logger                 logging.Logger
 	accessControl          auth.AccessControl
@@ -84,10 +79,8 @@ func (ui *UserInteractor) RevokeUserProductGrants(
 	product string,
 	comment ...string,
 ) error {
-
 	if err := ui.accessControl.CheckRoleGrants(user, auth.ActUpdateUserGrants); err != nil {
 		return fmt.Errorf("checking role grants: %w", err)
-
 	}
 
 	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserID, product, []string{})

@@ -4,14 +4,18 @@ package objectstorage_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
+	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7"
+	"github.com/sebdah/goldie/v2"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -27,6 +31,7 @@ type ObjectStorageSuite struct {
 
 	minioContainer testcontainers.Container
 	client         *minio.Client
+	adminClient    *madmin.AdminClient
 	objectStorage  *objectstorage.MinioObjectStorage
 }
 
@@ -64,24 +69,26 @@ func (s *ObjectStorageSuite) SetupSuite() {
 
 	viper.Set(config.MinioEndpointKey, minioEndpoint)
 
-	err = os.Setenv("AWS_REGION", "us-east-1")
-	s.Require().NoError(err)
+	//err = os.Setenv("AWS_REGION", "us-east-1")
+	//viper.Set(config.MinioRegionKey, "us-east-1")
+	//s.Require().NoError(err)
 
-	err = os.Setenv("AWS_ACCESS_KEY_ID", "minioadmin")
-	s.Require().NoError(err)
-
-	err = os.Setenv("AWS_SECRET_ACCESS_KEY", "minioadmin")
-	s.Require().NoError(err)
+	viper.Set(config.MinioRootUserKey, "minioadmin")
+	viper.Set(config.MinioRootPasswordKey, "minioadmin")
 
 	client, err := objectstorage.NewMinioClient()
 	s.Require().NoError(err)
 
+	adminClient, err := objectstorage.NewAdminMinioClient()
+	s.Require().NoError(err)
+
 	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 
-	s3ObjectStorage := objectstorage.NewMinioObjectStorage(logger, client)
+	s3ObjectStorage := objectstorage.NewMinioObjectStorage(logger, client, adminClient)
 
 	s.minioContainer = minioContainer
 	s.client = client
+	s.adminClient = adminClient
 	s.objectStorage = s3ObjectStorage
 }
 
@@ -93,10 +100,26 @@ func (s *ObjectStorageSuite) TearDownTest() {
 	ctx := context.Background()
 
 	err := s.client.RemoveBucketWithOptions(ctx, _testBucket, minio.RemoveBucketOptions{ForceDelete: true})
+	if err != nil {
+		var minioErr minio.ErrorResponse
+		errors.As(err, &minioErr)
+		if minioErr.StatusCode != http.StatusNotFound {
+			s.Failf(err.Error(), "Error deleting bucket %q", _testBucket)
+		}
+	}
+
+	policies, err := s.adminClient.ListCannedPolicies(ctx)
 	s.Require().NoError(err)
+
+	for name, _ := range policies {
+		err = s.adminClient.RemoveCannedPolicy(ctx, name)
+		if err != nil && !strings.Contains(err.Error(), "inbuilt policy") {
+			s.Failf(err.Error(), "Error deleting policy non inbuilt policy %q", name)
+		}
+	}
 }
 
-func (s *ObjectStorageSuite) TestCreateBucketWithPolicy() {
+func (s *ObjectStorageSuite) TestCreateBucket() {
 	ctx := context.Background()
 
 	err := s.objectStorage.CreateBucket(ctx, _testBucket)
@@ -105,4 +128,52 @@ func (s *ObjectStorageSuite) TestCreateBucketWithPolicy() {
 	bucketExists, err := s.client.BucketExists(ctx, _testBucket)
 	s.Require().NoError(err)
 	s.Assert().True(bucketExists)
+}
+
+func (s *ObjectStorageSuite) TestCreateBucket_WithLifecycle_ErrorTierDoesntExist() {
+	ctx := context.Background()
+
+	viper.Set(config.MinioTierEnabledKey, true)
+	viper.Set(config.MinioTierNameKey, "TIER-NAME")
+
+	err := s.objectStorage.CreateBucket(ctx, _testBucket)
+	s.Assert().Error(err)
+
+	viper.Set(config.MinioTierEnabledKey, false)
+}
+
+func (s *ObjectStorageSuite) TestCreateBucket_InvalidBucketName() {
+	ctx := context.Background()
+
+	err := s.objectStorage.CreateBucket(ctx, "invalid bucket")
+	s.Assert().Error(err)
+}
+
+func (s *ObjectStorageSuite) TestCreateBucketPolicy() {
+	var (
+		ctx                = context.Background()
+		expectedPolicyName = fmt.Sprintf("%s-policy", _testBucket)
+	)
+
+	err := s.objectStorage.CreateBucket(ctx, _testBucket)
+	s.Assert().NoError(err)
+
+	policyName, err := s.objectStorage.CreateBucketPolicy(ctx, _testBucket)
+	s.Require().NoError(err)
+	s.Assert().Equal(expectedPolicyName, policyName)
+
+	policy, err := s.adminClient.InfoCannedPolicy(ctx, policyName)
+	s.Require().NoError(err)
+
+	g := goldie.New(s.T())
+	g.Assert(s.T(), "CreateBucketPolicy", policy)
+}
+
+func (s *ObjectStorageSuite) TestCreateBucketPolicy_InvalidResourceInPolicy() {
+	var (
+		ctx = context.Background()
+	)
+
+	_, err := s.objectStorage.CreateBucketPolicy(ctx, "")
+	s.Require().Error(err)
 }

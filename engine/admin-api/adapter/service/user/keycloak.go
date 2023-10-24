@@ -45,6 +45,65 @@ func NewKeycloakUserRegistry(client *gocloak.GoCloak) (*KeycloakUserRegistry, er
 	}, nil
 }
 
+func (ur *KeycloakUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []string) error {
+	err := ur.refreshToken(ctx)
+	if err != nil {
+		return err
+	}
+
+	user, err := ur.client.GetUserByID(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), userID)
+	if err != nil {
+		return fmt.Errorf("getting user: %w", err)
+	}
+
+	if user.Attributes == nil {
+		user.Attributes = &map[string][]string{}
+	}
+
+	rolesAttribute, ok := (*user.Attributes)["product_roles"]
+	if !ok {
+		rolesAttribute = make([]string, 1)
+	}
+
+	userProductGrants := rolesAttribute[0]
+	userGrantsByProduct := make(map[string]interface{})
+
+	if userProductGrants == "" {
+		userProductGrants = "{}"
+	}
+
+	if err = json.Unmarshal([]byte(userProductGrants), &userGrantsByProduct); err != nil {
+		return fmt.Errorf("unmarshalling user's product grants: %w", err)
+	}
+
+	if len(grants) == 0 {
+		delete(userGrantsByProduct, product)
+	} else {
+		userGrantsByProduct[product] = grants
+	}
+
+	marshalledRoles, err := json.Marshal(userGrantsByProduct)
+	if err != nil {
+		return fmt.Errorf("marshaling user's product grants: %w", err)
+	}
+
+	rolesAttribute[0] = string(marshalledRoles)
+
+	(*user.Attributes)["product_roles"] = rolesAttribute
+
+	err = ur.refreshToken(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = ur.client.UpdateUser(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), *user)
+	if err != nil {
+		return fmt.Errorf("updating user: %w", err)
+	}
+
+	return nil
+}
+
 func (ur *KeycloakUserRegistry) refreshToken(ctx context.Context) error {
 	now := time.Now()
 
@@ -85,65 +144,6 @@ func (ur *KeycloakUserRegistry) refreshToken(ctx context.Context) error {
 	ur.token = token
 	ur.tokenExpiresAt = now.Add(time.Duration(token.ExpiresIn) * time.Second)
 	ur.refreshTokenExpiresAt = now.Add(time.Duration(token.RefreshExpiresIn) * time.Second)
-
-	return nil
-}
-
-func (ur *KeycloakUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []string) error {
-	err := ur.refreshToken(ctx)
-	if err != nil {
-		return err
-	}
-
-	user, err := ur.client.GetUserByID(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), userID)
-	if err != nil {
-		return fmt.Errorf("getting user: %w", err)
-	}
-
-	if user.Attributes == nil {
-		user.Attributes = &map[string][]string{}
-	}
-
-	rolesAttribute, ok := (*user.Attributes)["product_roles"]
-	if !ok {
-		rolesAttribute = make([]string, 1)
-	}
-
-	userProductGrants := rolesAttribute[0]
-	userGrantsByProduct := make(map[string]interface{})
-
-	if userProductGrants == "" {
-		userProductGrants = "{}"
-	}
-
-	if err = json.Unmarshal([]byte(userProductGrants), &userGrantsByProduct); err != nil {
-		return fmt.Errorf("unmarshalling user's product grants: %w", err)
-	}
-
-	if len(grants) == 0 {
-		delete(userGrantsByProduct, product)
-	} else {
-		userGrantsByProduct[product] = grants
-	}
-
-	marshalledRoles, err := json.Marshal(userGrantsByProduct)
-	if err != nil {
-		return fmt.Errorf("marshalling user's product grants: %w", err)
-	}
-
-	rolesAttribute[0] = string(marshalledRoles)
-
-	(*user.Attributes)["product_roles"] = rolesAttribute
-
-	err = ur.refreshToken(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = ur.client.UpdateUser(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), *user)
-	if err != nil {
-		return fmt.Errorf("updating user: %w", err)
-	}
 
 	return nil
 }

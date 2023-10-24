@@ -95,15 +95,55 @@ func (s *KeycloakSuite) SetupTest() {
 }
 
 func (s *KeycloakSuite) TearDownTest() {
+	ctx := context.Background()
+
 	testUser := s.getTestUser()
 	testUser.Attributes = &map[string][]string{}
+
 	err := s.keycloakClient.UpdateUser(
-		context.Background(),
+		ctx,
 		s.keycloakUserRegistry.token.AccessToken,
 		viper.GetString(config.KeycloakRealmKey),
 		*testUser,
 	)
 	s.Require().NoError(err)
+
+	groups, err := s.keycloakClient.GetGroups(
+		ctx,
+		s.keycloakUserRegistry.token.AccessToken,
+		viper.GetString(config.KeycloakRealmKey),
+		gocloak.GetGroupsParams{},
+	)
+	s.Require().NoError(err)
+
+	for _, group := range groups {
+		s.keycloakClient.DeleteGroup(
+			ctx,
+			s.keycloakUserRegistry.token.AccessToken,
+			viper.GetString(config.KeycloakRealmKey),
+			*group.ID,
+		)
+		s.Require().NoError(err)
+	}
+
+	users, err := s.keycloakClient.GetUsers(
+		ctx,
+		s.keycloakUserRegistry.token.AccessToken,
+		viper.GetString(config.KeycloakRealmKey),
+		gocloak.GetUsersParams{},
+	)
+
+	for _, user := range users {
+		if *user.ID != *testUser.ID {
+			err = s.keycloakClient.DeleteUser(
+				ctx,
+				s.keycloakUserRegistry.token.AccessToken,
+				viper.GetString(config.KeycloakRealmKey),
+				*user.ID,
+			)
+			s.Require().NoError(err)
+		}
+	}
 }
 
 func (s *KeycloakSuite) getTestUser() *gocloak.User {

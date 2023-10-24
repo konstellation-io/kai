@@ -12,6 +12,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/sethvargo/go-password/password"
 )
 
 var (
@@ -36,6 +37,7 @@ type ProductInteractor struct {
 	accessControl   auth.AccessControl
 	objectStorage   repository.ObjectStorage
 	natsService     service.NatsManagerService
+	userRegistry    service.UserRegistry
 }
 
 type ProductInteractorOpts struct {
@@ -50,6 +52,7 @@ type ProductInteractorOpts struct {
 	AccessControl   auth.AccessControl
 	ObjectStorage   repository.ObjectStorage
 	NatsService     service.NatsManagerService
+	UserRegistry    service.UserRegistry
 }
 
 // NewProductInteractor creates a new ProductInteractor.
@@ -66,6 +69,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.AccessControl,
 		ps.ObjectStorage,
 		ps.NatsService,
+		ps.UserRegistry,
 	}
 }
 
@@ -126,7 +130,19 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, fmt.Errorf("creating object storage policy: %w", err)
 	}
 
-	_ = policyName
+	err = i.userRegistry.CreateGroupWithPolicy(ctx, productID, policyName)
+	if err != nil {
+		return nil, err
+	}
+
+	passwd := password.MustGenerate(32, 8, 8, true, true)
+
+	err = i.userRegistry.CreateUserWithinGroup(ctx, productID, passwd, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	newProduct.MinioPassword = passwd
 
 	err = i.measurementRepo.CreateDatabase(newProduct.Name)
 	if err != nil {

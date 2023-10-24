@@ -17,14 +17,17 @@ const (
 	MinioTierEnabledKey     = "minio.tier.enabled"
 	MinioTierNameKey        = "minio.tier.name"
 	MinioRootUserKey        = "minio.credentials.user"
-	MinioRootPasswordKey    = "minio.credentials.password"
+	//nolint:gosec // false positive
+	MinioRootPasswordKey = "minio.credentials.password"
 
-	KeycloakAdminUserKey     = "keycloak.admin.user"
+	KeycloakAdminUserKey = "keycloak.admin.user"
+	//nolint:gosec // false positive
 	KeycloakAdminPasswordKey = "keycloak.admin.password"
 	KeycloakAdminClientIDKey = "keycloak.admin.clientID"
 	KeycloakMasterRealmKey   = "keycloak.masterRealm"
 	KeycloakRealmKey         = "keycloak.realm"
 	KeycloakURLKey           = "keycloak.url"
+	KeycloakTokenKey         = "keycloak.token"
 )
 
 func InitConfig() error {
@@ -49,8 +52,8 @@ func loadConfig() error {
 	viper.RegisterAlias(MinioRootUserKey, "MINIO_ROOT_USER")
 	viper.RegisterAlias(MinioRootPasswordKey, "MINIO_ROOT_PASSWORD")
 
-	viper.RegisterAlias(KeycloakAdminUserKey, "MINIO_ROOT_PASSWORD")
-	viper.RegisterAlias(KeycloakAdminPasswordKey, "MINIO_ROOT_PASSWORD")
+	viper.RegisterAlias(KeycloakAdminUserKey, "KEYCLOAK_ADMIN_USERNAME")
+	viper.RegisterAlias(KeycloakAdminPasswordKey, "KEYCLOAK_ADMIN_PASSWORD")
 	viper.RegisterAlias(KeycloakMasterRealmKey, "KEYCLOAK_MASTER_REALM")
 	viper.RegisterAlias(KeycloakAdminClientIDKey, "KEYCLOAK_ADMIN_CLIENT_ID")
 	viper.RegisterAlias(KeycloakRealmKey, "KEYCLOAK_REALM")

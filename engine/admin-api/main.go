@@ -133,6 +133,7 @@ func initGraphqlController(
 		AccessControl:   accessControl,
 		ObjectStorage:   s3ObjectStorage,
 		NatsService:     natsManagerService,
+		UserRegistry:    keycloakUserRegistry,
 	}
 	productInteractor := usecase.NewProductInteractor(&ps)
 
