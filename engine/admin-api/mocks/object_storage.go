@@ -64,6 +64,59 @@ func (_c *MockObjectStorage_CreateBucket_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
+// CreateBucketPolicy provides a mock function with given fields: ctx, bucket
+func (_m *MockObjectStorage) CreateBucketPolicy(ctx context.Context, bucket string) (string, error) {
+	ret := _m.Called(ctx, bucket)
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (string, error)); ok {
+		return rf(ctx, bucket)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) string); ok {
+		r0 = rf(ctx, bucket)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, bucket)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockObjectStorage_CreateBucketPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateBucketPolicy'
+type MockObjectStorage_CreateBucketPolicy_Call struct {
+	*mock.Call
+}
+
+// CreateBucketPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - bucket string
+func (_e *MockObjectStorage_Expecter) CreateBucketPolicy(ctx interface{}, bucket interface{}) *MockObjectStorage_CreateBucketPolicy_Call {
+	return &MockObjectStorage_CreateBucketPolicy_Call{Call: _e.mock.On("CreateBucketPolicy", ctx, bucket)}
+}
+
+func (_c *MockObjectStorage_CreateBucketPolicy_Call) Run(run func(ctx context.Context, bucket string)) *MockObjectStorage_CreateBucketPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockObjectStorage_CreateBucketPolicy_Call) Return(_a0 string, _a1 error) *MockObjectStorage_CreateBucketPolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockObjectStorage_CreateBucketPolicy_Call) RunAndReturn(run func(context.Context, string) (string, error)) *MockObjectStorage_CreateBucketPolicy_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockObjectStorage creates a new instance of MockObjectStorage. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockObjectStorage(t interface {

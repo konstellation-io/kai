@@ -26,33 +26,35 @@ var (
 
 // ProductInteractor contains app logic to handle Product entities.
 type ProductInteractor struct {
-	logger          logr.Logger
-	productRepo     repository.ProductRepo
-	measurementRepo repository.MeasurementRepo
-	versionRepo     repository.VersionRepo
-	metricRepo      repository.MetricRepo
-	processLogRepo  repository.ProcessLogRepository
-	processRepo     repository.ProcessRepository
-	userActivity    UserActivityInteracter
-	accessControl   auth.AccessControl
-	objectStorage   repository.ObjectStorage
-	natsService     service.NatsManagerService
-	userRegistry    service.UserRegistry
+	logger            logr.Logger
+	productRepo       repository.ProductRepo
+	measurementRepo   repository.MeasurementRepo
+	versionRepo       repository.VersionRepo
+	metricRepo        repository.MetricRepo
+	processLogRepo    repository.ProcessLogRepository
+	processRepo       repository.ProcessRepository
+	userActivity      UserActivityInteracter
+	accessControl     auth.AccessControl
+	objectStorage     repository.ObjectStorage
+	natsService       service.NatsManagerService
+	userRegistry      service.UserRegistry
+	passwordGenerator password.PasswordGenerator
 }
 
 type ProductInteractorOpts struct {
-	Logger          logr.Logger
-	ProductRepo     repository.ProductRepo
-	MeasurementRepo repository.MeasurementRepo
-	VersionRepo     repository.VersionRepo
-	MetricRepo      repository.MetricRepo
-	ProcessLogRepo  repository.ProcessLogRepository
-	ProcessRepo     repository.ProcessRepository
-	UserActivity    UserActivityInteracter
-	AccessControl   auth.AccessControl
-	ObjectStorage   repository.ObjectStorage
-	NatsService     service.NatsManagerService
-	UserRegistry    service.UserRegistry
+	Logger            logr.Logger
+	ProductRepo       repository.ProductRepo
+	MeasurementRepo   repository.MeasurementRepo
+	VersionRepo       repository.VersionRepo
+	MetricRepo        repository.MetricRepo
+	ProcessLogRepo    repository.ProcessLogRepository
+	ProcessRepo       repository.ProcessRepository
+	UserActivity      UserActivityInteracter
+	AccessControl     auth.AccessControl
+	ObjectStorage     repository.ObjectStorage
+	NatsService       service.NatsManagerService
+	UserRegistry      service.UserRegistry
+	PasswordGenerator password.PasswordGenerator
 }
 
 // NewProductInteractor creates a new ProductInteractor.
@@ -70,6 +72,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.ObjectStorage,
 		ps.NatsService,
 		ps.UserRegistry,
+		ps.PasswordGenerator,
 	}
 }
 
@@ -135,7 +138,7 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	passwd := password.MustGenerate(32, 8, 8, true, true)
+	passwd := i.passwordGenerator.MustGenerate(32, 8, 8, true, true)
 
 	err = i.userRegistry.CreateUserWithinGroup(ctx, productID, passwd, productID)
 	if err != nil {

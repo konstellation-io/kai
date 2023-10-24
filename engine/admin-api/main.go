@@ -22,6 +22,7 @@ import (
 	logging2 "github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+	"github.com/sethvargo/go-password/password"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
@@ -120,20 +121,25 @@ func initGraphqlController(
 	}
 
 	s3ObjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
+	passwordGenerator, err := password.NewGenerator(&password.GeneratorInput{})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	ps := usecase.ProductInteractorOpts{
-		Logger:          logger,
-		ProductRepo:     productRepo,
-		MeasurementRepo: measurementRepo,
-		VersionRepo:     versionMongoRepo,
-		MetricRepo:      metricRepo,
-		ProcessLogRepo:  processLogRepo,
-		ProcessRepo:     processRepo,
-		UserActivity:    userActivityInteractor,
-		AccessControl:   accessControl,
-		ObjectStorage:   s3ObjectStorage,
-		NatsService:     natsManagerService,
-		UserRegistry:    keycloakUserRegistry,
+		Logger:            logger,
+		ProductRepo:       productRepo,
+		MeasurementRepo:   measurementRepo,
+		VersionRepo:       versionMongoRepo,
+		MetricRepo:        metricRepo,
+		ProcessLogRepo:    processLogRepo,
+		ProcessRepo:       processRepo,
+		UserActivity:      userActivityInteractor,
+		AccessControl:     accessControl,
+		ObjectStorage:     s3ObjectStorage,
+		NatsService:       natsManagerService,
+		UserRegistry:      keycloakUserRegistry,
+		PasswordGenerator: passwordGenerator,
 	}
 	productInteractor := usecase.NewProductInteractor(&ps)
 
