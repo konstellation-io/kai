@@ -1,7 +1,5 @@
 developmentMode: {{ requiredEnv "DEVELOPMENT_MODE" }}
 config:
-  admin:
-    apiHost: {{ requiredEnv "KAI_ADMIN_API_HOST" | quote }}
   mongodb:
     connectionString:
       secretName: mongodb-database-kai-connection-string
