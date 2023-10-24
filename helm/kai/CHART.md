@@ -13,7 +13,7 @@
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | adminApi.affinity | object | `{}` | Assign custom affinity rules to the Admin API pods |
-| adminApi.host | string | `"api.kai.local"` | Hostname |
+| adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
 | adminApi.image.tag | string | `"0.2.0-develop.34"` | Image tag |
@@ -35,8 +35,7 @@
 | chronograf.persistence.size | string | `"2Gi"` | Storage size |
 | chronograf.persistence.storageClass | string | `"standard"` | Storage class name |
 | chronograf.tolerations | list | `[]` | Tolerations for use with node taints |
-| config | object | `{"admin":{"apiHost":"api.kai.local","corsEnabled":true},"baseDomainName":"local","minio":{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}},"mongodb":{"connectionString":{"secretKey":"","secretName":""}},"tls":{"certSecretName":"","enabled":false}}` | Config from kai/helm |
-| config.admin.apiHost | string | `"api.kai.local"` | Api Hostname for Admin UI and Admin API |
+| config | object | `{"admin":{"corsEnabled":true},"baseDomainName":"local","minio":{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}},"mongodb":{"connectionString":{"secretKey":"","secretName":""}},"tls":{"certSecretName":"","enabled":false}}` | Config from kai/helm |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.baseDomainName | string | `"local"` | Base domain name for Admin API and K8S Manager apps |
 | config.minio | object | `{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}}` | MinIO post deploy configuration |
@@ -111,7 +110,7 @@
 | keycloak.extraEnv | object | `{}` | Keycloak extra env vars in the form of a list of key-value pairs |
 | keycloak.extraVolumeMounts | list | `[]` | Extra volume mounts |
 | keycloak.extraVolumes | list | `[]` | Extra volumes |
-| keycloak.host | string | `"auth.kai.local"` |  |
+| keycloak.host | string | `"auth.kai.local"` | Hostname. This will be used to create the ingress rulem and to configure Keycloak and must be a subdomain of `.config.baseDomainName` |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy |
 | keycloak.image.repository | string | `"quay.io/keycloak/keycloak"` | The image repository |
 | keycloak.image.tag | string | `"21.1.1"` | The image tag |
@@ -217,7 +216,7 @@
 | registry.containerPort | int | `5000` | The container port |
 | registry.extraVolumeMounts | list | `[]` | Extra volume mounts for the registry deployment |
 | registry.extraVolumes | list | `[]` | Extra volumes for the registry deployment |
-| registry.host | string | `"registry.kai.local"` | Hostname |
+| registry.host | string | `"registry.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | registry.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | registry.image.repository | string | `"registry"` | Image repository |
 | registry.image.tag | string | `"2.8.2"` | Image tag |

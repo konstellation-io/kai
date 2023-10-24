@@ -15,8 +15,6 @@ config:
     # -- An existing secret containing a valid wildcard certificate for the value provissioned in `.config.baseDomainName`. Required if `config.tls.enabled = true`
     certSecretName: ""
   admin:
-    # -- Api Hostname for Admin UI and Admin API
-    apiHost: api.kai.local
     # -- Whether to enable CORS on Admin API
     corsEnabled: true
   mongodb:
@@ -77,7 +75,7 @@ adminApi:
     tag: 0.2.0-develop.34
     # -- Image pull policy
     pullPolicy: IfNotPresent
-  # -- Hostname
+  # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
   host: api.kai.local
   ingress:
     ## This Chart has been developed using Kong Ingress Controller by default.
@@ -173,6 +171,7 @@ k8sManager:
   #   value: "value"
   #   effect: "NoSchedule"
 keycloak:
+  # -- Hostname. This will be used to create the ingress rulem and to configure Keycloak and must be a subdomain of `.config.baseDomainName`
   host: "auth.kai.local"
   auth:
     # -- Keycloak admin username
@@ -677,7 +676,7 @@ registry:
   resources: {}
   # -- The container port
   containerPort: 5000
-  # -- Hostname
+  # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
   host: registry.kai.local
   ingress:
     # -- The name of the ingress class to use
