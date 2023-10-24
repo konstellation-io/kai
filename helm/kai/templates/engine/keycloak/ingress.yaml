@@ -10,22 +10,19 @@ metadata:
   {{- end }}
 spec:
   ingressClassName: {{ .Values.keycloak.ingress.className }}
-  {{- if .Values.keycloak.tls.enabled }}
+  {{- if .Values.config.tls.enabled }}
   tls:
     - hosts:
         - {{ .Values.keycloak.host }}
-      secretName: {{ .Values.keycloak.host }}-tls
+      secretName: {{ .Values.config.tls.certSecretName }}
   {{- end }}
   rules:
     - host: {{ .Values.keycloak.host }}
       http:
         paths:
           - path: "/"
-            {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
             pathType: Prefix
-            {{- end }}
             backend:
-              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
                 name: {{ include "keycloak.fullname" .}}
                 port:
@@ -34,7 +31,3 @@ spec:
                   {{- else }}
                   name: https
                   {{- end }}
-              {{- else }}
-              serviceName: {{ include "keycloak.fullname" .}}
-              servicePort: http
-              {{- end }}

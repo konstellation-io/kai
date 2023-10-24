@@ -63,13 +63,6 @@ app.kubernetes.io/name: {{ include "kai.name" . }}-admin-api
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Admin API S3 service region
-*/}}
-{{- define "admin-api.s3.region" -}}
-{{- default "us-east-1" .Values.config.s3.region -}}
-{{- end }}
-
 {{/* Fullname suffixed with chronograf */}}
 {{- define "chronograf.fullname" -}}
 {{- printf "%s-chronograf" (include "kai.fullname" .) -}}
@@ -120,6 +113,83 @@ app.kubernetes.io/instance: {{ .Release.Name }}
     {{ default "default" .Values.k8sManager.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/* Fullname suffixed with minio-config */}}
+{{- define "minio-config.fullname" -}}
+{{- printf "%s-minio-config" (include "kai.fullname" .) -}}
+{{- end }}
+
+{{/*
+minio-config labels
+*/}}
+{{- define "minio-config.labels" -}}
+{{ include "kai.labels" . }}
+{{ include "minio-config.selectorLabels" . }}
+{{- end }}
+
+{{/*
+minio-config selector labels
+*/}}
+{{- define "minio-config.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kai.name" . }}-minio-config
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+minio-config secret name
+*/}}
+{{- define "minio-config.tier.aws.secretName" -}}
+{{ default (include "minio-config.fullname" . ) .Values.config.minio.tier.aws.auth.secretName }}
+{{- end -}}
+
+{{/*
+minio-config access key
+*/}}
+{{- define "minio-config.tier.aws.accessKey" -}}
+{{ default "accessKey" .Values.config.minio.tier.aws.auth.secretKeyNames.accessKey }}
+{{- end -}}
+
+{{/*
+minio-config secret key
+*/}}
+{{- define "minio-config.tier.aws.secretKey" -}}
+{{ default "secretKey" .Values.config.minio.tier.aws.auth.secretKeyNames.secretKey }}
+{{- end -}}
+
+{{/*
+minio-config aws S3 endpoint URL
+*/}}
+{{- define "minio-config.tier.s3.endpointURL" -}}
+{{- default "https://s3.amazonaws.com" .Values.config.minio.tier.aws.endpointURL -}}
+{{- end }}
+
+{{/*
+minio-config remote bucket prefix (path in bucket to object transition)
+*/}}
+{{- define "minio-config.tier.s3.remotePrefix" -}}
+{{- default "DATA" .Values.config.minio.tier.remotePrefix -}}
+{{- end }}
+
+{{/*
+minio-config Tier name
+*/}}
+{{- define "minio-config.tier.name" -}}
+{{- default "KAI-REMOTE-STORAGE" .Values.config.minio.tier.name -}}
+{{- end }}
+
+{{/*
+minio-config AWS S3 remote bucket region for Tier
+*/}}
+{{- define "minio-config.tier.s3.region" -}}
+{{- default "us-east-1" .Values.config.minio.tier.aws.region -}}
+{{- end }}
+
+{{/*
+minio-config default buckets region
+*/}}
+{{- define "minio-config.region" -}}
+{{- default "us-east-1" .Values.config.minio.defaultRegion -}}
+{{- end }}
 
 {{/*
 nats labels

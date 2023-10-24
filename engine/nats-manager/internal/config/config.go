@@ -1,26 +1,25 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/spf13/viper"
 )
 
 const (
-	DevelopmentMode           = "development_mode"
-	NatsManagerPort           = "server.port"
-	NatsURL                   = "nats.url"
-	ObjectStoreDefaultTTLDays = "object_store.default_ttl_days"
+	DevelopmentMode           = "DEVELOPMENT_MODE"
+	NatsManagerPort           = "NATS_MANAGER_PORT"
+	NatsURL                   = "NATS_URL"
+	ObjectStoreDefaultTTLDays = "OBJECT_STORE_DEFAULT_TTL"
 )
 
 func Initialize() {
-	viper.AutomaticEnv()
-
-	viper.RegisterAlias("KAI_DEVELOPMENT_MODE", DevelopmentMode)
-	viper.RegisterAlias("KAI_NATS_MANAGER_PORT", NatsManagerPort)
-	viper.RegisterAlias("KAI_NATS_URL", NatsURL)
-	viper.RegisterAlias("KAI_OBJECT_STORE_DEFAULT_TTL", ObjectStoreDefaultTTLDays)
-
-	viper.SetDefault(DevelopmentMode, false)
+	viper.SetDefault(DevelopmentMode, true)
 	viper.SetDefault(NatsManagerPort, 50051)
 	viper.SetDefault(NatsURL, "localhost:4222")
 	viper.SetDefault(ObjectStoreDefaultTTLDays, 5)
+
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.SetEnvPrefix("KAI")
+	viper.AutomaticEnv()
 }
