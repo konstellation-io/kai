@@ -1,5 +1,4 @@
-{{- $protocol := ternary  "https" "http" .Values.adminApi.tls.enabled -}}
-{{- $keycloak_protocol := ternary "https" "http" .Values.keycloak.tls.enabled -}}
+{{- $protocol := ternary  "https" "http" .Values.config.tls.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
