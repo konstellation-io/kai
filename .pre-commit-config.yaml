@@ -1,3 +1,4 @@
+exclude: .*snap|.*golden
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.3.0
@@ -5,7 +6,6 @@ repos:
   hooks:
     - id: check-added-large-files
     - id: trailing-whitespace
-      exclude: '.*(snap|golden)'
     - id: check-merge-conflict
     - id: check-symlinks
     - id: end-of-file-fixer
