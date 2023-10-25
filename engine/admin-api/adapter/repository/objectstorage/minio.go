@@ -56,7 +56,7 @@ func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) e
 }
 
 func (os *MinioObjectStorage) CreateBucketPolicy(ctx context.Context, bucket string) (string, error) {
-	policyName := fmt.Sprintf("%s-policy", bucket)
+	policyName := bucket
 
 	err := os.adminClient.AddCannedPolicy(
 		ctx,

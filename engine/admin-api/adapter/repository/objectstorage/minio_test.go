@@ -152,7 +152,7 @@ func (s *ObjectStorageSuite) TestCreateBucket_InvalidBucketName() {
 func (s *ObjectStorageSuite) TestCreateBucketPolicy() {
 	var (
 		ctx                = context.Background()
-		expectedPolicyName = fmt.Sprintf("%s-policy", _testBucket)
+		expectedPolicyName = _testBucket
 	)
 
 	err := s.objectStorage.CreateBucket(ctx, _testBucket)
