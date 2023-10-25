@@ -4,7 +4,7 @@
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.min.io/ | minio | 5.0.13 |
+| https://charts.min.io/ | minio | 5.0.14 |
 | https://helm.influxdata.com/ | influxdb | 4.8.1 |
 | https://helm.influxdata.com/ | kapacitor | 1.4.6 |
 
@@ -16,7 +16,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.34"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.35"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -35,10 +35,8 @@
 | chronograf.persistence.size | string | `"2Gi"` | Storage size |
 | chronograf.persistence.storageClass | string | `"standard"` | Storage class name |
 | chronograf.tolerations | list | `[]` | Tolerations for use with node taints |
-| config | object | `{"admin":{"corsEnabled":true},"baseDomainName":"kai.local","minio":{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}},"mongodb":{"connectionString":{"secretKey":"","secretName":""}},"tls":{"certSecretName":"","enabled":false}}` | Config from kai/helm |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.baseDomainName | string | `"kai.local"` | Base domain name for Admin API and K8S Manager apps |
-| config.minio | object | `{"defaultRegion":"","tier":{"aws":{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""},"enabled":false,"name":"","remoteBucketName":"","remotePrefix":""}}` | MinIO post deploy configuration |
 | config.minio.defaultRegion | string | us-east-1 | Default region (only affect to Minio buckets) |
 | config.minio.tier.aws | object | `{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""}` | Transition Objects from MinIO to AWS S3 |
 | config.minio.tier.aws.auth | object | `{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""}` | AWS authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey) |
@@ -74,7 +72,7 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.34"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.35"` | Image tag |
 | k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
@@ -118,11 +116,13 @@
 | keycloak.ingress.annotations | object | See `keycloak.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | keycloak.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | keycloak.kli.oidcClient.clientId | string | `"kai-kli-oidc"` | The name of the OIDC client in Keycloak for KLI |
-| keycloak.kong | object | `{"oidcClient":{"clientId":"kong-oidc","secret":""},"oidcPluginName":"oidc"}` | The name of the client that will be crated on Keycloak first startup |
 | keycloak.kong.oidcClient.clientId | string | `"kong-oidc"` | The name of the OIDC client in Keycloak for Kong |
 | keycloak.kong.oidcClient.secret | string | `""` | The secret for the OIDC client that will be created on Keycloak first startup |
 | keycloak.kong.oidcPluginName | string | `"oidc"` | The name of the OIDC Kong plugin that should be installed on Kong ingress controller |
 | keycloak.livinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/health/live","port":"http"},"initialDelaySeconds":30,"periodSeconds":10,"timeoutSeconds":5}` | Container liveness probe |
+| keycloak.minio.oidcClient | object | `{"clientId":"minio","secret":""}` | The name of the OIDC client in Keycloak for MinIO |
+| keycloak.minio.oidcClient.clientId | string | `"minio"` | The name of the OIDC client in Keycloak for Kong |
+| keycloak.minio.oidcClient.secret | string | `""` | The secret for the OIDC client that will be created on Keycloak first startup |
 | keycloak.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | keycloak.podAnnotations | object | `{}` | Pod annotations |
 | keycloak.podSecurityContext | object | `{}` | Pod security context |
@@ -142,14 +142,20 @@
 | minio.consoleIngress.hosts | list | `["storage-console.kai.local"]` | Ingress hostnames |
 | minio.consoleIngress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
 | minio.consoleIngress.labels | object | `{}` | Ingress labels |
-| minio.consoleIngress.tls | list | `[]` |  |
+| minio.consoleIngress.tls | list | `[]` | Ingress TLS configuration |
 | minio.existingSecret | string | `""` | Use an exising secret for root user and password |
+| minio.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
+| minio.image.repository | string | `"quay.io/minio/minio"` | Image repository |
+| minio.image.tag | string | `"RELEASE.2023-09-30T07-02-29Z"` | Image tag |
 | minio.ingress.annotations | object | `{}` | Ingress annotations |
 | minio.ingress.enabled | bool | `true` | Enable ingress for MinIO API |
 | minio.ingress.hosts | list | `["storage.kai.local"]` | Ingress hostnames |
 | minio.ingress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
 | minio.ingress.labels | object | `{}` | Ingress labels |
 | minio.ingress.tls | list | `[]` | Ingress TLS configuration |
+| minio.mcImage.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
+| minio.mcImage.repository | string | `"quay.io/minio/mc"` | Image repository |
+| minio.mcImage.tag | string | `"RELEASE.2023-09-29T16-41-22Z"` | Image tag |
 | minio.minioAPIPort | string | `"9000"` | Internal port number for MinIO S3 API container |
 | minio.minioConsolePort | string | `"9001"` | Internal port number for MinIO Browser Console container |
 | minio.mode | string | `"standalone"` | Sets minio mode |
@@ -160,8 +166,8 @@
 | minio.resources | object | `{"requests":{"memory":"256Mi"}}` | Sets pods resources |
 | minio.rootPassword | string | Randomly generated value | Sets Root password |
 | minio.rootUser | string | Randomly generated value | Sets Root user |
-| minio.service.port | string | `"9000"` |  |
-| minio.service.type | string | `"ClusterIP"` |  |
+| minio.service.port | string | `"9000"` | Internal port number for MinIO S3 API service |
+| minio.service.type | string | `"ClusterIP"` | Service type |
 | mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods |
 | mongoExpress.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | mongoExpress.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
@@ -173,7 +179,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.34"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.35"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -205,7 +211,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.34"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.35"` | Image tag |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | registry.affinity | object | `{}` | Assign custom affinity rules to the pods |
 | registry.auth.password | string | password | Registry password |
