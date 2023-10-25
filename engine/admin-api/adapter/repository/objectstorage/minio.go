@@ -42,7 +42,7 @@ func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) e
 					Status: minio.Enabled,
 					Transition: lifecycle.Transition{
 						StorageClass: viper.GetString(config.MinioTierNameKey),
-						Days:         0,
+						Days:         lifecycle.ExpirationDays(viper.GetInt(config.MinioTierTransitionDaysKey)),
 					},
 				},
 			},

@@ -13,21 +13,23 @@ const (
 	CfgFilePathKey          = "CONFIG_FILE_PATH"
 	RegistryHostKey         = "registry.host"
 	VersionStatusTimeoutKey = "application.versionStatusTimeout"
-	MinioEndpointKey        = "minio.endpoint"
-	MinioTierEnabledKey     = "minio.tier.enabled"
-	MinioTierNameKey        = "minio.tier.name"
-	MinioRootUserKey        = "minio.credentials.user"
+
+	MinioEndpointKey           = "minio.endpoint"
+	MinioTierEnabledKey        = "minio.tier.enabled"
+	MinioTierNameKey           = "minio.tier.name"
+	MinioTierTransitionDaysKey = "minio.tier.transition.days"
+	MinioRootUserKey           = "minio.credentials.user"
 	//nolint:gosec // false positive
 	MinioRootPasswordKey = "minio.credentials.password"
 
 	KeycloakAdminUserKey = "keycloak.admin.user"
 	//nolint:gosec // false positive
-	KeycloakAdminPasswordKey = "keycloak.admin.password"
-	KeycloakAdminClientIDKey = "keycloak.admin.clientID"
-	KeycloakMasterRealmKey   = "keycloak.masterRealm"
-	KeycloakRealmKey         = "keycloak.realm"
-	KeycloakURLKey           = "keycloak.url"
-	KeycloakTokenKey         = "keycloak.token"
+	KeycloakAdminPasswordKey   = "keycloak.admin.password"
+	KeycloakAdminClientIDKey   = "keycloak.admin.clientID"
+	KeycloakMasterRealmKey     = "keycloak.masterRealm"
+	KeycloakRealmKey           = "keycloak.realm"
+	KeycloakURLKey             = "keycloak.url"
+	KeycloakPolicyAttributeKey = "keycloak.attributes.policy"
 )
 
 func InitConfig() error {
@@ -39,6 +41,8 @@ func setDefaultConfig() {
 	viper.SetDefault(CfgFilePathKey, "config.yml")
 	viper.SetDefault(VersionStatusTimeoutKey, 20*time.Minute)
 	viper.SetDefault(MinioTierEnabledKey, false)
+	viper.SetDefault(MinioTierTransitionDaysKey, 0)
+	viper.SetDefault(KeycloakPolicyAttributeKey, "policy")
 }
 
 func loadConfig() error {
@@ -51,6 +55,7 @@ func loadConfig() error {
 	viper.RegisterAlias(MinioTierEnabledKey, "MINIO_TIER_ENABLED")
 	viper.RegisterAlias(MinioRootUserKey, "MINIO_ROOT_USER")
 	viper.RegisterAlias(MinioRootPasswordKey, "MINIO_ROOT_PASSWORD")
+	viper.RegisterAlias(MinioTierTransitionDaysKey, "MINIO_TIER_TRANSITION_DAYS")
 
 	viper.RegisterAlias(KeycloakAdminUserKey, "KEYCLOAK_ADMIN_USERNAME")
 	viper.RegisterAlias(KeycloakAdminPasswordKey, "KEYCLOAK_ADMIN_PASSWORD")
@@ -58,6 +63,7 @@ func loadConfig() error {
 	viper.RegisterAlias(KeycloakAdminClientIDKey, "KEYCLOAK_ADMIN_CLIENT_ID")
 	viper.RegisterAlias(KeycloakRealmKey, "KEYCLOAK_REALM")
 	viper.RegisterAlias(KeycloakURLKey, "KEYCLOAK_BASE_URL")
+	viper.RegisterAlias(KeycloakPolicyAttributeKey, "KEYCLOAK_POLICY_ATTRIBUTE")
 
 	viper.AutomaticEnv()
 

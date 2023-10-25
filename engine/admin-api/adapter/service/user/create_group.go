@@ -18,7 +18,7 @@ func (ur *KeycloakUserRegistry) CreateGroupWithPolicy(ctx context.Context, name,
 	_, err = ur.client.CreateGroup(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), gocloak.Group{
 		Name: gocloak.StringP(name),
 		Attributes: &map[string][]string{
-			"policy": {policy},
+			viper.GetString(config.KeycloakPolicyAttributeKey): {policy},
 		},
 	})
 	if err != nil {
