@@ -72,7 +72,6 @@ func initGraphqlController(
 	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, oldLogger, mongodbClient)
 	processRepo := processrepository.New(cfg, oldLogger, mongodbClient)
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, oldLogger, mongodbClient)
-	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, oldLogger)
 
 	ccK8sManager, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -120,28 +119,26 @@ func initGraphqlController(
 		log.Fatal(err)
 	}
 
-	s3ObjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
 	passwordGenerator, err := password.NewGenerator(&password.GeneratorInput{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ps := usecase.ProductInteractorOpts{
+	productInteractor := usecase.NewProductInteractor(&usecase.ProductInteractorOpts{
 		Logger:            logger,
 		ProductRepo:       productRepo,
-		MeasurementRepo:   measurementRepo,
+		MeasurementRepo:   influx.NewMeasurementRepoInfluxDB(cfg, oldLogger),
 		VersionRepo:       versionMongoRepo,
 		MetricRepo:        metricRepo,
 		ProcessLogRepo:    processLogRepo,
 		ProcessRepo:       processRepo,
 		UserActivity:      userActivityInteractor,
 		AccessControl:     accessControl,
-		ObjectStorage:     s3ObjectStorage,
+		ObjectStorage:     objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient),
 		NatsService:       natsManagerService,
 		UserRegistry:      keycloakUserRegistry,
 		PasswordGenerator: passwordGenerator,
-	}
-	productInteractor := usecase.NewProductInteractor(&ps)
+	})
 
 	userInteractor := usecase.NewUserInteractor(
 		oldLogger,
