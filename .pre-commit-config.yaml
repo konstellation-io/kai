@@ -5,7 +5,7 @@ repos:
   hooks:
     - id: check-added-large-files
     - id: trailing-whitespace
-      exclude: .*snap
+      exclude: .*snap,*.golden
     - id: check-merge-conflict
     - id: check-symlinks
     - id: end-of-file-fixer
