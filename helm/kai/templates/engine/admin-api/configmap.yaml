@@ -29,7 +29,7 @@ data:
   # REGISTRY
   KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
   # MinIO
-  KAI_MINIO_ENDPOINT_URL: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
+  KAI_MINIO_ENDPOINT_URL: "{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
   KAI_MINIO_REGION: {{ include "minio-config.region" . }}
   # MinIO Tier
   KAI_MINIO_TIER_ENABLED: "{{ .Values.config.minio.tier.enabled }}"
