@@ -14,7 +14,8 @@ spec:
       labels:
         {{- include "nats-manager.labels" . | nindent 8 }}
       annotations:
-        helm.sh/restart-deployment: {{ randAlphaNum 5 | quote }}
+        checksum/config: {{ include (print $.Template.BasePath "/nats-manager/configmap.yaml") . | sha256sum }}
+
     spec:
       containers:
         - name: nats-manager

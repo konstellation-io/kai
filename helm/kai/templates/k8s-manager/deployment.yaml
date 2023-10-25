@@ -14,7 +14,7 @@ spec:
       labels:
         {{- include "k8s-manager.labels" . | nindent 8 }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/engine/k8s-manager/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/k8s-manager/configmap.yaml") . | sha256sum }}
     spec:
       serviceAccountName: {{ include "k8s-manager.serviceAccountName" . }}
       {{- with .Values.k8sManager.affinity }}

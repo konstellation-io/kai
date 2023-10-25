@@ -12,8 +12,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: {{ include (print $.Template.BasePath "/engine/registry/config-secret.yaml") . | sha256sum }}
-        checksum/htpasswd: {{ include (print $.Template.BasePath "/engine/registry/htpasswd-secret.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/registry/config-secret.yaml") . | sha256sum }}
+        checksum/htpasswd: {{ include (print $.Template.BasePath "/registry/htpasswd-secret.yaml") . | sha256sum }}
       {{- with .Values.registry.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

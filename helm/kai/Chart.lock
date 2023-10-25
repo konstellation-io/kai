@@ -1,12 +1,6 @@
 dependencies:
-- name: influxdb
-  repository: https://helm.influxdata.com/
-  version: 4.8.1
-- name: kapacitor
-  repository: https://helm.influxdata.com/
-  version: 1.4.6
 - name: minio
   repository: https://charts.min.io/
   version: 5.0.14
-digest: sha256:1e6b06622a8af746d838c3d07006abc507e719b93733a9025e555f41a1187561
-generated: "2023-10-23T10:47:33.706917476+02:00"
+digest: sha256:8048ffba291b7af1c9ebcd0ff2db4fdda2e29f330a11895af91f4063e0ffc94a
+generated: "2023-10-25T14:26:47.975378516+02:00"
