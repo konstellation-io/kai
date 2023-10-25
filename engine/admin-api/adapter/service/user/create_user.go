@@ -19,6 +19,7 @@ func (ur *KeycloakUserRegistry) CreateUserWithinGroup(ctx context.Context, name,
 		Username:      gocloak.StringP(name),
 		EmailVerified: gocloak.BoolP(true),
 		Groups:        &[]string{group},
+		Enabled:       gocloak.BoolP(true),
 		Credentials: &[]gocloak.CredentialRepresentation{
 			{
 				Value: gocloak.StringP(password),
