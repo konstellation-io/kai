@@ -1,0 +1,89 @@
+# Job to configure a MinIO Tier (transition objects to external extorage)
+{{- if and .Values.config.minio.tier.enabled }}
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: {{ include "minio-config.fullname" . }}
+  labels:
+    {{- include "minio-config.labels" . | nindent 4 }}
+spec:
+  manualSelector: true
+  selector:
+    matchLabels:
+      {{- include "minio-config.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "minio-config.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: minio-client-config
+          image: minio/mc
+          env:
+            # Set the tier provider
+            {{- if or (and .Values.config.minio.tier.aws.auth.secretName .Values.config.minio.tier.aws.auth.secretKeyNames.accessKey .Values.config.minio.tier.aws.auth.secretKeyNames.secretKey) (and .Values.config.minio.tier.aws.auth.accessKeyID .Values.config.minio.tier.aws.auth.secretAccessKey) }}
+            - name: TIER_SELECTED
+              value: "aws"
+            {{- end }}
+
+            # MINIO config
+            - name: KAI_MINIO_ENDPOINT_URL
+              value: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
+            - name: REMOTE_BUCKET_NAME
+              value: {{ .Values.config.minio.tier.remoteBucketName }}
+            - name: TIER_NAME
+              value: {{ include "minio-config.tier.name" . }}
+            - name: REMOTE_PREFIX
+              value: {{ include "minio-config.tier.s3.remotePrefix" . }}
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootUser
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootPassword
+
+            # AWS config
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio-config.tier.aws.secretName" . }}
+                  key: {{ include "minio-config.tier.aws.accessKey" . }}
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio-config.tier.aws.secretName" . }}
+                  key: {{ include "minio-config.tier.aws.secretKey" . }}
+            - name: AWS_ENDPOINT_URL_S3
+              value: {{ include "minio-config.tier.s3.endpointURL" . }}
+            - name: AWS_REGION
+              value: {{ include "minio-config.tier.s3.region" . }}
+
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              echo -e "Checking MinIO \`/health/live\` endpoint until get 200 code..."
+              until [ "$(curl -s -w '%{http_code}' -o /dev/null "${KAI_MINIO_ENDPOINT_URL}/minio/health/live")" -eq 200 ]; do sleep 2; done
+              echo -e "200 Ok \nMinIO is UP and Running, configuring MinIO client (mc) against MinIO server"
+              mc alias set kai-minio $KAI_MINIO_ENDPOINT_URL $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+              if [ "$TIER_SELECTED" == "aws" ]; then
+                echo -e "Tier provider selected: [AWS S3] \nChecking required variables for this tier"
+                variables=("TIER_NAME" "AWS_ENDPOINT_URL_S3" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" "REMOTE_BUCKET_NAME" "REMOTE_PREFIX" "AWS_REGION")
+                for var in "${variables[@]}"; do
+                  if [ -z "${!var}" ]; then
+                    echo "<ERROR> The variable $var is undefined or empty. Please check \`.Values.config.minio.tier\` section"
+                    exit 1
+                  fi
+                done
+                echo "All required variables are defined, creating the MinIO tier"
+                mc ilm tier add s3 kai-minio $TIER_NAME --endpoint $AWS_ENDPOINT_URL_S3 --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY --bucket $REMOTE_BUCKET_NAME --prefix $REMOTE_PREFIX --region $AWS_REGION --force
+                echo "Job completed successfully!"
+              else
+                echo -e "Minio Tier was enabled, but no specific configuration has been found for any Tier. Please check \`.Values.config.minio.tier\` section"
+                exit 1
+              fi
+{{- end }}

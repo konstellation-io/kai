@@ -69,36 +69,16 @@ spec:
                 secretKeyRef:
                   name: {{ include "keycloak.secretName" . }}
                   key: {{ include "keycloak.secretPasswordKey" . }}
-        # MinIO enabled
-        {{- if .Values.minio.enabled }}
-            - name: AWS_ACCESS_KEY_ID
+            - name: KAI_MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}
                   key: rootUser
-            - name: AWS_SECRET_ACCESS_KEY
+            - name: KAI_MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}
                   key: rootPassword
-        # MinIO disabled
-        {{- else if .Values.config.s3.auth.secretName }}
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.config.s3.auth.secretName }}
-                  key: {{ .Values.config.s3.auth.secretKeys.accessKey }}
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.config.s3.auth.secretName }}
-                  key: {{ .Values.config.s3.auth.secretKeys.secretKey }}
-        {{- else }}
-            - name: AWS_ACCESS_KEY_ID
-              value: {{ .Values.config.s3.auth.accessKeyID }}
-            - name: AWS_SECRET_ACCESS_KEY
-              value: {{ .Values.config.s3.auth.secretAccessKey }}
-        {{- end }}
           ports:
             - containerPort: 8080
               protocol: TCP
