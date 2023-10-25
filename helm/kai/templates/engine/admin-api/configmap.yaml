@@ -1,5 +1,4 @@
-{{- $protocol := ternary  "https" "http" .Values.adminApi.tls.enabled -}}
-{{- $keycloak_protocol := ternary "https" "http" .Values.keycloak.tls.enabled -}}
+{{- $protocol := ternary  "https" "http" .Values.config.tls.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,7 +9,7 @@ data:
   KAI_API_LOG_LEVEL: "{{ .Values.adminApi.logLevel }}"
   KAI_DEVELOPMENT_MODE: "{{ .Values.developmentMode }}"
   KAI_RELEASE_NAME: "{{ .Release.Name }}"
-  KAI_ADMIN_API_BASE_URL: "{{ $protocol }}://{{ .Values.config.admin.apiHost }}"
+  KAI_ADMIN_API_BASE_URL: "{{ $protocol }}://{{ .Values.adminApi.host }}"
   KAI_ADMIN_CORS_ENABLED: "{{ .Values.config.admin.corsEnabled }}"
   KAI_SERVICES_K8S_MANAGER: "{{ include "k8s-manager.fullname" . }}:50051"
   KAI_SERVICES_NATS_MANAGER: "{{ include "nats-manager.fullname" . }}:50051"

@@ -14,27 +14,20 @@ spec:
   {{- if .Values.adminApi.ingress.className }}
   ingressClassName: {{ .Values.adminApi.ingress.className }}
   {{- end }}
-  {{- if .Values.adminApi.tls.enabled }}
+  {{- if .Values.config.tls.enabled }}
   tls:
     - hosts:
         - {{ .Values.adminApi.host }}
-      secretName: {{ .Values.adminApi.host }}-tls
+      secretName: {{ .Values.config.tls.certSecretName }}
   {{- end }}
   rules:
     - host: {{ .Values.adminApi.host }}
       http:
         paths:
           - path: "/"
-            {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
             pathType: Prefix
-            {{- end }}
             backend:
-              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
                 name: {{ include "admin-api.fullname" . }}
                 port:
                   name: grpc
-              {{- else }}
-              serviceName: {{ include "admin-api.fullname" . }}
-              servicePort: grpc
-              {{- end }}
