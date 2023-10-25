@@ -80,6 +80,7 @@ func (s *KeycloakSuite) SetupSuite() {
 	viper.Set(config.KeycloakAdminUserKey, _adminUser)
 	viper.Set(config.KeycloakAdminPasswordKey, _adminPassword)
 	viper.Set(config.KeycloakAdminClientIDKey, "admin-cli")
+	viper.Set(config.KeycloakPolicyAttributeKey, "policy")
 }
 
 func (s *KeycloakSuite) TearDownSuite() {
