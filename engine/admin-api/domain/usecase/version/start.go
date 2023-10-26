@@ -80,7 +80,7 @@ func (h *Handler) updateKeyValueConfigurations(
 
 	if len(vers.Config) > 0 {
 		kvConfigurations = append(kvConfigurations, entity.KeyValueConfiguration{
-			Store:         versionCfg.KeyValueStores.KeyValueStore,
+			Store:         versionCfg.KeyValueStores.VersionKeyValueStore,
 			Configuration: vers.Config,
 		})
 	}
@@ -146,6 +146,11 @@ func (h *Handler) createStreamingResources(
 	productID string,
 	vers *entity.Version,
 ) (*entity.VersionStreamingResources, error) {
+	product, err := h.productRepo.GetByID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
 	versionStreamCfg, err := h.natsManagerService.CreateStreams(ctx, productID, vers)
 	if err != nil {
 		return nil, fmt.Errorf("error creating streams for version %q: %w", vers.Tag, err)
@@ -160,6 +165,8 @@ func (h *Handler) createStreamingResources(
 	if err != nil {
 		return nil, fmt.Errorf("error creating key-value stores for version %q: %w", vers.Tag, err)
 	}
+
+	kvStoreCfg.GlobalKeyValueStore = product.KeyValueStore
 
 	return entity.NewVersionConfig(versionStreamCfg, objectStoreCfg, kvStoreCfg)
 }

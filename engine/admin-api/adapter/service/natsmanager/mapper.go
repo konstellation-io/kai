@@ -98,8 +98,8 @@ func (n *Client) mapDTOToVersionKeyValueStoreConfig(
 	}
 
 	return &entity.KeyValueStores{
-		KeyValueStore: projectKeyValueStore,
-		Workflows:     workflowsKVConfig,
+		VersionKeyValueStore: projectKeyValueStore,
+		Workflows:            workflowsKVConfig,
 	}
 }
 
