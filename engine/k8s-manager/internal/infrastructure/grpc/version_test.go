@@ -53,9 +53,10 @@ func (s *VersionServiceTestSuite) TestStart() {
 
 	objectStore := "test-object-store"
 	req := &versionpb.StartRequest{
-		ProductId:     "test-product",
-		VersionTag:    "test-version",
-		KeyValueStore: "test-kv-store",
+		ProductId:            "test-product",
+		VersionTag:           "test-version",
+		GlobalKeyValueStore:  "test-global-kv-store",
+		VersionKeyValueStore: "test-kv-store",
 		Workflows: []*versionpb.Workflow{
 			{
 				Name: "test-workflow",
@@ -95,9 +96,10 @@ func (s *VersionServiceTestSuite) TestStart() {
 	}
 
 	expectedVersion := domain.Version{
-		Product:       req.ProductId,
-		Tag:           req.VersionTag,
-		KeyValueStore: req.KeyValueStore,
+		Product:              req.ProductId,
+		Tag:                  req.VersionTag,
+		GlobalKeyValueStore:  req.GlobalKeyValueStore,
+		VersionKeyValueStore: req.VersionKeyValueStore,
 		Workflows: []*domain.Workflow{
 			{
 				Name: req.Workflows[0].Name,

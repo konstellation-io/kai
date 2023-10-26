@@ -1,9 +1,10 @@
 package domain
 
 type Version struct {
-	Tag           string
-	Product       string
-	KeyValueStore string
+	Tag                  string
+	Product              string
+	GlobalKeyValueStore  string
+	VersionKeyValueStore string
 
 	Workflows []*Workflow
 }

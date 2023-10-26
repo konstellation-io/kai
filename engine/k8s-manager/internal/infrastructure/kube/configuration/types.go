@@ -16,7 +16,8 @@ type Metadata struct {
 }
 
 type CentralizedConfig struct {
-	Product  ConfigDefinition `yaml:"product"`
+	Global   ConfigDefinition `yaml:"global"`
+	Version  ConfigDefinition `yaml:"product"` // rename this to version
 	Workflow ConfigDefinition `yaml:"workflow"`
 	Process  ConfigDefinition `yaml:"process"`
 }
