@@ -68,11 +68,6 @@ func (s *ObjectStorageSuite) SetupSuite() {
 	minioEndpoint := fmt.Sprintf("%s:%d", host, port.Int())
 
 	viper.Set(config.MinioEndpointKey, minioEndpoint)
-
-	//err = os.Setenv("AWS_REGION", "us-east-1")
-	//viper.Set(config.MinioRegionKey, "us-east-1")
-	//s.Require().NoError(err)
-
 	viper.Set(config.MinioRootUserKey, "minioadmin")
 	viper.Set(config.MinioRootPasswordKey, "minioadmin")
 
