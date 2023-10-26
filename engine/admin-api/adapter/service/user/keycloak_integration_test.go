@@ -1,8 +1,6 @@
 //go:build integration
 
-// This test file needs to be in service package, otherwise it won't be able to access the private
-// fields of the service package. As some tests alter manually GocloakUserRegistry struct variables.
-package service
+package user
 
 import (
 	"context"
@@ -12,24 +10,30 @@ import (
 	"time"
 
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-type GocloakTestSuite struct {
+const (
+	_adminUser     = "admin"
+	_adminPassword = "admin"
+)
+
+type KeycloakSuite struct {
 	suite.Suite
-	keycloakContainer   testcontainers.Container
-	cfg                 *KeycloakConfig
-	gocloakUserRegistry *GocloakUserRegistry
-	gocloakClient       *gocloak.GoCloak
+	keycloakContainer    testcontainers.Container
+	keycloakUserRegistry *KeycloakUserRegistry
+	keycloakClient       *gocloak.GoCloak
 }
 
-func TestGocloakTestSuite(t *testing.T) {
-	suite.Run(t, new(GocloakTestSuite))
+func TestKeycloakSuite(t *testing.T) {
+	suite.Run(t, new(KeycloakSuite))
 }
 
-func (s *GocloakTestSuite) SetupSuite() {
+func (s *KeycloakSuite) SetupSuite() {
 	ctx := context.Background()
 
 	absFilePath, err := filepath.Abs("./testdata")
@@ -44,8 +48,8 @@ func (s *GocloakTestSuite) SetupSuite() {
 		ExposedPorts: []string{"8080/tcp"},
 		WaitingFor:   wait.ForLog("Listening on:"),
 		Env: map[string]string{
-			"KEYCLOAK_ADMIN":          "admin",
-			"KEYCLOAK_ADMIN_PASSWORD": "admin",
+			"KEYCLOAK_ADMIN":          _adminUser,
+			"KEYCLOAK_ADMIN_PASSWORD": _adminPassword,
 		},
 		Mounts: []testcontainers.ContainerMount{
 			{
@@ -67,50 +71,87 @@ func (s *GocloakTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	s.keycloakContainer = keycloakContainer
-	s.gocloakClient = WithClient(keycloakEndpoint)
+
+	s.keycloakClient = WithClient(keycloakEndpoint)
+
+	viper.Set(config.KeycloakURLKey, keycloakEndpoint)
+	viper.Set(config.KeycloakRealmKey, "example")
+	viper.Set(config.KeycloakMasterRealmKey, "master")
+	viper.Set(config.KeycloakAdminUserKey, _adminUser)
+	viper.Set(config.KeycloakAdminPasswordKey, _adminPassword)
+	viper.Set(config.KeycloakAdminClientIDKey, "admin-cli")
+	viper.Set(config.KeycloakPolicyAttributeKey, "policy")
 }
 
-func (s *GocloakTestSuite) TearDownSuite() {
+func (s *KeycloakSuite) TearDownSuite() {
 	err := s.keycloakContainer.Terminate(context.Background())
 	s.Require().NoError(err)
 }
 
-func (s *GocloakTestSuite) SetupTest() {
-	s.cfg = s.getConfig()
-	gocloakUserRegistry, err := NewGocloakUserRegistry(s.gocloakClient, s.cfg)
+func (s *KeycloakSuite) SetupTest() {
+	keycloakUserRegistry, err := NewKeycloakUserRegistry(s.keycloakClient)
 	s.Require().NoError(err)
 
-	s.gocloakUserRegistry = gocloakUserRegistry
+	s.keycloakUserRegistry = keycloakUserRegistry
 }
 
-func (s *GocloakTestSuite) TearDownTest() {
-	s.cfg = s.getConfig()
+func (s *KeycloakSuite) TearDownTest() {
+	ctx := context.Background()
+
 	testUser := s.getTestUser()
 	testUser.Attributes = &map[string][]string{}
-	err := s.gocloakClient.UpdateUser(
-		context.Background(),
-		s.gocloakUserRegistry.token.AccessToken,
-		s.cfg.Realm,
+
+	err := s.keycloakClient.UpdateUser(
+		ctx,
+		s.keycloakUserRegistry.token.AccessToken,
+		viper.GetString(config.KeycloakRealmKey),
 		*testUser,
 	)
 	s.Require().NoError(err)
-}
 
-func (s *GocloakTestSuite) getConfig() *KeycloakConfig {
-	return &KeycloakConfig{
-		Realm:         "example",
-		MasterRealm:   "master",
-		AdminUsername: "admin",
-		AdminPassword: "admin",
-		AdminClientID: "admin-cli",
+	groups, err := s.keycloakClient.GetGroups(
+		ctx,
+		s.keycloakUserRegistry.token.AccessToken,
+		viper.GetString(config.KeycloakRealmKey),
+		gocloak.GetGroupsParams{},
+	)
+	s.Require().NoError(err)
+
+	for _, group := range groups {
+		s.keycloakClient.DeleteGroup(
+			ctx,
+			s.keycloakUserRegistry.token.AccessToken,
+			viper.GetString(config.KeycloakRealmKey),
+			*group.ID,
+		)
+		s.Require().NoError(err)
+	}
+
+	users, err := s.keycloakClient.GetUsers(
+		ctx,
+		s.keycloakUserRegistry.token.AccessToken,
+		viper.GetString(config.KeycloakRealmKey),
+		gocloak.GetUsersParams{},
+	)
+
+	for _, user := range users {
+		if *user.ID != *testUser.ID {
+			err = s.keycloakClient.DeleteUser(
+				ctx,
+				s.keycloakUserRegistry.token.AccessToken,
+				viper.GetString(config.KeycloakRealmKey),
+				*user.ID,
+			)
+			s.Require().NoError(err)
+		}
 	}
 }
 
-func (s *GocloakTestSuite) getTestUser() *gocloak.User {
-	users, err := s.gocloakClient.GetUsers(
+func (s *KeycloakSuite) getTestUser() *gocloak.User {
+	users, err := s.keycloakClient.GetUsers(
 		context.Background(),
-		s.gocloakUserRegistry.token.AccessToken,
-		s.cfg.Realm,
+		s.keycloakUserRegistry.token.AccessToken,
+		viper.GetString(config.KeycloakRealmKey),
 		gocloak.GetUsersParams{},
 	)
 	s.Require().NoError(err)
@@ -118,13 +159,15 @@ func (s *GocloakTestSuite) getTestUser() *gocloak.User {
 	return users[0]
 }
 
-func (s *GocloakTestSuite) TestUpdateUserProductGrantsNoPreviousExisting() {
+func (s *KeycloakSuite) TestUpdateUserProductGrantsNoPreviousExisting() {
 	// GIVEN a user with no previous existing grants and a product
+	ctx := context.Background()
 	user := s.getTestUser()
 	product := "test-product"
 
 	// WHEN updating grants for a product for the first time
-	err := s.gocloakUserRegistry.UpdateUserProductGrants(
+	err := s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product,
 		[]string{"grant1", "grant2"},
@@ -149,13 +192,15 @@ func (s *GocloakTestSuite) TestUpdateUserProductGrantsNoPreviousExisting() {
 	s.Equal(expectedResult, obtainedResult)
 }
 
-func (s *GocloakTestSuite) TestUpdateUserProductGrantsWithPreviousExisting() {
+func (s *KeycloakSuite) TestUpdateUserProductGrantsWithPreviousExisting() {
 	// GIVEN a user with no previous existing grants and a product
+	ctx := context.Background()
 	user := s.getTestUser()
 	product := "test-product"
 
 	// GIVEN previous existing grants
-	err := s.gocloakUserRegistry.UpdateUserProductGrants(
+	err := s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product,
 		[]string{"grant1", "grant2"},
@@ -163,7 +208,8 @@ func (s *GocloakTestSuite) TestUpdateUserProductGrantsWithPreviousExisting() {
 	s.Require().NoError(err)
 
 	// WHEN updating grants for a product already existing
-	err = s.gocloakUserRegistry.UpdateUserProductGrants(
+	err = s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product,
 		[]string{"grant3"},
@@ -188,14 +234,16 @@ func (s *GocloakTestSuite) TestUpdateUserProductGrantsWithPreviousExisting() {
 	s.Equal(expectedResult, obtainedResult)
 }
 
-func (s *GocloakTestSuite) TestUpdateUserProductGrantsForOtherProduct() {
+func (s *KeycloakSuite) TestUpdateUserProductGrantsForOtherProduct() {
 	// GIVEN a user with no previous existing grants and two products
+	ctx := context.Background()
 	user := s.getTestUser()
 	product := "test-product"
 	product2 := "test-product-2"
 
 	// GIVEN previous existing grants
-	err := s.gocloakUserRegistry.UpdateUserProductGrants(
+	err := s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product,
 		[]string{"grant1", "grant2"},
@@ -203,7 +251,8 @@ func (s *GocloakTestSuite) TestUpdateUserProductGrantsForOtherProduct() {
 	s.Require().NoError(err)
 
 	// WHEN adding grants for other product
-	err = s.gocloakUserRegistry.UpdateUserProductGrants(
+	err = s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product2,
 		[]string{"grant3", "grant4"},
@@ -229,13 +278,15 @@ func (s *GocloakTestSuite) TestUpdateUserProductGrantsForOtherProduct() {
 	s.Equal(expectedResult, obtainedResult)
 }
 
-func (s *GocloakTestSuite) TestRevokeUserProductGrants() {
+func (s *KeycloakSuite) TestRevokeUserProductGrants() {
 	// GIVEN a user with no previous existing grants and a product
+	ctx := context.Background()
 	user := s.getTestUser()
 	product := "test-product"
 
 	// GIVEN previous existing grants
-	err := s.gocloakUserRegistry.UpdateUserProductGrants(
+	err := s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product,
 		[]string{"grant1", "grant2"},
@@ -243,7 +294,8 @@ func (s *GocloakTestSuite) TestRevokeUserProductGrants() {
 	s.Require().NoError(err)
 
 	// WHEN revoking grants
-	err = s.gocloakUserRegistry.UpdateUserProductGrants(
+	err = s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product,
 		[]string{},
@@ -266,21 +318,24 @@ func (s *GocloakTestSuite) TestRevokeUserProductGrants() {
 	s.Equal(expectedResult, obtainedResult)
 }
 
-func (s *GocloakTestSuite) TestRevokeUserProductGrantsForOtherProduct() {
+func (s *KeycloakSuite) TestRevokeUserProductGrantsForOtherProduct() {
 	// GIVEN a user with no previous existing grants and two products
+	ctx := context.Background()
 	user := s.getTestUser()
 	product := "test-product"
 	product2 := "test-product-2"
 
 	// GIVEN previous existing grants
-	err := s.gocloakUserRegistry.UpdateUserProductGrants(
+	err := s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product,
 		[]string{"grant1", "grant2"},
 	)
 	s.Require().NoError(err)
 
-	err = s.gocloakUserRegistry.UpdateUserProductGrants(
+	err = s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product2,
 		[]string{"grant3", "grant4"},
@@ -288,7 +343,8 @@ func (s *GocloakTestSuite) TestRevokeUserProductGrantsForOtherProduct() {
 	s.Require().NoError(err)
 
 	// WHEN revoking grants for one product
-	err = s.gocloakUserRegistry.UpdateUserProductGrants(
+	err = s.keycloakUserRegistry.UpdateUserProductGrants(
+		ctx,
 		*user.ID,
 		product,
 		[]string{},
@@ -313,67 +369,74 @@ func (s *GocloakTestSuite) TestRevokeUserProductGrantsForOtherProduct() {
 	s.Equal(expectedResult, obtainedResult)
 }
 
-func (s *GocloakTestSuite) TestRefreshNotExpiredToken() {
+func (s *KeycloakSuite) TestRefreshNotExpiredToken() {
 	// GIVEN the recently obtained token through setup test
-	expiredTimeCopy := s.gocloakUserRegistry.tokenExpiresAt
+	ctx := context.Background()
+	expiredTimeCopy := s.keycloakUserRegistry.tokenExpiresAt
 
 	// WHEN refreshing the token
-	err := s.gocloakUserRegistry.refreshToken()
+	err := s.keycloakUserRegistry.refreshToken(ctx)
 	s.Require().NoError(err)
 
 	// THEN the token is not refreshed
-	s.True(expiredTimeCopy.Equal(s.gocloakUserRegistry.tokenExpiresAt))
+	s.True(expiredTimeCopy.Equal(s.keycloakUserRegistry.tokenExpiresAt))
 }
 
-func (s *GocloakTestSuite) TestRefreshExpiredToken() {
+func (s *KeycloakSuite) TestRefreshExpiredToken() {
 	// GIVEN an expired token
-	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+	ctx := context.Background()
+	s.keycloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
 
 	// WHEN refreshing the token
 	now := time.Now()
-	err := s.gocloakUserRegistry.refreshToken()
+	err := s.keycloakUserRegistry.refreshToken(ctx)
 	s.Require().NoError(err)
 
 	// THEN the token is refreshed
-	s.True(now.Before(s.gocloakUserRegistry.tokenExpiresAt))
+	s.True(now.Before(s.keycloakUserRegistry.tokenExpiresAt))
 }
 
-func (s *GocloakTestSuite) TestRefreshExpiredRefreshToken() {
+func (s *KeycloakSuite) TestRefreshExpiredRefreshToken() {
 	// GIVEN both an expired token and its refresh token expired as well
-	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
-	s.gocloakUserRegistry.refreshtokenExpiresAt = time.Now().Add(-time.Hour)
+	ctx := context.Background()
+	s.keycloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+	s.keycloakUserRegistry.refreshTokenExpiresAt = time.Now().Add(-time.Hour)
 
 	// WHEN refreshing the token
 	now := time.Now()
-	err := s.gocloakUserRegistry.refreshToken()
+	err := s.keycloakUserRegistry.refreshToken(ctx)
 	s.Require().NoError(err)
 
 	// THEN a new token is obtained
-	s.True(now.Before(s.gocloakUserRegistry.tokenExpiresAt))
-	s.True(now.Before(s.gocloakUserRegistry.refreshtokenExpiresAt))
+	s.True(now.Before(s.keycloakUserRegistry.tokenExpiresAt))
+	s.True(now.Before(s.keycloakUserRegistry.refreshTokenExpiresAt))
 }
 
-func (s *GocloakTestSuite) TestRefreshExpiredTokenWithError() {
+func (s *KeycloakSuite) TestRefreshExpiredTokenWithError() {
 	// GIVEN an expired token
-	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+	ctx := context.Background()
+	s.keycloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
 
 	// WHEN refreshing the token with invalid credentials
-	s.gocloakUserRegistry.token.RefreshToken = "invalid"
-	err := s.gocloakUserRegistry.refreshToken()
+	s.keycloakUserRegistry.token.RefreshToken = "invalid"
+	err := s.keycloakUserRegistry.refreshToken(ctx)
 
-	// THEN an error promts
+	// THEN an error prompts
 	s.Require().Error(err)
 }
 
-func (s *GocloakTestSuite) TestRefreshExpiredRefreshTokenWithError() {
+func (s *KeycloakSuite) TestRefreshExpiredRefreshTokenWithError() {
 	// GIVEN both an expired token and its refresh token expired as well
-	s.gocloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
-	s.gocloakUserRegistry.refreshtokenExpiresAt = time.Now().Add(-time.Hour)
+	ctx := context.Background()
+	s.keycloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
+	s.keycloakUserRegistry.refreshTokenExpiresAt = time.Now().Add(-time.Hour)
 
 	// WHEN refreshing the token with invalid credentials
-	s.gocloakUserRegistry.cfg.AdminPassword = "invalid"
-	err := s.gocloakUserRegistry.refreshToken()
+	viper.Set(config.KeycloakAdminPasswordKey, "invalid")
+	err := s.keycloakUserRegistry.refreshToken(ctx)
 
-	// THEN an error promts
+	// THEN an error prompts
 	s.Require().Error(err)
+
+	viper.Set(config.KeycloakAdminPasswordKey, _adminPassword)
 }

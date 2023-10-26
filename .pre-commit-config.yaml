@@ -4,11 +4,12 @@ repos:
   # exclude: '*snap'
   hooks:
     - id: check-added-large-files
+    - id: end-of-file-fixer
+      exclude: .*golden
     - id: trailing-whitespace
-      exclude: .*snap
+      exclude: .*snap|.*golden
     - id: check-merge-conflict
     - id: check-symlinks
-    - id: end-of-file-fixer
 - repo: https://github.com/zricethezav/gitleaks
   rev: v8.8.12
   hooks:
