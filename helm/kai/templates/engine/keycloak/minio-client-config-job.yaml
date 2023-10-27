@@ -1,0 +1,119 @@
+{{- $protocol := ternary  "https" "http" .Values.config.tls.enabled -}}
+# Job to configure a MinIO Tier (transition objects to external extorage)
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: {{ include "keycloak.fullname" . }}-minio-client-config
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    "helm.sh/hook-weight": "-5"
+spec:
+  manualSelector: true
+  selector:
+    matchLabels:
+      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "keycloak.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: minio-oidc-config
+          image: {{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag }}
+          imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
+          env:
+            - name: KEYCLOAK_URL
+              value: "http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}"
+            - name: KEYCLOAK_HC_ENDPOINT
+              value: http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}{{ .Values.keycloak.livinessProbe.httpGet.path }}
+            - name: KEYCLOAK_REALM
+              value: {{ .Values.keycloak.realmName }}
+            - name: CLIENT_NAME
+              value: {{ .Values.keycloak.minio.oidcClient.clientId}}
+            - name: CLIENT_SCOPE_NAME
+              value: minio-authorization
+            - name: KCADM
+              value: /opt/keycloak/bin/kcadm.sh
+            - name: KEYCLOAK_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.secretUserKey" . }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.secretPasswordKey" . }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -eu
+
+              echo -e "Keycloak is UP and Running. Configuring Keycloak authentication"
+              $KCADM config credentials --server $KEYCLOAK_URL --realm master --user $KEYCLOAK_ADMIN_USER --password $KEYCLOAK_ADMIN_PASSWORD
+              STATUS=$?
+              if [ $STATUS -eq 0 ]; then
+                  echo -e "Configured Keycloak credentials"
+              else
+                  echo -e "Error configuring Keycloak credentials"
+                  exit 1
+              fi
+
+              CLIENT_ID=$($KCADM get clients -r $KEYCLOAK_REALM --fields clientId,id | grep -B1 $CLIENT_NAME | head -n1 | cut -d : -f 2 | tr -d '", ')
+              if [ "x$CLIENT_ID" == "x" ]; then
+                  echo -e "Client $CLIENT_NAME not found"
+                  exit 1
+              fi
+
+              CLIENT_SCOPE_ID=$($KCADM get client-scopes -r $KEYCLOAK_REALM --fields name,id | grep -B1 $CLIENT_SCOPE_NAME | head -n1 | cut -d : -f 2 | tr -d '", ')
+
+              if [ "x$CLIENT_SCOPE_ID" == "x" ]; then
+                  echo -e "Client scope $CLIENT_SCOPE_NAME not found. Creating..."
+                  $KCADM create client-scopes -r $KEYCLOAK_REALM -f - << EOF
+                    {
+                      "name": "$CLIENT_SCOPE_NAME",
+                      "protocol": "openid-connect",
+                      "attributes": {
+                        "include.in.token.scope": "true",
+                        "display.on.consent.screen": "true"
+                      },
+                      "protocolMappers": [
+                        {
+                          "protocol": "openid-connect",
+                          "protocolMapper": "oidc-group-membership-mapper",
+                          "name": "minio-groups",
+                          "config": {
+                            "claim.name": "groups",
+                            "full.path": false,
+                            "id.token.claim": "true",
+                            "access.token.claim": "true",
+                            "userinfo.token.claim": false
+                          }
+                        }
+                      ]
+                    }
+              EOF
+                  STATUS=$?
+                  if [ $STATUS -eq 0 ]; then
+                      echo -e "Client scope $CLIENT_SCOPE_NAME created"
+                      CLIENT_SCOPE_ID=$($KCADM get client-scopes -r $KEYCLOAK_REALM --fields name,id | grep -B1 $CLIENT_SCOPE_NAME | head -n1 | cut -d : -f 2 | tr -d '", ')
+                  else
+                      echo -e "Error creating client scope $CLIENT_SCOPE_NAME"
+                      exit 1
+                  fi
+              else
+                  echo -e "Client scope $CLIENT_SCOPE_NAME found. Nothing to do."
+              fi
+
+              $KCADM update clients/$CLIENT_ID/default-client-scopes/$CLIENT_SCOPE_ID -r $KEYCLOAK_REALM
+              STATUS=$?
+              if [ $STATUS -eq 0 ]; then
+                  echo -e "Client $CLIENT_NAME updated"
+              else
+                  echo -e "Error updating client $CLIENT_NAME"
+                  exit 1
+              fi
