@@ -123,6 +123,13 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
+	globalKeyValueStore, err := i.natsService.CreateGlobalKeyValueStore(ctx, productID)
+	if err != nil {
+		return nil, fmt.Errorf("creating global key-value store: %w", err)
+	}
+
+	newProduct.KeyValueStore = globalKeyValueStore
+
 	err = i.objectStorage.CreateBucket(ctx, productID)
 	if err != nil {
 		return nil, fmt.Errorf("creating object storage bucket: %w", err)

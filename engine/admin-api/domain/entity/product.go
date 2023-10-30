@@ -18,6 +18,7 @@ type Product struct {
 	CreationDate  time.Time `bson:"creationDate"`
 	Owner         string    `bson:"owner"`
 	MinioPassword string    `bson:"minioPassword"`
+	KeyValueStore string    `bson:"keyValueStore"`
 }
 
 func (r *Product) Validate() error {

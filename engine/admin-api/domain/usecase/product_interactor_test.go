@@ -23,6 +23,7 @@ import (
 const (
 	_testPassword     = "test-password"
 	_testBucketPolicy = "test-policy"
+	_testKvStore      = "test-kv-store"
 )
 
 type productSuite struct {
@@ -43,6 +44,7 @@ type productSuite struct {
 	objectStorage     *mocks.MockObjectStorage
 	userRegistry      *mocks.MockUserRegistry
 	passwordGenerator password.PasswordGenerator
+	natsService       *mocks.MockNatsManagerService
 }
 
 func TestProductSuite(t *testing.T) {
@@ -64,6 +66,7 @@ func (s *productSuite) SetupSuite() {
 	s.objectStorage = mocks.NewMockObjectStorage(s.T())
 	s.userRegistry = mocks.NewMockUserRegistry(ctrl)
 	s.passwordGenerator = password.NewMockGenerator(_testPassword, nil)
+	s.natsService = mocks.NewMockNatsManagerService(ctrl)
 
 	userActivity := usecase.NewUserActivityInteractor(
 		s.logger,
@@ -84,6 +87,7 @@ func (s *productSuite) SetupSuite() {
 		ObjectStorage:     s.objectStorage,
 		UserRegistry:      s.userRegistry,
 		PasswordGenerator: s.passwordGenerator,
+		NatsService:       s.natsService,
 	}
 	s.productInteractor = usecase.NewProductInteractor(&productInteractorOpts)
 }
@@ -120,11 +124,13 @@ func (s *productSuite) TestCreateProduct() {
 		CreationDate:  time.Time{},
 		Owner:         user.ID,
 		MinioPassword: _testPassword,
+		KeyValueStore: _testKvStore,
 	}
 
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
 	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Times(1).Return(nil)
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
@@ -241,6 +247,7 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingMeasurementsDatabase() {
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
 	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Times(1).Return(nil)
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
@@ -301,6 +308,7 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingMetricsRepoIndexes() {
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
 	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
@@ -327,6 +335,8 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingProcessLogRepoIndexes() {
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+
 	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
@@ -354,6 +364,8 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingVersionRepoIndexes() {
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+
 	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
@@ -382,6 +394,7 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
 	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
@@ -414,6 +427,7 @@ func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
 		Owner:         user.ID,
 		CreationDate:  time.Time{},
 		MinioPassword: _testPassword,
+		KeyValueStore: _testKvStore,
 	}
 
 	expectedError := errors.New("create product error")
@@ -421,6 +435,8 @@ func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
 	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+
 	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
