@@ -31,8 +31,13 @@ spec:
               value: {{ .Values.keycloak.minio.oidcClient.clientId }}
             - name: KAI_OIDC_MINIO_CLIENT_SECRET
               value: {{ .Values.keycloak.minio.oidcClient.secret }}
+            {{- if .Values.config.tls.enabled }}
             - name: KAI_OIDC_MINIO_CLIENT_CONFIG_URL
               value: {{ $protocol }}://{{ .Values.keycloak.host }}/realms/konstellation/.well-known/openid-configuration"
+            {{- else }}
+            - name: KAI_OIDC_MINIO_CLIENT_CONFIG_URL
+              value: {{ $protocol }}://{{ include "keycloak.fullname" .}}:{{ .Values.keycloak.service.ports.http }}/realms/konstellation/.well-known/openid-configuration"
+            {{- end }}
             - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
