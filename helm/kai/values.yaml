@@ -70,7 +70,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.39
+    tag: 0.2.0-develop.40
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
@@ -123,7 +123,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.39
+    tag: 0.2.0-develop.40
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -338,7 +338,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.39
+    tag: 0.2.0-develop.40
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -610,7 +610,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.39
+    tag: 0.2.0-develop.40
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
@@ -805,7 +805,7 @@ loki-stack:
     # -- Set loki as default datasource
     isDefault: true
     image:
-    # -- Loki version
+      # -- Loki version
       tag: 2.9.2
     persistence:
       # -- Enables persistent storage using PVC
@@ -835,7 +835,7 @@ loki-stack:
     deploymentStrategy:
       type: Recreate
     image:
-    # -- Grafana version
+      # -- Grafana version
       tag: 10.2.0
     # -- Admin user name
     adminUser: admin
