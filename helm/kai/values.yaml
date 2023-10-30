@@ -840,7 +840,8 @@ loki-stack:
     # -- Admin user name
     adminUser: admin
     # -- Set admin password (ommited if existingSecret is set)
-    adminPassword: "123456"
+    # @default -- Randomly generated value
+    adminPassword: ""
     # -- Use an existing secret for the admin user
     admin:
       ## -- Name of the existing secret. (if existingSecret is blank it will not be used)
@@ -874,6 +875,6 @@ loki-stack:
       annotations: {}
       # -- Ingress hostnames
       hosts:
-        - grafana.kai.local
+        - metrics.kai.local
       # -- Ingress TLS configuration
       tls: []

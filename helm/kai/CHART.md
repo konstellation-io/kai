@@ -141,14 +141,14 @@
 | loki-stack.grafana.admin | object | `{"existingSecret":"","passwordKey":"admin-password","userKey":"admin-user"}` | Use an existing secret for the admin user |
 | loki-stack.grafana.admin.passwordKey | string | `"admin-password"` | Name of the key in the secret that contains the password |
 | loki-stack.grafana.admin.userKey | string | `"admin-user"` | Name of the key in the secret that contains the admin user |
-| loki-stack.grafana.adminPassword | string | `"123456"` | Set admin password (ommited if existingSecret is set) |
+| loki-stack.grafana.adminPassword | string | Randomly generated value | Set admin password (ommited if existingSecret is set) |
 | loki-stack.grafana.adminUser | string | `"admin"` | Admin user name |
 | loki-stack.grafana.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
 | loki-stack.grafana.enabled | bool | `true` | Whether to enable Grafana |
 | loki-stack.grafana.image.tag | string | `"10.2.0"` | Grafana version |
 | loki-stack.grafana.ingress.annotations | object | `{}` | Ingress annotations |
 | loki-stack.grafana.ingress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
-| loki-stack.grafana.ingress.hosts | list | `["grafana.kai.local"]` | Ingress hostnames |
+| loki-stack.grafana.ingress.hosts | list | `["metrics.kai.local"]` | Ingress hostnames |
 | loki-stack.grafana.ingress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
 | loki-stack.grafana.ingress.labels | object | `{}` | Ingress labels |
 | loki-stack.grafana.ingress.tls | list | `[]` | Ingress TLS configuration |
