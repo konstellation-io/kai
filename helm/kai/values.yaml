@@ -796,3 +796,85 @@ minio:
       - storage-console.kai.local
     # -- Ingress TLS configuration
     tls: []
+## The following values are only a small set of options. For a full list see
+## the official Loki-stack chart at https://github.com/grafana/helm-charts/blob/main/charts/loki-stack/values.yaml
+##
+loki-stack:
+  ## Loki complete values https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
+  loki:
+    # -- Set loki as default datasource
+    isDefault: true
+    image:
+    # -- Loki version
+      tag: 2.9.2
+    persistence:
+      # -- Enables persistent storage using PVC
+      enabled: false
+      # -- Storage class name
+      # If defined, storageClassName: <storageClass>.
+      # If set to "-", storageClassName: "", which disables dynamic provisioning.
+      # If empty or set to null, no storageClassName spec is
+      # set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack).
+      storageClass: ""
+      # -- Access mode for the volume
+      accessMode: ReadWriteOnce
+      # -- Storage size
+      size: 2Gi
+    service:
+      # -- Service type
+      type: ClusterIP
+      # -- Internal port number for Grafana service
+      port: 3100
+  promtail:
+    enabled: false
+  ## Grafana complete values https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+  grafana:
+    # -- Whether to enable Grafana
+    enabled: true
+    # -- Deployment Strategy
+    deploymentStrategy:
+      type: Recreate
+    image:
+    # -- Grafana version
+      tag: 10.2.0
+    # -- Admin user name
+    adminUser: admin
+    # -- Set admin password (ommited if existingSecret is set)
+    # @default -- Randomly generated value
+    adminPassword: ""
+    # -- Use an existing secret for the admin user
+    admin:
+      ## -- Name of the existing secret. (if existingSecret is blank it will not be used)
+      existingSecret: ""
+      # -- Name of the key in the secret that contains the admin user
+      userKey: admin-user
+      # -- Name of the key in the secret that contains the password
+      passwordKey: admin-password
+    persistence:
+      # -- Enables persistent storage using PVC
+      enabled: false
+      # -- Storage class name
+      storageClass: ""
+      # -- Access mode for the volume
+      accessMode: ReadWriteOnce
+      # -- Storage size
+      size: 1Gi
+    service:
+      # -- Service type
+      type: ClusterIP
+      # -- Internal port number for Grafana service
+      port: 80
+    ingress:
+      # -- Enable ingress for MinIO Web Console
+      enabled: true
+      # -- The name of the ingress class to use
+      ingressClassName: kong
+      # -- Ingress labels
+      labels: {}
+      # -- Ingress annotations
+      annotations: {}
+      # -- Ingress hostnames
+      hosts:
+        - metrics.kai.local
+      # -- Ingress TLS configuration
+      tls: []

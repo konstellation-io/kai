@@ -5,6 +5,7 @@
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.min.io/ | minio | 5.0.14 |
+| https://grafana.github.io/helm-charts/ | loki-stack | 2.9.11 |
 | https://helm.influxdata.com/ | influxdb | 4.8.1 |
 | https://helm.influxdata.com/ | kapacitor | 1.4.6 |
 
@@ -137,6 +138,35 @@
 | keycloak.serviceAccount.create | bool | `true` |  |
 | keycloak.serviceAccount.name | string | `""` |  |
 | keycloak.tolerations | list | `[]` | Assign custom tolerations to the Keycloak pods |
+| loki-stack.grafana.admin | object | `{"existingSecret":"","passwordKey":"admin-password","userKey":"admin-user"}` | Use an existing secret for the admin user |
+| loki-stack.grafana.admin.passwordKey | string | `"admin-password"` | Name of the key in the secret that contains the password |
+| loki-stack.grafana.admin.userKey | string | `"admin-user"` | Name of the key in the secret that contains the admin user |
+| loki-stack.grafana.adminPassword | string | Randomly generated value | Set admin password (ommited if existingSecret is set) |
+| loki-stack.grafana.adminUser | string | `"admin"` | Admin user name |
+| loki-stack.grafana.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
+| loki-stack.grafana.enabled | bool | `true` | Whether to enable Grafana |
+| loki-stack.grafana.image.tag | string | `"10.2.0"` | Grafana version |
+| loki-stack.grafana.ingress.annotations | object | `{}` | Ingress annotations |
+| loki-stack.grafana.ingress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
+| loki-stack.grafana.ingress.hosts | list | `["metrics.kai.local"]` | Ingress hostnames |
+| loki-stack.grafana.ingress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
+| loki-stack.grafana.ingress.labels | object | `{}` | Ingress labels |
+| loki-stack.grafana.ingress.tls | list | `[]` | Ingress TLS configuration |
+| loki-stack.grafana.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
+| loki-stack.grafana.persistence.enabled | bool | `false` | Enables persistent storage using PVC |
+| loki-stack.grafana.persistence.size | string | `"1Gi"` | Storage size |
+| loki-stack.grafana.persistence.storageClass | string | `""` | Storage class name |
+| loki-stack.grafana.service.port | int | `80` | Internal port number for Grafana service |
+| loki-stack.grafana.service.type | string | `"ClusterIP"` | Service type |
+| loki-stack.loki.image.tag | string | `"2.9.2"` | Loki version |
+| loki-stack.loki.isDefault | bool | `true` | Set loki as default datasource |
+| loki-stack.loki.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
+| loki-stack.loki.persistence.enabled | bool | `false` | Enables persistent storage using PVC |
+| loki-stack.loki.persistence.size | string | `"2Gi"` | Storage size |
+| loki-stack.loki.persistence.storageClass | string | `""` | Storage class name If defined, storageClassName: <storageClass>. If set to "-", storageClassName: "", which disables dynamic provisioning. If empty or set to null, no storageClassName spec is set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack). |
+| loki-stack.loki.service.port | int | `3100` | Internal port number for Grafana service |
+| loki-stack.loki.service.type | string | `"ClusterIP"` | Service type |
+| loki-stack.promtail.enabled | bool | `false` |  |
 | minio.consoleIngress.annotations | object | `{}` | Ingress annotations |
 | minio.consoleIngress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
 | minio.consoleIngress.hosts | list | `["storage-console.kai.local"]` | Ingress hostnames |
