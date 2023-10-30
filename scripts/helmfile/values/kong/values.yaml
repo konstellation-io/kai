@@ -12,7 +12,10 @@ env:
     # See https://github.com/revomatico/docker-kong-oidc#session-shm
     x_session_storage: shm
     x_session_secret: c2VjcmV0
-
+    # https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffer_size
+    nginx_proxy_proxy_buffer_size: 160k
+    # https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffers
+    nginx_proxy_proxy_buffers: 32 160k
 proxy:
   type: NodePort
   http:
