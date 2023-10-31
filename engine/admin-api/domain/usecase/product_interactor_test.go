@@ -16,83 +16,83 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
-	"github.com/stretchr/testify/require"
+	"github.com/sethvargo/go-password/password"
+	"github.com/stretchr/testify/suite"
+)
+
+const (
+	_testPassword     = "test-password"
+	_testBucketPolicy = "test-policy"
+	_testKvStore      = "test-kv-store"
 )
 
 type productSuite struct {
+	suite.Suite
+
 	ctrl              *gomock.Controller
 	productInteractor *usecase.ProductInteractor
-	mocks             *productSuiteMocks
+
+	logger            logr.Logger
+	productRepo       *mocks.MockProductRepo
+	measurementRepo   *mocks.MockMeasurementRepo
+	versionRepo       *mocks.MockVersionRepo
+	metricRepo        *mocks.MockMetricRepo
+	processLogRepo    *mocks.MockProcessLogRepository
+	processRepo       *mocks.MockProcessRepository
+	userActivityRepo  *mocks.MockUserActivityRepo
+	accessControl     *mocks.MockAccessControl
+	objectStorage     *mocks.MockObjectStorage
+	userRegistry      *mocks.MockUserRegistry
+	passwordGenerator password.PasswordGenerator
+	natsService       *mocks.MockNatsManagerService
 }
 
-type productSuiteMocks struct {
-	logger           logr.Logger
-	productRepo      *mocks.MockProductRepo
-	measurementRepo  *mocks.MockMeasurementRepo
-	versionRepo      *mocks.MockVersionRepo
-	metricRepo       *mocks.MockMetricRepo
-	processLogRepo   *mocks.MockProcessLogRepository
-	processRepo      *mocks.MockProcessRepository
-	userActivityRepo *mocks.MockUserActivityRepo
-	accessControl    *mocks.MockAccessControl
-	objectStorage    *mocks.MockObjectStorage
+func TestProductSuite(t *testing.T) {
+	suite.Run(t, new(productSuite))
 }
 
-func newProductSuite(t *testing.T) *productSuite {
-	ctrl := gomock.NewController(t)
+func (s *productSuite) SetupSuite() {
+	ctrl := gomock.NewController(s.T())
 
-	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	productRepo := mocks.NewMockProductRepo(ctrl)
-	userActivityRepo := mocks.NewMockUserActivityRepo(ctrl)
-	measurementRepo := mocks.NewMockMeasurementRepo(ctrl)
-	versionRepo := mocks.NewMockVersionRepo(ctrl)
-	metricRepo := mocks.NewMockMetricRepo(ctrl)
-	processLogRepo := mocks.NewMockProcessLogRepository(ctrl)
-	processRepo := mocks.NewMockProcessRepository(ctrl)
-	accessControl := mocks.NewMockAccessControl(ctrl)
-	objectStorage := mocks.NewMockObjectStorage(t)
+	s.logger = testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
+	s.productRepo = mocks.NewMockProductRepo(ctrl)
+	s.userActivityRepo = mocks.NewMockUserActivityRepo(ctrl)
+	s.measurementRepo = mocks.NewMockMeasurementRepo(ctrl)
+	s.versionRepo = mocks.NewMockVersionRepo(ctrl)
+	s.metricRepo = mocks.NewMockMetricRepo(ctrl)
+	s.processLogRepo = mocks.NewMockProcessLogRepository(ctrl)
+	s.processRepo = mocks.NewMockProcessRepository(ctrl)
+	s.accessControl = mocks.NewMockAccessControl(ctrl)
+	s.objectStorage = mocks.NewMockObjectStorage(s.T())
+	s.userRegistry = mocks.NewMockUserRegistry(ctrl)
+	s.passwordGenerator = password.NewMockGenerator(_testPassword, nil)
+	s.natsService = mocks.NewMockNatsManagerService(ctrl)
 
 	userActivity := usecase.NewUserActivityInteractor(
-		logger,
-		userActivityRepo,
-		accessControl,
+		s.logger,
+		s.userActivityRepo,
+		s.accessControl,
 	)
 
-	ps := usecase.ProductInteractorOpts{
-		Logger:          logger,
-		ProductRepo:     productRepo,
-		MeasurementRepo: measurementRepo,
-		VersionRepo:     versionRepo,
-		MetricRepo:      metricRepo,
-		ProcessLogRepo:  processLogRepo,
-		ProcessRepo:     processRepo,
-		UserActivity:    userActivity,
-		AccessControl:   accessControl,
-		ObjectStorage:   objectStorage,
+	productInteractorOpts := usecase.ProductInteractorOpts{
+		Logger:            s.logger,
+		ProductRepo:       s.productRepo,
+		MeasurementRepo:   s.measurementRepo,
+		VersionRepo:       s.versionRepo,
+		MetricRepo:        s.metricRepo,
+		ProcessLogRepo:    s.processLogRepo,
+		ProcessRepo:       s.processRepo,
+		UserActivity:      userActivity,
+		AccessControl:     s.accessControl,
+		ObjectStorage:     s.objectStorage,
+		UserRegistry:      s.userRegistry,
+		PasswordGenerator: s.passwordGenerator,
+		NatsService:       s.natsService,
 	}
-	productInteractor := usecase.NewProductInteractor(&ps)
-
-	return &productSuite{
-		ctrl:              ctrl,
-		productInteractor: productInteractor,
-		mocks: &productSuiteMocks{
-			logger,
-			productRepo,
-			measurementRepo,
-			versionRepo,
-			metricRepo,
-			processLogRepo,
-			processRepo,
-			userActivityRepo,
-			accessControl,
-			objectStorage,
-		},
-	}
+	s.productInteractor = usecase.NewProductInteractor(&productInteractorOpts)
 }
 
-func TestGet(t *testing.T) {
-	s := newProductSuite(t)
-
+func (s *productSuite) TestGet() {
 	productID := "product1"
 	expectedProduct := &entity.Product{
 		ID: productID,
@@ -102,17 +102,15 @@ func TestGet(t *testing.T) {
 
 	ctx := context.Background()
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct)
-	s.mocks.productRepo.EXPECT().Get(ctx).Return(expectedProduct, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct)
+	s.productRepo.EXPECT().Get(ctx).Return(expectedProduct, nil)
 
 	product, err := s.productInteractor.Get(ctx, user, productID)
-	require.Nil(t, err)
-	require.Equal(t, expectedProduct, product)
+	s.Require().Nil(err)
+	s.Require().Equal(expectedProduct, product)
 }
 
-func TestCreateProduct(t *testing.T) {
-	s := newProductSuite(t)
-
+func (s *productSuite) TestCreateProduct() {
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -120,33 +118,37 @@ func TestCreateProduct(t *testing.T) {
 	productName := "test-product"
 	productDescription := "This is a product description"
 	expectedProduct := &entity.Product{
-		ID:           productID,
-		Name:         productName,
-		Description:  productDescription,
-		CreationDate: time.Time{},
-		Owner:        user.ID,
+		ID:            productID,
+		Name:          productName,
+		Description:   productDescription,
+		CreationDate:  time.Time{},
+		Owner:         user.ID,
+		MinioPassword: _testPassword,
+		KeyValueStore: _testKvStore,
 	}
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Times(1).Return(nil)
+	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
+	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
+	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
+	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 
-	require.Nil(t, err)
-	require.Equal(t, expectedProduct, product)
+	s.Require().Nil(err)
+	s.Require().Equal(expectedProduct, product)
 }
 
-func TestCreateProduct_FailsIfUserHasNotPermission(t *testing.T) {
-	s := newProductSuite(t)
-
+func (s *productSuite) TestCreateProduct_FailsIfUserHasNotPermission() {
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -155,16 +157,15 @@ func TestCreateProduct_FailsIfUserHasNotPermission(t *testing.T) {
 
 	grantError := errors.New("grant error")
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(grantError)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(grantError)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 
-	require.Error(t, grantError, err)
-	require.Nil(t, product)
+	s.Require().Error(grantError, err)
+	s.Require().Nil(product)
 }
 
-func TestCreateProduct_FailsIfProductHasAnInvalidField(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_FailsIfProductHasAnInvalidField() {
 
 	ctx := context.Background()
 
@@ -173,16 +174,15 @@ func TestCreateProduct_FailsIfProductHasAnInvalidField(t *testing.T) {
 	productName := "lore ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labores"
 	productDescription := "This is a product description"
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 
-	require.Error(t, err)
-	require.Nil(t, product)
+	s.Require().Error(err)
+	s.Require().Nil(product)
 }
 
-func TestCreateProduct_FailsIfProductWithSameIDAlreadyExists(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_FailsIfProductWithSameIDAlreadyExists() {
 
 	ctx := context.Background()
 
@@ -198,17 +198,16 @@ func TestCreateProduct_FailsIfProductWithSameIDAlreadyExists(t *testing.T) {
 		Description: "existing-product-description",
 	}
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(existingProduct, nil)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(existingProduct, nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 
-	require.Error(t, err)
-	require.Nil(t, product)
+	s.Require().Error(err)
+	s.Require().Nil(product)
 }
 
-func TestCreateProduct_FailsIfProductWithSameNameAlreadyExists(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_FailsIfProductWithSameNameAlreadyExists() {
 
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
@@ -224,18 +223,17 @@ func TestCreateProduct_FailsIfProductWithSameNameAlreadyExists(t *testing.T) {
 		Description: "existing-product-description",
 	}
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(existingProduct, nil)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByName(ctx, productName).Return(existingProduct, nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 
-	require.Error(t, err)
-	require.Nil(t, product)
+	s.Require().Error(err)
+	s.Require().Nil(product)
 }
 
-func TestCreateProduct_ErrorCreatingMeasurementsDatabase(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_ErrorCreatingMeasurementsDatabase() {
 
 	ctx := context.Background()
 
@@ -246,19 +244,22 @@ func TestCreateProduct_ErrorCreatingMeasurementsDatabase(t *testing.T) {
 
 	expectedError := errors.New("error creating database")
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(expectedError)
-	// s.mocks.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Times(1).Return(nil)
+	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
+	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
+	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(expectedError)
+	// s.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	require.ErrorIs(t, err, expectedError)
+	s.Require().ErrorIs(err, expectedError)
 }
 
-func TestCreateProduct_ErrorCheckingProductIDInRepo(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_ErrorCheckingProductIDInRepo() {
 
 	ctx := context.Background()
 
@@ -268,15 +269,14 @@ func TestCreateProduct_ErrorCheckingProductIDInRepo(t *testing.T) {
 	productDescription := "This is a product description"
 	repoError := errors.New("repo error")
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, repoError)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, repoError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	require.ErrorIs(t, err, repoError)
+	s.Require().ErrorIs(err, repoError)
 }
 
-func TestCreateProduct_ErrorCheckingProductNameInRepo(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_ErrorCheckingProductNameInRepo() {
 
 	ctx := context.Background()
 
@@ -286,16 +286,15 @@ func TestCreateProduct_ErrorCheckingProductNameInRepo(t *testing.T) {
 	productDescription := "This is a product description"
 	repoError := errors.New("repo error")
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, repoError)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, repoError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	require.ErrorIs(t, err, repoError)
+	s.Require().ErrorIs(err, repoError)
 }
 
-func TestCreateProduct_ErrorCreatingMetricsRepoIndexes(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_ErrorCreatingMetricsRepoIndexes() {
 
 	ctx := context.Background()
 
@@ -306,19 +305,23 @@ func TestCreateProduct_ErrorCreatingMetricsRepoIndexes(t *testing.T) {
 
 	expectedError := errors.New("error creating collection indexes")
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
+	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
+	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
+	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+
+	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
+	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	require.ErrorIs(t, err, expectedError)
+	s.Require().ErrorIs(err, expectedError)
 }
 
-func TestCreateProduct_ErrorCreatingProcessLogRepoIndexes(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_ErrorCreatingProcessLogRepoIndexes() {
 
 	ctx := context.Background()
 
@@ -329,20 +332,25 @@ func TestCreateProduct_ErrorCreatingProcessLogRepoIndexes(t *testing.T) {
 
 	expectedError := errors.New("error creating collection indexes")
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+
+	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
+	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
+	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
+	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+
+	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
+	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	require.ErrorIs(t, err, expectedError)
+	s.Require().ErrorIs(err, expectedError)
 }
 
-func TestCreateProduct_ErrorCreatingVersionRepoIndexes(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_ErrorCreatingVersionRepoIndexes() {
 
 	ctx := context.Background()
 
@@ -353,21 +361,26 @@ func TestCreateProduct_ErrorCreatingVersionRepoIndexes(t *testing.T) {
 
 	expectedError := errors.New("error creating versions collection indexes")
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+
+	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
+	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
+	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
+	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+
+	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
+	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	require.ErrorIs(t, err, expectedError)
+	s.Require().ErrorIs(err, expectedError)
 }
 
-func TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes() {
 
 	ctx := context.Background()
 
@@ -378,22 +391,26 @@ func TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes(t *testing.T) {
 
 	expectedError := errors.New("error creating versions collection indexes")
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
+	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
+	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
+	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+
+	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
+	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	require.ErrorIs(t, err, expectedError)
+	s.Require().ErrorIs(err, expectedError)
 }
 
-func TestCreateProduct_FailsIfCreateProductFails(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
 
 	ctx := context.Background()
 
@@ -404,32 +421,39 @@ func TestCreateProduct_FailsIfCreateProductFails(t *testing.T) {
 	productDescription := "This is a product description"
 
 	newProduct := &entity.Product{
-		ID:           productID,
-		Name:         productName,
-		Description:  productDescription,
-		Owner:        user.ID,
-		CreationDate: time.Time{},
+		ID:            productID,
+		Name:          productName,
+		Description:   productDescription,
+		Owner:         user.ID,
+		CreationDate:  time.Time{},
+		MinioPassword: _testPassword,
+		KeyValueStore: _testKvStore,
 	}
 
 	expectedError := errors.New("create product error")
 
-	s.mocks.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.mocks.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.mocks.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.mocks.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.mocks.productRepo.EXPECT().Create(ctx, newProduct).Return(nil, expectedError)
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
+
+	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
+	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
+	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
+	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+
+	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
+	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.productRepo.EXPECT().Create(ctx, newProduct).Return(nil, expectedError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	require.ErrorIs(t, err, expectedError)
+	s.Require().ErrorIs(err, expectedError)
 }
 
-func TestGetByID(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestGetByID() {
 
 	ctx := context.Background()
 
@@ -444,17 +468,16 @@ func TestGetByID(t *testing.T) {
 		CreationDate: time.Time{},
 	}
 
-	s.mocks.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct).Return(nil)
-	s.mocks.productRepo.EXPECT().GetByID(ctx, productID).Return(expected, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(expected, nil)
 
 	actual, err := s.productInteractor.GetByID(ctx, user, productID)
 
-	require.Nil(t, err)
-	require.Equal(t, expected, actual)
+	s.Require().Nil(err)
+	s.Require().Equal(expected, actual)
 }
 
-func TestFindAll(t *testing.T) {
-	s := newProductSuite(t)
+func (s *productSuite) TestFindAll() {
 
 	ctx := context.Background()
 
@@ -481,19 +504,17 @@ func TestFindAll(t *testing.T) {
 
 	userProducts := []string{productID}
 
-	s.mocks.accessControl.EXPECT().IsAdmin(user).Return(false)
-	s.mocks.accessControl.EXPECT().GetUserProducts(user).Return(userProducts)
-	s.mocks.productRepo.EXPECT().FindByIDs(ctx, userProducts).Return(expected, nil)
+	s.accessControl.EXPECT().IsAdmin(user).Return(false)
+	s.accessControl.EXPECT().GetUserProducts(user).Return(userProducts)
+	s.productRepo.EXPECT().FindByIDs(ctx, userProducts).Return(expected, nil)
 
 	actual, err := s.productInteractor.FindAll(ctx, user)
 
-	require.Nil(t, err)
-	require.Equal(t, expected, actual)
+	s.Require().Nil(err)
+	s.Require().Equal(expected, actual)
 }
 
-func TestFindAll_AdminUser(t *testing.T) {
-	s := newProductSuite(t)
-
+func (s *productSuite) TestFindAll_AdminUser() {
 	ctx := context.Background()
 
 	productID := "test-product"
@@ -510,11 +531,11 @@ func TestFindAll_AdminUser(t *testing.T) {
 		},
 	}
 
-	s.mocks.accessControl.EXPECT().IsAdmin(user).Return(true)
-	s.mocks.productRepo.EXPECT().FindAll(ctx).Return(expected, nil)
+	s.accessControl.EXPECT().IsAdmin(user).Return(true)
+	s.productRepo.EXPECT().FindAll(ctx).Return(expected, nil)
 
 	actual, err := s.productInteractor.FindAll(ctx, user)
 
-	require.Nil(t, err)
-	require.Equal(t, expected, actual)
+	s.Require().Nil(err)
+	s.Require().Equal(expected, actual)
 }

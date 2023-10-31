@@ -112,22 +112,23 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 
 		versionConfig = s.getConfigForVersion(version)
 
-		workflowStreamCfg = versionConfig.StreamsConfig.Workflows[workflow.Name]
+		workflowStreamCfg = versionConfig.Streams.Workflows[workflow.Name]
 		processStreamCfg  = workflowStreamCfg.Processes[process.Name]
 
-		workflowKVStoreCfg = versionConfig.KeyValueStoresConfig.Workflows[workflow.Name]
+		workflowKVStoreCfg = versionConfig.KeyValueStores.Workflows[workflow.Name]
 		processKVStore     = workflowKVStoreCfg.Processes[process.Name]
 	)
 
 	req := &versionpb.StartRequest{
-		ProductId:     productID,
-		VersionTag:    version.Tag,
-		KeyValueStore: versionConfig.KeyValueStoresConfig.KeyValueStore,
+		ProductId:            productID,
+		VersionTag:           version.Tag,
+		GlobalKeyValueStore:  versionConfig.KeyValueStores.GlobalKeyValueStore,
+		VersionKeyValueStore: versionConfig.KeyValueStores.VersionKeyValueStore,
 		Workflows: []*versionpb.Workflow{
 			{
 				Name:          workflow.Name,
-				Stream:        versionConfig.StreamsConfig.Workflows[workflow.Name].Stream,
-				KeyValueStore: versionConfig.KeyValueStoresConfig.Workflows[workflow.Name].KeyValueStore,
+				Stream:        versionConfig.Streams.Workflows[workflow.Name].Stream,
+				KeyValueStore: versionConfig.KeyValueStores.Workflows[workflow.Name].KeyValueStore,
 				Processes: []*versionpb.Process{
 					{
 						Name:          process.Name,
@@ -227,7 +228,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFoun
 	)
 
 	// override default workflow to empty map
-	versionConfig.StreamsConfig.Workflows = map[string]entity.WorkflowStreamConfig{}
+	versionConfig.Streams.Workflows = map[string]entity.WorkflowStreamResources{}
 
 	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowStreamNotFound)
@@ -253,7 +254,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowKeyValue
 	)
 
 	// override default workflow config to empty map
-	versionConfig.KeyValueStoresConfig.Workflows = entity.WorkflowsKeyValueStoresConfig{}
+	versionConfig.KeyValueStores.Workflows = map[string]*entity.WorkflowKeyValueStores{}
 
 	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowKVStoreNotFound)
@@ -279,7 +280,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowObjectSt
 	)
 
 	// override default workflow config to empty map
-	versionConfig.ObjectStoresConfig.Workflows = map[string]entity.WorkflowObjectStoresConfig{}
+	versionConfig.ObjectStores.Workflows = map[string]entity.WorkflowObjectStoresConfig{}
 
 	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowObjectStoreNotFound)
@@ -305,7 +306,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_ProcessStreamNotFo
 	)
 
 	// override default workflow config to empty map
-	versionConfig.StreamsConfig.Workflows[workflow.Name] = entity.WorkflowStreamConfig{
+	versionConfig.Streams.Workflows[workflow.Name] = entity.WorkflowStreamResources{
 		Stream:    "stream",
 		Processes: map[string]entity.ProcessStreamConfig{},
 	}
@@ -314,14 +315,14 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_ProcessStreamNotFo
 	s.Assert().ErrorIs(err, entity.ErrProcessStreamNotFound)
 }
 
-func (s *StartVersionTestSuite) getConfigForVersion(version *entity.Version) *entity.VersionConfig {
+func (s *StartVersionTestSuite) getConfigForVersion(version *entity.Version) *entity.VersionStreamingResources {
 	var (
 		workflow = version.Workflows[0]
 		process  = version.Workflows[0].Processes[0]
 	)
 
-	streamConfig := &entity.VersionStreamsConfig{
-		Workflows: map[string]entity.WorkflowStreamConfig{
+	streamConfig := &entity.VersionStreams{
+		Workflows: map[string]entity.WorkflowStreamResources{
 			workflow.Name: {
 				Stream: "test-stream",
 				Processes: map[string]entity.ProcessStreamConfig{
@@ -334,7 +335,7 @@ func (s *StartVersionTestSuite) getConfigForVersion(version *entity.Version) *en
 		},
 	}
 
-	objectStoreConfig := &entity.VersionObjectStoresConfig{
+	objectStoreConfig := &entity.VersionObjectStores{
 		Workflows: map[string]entity.WorkflowObjectStoresConfig{
 			workflow.Name: {
 				Processes: map[string]string{
@@ -344,8 +345,8 @@ func (s *StartVersionTestSuite) getConfigForVersion(version *entity.Version) *en
 		},
 	}
 
-	keyValueStoresConfig := &entity.KeyValueStoresConfig{
-		KeyValueStore: "test-product-kv-store",
+	keyValueStoresConfig := &entity.KeyValueStores{
+		VersionKeyValueStore: "test-product-kv-store",
 		Workflows: map[string]*entity.WorkflowKeyValueStores{
 			workflow.Name: {
 				KeyValueStore: "test-workflow-kv-store",
@@ -356,9 +357,9 @@ func (s *StartVersionTestSuite) getConfigForVersion(version *entity.Version) *en
 		},
 	}
 
-	return &entity.VersionConfig{
-		StreamsConfig:        streamConfig,
-		ObjectStoresConfig:   objectStoreConfig,
-		KeyValueStoresConfig: keyValueStoresConfig,
+	return &entity.VersionStreamingResources{
+		Streams:        streamConfig,
+		ObjectStores:   objectStoreConfig,
+		KeyValueStores: keyValueStoresConfig,
 	}
 }

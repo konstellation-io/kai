@@ -10,7 +10,9 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/sethvargo/go-password/password"
 )
 
 var (
@@ -24,29 +26,35 @@ var (
 
 // ProductInteractor contains app logic to handle Product entities.
 type ProductInteractor struct {
-	logger          logr.Logger
-	productRepo     repository.ProductRepo
-	measurementRepo repository.MeasurementRepo
-	versionRepo     repository.VersionRepo
-	metricRepo      repository.MetricRepo
-	processLogRepo  repository.ProcessLogRepository
-	processRepo     repository.ProcessRepository
-	userActivity    UserActivityInteracter
-	accessControl   auth.AccessControl
-	objectStorage   repository.ObjectStorage
+	logger            logr.Logger
+	productRepo       repository.ProductRepo
+	measurementRepo   repository.MeasurementRepo
+	versionRepo       repository.VersionRepo
+	metricRepo        repository.MetricRepo
+	processLogRepo    repository.ProcessLogRepository
+	processRepo       repository.ProcessRepository
+	userActivity      UserActivityInteracter
+	accessControl     auth.AccessControl
+	objectStorage     repository.ObjectStorage
+	natsService       service.NatsManagerService
+	userRegistry      service.UserRegistry
+	passwordGenerator password.PasswordGenerator
 }
 
 type ProductInteractorOpts struct {
-	Logger          logr.Logger
-	ProductRepo     repository.ProductRepo
-	MeasurementRepo repository.MeasurementRepo
-	VersionRepo     repository.VersionRepo
-	MetricRepo      repository.MetricRepo
-	ProcessLogRepo  repository.ProcessLogRepository
-	ProcessRepo     repository.ProcessRepository
-	UserActivity    UserActivityInteracter
-	AccessControl   auth.AccessControl
-	ObjectStorage   repository.ObjectStorage
+	Logger            logr.Logger
+	ProductRepo       repository.ProductRepo
+	MeasurementRepo   repository.MeasurementRepo
+	VersionRepo       repository.VersionRepo
+	MetricRepo        repository.MetricRepo
+	ProcessLogRepo    repository.ProcessLogRepository
+	ProcessRepo       repository.ProcessRepository
+	UserActivity      UserActivityInteracter
+	AccessControl     auth.AccessControl
+	ObjectStorage     repository.ObjectStorage
+	NatsService       service.NatsManagerService
+	UserRegistry      service.UserRegistry
+	PasswordGenerator password.PasswordGenerator
 }
 
 // NewProductInteractor creates a new ProductInteractor.
@@ -62,6 +70,9 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.UserActivity,
 		ps.AccessControl,
 		ps.ObjectStorage,
+		ps.NatsService,
+		ps.UserRegistry,
+		ps.PasswordGenerator,
 	}
 }
 
@@ -112,10 +123,36 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
+	globalKeyValueStore, err := i.natsService.CreateGlobalKeyValueStore(ctx, productID)
+	if err != nil {
+		return nil, fmt.Errorf("creating global key-value store: %w", err)
+	}
+
+	newProduct.KeyValueStore = globalKeyValueStore
+
 	err = i.objectStorage.CreateBucket(ctx, productID)
 	if err != nil {
-		return nil, fmt.Errorf("creating s3 bucket: %w", err)
+		return nil, fmt.Errorf("creating object storage bucket: %w", err)
 	}
+
+	policyName, err := i.objectStorage.CreateBucketPolicy(ctx, productID)
+	if err != nil {
+		return nil, fmt.Errorf("creating object storage policy: %w", err)
+	}
+
+	err = i.userRegistry.CreateGroupWithPolicy(ctx, productID, policyName)
+	if err != nil {
+		return nil, err
+	}
+
+	passwd := i.passwordGenerator.MustGenerate(32, 8, 8, true, true)
+
+	err = i.userRegistry.CreateUserWithinGroup(ctx, productID, passwd, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	newProduct.MinioPassword = passwd
 
 	err = i.measurementRepo.CreateDatabase(newProduct.Name)
 	if err != nil {

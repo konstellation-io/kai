@@ -3,11 +3,11 @@
 package service_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/service"
@@ -57,7 +57,6 @@ var (
 
 type NatsServiceTestSuite struct {
 	suite.Suite
-	cfg             *config.Config
 	logger          logging.Logger
 	natsManagerMock *mocks.MockNatsManager
 	natsService     *service.NatsService
@@ -69,15 +68,13 @@ func TestNatsServiceTestSuite(t *testing.T) {
 
 func (s *NatsServiceTestSuite) SetupSuite() {
 	mockController := gomock.NewController(s.T())
-	cfg := &config.Config{}
 	logger := mocks.NewMockLogger(mockController)
 	mocks.AddLoggerExpects(logger)
 
 	s.natsManagerMock = mocks.NewMockNatsManager(mockController)
 
-	s.natsService = service.NewNatsService(cfg, logger, s.natsManagerMock)
+	s.natsService = service.NewNatsService(logger, s.natsManagerMock)
 
-	s.cfg = cfg
 	s.logger = logger
 }
 
@@ -195,8 +192,8 @@ func (s *NatsServiceTestSuite) TestDeleteObjectStores() {
 	s.NotEmpty(clientResponse.Message)
 }
 
-func (s *NatsServiceTestSuite) TestCreateKeyValueStores() {
-	req := &natspb.CreateKeyValueStoresRequest{
+func (s *NatsServiceTestSuite) TestCreateVersionKeyValueStores() {
+	req := &natspb.CreateVersionKeyValueStoresRequest{
 		ProductId:  productID,
 		VersionTag: versionTag,
 		Workflows:  protoWorkflows,
@@ -220,7 +217,7 @@ func (s *NatsServiceTestSuite) TestCreateKeyValueStores() {
 		},
 	}
 
-	expectedClientResponse := &natspb.CreateKeyValueStoreResponse{
+	expectedClientResponse := &natspb.CreateVersionKeyValueStoresResponse{
 		KeyValueStore: testProjectStore,
 		Workflows: map[string]*natspb.WorkflowKeyValueStoreConfig{
 			req.Workflows[0].Name: {
@@ -233,10 +230,10 @@ func (s *NatsServiceTestSuite) TestCreateKeyValueStores() {
 	}
 
 	s.natsManagerMock.EXPECT().
-		CreateKeyValueStores(req.ProductId, req.VersionTag, expectedEntityWorkflows).
+		CreateVersionKeyValueStores(req.ProductId, req.VersionTag, expectedEntityWorkflows).
 		Return(managerResponse, nil)
 
-	clientResponse, err := s.natsService.CreateKeyValueStores(nil, req)
+	clientResponse, err := s.natsService.CreateVersionKeyValueStores(nil, req)
 	s.Require().NoError(err)
 	s.Equal(expectedClientResponse, clientResponse)
 }
@@ -285,13 +282,87 @@ func (s *NatsServiceTestSuite) TestDeleteObjectStoresError() {
 	s.Require().Error(err)
 }
 
-func (s *NatsServiceTestSuite) TestCreateKeyValueStoresError() {
-	req := &natspb.CreateKeyValueStoresRequest{}
+func (s *NatsServiceTestSuite) TestCreateVersionKeyValueStoresError() {
+	req := &natspb.CreateVersionKeyValueStoresRequest{}
 
 	s.natsManagerMock.EXPECT().
-		CreateKeyValueStores(gomock.Any(), gomock.Any(), gomock.Any()).
+		CreateVersionKeyValueStores(gomock.Any(), gomock.Any(), gomock.Any()).
 		Return(nil, errors.New("mock error"))
 
-	_, err := s.natsService.CreateKeyValueStores(nil, req)
+	_, err := s.natsService.CreateVersionKeyValueStores(nil, req)
 	s.Require().Error(err)
+}
+
+func (s *NatsServiceTestSuite) TestCreateGlobalKeyValueStores() {
+	ctx := context.Background()
+	req := &natspb.CreateGlobalKeyValueStoreRequest{
+		ProductId: productID,
+	}
+	expectedKVStore := "globalKVStore"
+
+	s.natsManagerMock.EXPECT().
+		CreateGlobalKeyValueStore(productID).
+		Return(expectedKVStore, nil)
+
+	res, err := s.natsService.CreateGlobalKeyValueStore(ctx, req)
+	s.Require().NoError(err)
+	s.Assert().Equal(res.GlobalKeyValueStore, expectedKVStore)
+}
+
+func (s *NatsServiceTestSuite) TestCreateGlobalKeyValueStores_Error() {
+	ctx := context.Background()
+	req := &natspb.CreateGlobalKeyValueStoreRequest{
+		ProductId: productID,
+	}
+	expectedError := errors.New("nats manager error")
+
+	s.natsManagerMock.EXPECT().
+		CreateGlobalKeyValueStore(productID).
+		Return("", expectedError)
+
+	_, err := s.natsService.CreateGlobalKeyValueStore(ctx, req)
+	s.Require().ErrorIs(err, expectedError)
+}
+
+func (s *NatsServiceTestSuite) TestUpdateKeyValueConfiguration() {
+	ctx := context.Background()
+	kvStore := "kvStore"
+	configuration := map[string]string{
+		"key1": "val1",
+	}
+	req := &natspb.UpdateKeyValueConfigurationRequest{
+		KeyValueStoresConfig: []*natspb.KeyValueConfiguration{
+			{
+				KeyValueStore: kvStore,
+				Configuration: configuration,
+			},
+		},
+	}
+
+	s.natsManagerMock.EXPECT().UpdateKeyValueStoresConfiguration([]entity.KeyValueConfiguration{
+		{
+			KeyValueStore: kvStore,
+			Configuration: configuration,
+		},
+	}).Return(nil)
+
+	_, err := s.natsService.UpdateKeyValueConfiguration(ctx, req)
+	s.Require().NoError(err)
+}
+
+func (s *NatsServiceTestSuite) TestUpdateKeyValueConfiguration_Error() {
+	ctx := context.Background()
+	req := &natspb.UpdateKeyValueConfigurationRequest{
+		KeyValueStoresConfig: []*natspb.KeyValueConfiguration{
+			{
+				KeyValueStore: "kvStore",
+			},
+		},
+	}
+	expectedError := errors.New("nats manager error")
+
+	s.natsManagerMock.EXPECT().UpdateKeyValueStoresConfiguration(gomock.Any()).Return(expectedError)
+
+	_, err := s.natsService.UpdateKeyValueConfiguration(ctx, req)
+	s.Require().ErrorIs(err, expectedError)
 }

@@ -6,6 +6,7 @@ import "context"
 
 type ObjectStorage interface {
 	CreateBucket(ctx context.Context, bucket string) error
+	CreateBucketPolicy(ctx context.Context, bucket string) (string, error)
 	UploadImageSources(ctx context.Context, product, image string, sources []byte) error
 	DeleteImageSources(ctx context.Context, product, image string) error
 }

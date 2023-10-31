@@ -1,0 +1,4 @@
+development_mode: true
+nats_manager_port: 50051
+nats_url: localhost:4222
+object_store_default_ttl: 5

@@ -22,8 +22,10 @@ show_etchost_help() {
 update_etc_hosts() {
   MINIKUBE_IP=$(minikube ip -p "$MINIKUBE_PROFILE")
   echo "$MINIKUBE_IP api.kai.local
+$MINIKUBE_IP metrics.kai.local
 $MINIKUBE_IP auth.kai.local
-$MINIKUBE_IP s3.kai.local
+$MINIKUBE_IP storage.kai.local
+$MINIKUBE_IP storage-console.kai.local
 $MINIKUBE_IP registry.kai.local
 " > /tmp/kai.hostctl
 
@@ -46,7 +48,10 @@ show_etc_hosts() {
   echo_info "👇 Add the following lines to your /etc/hosts"
   echo
   echo "$INGRESS_IP api.kai.local"
+  echo "$INGRESS_IP metrics.kai.local"
   echo "$INGRESS_IP auth.kai.local"
-  echo "$INGRESS_IP s3.kai.local"
+  echo "$INGRESS_IP storage.kai.local"
+  echo "$INGRESS_IP storage-console.kai.local"
+  echo "$INGRESS_IP registry.kai.local"
   echo
 }

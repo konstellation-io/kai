@@ -42,7 +42,7 @@ func (k *K8sVersionService) Start(
 	ctx context.Context,
 	productID string,
 	version *entity.Version,
-	versionConfig *entity.VersionConfig,
+	versionConfig *entity.VersionStreamingResources,
 ) error {
 	wf, err := mapWorkflowsToDTO(version.Workflows, versionConfig)
 	if err != nil {
@@ -50,10 +50,11 @@ func (k *K8sVersionService) Start(
 	}
 
 	req := versionpb.StartRequest{
-		ProductId:     productID,
-		VersionTag:    version.Tag,
-		Workflows:     wf,
-		KeyValueStore: versionConfig.KeyValueStoresConfig.KeyValueStore,
+		ProductId:            productID,
+		VersionTag:           version.Tag,
+		Workflows:            wf,
+		GlobalKeyValueStore:  versionConfig.KeyValueStores.GlobalKeyValueStore,
+		VersionKeyValueStore: versionConfig.KeyValueStores.VersionKeyValueStore,
 	}
 
 	_, err = k.client.Start(ctx, &req)

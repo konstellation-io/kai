@@ -26,3 +26,8 @@ func (wb *WorkflowBuilder) WithProcesses(processes []entity.Process) *WorkflowBu
 	wb.workflow.Processes = processes
 	return wb
 }
+
+func (wb *WorkflowBuilder) WithConfig(config []entity.ConfigurationVariable) *WorkflowBuilder {
+	wb.workflow.Config = config
+	return wb
+}

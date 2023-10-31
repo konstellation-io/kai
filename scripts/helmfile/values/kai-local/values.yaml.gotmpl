@@ -1,7 +1,5 @@
 developmentMode: {{ requiredEnv "DEVELOPMENT_MODE" }}
 config:
-  admin:
-    apiHost: {{ requiredEnv "KRE_ADMIN_API_HOST" | quote }}
   mongodb:
     connectionString:
       secretName: mongodb-database-kai-connection-string
@@ -12,7 +10,7 @@ mongoExpress:
     secretKey: connectionString.standard
 kapacitor:
   enabled: true
-  influxURL: {{ requiredEnv "KRE_INFLUX_URL" | quote }}
+  influxURL: {{ requiredEnv "KAI_INFLUX_URL" | quote }}
 nats:
   limits:
     maxPayload: 8MB
@@ -35,6 +33,9 @@ keycloak:
   kong:
     oidcClient:
       secret: "Xtdi7NZ3Ny98N74vpqV59dillSrGnHpX"
+  minio:
+    oidcClient:
+      secret: "juujMJXmpnmr8jCUprAAb74Ce8wghrdf"
 adminApi:
   image:
     tag: latest
@@ -48,6 +49,8 @@ mongoWriter:
   image:
     tag: latest
 minio:
-  enabled: true
   persistence:
     size: 10Gi
+registry:
+  storage:
+    storageClass: "standard"

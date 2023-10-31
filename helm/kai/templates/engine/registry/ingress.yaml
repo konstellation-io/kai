@@ -13,27 +13,20 @@ spec:
   {{- if .Values.registry.ingress.className }}
   ingressClassName: {{ .Values.registry.ingress.className }}
   {{- end }}
-  {{- if .Values.registry.tls.enabled }}
+  {{- if .Values.config.tls.enabled }}
   tls:
     - hosts:
         - {{ .Values.registry.host }}
-      secretName: {{ .Values.registry.host }}-tls
+      secretName: {{ .Values.config.tls.certSecretName }}
   {{- end }}
   rules:
     - host: {{ .Values.registry.host }}
       http:
         paths:
           - path: "/"
-            {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
             pathType: Prefix
-            {{- end }}
             backend:
-              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
                 name: {{ include "registry.fullname" . }}
                 port:
                   name: http
-              {{- else }}
-              serviceName: {{ include "registry.fullname" . }}
-              servicePort: http
-              {{- end }}
