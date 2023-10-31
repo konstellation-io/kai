@@ -69,9 +69,9 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(ImageRegistryInsecureKey, "REGISTRY_INSECURE")
 	viper.RegisterAlias(ImageBuilderImageKey, "IMAGE_BUILDER_IMAGE")
 
-	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT")
-	viper.RegisterAlias(MinioAccessKeyIDKey, "MINIO_ACCESS_KEY_ID")
-	viper.RegisterAlias(MinioAccessKeySecretKey, "MINIO_ACCESS_KEY_SECRET")
+	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT_URL")
+	viper.RegisterAlias(MinioAccessKeyIDKey, "MINIO_ROOT_USER")
+	viper.RegisterAlias(MinioAccessKeySecretKey, "MINIO_ROOT_PASSWORD")
 	viper.RegisterAlias(MinioRegionKey, "MINIO_REGION")
 
 	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_ENABLED")
@@ -99,6 +99,7 @@ func setDefaultValues() {
 
 	viper.SetDefault(ImageBuilderImageKey, "gcr.io/kaniko-project/executor:latest")
 	viper.SetDefault(ImageBuilderLogLevel, "error")
+	viper.SetDefault(MinioRegionKey, "us-east-1")
 
 	viper.SetDefault("kubernetes.isInsideCluster", true)
 	viper.SetDefault(KubeNamespaceKey, "kai")

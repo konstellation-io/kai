@@ -149,7 +149,7 @@ func (ps *ProcessService) uploadProcessToRegistry(
 		}
 	}()
 
-	_, err = ps.versionService.RegisterProcess(ctx, registeredProcess.ID, registeredProcess.Image, compressedFile)
+	_, err = ps.versionService.RegisterProcess(ctx, product, registeredProcess.ID, registeredProcess.Image)
 	if err != nil {
 		ps.uploadingProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("registering process: %w", err))
 		return

@@ -28,6 +28,7 @@ const (
 	_namespace    = "test"
 	_registryHost = "test.local"
 	_imageName    = "test-image:v1.0.0"
+	_product      = "test"
 )
 
 var (
@@ -52,7 +53,7 @@ func TestBuildImage_SucceedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, _expectedImageRef, []byte{})
+		imageRef, err := imageBuilder.BuildImage(ctx, _product, _imageName, _expectedImageRef)
 		require.NoError(t, err)
 		assert.Equal(t, _expectedImageRef, imageRef)
 		wg.Done()
@@ -102,7 +103,7 @@ func TestBuildImage_FailedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		_, err := imageBuilder.BuildImage(ctx, _imageName, _expectedImageRef, []byte{})
+		_, err := imageBuilder.BuildImage(ctx, _product, _imageName, _expectedImageRef)
 		require.ErrorIs(t, err, registry.ErrFailedImageBuild)
 		wg.Done()
 	}()
@@ -151,7 +152,7 @@ func TestBuildImage_UnknownEvent(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		imageRef, err := imageBuilder.BuildImage(ctx, _imageName, _expectedImageRef, []byte{})
+		imageRef, err := imageBuilder.BuildImage(ctx, _product, _imageName, _expectedImageRef)
 		require.NoError(t, err)
 		assert.Equal(t, _expectedImageRef, imageRef)
 		wg.Done()
@@ -198,7 +199,7 @@ func TestBuildImage_DeletedJob(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		_, err := imageBuilder.BuildImage(ctx, _imageName, _expectedImageRef, []byte{})
+		_, err := imageBuilder.BuildImage(ctx, _product, _imageName, _expectedImageRef)
 		require.ErrorIs(t, err, registry.ErrErrorEvent)
 		wg.Done()
 	}()

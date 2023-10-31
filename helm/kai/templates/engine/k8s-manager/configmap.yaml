@@ -25,3 +25,4 @@ data:
   KAI_REGISTRY_AUTH_SECRET_NAME: "{{ include "registry.auth.secretName" . }}"
   KAI_REGISTRY_INSECURE: "{{ not .Values.config.tls.enabled }}"
   KAI_MINIO_ENDPOINT_URL: "{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
+  KAI_MINIO_REGION: {{ include "minio-config.region" . }}

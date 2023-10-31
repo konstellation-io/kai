@@ -31,7 +31,6 @@ const (
 
 	//nolint:gosec // False positive
 	_registryAuthSecretVolume = "registry-auth-secret"
-	_configVolumeName         = "config"
 )
 
 var (
@@ -55,10 +54,10 @@ func NewKanikoImageBuilder(logger logr.Logger, client kubernetes.Interface) *Kan
 	}
 }
 
-func (ib *KanikoImageBuilder) BuildImage(ctx context.Context, processID, processImage string, sources []byte) (string, error) {
+func (ib *KanikoImageBuilder) BuildImage(ctx context.Context, productID, processID, processImage string) (string, error) {
 	jobName := ib.getJobNameForImage(processID)
 
-	job := ib.getImageBuilderJob(jobName, processImage)
+	job := ib.getImageBuilderJob(productID, jobName, processImage)
 
 	_, err := ib.client.BatchV1().Jobs(ib.namespace).Create(ctx, job, metav1.CreateOptions{})
 	if err != nil {
@@ -90,7 +89,7 @@ func (ib *KanikoImageBuilder) getJobNameForImage(imageName string) string {
 	return fmt.Sprintf("image-builder-%s", normalizedImageName)
 }
 
-func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination string) *batchv1.Job {
+func (ib *KanikoImageBuilder) getImageBuilderJob(productID, jobName, imageWithDestination string) *batchv1.Job {
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: jobName,
@@ -109,7 +108,7 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination s
 							Image:   viper.GetString(config.ImageBuilderImageKey),
 							Command: nil,
 							Args: []string{
-								fmt.Sprintf("--context=s3://%s/%s", "demo", imageWithDestination),
+								fmt.Sprintf("--context=s3://%s/%s", productID, imageWithDestination),
 								fmt.Sprintf("--insecure=%s", viper.GetString(config.ImageRegistryInsecureKey)),
 								fmt.Sprintf("--verbosity=%s", viper.GetString(config.ImageBuilderLogLevel)),
 								fmt.Sprintf("--destination=%s", imageWithDestination),
@@ -117,7 +116,7 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination s
 							Env: []corev1.EnvVar{
 								{
 									Name:  "S3_ENDPOINT",
-									Value: viper.GetString(config.MinioEndpointKey),
+									Value: "http://" + viper.GetString(config.MinioEndpointKey),
 								},
 								{
 									Name:  "AWS_ACCESS_KEY_ID",
@@ -137,10 +136,6 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination s
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      _configVolumeName,
-									MountPath: "/sources",
-								},
 								{
 									Name:      _registryAuthSecretVolume,
 									MountPath: "/kaniko/.docker",

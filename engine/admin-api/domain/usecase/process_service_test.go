@@ -131,7 +131,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	s.processRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
 	s.objectStorage.EXPECT().UploadImageSources(ctx, productID, expectedRegisteredProcess.Image, expectedBytes).Return(nil)
 
-	s.versionService.EXPECT().RegisterProcess(gomock.Any(), expectedRegisteredProcess.ID, expectedRegisteredProcess.Image, expectedBytes).Return("", nil)
+	s.versionService.EXPECT().RegisterProcess(gomock.Any(), productID, expectedRegisteredProcess.ID, expectedRegisteredProcess.Image).Return("", nil)
 	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(nil)
 	s.objectStorage.EXPECT().DeleteImageSources(ctx, productID, expectedRegisteredProcess.Image).Return(nil)
 
@@ -180,7 +180,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_OverrideLatest() {
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(existingProcess, nil)
 	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcher).Return(nil)
 	s.objectStorage.EXPECT().UploadImageSources(ctx, productID, expectedRegisteredProcess.Image, expectedBytes).Return(nil)
-	s.versionService.EXPECT().RegisterProcess(gomock.Any(), expectedRegisteredProcess.ID, expectedRegisteredProcess.Image, expectedBytes).Return("", nil)
+	s.versionService.EXPECT().RegisterProcess(gomock.Any(), productID, expectedRegisteredProcess.ID, expectedRegisteredProcess.Image).Return("", nil)
 	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(nil)
 	s.objectStorage.EXPECT().DeleteImageSources(ctx, productID, expectedRegisteredProcess.Image).Return(nil)
 
@@ -215,7 +215,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFa
 	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(alreadyRegisteredProcess, nil)
 	s.processRepo.EXPECT().Update(ctx, productID, customMatcherCreating).Return(nil).Times(1)
 	s.objectStorage.EXPECT().UploadImageSources(ctx, productID, alreadyRegisteredProcess.Image, expectedBytes).Return(nil)
-	s.versionService.EXPECT().RegisterProcess(gomock.Any(), alreadyRegisteredProcess.ID, alreadyRegisteredProcess.Image, expectedBytes).Return("", nil)
+	s.versionService.EXPECT().RegisterProcess(gomock.Any(), productID, alreadyRegisteredProcess.ID, alreadyRegisteredProcess.Image).Return("", nil)
 	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(nil).Times(1)
 	s.objectStorage.EXPECT().DeleteImageSources(ctx, productID, alreadyRegisteredProcess.Image).Return(nil)
 
@@ -321,8 +321,6 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
 
 	testFile, err := os.Open(testFileAddr)
 	s.Require().NoError(err)
-	expectedBytes, err := os.ReadFile(testFileAddr)
-	s.Require().NoError(err)
 
 	expectedRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
 	customMatcher := newRegisteredProcessMatcher(expectedRegisteredProcess)
@@ -334,7 +332,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, usecase.ErrRegisteredProcessNotFound)
 	s.processRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
 	s.versionService.EXPECT().
-		RegisterProcess(gomock.Any(), expectedRegisteredProcess.ID, expectedRegisteredProcess.Image, expectedBytes).
+		RegisterProcess(gomock.Any(), productID, expectedRegisteredProcess.ID, expectedRegisteredProcess.Image).
 		Return("", fmt.Errorf("mocked error"))
 	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(nil)
 
@@ -372,8 +370,6 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_UpdateError() {
 
 	testFile, err := os.Open(testFileAddr)
 	s.Require().NoError(err)
-	expectedBytes, err := os.ReadFile(testFileAddr)
-	s.Require().NoError(err)
 
 	expectedRegisteredProcess := s.getTestProcess(entity.RegisterProcessStatusCreating)
 	customMatcher := newRegisteredProcessMatcher(expectedRegisteredProcess)
@@ -383,7 +379,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_UpdateError() {
 
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, usecase.ErrRegisteredProcessNotFound)
 	s.processRepo.EXPECT().Create(productID, customMatcher).Return(nil, nil)
-	s.versionService.EXPECT().RegisterProcess(gomock.Any(), expectedRegisteredProcess.ID, expectedRegisteredProcess.Image, expectedBytes).Return("", nil)
+	s.versionService.EXPECT().RegisterProcess(gomock.Any(), productID, expectedRegisteredProcess.ID, expectedRegisteredProcess.Image).Return("", nil)
 	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(fmt.Errorf("listen to Death Grips"))
 
 	returnedProcess, notifyCh, err := s.processService.RegisterProcess(
