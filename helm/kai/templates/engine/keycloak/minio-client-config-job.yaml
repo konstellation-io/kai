@@ -25,9 +25,7 @@ spec:
           imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
           env:
             - name: KEYCLOAK_URL
-              value: "http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}"
-            - name: KEYCLOAK_HC_ENDPOINT
-              value: http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}{{ .Values.keycloak.livinessProbe.httpGet.path }}
+              value: http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}
             - name: KEYCLOAK_REALM
               value: {{ .Values.keycloak.realmName }}
             - name: CLIENT_NAME
