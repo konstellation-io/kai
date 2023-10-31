@@ -95,12 +95,11 @@ func (mr *MockVersionRepoMockRecorder) ListVersionsByProduct(ctx, productID inte
 }
 
 // SetError mocks base method.
-func (m *MockVersionRepo) SetError(ctx context.Context, productID string, version *entity.Version, errorMessage string) (*entity.Version, error) {
+func (m *MockVersionRepo) SetError(ctx context.Context, productID string, version *entity.Version, errorMessage string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetError", ctx, productID, version, errorMessage)
-	ret0, _ := ret[0].(*entity.Version)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // SetError indicates an expected call of SetError.

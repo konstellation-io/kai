@@ -7,6 +7,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/pkg/compensator"
 	"github.com/spf13/viper"
 )
 
@@ -17,57 +18,117 @@ func (h *Handler) Start(
 	productID,
 	versionTag,
 	comment string,
-) (*entity.Version, chan *entity.Version, error) {
+) (*entity.Version, chan bool, error) {
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
-		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.Email, productID, v, ErrUserNotAuthorized, StartAction)
-
 		return nil, nil, err
 	}
 
 	h.logger.Info("Starting version", "userEmail", user.Email, "versionTag", versionTag, "productID", productID)
 
-	vers, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
-	if err != nil {
-		v := &entity.Version{Tag: versionTag}
-		h.registerActionFailed(user.Email, productID, v, ErrVersionNotFound, StartAction)
+	compensations := compensator.New()
 
+	product, err := h.productRepo.GetByID(ctx, productID)
+	if err != nil {
 		return nil, nil, err
 	}
 
-	if !vers.CanBeStarted() {
-		h.registerActionFailed(user.Email, productID, vers, ErrVersionCannotBeStarted, StartAction)
+	version, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if !version.CanBeStarted() {
 		return nil, nil, ErrVersionCannotBeStarted
 	}
 
-	versionCfg, err := h.createStreamingResources(ctx, productID, vers)
+	version.Status = entity.VersionStatusStarting
+	err = h.versionRepo.SetStatus(ctx, productID, version.Tag, entity.VersionStatusStarting)
 	if err != nil {
-		h.registerActionFailed(user.Email, productID, vers, ErrCreatingNATSResources, StartAction)
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("setting version status to %q: %w", entity.VersionStatusStarting, err)
 	}
 
-	err = h.updateKeyValueConfigurations(ctx, vers, versionCfg)
+	doneCh := make(chan bool, 1)
+
+	go func() {
+		defer func() {
+			fmt.Println("here")
+			doneCh <- true
+		}()
+
+		err = h.createVersionResources(ctx, product, version, compensations)
+		if err != nil {
+			h.handleStartVersionError(ctx, productID, version, err, compensations)
+			return
+		}
+
+		err = h.userActivityInteractor.RegisterStartAction(user.Email, productID, version, comment)
+		if err != nil {
+			h.logger.Error(err, "Error registering user activity",
+				"productID", productID,
+				"versionTag", version.Tag,
+				"comment", comment,
+			)
+
+			return
+		}
+	}()
+
+	return version, doneCh, nil
+}
+
+func (h *Handler) createVersionResources(
+	ctx context.Context,
+	product *entity.Product,
+	version *entity.Version,
+	compensations *compensator.Compensator,
+) error {
+	ctx, cancel := context.WithTimeout(ctx, viper.GetDuration(config.VersionStatusTimeoutKey))
+	defer cancel()
+
+	versionStreamCfg, err := h.natsManagerService.CreateStreams(ctx, product.ID, version)
 	if err != nil {
-		return nil, nil, err
+		return fmt.Errorf("error creating streams for version %q: %w", version.Tag, err)
 	}
 
-	vers.Status = entity.VersionStatusStarting
+	compensations.AddCompensation(h.deleteStreamFunc(ctx, product.ID, version))
 
-	err = h.versionRepo.SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting)
+	objectStoreCfg, err := h.natsManagerService.CreateObjectStores(ctx, product.ID, version)
 	if err != nil {
-		h.logger.Error(err, "Error updating version status",
-			"productID", productID,
-			"versionTag", vers.Tag,
-			"previousStatus", vers.Status,
-			"newStatus", entity.VersionStatusStarting,
-		)
+		return fmt.Errorf("error creating objects stores for version %q: %w", version.Tag, err)
 	}
 
-	notifyStatusCh := make(chan *entity.Version, 1)
+	compensations.AddCompensation(h.deleteObjectStoresFunc(ctx, product.ID, version))
 
-	go h.startAndNotify(user.Email, productID, comment, vers, versionCfg, notifyStatusCh)
+	kvStoreCfg, err := h.natsManagerService.CreateVersionKeyValueStores(ctx, product.ID, version)
+	if err != nil {
+		return fmt.Errorf("error creating key-value stores for version %q: %w", version.Tag, err)
+	}
 
-	return vers, notifyStatusCh, nil
+	kvStoreCfg.GlobalKeyValueStore = product.KeyValueStore
+
+	versionCfg, err := entity.NewVersionConfig(versionStreamCfg, objectStoreCfg, kvStoreCfg)
+	if err != nil {
+		return err
+	}
+
+	err = h.updateKeyValueConfigurations(ctx, version, versionCfg)
+	if err != nil {
+		return fmt.Errorf("initializing centralized configuration: %w", err)
+	}
+
+	err = h.k8sService.Start(ctx, product.ID, version, versionCfg)
+	if err != nil {
+		return fmt.Errorf("starting version on k8s service: %w", err)
+	}
+
+	compensations.AddCompensation(h.stopVersionFunc(ctx, product.ID, version))
+
+	err = h.versionRepo.SetStatus(ctx, product.ID, version.Tag, entity.VersionStatusStarted)
+	if err != nil {
+		return fmt.Errorf("updating version status to %q: %w", entity.VersionStatusStarted, err)
+	}
+
+	return nil
 }
 
 func (h *Handler) updateKeyValueConfigurations(
@@ -103,6 +164,26 @@ func (h *Handler) updateKeyValueConfigurations(
 	}
 
 	return nil
+}
+
+func (h *Handler) handleStartVersionError(
+	ctx context.Context,
+	productID string,
+	version *entity.Version,
+	startError error,
+	compensations *compensator.Compensator,
+) {
+	h.logger.Error(startError, "Error starting version", "productID", productID, "versionTag", version.Tag)
+
+	err := compensations.Execute()
+	if err != nil {
+		h.logger.Error(err, "Error executing compensations")
+	}
+
+	err = h.versionRepo.SetError(ctx, productID, version, startError.Error())
+	if err != nil {
+		h.logger.Error(err, "Updating version with error", "productID", productID, "versionTag", version.Tag)
+	}
 }
 
 func (h *Handler) getWorkflowConfigurations(
@@ -141,77 +222,20 @@ func (h *Handler) getWorkflowConfigurations(
 	return workflowConfigurations, nil
 }
 
-func (h *Handler) createStreamingResources(
-	ctx context.Context,
-	productID string,
-	vers *entity.Version,
-) (*entity.VersionStreamingResources, error) {
-	product, err := h.productRepo.GetByID(ctx, productID)
-	if err != nil {
-		return nil, err
+func (h *Handler) deleteStreamFunc(ctx context.Context, productID string, version *entity.Version) func() error {
+	return func() error {
+		return h.natsManagerService.DeleteStreams(ctx, productID, version.Tag)
 	}
-
-	versionStreamCfg, err := h.natsManagerService.CreateStreams(ctx, productID, vers)
-	if err != nil {
-		return nil, fmt.Errorf("error creating streams for version %q: %w", vers.Tag, err)
-	}
-
-	objectStoreCfg, err := h.natsManagerService.CreateObjectStores(ctx, productID, vers)
-	if err != nil {
-		return nil, fmt.Errorf("error creating objects stores for version %q: %w", vers.Tag, err)
-	}
-
-	kvStoreCfg, err := h.natsManagerService.CreateVersionKeyValueStores(ctx, productID, vers)
-	if err != nil {
-		return nil, fmt.Errorf("error creating key-value stores for version %q: %w", vers.Tag, err)
-	}
-
-	kvStoreCfg.GlobalKeyValueStore = product.KeyValueStore
-
-	return entity.NewVersionConfig(versionStreamCfg, objectStoreCfg, kvStoreCfg)
 }
 
-func (h *Handler) startAndNotify(
-	userEmail,
-	productID,
-	comment string,
-	vers *entity.Version,
-	versionConfig *entity.VersionStreamingResources,
-	notifyStatusCh chan *entity.Version,
-) {
-	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration(config.VersionStatusTimeoutKey))
-	defer func() {
-		cancel()
-		close(notifyStatusCh)
-	}()
-
-	err := h.k8sService.Start(ctx, productID, vers, versionConfig)
-	if err != nil {
-		h.registerActionFailed(userEmail, productID, vers, ErrStartingVersion, StartAction)
-		h.handleVersionServiceActionError(ctx, productID, vers, notifyStatusCh, err)
-
-		return
+func (h *Handler) deleteObjectStoresFunc(ctx context.Context, productID string, version *entity.Version) func() error {
+	return func() error {
+		return h.natsManagerService.DeleteObjectStores(ctx, productID, version.Tag)
 	}
+}
 
-	err = h.versionRepo.SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarted)
-	if err != nil {
-		h.logger.Error(err, "Error updating version status",
-			"productID", productID,
-			"versionTag", vers.Tag,
-			"previousStatus", vers.Status,
-			"newStatus", entity.VersionStatusStarted,
-		)
+func (h *Handler) stopVersionFunc(ctx context.Context, productID string, version *entity.Version) func() error {
+	return func() error {
+		return h.k8sService.Stop(ctx, productID, version)
 	}
-
-	err = h.userActivityInteractor.RegisterStartAction(userEmail, productID, vers, comment)
-	if err != nil {
-		h.logger.Error(err, "Error registering user activity",
-			"productID", productID,
-			"versionTag", vers.Tag,
-			"comment", comment,
-		)
-	}
-
-	vers.Status = entity.VersionStatusStarted
-	notifyStatusCh <- vers
 }

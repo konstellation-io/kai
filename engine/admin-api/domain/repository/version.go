@@ -18,5 +18,5 @@ type VersionRepo interface {
 	// SetStatus updates the status and deletes the error message of the version.
 	SetStatus(ctx context.Context, productID, versionTag string, status entity.VersionStatus) error
 	// SetError sets the error message of the version and updates the status to Error.
-	SetError(ctx context.Context, productID string, version *entity.Version, errorMessage string) (*entity.Version, error)
+	SetError(ctx context.Context, productID string, version *entity.Version, errorMessage string) error
 }
