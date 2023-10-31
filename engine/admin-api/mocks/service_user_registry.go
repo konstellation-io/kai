@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -33,16 +34,44 @@ func (m *MockUserRegistry) EXPECT() *MockUserRegistryMockRecorder {
 	return m.recorder
 }
 
-// UpdateUserProductGrants mocks base method.
-func (m *MockUserRegistry) UpdateUserProductGrants(userID, product string, grants []string) error {
+// CreateGroupWithPolicy mocks base method.
+func (m *MockUserRegistry) CreateGroupWithPolicy(ctx context.Context, name, policy string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUserProductGrants", userID, product, grants)
+	ret := m.ctrl.Call(m, "CreateGroupWithPolicy", ctx, name, policy)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateGroupWithPolicy indicates an expected call of CreateGroupWithPolicy.
+func (mr *MockUserRegistryMockRecorder) CreateGroupWithPolicy(ctx, name, policy interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGroupWithPolicy", reflect.TypeOf((*MockUserRegistry)(nil).CreateGroupWithPolicy), ctx, name, policy)
+}
+
+// CreateUserWithinGroup mocks base method.
+func (m *MockUserRegistry) CreateUserWithinGroup(ctx context.Context, name, password, group string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUserWithinGroup", ctx, name, password, group)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateUserWithinGroup indicates an expected call of CreateUserWithinGroup.
+func (mr *MockUserRegistryMockRecorder) CreateUserWithinGroup(ctx, name, password, group interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserWithinGroup", reflect.TypeOf((*MockUserRegistry)(nil).CreateUserWithinGroup), ctx, name, password, group)
+}
+
+// UpdateUserProductGrants mocks base method.
+func (m *MockUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserProductGrants", ctx, userID, product, grants)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateUserProductGrants indicates an expected call of UpdateUserProductGrants.
-func (mr *MockUserRegistryMockRecorder) UpdateUserProductGrants(userID, product, grants interface{}) *gomock.Call {
+func (mr *MockUserRegistryMockRecorder) UpdateUserProductGrants(ctx, userID, product, grants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).UpdateUserProductGrants), userID, product, grants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).UpdateUserProductGrants), ctx, userID, product, grants)
 }

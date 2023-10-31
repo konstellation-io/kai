@@ -184,6 +184,7 @@ func (r *mutationResolver) UpdateUserProductGrants(
 	user := ctx.Value("user").(*entity.User)
 
 	err := r.userInteractor.UpdateUserProductGrants(
+		ctx,
 		user,
 		input.TargetID,
 		input.Product,
@@ -203,7 +204,7 @@ func (r *mutationResolver) RevokeUserProductGrants(
 ) (*entity.User, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	err := r.userInteractor.RevokeUserProductGrants(loggedUser, input.TargetID, input.Product, *input.Comment)
+	err := r.userInteractor.RevokeUserProductGrants(ctx, loggedUser, input.TargetID, input.Product, *input.Comment)
 	if err != nil {
 		return nil, err
 	}

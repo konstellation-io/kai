@@ -50,17 +50,6 @@ type Config struct {
 		K8sManager  string `yaml:"k8sManager" envconfig:"KAI_SERVICES_K8S_MANAGER"`
 		NatsManager string `yaml:"natsManager" envconfig:"KAI_SERVICES_NATS_MANAGER"`
 	} `yaml:"services"`
-
-	Keycloak KeycloakConfig `yaml:"keycloak"`
-}
-
-type KeycloakConfig struct {
-	URL           string `yaml:"baseUrl" envconfig:"KEYCLOAK_BASE_URL"`
-	Realm         string `yaml:"realm" envconfig:"KEYCLOAK_REALM"`
-	MasterRealm   string `yaml:"masterRealm" envconfig:"KEYCLOAK_MASTER_REALM"`
-	AdminUsername string `yaml:"adminUsername" envconfig:"KEYCLOAK_ADMIN_USERNAME"`
-	AdminPassword string `yaml:"adminPassword" envconfig:"KEYCLOAK_ADMIN_PASSWORD"`
-	AdminClientID string `yaml:"clientId" envconfig:"KEYCLOAK_ADMIN_CLIENT_ID"`
 }
 
 // NewConfig will read the config.yml file and override values with env vars.
