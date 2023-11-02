@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wait-for.fullname" . }}
+  labels:
+    {{- include "wait-for.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-3"
+    "helm.sh/hook-delete-policy": before-hook-creation
+data:
+  checker.sh: |-
+    #!/bin/sh -e
+
+    wait_for_port(){
+        until nc -zv $1 $2 > /dev/null; do
+        >&2 echo "The service [$1] is unavailable - sleeping"
+        sleep 2
+        done
+        >&2 echo "The service [$1] is up!"
+    }
+
+    wait_for_html(){
+        until [ "$(curl -s -w '%{http_code}' -o /dev/null "$1")" -eq 200 ]; do
+        >&2 echo "The service [$1] is unavailable - sleeping"
+        sleep 2
+        done
+        >&2 echo "The endpoint [$1] respond with 200 OK!"
+    }
+
+    wait_for(){
+        # var should follow the follwing structure "$service_url,$service_port"
+        # for instance POSTGRES_URL:POSTGRES_PORT
+
+        for var in "$@"
+        do
+        export check_type=`echo $var | cut -d ':' -f1`
+        export service_url=`echo $var | cut -d ':' -f2`
+        export endpoint_url=`echo $var | awk -F ':' '{for (i=2; i<=NF; i++) printf "%s%s", $i, (i==NF) ? "\n" : ":"}'`
+        export service_port=`echo $var | cut -d ':' -f3`
+        if [ -z $service_url ] || [ -z $service_port ]; then
+            echo "skipping wait due to missing configs parameters (url or port)."
+        else
+            case $check_type in
+                port)
+                    echo "check_type: $check_type"
+                    echo "service_url: $service_url"
+                    echo "service_port: $service_port"
+                    wait_for_port $service_url $service_port;;
+                html)
+                    echo "check_type: $check_type"
+                    echo "endpoint_url: $endpoint_url"
+                    wait_for_html $endpoint_url ;;
+            esac
+        fi
+        done
+    }
+
+    case $1 in
+        wait_for)
+        shift
+        wait_for "$@"
+        ;;
+
+        *) exec "$@" ;;
+    esac
+
+    exit 0

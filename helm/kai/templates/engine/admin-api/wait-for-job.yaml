@@ -1,0 +1,35 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: {{ include "wait-for.fullname" . }}
+  labels:
+    {{- include "wait-for.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  manualSelector: true
+  selector:
+    matchLabels:
+      {{- include "wait-for.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "wait-for.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: {{ include "wait-for.fullname" . }}
+        image: busybox:1.36
+        command: [ "/bin/sh", "/scripts/checker.sh" ]
+        args: ["wait_for", "port:{{ .Values.keycloak.db.auth.host }}:{{ .Values.keycloak.db.auth.port }}", "port:mongodb-database-svc:27017"]
+        volumeMounts:
+          - name: scripts
+            mountPath: /scripts
+      volumes:
+      - name: scripts
+        projected:
+          sources:
+          - configMap:
+              name: {{ template "wait-for.fullname" . }}
