@@ -8,5 +8,8 @@ dependencies:
 - name: minio
   repository: https://charts.min.io/
   version: 5.0.14
-digest: sha256:1e6b06622a8af746d838c3d07006abc507e719b93733a9025e555f41a1187561
-generated: "2023-10-23T10:47:33.706917476+02:00"
+- name: loki-stack
+  repository: https://grafana.github.io/helm-charts/
+  version: 2.9.11
+digest: sha256:ca64d2a610e738044edbb2cb085fdb1a4c38688a1c8a5d4a53742b6d06fe57ec
+generated: "2023-10-27T12:06:37.316347+02:00"
