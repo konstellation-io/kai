@@ -8,8 +8,9 @@ var (
 )
 
 type KeyValueStores struct {
-	KeyValueStore string
-	Workflows     map[string]*WorkflowKeyValueStores
+	GlobalKeyValueStore  string
+	VersionKeyValueStore string
+	Workflows            map[string]*WorkflowKeyValueStores
 }
 
 type WorkflowKeyValueStores struct {
