@@ -32,6 +32,13 @@ spec:
       securityContext:
         fsGroup: 10001
       initContainers:
+        - name: wait-for-keycloak
+          image: busybox:1.36
+          command: [ "/bin/sh", "/scripts/checker.sh" ]
+          args: ["wait_for", "html:http://{{ include "keycloak.fullname" . }}/health/ready"]
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
         - name: create-admin-api-files-directory
           image: alpine:3.10
           imagePullPolicy: IfNotPresent
@@ -90,3 +97,8 @@ spec:
         - name: admin-api-storage
           persistentVolumeClaim:
             claimName: {{ include "admin-api.fullname" . }}
+        - name: scripts
+          projected:
+            sources:
+            - configMap:
+                name: {{ template "wait-for.fullname" . }}

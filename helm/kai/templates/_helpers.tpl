@@ -114,6 +114,27 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}
 
+{{/* Fullname suffixed with wait-for */}}
+{{- define "wait-for.fullname" -}}
+{{- printf "%s-wait-for" (include "kai.fullname" .) -}}
+{{- end }}
+
+{{/*
+wait-for labels
+*/}}
+{{- define "wait-for.labels" -}}
+{{ include "kai.labels" . }}
+{{ include "wait-for.selectorLabels" . }}
+{{- end }}
+
+{{/*
+wait-for selector labels
+*/}}
+{{- define "wait-for.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kai.name" . }}-wait-for
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
 {{/* Fullname suffixed with minio-config */}}
 {{- define "minio-config.fullname" -}}
 {{- printf "%s-minio-config" (include "kai.fullname" .) -}}

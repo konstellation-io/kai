@@ -1,5 +1,4 @@
 {{- $protocol := ternary  "https" "http" .Values.config.tls.enabled -}}
-# Job to configure a MinIO Tier (transition objects to external extorage)
 kind: Job
 apiVersion: batch/v1
 metadata:
