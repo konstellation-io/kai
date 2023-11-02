@@ -1,18 +1,13 @@
 package usecase
 
 import (
+	"fmt"
+
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
-	"github.com/konstellation-io/kai/engine/admin-api/internal/errors"
-)
-
-const (
-	updateUserProductGrantsWrapper = "update user product grants"
-	revokeUserProductGrantsWrapper = "revoke user product grants"
-	updateUserProductGrantsLog     = "Updated user %q grants for product %q: %v"
-	revokeUserProductGrantsLog     = "Revoked user %q grants for product %q"
+	"golang.org/x/net/context"
 )
 
 type UserInteractor struct {
@@ -40,20 +35,20 @@ func NewUserInteractor(
 }
 
 func (ui *UserInteractor) UpdateUserProductGrants(
+	ctx context.Context,
 	user *entity.User,
 	targetUserID,
 	product string,
 	grants []string,
 	comment ...string,
 ) error {
-	wrapErr := errors.Wrapper(updateUserProductGrantsWrapper + ": %w")
 	if err := ui.accessControl.CheckRoleGrants(user, auth.ActUpdateUserGrants); err != nil {
-		return wrapErr(err)
+		return fmt.Errorf("checking role grants: %w", err)
 	}
 
-	err := ui.userRegistry.UpdateUserProductGrants(targetUserID, product, grants)
+	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserID, product, grants)
 	if err != nil {
-		return wrapErr(err)
+		return fmt.Errorf("updating grants in user's registry: %w", err)
 	}
 
 	var givenComment string
@@ -69,29 +64,28 @@ func (ui *UserInteractor) UpdateUserProductGrants(
 		givenComment,
 	)
 	if err != nil {
-		return wrapErr(err)
+		return fmt.Errorf("registering user activity: %w", err)
 	}
 
-	ui.logger.Infof(updateUserProductGrantsLog, targetUserID, product, grants)
+	ui.logger.Infof("Updated user %q grants for product %q: %v", targetUserID, product, grants)
 
 	return nil
 }
 
 func (ui *UserInteractor) RevokeUserProductGrants(
+	ctx context.Context,
 	user *entity.User,
 	targetUserID,
 	product string,
 	comment ...string,
 ) error {
-	wrapErr := errors.Wrapper(revokeUserProductGrantsWrapper + ": %w")
-
 	if err := ui.accessControl.CheckRoleGrants(user, auth.ActUpdateUserGrants); err != nil {
-		return wrapErr(err)
+		return fmt.Errorf("checking role grants: %w", err)
 	}
 
-	err := ui.userRegistry.UpdateUserProductGrants(targetUserID, product, []string{})
+	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserID, product, []string{})
 	if err != nil {
-		return wrapErr(err)
+		return fmt.Errorf("updating grants in user's registry: %w", err)
 	}
 
 	var givenComment string
@@ -107,10 +101,10 @@ func (ui *UserInteractor) RevokeUserProductGrants(
 		givenComment,
 	)
 	if err != nil {
-		return wrapErr(err)
+		return fmt.Errorf("registering user activity: %w", err)
 	}
 
-	ui.logger.Infof(revokeUserProductGrantsLog, targetUserID, product)
+	ui.logger.Infof("Revoked user %q grants for product %q", targetUserID, product)
 
 	return nil
 }
