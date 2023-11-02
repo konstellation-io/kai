@@ -78,9 +78,9 @@ func (v *VersionService) RegisterProcess(
 	v.logger.Info("Register process request received")
 
 	imageID, err := v.processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
+		ProductID:    req.ProductId,
 		ProcessID:    req.ProcessId,
 		ProcessImage: req.ProcessImage,
-		Sources:      req.File,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("registering process: %w", err)
