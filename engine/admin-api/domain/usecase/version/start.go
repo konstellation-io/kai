@@ -51,24 +51,12 @@ func (h *Handler) Start(
 
 	go func() {
 		defer func() {
-			fmt.Println("here")
 			doneCh <- true
 		}()
 
-		err = h.createVersionResources(ctx, product, version, compensations)
+		err = h.createVersionResources(ctx, user, product, version, comment, compensations)
 		if err != nil {
 			h.handleStartVersionError(ctx, productID, version, err, compensations)
-			return
-		}
-
-		err = h.userActivityInteractor.RegisterStartAction(user.Email, productID, version, comment)
-		if err != nil {
-			h.logger.Error(err, "Error registering user activity",
-				"productID", productID,
-				"versionTag", version.Tag,
-				"comment", comment,
-			)
-
 			return
 		}
 	}()
@@ -78,8 +66,10 @@ func (h *Handler) Start(
 
 func (h *Handler) createVersionResources(
 	ctx context.Context,
+	user *entity.User,
 	product *entity.Product,
 	version *entity.Version,
+	comment string,
 	compensations *compensator.Compensator,
 ) error {
 	ctx, cancel := context.WithTimeout(ctx, viper.GetDuration(config.VersionStatusTimeoutKey))
@@ -126,6 +116,11 @@ func (h *Handler) createVersionResources(
 	err = h.versionRepo.SetStatus(ctx, product.ID, version.Tag, entity.VersionStatusStarted)
 	if err != nil {
 		return fmt.Errorf("updating version status to %q: %w", entity.VersionStatusStarted, err)
+	}
+
+	err = h.userActivityInteractor.RegisterStartAction(user.Email, product.ID, version, comment)
+	if err != nil {
+		return fmt.Errorf("registering start action: %w", err)
 	}
 
 	return nil

@@ -133,7 +133,7 @@ func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 	s.ErrorIs(err, version.ErrVersionCannotBeStarted)
 }
 
-func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
+func (s *versionSuite) TestStart_ErrorCreatingStreams() {
 	// GIVEN a valid user and a non-existent version
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
@@ -152,7 +152,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, versionTag, entity.VersionStatusStarting).Return(nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(gomock.Any(), productID, vers).Return(nil, expectedError)
-	s.versionRepo.EXPECT().SetError(ctx, productID, vers, errStrMatcher).Return(nil, nil)
+	s.versionRepo.EXPECT().SetError(ctx, productID, vers, errStrMatcher).Return(nil)
 
 	// WHEN starting the version
 	_, doneCh, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
@@ -161,8 +161,8 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 	<-doneCh
 }
 
-func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
-	// GIVEN a valid user and a non-existent version
+func (s *versionSuite) TestStart_ErrorCreatingObjectStore() {
+	// GIVEN a valid user and a version
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
@@ -172,7 +172,6 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 
 	expectedError := errors.New("error creating object-stores")
 
-	versionMatcher := newVersionMatcher(vers)
 	errStrMatcher := newStringContainsMatcher(expectedError.Error())
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
@@ -186,9 +185,6 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 	s.natsManagerService.EXPECT().DeleteStreams(gomock.Any(), productID, vers.Tag).Return(nil)
 	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStrMatcher).Return(nil)
 
-	s.userActivityInteractor.EXPECT().
-		RegisterStartAction(user.Email, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
-
 	// WHEN starting the version
 	_, doneCh, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
 	s.Require().NoError(err)
@@ -196,169 +192,127 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 	<-doneCh
 }
 
-//	func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
-//		// GIVEN a valid user and a non existent version
-//		ctx := context.Background()
-//		user := testhelpers.NewUserBuilder().Build()
-//		vers := testhelpers.NewVersionBuilder().
-//			WithTag(versionTag).
-//			WithStatus(entity.VersionStatusCreated).
-//			Build()
-//		versionMatcher := newVersionMatcher(vers)
-//
-//		customErr := errors.New("dame da ne")
-//
-//		s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-//		s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
-//		s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
-//
-//		s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
-//		s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, nil)
-//		s.natsManagerService.EXPECT().CreateVersionKeyValueStores(ctx, productID, vers).Return(nil, customErr)
-//
-//		s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, versionMatcher, version.ErrCreatingNATSResources.Error()).Return(nil)
-//
-//		// WHEN starting the version
-//		_, _, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
-//
-//		// THEN an error is returned
-//		s.Error(err)
-//		s.ErrorIs(err, customErr)
-//	}
-//
-//	func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
-//		// GIVEN a valid user and version
-//		ctx := context.Background()
-//		user := testhelpers.NewUserBuilder().Build()
-//		vers := testhelpers.NewVersionBuilder().
-//			WithTag(versionTag).
-//			WithStatus(entity.VersionStatusCreated).
-//			Build()
-//
-//		versionStreamResources := s.getVersionStreamingResources(vers)
-//
-//		setStatusErrStarting := errors.New("hello this error")
-//		setStatusErrStarted := errors.New("no, this is patrick")
-//		registerActionErr := errors.New("this is sparta remix")
-//
-//		s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-//		s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
-//		s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
-//
-//		s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(versionStreamResources.Streams, nil)
-//		s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(versionStreamResources.ObjectStores, nil)
-//		s.natsManagerService.EXPECT().CreateVersionKeyValueStores(ctx, productID, vers).Return(versionStreamResources.KeyValueStores, nil)
-//
-//		// GIVEN first set status errors
-//		s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).
-//			Return(setStatusErrStarting)
-//
-//		// go rutine expected calls
-//		s.versionService.EXPECT().Start(gomock.Any(), productID, vers, versionStreamResources).Return(nil)
-//		// GIVEN second set status errors
-//		s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).
-//			Return(setStatusErrStarted)
-//		// GIVEN register start action errors
-//		s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, vers, "testing").
-//			Return(registerActionErr)
-//
-//		// WHEN starting the version
-//		startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
-//		s.NoError(err)
-//
-//		// THEN the version status first is starting
-//		vers.Status = entity.VersionStatusStarting
-//		s.Equal(vers, startingVer)
-//
-//		// THEN the version status when the go rutine ends is started
-//		versionStatus := <-notifyChn
-//		s.Equal(entity.VersionStatusStarted, versionStatus.Status)
-//
-//		// THEN both set status are logged
-//		s.Require().Len(s.observedLogs.All(), 4)
-//		log1 := s.observedLogs.All()[1]
-//		s.Equal(log1.ContextMap()["error"], setStatusErrStarting.Error())
-//		log2 := s.observedLogs.All()[2]
-//		s.Equal(log2.ContextMap()["error"], setStatusErrStarted.Error())
-//		log3 := s.observedLogs.All()[3]
-//		s.Equal(log3.ContextMap()["error"], registerActionErr.Error())
-//	}
-//
-//	func (s *versionSuite) TestStart_ErrorUserNotAuthorized_ErrorRegisterAction() {
-//		// GIVEN an unauthorized user and a version
-//		ctx := context.Background()
-//		badUser := testhelpers.NewUserBuilder().Build()
-//		expectedVer := &entity.Version{Tag: versionTag}
-//		versionMatcher := newVersionMatcher(expectedVer)
-//
-//		customErr := errors.New("git good")
-//		regiserActionErr := errors.New("also failed")
-//
-//		s.accessControl.EXPECT().CheckProductGrants(badUser, productID, auth.ActStartVersion).Return(customErr)
-//		// GIVEN error registering action
-//		s.userActivityInteractor.EXPECT().RegisterStartAction(badUser.Email, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(regiserActionErr)
-//
-//		// WHEN starting the version
-//		_, _, err := s.handler.Start(ctx, badUser, productID, expectedVer.Tag, "testing")
-//
-//		// THEN an error is returned
-//		s.Error(err)
-//		s.ErrorIs(err, customErr)
-//
-//		// THEN failed registered action is logged
-//		s.Require().Len(s.observedLogs.All(), 1)
-//		log1 := s.observedLogs.All()[0]
-//		s.Equal(log1.ContextMap()["error"], regiserActionErr.Error())
-//	}
-//
-//	func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
-//		// GIVEN a valid user and version
-//		ctx := context.Background()
-//		user := testhelpers.NewUserBuilder().Build()
-//		vers := testhelpers.NewVersionBuilder().
-//			WithTag(versionTag).
-//			WithStatus(entity.VersionStatusCreated).
-//			Build()
-//		errStartingVersion := "error starting version"
-//		setErrorErr := errors.New("bomb rush crew")
-//
-//		streamResources := s.getVersionStreamingResources(vers)
-//
-//		s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
-//		s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
-//		s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
-//
-//		s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(streamResources.Streams, nil)
-//		s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(streamResources.ObjectStores, nil)
-//		s.natsManagerService.EXPECT().CreateVersionKeyValueStores(ctx, productID, vers).Return(streamResources.KeyValueStores, nil)
-//		s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).Return(nil)
-//
-//		// go rutine expected calls
-//		s.versionService.EXPECT().Start(gomock.Any(), productID, vers, streamResources).
-//			Return(fmt.Errorf(errStartingVersion))
-//		s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, vers, version.ErrStartingVersion.Error()).Return(nil)
-//
-//		// GIVEN set status
-//		s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStartingVersion).Return(nil, setErrorErr)
-//
-//		// WHEN starting the version
-//		startingVer, notifyChn, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
-//		s.NoError(err)
-//
-//		// THEN the version status first is starting
-//		vers.Status = entity.VersionStatusStarting
-//		s.Equal(vers, startingVer)
-//
-//		// THEN the version status when the go rutine ends is error
-//		versionStatus := <-notifyChn
-//		s.Equal(entity.VersionStatusError, versionStatus.Status)
-//		s.Equal(errStartingVersion, versionStatus.Error)
-//
-//		// THEN set error is logged
-//		s.Require().Len(s.observedLogs.All(), 2)
-//		log1 := s.observedLogs.All()[1]
-//		s.Equal(log1.ContextMap()["error"], setErrorErr.Error())
-//	}
+func (s *versionSuite) TestStart_ErrorCreatingKeyValueStores() {
+	ctx := context.Background()
+	user := testhelpers.NewUserBuilder().Build()
+	vers := testhelpers.NewVersionBuilder().
+		WithTag(versionTag).
+		WithStatus(entity.VersionStatusCreated).
+		Build()
+
+	expectedError := errors.New("error creating key-value store")
+
+	errStrMatcher := newStringContainsMatcher(expectedError.Error())
+
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
+	s.versionRepo.EXPECT().SetStatus(ctx, productID, versionTag, entity.VersionStatusStarting).Return(nil)
+
+	s.natsManagerService.EXPECT().CreateStreams(gomock.Any(), productID, vers).Return(nil, nil)
+	s.natsManagerService.EXPECT().CreateObjectStores(gomock.Any(), productID, vers).Return(nil, nil)
+	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(gomock.Any(), productID, vers).Return(nil, expectedError)
+	s.natsManagerService.EXPECT().DeleteObjectStores(gomock.Any(), productID, vers.Tag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(gomock.Any(), productID, vers.Tag).Return(nil)
+	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStrMatcher).Return(nil)
+
+	_, doneCh, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
+	s.Require().NoError(err)
+
+	<-doneCh
+}
+
+func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
+	// GIVEN a valid user and version
+	ctx := context.Background()
+	user := testhelpers.NewUserBuilder().Build()
+	vers := testhelpers.NewVersionBuilder().
+		WithTag(versionTag).
+		WithStatus(entity.VersionStatusCreated).
+		Build()
+
+	expectedError := errors.New("error starting version")
+
+	errStrMatcher := newStringContainsMatcher(expectedError.Error())
+
+	streamResources := s.getVersionStreamingResources(vers)
+
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
+	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).Return(nil)
+
+	s.natsManagerService.EXPECT().CreateStreams(gomock.Any(), productID, vers).Return(streamResources.Streams, nil)
+	s.natsManagerService.EXPECT().CreateObjectStores(gomock.Any(), productID, vers).Return(streamResources.ObjectStores, nil)
+	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(gomock.Any(), productID, vers).Return(streamResources.KeyValueStores, nil)
+
+	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, streamResources).
+		Return(expectedError)
+
+	s.natsManagerService.EXPECT().DeleteObjectStores(gomock.Any(), productID, vers.Tag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(gomock.Any(), productID, vers.Tag).Return(nil)
+
+	// GIVEN set status
+	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStrMatcher).Return(nil)
+
+	// WHEN starting the version
+	startingVer, doneCh, err := s.handler.Start(ctx, user, productID, versionTag, "testing")
+	s.NoError(err)
+
+	// THEN the version status first is starting
+	vers.Status = entity.VersionStatusStarting
+	s.Equal(vers, startingVer)
+
+	<-doneCh
+}
+
+func (s *versionSuite) TestStart_ErrorRegisteringUserActivity() {
+	// GIVEN a valid user and version
+	ctx := context.Background()
+	user := testhelpers.NewUserBuilder().Build()
+	vers := testhelpers.NewVersionBuilder().
+		WithTag(versionTag).
+		WithStatus(entity.VersionStatusCreated).
+		Build()
+
+	comment := "testing"
+
+	expectedError := errors.New("error registering user activity")
+
+	errStrMatcher := newStringContainsMatcher(expectedError.Error())
+
+	streamResources := s.getVersionStreamingResources(vers)
+
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
+	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).Return(nil)
+
+	s.natsManagerService.EXPECT().CreateStreams(gomock.Any(), productID, vers).Return(streamResources.Streams, nil)
+	s.natsManagerService.EXPECT().CreateObjectStores(gomock.Any(), productID, vers).Return(streamResources.ObjectStores, nil)
+	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(gomock.Any(), productID, vers).Return(streamResources.KeyValueStores, nil)
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).Return(nil)
+	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, streamResources).
+		Return(nil)
+
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, vers, comment).Return(expectedError)
+
+	s.natsManagerService.EXPECT().DeleteObjectStores(gomock.Any(), productID, vers.Tag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(gomock.Any(), productID, vers.Tag).Return(nil)
+	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(nil)
+	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStrMatcher).Return(nil)
+
+	// WHEN starting the version
+	startingVer, doneCh, err := s.handler.Start(ctx, user, productID, versionTag, comment)
+	s.NoError(err)
+
+	// THEN the version status first is starting
+	vers.Status = entity.VersionStatusStarting
+	s.Equal(vers, startingVer)
+
+	<-doneCh
+}
+
 func (s *versionSuite) getVersionStreamingResources(vers *entity.Version) *entity.VersionStreamingResources {
 	s.Require().Greater(len(vers.Workflows), 0)
 	s.Require().Greater(len(vers.Workflows[0].Processes), 0)
