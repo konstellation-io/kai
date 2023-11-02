@@ -68,8 +68,11 @@ func (kc KubeConfiguration) getProcessConfig(
 			ObjectStore:   process.ObjectStore,
 		},
 		CentralizedConfig: CentralizedConfig{
-			Product: ConfigDefinition{
-				Bucket: version.KeyValueStore,
+			Global: ConfigDefinition{
+				Bucket: version.GlobalKeyValueStore,
+			},
+			Version: ConfigDefinition{
+				Bucket: version.VersionKeyValueStore,
 			},
 			Workflow: ConfigDefinition{
 				Bucket: workflow.KeyValueStore,

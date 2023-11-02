@@ -14,6 +14,16 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
+const (
+	_globalKeyValueStore = "test-global-kv-store"
+)
+
+var (
+	prod = &entity.Product{
+		KeyValueStore: _globalKeyValueStore,
+	}
+)
+
 func (s *versionSuite) TestStart_OK() {
 	// GIVEN a valid user and version
 	ctx := context.Background()
@@ -30,7 +40,7 @@ func (s *versionSuite) TestStart_OK() {
 
 	configurationsToUpdate := []entity.KeyValueConfiguration{
 		{
-			Store:         keyValueStoreResources.KeyValueStore,
+			Store:         keyValueStoreResources.VersionKeyValueStore,
 			Configuration: vers.Config,
 		},
 		{
@@ -45,6 +55,7 @@ func (s *versionSuite) TestStart_OK() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(versionStreamResources.Streams, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(versionStreamResources.ObjectStores, nil)
@@ -148,6 +159,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateStreams() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, customErr)
 
@@ -175,6 +187,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateObjectStore() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, customErr)
@@ -203,6 +216,7 @@ func (s *versionSuite) TestStart_ErrorGetVersionConfig_CreateKeyValueStore() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(nil, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(nil, nil)
@@ -235,6 +249,7 @@ func (s *versionSuite) TestStart_CheckNonBlockingErrorLogging() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(versionStreamResources.Streams, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(versionStreamResources.ObjectStores, nil)
@@ -317,6 +332,7 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStartVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Times(1).Return(prod, nil)
 
 	s.natsManagerService.EXPECT().CreateStreams(ctx, productID, vers).Return(streamResources.Streams, nil)
 	s.natsManagerService.EXPECT().CreateObjectStores(ctx, productID, vers).Return(streamResources.ObjectStores, nil)
@@ -358,7 +374,8 @@ func (s *versionSuite) getVersionStreamingResources(vers *entity.Version) *entit
 	process := workflow.Processes[0]
 
 	versionKeyValueStores := &entity.KeyValueStores{
-		KeyValueStore: "version-kv-store",
+		GlobalKeyValueStore:  _globalKeyValueStore,
+		VersionKeyValueStore: "version-kv-store",
 		Workflows: map[string]*entity.WorkflowKeyValueStores{
 			workflow.Name: {
 				KeyValueStore: "workflow-kv-store",

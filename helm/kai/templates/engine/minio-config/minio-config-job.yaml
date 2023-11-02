@@ -1,0 +1,170 @@
+{{- $protocol := ternary  "https" "http" .Values.config.tls.enabled -}}
+# Job to configure a MinIO Tier (transition objects to external extorage)
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: {{ include "minio-config.fullname" . }}
+  labels:
+    {{- include "minio-config.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+spec:
+  manualSelector: true
+  selector:
+    matchLabels:
+      {{- include "minio-config.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "minio-config.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: minio-oidc-config
+          image: {{ .Values.minio.mcImage.repository }}:{{ .Values.minio.mcImage.tag }}
+          imagePullPolicy: {{ .Values.minio.mcImage.pullPolicy }}
+          env:
+            - name: KAI_MINIO_ENDPOINT_URL
+              value: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
+            - name: KAI_OIDC_MINIO_CLIENT
+              value: {{ .Values.keycloak.minio.oidcClient.clientId }}
+            - name: KAI_OIDC_MINIO_CLIENT_SECRET
+              value: {{ .Values.keycloak.minio.oidcClient.secret }}
+            - name: KAI_OIDC_MINIO_CLIENT_CONFIG_URL
+              value: {{ $protocol }}://{{ .Values.keycloak.host }}/realms/konstellation/.well-known/openid-configuration
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootUser
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootPassword
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              echo -e "Checking MinIO \`/health/live\` endpoint until get 200 code..."
+              until [ "$(curl -s -w '%{http_code}' -o /dev/null "${KAI_MINIO_ENDPOINT_URL}/minio/health/live")" -eq 200 ]; do sleep 2; done
+              echo -e "200 Ok \nMinIO is UP and Running, configuring MinIO client (mc) against MinIO server"
+              mc alias set kai-minio $KAI_MINIO_ENDPOINT_URL $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+              echo "Configuring OpenID authentication"
+              mc idp openid ls kai-minio --json | grep KAIAuth > /dev/null
+              STATUS=$?
+              echo status is $STATUS
+              if [ $STATUS != 0 ]; then
+                echo "Creating OpenID configuration"
+                mc idp openid add kai-minio KAIAuth \
+                  client_id="$KAI_OIDC_MINIO_CLIENT" \
+                  client_secret="$KAI_OIDC_MINIO_CLIENT_SECRET" \
+                  config_url="$KAI_OIDC_MINIO_CLIENT_CONFIG_URL" \
+                  display_name="KAI Auth" scopes="openid" \
+                  redirect_uri_dynamic="on" \
+                  claim_name=groups
+                STATUS=$?
+              else
+                echo "Updating the existing OpenID configuration"
+                mc idp openid update kai-minio KAIAuth \
+                   client_id="$KAI_OIDC_MINIO_CLIENT" \
+                   client_secret="$KAI_OIDC_MINIO_CLIENT_SECRET" \
+                   config_url="$KAI_OIDC_MINIO_CLIENT_CONFIG_URL" \
+                   display_name="KAI Auth" scopes="openid" \
+                   redirect_uri_dynamic="on" \
+                   claim_name=groups
+                STATUS=$?
+              fi
+              if [ $STATUS == 0 ]; then
+                echo "OpenID authentication configured successfully! Restarting MiniO server..."
+                mc admin service restart kai-minio
+              else
+                echo "Error configuring OpenID authentication"
+                exit 1
+              fi
+        {{- if .Values.config.minio.tier.enabled }}
+        - name: minio-tier-config
+          image: {{ .Values.minio.mcImage.repository }}:{{ .Values.minio.mcImage.tag }}
+          imagePullPolicy: {{ .Values.minio.mcImage.pullPolicy }}
+          env:
+            - name: KAI_MINIO_ENDPOINT_URL
+              value: "http://{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
+            - name: REMOTE_BUCKET_NAME
+              value: {{ .Values.config.minio.tier.remoteBucketName }}
+            - name: REMOTE_PREFIX
+              value: {{ include "minio-config.tier.s3.remotePrefix" . }}
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootUser
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootPassword
+            - name: TIER_NAME
+              value: {{ include "minio-config.tier.name" . }}
+            # Set the tier provider
+            {{- if or (and .Values.config.minio.tier.aws.auth.secretName .Values.config.minio.tier.aws.auth.secretKeyNames.accessKey .Values.config.minio.tier.aws.auth.secretKeyNames.secretKey) (and .Values.config.minio.tier.aws.auth.accessKeyID .Values.config.minio.tier.aws.auth.secretAccessKey) }}
+            - name: TIER_SELECTED
+              value: "aws"
+            # AWS config
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio-config.tier.aws.secretName" . }}
+                  key: {{ include "minio-config.tier.aws.accessKey" . }}
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio-config.tier.aws.secretName" . }}
+                  key: {{ include "minio-config.tier.aws.secretKey" . }}
+            - name: AWS_ENDPOINT_URL_S3
+              value: {{ include "minio-config.tier.s3.endpointURL" . }}
+            - name: AWS_REGION
+              value: {{ include "minio-config.tier.s3.region" . }}
+            {{- end }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              echo -e "Checking MinIO \`/health/live\` endpoint until get 200 code..."
+              until [ "$(curl -s -w '%{http_code}' -o /dev/null "${KAI_MINIO_ENDPOINT_URL}/minio/health/live")" -eq 200 ]; do sleep 2; done
+              echo -e "200 Ok \nMinIO is UP and Running, configuring MinIO client (mc) against MinIO server"
+              mc alias set kai-minio $KAI_MINIO_ENDPOINT_URL $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+              if [ "$TIER_SELECTED" == "aws" ]; then
+                echo -e "Tier provider selected: [AWS S3] \nChecking required variables for this tier"
+                variables=("TIER_NAME" "AWS_ENDPOINT_URL_S3" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" "REMOTE_BUCKET_NAME" "REMOTE_PREFIX" "AWS_REGION")
+                for var in "${variables[@]}"; do
+                  if [ -z "${!var}" ]; then
+                    echo "<ERROR> The variable $var is undefined or empty. Please check \`.Values.config.minio.tier\` section"
+                    exit 1
+                  fi
+                done
+                echo "All required variables are defined, creating the MinIO tier"
+                mc admin tier ls kai-minio --json  | grep ${TIER_NAME} > /dev/null
+                STATUS=$?
+                if [ $STATUS != 0 ]; then
+                  mc ilm tier add s3 kai-minio $TIER_NAME \
+                    --endpoint $AWS_ENDPOINT_URL_S3 \
+                    --access-key $AWS_ACCESS_KEY_ID \
+                    --secret-key $AWS_SECRET_ACCESS_KEY \
+                    --bucket $REMOTE_BUCKET_NAME \
+                    --prefix $REMOTE_PREFIX \
+                    --region $AWS_REGION \
+                    --force
+                  STATUS=$?
+                  if [ $STATUS == 0 ]; then
+                    echo "Tier added successfully!"
+                  else
+                    echo "Error adding the tier"
+                    exit 1
+                  fi
+                else
+                  echo "Tier already exists. Nothing to do"
+                fi
+              else
+                echo -e "Minio Tier was enabled, but no specific configuration has been found for any Tier. Please check \`.Values.config.minio.tier\` section"
+                exit 1
+              fi
+        {{- end }}

@@ -12,16 +12,18 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/user"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	logging2 "github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+	"github.com/sethvargo/go-password/password"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -70,7 +72,6 @@ func initGraphqlController(
 	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, oldLogger, mongodbClient)
 	processRepo := processrepository.New(cfg, oldLogger, mongodbClient)
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, oldLogger, mongodbClient)
-	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, oldLogger)
 
 	ccK8sManager, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -101,48 +102,49 @@ func initGraphqlController(
 		log.Fatal(err)
 	}
 
-	keycloakCfg := service.KeycloakConfig{
-		Realm:         cfg.Keycloak.Realm,
-		MasterRealm:   cfg.Keycloak.MasterRealm,
-		AdminUsername: cfg.Keycloak.AdminUsername,
-		AdminPassword: cfg.Keycloak.AdminPassword,
-		AdminClientID: cfg.Keycloak.AdminClientID,
-	}
-
-	gocloakUserRegistry, err := service.NewGocloakUserRegistry(service.WithClient(cfg.Keycloak.URL), &keycloakCfg)
+	keycloakUserRegistry, err := user.NewKeycloakUserRegistry(user.WithClient(viper.GetString(config.KeycloakURLKey)))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
-	s3client, err := objectstorage.NewS3Client()
+	minioClient, err := objectstorage.NewMinioClient()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s3ObjectStorage := objectstorage.NewS3ObjectStorage(logger, s3client)
-
-	ps := usecase.ProductInteractorOpts{
-		Logger:          logger,
-		ProductRepo:     productRepo,
-		MeasurementRepo: measurementRepo,
-		VersionRepo:     versionMongoRepo,
-		MetricRepo:      metricRepo,
-		ProcessLogRepo:  processLogRepo,
-		ProcessRepo:     processRepo,
-		UserActivity:    userActivityInteractor,
-		AccessControl:   accessControl,
-		ObjectStorage:   s3ObjectStorage,
-		NatsService:     natsManagerService,
+	minioAdminClient, err := objectstorage.NewAdminMinioClient()
+	if err != nil {
+		log.Fatal(err)
 	}
-	productInteractor := usecase.NewProductInteractor(&ps)
+
+	passwordGenerator, err := password.NewGenerator(&password.GeneratorInput{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	productInteractor := usecase.NewProductInteractor(&usecase.ProductInteractorOpts{
+		Logger:            logger,
+		ProductRepo:       productRepo,
+		MeasurementRepo:   influx.NewMeasurementRepoInfluxDB(cfg, oldLogger),
+		VersionRepo:       versionMongoRepo,
+		MetricRepo:        metricRepo,
+		ProcessLogRepo:    processLogRepo,
+		ProcessRepo:       processRepo,
+		UserActivity:      userActivityInteractor,
+		AccessControl:     accessControl,
+		ObjectStorage:     objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient),
+		NatsService:       natsManagerService,
+		UserRegistry:      keycloakUserRegistry,
+		PasswordGenerator: passwordGenerator,
+	})
 
 	userInteractor := usecase.NewUserInteractor(
 		oldLogger,
 		accessControl,
 		userActivityInteractor,
-		gocloakUserRegistry,
+		keycloakUserRegistry,
 	)
 
 	versionInteractor := version.NewHandler(

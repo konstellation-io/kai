@@ -23,7 +23,7 @@ func TestNewVersionConfig(t *testing.T) {
 			Workflows: map[string]entity.WorkflowObjectStoresConfig{},
 		},
 		KeyValueStores: &entity.KeyValueStores{
-			KeyValueStore: "versionKVStore",
+			VersionKeyValueStore: "versionKVStore",
 			Workflows: map[string]*entity.WorkflowKeyValueStores{
 				"workflow-1": {
 					KeyValueStore: "workflowKVStore",
@@ -40,7 +40,7 @@ func TestNewVersionConfig(t *testing.T) {
 func TestNewVersionConfig_ErrorIfStramConfigNil(t *testing.T) {
 	expected := &entity.VersionStreamingResources{
 		KeyValueStores: &entity.KeyValueStores{
-			KeyValueStore: "versionKVStore",
+			VersionKeyValueStore: "versionKVStore",
 			Workflows: map[string]*entity.WorkflowKeyValueStores{
 				"workflow-1": {
 					KeyValueStore: "workflowKVStore",
