@@ -7,10 +7,11 @@ import (
 
 func mapRequestToVersion(req *versionpb.StartRequest) domain.Version {
 	return domain.Version{
-		Product:       req.ProductId,
-		Tag:           req.VersionTag,
-		KeyValueStore: req.KeyValueStore,
-		Workflows:     mapReqWorkflowsToWorkflows(req.Workflows),
+		Product:              req.ProductId,
+		Tag:                  req.VersionTag,
+		GlobalKeyValueStore:  req.GlobalKeyValueStore,
+		VersionKeyValueStore: req.VersionKeyValueStore,
+		Workflows:            mapReqWorkflowsToWorkflows(req.Workflows),
 	}
 }
 

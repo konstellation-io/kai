@@ -41,8 +41,9 @@ message Network {
 message StartRequest {
   string product_id = 1;
   string version_tag = 2;
-  string key_value_store = 3;
-  repeated Workflow workflows = 4;
+  string global_key_value_store = 3;
+  string version_key_value_store = 4;
+  repeated Workflow workflows = 5;
 }
 
 message StopRequest {

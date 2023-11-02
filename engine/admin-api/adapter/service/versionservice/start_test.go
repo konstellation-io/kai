@@ -120,9 +120,10 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 	)
 
 	req := &versionpb.StartRequest{
-		ProductId:     productID,
-		VersionTag:    version.Tag,
-		KeyValueStore: versionConfig.KeyValueStores.KeyValueStore,
+		ProductId:            productID,
+		VersionTag:           version.Tag,
+		GlobalKeyValueStore:  versionConfig.KeyValueStores.GlobalKeyValueStore,
+		VersionKeyValueStore: versionConfig.KeyValueStores.VersionKeyValueStore,
 		Workflows: []*versionpb.Workflow{
 			{
 				Name:          workflow.Name,
@@ -345,7 +346,7 @@ func (s *StartVersionTestSuite) getConfigForVersion(version *entity.Version) *en
 	}
 
 	keyValueStoresConfig := &entity.KeyValueStores{
-		KeyValueStore: "test-product-kv-store",
+		VersionKeyValueStore: "test-product-kv-store",
 		Workflows: map[string]*entity.WorkflowKeyValueStores{
 			workflow.Name: {
 				KeyValueStore: "test-workflow-kv-store",

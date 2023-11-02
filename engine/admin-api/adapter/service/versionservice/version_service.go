@@ -50,10 +50,11 @@ func (k *K8sVersionService) Start(
 	}
 
 	req := versionpb.StartRequest{
-		ProductId:     productID,
-		VersionTag:    version.Tag,
-		Workflows:     wf,
-		KeyValueStore: versionConfig.KeyValueStores.KeyValueStore,
+		ProductId:            productID,
+		VersionTag:           version.Tag,
+		Workflows:            wf,
+		GlobalKeyValueStore:  versionConfig.KeyValueStores.GlobalKeyValueStore,
+		VersionKeyValueStore: versionConfig.KeyValueStores.VersionKeyValueStore,
 	}
 
 	_, err = k.client.Start(ctx, &req)

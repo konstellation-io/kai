@@ -188,7 +188,7 @@ func (s *NatsManagerTestSuite) TestCreateKeyValueStores() {
 	}
 
 	expectedResponse := &entity.KeyValueStores{
-		KeyValueStore: "v1.0.0-key-value-store-name",
+		VersionKeyValueStore: "v1.0.0-key-value-store-name",
 		Workflows: map[string]*entity.WorkflowKeyValueStores{
 			testWorkflow.Name: {
 				KeyValueStore: "test-workflow-key-value-store-name",
