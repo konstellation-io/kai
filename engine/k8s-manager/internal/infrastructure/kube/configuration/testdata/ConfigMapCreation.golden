@@ -82,6 +82,8 @@ data:
             inputs:
                 - other-process
         centralized_configuration:
+            global:
+                bucket: ""
             product:
                 bucket: v1.0.0-kv-store
             workflow:
