@@ -87,9 +87,9 @@ message ProcessStatusResponse {
 }
 
 message RegisterProcessRequest {
-  string process_id = 1;
-  string process_image = 2;
-  bytes file = 3;
+  string product_id = 1;
+  string process_id = 2;
+  string process_image = 3;
 }
 
 message RegisterProcessResponse {

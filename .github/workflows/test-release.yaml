@@ -219,10 +219,10 @@ jobs:
 
     - name: Install Chart Releaser
       if: needs.release-version.outputs.newRelease == 'true'
-      uses: helm/chart-releaser-action@v1.5.0
+      uses: helm/chart-releaser-action@v1.6.0
       with:
         install_only: true
-        version: v1.5.0
+        version: v1.6.0
 
     - name: Get repository name
       if: needs.release-version.outputs.newRelease == 'true'

@@ -28,7 +28,7 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.3
 	go.mongodb.org/mongo-driver v1.11.3
 	go.uber.org/zap v1.24.0
-	google.golang.org/grpc v1.57.0
+	google.golang.org/grpc v1.57.1
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -83,7 +83,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/creasty/defaults v1.7.0 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
-	github.com/docker/docker v24.0.5+incompatible // indirect; 24.0 branch
+	github.com/docker/docker v24.0.7+incompatible // indirect; 24.0 branch
 	github.com/docker/go-connections v0.4.1-0.20210727194412-58542c764a11 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect

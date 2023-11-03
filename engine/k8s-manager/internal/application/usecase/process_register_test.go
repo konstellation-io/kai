@@ -19,7 +19,6 @@ func TestRegisterProcess(t *testing.T) {
 		imageBuilder    = mocks.NewImageBuilderMock(t)
 		processRegister = usecase.NewProcessRegister(logger, imageBuilder)
 		ctx             = context.Background()
-		source          = []byte("test-source")
 	)
 
 	const (
@@ -29,14 +28,14 @@ func TestRegisterProcess(t *testing.T) {
 	)
 
 	imageBuilder.EXPECT().
-		BuildImage(ctx, processID, processImage, source).
+		BuildImage(ctx, product, processID, processImage).
 		Return(processImage, nil).
 		Once()
 
 	imageID, err := processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
+		ProductID:    product,
 		ProcessID:    processID,
 		ProcessImage: processImage,
-		Sources:      source,
 	})
 	assert.NoError(t, err)
 
@@ -49,7 +48,6 @@ func TestRegisterProcess_ErrorBuildingImage(t *testing.T) {
 		imageBuilder    = mocks.NewImageBuilderMock(t)
 		processRegister = usecase.NewProcessRegister(logger, imageBuilder)
 		ctx             = context.Background()
-		source          = []byte("test-source")
 	)
 
 	const (
@@ -61,14 +59,14 @@ func TestRegisterProcess_ErrorBuildingImage(t *testing.T) {
 	expectedError := errors.New("error building image")
 
 	imageBuilder.EXPECT().
-		BuildImage(ctx, processID, processImage, source).
+		BuildImage(ctx, product, processID, processImage).
 		Return("", expectedError).
 		Once()
 
 	_, err := processRegister.RegisterProcess(ctx, usecase.RegisterProcessParams{
+		ProductID:    product,
 		ProcessID:    processID,
 		ProcessImage: processImage,
-		Sources:      source,
 	})
 	assert.ErrorIs(t, err, expectedError)
 }
