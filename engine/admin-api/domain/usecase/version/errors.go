@@ -22,9 +22,7 @@ var (
 	ErrVersionCannotBeStopped     = errors.New("error version cannot be stopped, status must be 'started'")
 	ErrVersionCannotBePublished   = errors.New("error publishing version, status must be 'started'")
 	ErrVersionCannotBeUnpublished = errors.New("error unpublishing version, status must be 'published'")
-	ErrCreatingNATSResources      = errors.New("error creating NATS resources")
 	ErrDeletingNATSResources      = errors.New("error deleting NATS resources")
-	ErrStartingVersion            = errors.New("error starting version")
 	ErrStoppingVersion            = errors.New("error stopping version")
 	ErrUnpublishingVersion        = errors.New("error unpublishing version")
 )
@@ -68,7 +66,7 @@ func (h *Handler) handleVersionServiceActionError(
 	ctx context.Context, productID string, vers *entity.Version,
 	notifyStatusCh chan *entity.Version, actionErr error,
 ) {
-	err := h.versionRepo.SetError(ctx, productID, vers, actionErr.Error())
+	err := h.versionRepo.SetErrorStatusWithError(ctx, productID, vers.Tag, actionErr.Error())
 	if err != nil {
 		h.logger.Error(err, "Error updating version error",
 			"productID", productID,

@@ -263,7 +263,7 @@ func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, productID, vers, version.ErrStoppingVersion.Error()).Return(nil)
 
 	// Given set status
-	s.versionRepo.EXPECT().SetError(gomock.Any(), productID, vers, errStoppingVersion).Return(setErrorErr)
+	s.versionRepo.EXPECT().SetErrorStatusWithError(gomock.Any(), productID, vers.Tag, errStoppingVersion).Return(setErrorErr)
 
 	// WHEN stopping the version
 	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")

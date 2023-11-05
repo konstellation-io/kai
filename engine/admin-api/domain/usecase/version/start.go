@@ -18,9 +18,9 @@ func (h *Handler) Start(
 	productID,
 	versionTag,
 	comment string,
-) (*entity.Version, chan bool, error) {
+) (*entity.Version, error) {
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	h.logger.Info("Starting version", "userEmail", user.Email, "versionTag", versionTag, "productID", productID)
@@ -29,31 +29,25 @@ func (h *Handler) Start(
 
 	product, err := h.productRepo.GetByID(ctx, productID)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	version, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if !version.CanBeStarted() {
-		return nil, nil, ErrVersionCannotBeStarted
+		return nil, ErrVersionCannotBeStarted
 	}
 
 	version.Status = entity.VersionStatusStarting
 	err = h.versionRepo.SetStatus(ctx, productID, version.Tag, entity.VersionStatusStarting)
 	if err != nil {
-		return nil, nil, fmt.Errorf("setting version status to %q: %w", entity.VersionStatusStarting, err)
+		return nil, fmt.Errorf("setting version status to %q: %w", entity.VersionStatusStarting, err)
 	}
 
-	doneCh := make(chan bool, 1)
-
 	go func() {
-		defer func() {
-			doneCh <- true
-		}()
-
 		err = h.createVersionResources(ctx, user, product, version, comment, compensations)
 		if err != nil {
 			h.handleStartVersionError(ctx, productID, version, err, compensations)
@@ -61,7 +55,7 @@ func (h *Handler) Start(
 		}
 	}()
 
-	return version, doneCh, nil
+	return version, nil
 }
 
 func (h *Handler) createVersionResources(
@@ -172,12 +166,23 @@ func (h *Handler) handleStartVersionError(
 
 	err := compensations.Execute()
 	if err != nil {
-		h.logger.Error(err, "Error executing compensations")
+		h.handleCriticalError(ctx, productID, version, err)
+		return
 	}
 
-	err = h.versionRepo.SetError(ctx, productID, version, startError.Error())
+	err = h.versionRepo.SetErrorStatusWithError(ctx, productID, version.Tag, startError.Error())
 	if err != nil {
 		h.logger.Error(err, "Updating version with error", "productID", productID, "versionTag", version.Tag)
+	}
+}
+
+func (h *Handler) handleCriticalError(ctx context.Context, productID string, version *entity.Version, err error) {
+	err = h.versionRepo.SetCriticalStatusWithError(ctx, productID, version.Tag, err.Error())
+	if err != nil {
+		h.logger.Error(err,
+			"Error setting status version",
+			"productID", productID, "versionTag", version.Tag, "wantedStatus", entity.VersionStatusCritical,
+		)
 	}
 }
 
