@@ -168,15 +168,15 @@ func (s *VersionServiceTestSuite) TestRegisterProcess() {
 	ctx := context.Background()
 
 	req := &versionpb.RegisterProcessRequest{
+		ProductId:    "test-product",
 		ProcessId:    "test-process",
 		ProcessImage: "test-image",
-		File:         []byte("test-sources"),
 	}
 
 	expectedParams := usecase.RegisterProcessParams{
+		ProductID:    req.ProductId,
 		ProcessID:    req.ProcessId,
 		ProcessImage: req.ProcessImage,
-		Sources:      req.File,
 	}
 
 	s.processServiceMock.EXPECT().RegisterProcess(ctx, expectedParams).Return("test-image-id", nil)
@@ -191,15 +191,15 @@ func (s *VersionServiceTestSuite) TestRegisterProcess_Error() {
 	ctx := context.Background()
 
 	req := &versionpb.RegisterProcessRequest{
+		ProductId:    "test-product-error",
 		ProcessId:    "test-process-error",
 		ProcessImage: "test-image",
-		File:         []byte("test-sources"),
 	}
 
 	expectedParams := usecase.RegisterProcessParams{
+		ProductID:    req.ProductId,
 		ProcessID:    req.ProcessId,
 		ProcessImage: req.ProcessImage,
-		Sources:      req.File,
 	}
 
 	s.processServiceMock.EXPECT().RegisterProcess(ctx, expectedParams).Return("", fmt.Errorf("test error"))

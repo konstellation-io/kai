@@ -51,18 +51,18 @@ func (mr *MockVersionServiceMockRecorder) Publish(ctx, productID, versionTag int
 }
 
 // RegisterProcess mocks base method.
-func (m *MockVersionService) RegisterProcess(ctx context.Context, processID, processImage string, file []byte) (string, error) {
+func (m *MockVersionService) RegisterProcess(ctx context.Context, productID, processID, processImage string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterProcess", ctx, processID, processImage, file)
+	ret := m.ctrl.Call(m, "RegisterProcess", ctx, productID, processID, processImage)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // RegisterProcess indicates an expected call of RegisterProcess.
-func (mr *MockVersionServiceMockRecorder) RegisterProcess(ctx, processID, processImage, file interface{}) *gomock.Call {
+func (mr *MockVersionServiceMockRecorder) RegisterProcess(ctx, productID, processID, processImage interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterProcess", reflect.TypeOf((*MockVersionService)(nil).RegisterProcess), ctx, processID, processImage, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterProcess", reflect.TypeOf((*MockVersionService)(nil).RegisterProcess), ctx, productID, processID, processImage)
 }
 
 // Start mocks base method.

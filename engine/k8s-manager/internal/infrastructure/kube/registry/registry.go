@@ -31,7 +31,6 @@ const (
 
 	//nolint:gosec // False positive
 	_registryAuthSecretVolume = "registry-auth-secret"
-	_configVolumeName         = "config"
 )
 
 var (
@@ -55,13 +54,12 @@ func NewKanikoImageBuilder(logger logr.Logger, client kubernetes.Interface) *Kan
 	}
 }
 
-func (ib *KanikoImageBuilder) BuildImage(ctx context.Context, processID, processImage string, sources []byte) (string, error) {
+func (ib *KanikoImageBuilder) BuildImage(ctx context.Context, productID, processID, processImage string) (string, error) {
 	jobName := ib.getJobNameForImage(processID)
-	jobConfigName := fmt.Sprintf("%s-config", jobName)
 
-	job := ib.getImageBuilderJob(jobName, processImage, jobConfigName)
+	job := ib.getImageBuilderJob(productID, jobName, processImage)
 
-	createdJob, err := ib.client.BatchV1().Jobs(ib.namespace).Create(ctx, job, metav1.CreateOptions{})
+	_, err := ib.client.BatchV1().Jobs(ib.namespace).Create(ctx, job, metav1.CreateOptions{})
 	if err != nil {
 		return "", fmt.Errorf("creating image building job: %w", err)
 	}
@@ -78,13 +76,6 @@ func (ib *KanikoImageBuilder) BuildImage(ctx context.Context, processID, process
 		ib.logger.Info("Job successfully deleted", "job", job.Name)
 	}()
 
-	configMap := ib.getJobConfigMap(jobConfigName, createdJob, sources)
-
-	_, err = ib.client.CoreV1().ConfigMaps(ib.namespace).Create(ctx, configMap, metav1.CreateOptions{})
-	if err != nil {
-		return "", fmt.Errorf("creating image builder config: %w", err)
-	}
-
 	err = ib.watchForJob(ctx, job)
 	if err != nil {
 		return "", err
@@ -98,26 +89,7 @@ func (ib *KanikoImageBuilder) getJobNameForImage(imageName string) string {
 	return fmt.Sprintf("image-builder-%s", normalizedImageName)
 }
 
-func (ib *KanikoImageBuilder) getJobConfigMap(jobConfigName string, createdJob *batchv1.Job, sources []byte) *corev1.ConfigMap {
-	return &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: jobConfigName,
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: "batch/v1",
-					Kind:       "Job",
-					Name:       createdJob.Name,
-					UID:        createdJob.UID,
-				},
-			},
-		},
-		BinaryData: map[string][]byte{
-			"file.tar.gz": sources,
-		},
-	}
-}
-
-func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination, jobConfigName string) *batchv1.Job {
+func (ib *KanikoImageBuilder) getImageBuilderJob(productID, jobName, imageWithDestination string) *batchv1.Job {
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: jobName,
@@ -136,16 +108,34 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination, 
 							Image:   viper.GetString(config.ImageBuilderImageKey),
 							Command: nil,
 							Args: []string{
-								"--context=tar:///sources/file.tar.gz",
+								fmt.Sprintf("--context=s3://%s/%s", productID, imageWithDestination),
 								fmt.Sprintf("--insecure=%s", viper.GetString(config.ImageRegistryInsecureKey)),
 								fmt.Sprintf("--verbosity=%s", viper.GetString(config.ImageBuilderLogLevel)),
 								fmt.Sprintf("--destination=%s", imageWithDestination),
 							},
-							VolumeMounts: []corev1.VolumeMount{
+							Env: []corev1.EnvVar{
 								{
-									Name:      _configVolumeName,
-									MountPath: "/sources",
+									Name:  "S3_ENDPOINT",
+									Value: "http://" + viper.GetString(config.MinioEndpointKey),
 								},
+								{
+									Name:  "AWS_ACCESS_KEY_ID",
+									Value: viper.GetString(config.MinioAccessKeyIDKey),
+								},
+								{
+									Name:  "AWS_SECRET_ACCESS_KEY",
+									Value: viper.GetString(config.MinioAccessKeySecretKey),
+								},
+								{
+									Name:  "AWS_REGION",
+									Value: viper.GetString(config.MinioRegionKey),
+								},
+								{
+									Name:  "S3_FORCE_PATH_STYLE",
+									Value: "true",
+								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      _registryAuthSecretVolume,
 									MountPath: "/kaniko/.docker",
@@ -155,23 +145,8 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(jobName, imageWithDestination, 
 					},
 					RestartPolicy: corev1.RestartPolicyNever,
 					Volumes: []corev1.Volume{
-						ib.getConfigVolume(jobConfigName),
 						ib.getRegistryAuthVolume(),
 					},
-				},
-			},
-		},
-	}
-}
-
-func (ib *KanikoImageBuilder) getConfigVolume(jobConfigName string) corev1.Volume {
-	return corev1.Volume{
-		Name: _configVolumeName,
-		VolumeSource: corev1.VolumeSource{
-			HostPath: nil,
-			ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: jobConfigName,
 				},
 			},
 		},
