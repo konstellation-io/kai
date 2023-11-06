@@ -99,6 +99,6 @@ data:
         auth:
             endpoint: test-auth-endpoint
             client: test-auth-client-id
-            client_secret: ""
+            client_secret: test-auth-client-secret
             realm: test-auth-realm
 binarydata: {}

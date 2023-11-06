@@ -31,10 +31,10 @@ const (
 	MinioRegionKey          = "minio.regionKey"
 	MinioSSLEnabledKey      = "minio.ssl"
 
-	AuthEndpointKey       = "auth.endpoint"
-	AuthRealmKey          = "auth.realm"
-	AuthClientIDKey       = "auth.clientID"
-	AuthClientIDSecretKey = "auth.clientID"
+	AuthEndpointKey     = "auth.endpoint"
+	AuthRealmKey        = "auth.realm"
+	AuthClientIDKey     = "auth.clientID"
+	AuthClientSecretKey = "auth.clientSecret"
 
 	TriggersRequestTimeoutKey         = "networking.trigger.requestTimeout"
 	TriggersB64IngressesAnnotaionsKey = "networking.trigger.b64Annotations"
@@ -85,7 +85,8 @@ func Init(configFilePath string) error {
 
 	viper.RegisterAlias(AuthEndpointKey, "KEYCLOAK_BASE_URL")
 	viper.RegisterAlias(AuthRealmKey, "KEYCLOAK_REALM")
-	viper.RegisterAlias(AuthClientIDKey, "KEYCLOAK_ADMIN_CLIENT_ID")
+	viper.RegisterAlias(AuthClientIDKey, "KEYCLOAK_MINIO_CLIENT_ID")
+	viper.RegisterAlias(AuthClientSecretKey, "KEYCLOAK_MINIO_CLIENT_SECRET")
 
 	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_ENABLED")
 	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_CERT_SECRET_NAME")

@@ -91,10 +91,10 @@ func (kc KubeConfiguration) getProcessConfig(
 			Bucket:         version.MinioConfiguration.Bucket,
 		},
 		Auth: AuthConfig{
-			Endpoint: viper.GetString(config.AuthEndpointKey),
-			Client:   viper.GetString(config.AuthClientIDKey),
-			//ClientSecret: "",
-			Realm: viper.GetString(config.AuthRealmKey),
+			Endpoint:     viper.GetString(config.AuthEndpointKey),
+			Client:       viper.GetString(config.AuthClientIDKey),
+			ClientSecret: viper.GetString(config.AuthClientSecretKey),
+			Realm:        viper.GetString(config.AuthRealmKey),
 		},
 	}
 }
