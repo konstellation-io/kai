@@ -67,12 +67,7 @@ func (kp *KubeProcess) watchForVersionDeployments(ctx context.Context, version d
 				return ErrParsingDeployment
 			}
 
-			isDeploymentReady := kp.isDeploymentReady(deployment)
-			if err != nil {
-				return err
-			}
-
-			if isDeploymentReady {
+			if kp.isDeploymentReady(deployment) {
 				readyDeployments[deployment.Name] = true
 			}
 

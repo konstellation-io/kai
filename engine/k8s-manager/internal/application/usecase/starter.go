@@ -28,7 +28,7 @@ func (s *VersionStarter) StartVersion(ctx context.Context, version domain.Versio
 	compensations := compensator.New()
 
 	if err := s.createVersionResources(ctx, version, compensations); err != nil {
-		if compensationsErrors := compensations.Execute(); err != nil {
+		if compensationsErrors := compensations.Execute(); compensationsErrors != nil {
 			s.logger.Error(compensationsErrors, "Error(s) executing compensations")
 		}
 
