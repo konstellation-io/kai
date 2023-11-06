@@ -20,3 +20,4 @@ p, MLE, view_server_info
 
 p, ADMIN, create_product
 p, ADMIN, update_user_grants
+p, ADMIN, start_critical_version

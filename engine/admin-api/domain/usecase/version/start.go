@@ -37,11 +37,18 @@ func (h *Handler) Start(
 		return nil, err
 	}
 
+	if version.Status == entity.VersionStatusCritical {
+		if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartCriticalVersion); err != nil {
+			return nil, err
+		}
+	}
+
 	if !version.CanBeStarted() {
 		return nil, ErrVersionCannotBeStarted
 	}
 
 	version.Status = entity.VersionStatusStarting
+
 	err = h.versionRepo.SetStatus(ctx, productID, version.Tag, entity.VersionStatusStarting)
 	if err != nil {
 		return nil, fmt.Errorf("setting version status to %q: %w", entity.VersionStatusStarting, err)
@@ -161,6 +168,7 @@ func (h *Handler) handleStartVersionError(
 	compensations *compensator.Compensator,
 ) {
 	h.logger.Error(startError, "Error starting version", "productID", productID, "versionTag", version.Tag)
+
 	ctx := context.Background()
 
 	err := compensations.Execute()

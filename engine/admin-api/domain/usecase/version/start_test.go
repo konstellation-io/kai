@@ -116,6 +116,28 @@ func (s *versionSuite) TestStart_ErrorUserNotAuthorized() {
 	s.ErrorIs(err, expectedError)
 }
 
+func (s *versionSuite) TestStart_ErrorCriticalVersionUnauthorized() {
+	// GIVEN an unauthorized user and a version
+	ctx := context.Background()
+	user := testhelpers.NewUserBuilder().Build()
+	vers := testhelpers.NewVersionBuilder().
+		WithStatus(entity.VersionStatusCritical).
+		Build()
+
+	expectedError := errors.New("unauthorized")
+
+	s.accessControl.EXPECT().CheckProductGrants(user, prod.ID, auth.ActStartVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, prod.ID).Return(prod, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, prod.ID, vers.Tag).Return(vers, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, prod.ID, auth.ActStartCriticalVersion).Return(expectedError)
+
+	// WHEN starting the version
+	_, err := s.handler.Start(ctx, user, productID, vers.Tag, "testing")
+
+	// THEN an error is returned
+	s.ErrorIs(err, expectedError)
+}
+
 func (s *versionSuite) TestStart_ErrorNonExistingVersion() {
 	// GIVEN a valid user and a non-existent version
 	ctx := context.Background()
@@ -365,7 +387,6 @@ func (s *versionSuite) TestStart_ErrorRegisteringUserActivity() {
 	s.Equal(vers, startingVer)
 
 	s.Require().NoError(testhelpers.WaitOrTimeout(&wg, _waitGroupTimeout))
-
 }
 
 func (s *versionSuite) getVersionStreamingResources(vers *entity.Version) *entity.VersionStreamingResources {
