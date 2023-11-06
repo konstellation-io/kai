@@ -31,9 +31,10 @@ const (
 	MinioRegionKey          = "minio.regionKey"
 	MinioSSLEnabledKey      = "minio.ssl"
 
-	AuthEndpointKey = "auth.endpoint"
-	AuthRealmKey    = "auth.realm"
-	AuthClientIDKey = "auth.clientID"
+	AuthEndpointKey       = "auth.endpoint"
+	AuthRealmKey          = "auth.realm"
+	AuthClientIDKey       = "auth.clientID"
+	AuthClientIDSecretKey = "auth.clientID"
 
 	TriggersRequestTimeoutKey         = "networking.trigger.requestTimeout"
 	TriggersB64IngressesAnnotaionsKey = "networking.trigger.b64Annotations"
