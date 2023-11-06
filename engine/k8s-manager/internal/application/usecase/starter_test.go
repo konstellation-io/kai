@@ -32,6 +32,8 @@ func TestStartVersion(t *testing.T) {
 
 	mockCreateProcess(t, containerSvc, configName, version, *version.Workflows[0].Processes[0])
 
+	containerSvc.EXPECT().WaitProcesses(mock.Anything, version).Return(nil)
+
 	starter := usecase.NewVersionStarter(logger, containerSvc)
 
 	ctx := context.Background()
@@ -67,6 +69,8 @@ func TestStartVersion_WithMultipleProcesses(t *testing.T) {
 			mockCreateProcess(t, containerSvc, configName, version, *p)
 		}
 	}
+
+	containerSvc.EXPECT().WaitProcesses(mock.Anything, version).Return(nil)
 
 	starter := usecase.NewVersionStarter(logger, containerSvc)
 
@@ -127,6 +131,8 @@ func TestStartVersion_WithNetworking(t *testing.T) {
 		Return(nil).
 		Once()
 
+	containerSvc.EXPECT().WaitProcesses(mock.Anything, version).Return(nil)
+
 	starter := usecase.NewVersionStarter(logger, containerSvc)
 
 	ctx := context.Background()
@@ -165,6 +171,8 @@ func TestStartVersion_WithCPU(t *testing.T) {
 
 	starter := usecase.NewVersionStarter(logger, containerSvc)
 
+	containerSvc.EXPECT().WaitProcesses(mock.Anything, version).Return(nil)
+
 	ctx := context.Background()
 	err := starter.StartVersion(ctx, version)
 	assert.NoError(t, err)
@@ -198,6 +206,8 @@ func TestStartVersion_WithMemory(t *testing.T) {
 		Once()
 
 	mockCreateProcess(t, containerSvc, configName, version, *version.Workflows[0].Processes[0])
+
+	containerSvc.EXPECT().WaitProcesses(mock.Anything, version).Return(nil)
 
 	starter := usecase.NewVersionStarter(logger, containerSvc)
 
@@ -256,6 +266,9 @@ func TestStartVersion_ErrorCreatingProcess(t *testing.T) {
 		Return(expectedErr).
 		Once()
 
+	containerSvc.EXPECT().DeleteProcesses(mock.Anything, version.Product, version.Tag).Return(nil)
+	containerSvc.EXPECT().DeleteConfiguration(mock.Anything, version.Product, version.Tag).Return(nil)
+
 	starter := usecase.NewVersionStarter(logger, containerSvc)
 
 	ctx := context.Background()
@@ -302,6 +315,9 @@ func TestStartVersion_ErrorCreatingNetwork(t *testing.T) {
 		CreateNetwork(mock.Anything, createNetworkParams).
 		Return(expectedErr).
 		Once()
+
+	containerSvc.EXPECT().DeleteProcesses(mock.Anything, version.Product, version.Tag).Return(nil)
+	containerSvc.EXPECT().DeleteConfiguration(mock.Anything, version.Product, version.Tag).Return(nil)
 
 	starter := usecase.NewVersionStarter(logger, containerSvc)
 

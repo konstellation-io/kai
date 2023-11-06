@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -29,6 +30,8 @@ const (
 	TriggersIngressClassNameKey       = "networking.trigger.ingressClassName"
 	TriggersTLSEnabledKey             = "networking.trigger.tls.isEnabled"
 	TLSSecretNameKey                  = "networking.trigger.tls.secretName"
+
+	ProcessTimeoutKey = "processes.timeout"
 
 	AutoscaleCPUPercentageKey = "autoescale.cpu.percentage"
 
@@ -93,6 +96,7 @@ func setDefaultValues() {
 	viper.SetDefault(KubeNamespaceKey, "kai")
 
 	viper.SetDefault(AutoscaleCPUPercentageKey, 80)
+	viper.SetDefault(ProcessTimeoutKey, 5*time.Minute)
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {

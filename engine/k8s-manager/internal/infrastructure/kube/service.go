@@ -70,3 +70,7 @@ func (k *K8sContainerService) PublishNetwork(ctx context.Context, params service
 func (k *K8sContainerService) UnpublishNetwork(ctx context.Context, product, version string) error {
 	return k.networkService.UnpublishNetwork(ctx, product, version)
 }
+
+func (k *K8sContainerService) WaitProcesses(ctx context.Context, version domain.Version) error {
+	return k.processService.WaitProcesses(ctx, version)
+}

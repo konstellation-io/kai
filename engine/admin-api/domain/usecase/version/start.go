@@ -48,9 +48,9 @@ func (h *Handler) Start(
 	}
 
 	go func() {
-		err = h.createVersionResources(ctx, user, product, version, comment, compensations)
+		err = h.createVersionResources(user, product, version, comment, compensations)
 		if err != nil {
-			h.handleStartVersionError(ctx, productID, version, err, compensations)
+			h.handleStartVersionError(productID, version, err, compensations)
 			return
 		}
 	}()
@@ -59,14 +59,13 @@ func (h *Handler) Start(
 }
 
 func (h *Handler) createVersionResources(
-	ctx context.Context,
 	user *entity.User,
 	product *entity.Product,
 	version *entity.Version,
 	comment string,
 	compensations *compensator.Compensator,
 ) error {
-	ctx, cancel := context.WithTimeout(ctx, viper.GetDuration(config.VersionStatusTimeoutKey))
+	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration(config.VersionStatusTimeoutKey))
 	defer cancel()
 
 	versionStreamCfg, err := h.natsManagerService.CreateStreams(ctx, product.ID, version)
@@ -74,14 +73,14 @@ func (h *Handler) createVersionResources(
 		return fmt.Errorf("error creating streams for version %q: %w", version.Tag, err)
 	}
 
-	compensations.AddCompensation(h.deleteStreamFunc(ctx, product.ID, version))
+	compensations.AddCompensation(h.deleteStreamFunc(product.ID, version))
 
 	objectStoreCfg, err := h.natsManagerService.CreateObjectStores(ctx, product.ID, version)
 	if err != nil {
 		return fmt.Errorf("error creating objects stores for version %q: %w", version.Tag, err)
 	}
 
-	compensations.AddCompensation(h.deleteObjectStoresFunc(ctx, product.ID, version))
+	compensations.AddCompensation(h.deleteObjectStoresFunc(product.ID, version))
 
 	kvStoreCfg, err := h.natsManagerService.CreateVersionKeyValueStores(ctx, product.ID, version)
 	if err != nil {
@@ -105,7 +104,7 @@ func (h *Handler) createVersionResources(
 		return fmt.Errorf("starting version on k8s service: %w", err)
 	}
 
-	compensations.AddCompensation(h.stopVersionFunc(ctx, product.ID, version))
+	compensations.AddCompensation(h.stopVersionFunc(product.ID, version))
 
 	err = h.versionRepo.SetStatus(ctx, product.ID, version.Tag, entity.VersionStatusStarted)
 	if err != nil {
@@ -156,13 +155,13 @@ func (h *Handler) updateKeyValueConfigurations(
 }
 
 func (h *Handler) handleStartVersionError(
-	ctx context.Context,
 	productID string,
 	version *entity.Version,
 	startError error,
 	compensations *compensator.Compensator,
 ) {
 	h.logger.Error(startError, "Error starting version", "productID", productID, "versionTag", version.Tag)
+	ctx := context.Background()
 
 	err := compensations.Execute()
 	if err != nil {
@@ -222,20 +221,20 @@ func (h *Handler) getWorkflowConfigurations(
 	return workflowConfigurations, nil
 }
 
-func (h *Handler) deleteStreamFunc(ctx context.Context, productID string, version *entity.Version) func() error {
+func (h *Handler) deleteStreamFunc(productID string, version *entity.Version) func() error {
 	return func() error {
-		return h.natsManagerService.DeleteStreams(ctx, productID, version.Tag)
+		return h.natsManagerService.DeleteStreams(context.Background(), productID, version.Tag)
 	}
 }
 
-func (h *Handler) deleteObjectStoresFunc(ctx context.Context, productID string, version *entity.Version) func() error {
+func (h *Handler) deleteObjectStoresFunc(productID string, version *entity.Version) func() error {
 	return func() error {
-		return h.natsManagerService.DeleteObjectStores(ctx, productID, version.Tag)
+		return h.natsManagerService.DeleteObjectStores(context.Background(), productID, version.Tag)
 	}
 }
 
-func (h *Handler) stopVersionFunc(ctx context.Context, productID string, version *entity.Version) func() error {
+func (h *Handler) stopVersionFunc(productID string, version *entity.Version) func() error {
 	return func() error {
-		return h.k8sService.Stop(ctx, productID, version)
+		return h.k8sService.Stop(context.Background(), productID, version)
 	}
 }

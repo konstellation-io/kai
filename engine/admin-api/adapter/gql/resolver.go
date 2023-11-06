@@ -98,7 +98,7 @@ func (r *mutationResolver) notifyRegisteredProcessStatus(notifyCh chan *entity.R
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, _, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
+	v, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 	if err != nil {
 		r.logger.Errorf("[mutationResolver.StartVersion] errors starting version: %s", err)
 		return nil, err
