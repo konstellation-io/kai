@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -171,4 +172,50 @@ func (s *ObjectStorageSuite) TestCreateBucketPolicy_InvalidResourceInPolicy() {
 
 	_, err := s.objectStorage.CreateBucketPolicy(ctx, "")
 	s.Require().Error(err)
+}
+
+func (s *ObjectStorageSuite) TestUploadImageSources() {
+	var (
+		ctx     = context.Background()
+		product = _testBucket
+		image   = "test-image"
+		sources = []byte("this is a test")
+	)
+
+	err := s.client.MakeBucket(ctx, product, minio.MakeBucketOptions{})
+	s.Require().NoError(err)
+
+	err = s.objectStorage.UploadImageSources(ctx, product, image, sources)
+	s.Assert().NoError(err)
+
+	actualImage, err := s.client.GetObject(ctx, product, image, minio.GetObjectOptions{})
+	s.Require().NoError(err)
+
+	content, err := io.ReadAll(actualImage)
+	s.Require().NoError(err)
+
+	s.Assert().Equal(sources, content)
+}
+
+func (s *ObjectStorageSuite) TestDeleteImageSources() {
+	var (
+		ctx     = context.Background()
+		product = _testBucket
+		image   = "test-image"
+		sources = []byte("this is a test")
+	)
+
+	err := s.client.MakeBucket(ctx, product, minio.MakeBucketOptions{})
+	s.Require().NoError(err)
+
+	err = s.objectStorage.UploadImageSources(ctx, product, image, sources)
+	s.Assert().NoError(err)
+
+	err = s.objectStorage.DeleteImageSources(ctx, product, image)
+	s.Assert().NoError(err)
+
+	objs := s.client.ListObjects(ctx, product, minio.ListObjectsOptions{})
+	for obj := range objs {
+		s.Fail("Found unexpected object", "Object %q was not deleted", obj.Key)
+	}
 }

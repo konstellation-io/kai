@@ -28,6 +28,7 @@ type ProcessService struct {
 	logger            logr.Logger
 	processRepository repository.ProcessRepository
 	versionService    service.VersionService
+	objectStorage     repository.ObjectStorage
 }
 
 type ProcessMetadata struct {
@@ -38,11 +39,13 @@ func NewProcessService(
 	logger logr.Logger,
 	k8sService service.VersionService,
 	processRepository repository.ProcessRepository,
+	objectStorage repository.ObjectStorage,
 ) *ProcessService {
 	return &ProcessService{
 		logger:            logger,
 		versionService:    k8sService,
 		processRepository: processRepository,
+		objectStorage:     objectStorage,
 	}
 }
 
@@ -134,7 +137,19 @@ func (ps *ProcessService) uploadProcessToRegistry(
 		return
 	}
 
-	_, err = ps.versionService.RegisterProcess(ctx, registeredProcess.ID, registeredProcess.Image, compressedFile)
+	err = ps.objectStorage.UploadImageSources(ctx, product, registeredProcess.Image, compressedFile)
+	if err != nil {
+		ps.uploadingProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("uploading sources: %w", err))
+		return
+	}
+
+	defer func() {
+		if err := ps.objectStorage.DeleteImageSources(ctx, product, registeredProcess.Image); err != nil {
+			ps.logger.Error(err, "Error deleting image's sources", "product", product, "image", registeredProcess.Image)
+		}
+	}()
+
+	_, err = ps.versionService.RegisterProcess(ctx, product, registeredProcess.ID, registeredProcess.Image)
 	if err != nil {
 		ps.uploadingProcessError(ctx, product, registeredProcess, notifyStatusCh, fmt.Errorf("registering process: %w", err))
 		return

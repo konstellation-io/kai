@@ -63,6 +63,7 @@ func main() {
 	app.Start()
 }
 
+//nolint:funlen //future refactor
 func initGraphqlController(
 	cfg *config.Config, oldLogger logging2.Logger, logger logr.Logger, mongodbClient *mongo.Client,
 ) *controller.GraphQLController {
@@ -124,6 +125,8 @@ func initGraphqlController(
 		log.Fatal(err)
 	}
 
+	minioOjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
+
 	productInteractor := usecase.NewProductInteractor(&usecase.ProductInteractorOpts{
 		Logger:            logger,
 		ProductRepo:       productRepo,
@@ -134,7 +137,7 @@ func initGraphqlController(
 		ProcessRepo:       processRepo,
 		UserActivity:      userActivityInteractor,
 		AccessControl:     accessControl,
-		ObjectStorage:     objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient),
+		ObjectStorage:     minioOjectStorage,
 		NatsService:       natsManagerService,
 		UserRegistry:      keycloakUserRegistry,
 		PasswordGenerator: passwordGenerator,
@@ -169,7 +172,7 @@ func initGraphqlController(
 
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
 
-	processService := usecase.NewProcessService(logger, k8sService, processRepo)
+	processService := usecase.NewProcessService(logger, k8sService, processRepo, minioOjectStorage)
 
 	return controller.NewGraphQLController(
 		controller.Params{

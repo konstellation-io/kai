@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "0.2.0-develop.39"
+appVersion: "0.2.0-develop.43"
 description: KAI
 name: kai
-version: 0.2.0-develop.39
+version: 0.2.0-develop.43
 dependencies:
   - name: influxdb
     version: "4.8.1"
@@ -14,3 +14,6 @@ dependencies:
   - name: minio
     version: "5.0.14"
     repository: https://charts.min.io/
+  - name: loki-stack
+    version: "2.9.11"
+    repository: https://grafana.github.io/helm-charts/
