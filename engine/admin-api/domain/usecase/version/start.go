@@ -106,7 +106,7 @@ func (h *Handler) createVersionResources(
 		return fmt.Errorf("initializing centralized configuration: %w", err)
 	}
 
-	err = h.k8sService.Start(ctx, product.ID, version, versionCfg)
+	err = h.k8sService.Start(ctx, product, version, versionCfg)
 	if err != nil {
 		return fmt.Errorf("starting version on k8s service: %w", err)
 	}

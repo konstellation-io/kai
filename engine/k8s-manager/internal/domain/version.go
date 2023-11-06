@@ -6,7 +6,8 @@ type Version struct {
 	GlobalKeyValueStore  string
 	VersionKeyValueStore string
 
-	Workflows []*Workflow
+	Workflows          []*Workflow
+	MinioConfiguration MinioConfiguration
 }
 
 type Workflow struct {
@@ -14,4 +15,10 @@ type Workflow struct {
 	Stream        string
 	KeyValueStore string
 	Processes     []*Process
+}
+
+type MinioConfiguration struct {
+	User     string
+	Password string
+	Bucket   string
 }

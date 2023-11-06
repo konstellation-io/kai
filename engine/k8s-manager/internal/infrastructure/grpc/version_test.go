@@ -4,7 +4,7 @@ package grpc_test
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/go-logr/logr"
@@ -57,6 +57,11 @@ func (s *VersionServiceTestSuite) TestStart() {
 		VersionTag:           "test-version",
 		GlobalKeyValueStore:  "test-global-kv-store",
 		VersionKeyValueStore: "test-kv-store",
+		MinioConfiguration: &versionpb.MinioConfiguration{
+			User:     "test-minio-user",
+			Password: "test-minio-password",
+			Bucket:   "test-minio-bucket",
+		},
 		Workflows: []*versionpb.Workflow{
 			{
 				Name: "test-workflow",
@@ -100,6 +105,11 @@ func (s *VersionServiceTestSuite) TestStart() {
 		Tag:                  req.VersionTag,
 		GlobalKeyValueStore:  req.GlobalKeyValueStore,
 		VersionKeyValueStore: req.VersionKeyValueStore,
+		MinioConfiguration: domain.MinioConfiguration{
+			User:     req.MinioConfiguration.User,
+			Password: req.MinioConfiguration.Password,
+			Bucket:   req.MinioConfiguration.Bucket,
+		},
 		Workflows: []*domain.Workflow{
 			{
 				Name: req.Workflows[0].Name,
@@ -140,8 +150,8 @@ func (s *VersionServiceTestSuite) TestStart() {
 	s.versionServiceMock.EXPECT().StartVersion(ctx, expectedVersion).Return(nil)
 
 	res, err := s.versionGRPCService.Start(ctx, req)
-	require.NoError(s.T(), err)
-	require.NotNil(s.T(), res)
+	s.Require().NoError(err)
+	s.NotNil(res)
 }
 
 func (s *VersionServiceTestSuite) TestStop() {
@@ -160,8 +170,8 @@ func (s *VersionServiceTestSuite) TestStop() {
 	s.versionServiceMock.EXPECT().StopVersion(ctx, expectedParams).Return(nil)
 
 	res, err := s.versionGRPCService.Stop(ctx, req)
-	require.NoError(s.T(), err)
-	require.NotNil(s.T(), res)
+	s.Require().NoError(err)
+	s.NotNil(res)
 }
 
 func (s *VersionServiceTestSuite) TestRegisterProcess() {
@@ -202,8 +212,10 @@ func (s *VersionServiceTestSuite) TestRegisterProcess_Error() {
 		ProcessImage: req.ProcessImage,
 	}
 
-	s.processServiceMock.EXPECT().RegisterProcess(ctx, expectedParams).Return("", fmt.Errorf("test error"))
+	expectedError := errors.New("error registering process")
+
+	s.processServiceMock.EXPECT().RegisterProcess(ctx, expectedParams).Return("", expectedError)
 
 	_, err := s.versionGRPCService.RegisterProcess(ctx, req)
-	require.Error(s.T(), err)
+	s.Require().ErrorIs(err, expectedError)
 }

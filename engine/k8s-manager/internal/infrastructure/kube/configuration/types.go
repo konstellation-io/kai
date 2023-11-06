@@ -4,6 +4,8 @@ type ProcessConfig struct {
 	Metadata          Metadata          `yaml:"metadata"`
 	Nats              NatsConfig        `yaml:"nats"`
 	CentralizedConfig CentralizedConfig `yaml:"centralized_configuration"`
+	Minio             MinioConfig       `yaml:"minio"`
+	Auth              AuthConfig        `yaml:"auth"`
 }
 
 type Metadata struct {
@@ -33,4 +35,19 @@ type NatsConfig struct {
 	Subject       string   `yaml:"output"`
 	Subscriptions []string `yaml:"inputs"`
 	ObjectStore   *string  `yaml:"object_store,omitempty"`
+}
+
+type MinioConfig struct {
+	Endpoint       string `yaml:"endpoint"`
+	ClientUser     string `yaml:"client_user"`
+	ClientPassword string `yaml:"client_password"`
+	SSL            bool   `yaml:"ssl"`
+	Bucket         string `yaml:"string"`
+}
+
+type AuthConfig struct {
+	Endpoint     string `yaml:"endpoint"`
+	Client       string `yaml:"client"`
+	ClientSecret string `yaml:"client_secret"`
+	Realm        string `yaml:"realm"`
 }

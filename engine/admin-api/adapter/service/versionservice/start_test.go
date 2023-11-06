@@ -75,7 +75,7 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 	ctx := context.Background()
 
 	var (
-		productID = "test-product"
+		product = testhelpers.NewProductBuilder().Build()
 
 		process = testhelpers.NewProcessBuilder().
 			WithObjectStore(&entity.ProcessObjectStore{
@@ -120,7 +120,7 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 	)
 
 	req := &versionpb.StartRequest{
-		ProductId:            productID,
+		ProductId:            product.ID,
 		VersionTag:           version.Tag,
 		GlobalKeyValueStore:  versionConfig.KeyValueStores.GlobalKeyValueStore,
 		VersionKeyValueStore: versionConfig.KeyValueStores.VersionKeyValueStore,
@@ -162,12 +162,17 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 				},
 			},
 		},
+		MinioConfiguration: &versionpb.MinioConfiguration{
+			User:     product.MinioConfiguration.User,
+			Password: product.MinioConfiguration.Password,
+			Bucket:   product.MinioConfiguration.Bucket,
+		},
 	}
 
 	customMatcher := newStartRequestMatcher(req)
 	s.mockService.EXPECT().Start(ctx, customMatcher).Return(&versionpb.Response{Message: "ok"}, nil)
 
-	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, product, version, versionConfig)
 	s.Require().NoError(err)
 }
 
@@ -175,7 +180,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ClientError() {
 	ctx := context.Background()
 
 	var (
-		productID     = "test-product"
+		product       = testhelpers.NewProductBuilder().Build()
 		version       = testhelpers.NewVersionBuilder().Build()
 		versionConfig = s.getConfigForVersion(version)
 	)
@@ -184,7 +189,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ClientError() {
 
 	s.mockService.EXPECT().Start(gomock.Any(), gomock.Any()).Return(nil, expectedError)
 
-	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, product, version, versionConfig)
 	s.Assert().ErrorIs(err, expectedError)
 }
 
@@ -192,7 +197,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFoun
 	ctx := context.Background()
 
 	var (
-		productID = "test-product"
+		product = testhelpers.NewProductBuilder().Build()
 
 		process = testhelpers.NewProcessBuilder().
 			WithObjectStore(&entity.ProcessObjectStore{
@@ -230,7 +235,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFoun
 	// override default workflow to empty map
 	versionConfig.Streams.Workflows = map[string]entity.WorkflowStreamResources{}
 
-	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, product, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowStreamNotFound)
 }
 
@@ -238,7 +243,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowKeyValue
 	ctx := context.Background()
 
 	var (
-		productID = "test-product"
+		product = testhelpers.NewProductBuilder().Build()
 
 		process = testhelpers.NewProcessBuilder().Build()
 
@@ -256,7 +261,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowKeyValue
 	// override default workflow config to empty map
 	versionConfig.KeyValueStores.Workflows = map[string]*entity.WorkflowKeyValueStores{}
 
-	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, product, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowKVStoreNotFound)
 }
 
@@ -264,8 +269,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowObjectSt
 	ctx := context.Background()
 
 	var (
-		productID = "test-product"
-
+		product = testhelpers.NewProductBuilder().Build()
 		process = testhelpers.NewProcessBuilder().Build()
 
 		workflow = testhelpers.NewWorkflowBuilder().
@@ -282,7 +286,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_NoWorkflowObjectSt
 	// override default workflow config to empty map
 	versionConfig.ObjectStores.Workflows = map[string]entity.WorkflowObjectStoresConfig{}
 
-	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, product, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrWorkflowObjectStoreNotFound)
 }
 
@@ -290,7 +294,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_ProcessStreamNotFo
 	ctx := context.Background()
 
 	var (
-		productID = "test-product"
+		product = testhelpers.NewProductBuilder().Build()
 
 		process = testhelpers.NewProcessBuilder().Build()
 
@@ -311,7 +315,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_ProcessStreamNotFo
 		Processes: map[string]entity.ProcessStreamConfig{},
 	}
 
-	err := s.k8sVersionClient.Start(ctx, productID, version, versionConfig)
+	err := s.k8sVersionClient.Start(ctx, product, version, versionConfig)
 	s.Assert().ErrorIs(err, entity.ErrProcessStreamNotFound)
 }
 

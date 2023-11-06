@@ -16,6 +16,11 @@ func defaultVersion() domain.Version {
 		Workflows: []*domain.Workflow{
 			NewWorkflowBuilder().Build(),
 		},
+		MinioConfiguration: domain.MinioConfiguration{
+			User:     "test-minio-user",
+			Password: "test-minio-password",
+			Bucket:   "test-minio-bucket",
+		},
 	}
 }
 

@@ -40,7 +40,7 @@ func New(cfg *config.Config, logger logging.Logger, client versionpb.VersionServ
 // Start creates the version resources in k8s.
 func (k *K8sVersionService) Start(
 	ctx context.Context,
-	productID string,
+	product *entity.Product,
 	version *entity.Version,
 	versionConfig *entity.VersionStreamingResources,
 ) error {
@@ -50,11 +50,16 @@ func (k *K8sVersionService) Start(
 	}
 
 	req := versionpb.StartRequest{
-		ProductId:            productID,
+		ProductId:            product.ID,
 		VersionTag:           version.Tag,
 		Workflows:            wf,
 		GlobalKeyValueStore:  versionConfig.KeyValueStores.GlobalKeyValueStore,
 		VersionKeyValueStore: versionConfig.KeyValueStores.VersionKeyValueStore,
+		MinioConfiguration: &versionpb.MinioConfiguration{
+			User:     product.MinioConfiguration.User,
+			Password: product.MinioConfiguration.Password,
+			Bucket:   product.MinioConfiguration.Bucket,
+		},
 	}
 
 	_, err = k.client.Start(ctx, &req)

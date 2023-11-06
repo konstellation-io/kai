@@ -12,6 +12,11 @@ func mapRequestToVersion(req *versionpb.StartRequest) domain.Version {
 		GlobalKeyValueStore:  req.GlobalKeyValueStore,
 		VersionKeyValueStore: req.VersionKeyValueStore,
 		Workflows:            mapReqWorkflowsToWorkflows(req.Workflows),
+		MinioConfiguration: domain.MinioConfiguration{
+			User:     req.MinioConfiguration.User,
+			Password: req.MinioConfiguration.Password,
+			Bucket:   req.MinioConfiguration.Bucket,
+		},
 	}
 }
 

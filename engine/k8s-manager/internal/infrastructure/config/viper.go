@@ -29,6 +29,11 @@ const (
 	MinioAccessKeyIDKey     = "minio.accessKeyID"
 	MinioAccessKeySecretKey = "minio.accessKeySecret"
 	MinioRegionKey          = "minio.regionKey"
+	MinioSSLEnabledKey      = "minio.ssl"
+
+	AuthEndpointKey = "auth.endpoint"
+	AuthRealmKey    = "auth.realm"
+	AuthClientIDKey = "auth.clientID"
 
 	TriggersRequestTimeoutKey         = "networking.trigger.requestTimeout"
 	TriggersB64IngressesAnnotaionsKey = "networking.trigger.b64Annotations"
@@ -77,6 +82,10 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(MinioAccessKeySecretKey, "MINIO_ROOT_PASSWORD")
 	viper.RegisterAlias(MinioRegionKey, "MINIO_REGION")
 
+	viper.RegisterAlias(AuthEndpointKey, "KEYCLOAK_BASE_URL")
+	viper.RegisterAlias(AuthRealmKey, "KEYCLOAK_REALM")
+	viper.RegisterAlias(AuthClientIDKey, "KEYCLOAK_ADMIN_CLIENT_ID")
+
 	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_ENABLED")
 	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_CERT_SECRET_NAME")
 	viper.RegisterAlias(TriggersIngressClassNameKey, "TRIGGERS_INGRESS_CLASS_NAME")
@@ -102,7 +111,9 @@ func setDefaultValues() {
 
 	viper.SetDefault(ImageBuilderImageKey, "gcr.io/kaniko-project/executor:latest")
 	viper.SetDefault(ImageBuilderLogLevel, "error")
+
 	viper.SetDefault(MinioRegionKey, "us-east-1")
+	viper.SetDefault(MinioSSLEnabledKey, false)
 
 	viper.SetDefault("kubernetes.isInsideCluster", true)
 	viper.SetDefault(KubeNamespaceKey, "kai")
