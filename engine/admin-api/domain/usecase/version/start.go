@@ -37,14 +37,14 @@ func (h *Handler) Start(
 		return nil, err
 	}
 
+	if !version.CanBeStarted() {
+		return nil, ErrVersionCannotBeStarted
+	}
+
 	if version.Status == entity.VersionStatusCritical {
 		if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartCriticalVersion); err != nil {
 			return nil, err
 		}
-	}
-
-	if !version.CanBeStarted() {
-		return nil, ErrVersionCannotBeStarted
 	}
 
 	version.Status = entity.VersionStatusStarting
