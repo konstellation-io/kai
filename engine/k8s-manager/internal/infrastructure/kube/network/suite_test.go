@@ -19,15 +19,14 @@ import (
 )
 
 const (
-	_processFormat = "%s.%s/%s-%s"
-	_labelFormat   = "product=%s,version=%s"
-	product        = "test-product"
-	version        = "v1.0.0"
-	workflow       = "test-workflow"
-	process        = "test-process"
+	_labelFormat = "product=%s,version=%s"
+	_product     = "test-product"
+	_version     = "v1.0.0"
+	_workflow    = "test-workflow"
+	_process     = "test-process"
 )
 
-var fullProcessIdentifier = strings.ReplaceAll(fmt.Sprintf("%s-%s-%s-%s", product, version, workflow, process), ".", "-")
+var fullProcessIdentifier = strings.ReplaceAll(fmt.Sprintf("%s-%s-%s-%s", _product, _version, _workflow, _process), ".", "-")
 
 type networkSuite struct {
 	suite.Suite

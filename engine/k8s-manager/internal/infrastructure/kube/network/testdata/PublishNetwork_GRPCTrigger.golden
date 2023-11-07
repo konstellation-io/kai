@@ -34,20 +34,17 @@ items:
       spec:
         ingressclassname: ""
         defaultbackend: null
-        tls:
-            - hosts:
-                - v1-0-0.test-product.test
-              secretname: test-product-v1-0-0-tls
+        tls: []
         rules:
-            - host: v1-0-0.test-product.test
+            - host: test-product-v1-0-0-test-workflow-test-process
               ingressrulevalue:
                 http:
                     paths:
-                        - path: test-workflow-test-process
+                        - path: /
                           pathtype: Prefix
                           backend:
                             service:
-                                name: test-product-v1-0-0-test-workflow-test-process
+                                name: test-process.test-workflow.v1-0-0.test-product.test
                                 port:
                                     name: trigger
                                     number: 0

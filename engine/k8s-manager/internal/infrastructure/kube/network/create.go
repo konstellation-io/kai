@@ -28,8 +28,9 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 
 	_, err := kn.client.CoreV1().Services(kn.namespace).Create(ctx, &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   kn.getServiceName(params.Product, params.Version, params.Workflow, params.Process.Name),
-			Labels: kn.getNetworkLabels(params.Product, params.Version, params.Workflow, params.Process.Name),
+			Name: kn.getServiceName(params.Product, params.Version, params.Workflow, params.Process.Name),
+			Labels: kn.getServiceLabels(
+				params.Product, params.Version, params.Workflow, params.Process.Name, params.Process.Networking.Protocol),
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: kn.getSelector(params.Product, params.Version, params.Workflow, params.Process.Name),
@@ -57,12 +58,13 @@ func (kn KubeNetwork) getSelector(product, version, workflow, process string) ma
 	}
 }
 
-func (kn KubeNetwork) getNetworkLabels(product, version, workflow, process string) map[string]string {
+func (kn KubeNetwork) getServiceLabels(product, version, workflow, process, protocol string) map[string]string {
 	return map[string]string{
 		"product":  product,
 		"version":  version,
 		"workflow": workflow,
 		"process":  process,
+		"protocol": protocol,
 		"type":     "network",
 	}
 }

@@ -15,11 +15,11 @@ import (
 func (s *networkSuite) TestUnpublish() {
 	ctx := context.Background()
 	err := s.service.CreateNetwork(ctx, service.CreateNetworkParams{
-		Product:  product,
-		Version:  version,
-		Workflow: workflow,
+		Product:  _product,
+		Version:  _version,
+		Workflow: _workflow,
 		Process: &domain.Process{
-			Name: process,
+			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
 				Protocol:   "TCP",
@@ -30,22 +30,22 @@ func (s *networkSuite) TestUnpublish() {
 	s.Require().NoError(err)
 
 	_, err = s.service.PublishNetwork(ctx, service.PublishNetworkParams{
-		Product: product,
-		Version: version,
+		Product: _product,
+		Version: _version,
 	})
 
-	err = s.service.UnpublishNetwork(ctx, product, version)
+	err = s.service.UnpublishNetwork(ctx, _product, _version)
 	require.NoError(s.T(), err)
 }
 
 func (s *networkSuite) TestUnpublish_FailedToDeleteIngressError() {
 	ctx := context.Background()
 	err := s.service.CreateNetwork(ctx, service.CreateNetworkParams{
-		Product:  product,
-		Version:  version,
-		Workflow: workflow,
+		Product:  _product,
+		Version:  _version,
+		Workflow: _workflow,
 		Process: &domain.Process{
-			Name: process,
+			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
 				Protocol:   "TCP",
@@ -64,10 +64,10 @@ func (s *networkSuite) TestUnpublish_FailedToDeleteIngressError() {
 	})
 
 	_, err = s.service.PublishNetwork(ctx, service.PublishNetworkParams{
-		Product: product,
-		Version: version,
+		Product: _product,
+		Version: _version,
 	})
 
-	err = s.service.UnpublishNetwork(ctx, product, version)
+	err = s.service.UnpublishNetwork(ctx, _product, _version)
 	s.Require().ErrorIs(err, expectedErr)
 }

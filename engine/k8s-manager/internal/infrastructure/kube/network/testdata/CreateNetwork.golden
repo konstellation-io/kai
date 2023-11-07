@@ -24,6 +24,7 @@ items:
         labels:
             process: test-process
             product: test-product
+            protocol: TCP
             type: network
             version: v1.0.0
             workflow: test-workflow

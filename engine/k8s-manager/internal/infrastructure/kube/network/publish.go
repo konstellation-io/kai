@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
+	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
@@ -22,44 +24,21 @@ const (
 )
 
 func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.PublishNetworkParams) (map[string]string, error) {
-	res, err := kn.client.CoreV1().Services(kn.namespace).List(ctx, metav1.ListOptions{
+	servicesToPublish, err := kn.client.CoreV1().Services(kn.namespace).List(ctx, metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("product=%s,version=%s", params.Product, params.Version),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("listing services: %w", err)
 	}
 
-	ingressName := strings.ReplaceAll(fmt.Sprintf("%s-%s", params.Product, params.Version), ".", "-")
-
-	triggerHost := fmt.Sprintf("%s.%s", ingressName, viper.GetString(config.BaseDomainNameKey))
-
-	ingressPaths := make([]networkingv1.HTTPIngressPath, 0, len(res.Items))
-	publishedEndpoints := make(map[string]string, len(res.Items))
-
-	pathType := networkingv1.PathTypePrefix
-
 	annotations, err := kn.getIngressAnnotations()
 	if err != nil {
 		return nil, fmt.Errorf("parsing ingress annotations: %w", err)
 	}
 
-	for _, svc := range res.Items {
-		triggerPath := fmt.Sprintf("/%s-%s", svc.Labels["workflow"], svc.Labels["process"])
-		publishedEndpoints[svc.Name] = fmt.Sprintf("%s%s", triggerHost, triggerPath)
+	ingressName := kn.getIngressName(params.Product, params.Version)
 
-		ingressPaths = append(ingressPaths, networkingv1.HTTPIngressPath{
-			Path:     triggerPath,
-			PathType: &pathType,
-			Backend: networkingv1.IngressBackend{
-				Service: &networkingv1.IngressServiceBackend{
-					Name: svc.Name,
-					Port: networkingv1.ServiceBackendPort{
-						Name: _servicePortName,
-					},
-				},
-			},
-		})
-	}
+	ingressRules, publishedEndpoints := kn.getIngressRules(params.Product, params.Version, servicesToPublish)
 
 	ingress := &networkingv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
@@ -75,7 +54,11 @@ func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.Publish
 			},
 			Annotations: annotations,
 		},
-		Spec: kn.getIngressSpec(triggerHost, ingressPaths),
+		Spec: networkingv1.IngressSpec{
+			IngressClassName: pointer.String(viper.GetString(config.TriggersIngressClassNameKey)),
+			Rules:            ingressRules,
+			TLS:              kn.getIngressTLSConfiguration(ingressRules, ingressName),
+		},
 	}
 
 	_, err = kn.client.NetworkingV1().Ingresses(kn.namespace).Create(ctx, ingress, metav1.CreateOptions{})
@@ -84,40 +67,6 @@ func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.Publish
 	}
 
 	return publishedEndpoints, nil
-}
-
-func (kn KubeNetwork) getIngressSpec(triggerHost string, ingressPaths []networkingv1.HTTPIngressPath) networkingv1.IngressSpec {
-	ingressSpec := networkingv1.IngressSpec{
-		IngressClassName: pointer.String(viper.GetString(config.TriggersIngressClassNameKey)),
-		Rules: []networkingv1.IngressRule{
-			{
-				Host: triggerHost,
-				IngressRuleValue: networkingv1.IngressRuleValue{
-					HTTP: &networkingv1.HTTPIngressRuleValue{
-						Paths: ingressPaths,
-					},
-				},
-			},
-		},
-	}
-
-	if viper.GetBool(config.TriggersTLSEnabledKey) {
-		var tlsSecretName string
-		if viper.GetString(config.TLSSecretNameKey) != "" {
-			tlsSecretName = viper.GetString(config.TLSSecretNameKey)
-		} else {
-			tlsSecretName = fmt.Sprintf("%s-tls", triggerHost)
-		}
-
-		ingressSpec.TLS = []networkingv1.IngressTLS{
-			{
-				Hosts:      []string{triggerHost},
-				SecretName: tlsSecretName,
-			},
-		}
-	}
-
-	return ingressSpec
 }
 
 func (kn KubeNetwork) getIngressAnnotations() (map[string]string, error) {
@@ -144,6 +93,141 @@ func (kn KubeNetwork) getIngressAnnotations() (map[string]string, error) {
 	return mergeAnnotations(annotationsMap, defaultAnnotations), nil
 }
 
+func (kn KubeNetwork) getIngressName(product, version string) string {
+	return strings.ReplaceAll(fmt.Sprintf("%s-%s", product, version), ".", "-")
+}
+
+func (kn KubeNetwork) getIngressRules(
+	product, version string, servicesToPublish *corev1.ServiceList,
+) (rules []networkingv1.IngressRule, endpoints map[string]string) {
+	var (
+		httpHost = kn.getHTTPHost(product, version)
+
+		httpPaths          = make([]networkingv1.HTTPIngressPath, 0, len(servicesToPublish.Items))
+		publishedEndpoints = make(map[string]string, len(servicesToPublish.Items))
+		ingressRules       []networkingv1.IngressRule
+	)
+
+	for _, svc := range servicesToPublish.Items {
+		workflow := svc.Labels["workflow"]
+		process := svc.Labels["process"]
+
+		if kn.isGrpc(svc) {
+			grpcHost := kn.getGRPCHost(workflow, process, httpHost)
+			publishedEndpoints[svc.Name] = grpcHost
+			ingressRules = append(ingressRules, kn.getGRPCIngressRule(svc.Name, grpcHost))
+		} else {
+			triggerPath := kn.getTriggerPath(workflow, process)
+			publishedEndpoints[svc.Name] = path.Join(httpHost, triggerPath)
+			httpPaths = append(httpPaths, kn.getTriggerIngressPath(triggerPath, svc.Name))
+		}
+	}
+
+	if len(httpPaths) > 0 {
+		ingressRules = append(ingressRules, kn.getHTTPIngressRule(httpHost, httpPaths))
+	}
+
+	return ingressRules, publishedEndpoints
+}
+
+func (kn KubeNetwork) isGrpc(svc corev1.Service) bool {
+	return svc.Labels["protocol"] == "grpc"
+}
+
+func (kn KubeNetwork) getGRPCHost(workflow, process, httpHost string) string {
+	return fmt.Sprintf("%s.%s.%s", replaceDotsWithHyphen(process), replaceDotsWithHyphen(workflow), httpHost)
+}
+
+func (kn KubeNetwork) getGRPCIngressRule(grpcHost, serviceName string) networkingv1.IngressRule {
+	pathType := networkingv1.PathTypePrefix
+
+	return networkingv1.IngressRule{
+		Host: grpcHost,
+		IngressRuleValue: networkingv1.IngressRuleValue{
+			HTTP: &networkingv1.HTTPIngressRuleValue{
+				Paths: []networkingv1.HTTPIngressPath{
+					{
+						Path:     "/",
+						PathType: &pathType,
+						Backend: networkingv1.IngressBackend{
+							Service: &networkingv1.IngressServiceBackend{
+								Name: serviceName,
+								Port: networkingv1.ServiceBackendPort{
+									Name: _servicePortName,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func (kn KubeNetwork) getHTTPHost(product, version string) string {
+	return fmt.Sprintf("%s.%s.%s",
+		replaceDotsWithHyphen(version), replaceDotsWithHyphen(product), viper.GetString(config.BaseDomainNameKey),
+	)
+}
+
+func (kn KubeNetwork) getHTTPIngressRule(httpHost string, httpPaths []networkingv1.HTTPIngressPath) networkingv1.IngressRule {
+	return networkingv1.IngressRule{
+		Host: httpHost,
+		IngressRuleValue: networkingv1.IngressRuleValue{
+			HTTP: &networkingv1.HTTPIngressRuleValue{
+				Paths: httpPaths,
+			},
+		},
+	}
+}
+
+func (kn KubeNetwork) getTriggerPath(workflow, process string) string {
+	return fmt.Sprintf("%s-%s", replaceDotsWithHyphen(workflow), replaceDotsWithHyphen(process))
+}
+
+func (kn KubeNetwork) getTriggerIngressPath(triggerPath, serviceName string) networkingv1.HTTPIngressPath {
+	pathType := networkingv1.PathTypePrefix
+
+	return networkingv1.HTTPIngressPath{
+		Path:     triggerPath,
+		PathType: &pathType,
+		Backend: networkingv1.IngressBackend{
+			Service: &networkingv1.IngressServiceBackend{
+				Name: serviceName,
+				Port: networkingv1.ServiceBackendPort{
+					Name: _servicePortName,
+				},
+			},
+		},
+	}
+}
+
+func (kn KubeNetwork) getIngressTLSConfiguration(rules []networkingv1.IngressRule, ingressName string) []networkingv1.IngressTLS {
+	if !viper.GetBool(config.TriggersTLSEnabledKey) {
+		return nil
+	}
+
+	var tlsSecretName string
+	if viper.GetString(config.TLSSecretNameKey) != "" {
+		tlsSecretName = viper.GetString(config.TLSSecretNameKey)
+	} else {
+		tlsSecretName = fmt.Sprintf("%s-tls", ingressName)
+	}
+
+	publishedHosts := make([]string, 0, len(rules))
+
+	for _, rule := range rules {
+		publishedHosts = append(publishedHosts, rule.Host)
+	}
+
+	return []networkingv1.IngressTLS{
+		{
+			Hosts:      publishedHosts,
+			SecretName: tlsSecretName,
+		},
+	}
+}
+
 func mergeAnnotations(annotations1, annotations2 map[string]string) map[string]string {
 	annotations := make(map[string]string, len(annotations1)+len(annotations2))
 
@@ -156,4 +240,8 @@ func mergeAnnotations(annotations1, annotations2 map[string]string) map[string]s
 	}
 
 	return annotations
+}
+
+func replaceDotsWithHyphen(str string) string {
+	return strings.ReplaceAll(str, ".", "-")
 }
