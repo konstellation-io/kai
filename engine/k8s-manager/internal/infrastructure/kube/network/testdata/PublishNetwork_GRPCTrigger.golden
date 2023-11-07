@@ -36,7 +36,7 @@ items:
         defaultbackend: null
         tls: []
         rules:
-            - host: test-product-v1-0-0-test-workflow-test-process
+            - host: test-process.test-workflow.v1-0-0.test-product.test
               ingressrulevalue:
                 http:
                     paths:
@@ -44,7 +44,7 @@ items:
                           pathtype: Prefix
                           backend:
                             service:
-                                name: test-process.test-workflow.v1-0-0.test-product.test
+                                name: test-product-v1-0-0-test-workflow-test-process
                                 port:
                                     name: trigger
                                     number: 0

@@ -115,7 +115,7 @@ func (kn KubeNetwork) getIngressRules(
 		if kn.isGrpc(svc) {
 			grpcHost := kn.getGRPCHost(workflow, process, httpHost)
 			publishedEndpoints[svc.Name] = grpcHost
-			ingressRules = append(ingressRules, kn.getGRPCIngressRule(svc.Name, grpcHost))
+			ingressRules = append(ingressRules, kn.getGRPCIngressRule(grpcHost, svc.Name))
 		} else {
 			triggerPath := kn.getTriggerPath(workflow, process)
 			publishedEndpoints[svc.Name] = path.Join(httpHost, triggerPath)
@@ -182,7 +182,7 @@ func (kn KubeNetwork) getHTTPIngressRule(httpHost string, httpPaths []networking
 }
 
 func (kn KubeNetwork) getTriggerPath(workflow, process string) string {
-	return fmt.Sprintf("%s-%s", replaceDotsWithHyphen(workflow), replaceDotsWithHyphen(process))
+	return fmt.Sprintf("/%s-%s", replaceDotsWithHyphen(workflow), replaceDotsWithHyphen(process))
 }
 
 func (kn KubeNetwork) getTriggerIngressPath(triggerPath, serviceName string) networkingv1.HTTPIngressPath {

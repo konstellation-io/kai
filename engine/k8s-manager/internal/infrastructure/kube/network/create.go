@@ -38,7 +38,6 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 			Ports: []corev1.ServicePort{
 				{
 					Name:       _servicePortName,
-					Protocol:   corev1.Protocol(networking.Protocol),
 					TargetPort: intstr.FromInt(networking.TargetPort),
 					Port:       int32(networking.SourcePort),
 				},
