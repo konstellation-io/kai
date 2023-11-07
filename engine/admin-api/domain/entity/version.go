@@ -133,8 +133,15 @@ func (s ObjectStoreScope) String() string {
 type ProcessNetworking struct {
 	TargetPort      int
 	DestinationPort int
-	Protocol        string
+	Protocol        NetworkingProtocol
 }
+
+type NetworkingProtocol string
+
+const (
+	NetworkingProtocolHTTP NetworkingProtocol = "HTTP"
+	NetworkingProtocolGRPC NetworkingProtocol = "GRPC"
+)
 
 type ResourceLimit struct {
 	Request string

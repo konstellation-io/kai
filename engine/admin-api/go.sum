@@ -239,8 +239,8 @@ github.com/klauspost/cpuid/v2 v2.2.5/go.mod h1:Lcz8mBdAVJIBVzewtcLocK12l3Y+JytZY
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459 h1:310+tQT8Nl319PRRgk+y7VvCLCN6WSP/iv6BawcLkww=
 github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459/go.mod h1:YUG3Uvb2wB64+MvlGsvO/9XsdcEPzVkphzqR0SnECLQ=
-github.com/konstellation-io/krt v0.1.6 h1:VoqJcRUPewT4NkkgIdwj8aD2R+FAMXCJ3L2DnRQ8178=
-github.com/konstellation-io/krt v0.1.6/go.mod h1:gzukJ5SZG8kGhrsjTuwZ+UR3z5XimRnn9Q0DMKnSeDs=
+github.com/konstellation-io/krt v0.1.7 h1:nYNxw9tvxuGHWYNCVW11EmEEWcgIMeTjIbxImeiTTcY=
+github.com/konstellation-io/krt v0.1.7/go.mod h1:gzukJ5SZG8kGhrsjTuwZ+UR3z5XimRnn9Q0DMKnSeDs=
 github.com/kr/fs v0.1.0/go.mod h1:FFnZGqtBN9Gxj7eW1uZ42v5BccTP0vu6NEaFoC2HwRg=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=

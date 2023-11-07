@@ -91,7 +91,7 @@ func (h *Handler) mapKrtNetworkingToVersion(krtNetworking *krt.ProcessNetworking
 	return &entity.ProcessNetworking{
 		TargetPort:      krtNetworking.TargetPort,
 		DestinationPort: krtNetworking.DestinationPort,
-		Protocol:        string(krtNetworking.Protocol),
+		Protocol:        entity.NetworkingProtocol(string(krtNetworking.Protocol)),
 	}
 }
 

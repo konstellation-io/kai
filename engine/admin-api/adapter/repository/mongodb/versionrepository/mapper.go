@@ -78,7 +78,7 @@ func mapDTOToEntityProcessNetworking(dto *processNetworkingDTO) *entity.ProcessN
 	return &entity.ProcessNetworking{
 		TargetPort:      dto.TargetPort,
 		DestinationPort: dto.DestinationPort,
-		Protocol:        dto.Protocol,
+		Protocol:        entity.NetworkingProtocol(dto.Protocol),
 	}
 }
 
@@ -200,7 +200,7 @@ func mapEntityToDTOProcessNetworking(networking *entity.ProcessNetworking) *proc
 	return &processNetworkingDTO{
 		TargetPort:      networking.TargetPort,
 		DestinationPort: networking.DestinationPort,
-		Protocol:        networking.Protocol,
+		Protocol:        string(networking.Protocol),
 	}
 }
 

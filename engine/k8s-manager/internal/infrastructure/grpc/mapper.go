@@ -51,7 +51,7 @@ func mapReqProcessToProcess(reqProcesses []*versionpb.Process) []*domain.Process
 			p.Networking = &domain.Networking{
 				SourcePort: int(process.Networking.SourcePort),
 				TargetPort: int(process.Networking.TargetPort),
-				Protocol:   process.Networking.Protocol,
+				Protocol:   domain.NetworkingProtocol(process.Networking.Protocol),
 			}
 		}
 

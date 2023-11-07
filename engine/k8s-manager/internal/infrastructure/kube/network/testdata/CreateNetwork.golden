@@ -35,7 +35,7 @@ items:
       spec:
         ports:
             - name: trigger
-              protocol: TCP
+              protocol: ""
               appprotocol: null
               port: 80
               targetport:

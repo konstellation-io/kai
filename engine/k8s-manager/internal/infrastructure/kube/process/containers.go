@@ -51,7 +51,6 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 		container.Ports = []corev1.ContainerPort{
 			{
 				ContainerPort: int32(process.Networking.SourcePort),
-				Protocol:      getProtocol(process.Networking.Protocol),
 			},
 		}
 	}

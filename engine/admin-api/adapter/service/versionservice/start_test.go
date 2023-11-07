@@ -141,7 +141,7 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 						ObjectStore:   &process.ObjectStore.Name,
 						Networking: &versionpb.Network{
 							TargetPort: int32(process.Networking.TargetPort),
-							Protocol:   process.Networking.Protocol,
+							Protocol:   string(process.Networking.Protocol),
 							SourcePort: int32(process.Networking.DestinationPort),
 						},
 						ResourceLimits: &versionpb.ProcessResourceLimits{
