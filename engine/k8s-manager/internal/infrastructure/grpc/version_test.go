@@ -73,7 +73,7 @@ func (s *VersionServiceTestSuite) TestStart() {
 						Type:          versionpb.ProcessType_ProcessTypeExit,
 						Networking: &versionpb.Network{
 							TargetPort: 8080,
-							Protocol:   "TCP",
+							Protocol:   "GRPC",
 							SourcePort: 8080,
 						},
 						Config: map[string]string{

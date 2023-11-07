@@ -2,7 +2,6 @@ package process
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 	"github.com/spf13/viper"
@@ -99,20 +98,6 @@ func getFluentBitContainer(spec *processSpec) corev1.Container {
 				MountPath: "/var/log/app",
 			},
 		},
-	}
-}
-
-func getProtocol(protocol string) corev1.Protocol {
-	switch strings.ToUpper(protocol) {
-	case "TCP":
-		return corev1.ProtocolTCP
-	case "UDP":
-		return corev1.ProtocolUDP
-	case "SCTP":
-		return corev1.ProtocolSCTP
-	default:
-		// Default Kubernetes value
-		return corev1.ProtocolTCP
 	}
 }
 

@@ -85,7 +85,7 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 			WithNetworking(&entity.ProcessNetworking{
 				TargetPort:      8080,
 				DestinationPort: 8080,
-				Protocol:        "TCP",
+				Protocol:        "GRPC",
 			}).
 			WithResourceLimits(&entity.ProcessResourceLimits{
 				CPU: &entity.ResourceLimit{
@@ -202,7 +202,7 @@ func (s *StartVersionTestSuite) TestStartVersion_ErrorMapping_WorkflowStreamFoun
 			WithNetworking(&entity.ProcessNetworking{
 				TargetPort:      8080,
 				DestinationPort: 8080,
-				Protocol:        "TCP",
+				Protocol:        "GRPC",
 			}).
 			WithResourceLimits(&entity.ProcessResourceLimits{
 				CPU: &entity.ResourceLimit{
