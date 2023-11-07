@@ -36,7 +36,7 @@ type VersionRepositoryTestSuite struct {
 	versionRepo      *VersionRepoMongoDB
 }
 
-func TestGocloakTestSuite(t *testing.T) {
+func TestVersionRepositoryTestSuite(t *testing.T) {
 	suite.Run(t, new(VersionRepositoryTestSuite))
 }
 
@@ -247,26 +247,56 @@ func (s *VersionRepositoryTestSuite) TestSetStatusNotFound() {
 	s.Assert().ErrorIs(err, version.ErrVersionNotFound)
 }
 
-func (s *VersionRepositoryTestSuite) TestSetError() {
+func (s *VersionRepositoryTestSuite) TesSetErrorStatusWithError() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
 	}
 	ctx := context.Background()
 
+	expectedVersionError := "error starting version"
+
 	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
 
-	_, err = s.versionRepo.SetError(context.Background(), productID, createdVer, "error1")
+	err = s.versionRepo.SetErrorStatusWithError(context.Background(), productID, createdVer.Tag, expectedVersionError)
 	s.Require().NoError(err)
 
 	updatedVer, err := s.versionRepo.GetByTag(ctx, productID, createdVer.Tag)
 	s.Require().NoError(err)
 
-	s.Equal("error1", updatedVer.Error)
+	s.Assert().Equal(entity.VersionStatusError, updatedVer.Status)
+	s.Assert().Equal(expectedVersionError, updatedVer.Error)
 }
 
-func (s *VersionRepositoryTestSuite) TestSetErrorNotFound() {
-	_, err := s.versionRepo.SetError(context.Background(), productID, &entity.Version{Tag: "notfound"}, "error1")
+func (s *VersionRepositoryTestSuite) TestSetErrorStatusWithError_NotFound() {
+	err := s.versionRepo.SetErrorStatusWithError(context.Background(), productID, "notfound", "error1")
+	s.Require().Error(err)
+	s.True(errors.Is(err, version.ErrVersionNotFound))
+}
+
+func (s *VersionRepositoryTestSuite) TesSetCriticalStatusWithError() {
+	testVersion := &entity.Version{
+		Tag: versionTag,
+	}
+	ctx := context.Background()
+
+	expectedVersionError := "error starting version"
+
+	createdVer, err := s.versionRepo.Create(creatorID, productID, testVersion)
+	s.Require().NoError(err)
+
+	err = s.versionRepo.SetCriticalStatusWithError(context.Background(), productID, createdVer.Tag, expectedVersionError)
+	s.Require().NoError(err)
+
+	updatedVer, err := s.versionRepo.GetByTag(ctx, productID, createdVer.Tag)
+	s.Require().NoError(err)
+
+	s.Assert().Equal(entity.VersionStatusCritical, updatedVer.Status)
+	s.Assert().Equal(expectedVersionError, updatedVer.Error)
+}
+
+func (s *VersionRepositoryTestSuite) TestSetCriticalStatusWithError_NotFound() {
+	err := s.versionRepo.SetCriticalStatusWithError(context.Background(), productID, "notfound", "error1")
 	s.Require().Error(err)
 	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
