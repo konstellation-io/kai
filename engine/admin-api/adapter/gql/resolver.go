@@ -98,27 +98,13 @@ func (r *mutationResolver) notifyRegisteredProcessStatus(notifyCh chan *entity.R
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, notifyCh, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
+	v, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 	if err != nil {
 		r.logger.Errorf("[mutationResolver.StartVersion] errors starting version: %s", err)
 		return nil, err
 	}
 
-	go r.notifyVersionStartStatus(notifyCh)
-
 	return v, err
-}
-
-func (r *mutationResolver) notifyVersionStartStatus(notifyCh chan *entity.Version) {
-	for startingVersion := range notifyCh {
-		switch startingVersion.Status {
-		case entity.VersionStatusStarted:
-			r.logger.Infof("Version successfully started with Tag: %q", startingVersion.Tag)
-		case entity.VersionStatusError:
-			r.logger.Errorf("Error starting version with Tag: %q - %s", startingVersion.Tag, startingVersion.Error)
-		default:
-		}
-	}
 }
 
 func (r *mutationResolver) StopVersion(ctx context.Context, input StopVersionInput) (*entity.Version, error) {

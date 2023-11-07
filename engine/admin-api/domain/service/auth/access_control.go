@@ -13,6 +13,7 @@ const ActCreateProduct Action = "create_product"
 
 const ActCreateVersion Action = "create_version"
 const ActStartVersion Action = "start_version"
+const ActStartCriticalVersion Action = "start_critical_version"
 const ActStopVersion Action = "stop_version"
 const ActPublishVersion Action = "publish_version"
 const ActUnpublishVersion Action = "unpublish_version"
@@ -30,7 +31,7 @@ func (e Action) IsValid() bool {
 	case ActCreateProduct, ActStartVersion, ActStopVersion, ActUpdateUserGrants,
 		ActPublishVersion, ActUnpublishVersion, ActEditVersion, ActViewMetrics,
 		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion,
-		ActViewServerInfo:
+		ActViewServerInfo, ActStartCriticalVersion:
 		return true
 	}
 

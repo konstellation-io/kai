@@ -150,29 +150,31 @@ func (r *VersionRepoMongoDB) SetStatus(
 	return res.Err()
 }
 
-func (r *VersionRepoMongoDB) SetError(
+func (r *VersionRepoMongoDB) SetCriticalStatusWithError(ctx context.Context, productID, versionTag, errorMessage string) error {
+	return r.setStatusWithError(ctx, productID, versionTag, errorMessage, entity.VersionStatusCritical)
+}
+
+func (r *VersionRepoMongoDB) SetErrorStatusWithError(ctx context.Context, productID, versionTag, errorMessage string) error {
+	return r.setStatusWithError(ctx, productID, versionTag, errorMessage, entity.VersionStatusError)
+}
+
+func (r *VersionRepoMongoDB) setStatusWithError(
 	ctx context.Context,
-	productID string,
-	versionFailed *entity.Version,
-	errorMessage string,
-) (*entity.Version, error) {
+	productID, versionTag, errorMessage string,
+	status entity.VersionStatus,
+) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
-	versionDTO := mapEntityToDTO(versionFailed)
+	elem := bson.M{"$set": bson.M{"status": status.String(), "error": errorMessage}}
 
-	versionDTO.Status = entity.VersionStatusError.String()
-	versionDTO.Error = errorMessage
-
-	elem := bson.M{"$set": bson.M{"status": versionDTO.Status, "error": versionDTO.Error}}
-
-	result, err := collection.UpdateOne(ctx, bson.M{"tag": versionDTO.Tag}, elem)
+	result, err := collection.UpdateOne(ctx, bson.M{"tag": versionTag}, elem)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if result.ModifiedCount == 0 {
-		return nil, version.ErrVersionNotFound
+		return version.ErrVersionNotFound
 	}
 
-	return mapDTOToEntity(versionDTO), nil
+	return nil
 }

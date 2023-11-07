@@ -35,6 +35,7 @@ const (
 	VersionStatusStopping  VersionStatus = "STOPPING"
 	VersionStatusStopped   VersionStatus = "STOPPED"
 	VersionStatusError     VersionStatus = "ERROR"
+	VersionStatusCritical  VersionStatus = "CRITICAL"
 )
 
 func (e VersionStatus) String() string {
@@ -43,7 +44,7 @@ func (e VersionStatus) String() string {
 
 func (v Version) CanBeStarted() bool {
 	switch v.Status {
-	case VersionStatusCreated, VersionStatusStopped, VersionStatusError:
+	case VersionStatusCreated, VersionStatusStopped, VersionStatusError, VersionStatusCritical:
 		return true
 	default:
 		return false

@@ -30,6 +30,7 @@ type ContainerStarter interface {
 	CreateProcess(ctx context.Context, params CreateProcessParams) error
 	CreateNetwork(ctx context.Context, params CreateNetworkParams) error
 	CreateVersionConfiguration(ctx context.Context, version domain.Version) (string, error)
+	WaitProcesses(ctx context.Context, version domain.Version) error
 }
 
 type ContainerStopper interface {

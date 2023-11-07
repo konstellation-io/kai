@@ -18,13 +18,11 @@ var (
 	ErrVersionNotFound            = errors.New("error version not found")
 	ErrVersionDuplicated          = errors.New("error version duplicated")
 	ErrUserNotAuthorized          = errors.New("error user not authorized")
-	ErrVersionCannotBeStarted     = errors.New("error version cannot be started, status must be 'created', 'stopped' or 'failed'")
+	ErrVersionCannotBeStarted     = errors.New("error version cannot be started, status must be 'created', 'stopped' or 'error'")
 	ErrVersionCannotBeStopped     = errors.New("error version cannot be stopped, status must be 'started'")
 	ErrVersionCannotBePublished   = errors.New("error publishing version, status must be 'started'")
 	ErrVersionCannotBeUnpublished = errors.New("error unpublishing version, status must be 'published'")
-	ErrCreatingNATSResources      = errors.New("error creating NATS resources")
 	ErrDeletingNATSResources      = errors.New("error deleting NATS resources")
-	ErrStartingVersion            = errors.New("error starting version")
 	ErrStoppingVersion            = errors.New("error stopping version")
 	ErrUnpublishingVersion        = errors.New("error unpublishing version")
 )
@@ -53,16 +51,8 @@ func NewErrInvalidKRT(msg string, errs error) KRTValidationError {
 	}
 }
 
-func (h *Handler) registerActionFailed(userEmail, productID string, vers *entity.Version, incomingErr error, action int) {
-	var err error
-
-	switch action {
-	case StartAction:
-		err = h.userActivityInteractor.RegisterStartAction(userEmail, productID, vers, incomingErr.Error())
-	case StopAction:
-		err = h.userActivityInteractor.RegisterStopAction(userEmail, productID, vers, incomingErr.Error())
-	}
-
+func (h *Handler) registerStopActionFailed(userEmail, productID string, vers *entity.Version, incomingErr error) {
+	err := h.userActivityInteractor.RegisterStopAction(userEmail, productID, vers, incomingErr.Error())
 	if err != nil {
 		h.logger.Error(err, "Error registering user activity",
 			"productID", productID,
@@ -76,7 +66,7 @@ func (h *Handler) handleVersionServiceActionError(
 	ctx context.Context, productID string, vers *entity.Version,
 	notifyStatusCh chan *entity.Version, actionErr error,
 ) {
-	_, err := h.versionRepo.SetError(ctx, productID, vers, actionErr.Error())
+	err := h.versionRepo.SetErrorStatusWithError(ctx, productID, vers.Tag, actionErr.Error())
 	if err != nil {
 		h.logger.Error(err, "Error updating version error",
 			"productID", productID,
