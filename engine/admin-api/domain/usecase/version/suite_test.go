@@ -5,6 +5,7 @@ package version_test
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/go-logr/zapr"
@@ -38,6 +39,29 @@ func (m versionMatcher) Matches(actual interface{}) bool {
 	}
 
 	return reflect.DeepEqual(actualCfg, m.expectedVersion)
+}
+
+type stringContainsMatcher struct {
+	expectedSubstring string
+}
+
+func newStringContainsMatcher(expectedSubstring string) *stringContainsMatcher {
+	return &stringContainsMatcher{
+		expectedSubstring: expectedSubstring,
+	}
+}
+
+func (m stringContainsMatcher) String() string {
+	return fmt.Sprintf("contains %s", m.expectedSubstring)
+}
+
+func (m stringContainsMatcher) Matches(actual interface{}) bool {
+	actualStr, ok := actual.(string)
+	if !ok {
+		return false
+	}
+
+	return strings.Contains(actualStr, m.expectedSubstring)
 }
 
 type versionSuite struct {

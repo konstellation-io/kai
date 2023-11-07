@@ -94,19 +94,32 @@ func (mr *MockVersionRepoMockRecorder) ListVersionsByProduct(ctx, productID inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVersionsByProduct", reflect.TypeOf((*MockVersionRepo)(nil).ListVersionsByProduct), ctx, productID)
 }
 
-// SetError mocks base method.
-func (m *MockVersionRepo) SetError(ctx context.Context, productID string, version *entity.Version, errorMessage string) (*entity.Version, error) {
+// SetCriticalStatusWithError mocks base method.
+func (m *MockVersionRepo) SetCriticalStatusWithError(ctx context.Context, productID, version, errorMessage string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetError", ctx, productID, version, errorMessage)
-	ret0, _ := ret[0].(*entity.Version)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "SetCriticalStatusWithError", ctx, productID, version, errorMessage)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// SetError indicates an expected call of SetError.
-func (mr *MockVersionRepoMockRecorder) SetError(ctx, productID, version, errorMessage interface{}) *gomock.Call {
+// SetCriticalStatusWithError indicates an expected call of SetCriticalStatusWithError.
+func (mr *MockVersionRepoMockRecorder) SetCriticalStatusWithError(ctx, productID, version, errorMessage interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetError", reflect.TypeOf((*MockVersionRepo)(nil).SetError), ctx, productID, version, errorMessage)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCriticalStatusWithError", reflect.TypeOf((*MockVersionRepo)(nil).SetCriticalStatusWithError), ctx, productID, version, errorMessage)
+}
+
+// SetErrorStatusWithError mocks base method.
+func (m *MockVersionRepo) SetErrorStatusWithError(ctx context.Context, productID, version, errorMessage string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetErrorStatusWithError", ctx, productID, version, errorMessage)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetErrorStatusWithError indicates an expected call of SetErrorStatusWithError.
+func (mr *MockVersionRepoMockRecorder) SetErrorStatusWithError(ctx, productID, version, errorMessage interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetErrorStatusWithError", reflect.TypeOf((*MockVersionRepo)(nil).SetErrorStatusWithError), ctx, productID, version, errorMessage)
 }
 
 // SetStatus mocks base method.
