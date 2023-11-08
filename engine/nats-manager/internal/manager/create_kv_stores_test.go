@@ -3,6 +3,7 @@
 package manager_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/manager"
 	"github.com/konstellation-io/kai/engine/nats-manager/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateKVStore(t *testing.T) {
@@ -28,7 +30,7 @@ func TestCreateKVStore(t *testing.T) {
 		testWorkflowID        = "test-workflow"
 		testProcessName       = "test-process"
 		testCleanedVersionTag = "v1_0_0"
-		projectKeyValueStore  = "key-store_test-product_v1_0_0"
+		versionKeyValueStore  = "key-store_test-product_v1_0_0"
 		workflowKeyValueStore = "key-store_test-product_v1_0_0_test-workflow"
 		processKeyValueStore  = "key-store_test-product_v1_0_0_test-workflow_test-process"
 	)
@@ -56,7 +58,7 @@ func TestCreateKVStore(t *testing.T) {
 				fmt.Sprintf("key-store_%s_%s_%s_%s", testProductID, testCleanedVersionTag, testWorkflowID, testProcessName),
 			},
 			expectedWorkflowsKVCfg: &entity.VersionKeyValueStores{
-				ProjectStore: projectKeyValueStore,
+				ProjectStore: versionKeyValueStore,
 				WorkflowsStores: map[string]*entity.WorkflowKeyValueStores{
 					testWorkflowID: {
 						WorkflowStore: workflowKeyValueStore,
@@ -82,7 +84,7 @@ func TestCreateKVStore(t *testing.T) {
 				fmt.Sprintf("key-store_%s_%s_%s", testProductID, testCleanedVersionTag, testWorkflowID),
 			},
 			expectedWorkflowsKVCfg: &entity.VersionKeyValueStores{
-				ProjectStore: projectKeyValueStore,
+				ProjectStore: versionKeyValueStore,
 				WorkflowsStores: map[string]*entity.WorkflowKeyValueStores{
 					testWorkflowID: {
 						WorkflowStore: workflowKeyValueStore,
@@ -118,4 +120,44 @@ func TestCreateKVStore(t *testing.T) {
 			assert.Equal(t, tc.expectedWorkflowsKVCfg, workflowsKVCfg)
 		})
 	}
+}
+
+func TestCreateGlobalKVStore(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	logger := mocks.NewMockLogger(ctrl)
+	logger.EXPECT().Infof(gomock.Any(), gomock.Any()).Return().AnyTimes()
+	client := mocks.NewMockNatsClient(ctrl)
+	natsManager := manager.NewNatsManager(logger, client)
+
+	const (
+		testProductID       = "test-product"
+		globalKeyValueStore = "key-store_test-product"
+	)
+
+	client.EXPECT().CreateKeyValueStore(globalKeyValueStore).Return(nil)
+
+	globalKVStore, err := natsManager.CreateGlobalKeyValueStore(testProductID)
+	require.NoError(t, err)
+
+	assert.Equal(t, globalKeyValueStore, globalKVStore)
+}
+
+func TestCreateGlobalKVStore_Error(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	logger := mocks.NewMockLogger(ctrl)
+	logger.EXPECT().Infof(gomock.Any(), gomock.Any()).Return().AnyTimes()
+	client := mocks.NewMockNatsClient(ctrl)
+	natsManager := manager.NewNatsManager(logger, client)
+
+	const (
+		testProductID       = "test-product"
+		globalKeyValueStore = "key-store_test-product"
+	)
+
+	client.EXPECT().CreateKeyValueStore(globalKeyValueStore).Return(errors.New("mock error"))
+
+	_, err := natsManager.CreateGlobalKeyValueStore(testProductID)
+	assert.Error(t, err)
 }
