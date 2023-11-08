@@ -12,8 +12,8 @@ data:
   KAI_BASE_DOMAIN_NAME: {{ .Values.config.baseDomainName }}
   KAI_TRIGGERS_REQUEST_TIMEOUT: "30"
   KAI_TRIGGERS_BASE64_INGRESSES_ANNOTATIONS: {{ .Values.k8sManager.triggers.ingress.annotations | toYaml | b64enc }}
-  KAI_TRIGGERS_TLS_ENABLED: "{{ .Values.config.tls }}"
-  {{- if .Values.config.tls }}
+  KAI_TRIGGERS_TLS_ENABLED: "{{ .Values.config.tls.enabled }}"
+  {{- if .Values.config.tls.enabled }}
   KAI_TRIGGERS_TLS_CERT_SECRET_NAME: {{ .Values.config.tls.certSecretName }}
   {{- end }}
   {{- if .Values.k8sManager.triggers.ingress.className }}
@@ -26,3 +26,6 @@ data:
   KAI_REGISTRY_INSECURE: "{{ not .Values.config.tls.enabled }}"
   KAI_MINIO_ENDPOINT_URL: "{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
   KAI_MINIO_REGION: {{ include "minio-config.region" . }}
+  KAI_KEYCLOAK_BASE_URL: "http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}"
+  KAI_KEYCLOAK_REALM: "{{ .Values.keycloak.realmName }}"
+  KAI_KEYCLOAK_MINIO_CLIENT_ID: "{{ .Values.keycloak.minio.oidcClient.clientId }}"

@@ -35,6 +35,11 @@ func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) e
 		return fmt.Errorf("creating bucket: %w", err)
 	}
 
+	err = os.client.EnableVersioning(ctx, bucket)
+	if err != nil {
+		return fmt.Errorf("enabling versioning in bucket: %w", err)
+	}
+
 	if viper.GetBool(config.MinioTierEnabledKey) {
 		err = os.client.SetBucketLifecycle(ctx, bucket, &lifecycle.Configuration{
 			Rules: []lifecycle.Rule{

@@ -220,7 +220,7 @@ items:
                         - name: ""
                           hostport: 0
                           containerport: 80
-                          protocol: TCP
+                          protocol: ""
                           hostip: ""
                       envfrom:
                         - prefix: ""

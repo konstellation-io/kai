@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -81,6 +82,19 @@ func (kc KubeConfiguration) getProcessConfig(
 				Bucket: process.KeyValueStore,
 				Config: process.Config,
 			},
+		},
+		Minio: MinioConfig{
+			Endpoint:       viper.GetString(config.MinioEndpointKey),
+			ClientUser:     version.MinioConfiguration.User,
+			ClientPassword: version.MinioConfiguration.Password,
+			SSL:            viper.GetBool(config.MinioSSLEnabledKey),
+			Bucket:         version.MinioConfiguration.Bucket,
+		},
+		Auth: AuthConfig{
+			Endpoint:     viper.GetString(config.AuthEndpointKey),
+			Client:       viper.GetString(config.AuthClientIDKey),
+			ClientSecret: viper.GetString(config.AuthClientSecretKey),
+			Realm:        viper.GetString(config.AuthRealmKey),
 		},
 	}
 }

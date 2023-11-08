@@ -66,17 +66,17 @@ func (mr *MockVersionServiceMockRecorder) RegisterProcess(ctx, productID, proces
 }
 
 // Start mocks base method.
-func (m *MockVersionService) Start(ctx context.Context, productID string, version *entity.Version, versionConfig *entity.VersionStreamingResources) error {
+func (m *MockVersionService) Start(ctx context.Context, product *entity.Product, version *entity.Version, versionConfig *entity.VersionStreamingResources) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Start", ctx, productID, version, versionConfig)
+	ret := m.ctrl.Call(m, "Start", ctx, product, version, versionConfig)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Start indicates an expected call of Start.
-func (mr *MockVersionServiceMockRecorder) Start(ctx, productID, version, versionConfig interface{}) *gomock.Call {
+func (mr *MockVersionServiceMockRecorder) Start(ctx, product, version, versionConfig interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockVersionService)(nil).Start), ctx, productID, version, versionConfig)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockVersionService)(nil).Start), ctx, product, version, versionConfig)
 }
 
 // Stop mocks base method.

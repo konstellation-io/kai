@@ -89,7 +89,7 @@ func TestStartVersion_WithNetworking(t *testing.T) {
 			WithNetworking(domain.Networking{
 				SourcePort: 80,
 				TargetPort: 80,
-				Protocol:   "TCP",
+				Protocol:   "GRPC",
 			}).
 			Build(),
 	}
@@ -416,7 +416,7 @@ func getVersionWithNetworking(t *testing.T) domain.Version {
 			WithNetworking(domain.Networking{
 				SourcePort: 80,
 				TargetPort: 80,
-				Protocol:   "TCP",
+				Protocol:   "GRPC",
 			}).
 			Build(),
 	}
