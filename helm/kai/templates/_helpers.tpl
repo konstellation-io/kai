@@ -114,6 +114,27 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}
 
+{{/* Fullname suffixed with grafana-datasources */}}
+{{- define "grafana-datasources.fullname" -}}
+{{- printf "%s-grafana-datasources" (include "kai.fullname" .) -}}
+{{- end }}
+
+{{/*
+grafana-datasources labels
+*/}}
+{{- define "grafana-datasources.labels" -}}
+{{ include "kai.labels" . }}
+{{ include "grafana-datasources.selectorLabels" . }}
+{{- end }}
+
+{{/*
+grafana-datasources selector labels
+*/}}
+{{- define "grafana-datasources.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kai.name" . }}-grafana-datasources
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
 {{/* Fullname suffixed with minio-config */}}
 {{- define "minio-config.fullname" -}}
 {{- printf "%s-minio-config" (include "kai.fullname" .) -}}

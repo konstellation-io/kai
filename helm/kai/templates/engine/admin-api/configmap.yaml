@@ -35,4 +35,6 @@ data:
   KAI_MINIO_TIER_ENABLED: "{{ .Values.config.minio.tier.enabled }}"
   KAI_MINIO_TIER_NAME: {{ include "minio-config.tier.name" . }}
   # Loki
-  KAI_LOKI_ADDRESS: "http://{{(include "loki.serviceName" (index .Subcharts "loki-stack") )}}:{{ index .Values "loki-stack" "loki" "service" "port" }}"
+  KAI_LOKI_ADDRESS: {{ tpl .Values.loki.url . | quote }}
+  # Prometheus
+  KAI_PROMETHEUS_ADDRESS: {{ tpl .Values.prometheus.url . | quote }}
