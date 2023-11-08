@@ -76,6 +76,11 @@ func (h *Handler) deleteNatsResources(ctx context.Context, productID string, ver
 		return fmt.Errorf("error deleting object stores for version %q: %w", vers.Tag, err)
 	}
 
+	err = h.natsManagerService.DeleteVersionKeyValueStores(ctx, productID, vers)
+	if err != nil {
+		return fmt.Errorf("error deleting key value stores for version %q: %w", vers.Tag, err)
+	}
+
 	return nil
 }
 

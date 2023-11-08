@@ -29,7 +29,7 @@ type NatsManagerServiceClient interface {
 	UpdateKeyValueConfiguration(ctx context.Context, in *UpdateKeyValueConfigurationRequest, opts ...grpc.CallOption) (*UpdateKeyValueConfigurationResponse, error)
 	DeleteStreams(ctx context.Context, in *DeleteStreamsRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	DeleteObjectStores(ctx context.Context, in *DeleteObjectStoresRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
-	DeleteKeyValueStores(ctx context.Context, in *DeleteVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	DeleteVersionKeyValueStores(ctx context.Context, in *DeleteVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
 
 type natsManagerServiceClient struct {
@@ -103,9 +103,9 @@ func (c *natsManagerServiceClient) DeleteObjectStores(ctx context.Context, in *D
 	return out, nil
 }
 
-func (c *natsManagerServiceClient) DeleteKeyValueStores(ctx context.Context, in *DeleteVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
+func (c *natsManagerServiceClient) DeleteVersionKeyValueStores(ctx context.Context, in *DeleteVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, "/nats.NatsManagerService/DeleteKeyValueStores", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/nats.NatsManagerService/DeleteVersionKeyValueStores", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ type NatsManagerServiceServer interface {
 	UpdateKeyValueConfiguration(context.Context, *UpdateKeyValueConfigurationRequest) (*UpdateKeyValueConfigurationResponse, error)
 	DeleteStreams(context.Context, *DeleteStreamsRequest) (*DeleteResponse, error)
 	DeleteObjectStores(context.Context, *DeleteObjectStoresRequest) (*DeleteResponse, error)
-	DeleteKeyValueStores(context.Context, *DeleteVersionKeyValueStoresRequest) (*DeleteResponse, error)
+	DeleteVersionKeyValueStores(context.Context, *DeleteVersionKeyValueStoresRequest) (*DeleteResponse, error)
 	mustEmbedUnimplementedNatsManagerServiceServer()
 }
 
@@ -152,8 +152,8 @@ func (UnimplementedNatsManagerServiceServer) DeleteStreams(context.Context, *Del
 func (UnimplementedNatsManagerServiceServer) DeleteObjectStores(context.Context, *DeleteObjectStoresRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteObjectStores not implemented")
 }
-func (UnimplementedNatsManagerServiceServer) DeleteKeyValueStores(context.Context, *DeleteVersionKeyValueStoresRequest) (*DeleteResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteKeyValueStores not implemented")
+func (UnimplementedNatsManagerServiceServer) DeleteVersionKeyValueStores(context.Context, *DeleteVersionKeyValueStoresRequest) (*DeleteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVersionKeyValueStores not implemented")
 }
 func (UnimplementedNatsManagerServiceServer) mustEmbedUnimplementedNatsManagerServiceServer() {}
 
@@ -294,20 +294,20 @@ func _NatsManagerService_DeleteObjectStores_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NatsManagerService_DeleteKeyValueStores_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _NatsManagerService_DeleteVersionKeyValueStores_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteVersionKeyValueStoresRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NatsManagerServiceServer).DeleteKeyValueStores(ctx, in)
+		return srv.(NatsManagerServiceServer).DeleteVersionKeyValueStores(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/nats.NatsManagerService/DeleteKeyValueStores",
+		FullMethod: "/nats.NatsManagerService/DeleteVersionKeyValueStores",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NatsManagerServiceServer).DeleteKeyValueStores(ctx, req.(*DeleteVersionKeyValueStoresRequest))
+		return srv.(NatsManagerServiceServer).DeleteVersionKeyValueStores(ctx, req.(*DeleteVersionKeyValueStoresRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -348,8 +348,8 @@ var NatsManagerService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NatsManagerService_DeleteObjectStores_Handler,
 		},
 		{
-			MethodName: "DeleteKeyValueStores",
-			Handler:    _NatsManagerService_DeleteKeyValueStores_Handler,
+			MethodName: "DeleteVersionKeyValueStores",
+			Handler:    _NatsManagerService_DeleteVersionKeyValueStores_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

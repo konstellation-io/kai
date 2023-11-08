@@ -123,6 +123,20 @@ func (mr *MockNatsManagerServiceMockRecorder) DeleteStreams(ctx, product, versio
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManagerService)(nil).DeleteStreams), ctx, product, versionTag)
 }
 
+// DeleteVersionKeyValueStores mocks base method.
+func (m *MockNatsManagerService) DeleteVersionKeyValueStores(ctx context.Context, product string, version *entity.Version) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteVersionKeyValueStores", ctx, product, version)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteVersionKeyValueStores indicates an expected call of DeleteVersionKeyValueStores.
+func (mr *MockNatsManagerServiceMockRecorder) DeleteVersionKeyValueStores(ctx, product, version interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteVersionKeyValueStores", reflect.TypeOf((*MockNatsManagerService)(nil).DeleteVersionKeyValueStores), ctx, product, version)
+}
+
 // UpdateKeyValueConfiguration mocks base method.
 func (m *MockNatsManagerService) UpdateKeyValueConfiguration(ctx context.Context, configurations []entity.KeyValueConfiguration) error {
 	m.ctrl.T.Helper()

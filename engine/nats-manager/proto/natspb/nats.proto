@@ -124,5 +124,5 @@ service NatsManagerService {
   rpc UpdateKeyValueConfiguration(UpdateKeyValueConfigurationRequest) returns (UpdateKeyValueConfigurationResponse);
   rpc DeleteStreams (DeleteStreamsRequest) returns (DeleteResponse);
   rpc DeleteObjectStores (DeleteObjectStoresRequest) returns (DeleteResponse);
-  rpc DeleteKeyValueStores (DeleteVersionKeyValueStoresRequest) returns (DeleteResponse);
+  rpc DeleteVersionKeyValueStores (DeleteVersionKeyValueStoresRequest) returns (DeleteResponse);
 };

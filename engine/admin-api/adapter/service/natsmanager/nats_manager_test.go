@@ -4,7 +4,7 @@ package natsmanager_test
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -19,6 +19,8 @@ import (
 )
 
 const productID = "test-product"
+
+var mockedError = fmt.Errorf("mocked error")
 
 var (
 	testProcess = testhelpers.NewProcessBuilder().
@@ -77,13 +79,13 @@ func (s *NatsManagerTestSuite) SetupSuite() {
 	mocks.AddLoggerExpects(logger)
 	service := mocks.NewMockNatsManagerServiceClient(mockController)
 
-	k8sVersionClient, err := natsmanager.NewClient(cfg, logger, service)
+	natsManagerClient, err := natsmanager.NewClient(cfg, logger, service)
 	s.Require().NoError(err)
 
 	s.cfg = cfg
 	s.logger = logger
 	s.mockService = service
-	s.natsManagerClient = k8sVersionClient
+	s.natsManagerClient = natsManagerClient
 }
 
 func (s *NatsManagerTestSuite) TestCreateStreams() {
@@ -238,7 +240,7 @@ func (s *NatsManagerTestSuite) TestCreateStreamsManagerError() {
 	ctx := context.Background()
 
 	s.mockService.EXPECT().CreateStreams(ctx, gomock.Any()).
-		Return(&natspb.CreateStreamsResponse{}, errors.New("mocked error"))
+		Return(&natspb.CreateStreamsResponse{}, mockedError)
 
 	_, err := s.natsManagerClient.CreateStreams(ctx, productID, testVersion)
 	s.Error(err)
@@ -248,7 +250,7 @@ func (s *NatsManagerTestSuite) TestCreateObjectStoresManagerError() {
 	ctx := context.Background()
 
 	s.mockService.EXPECT().CreateObjectStores(ctx, gomock.Any()).
-		Return(&natspb.CreateObjectStoresResponse{}, errors.New("mocked error"))
+		Return(&natspb.CreateObjectStoresResponse{}, mockedError)
 
 	_, err := s.natsManagerClient.CreateObjectStores(ctx, productID, testVersion)
 	s.Error(err)
@@ -258,7 +260,7 @@ func (s *NatsManagerTestSuite) TestCreateKeyValueStoresManagerError() {
 	ctx := context.Background()
 
 	s.mockService.EXPECT().CreateVersionKeyValueStores(ctx, gomock.Any()).
-		Return(&natspb.CreateVersionKeyValueStoresResponse{}, errors.New("mocked error"))
+		Return(&natspb.CreateVersionKeyValueStoresResponse{}, mockedError)
 
 	_, err := s.natsManagerClient.CreateVersionKeyValueStores(ctx, productID, testVersion)
 	s.Error(err)
@@ -268,7 +270,7 @@ func (s *NatsManagerTestSuite) TestDeleteStreamsManagerError() {
 	ctx := context.Background()
 
 	s.mockService.EXPECT().DeleteStreams(ctx, gomock.Any()).
-		Return(&natspb.DeleteResponse{}, errors.New("mocked error"))
+		Return(&natspb.DeleteResponse{}, mockedError)
 
 	err := s.natsManagerClient.DeleteStreams(ctx, productID, testVersion.Tag)
 	s.Error(err)
@@ -278,8 +280,28 @@ func (s *NatsManagerTestSuite) TestDeleteObjectStoresManagerError() {
 	ctx := context.Background()
 
 	s.mockService.EXPECT().DeleteObjectStores(ctx, gomock.Any()).
-		Return(&natspb.DeleteResponse{}, errors.New("mocked error"))
+		Return(&natspb.DeleteResponse{}, mockedError)
 
 	err := s.natsManagerClient.DeleteObjectStores(ctx, productID, testVersion.Tag)
+	s.Error(err)
+}
+
+func (s *NatsManagerTestSuite) TestDeleteVersionKeyValueStoresManager() {
+	ctx := context.Background()
+
+	s.mockService.EXPECT().DeleteVersionKeyValueStores(ctx, gomock.Any()).
+		Return(&natspb.DeleteResponse{}, nil)
+
+	err := s.natsManagerClient.DeleteVersionKeyValueStores(ctx, productID, testVersion)
+	s.NoError(err)
+}
+
+func (s *NatsManagerTestSuite) TestDeleteVersionKeyValueStoresManagerError() {
+	ctx := context.Background()
+
+	s.mockService.EXPECT().DeleteVersionKeyValueStores(ctx, gomock.Any()).
+		Return(&natspb.DeleteResponse{}, mockedError)
+
+	err := s.natsManagerClient.DeleteVersionKeyValueStores(ctx, productID, testVersion)
 	s.Error(err)
 }
