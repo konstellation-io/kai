@@ -17,38 +17,43 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	_httpEndpointFormat = "%s.%s.%s/%s-%s"
+	_grpcEndpointFormat = "%s.%s.%s.%s.%s"
+	_httpProtocol       = "http"
+	_grpcProtocol       = "grpc"
+)
+
 func (s *networkSuite) TestPublish() {
 	ctx := context.Background()
 	err := s.service.CreateNetwork(ctx, service.CreateNetworkParams{
-		Product:  product,
-		Version:  version,
-		Workflow: workflow,
+		Product:  _product,
+		Version:  _version,
+		Workflow: _workflow,
 		Process: &domain.Process{
-			Name: process,
+			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
+				Protocol:   _httpProtocol,
 				TargetPort: 8080,
-				Protocol:   "GRPC",
 			},
 		},
 	})
 	s.Require().NoError(err)
 
-	versionIdentifier := strings.ReplaceAll(fmt.Sprintf("%s-%s", product, version), ".", "-")
-
 	expectedPublishedURLs := map[string]string{
-		fullProcessIdentifier: fmt.Sprintf(_processFormat, versionIdentifier, viper.GetString(config.BaseDomainNameKey), workflow, process),
+		fullProcessIdentifier: s.getHTTPEndpoint(),
 	}
 
 	publishedURLs, err := s.service.PublishNetwork(ctx, service.PublishNetworkParams{
-		Product: product,
-		Version: version,
+		Product: _product,
+		Version: _version,
 	})
 	s.Require().NoError(err)
 	s.Assert().Equal(expectedPublishedURLs, publishedURLs)
 
 	res, err := s.clientset.NetworkingV1().Ingresses(s.namespace).List(ctx, metav1.ListOptions{
-		LabelSelector: fmt.Sprintf(_labelFormat, product, version),
+		LabelSelector: fmt.Sprintf(_labelFormat, _product, _version),
 	})
 	s.Require().NoError(err)
 
@@ -59,40 +64,78 @@ func (s *networkSuite) TestPublish() {
 	g.Assert(s.T(), "PublishNetwork", ingressesYaml)
 }
 
-func (s *networkSuite) TestPublish_WithTLS() {
-	viper.Set(config.TriggersTLSEnabledKey, true)
+func (s *networkSuite) TestPublish_GRPCTrigger() {
 	ctx := context.Background()
-
 	err := s.service.CreateNetwork(ctx, service.CreateNetworkParams{
-		Product:  product,
-		Version:  version,
-		Workflow: workflow,
+		Product:  _product,
+		Version:  _version,
+		Workflow: _workflow,
 		Process: &domain.Process{
-			Name: process,
+			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
+				Protocol:   _grpcProtocol,
 				TargetPort: 8080,
-				Protocol:   "GRPC",
 			},
 		},
 	})
 	s.Require().NoError(err)
 
-	versionIdentifier := strings.ReplaceAll(fmt.Sprintf("%s-%s", product, version), ".", "-")
-
 	expectedPublishedURLs := map[string]string{
-		fullProcessIdentifier: fmt.Sprintf(_processFormat, versionIdentifier, viper.GetString(config.BaseDomainNameKey), workflow, process),
+		fullProcessIdentifier: s.getGRPCEndpoint(),
 	}
 
 	publishedURLs, err := s.service.PublishNetwork(ctx, service.PublishNetworkParams{
-		Product: product,
-		Version: version,
+		Product: _product,
+		Version: _version,
 	})
 	s.Require().NoError(err)
 	s.Assert().Equal(expectedPublishedURLs, publishedURLs)
 
 	res, err := s.clientset.NetworkingV1().Ingresses(s.namespace).List(ctx, metav1.ListOptions{
-		LabelSelector: fmt.Sprintf(_labelFormat, product, version),
+		LabelSelector: fmt.Sprintf(_labelFormat, _product, _version),
+	})
+	s.Require().NoError(err)
+
+	ingressesYaml, err := yaml.Marshal(res)
+	require.NoError(s.T(), err)
+
+	g := goldie.New(s.T())
+	g.Assert(s.T(), "PublishNetwork_GRPCTrigger", ingressesYaml)
+}
+
+func (s *networkSuite) TestPublish_WithTLS() {
+	viper.Set(config.TriggersTLSEnabledKey, true)
+	ctx := context.Background()
+
+	err := s.service.CreateNetwork(ctx, service.CreateNetworkParams{
+		Product:  _product,
+		Version:  _version,
+		Workflow: _workflow,
+		Process: &domain.Process{
+			Name: _process,
+			Networking: &domain.Networking{
+				SourcePort: 8080,
+				Protocol:   _httpProtocol,
+				TargetPort: 8080,
+			},
+		},
+	})
+	s.Require().NoError(err)
+
+	expectedPublishedURLs := map[string]string{
+		fullProcessIdentifier: s.getHTTPEndpoint(),
+	}
+
+	publishedURLs, err := s.service.PublishNetwork(ctx, service.PublishNetworkParams{
+		Product: _product,
+		Version: _version,
+	})
+	s.Require().NoError(err)
+	s.Assert().Equal(expectedPublishedURLs, publishedURLs)
+
+	res, err := s.clientset.NetworkingV1().Ingresses(s.namespace).List(ctx, metav1.ListOptions{
+		LabelSelector: fmt.Sprintf(_labelFormat, _product, _version),
 	})
 	s.Require().NoError(err)
 
@@ -109,35 +152,33 @@ func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
 	ctx := context.Background()
 
 	err := s.service.CreateNetwork(ctx, service.CreateNetworkParams{
-		Product:  product,
-		Version:  version,
-		Workflow: workflow,
+		Product:  _product,
+		Version:  _version,
+		Workflow: _workflow,
 		Process: &domain.Process{
-			Name: process,
+			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
+				Protocol:   _httpProtocol,
 				TargetPort: 8080,
-				Protocol:   "GRPC",
 			},
 		},
 	})
 	s.Require().NoError(err)
 
-	versionIdentifier := strings.ReplaceAll(fmt.Sprintf("%s-%s", product, version), ".", "-")
-
 	expectedPublishedURLs := map[string]string{
-		fullProcessIdentifier: fmt.Sprintf(_processFormat, versionIdentifier, viper.GetString(config.BaseDomainNameKey), workflow, process),
+		fullProcessIdentifier: s.getHTTPEndpoint(),
 	}
 
 	publishedURLs, err := s.service.PublishNetwork(ctx, service.PublishNetworkParams{
-		Product: product,
-		Version: version,
+		Product: _product,
+		Version: _version,
 	})
 	s.Require().NoError(err)
 	s.Assert().Equal(expectedPublishedURLs, publishedURLs)
 
 	res, err := s.clientset.NetworkingV1().Ingresses(s.namespace).List(ctx, metav1.ListOptions{
-		LabelSelector: fmt.Sprintf(_labelFormat, product, version),
+		LabelSelector: fmt.Sprintf(_labelFormat, _product, _version),
 	})
 	s.Require().NoError(err)
 
@@ -146,4 +187,22 @@ func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
 
 	g := goldie.New(s.T())
 	g.Assert(s.T(), "PublishNetwork_WithTLS_WithTLSSecret", ingressesYaml)
+}
+
+func (s *networkSuite) getHTTPEndpoint() string {
+	version := strings.ReplaceAll(_version, ".", "-")
+	product := strings.ReplaceAll(_product, ".", "-")
+	workflow := strings.ReplaceAll(_workflow, ".", "-")
+	process := strings.ReplaceAll(_process, ".", "-")
+
+	return fmt.Sprintf(_httpEndpointFormat, version, product, viper.GetString(config.BaseDomainNameKey), workflow, process)
+}
+
+func (s *networkSuite) getGRPCEndpoint() string {
+	version := strings.ReplaceAll(_version, ".", "-")
+	product := strings.ReplaceAll(_product, ".", "-")
+	workflow := strings.ReplaceAll(_workflow, ".", "-")
+	process := strings.ReplaceAll(_process, ".", "-")
+
+	return fmt.Sprintf(_grpcEndpointFormat, process, workflow, version, product, viper.GetString(config.BaseDomainNameKey))
 }

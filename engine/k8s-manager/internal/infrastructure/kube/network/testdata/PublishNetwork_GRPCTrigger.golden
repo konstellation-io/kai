@@ -36,11 +36,11 @@ items:
         defaultbackend: null
         tls: []
         rules:
-            - host: v1-0-0.test-product.test
+            - host: test-process.test-workflow.v1-0-0.test-product.test
               ingressrulevalue:
                 http:
                     paths:
-                        - path: /test-workflow-test-process
+                        - path: /
                           pathtype: Prefix
                           backend:
                             service:
