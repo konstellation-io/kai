@@ -23,9 +23,16 @@ func (p *Process) IsTrigger() bool {
 
 type Networking struct {
 	SourcePort int
-	Protocol   string
 	TargetPort int
+	Protocol   NetworkingProtocol
 }
+
+type NetworkingProtocol string
+
+const (
+	NetworkingProtocolHTTP NetworkingProtocol = "HTTP"
+	NetworkingProtocolGRPC NetworkingProtocol = "GRPC"
+)
 
 type ProcessType int
 

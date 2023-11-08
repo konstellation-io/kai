@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,6 +23,7 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 		"version", params.Version,
 		"workflow", params.Workflow,
 		"process", params.Process.Name,
+		"protocol", params.Process.Networking.Protocol,
 	)
 
 	networking := params.Process.Networking
@@ -31,6 +33,7 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 			Name: kn.getServiceName(params.Product, params.Version, params.Workflow, params.Process.Name),
 			Labels: kn.getServiceLabels(
 				params.Product, params.Version, params.Workflow, params.Process.Name, params.Process.Networking.Protocol),
+			Annotations: kn.getServiceAnnotations(networking.Protocol),
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: kn.getSelector(params.Product, params.Version, params.Workflow, params.Process.Name),
@@ -66,6 +69,19 @@ func (kn KubeNetwork) getServiceLabels(product, version, workflow, process, prot
 		"protocol": protocol,
 		"type":     "network",
 	}
+}
+
+func (kn KubeNetwork) getServiceAnnotations(protocol domain.NetworkingProtocol) map[string]string {
+	annotations := make(map[string]string)
+	key := "konghq.com/protocol"
+
+	switch protocol {
+	case domain.NetworkingProtocolGRPC:
+		annotations[key] = "grpc"
+	default:
+	}
+
+	return annotations
 }
 
 func (kn KubeNetwork) getServiceName(product, version, workflow, process string) string {

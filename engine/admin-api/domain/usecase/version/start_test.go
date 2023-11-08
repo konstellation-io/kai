@@ -58,7 +58,7 @@ func (s *versionSuite) TestStart_OK() {
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStarting).Return(nil)
 
 	// goroutine calls
-	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, versionStreamResources).Return(nil)
+	s.versionService.EXPECT().Start(gomock.Any(), prod, vers, versionStreamResources).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).
 		DoAndReturn(func(a1, a2, a3, a4 interface{}) error {
 			wg.Done()
@@ -313,7 +313,7 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 	s.natsManagerService.EXPECT().CreateObjectStores(gomock.Any(), productID, vers).Return(streamResources.ObjectStores, nil)
 	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(gomock.Any(), productID, vers).Return(streamResources.KeyValueStores, nil)
 
-	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, streamResources).
+	s.versionService.EXPECT().Start(gomock.Any(), prod, vers, streamResources).
 		Return(expectedError)
 
 	s.natsManagerService.EXPECT().DeleteObjectStores(gomock.Any(), productID, vers.Tag).Return(nil)
@@ -364,7 +364,7 @@ func (s *versionSuite) TestStart_ErrorRegisteringUserActivity() {
 	s.natsManagerService.EXPECT().CreateObjectStores(gomock.Any(), productID, vers).Return(streamResources.ObjectStores, nil)
 	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(gomock.Any(), productID, vers).Return(streamResources.KeyValueStores, nil)
 	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStarted).Return(nil)
-	s.versionService.EXPECT().Start(gomock.Any(), productID, vers, streamResources).
+	s.versionService.EXPECT().Start(gomock.Any(), prod, vers, streamResources).
 		Return(nil)
 
 	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, productID, vers, comment).Return(expectedError)

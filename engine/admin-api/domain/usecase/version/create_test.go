@@ -164,7 +164,7 @@ func getClassificatorVersion() *entity.Version {
 						Networking: &entity.ProcessNetworking{
 							TargetPort:      9000,
 							DestinationPort: 9000,
-							Protocol:        "TCP",
+							Protocol:        "GRPC",
 						},
 						ResourceLimits: &entity.ProcessResourceLimits{
 							CPU: &entity.ResourceLimit{

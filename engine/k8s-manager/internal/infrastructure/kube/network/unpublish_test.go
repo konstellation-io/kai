@@ -22,8 +22,8 @@ func (s *networkSuite) TestUnpublish() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   "TCP",
 				TargetPort: 8080,
+				Protocol:   "GRPC",
 			},
 		},
 	})
@@ -48,8 +48,8 @@ func (s *networkSuite) TestUnpublish_FailedToDeleteIngressError() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   "TCP",
 				TargetPort: 8080,
+				Protocol:   "GRPC",
 			},
 		},
 	})
