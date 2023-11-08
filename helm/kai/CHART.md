@@ -19,7 +19,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.44"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.47"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -96,7 +96,7 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.44"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.47"` | Image tag |
 | k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
@@ -223,7 +223,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.44"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.47"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -255,7 +255,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.44"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.47"` | Image tag |
 | prometheus.alertmanager.enabled | bool | `true` | Whether to enable alertmanager |
 | prometheus.alertmanager.image.tag | string | `"v0.26.0"` | alertmanager server version |
 | prometheus.alertmanager.persistence.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |

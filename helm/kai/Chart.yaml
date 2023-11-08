@@ -16,7 +16,7 @@ dependencies:
     repository: https://charts.min.io/
   - name: grafana
     version: "7.0.3"
-    repository:  "https://grafana.github.io/helm-charts"
+    repository: "https://grafana.github.io/helm-charts"
     condition: grafana.enabled
   - name: loki
     repository: "https://grafana.github.io/helm-charts"
@@ -24,5 +24,5 @@ dependencies:
     condition: loki.enabled
   - name: prometheus
     version: "25.4.0"
-    repository:  "https://prometheus-community.github.io/helm-charts"
+    repository: "https://prometheus-community.github.io/helm-charts"
     condition: prometheus.enabled
