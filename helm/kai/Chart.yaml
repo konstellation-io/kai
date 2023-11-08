@@ -14,14 +14,14 @@ dependencies:
   - name: minio
     version: "5.0.14"
     repository: https://charts.min.io/
-  - name: loki
-    repository: "https://grafana.github.io/helm-charts"
-    version: "5.36.3"
-    condition: loki.enabled
   - name: grafana
     version: "7.0.3"
     repository:  "https://grafana.github.io/helm-charts"
     condition: grafana.enabled
+  - name: loki
+    repository: "https://grafana.github.io/helm-charts"
+    version: "5.36.3"
+    condition: loki.enabled
   - name: prometheus
     version: "25.4.0"
     repository:  "https://prometheus-community.github.io/helm-charts"
