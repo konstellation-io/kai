@@ -814,7 +814,7 @@ grafana:
     datasources:
       enabled: true
       label: grafana_datasource
-      labelValue: "true"
+      labelValue: "1"
       maxLines: 1000
   # -- Admin user name
   adminUser: admin

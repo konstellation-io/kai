@@ -80,7 +80,7 @@
 | grafana.persistence.storageClass | string | `""` | Storage class name |
 | grafana.service.port | int | `80` | Internal port number for Grafana service |
 | grafana.service.type | string | `"ClusterIP"` | Service type |
-| grafana.sidecar | object | `{"datasources":{"enabled":true,"label":"grafana_datasource","labelValue":"true","maxLines":1000}}` | sidecar config (required for datasource config section in loki and prometheus) |
+| grafana.sidecar | object | `{"datasources":{"enabled":true,"label":"grafana_datasource","labelValue":"1","maxLines":1000}}` | sidecar config (required for datasource config section in loki and prometheus) |
 | influxdb.address | string | `"http://kai-influxdb/"` |  |
 | influxdb.affinity | object | `{}` | Assign custom affinity rules to the InfluxDB pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | influxdb.config.http | object | `{"auth-enabled":false,"enabled":true,"flux-enabled":true}` | [Details](https://docs.influxdata.com/influxdb/v1.8/administration/config/#http) |
