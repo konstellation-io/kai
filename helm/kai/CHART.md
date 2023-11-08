@@ -177,6 +177,7 @@
 | loki.loki.service.type | string | `"ClusterIP"` | Service type |
 | loki.loki.storage.type | string | `"filesystem"` |  |
 | loki.monitoring.lokiCanary | object | `{"enabled":false}` | Whether to enable lokiCanary |
+| loki.monitoring.selfMonitoring | object | `{"enabled":false,"grafanaAgent":{"installOperator":false}}` | scrape its own Loki logs |
 | loki.singleBinary.replicas | int | `1` |  |
 | loki.test.enabled | bool | `false` |  |
 | loki.url | string | `"http://{{ include \"loki.fullname\" .Subcharts.loki }}:{{ .Values.loki.loki.server.http_listen_port }}"` | Loki endpoint url |
@@ -262,7 +263,7 @@
 | prometheus.alertmanager.persistence.size | string | `"4Gi"` | Storage size |
 | prometheus.alertmanager.persistence.storageClass | string | `""` | Storage class name |
 | prometheus.datasource | object | `{"jsonData":"{}"}` | grafana datasource json data config |
-| prometheus.enabled | bool | `true` | Whether to enable Grafana |
+| prometheus.enabled | bool | `true` | Whether to enable Prometheus |
 | prometheus.isDefault | bool | `false` | Set prometheus as default datasource |
 | prometheus.kube-state-metrics.enabled | bool | `false` |  |
 | prometheus.prometheus-node-exporter.enabled | bool | `false` |  |
