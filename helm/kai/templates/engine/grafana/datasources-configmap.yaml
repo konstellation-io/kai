@@ -2,16 +2,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "loki-stack.fullname" . }}
+  name: {{ template "grafana-datasources.fullname" . }}
   labels:
-    {{- include "loki-stack.labels" . | nindent 4 }}
+    {{- include "grafana-datasources.labels" . | nindent 4 }}
     {{- if .Values.grafana.sidecar.datasources.label }}
     {{ .Values.grafana.sidecar.datasources.label }}: {{ .Values.grafana.sidecar.datasources.labelValue | quote }}
     {{- else }}
     grafana_datasource: "1"
     {{- end }}
 data:
-  loki-stack-datasource.yaml: |-
+  grafana-datasources.yaml: |-
     apiVersion: 1
     datasources:
 {{- if .Values.loki.enabled }}

@@ -814,7 +814,7 @@ grafana:
     datasources:
       enabled: true
       label: grafana_datasource
-      labelValue: "1"
+      labelValue: "true"
       maxLines: 1000
   # -- Admin user name
   adminUser: admin
@@ -924,12 +924,14 @@ prometheus:
   # -- Set prometheus as default datasource
   isDefault: false
   # -- Prometheus endpoint url
-  url: http://{{ include "prometheus.fullname" .}}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}
+  url: http://{{ include "prometheus.fullname" .Subcharts.prometheus }}-{{ .Values.prometheus.server.name }}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}
   # -- grafana datasource json data config
   datasource:
     jsonData: "{}"
   ## server configuration
   server:
+    # -- name of the prometheus server
+    name: server
     image:
       # -- prometheus server version
       tag: v2.47.2
