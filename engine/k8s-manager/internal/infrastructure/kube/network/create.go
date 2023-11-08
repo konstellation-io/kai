@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	_servicePortName = "trigger"
+	_servicePortName           = "trigger"
+	_serviceProtocolAnnotation = "konghq.com/protocol"
 )
 
 func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNetworkParams) error {
@@ -32,7 +33,7 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 		ObjectMeta: metav1.ObjectMeta{
 			Name: kn.getServiceName(params.Product, params.Version, params.Workflow, params.Process.Name),
 			Labels: kn.getServiceLabels(
-				params.Product, params.Version, params.Workflow, params.Process.Name, params.Process.Networking.Protocol),
+				params.Product, params.Version, params.Workflow, params.Process.Name, string(params.Process.Networking.Protocol)),
 			Annotations: kn.getServiceAnnotations(networking.Protocol),
 		},
 		Spec: corev1.ServiceSpec{
@@ -73,11 +74,10 @@ func (kn KubeNetwork) getServiceLabels(product, version, workflow, process, prot
 
 func (kn KubeNetwork) getServiceAnnotations(protocol domain.NetworkingProtocol) map[string]string {
 	annotations := make(map[string]string)
-	key := "konghq.com/protocol"
 
 	switch protocol {
 	case domain.NetworkingProtocolGRPC:
-		annotations[key] = "grpc"
+		annotations[_serviceProtocolAnnotation] = strings.ToLower(string(domain.NetworkingProtocolGRPC))
 	default:
 	}
 
