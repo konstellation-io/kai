@@ -367,6 +367,47 @@ func TestStartVersion_ErrorWaitingProcesses(t *testing.T) {
 	assert.ErrorIs(t, err, expectedErr)
 }
 
+func TestStartVersion_ErrorWaitingProcesses_ErrorExecutingCompensation(t *testing.T) {
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+	containerSvc := mocks.NewContainerServiceMock(t)
+
+	expectedErr := errors.New("error waiting resources")
+
+	version := testhelpers.NewVersionBuilder().Build()
+
+	configName := "test-config-name"
+
+	containerSvc.EXPECT().
+		CreateVersionConfiguration(mock.Anything, version).
+		Return(configName, nil).
+		Once()
+
+	createProcessParams := service.CreateProcessParams{
+		ConfigName: configName,
+		Product:    version.Product,
+		Version:    version.Tag,
+		Workflow:   version.Workflows[0].Name,
+		Process:    version.Workflows[0].Processes[0],
+	}
+
+	containerSvc.EXPECT().
+		CreateProcess(mock.Anything, createProcessParams).
+		Return(nil).
+		Once()
+
+	containerSvc.EXPECT().WaitProcesses(mock.Anything, version).Return(expectedErr)
+
+	containerSvc.EXPECT().DeleteProcesses(mock.Anything, version.Product, version.Tag).Return(nil)
+	containerSvc.EXPECT().DeleteConfiguration(mock.Anything, version.Product, version.Tag).Return(nil)
+	containerSvc.EXPECT().DeleteNetwork(mock.Anything, version.Product, version.Tag).Return(errors.New("compensation error"))
+
+	starter := usecase.NewVersionStarter(logger, containerSvc)
+
+	ctx := context.Background()
+	err := starter.StartVersion(ctx, version)
+	assert.ErrorIs(t, err, expectedErr)
+}
+
 func getVersionWithNetworking(t *testing.T) domain.Version {
 	t.Helper()
 	processes := []*domain.Process{
