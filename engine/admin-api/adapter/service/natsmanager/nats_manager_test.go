@@ -29,7 +29,7 @@ var (
 		WithNetworking(&entity.ProcessNetworking{
 			TargetPort:      8080,
 			DestinationPort: 8080,
-			Protocol:        "TCP",
+			Protocol:        "GRPC",
 		}).
 		Build()
 

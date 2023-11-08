@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,7 +14,8 @@ import (
 )
 
 const (
-	_servicePortName = "trigger"
+	_servicePortName           = "trigger"
+	_serviceProtocolAnnotation = "konghq.com/protocol"
 )
 
 func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNetworkParams) error {
@@ -22,14 +24,17 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 		"version", params.Version,
 		"workflow", params.Workflow,
 		"process", params.Process.Name,
+		"protocol", params.Process.Networking.Protocol,
 	)
 
 	networking := params.Process.Networking
 
 	_, err := kn.client.CoreV1().Services(kn.namespace).Create(ctx, &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   kn.getServiceName(params.Product, params.Version, params.Workflow, params.Process.Name),
-			Labels: kn.getNetworkLabels(params.Product, params.Version, params.Workflow, params.Process.Name),
+			Name: kn.getServiceName(params.Product, params.Version, params.Workflow, params.Process.Name),
+			Labels: kn.getServiceLabels(
+				params.Product, params.Version, params.Workflow, params.Process.Name, string(params.Process.Networking.Protocol)),
+			Annotations: kn.getServiceAnnotations(networking.Protocol),
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: kn.getSelector(params.Product, params.Version, params.Workflow, params.Process.Name),
@@ -37,7 +42,6 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 			Ports: []corev1.ServicePort{
 				{
 					Name:       _servicePortName,
-					Protocol:   corev1.Protocol(networking.Protocol),
 					TargetPort: intstr.FromInt(networking.TargetPort),
 					Port:       int32(networking.SourcePort),
 				},
@@ -57,14 +61,27 @@ func (kn KubeNetwork) getSelector(product, version, workflow, process string) ma
 	}
 }
 
-func (kn KubeNetwork) getNetworkLabels(product, version, workflow, process string) map[string]string {
+func (kn KubeNetwork) getServiceLabels(product, version, workflow, process, protocol string) map[string]string {
 	return map[string]string{
 		"product":  product,
 		"version":  version,
 		"workflow": workflow,
 		"process":  process,
+		"protocol": protocol,
 		"type":     "network",
 	}
+}
+
+func (kn KubeNetwork) getServiceAnnotations(protocol domain.NetworkingProtocol) map[string]string {
+	annotations := make(map[string]string)
+
+	switch protocol {
+	case domain.NetworkingProtocolGRPC:
+		annotations[_serviceProtocolAnnotation] = strings.ToLower(string(domain.NetworkingProtocolGRPC))
+	default:
+	}
+
+	return annotations
 }
 
 func (kn KubeNetwork) getServiceName(product, version, workflow, process string) string {

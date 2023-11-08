@@ -36,7 +36,7 @@ func TestCreateNetwork(t *testing.T) {
 		WithNetworking(domain.Networking{
 			SourcePort: 80,
 			TargetPort: 80,
-			Protocol:   "TCP",
+			Protocol:   "GRPC",
 		}).
 		Build()
 
@@ -81,7 +81,7 @@ func TestCreateNetwork_ClientError(t *testing.T) {
 		WithNetworking(domain.Networking{
 			SourcePort: 80,
 			TargetPort: 80,
-			Protocol:   "TCP",
+			Protocol:   "GRPC",
 		}).
 		Build()
 
@@ -109,7 +109,7 @@ func TestDeleteNetwork(t *testing.T) {
 		WithNetworking(domain.Networking{
 			SourcePort: 80,
 			TargetPort: 80,
-			Protocol:   "TCP",
+			Protocol:   "GRPC",
 		}).
 		Build()
 
@@ -173,7 +173,7 @@ func TestDelete_ClientErrorDeletingSomeService(t *testing.T) {
 		WithNetworking(domain.Networking{
 			SourcePort: 80,
 			TargetPort: 80,
-			Protocol:   "TCP",
+			Protocol:   "GRPC",
 		}).
 		Build()
 

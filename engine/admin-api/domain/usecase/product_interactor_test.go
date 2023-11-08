@@ -118,12 +118,17 @@ func (s *productSuite) TestCreateProduct() {
 	productName := "test-product"
 	productDescription := "This is a product description"
 	expectedProduct := &entity.Product{
-		ID:            productID,
-		Name:          productName,
-		Description:   productDescription,
-		CreationDate:  time.Time{},
-		Owner:         user.ID,
-		MinioPassword: _testPassword,
+		ID:           productID,
+		Name:         productName,
+		Description:  productDescription,
+		CreationDate: time.Time{},
+		Owner:        user.ID,
+		MinioConfiguration: entity.MinioConfiguration{
+			User:     productID,
+			Group:    productID,
+			Password: _testPassword,
+			Bucket:   productID,
+		},
 		KeyValueStore: _testKvStore,
 	}
 
@@ -421,12 +426,17 @@ func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
 	productDescription := "This is a product description"
 
 	newProduct := &entity.Product{
-		ID:            productID,
-		Name:          productName,
-		Description:   productDescription,
-		Owner:         user.ID,
-		CreationDate:  time.Time{},
-		MinioPassword: _testPassword,
+		ID:           productID,
+		Name:         productName,
+		Description:  productDescription,
+		Owner:        user.ID,
+		CreationDate: time.Time{},
+		MinioConfiguration: entity.MinioConfiguration{
+			User:     productID,
+			Group:    productID,
+			Password: _testPassword,
+			Bucket:   productID,
+		},
 		KeyValueStore: _testKvStore,
 	}
 
