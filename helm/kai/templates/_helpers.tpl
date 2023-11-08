@@ -114,6 +114,56 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}
 
+# {{/* Fullname suffixed with grafana-prometheus-datasource */}}
+# {{- define "grafana-prometheus-datasource.fullname" -}}
+# {{- printf "%s-grafana-prometheus-datasource" (include "kai.fullname" .) -}}
+# {{- end }}
+
+# {{/*
+# grafana-prometheus-datasource labels
+# */}}
+# {{- define "grafana-prometheus-datasource.labels" -}}
+# {{ include "kai.labels" . }}
+# {{ include "grafana-prometheus-datasource.selectorLabels" . }}
+# {{- end }}
+
+# {{/*
+# grafana-prometheus-datasource selector labels
+# */}}
+# {{- define "grafana-prometheus-datasource.selectorLabels" -}}
+# app.kubernetes.io/name: {{ include "kai.name" . }}-grafana-prometheus-datasource
+# app.kubernetes.io/instance: {{ .Release.Name }}
+# {{- end }}
+
+{{/* Fullname suffixed with loki-stack */}}
+{{- define "loki-stack.fullname" -}}
+{{- printf "%s-loki-stack" (include "kai.fullname" .) -}}
+{{- end }}
+
+{{/*
+loki-stack labels
+*/}}
+{{- define "loki-stack.labels" -}}
+{{ include "kai.labels" . }}
+{{ include "loki-stack.selectorLabels" . }}
+{{- end }}
+
+{{/*
+loki-stack selector labels
+*/}}
+{{- define "loki-stack.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kai.name" . }}-loki-stack
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Override the naming defined by the prometheus chart.
+Added as a fix for https://github.com/grafana/loki/issues/1169
+*/}}
+{{- define "prometheus.fullname" -}}
+{{- printf "%s-%s" .Release.Name "prometheus-server" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{/* Fullname suffixed with minio-config */}}
 {{- define "minio-config.fullname" -}}
 {{- printf "%s-minio-config" (include "kai.fullname" .) -}}

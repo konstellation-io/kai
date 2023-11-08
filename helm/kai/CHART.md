@@ -5,9 +5,11 @@
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.min.io/ | minio | 5.0.14 |
-| https://grafana.github.io/helm-charts/ | loki-stack | 2.9.11 |
+| https://grafana.github.io/helm-charts | grafana | 7.0.3 |
+| https://grafana.github.io/helm-charts | loki | 5.36.3 |
 | https://helm.influxdata.com/ | influxdb | 4.8.1 |
 | https://helm.influxdata.com/ | kapacitor | 1.4.6 |
+| https://prometheus-community.github.io/helm-charts | prometheus | 25.4.0 |
 
 ## Values
 
@@ -17,7 +19,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.39"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.44"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -58,6 +60,27 @@
 | config.tls.certSecretName | string | `""` | An existing secret containing a valid wildcard certificate for the value provissioned in `.config.baseDomainName`. Required if `config.tls.enabled = true` |
 | config.tls.enabled | bool | `false` | Whether to enable TLS |
 | developmentMode | bool | `false` | Whether to setup developement mode |
+| grafana.admin | object | `{"existingSecret":"","passwordKey":"admin-password","userKey":"admin-user"}` | Use an existing secret for the admin user |
+| grafana.admin.passwordKey | string | `"admin-password"` | Name of the key in the secret that contains the password |
+| grafana.admin.userKey | string | `"admin-user"` | Name of the key in the secret that contains the admin user |
+| grafana.adminPassword | string | Randomly generated value | Set admin password (ommited if existingSecret is set) |
+| grafana.adminUser | string | `"admin"` | Admin user name |
+| grafana.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
+| grafana.enabled | bool | `true` | Whether to enable Grafana |
+| grafana.image.tag | string | `"10.2.0"` | Grafana version |
+| grafana.ingress.annotations | object | `{}` | Ingress annotations |
+| grafana.ingress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
+| grafana.ingress.hosts | list | `["monitoring.kai.local"]` | Ingress hostnames |
+| grafana.ingress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
+| grafana.ingress.labels | object | `{}` | Ingress labels |
+| grafana.ingress.tls | list | `[]` | Ingress TLS configuration |
+| grafana.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
+| grafana.persistence.enabled | bool | `false` | Enables persistent storage using PVC |
+| grafana.persistence.size | string | `"1Gi"` | Storage size |
+| grafana.persistence.storageClass | string | `""` | Storage class name |
+| grafana.service.port | int | `80` | Internal port number for Grafana service |
+| grafana.service.type | string | `"ClusterIP"` | Service type |
+| grafana.sidecar | object | `{"datasources":{"enabled":true,"label":"grafana_datasource","labelValue":"1","maxLines":1000}}` | sidecar config (required for datasource config section in loki and prometheus) |
 | influxdb.address | string | `"http://kai-influxdb/"` |  |
 | influxdb.affinity | object | `{}` | Assign custom affinity rules to the InfluxDB pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | influxdb.config.http | object | `{"auth-enabled":false,"enabled":true,"flux-enabled":true}` | [Details](https://docs.influxdata.com/influxdb/v1.8/administration/config/#http) |
@@ -73,7 +96,7 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.39"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.44"` | Image tag |
 | k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
@@ -138,35 +161,25 @@
 | keycloak.serviceAccount.create | bool | `true` |  |
 | keycloak.serviceAccount.name | string | `""` |  |
 | keycloak.tolerations | list | `[]` | Assign custom tolerations to the Keycloak pods |
-| loki-stack.grafana.admin | object | `{"existingSecret":"","passwordKey":"admin-password","userKey":"admin-user"}` | Use an existing secret for the admin user |
-| loki-stack.grafana.admin.passwordKey | string | `"admin-password"` | Name of the key in the secret that contains the password |
-| loki-stack.grafana.admin.userKey | string | `"admin-user"` | Name of the key in the secret that contains the admin user |
-| loki-stack.grafana.adminPassword | string | Randomly generated value | Set admin password (ommited if existingSecret is set) |
-| loki-stack.grafana.adminUser | string | `"admin"` | Admin user name |
-| loki-stack.grafana.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
-| loki-stack.grafana.enabled | bool | `true` | Whether to enable Grafana |
-| loki-stack.grafana.image.tag | string | `"10.2.0"` | Grafana version |
-| loki-stack.grafana.ingress.annotations | object | `{}` | Ingress annotations |
-| loki-stack.grafana.ingress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
-| loki-stack.grafana.ingress.hosts | list | `["metrics.kai.local"]` | Ingress hostnames |
-| loki-stack.grafana.ingress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
-| loki-stack.grafana.ingress.labels | object | `{}` | Ingress labels |
-| loki-stack.grafana.ingress.tls | list | `[]` | Ingress TLS configuration |
-| loki-stack.grafana.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
-| loki-stack.grafana.persistence.enabled | bool | `false` | Enables persistent storage using PVC |
-| loki-stack.grafana.persistence.size | string | `"1Gi"` | Storage size |
-| loki-stack.grafana.persistence.storageClass | string | `""` | Storage class name |
-| loki-stack.grafana.service.port | int | `80` | Internal port number for Grafana service |
-| loki-stack.grafana.service.type | string | `"ClusterIP"` | Service type |
-| loki-stack.loki.image.tag | string | `"2.9.2"` | Loki version |
-| loki-stack.loki.isDefault | bool | `true` | Set loki as default datasource |
-| loki-stack.loki.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
-| loki-stack.loki.persistence.enabled | bool | `false` | Enables persistent storage using PVC |
-| loki-stack.loki.persistence.size | string | `"2Gi"` | Storage size |
-| loki-stack.loki.persistence.storageClass | string | `""` | Storage class name If defined, storageClassName: <storageClass>. If set to "-", storageClassName: "", which disables dynamic provisioning. If empty or set to null, no storageClassName spec is set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack). |
-| loki-stack.loki.service.port | int | `3100` | Internal port number for Grafana service |
-| loki-stack.loki.service.type | string | `"ClusterIP"` | Service type |
-| loki-stack.promtail.enabled | bool | `false` |  |
+| loki.datasource | object | `{"jsonData":"{}","uid":""}` | grafana datasource json data config |
+| loki.enabled | bool | `true` | Whether to enable Loki |
+| loki.gateway.enabled | bool | `false` | Specifies whether the gateway should be enabled |
+| loki.isDefault | bool | `true` | Set loki as default datasource |
+| loki.loki.auth_enabled | bool | `false` | Should authentication be enabled |
+| loki.loki.commonConfig | object | `{"replication_factor":1}` | monolithic loki |
+| loki.loki.image.tag | string | `"2.9.2"` | Loki version |
+| loki.loki.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
+| loki.loki.persistence.enabled | bool | `false` | Enables persistent storage using PVC |
+| loki.loki.persistence.size | string | `"2Gi"` | Storage size |
+| loki.loki.persistence.storageClass | string | `""` | Storage class name If defined, storageClassName: <storageClass>. If set to "-", storageClassName: "", which disables dynamic provisioning. If empty or set to null, no storageClassName spec is set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack). |
+| loki.loki.server.http_listen_port | int | `3100` |  |
+| loki.loki.service.port | int | `3100` | Internal port number for Grafana service |
+| loki.loki.service.type | string | `"ClusterIP"` | Service type |
+| loki.loki.storage.type | string | `"filesystem"` |  |
+| loki.monitoring.lokiCanary | object | `{"enabled":false}` | Whether to enable lokiCanary |
+| loki.singleBinary.replicas | int | `1` |  |
+| loki.test.enabled | bool | `false` |  |
+| loki.url | string | `"http://{{ include \"loki.fullname\" .Subcharts.loki }}:{{ .Values.loki.loki.server.http_listen_port }}"` | Loki endpoint url |
 | minio.consoleIngress.annotations | object | `{}` | Ingress annotations |
 | minio.consoleIngress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
 | minio.consoleIngress.hosts | list | `["storage-console.kai.local"]` | Ingress hostnames |
@@ -209,7 +222,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.39"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.44"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -241,7 +254,33 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.39"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.44"` | Image tag |
+| prometheus.alertmanager.enabled | bool | `true` | Whether to enable alertmanager |
+| prometheus.alertmanager.image.tag | string | `"v0.26.0"` | alertmanager server version |
+| prometheus.alertmanager.persistence.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |
+| prometheus.alertmanager.persistence.enabled | bool | `true` |  |
+| prometheus.alertmanager.persistence.size | string | `"4Gi"` | Storage size |
+| prometheus.alertmanager.persistence.storageClass | string | `""` | Storage class name |
+| prometheus.datasource | object | `{"jsonData":"{}"}` | grafana datasource json data config |
+| prometheus.enabled | bool | `true` | Whether to enable Grafana |
+| prometheus.isDefault | bool | `false` | Set prometheus as default datasource |
+| prometheus.kube-state-metrics.enabled | bool | `false` |  |
+| prometheus.prometheus-node-exporter.enabled | bool | `false` |  |
+| prometheus.prometheus-pushgateway.enabled | bool | `false` |  |
+| prometheus.server.image.tag | string | `"v2.47.2"` | prometheus server version |
+| prometheus.server.ingress.annotations | object | `{}` | Ingress annotations |
+| prometheus.server.ingress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
+| prometheus.server.ingress.extraLabels | object | `{}` | Ingress labels |
+| prometheus.server.ingress.hosts | list | `["prometheus.kai.local"]` | Ingress hostnames |
+| prometheus.server.ingress.ingressClassName | string | `"kong"` | The name of the ingress class to use |
+| prometheus.server.ingress.tls | list | `[]` | Ingress TLS configuration |
+| prometheus.server.persistentVolume.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |
+| prometheus.server.persistentVolume.enabled | bool | `true` | Enables persistent storage using PVC |
+| prometheus.server.persistentVolume.size | string | `"2Gi"` | Storage size |
+| prometheus.server.persistentVolume.storageClass | string | `""` | Storage class name |
+| prometheus.server.service.servicePort | int | `80` | Internal port number for grafana service |
+| prometheus.server.service.type | string | `"ClusterIP"` | Service type |
+| prometheus.url | string | `"http://{{ include \"prometheus.fullname\" .}}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}"` | Prometheus endpoint url |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | registry.affinity | object | `{}` | Assign custom affinity rules to the pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | registry.auth.password | string | password | Registry password |

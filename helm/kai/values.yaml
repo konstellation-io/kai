@@ -797,16 +797,106 @@ minio:
     # -- Ingress TLS configuration
     tls: []
 ## The following values are only a small set of options. For a full list see
-## the official Loki-stack chart at https://github.com/grafana/helm-charts/blob/main/charts/loki-stack/values.yaml
+## the official Grafana chart at https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
 ##
-loki-stack:
-  ## Loki complete values https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
+grafana:
+  # -- Whether to enable Grafana
+  enabled: true
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
+  image:
+    # -- Grafana version
+    tag: 10.2.0
+  ## Sidecars that collect the configmaps with specified label and stores the included files them into the respective folders
+  # -- sidecar config (required for datasource config section in loki and prometheus)
+  sidecar:
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1"
+      maxLines: 1000
+  # -- Admin user name
+  adminUser: admin
+  # -- Set admin password (ommited if existingSecret is set)
+  # @default -- Randomly generated value
+  adminPassword: ""
+  # -- Use an existing secret for the admin user
+  admin:
+    ## -- Name of the existing secret. (if existingSecret is blank it will not be used)
+    existingSecret: ""
+    # -- Name of the key in the secret that contains the admin user
+    userKey: admin-user
+    # -- Name of the key in the secret that contains the password
+    passwordKey: admin-password
+  persistence:
+    # -- Enables persistent storage using PVC
+    enabled: false
+    # -- Storage class name
+    storageClass: ""
+    # -- Access mode for the volume
+    accessMode: ReadWriteOnce
+    # -- Storage size
+    size: 1Gi
+  service:
+    # -- Service type
+    type: ClusterIP
+    # -- Internal port number for Grafana service
+    port: 80
+  ingress:
+    # -- Enable ingress for MinIO Web Console
+    enabled: true
+    # -- The name of the ingress class to use
+    ingressClassName: kong
+    # -- Ingress labels
+    labels: {}
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hostnames
+    hosts:
+      - monitoring.kai.local
+    # -- Ingress TLS configuration
+    tls: []
+## The following values are only a small set of options. For a full list see
+## the official loki chart at https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
+##
+loki:
+  # -- Whether to enable Loki
+  enabled: true
+  # -- Set loki as default datasource
+  isDefault: true
+  # -- Loki endpoint url
+  url: http://{{ include "loki.fullname" .Subcharts.loki }}:{{ .Values.loki.loki.server.http_listen_port }}
+  # -- grafana datasource json data config
+  datasource:
+    jsonData: "{}"
+    uid: ""
+  singleBinary:
+    replicas: 1
+  test:
+    enabled: false
+  monitoring:
+    ## The Loki canary pushes logs to and queries from this loki installation to test that it's working correctly
+    # -- Whether to enable lokiCanary
+    lokiCanary:
+      enabled: false
+  # Configuration for the gateway
+  gateway:
+    # -- Specifies whether the gateway should be enabled
+    enabled: false
   loki:
-    # -- Set loki as default datasource
-    isDefault: true
     image:
       # -- Loki version
       tag: 2.9.2
+    server:
+      http_listen_port: 3100
+    # -- Should authentication be enabled
+    auth_enabled: false
+    # -- monolithic loki
+    commonConfig:
+      replication_factor: 1
+    storage:
+      type: 'filesystem'
     persistence:
       # -- Enables persistent storage using PVC
       enabled: false
@@ -825,56 +915,75 @@ loki-stack:
       type: ClusterIP
       # -- Internal port number for Grafana service
       port: 3100
-  promtail:
-    enabled: false
-  ## Grafana complete values https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
-  grafana:
-    # -- Whether to enable Grafana
-    enabled: true
-    # -- Deployment Strategy
-    deploymentStrategy:
-      type: Recreate
+## The following values are only a small set of options. For a full list see
+## the official Prometheus chart at https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
+##
+prometheus:
+  # -- Whether to enable Grafana
+  enabled: true
+  # -- Set prometheus as default datasource
+  isDefault: false
+  # -- Prometheus endpoint url
+  url: http://{{ include "prometheus.fullname" .}}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}
+  # -- grafana datasource json data config
+  datasource:
+    jsonData: "{}"
+  ## server configuration
+  server:
     image:
-      # -- Grafana version
-      tag: 10.2.0
-    # -- Admin user name
-    adminUser: admin
-    # -- Set admin password (ommited if existingSecret is set)
-    # @default -- Randomly generated value
-    adminPassword: ""
-    # -- Use an existing secret for the admin user
-    admin:
-      ## -- Name of the existing secret. (if existingSecret is blank it will not be used)
-      existingSecret: ""
-      # -- Name of the key in the secret that contains the admin user
-      userKey: admin-user
-      # -- Name of the key in the secret that contains the password
-      passwordKey: admin-password
-    persistence:
+      # -- prometheus server version
+      tag: v2.47.2
+    persistentVolume:
       # -- Enables persistent storage using PVC
-      enabled: false
+      enabled: true
       # -- Storage class name
       storageClass: ""
       # -- Access mode for the volume
-      accessMode: ReadWriteOnce
+      accessModes:
+        - ReadWriteOnce
       # -- Storage size
-      size: 1Gi
+      size: 2Gi
     service:
       # -- Service type
       type: ClusterIP
-      # -- Internal port number for Grafana service
-      port: 80
+      # -- Internal port number for grafana service
+      servicePort: 80
     ingress:
       # -- Enable ingress for MinIO Web Console
       enabled: true
       # -- The name of the ingress class to use
       ingressClassName: kong
       # -- Ingress labels
-      labels: {}
+      extraLabels: {}
       # -- Ingress annotations
       annotations: {}
       # -- Ingress hostnames
       hosts:
-        - metrics.kai.local
+        - prometheus.kai.local
       # -- Ingress TLS configuration
       tls: []
+  ## Alertmanager complete values https://github.com/prometheus-community/helm-charts/tree/main/charts/alertmanager
+  alertmanager:
+    # -- Whether to enable alertmanager
+    enabled: true
+    image:
+      # -- alertmanager server version
+      tag: v0.26.0
+    persistence:
+      enabled: true
+      # -- Storage class name
+      storageClass: ""
+      # -- Access mode for the volume
+      accessModes:
+        - ReadWriteOnce
+      # -- Storage size
+      size: 4Gi
+  ## Kube-state-metrics complete values  https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-state-metrics
+  kube-state-metrics:
+    enabled: false
+  ## Prometheus-node-exporter complete values  https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-node-exporter
+  prometheus-node-exporter:
+    enabled: false
+  ## Prometheus-pushgateway complete values  https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-pushgateway
+  prometheus-pushgateway:
+    enabled: false
