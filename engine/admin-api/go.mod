@@ -15,7 +15,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459
-	github.com/konstellation-io/krt v0.1.6
+	github.com/konstellation-io/krt v0.1.7
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/minio/madmin-go/v3 v3.0.27
 	github.com/minio/minio-go/v7 v7.0.63

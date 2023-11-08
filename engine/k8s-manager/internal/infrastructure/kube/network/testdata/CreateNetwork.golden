@@ -27,7 +27,8 @@ items:
             type: network
             version: v1.0.0
             workflow: test-workflow
-        annotations: {}
+        annotations:
+            konghq.com/protocol: grpc
         ownerreferences: []
         finalizers: []
         zzz_deprecatedclustername: ""
@@ -35,7 +36,7 @@ items:
       spec:
         ports:
             - name: trigger
-              protocol: TCP
+              protocol: ""
               appprotocol: null
               port: 80
               targetport:

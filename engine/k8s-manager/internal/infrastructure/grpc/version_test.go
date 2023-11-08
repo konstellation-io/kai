@@ -73,7 +73,7 @@ func (s *VersionServiceTestSuite) TestStart() {
 						Type:          versionpb.ProcessType_ProcessTypeExit,
 						Networking: &versionpb.Network{
 							TargetPort: 8080,
-							Protocol:   "TCP",
+							Protocol:   "GRPC",
 							SourcePort: 8080,
 						},
 						Config: map[string]string{
@@ -115,7 +115,7 @@ func (s *VersionServiceTestSuite) TestStart() {
 						KeyValueStore: req.Workflows[0].Processes[0].KeyValueStore,
 						Type:          domain.ProcessType(req.Workflows[0].Processes[0].Type),
 						Networking: &domain.Networking{
-							Protocol:   req.Workflows[0].Processes[0].Networking.Protocol,
+							Protocol:   domain.NetworkingProtocol(req.Workflows[0].Processes[0].Networking.Protocol),
 							SourcePort: int(req.Workflows[0].Processes[0].Networking.SourcePort),
 							TargetPort: int(req.Workflows[0].Processes[0].Networking.TargetPort),
 						},

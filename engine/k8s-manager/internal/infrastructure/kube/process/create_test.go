@@ -113,8 +113,8 @@ func TestStartProcess_WithNetwork(t *testing.T) {
 	process := testhelpers.NewProcessBuilder().
 		WithNetworking(domain.Networking{
 			SourcePort: 80,
-			Protocol:   "tcp",
 			TargetPort: 80,
+			Protocol:   "GRPC",
 		}).
 		Build()
 

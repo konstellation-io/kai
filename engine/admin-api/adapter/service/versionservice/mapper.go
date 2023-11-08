@@ -81,7 +81,7 @@ func mapProcessesToDTO(
 		if p.Networking != nil {
 			process.Networking = &versionpb.Network{
 				TargetPort: int32(p.Networking.TargetPort),
-				Protocol:   p.Networking.Protocol,
+				Protocol:   string(p.Networking.Protocol),
 				SourcePort: int32(p.Networking.DestinationPort),
 			}
 		}

@@ -73,7 +73,7 @@ var domainVersion = &entity.Version{
 					Networking: &entity.ProcessNetworking{
 						TargetPort:      8080,
 						DestinationPort: 8080,
-						Protocol:        "TCP",
+						Protocol:        "GRPC",
 					},
 					ResourceLimits: &entity.ProcessResourceLimits{
 						CPU: &entity.ResourceLimit{
@@ -161,7 +161,7 @@ var DTOVersion = &versionDTO{
 					Networking: &processNetworkingDTO{
 						TargetPort:      8080,
 						DestinationPort: 8080,
-						Protocol:        "TCP",
+						Protocol:        "GRPC",
 					},
 					ResourceLimits: &processResourceLimitsDTO{
 						CPU: &resourceLimitDTO{

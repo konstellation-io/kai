@@ -27,8 +27,8 @@ func (s *networkSuite) TestPublish() {
 			Name: process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   "TCP",
 				TargetPort: 8080,
+				Protocol:   "GRPC",
 			},
 		},
 	})
@@ -71,8 +71,8 @@ func (s *networkSuite) TestPublish_WithTLS() {
 			Name: process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   "TCP",
 				TargetPort: 8080,
+				Protocol:   "GRPC",
 			},
 		},
 	})
@@ -116,8 +116,8 @@ func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
 			Name: process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   "TCP",
 				TargetPort: 8080,
+				Protocol:   "GRPC",
 			},
 		},
 	})
