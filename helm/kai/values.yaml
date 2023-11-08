@@ -900,11 +900,11 @@ loki:
     persistence:
       # -- Enables persistent storage using PVC
       enabled: false
-      # -- Storage class name
       # If defined, storageClassName: <storageClass>.
       # If set to "-", storageClassName: "", which disables dynamic provisioning.
       # If empty or set to null, no storageClassName spec is
       # set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack).
+      # -- Storage class name
       storageClass: ""
       # -- Access mode for the volume
       accessMode: ReadWriteOnce

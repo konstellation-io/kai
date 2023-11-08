@@ -171,7 +171,7 @@
 | loki.loki.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
 | loki.loki.persistence.enabled | bool | `false` | Enables persistent storage using PVC |
 | loki.loki.persistence.size | string | `"2Gi"` | Storage size |
-| loki.loki.persistence.storageClass | string | `""` | Storage class name If defined, storageClassName: <storageClass>. If set to "-", storageClassName: "", which disables dynamic provisioning. If empty or set to null, no storageClassName spec is set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack). |
+| loki.loki.persistence.storageClass | string | `""` | Storage class name |
 | loki.loki.server.http_listen_port | int | `3100` |  |
 | loki.loki.service.port | int | `3100` | Internal port number for Grafana service |
 | loki.loki.service.type | string | `"ClusterIP"` | Service type |
