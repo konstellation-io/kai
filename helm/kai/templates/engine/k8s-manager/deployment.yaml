@@ -51,6 +51,8 @@ spec:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}
                   key: rootPassword
+            - name: KAI_KEYCLOAK_MINIO_CLIENT_SECRET
+              value: "{{ .Values.keycloak.kong.oidcClient.secret }}"
           ports:
             - containerPort: 50051
               protocol: TCP

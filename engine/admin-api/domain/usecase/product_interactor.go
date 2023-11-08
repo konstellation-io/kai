@@ -130,7 +130,14 @@ func (i *ProductInteractor) CreateProduct(
 
 	newProduct.KeyValueStore = globalKeyValueStore
 
-	err = i.objectStorage.CreateBucket(ctx, productID)
+	minioConfiguration := entity.MinioConfiguration{
+		User:     productID,
+		Group:    productID,
+		Password: i.passwordGenerator.MustGenerate(32, 8, 8, true, true),
+		Bucket:   productID,
+	}
+
+	err = i.objectStorage.CreateBucket(ctx, minioConfiguration.Bucket)
 	if err != nil {
 		return nil, fmt.Errorf("creating object storage bucket: %w", err)
 	}
@@ -140,19 +147,22 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, fmt.Errorf("creating object storage policy: %w", err)
 	}
 
-	err = i.userRegistry.CreateGroupWithPolicy(ctx, productID, policyName)
+	err = i.userRegistry.CreateGroupWithPolicy(ctx, minioConfiguration.Group, policyName)
 	if err != nil {
 		return nil, err
 	}
 
-	passwd := i.passwordGenerator.MustGenerate(32, 8, 8, true, true)
-
-	err = i.userRegistry.CreateUserWithinGroup(ctx, productID, passwd, productID)
+	err = i.userRegistry.CreateUserWithinGroup(
+		ctx,
+		minioConfiguration.User,
+		minioConfiguration.Password,
+		minioConfiguration.Group,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	newProduct.MinioPassword = passwd
+	newProduct.MinioConfiguration = minioConfiguration
 
 	err = i.measurementRepo.CreateDatabase(newProduct.Name)
 	if err != nil {

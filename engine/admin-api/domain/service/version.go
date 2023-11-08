@@ -9,7 +9,7 @@ import (
 )
 
 type VersionService interface {
-	Start(ctx context.Context, productID string, version *entity.Version, versionConfig *entity.VersionStreamingResources) error
+	Start(ctx context.Context, product *entity.Product, version *entity.Version, versionConfig *entity.VersionStreamingResources) error
 	Stop(ctx context.Context, productID string, version *entity.Version) error
 	Publish(ctx context.Context, productID, versionTag string) (map[string]string, error)
 	Unpublish(ctx context.Context, productID string, version *entity.Version) error

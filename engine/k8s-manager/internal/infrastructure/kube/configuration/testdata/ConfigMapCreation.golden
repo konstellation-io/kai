@@ -90,4 +90,15 @@ data:
                 bucket: test-workflow-kv-store
             process:
                 bucket: test-process-kv-store
+        minio:
+            endpoint: test-minio-endpoint
+            client_user: test-minio-user
+            client_password: test-minio-password
+            ssl: false
+            string: test-minio-bucket
+        auth:
+            endpoint: test-auth-endpoint
+            client: test-auth-client-id
+            client_secret: test-auth-client-secret
+            realm: test-auth-realm
 binarydata: {}
