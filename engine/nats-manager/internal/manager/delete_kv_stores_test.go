@@ -18,7 +18,7 @@ func TestDeleteKeyValueStores(t *testing.T) {
 		testVersionTag        = "v1.0.0"
 		testWorkflowID        = "test-workflow"
 		testProcessName       = "test-process"
-		projectKeyValueStore  = "key-store_test-product_v1_0_0"
+		versionKeyValueStore  = "key-store_test-product_v1_0_0"
 		workflowKeyValueStore = "key-store_test-product_v1_0_0_test-workflow"
 		processKeyValueStore  = "key-store_test-product_v1_0_0_test-workflow_test-process"
 	)
@@ -37,7 +37,7 @@ func TestDeleteKeyValueStores(t *testing.T) {
 			Build(),
 	}
 
-	client.EXPECT().DeleteKeyValueStore(projectKeyValueStore).Return(nil)
+	client.EXPECT().DeleteKeyValueStore(versionKeyValueStore).Return(nil)
 	client.EXPECT().DeleteKeyValueStore(workflowKeyValueStore).Return(nil)
 	client.EXPECT().DeleteKeyValueStore(processKeyValueStore).Return(nil)
 

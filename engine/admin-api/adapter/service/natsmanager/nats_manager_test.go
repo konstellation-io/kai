@@ -4,7 +4,7 @@ package natsmanager_test
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -20,7 +20,7 @@ import (
 
 const productID = "test-product"
 
-var mockedError = fmt.Errorf("mocked error")
+var mockedError = errors.New("mocked error")
 
 var (
 	testProcess = testhelpers.NewProcessBuilder().
