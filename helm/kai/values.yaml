@@ -876,6 +876,13 @@ loki:
   test:
     enabled: false
   monitoring:
+    # Self monitoring determines whether Loki should scrape its own logs.
+    # This feature currently relies on the Grafana Agent Operator being installed,
+    # -- scrape its own Loki logs
+    selfMonitoring:
+      enabled: false
+      grafanaAgent:
+        installOperator: false
     ## The Loki canary pushes logs to and queries from this loki installation to test that it's working correctly
     # -- Whether to enable lokiCanary
     lokiCanary:
@@ -919,7 +926,7 @@ loki:
 ## the official Prometheus chart at https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
 ##
 prometheus:
-  # -- Whether to enable Grafana
+  # -- Whether to enable Prometheus
   enabled: true
   # -- Set prometheus as default datasource
   isDefault: false
