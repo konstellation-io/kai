@@ -8,14 +8,17 @@ dependencies:
 - name: minio
   repository: https://charts.min.io/
   version: 5.0.14
-- name: loki
-  repository: https://grafana.github.io/helm-charts
-  version: 5.36.3
 - name: grafana
   repository: https://grafana.github.io/helm-charts
   version: 7.0.3
+- name: loki
+  repository: https://grafana.github.io/helm-charts
+  version: 5.36.3
 - name: prometheus
   repository: https://prometheus-community.github.io/helm-charts
   version: 25.4.0
-digest: sha256:3d2465e652b5920d02a8982f199cbb3fb1b33c97fc3c7790484bb5d37fd40596
-generated: "2023-11-07T22:09:45.434429+01:00"
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 18.2.1
+digest: sha256:2007a2e26a964b6e1b44a23bb2d1ce0e035c15ab5d3d1fce01888701f4ee4115
+generated: "2023-11-08T17:22:23.55864+01:00"
