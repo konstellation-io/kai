@@ -993,10 +993,13 @@ prometheus:
 ## the official Redis chart at https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
 ##
 redis:
+  # -- Whether to enable redis
+  enabled: true
   image:
+    # -- Redis server version
     tag: 7.2.3-debian-11-r0
   # -- architecture. Allowed values: `standalone` or `replication`
-  architecture: replication
+  architecture: standalone
   auth:
     enabled: true
     # @default -- random 10-character alphanumeric string if not set
@@ -1032,9 +1035,9 @@ redis:
         redis: 6379
   replica:
     # -- Number of replicas
-    replicaCount: 0
+    replicaCount: 1
     persistence:
-      enabled: false
+      enabled: true
       ## If defined, storageClassName: <storageClass>
       ## If set to "-", storageClassName: "", which disables dynamic provisioning
       ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
@@ -1056,7 +1059,7 @@ redis:
       # -- Min replicas for the pod autoscaling
       minReplicas: 1
       # -- Max replicas for the pod autoscaling
-      maxReplicas: 3
+      maxReplicas: 5
   tls:
     # -- Enabled Enable TLS traffic
     enabled: false
