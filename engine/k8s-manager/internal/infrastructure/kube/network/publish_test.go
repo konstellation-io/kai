@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	_httpEndpointFormat = "%s.%s.%s/%s-%s"
-	_grpcEndpointFormat = "%s.%s.%s.%s.%s"
+	_httpEndpointFormat = "%s.%s/%s-%s"
+	_grpcEndpointFormat = "%s.%s.%s.%s"
 	_httpProtocol       = "http"
 	_grpcProtocol       = "grpc"
 )
@@ -190,19 +190,17 @@ func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
 }
 
 func (s *networkSuite) getHTTPEndpoint() string {
-	version := strings.ReplaceAll(_version, ".", "-")
 	product := strings.ReplaceAll(_product, ".", "-")
 	workflow := strings.ReplaceAll(_workflow, ".", "-")
 	process := strings.ReplaceAll(_process, ".", "-")
 
-	return fmt.Sprintf(_httpEndpointFormat, version, product, viper.GetString(config.BaseDomainNameKey), workflow, process)
+	return fmt.Sprintf(_httpEndpointFormat, product, viper.GetString(config.BaseDomainNameKey), workflow, process)
 }
 
 func (s *networkSuite) getGRPCEndpoint() string {
-	version := strings.ReplaceAll(_version, ".", "-")
 	product := strings.ReplaceAll(_product, ".", "-")
 	workflow := strings.ReplaceAll(_workflow, ".", "-")
 	process := strings.ReplaceAll(_process, ".", "-")
 
-	return fmt.Sprintf(_grpcEndpointFormat, process, workflow, version, product, viper.GetString(config.BaseDomainNameKey))
+	return fmt.Sprintf(_grpcEndpointFormat, process, workflow, product, viper.GetString(config.BaseDomainNameKey))
 }

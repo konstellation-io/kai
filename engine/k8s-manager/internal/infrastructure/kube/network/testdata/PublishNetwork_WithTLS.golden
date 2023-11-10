@@ -36,10 +36,10 @@ items:
         defaultbackend: null
         tls:
             - hosts:
-                - v1-0-0.test-product.test
+                - test-product.test
               secretname: test-product-v1-0-0-tls
         rules:
-            - host: v1-0-0.test-product.test
+            - host: test-product.test
               ingressrulevalue:
                 http:
                     paths:
