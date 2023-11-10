@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "0.2.0-develop.48"
+appVersion: "0.2.0-develop.49"
 description: KAI
 name: kai
-version: 0.2.0-develop.48
+version: 0.2.0-develop.49
 dependencies:
   - name: influxdb
     version: "4.8.1"
