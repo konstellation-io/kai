@@ -28,8 +28,7 @@ func TestStartProcess(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set(config.KubeNamespaceKey, _namespace)
-	viper.Set(config.AutoscaleCPUPercentageKey, 80)
+	setDefaultConfig()
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 
@@ -66,7 +65,7 @@ func TestStartProcess_WithHPA(t *testing.T) {
 		ctx       = context.Background()
 	)
 
-	viper.Set(config.KubeNamespaceKey, _namespace)
+	setDefaultConfig()
 
 	process := testhelpers.NewProcessBuilder().
 		WithReplicas(5).
@@ -104,7 +103,7 @@ func TestStartProcess_WithNetwork(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set(config.KubeNamespaceKey, _namespace)
+	setDefaultConfig()
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 
@@ -143,7 +142,7 @@ func TestStartProcess_WithResourceLimits(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
 
-	viper.Set(config.KubeNamespaceKey, _namespace)
+	setDefaultConfig()
 
 	svc := kube.NewK8sContainerService(logger, clientset)
 
@@ -186,7 +185,9 @@ func TestStartProcess_WithResourceLimits(t *testing.T) {
 func TestStartProcess_WithMoreReplicas(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
-	viper.Set(config.KubeNamespaceKey, _namespace)
+
+	setDefaultConfig()
+
 	svc := kube.NewK8sContainerService(logger, clientset)
 
 	ctx := context.Background()
@@ -219,7 +220,9 @@ func TestStartProcess_WithMoreReplicas(t *testing.T) {
 func TestStartProcess_WithGpuEnabled(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	clientset := fake.NewSimpleClientset()
-	viper.Set(config.KubeNamespaceKey, _namespace)
+
+	setDefaultConfig()
+
 	svc := kube.NewK8sContainerService(logger, clientset)
 
 	ctx := context.Background()
@@ -251,8 +254,9 @@ func TestStartProcess_WithGpuEnabled(t *testing.T) {
 
 func TestStartProcess_ClientError(t *testing.T) {
 	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
-	namespace := "test"
-	viper.Set(config.KubeNamespaceKey, namespace)
+
+	setDefaultConfig()
+
 	clientset := fake.NewSimpleClientset()
 
 	expectedError := errors.New("kubernetes client error")
@@ -279,4 +283,12 @@ func TestStartProcess_ClientError(t *testing.T) {
 
 	err := svc.CreateProcess(ctx, params)
 	require.Error(t, err)
+}
+
+func setDefaultConfig() {
+	viper.Set(config.KubeNamespaceKey, _namespace)
+	viper.Set(config.AutoscaleCPUPercentageKey, 80)
+	viper.Set(config.FluentBitImageKey, "fluent/fluent-bit")
+	viper.Set(config.FluentBitTagKey, "1.3")
+	viper.Set(config.FluentBitPullPolicyKey, "IfNotPresent")
 }

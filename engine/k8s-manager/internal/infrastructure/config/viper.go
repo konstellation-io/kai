@@ -43,9 +43,12 @@ const (
 	TriggersTLSEnabledKey             = "networking.trigger.tls.isEnabled"
 	TLSSecretNameKey                  = "networking.trigger.tls.secretName"
 
-	ProcessTimeoutKey = "processes.timeout"
-
+	ProcessTimeoutKey         = "processes.timeout"
 	AutoscaleCPUPercentageKey = "autoescale.cpu.percentage"
+
+	FluentBitImageKey      = "fluentbit.image"
+	FluentBitTagKey        = "fluentbit.tag"
+	FluentBitPullPolicyKey = "fluentbit.pullPolicy"
 
 	configType = "yaml"
 
@@ -97,6 +100,10 @@ func Init(configFilePath string) error {
 
 	viper.RegisterAlias(AutoscaleCPUPercentageKey, "AUTOSCALE_CPU_PERCENTAGE")
 
+	viper.RegisterAlias(FluentBitImageKey, "FLUENTBIT_IMAGE")
+	viper.RegisterAlias(FluentBitTagKey, "FLUENTBIT_TAG")
+	viper.RegisterAlias(FluentBitPullPolicyKey, "FLUENTBIT_PULLPOLICY")
+
 	viper.AutomaticEnv()
 
 	setDefaultValues()
@@ -123,6 +130,10 @@ func setDefaultValues() {
 
 	viper.SetDefault(AutoscaleCPUPercentageKey, 80)
 	viper.SetDefault(ProcessTimeoutKey, 5*time.Minute)
+
+	viper.SetDefault(FluentBitImageKey, "fluent/fluent-bit")
+	viper.SetDefault(FluentBitTagKey, "1.3")
+	viper.SetDefault(FluentBitPullPolicyKey, "IfNotPresent")
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {
