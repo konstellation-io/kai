@@ -39,7 +39,7 @@ data:
   # Prometheus
   KAI_PROMETHEUS_ADDRESS: {{ include "prometheus.url" . }}
   # Redis
-  KAI_REDIS_MASTER_ADDRESS: "{{ include "redis-master.fullname" . }}:{{ .Values.redis.master.service.ports.redis }}"
-  {{- if eq .Values.redis.architecture "replication" }}
-  KAI_REDIS_REPLICAS_ADDRESS: "{{ include "redis-replicas.fullname" . }}:{{ .Values.redis.replica.service.ports.redis }}"
+  KAI_REDIS_MASTER_ADDRESS: {{ include "redis.master.url" . }}
+  {{- if or (eq .Values.redis.architecture "replication")  (eq .Values.config.redis.architecture "replication") }}
+  KAI_REDIS_REPLICAS_ADDRESS: {{ include "redis.replicas.url" . }}
   {{- end }}
