@@ -450,3 +450,25 @@ Registry auth secret name
 {{- define "registry.auth.secretName" -}}
 {{- printf "%s-auth" (include "registry.fullname" . ) -}}
 {{- end -}}
+
+{{/*
+Loki URL
+*/}}
+{{- define "loki.url" -}}
+{{- if .Values.loki.enabled -}}
+    {{- tpl .Values.config.loki.url . | quote -}}
+{{- else -}}
+    {{- .Values.config.loki.url -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Prometheus URL
+*/}}
+{{- define "prometheus.url" -}}
+{{- if .Values.prometheus.enabled -}}
+    {{- tpl .Values.config.prometheus.url . | quote -}}
+{{- else -}}
+    {{- .Values.config.prometheus.url -}}
+{{- end -}}
+{{- end -}}
