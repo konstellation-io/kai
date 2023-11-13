@@ -14,6 +14,10 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 )
 
+var (
+	_productRepoTimeout = 60 * time.Second
+)
+
 type ProductRepoMongoDB struct {
 	cfg        *config.Config
 	logger     logging.Logger
@@ -108,7 +112,7 @@ func (r *ProductRepoMongoDB) FindAll(ctx context.Context) ([]*entity.Product, er
 }
 
 func (r *ProductRepoMongoDB) FindByIDs(ctx context.Context, ids []string) ([]*entity.Product, error) {
-	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, _productRepoTimeout)
 	defer cancel()
 
 	cursor, err := r.collection.Find(ctx, bson.M{"_id": bson.M{"$in": ids}})
@@ -124,4 +128,20 @@ func (r *ProductRepoMongoDB) FindByIDs(ctx context.Context, ids []string) ([]*en
 	}
 
 	return products, nil
+}
+
+func (r *ProductRepoMongoDB) Update(ctx context.Context, product *entity.Product) error {
+	ctx, cancel := context.WithTimeout(ctx, _productRepoTimeout)
+	defer cancel()
+
+	_, err := r.collection.UpdateByID(
+		ctx,
+		product.ID,
+		product,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

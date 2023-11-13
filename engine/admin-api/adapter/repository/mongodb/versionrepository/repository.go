@@ -150,6 +150,21 @@ func (r *VersionRepoMongoDB) SetStatus(
 	return res.Err()
 }
 
+func (r *VersionRepoMongoDB) SetPublishedStatus(ctx context.Context, productID, versionTag, publicationAuthor string) error {
+	collection := r.client.Database(productID).Collection(versionsCollectionName)
+
+	res := collection.FindOneAndUpdate(
+		ctx,
+		bson.M{"tag": versionTag},
+		bson.M{"publicationDate": time.Now(), "publicationAuthor": publicationAuthor, "status": entity.VersionStatusPublished},
+	)
+	if errors.Is(res.Err(), mongo.ErrNoDocuments) {
+		return version.ErrVersionNotFound
+	}
+
+	return res.Err()
+}
+
 func (r *VersionRepoMongoDB) SetCriticalStatusWithError(ctx context.Context, productID, versionTag, errorMessage string) error {
 	return r.setStatusWithError(ctx, productID, versionTag, errorMessage, entity.VersionStatusCritical)
 }
