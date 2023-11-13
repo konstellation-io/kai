@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -58,7 +59,7 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 }
 
 func getFluentBitContainer(spec *processSpec) corev1.Container {
-	fluetBitImage := fmt.Sprintf("%s:%s", viper.GetString("fluentbit.image"), viper.GetString("fluentbit.tag"))
+	fluentBitImage := fmt.Sprintf("%s:%s", viper.GetString(config.FluentBitImageKey), viper.GetString(config.FluentBitTagKey))
 	envVars := []corev1.EnvVar{
 		{Name: "KAI_MESSAGING_HOST", Value: viper.GetString("messaging.host")},
 		{Name: "KAI_MESSAGING_PORT", Value: viper.GetString("messaging.port")},
@@ -70,8 +71,8 @@ func getFluentBitContainer(spec *processSpec) corev1.Container {
 
 	return corev1.Container{
 		Name:            "fluent-bit",
-		Image:           fluetBitImage,
-		ImagePullPolicy: corev1.PullIfNotPresent,
+		Image:           fluentBitImage,
+		ImagePullPolicy: corev1.PullPolicy(viper.GetString(config.FluentBitPullPolicyKey)),
 		Command: []string{
 			"/fluent-bit/bin/fluent-bit",
 			"-c",

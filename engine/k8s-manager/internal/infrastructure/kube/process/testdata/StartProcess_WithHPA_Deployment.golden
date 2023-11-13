@@ -148,7 +148,7 @@ items:
                 initcontainers: []
                 containers:
                     - name: fluent-bit
-                      image: ':'
+                      image: fluent/fluent-bit:1.3
                       command:
                         - /fluent-bit/bin/fluent-bit
                         - -c
