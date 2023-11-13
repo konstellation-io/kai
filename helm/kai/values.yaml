@@ -63,6 +63,24 @@ config:
           accessKeyID: ""
           # -- S3 Secret Access Key if no secret is used
           secretAccessKey: ""
+  loki:
+    # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Set loki as default datasource for Grafana.
+    isDefault: true
+    # -- Loki endpoint url. Change this to your own URL when `loki.enabled: false`
+    url: http://{{ include "loki.fullname" .Subcharts.loki }}:{{ .Values.loki.loki.server.http_listen_port }}
+    # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
+    datasource:
+      jsonData: "{}"
+      uid: ""
+  prometheus:
+    # -- Only when `prometheus.enabled: true` and `grafana.enabled: true`. Set prometheus as default datasource for Grafana.
+    isDefault: false
+    # -- Prometheus endpoint url. Change this to your own URL when `prometheus.enabled: false`
+    url: http://{{ include "prometheus.fullname" .Subcharts.prometheus }}-{{ .Values.prometheus.server.name }}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}
+    # -- Only when `prometheus.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
+    datasource:
+      jsonData: "{}"
+
 adminApi:
   # -- Default application log level
   logLevel: INFO
@@ -863,14 +881,6 @@ grafana:
 loki:
   # -- Whether to enable Loki
   enabled: true
-  # -- Set loki as default datasource
-  isDefault: true
-  # -- Loki endpoint url
-  url: http://{{ include "loki.fullname" .Subcharts.loki }}:{{ .Values.loki.loki.server.http_listen_port }}
-  # -- grafana datasource json data config
-  datasource:
-    jsonData: "{}"
-    uid: ""
   singleBinary:
     replicas: 1
   test:
@@ -928,13 +938,6 @@ loki:
 prometheus:
   # -- Whether to enable Prometheus
   enabled: true
-  # -- Set prometheus as default datasource
-  isDefault: false
-  # -- Prometheus endpoint url
-  url: http://{{ include "prometheus.fullname" .Subcharts.prometheus }}-{{ .Values.prometheus.server.name }}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}
-  # -- grafana datasource json data config
-  datasource:
-    jsonData: "{}"
   ## server configuration
   server:
     # -- name of the prometheus server
