@@ -100,8 +100,8 @@ func (os *MinioObjectStorage) getPolicy(bucket string) []byte {
 				{
 					"Effect":"Allow",
 					"Action":["s3:*"],
-					"Resource":["arn:aws:s3:::%s"]
+					"Resource":["arn:aws:s3:::%s","arn:aws:s3:::%s/*"]
 				}
 			]
-		}`, bucket))
+		}`, bucket, bucket))
 }
