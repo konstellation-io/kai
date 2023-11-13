@@ -30,6 +30,8 @@ const (
 	KeycloakRealmKey           = "keycloak.realm"
 	KeycloakURLKey             = "keycloak.url"
 	KeycloakPolicyAttributeKey = "keycloak.attributes.policy"
+
+	MongoDBKaiDatabaseKey = "mongodb.dbName"
 )
 
 func InitConfig() error {
@@ -43,6 +45,7 @@ func setDefaultConfig() {
 	viper.SetDefault(MinioTierEnabledKey, false)
 	viper.SetDefault(MinioTierTransitionDaysKey, 0)
 	viper.SetDefault(KeycloakPolicyAttributeKey, "policy")
+	viper.SetDefault(MongoDBKaiDatabaseKey, "kai")
 }
 
 func loadConfig() error {
