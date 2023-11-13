@@ -70,7 +70,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.47
+    tag: 0.2.0-develop.49
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
@@ -123,7 +123,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.47
+    tag: 0.2.0-develop.49
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -338,7 +338,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.47
+    tag: 0.2.0-develop.49
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -610,7 +610,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.47
+    tag: 0.2.0-develop.49
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
@@ -876,6 +876,13 @@ loki:
   test:
     enabled: false
   monitoring:
+    # Self monitoring determines whether Loki should scrape its own logs.
+    # This feature currently relies on the Grafana Agent Operator being installed,
+    # -- scrape its own Loki logs
+    selfMonitoring:
+      enabled: false
+      grafanaAgent:
+        installOperator: false
     ## The Loki canary pushes logs to and queries from this loki installation to test that it's working correctly
     # -- Whether to enable lokiCanary
     lokiCanary:
@@ -919,7 +926,7 @@ loki:
 ## the official Prometheus chart at https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
 ##
 prometheus:
-  # -- Whether to enable Grafana
+  # -- Whether to enable Prometheus
   enabled: true
   # -- Set prometheus as default datasource
   isDefault: false
@@ -979,7 +986,7 @@ prometheus:
       accessModes:
         - ReadWriteOnce
       # -- Storage size
-      size: 4Gi
+      size: 2Gi
   ## Kube-state-metrics complete values  https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-state-metrics
   kube-state-metrics:
     enabled: false
@@ -988,4 +995,87 @@ prometheus:
     enabled: false
   ## Prometheus-pushgateway complete values  https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-pushgateway
   prometheus-pushgateway:
+    enabled: false
+## The following values are only a small set of options. For a full list see
+## the official Redis chart at https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+##
+redis:
+  # -- Whether to enable redis
+  enabled: true
+  image:
+    # -- Redis server version
+    tag: 7.2.3-debian-11-r0
+  # -- architecture. Allowed values: `standalone` or `replication`
+  architecture: standalone
+  auth:
+    enabled: true
+    # @default -- random 10-character alphanumeric string if not set
+    password: ""
+    ## NOTE: When existingSecret is set, the previous `auth.password` parameter is ignored
+    # -- The name of an existing secret with Redis credentials
+    existingSecret: ""
+    ## NOTE: existingSecretPasswordKey is ignored unless `auth.existingSecret` parameter is set
+    # -- Password key to be retrieved from existing secret
+    existingSecretPasswordKey: ""
+  # -- number of replicas
+  master:
+    # -- redis Container port to open on master nodes
+    containerPorts:
+      redis: 6379
+    persistence:
+      enabled: true
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
+      # -- Storage class name
+      storageClass: ""
+      # -- Access mode for the volume
+      accessModes:
+        - ReadWriteOnce
+      # -- Storage size
+      size: 2Gi
+    service:
+      # -- Service type
+      type: ClusterIP
+      # -- Internal port number for master redis service
+      ports:
+        redis: 6379
+  replica:
+    # -- Number of replicas
+    replicaCount: 1
+    persistence:
+      enabled: true
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
+      # -- Storage class name
+      storageClass: ""
+      # -- Access mode for the volume
+      accessModes:
+        - ReadWriteOnce
+      # -- Storage size
+      size: 2Gi
+    service:
+      # -- Service type
+      type: ClusterIP
+      # -- Internal port number for master redis service
+      ports:
+        redis: 6379
+    autoscaling:
+      enabled: false
+      # -- Min replicas for the pod autoscaling
+      minReplicas: 1
+      # -- Max replicas for the pod autoscaling
+      maxReplicas: 5
+  tls:
+    # -- Enabled Enable TLS traffic
+    enabled: false
+    # -- Require clients to authenticate
+    authClients: false
+    # -- Enable autogenerated certificates
+    autoGenerated: false
+    # -- The name of the existing secret that contains the TLS certificates
+    existingSecret: ""
+  metrics:
+    # -- Start a sidecar prometheus exporter to expose redis metrics
     enabled: false

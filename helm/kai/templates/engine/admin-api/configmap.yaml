@@ -38,3 +38,8 @@ data:
   KAI_LOKI_ADDRESS: {{ tpl .Values.loki.url . | quote }}
   # Prometheus
   KAI_PROMETHEUS_ADDRESS: {{ tpl .Values.prometheus.url . | quote }}
+  # Redis
+  KAI_REDIS_MASTER_ADDRESS: "{{ include "redis-master.fullname" . }}:{{ .Values.redis.master.service.ports.redis }}"
+  {{- if eq .Values.redis.architecture "replication" }}  
+  KAI_REDIS_REPLICAS_ADDRESS: "{{ include "redis-replicas.fullname" . }}:{{ .Values.redis.replica.service.ports.redis }}"
+  {{- end }}
