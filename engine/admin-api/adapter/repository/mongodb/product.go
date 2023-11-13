@@ -14,7 +14,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 )
 
-var (
+const (
 	_productRepoTimeout = 60 * time.Second
 )
 
