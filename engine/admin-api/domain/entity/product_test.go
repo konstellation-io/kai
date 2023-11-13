@@ -11,7 +11,7 @@ import (
 
 func TestProduct_HasVersionPublished(t *testing.T) {
 	product := testhelpers.NewProductBuilder().
-		WithPublishedVersion("test-version").
+		WithPublishedVersion(testhelpers.StrPointer("test-version")).
 		Build()
 
 	assert.True(t, product.HasVersionPublished())
@@ -19,6 +19,14 @@ func TestProduct_HasVersionPublished(t *testing.T) {
 
 func TestProduct_HasVersionPublished_NoVersionPublished(t *testing.T) {
 	product := testhelpers.NewProductBuilder().
+		Build()
+
+	assert.False(t, product.HasVersionPublished())
+}
+
+func TestProduct_HasVersionPublished_NoVersionPublished_EmtpyString(t *testing.T) {
+	product := testhelpers.NewProductBuilder().
+		WithPublishedVersion(nil).
 		Build()
 
 	assert.False(t, product.HasVersionPublished())
@@ -34,7 +42,9 @@ func TestProduct_UpdatePublishedVersion(t *testing.T) {
 }
 
 func TestProduct_RemovePublishedVersion(t *testing.T) {
-	product := testhelpers.NewProductBuilder().Build()
+	product := testhelpers.NewProductBuilder().
+		WithPublishedVersion(testhelpers.StrPointer("test-version")).
+		Build()
 
 	product.RemovePublishedVersion()
 

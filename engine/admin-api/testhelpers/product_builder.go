@@ -28,8 +28,8 @@ func NewProductBuilder() *ProductBuilder {
 	}
 }
 
-func (pb *ProductBuilder) WithPublishedVersion(publishedVersion string) *ProductBuilder {
-	pb.product.PublishedVersion = &publishedVersion
+func (pb *ProductBuilder) WithPublishedVersion(publishedVersion *string) *ProductBuilder {
+	pb.product.PublishedVersion = publishedVersion
 	return pb
 }
 

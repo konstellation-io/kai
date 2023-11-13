@@ -18,9 +18,7 @@ func (s *versionSuite) TestCreateVersion() {
 		ctx             = context.Background()
 		user            = testhelpers.NewUserBuilder().Build()
 		expectedVersion = getClassificatorVersion()
-		product         = &entity.Product{
-			ID: "test-product",
-		}
+		product         = testhelpers.NewProductBuilder().Build()
 	)
 
 	file, err := os.Open("./testdata/classificator_krt.yaml")
