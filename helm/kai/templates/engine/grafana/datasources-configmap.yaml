@@ -1,4 +1,4 @@
-{{- if .Values.grafana.sidecar.datasources.enabled }}
+{{- if and .Values.grafana.enabled .Values.grafana.sidecar.datasources.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -18,13 +18,13 @@ data:
     - name: Loki
       type: loki
       access: proxy
-      url: {{ tpl .Values.loki.url . | quote }}
+      url: {{ include "loki.url" . }}
       version: 1
-      isDefault: {{ default false .Values.loki.isDefault }}
-      {{- with .Values.loki.datasource.uid }}
+      isDefault: {{ default false .Values.config.loki.isDefault }}
+      {{- with .Values.config.loki.datasource.uid }}
       uid: {{ . | quote }}
       {{- end }}
-      {{- with .Values.loki.datasource.jsonData }}
+      {{- with .Values.config.loki.datasource.jsonData }}
       jsonData:
         {{- tpl . $ | nindent 8 }}
       {{- end }}
@@ -34,10 +34,10 @@ data:
     - name: Prometheus
       type: prometheus
       access: proxy
-      url: {{ tpl .Values.prometheus.url . | quote }}
+      url: {{ include "prometheus.url" . }}
       version: 1
-      isDefault: {{ default false .Values.prometheus.isDefault }}
-      {{- with .Values.prometheus.datasource.jsonData }}
+      isDefault: {{ default false .Values.config.prometheus.isDefault }}
+      {{- with .Values.config.prometheus.datasource.jsonData }}
       jsonData:
         {{- tpl . $ | nindent 8 }}
       {{- end }}

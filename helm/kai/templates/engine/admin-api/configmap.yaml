@@ -35,11 +35,11 @@ data:
   KAI_MINIO_TIER_ENABLED: "{{ .Values.config.minio.tier.enabled }}"
   KAI_MINIO_TIER_NAME: {{ include "minio-config.tier.name" . }}
   # Loki
-  KAI_LOKI_ADDRESS: {{ tpl .Values.loki.url . | quote }}
+  KAI_LOKI_ADDRESS: {{ include "loki.url" . }}
   # Prometheus
-  KAI_PROMETHEUS_ADDRESS: {{ tpl .Values.prometheus.url . | quote }}
+  KAI_PROMETHEUS_ADDRESS: {{ include "prometheus.url" . }}
   # Redis
   KAI_REDIS_MASTER_ADDRESS: "{{ include "redis-master.fullname" . }}:{{ .Values.redis.master.service.ports.redis }}"
-  {{- if eq .Values.redis.architecture "replication" }}  
+  {{- if eq .Values.redis.architecture "replication" }}
   KAI_REDIS_REPLICAS_ADDRESS: "{{ include "redis-replicas.fullname" . }}:{{ .Values.redis.replica.service.ports.redis }}"
   {{- end }}
