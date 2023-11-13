@@ -139,7 +139,7 @@ func (r *ProductRepoMongoDB) Update(ctx context.Context, product *entity.Product
 
 	resp, err := r.collection.ReplaceOne(
 		ctx,
-		bson.D{{"_id", product.ID}},
+		bson.M{"_id": product.ID},
 		product,
 	)
 	if err != nil {
