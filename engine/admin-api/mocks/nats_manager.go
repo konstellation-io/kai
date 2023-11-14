@@ -156,6 +156,26 @@ func (mr *MockNatsManagerServiceClientMockRecorder) DeleteStreams(ctx, in interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).DeleteStreams), varargs...)
 }
 
+// DeleteVersionKeyValueStores mocks base method.
+func (m *MockNatsManagerServiceClient) DeleteVersionKeyValueStores(ctx context.Context, in *natspb.DeleteVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*natspb.DeleteResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteVersionKeyValueStores", varargs...)
+	ret0, _ := ret[0].(*natspb.DeleteResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteVersionKeyValueStores indicates an expected call of DeleteVersionKeyValueStores.
+func (mr *MockNatsManagerServiceClientMockRecorder) DeleteVersionKeyValueStores(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteVersionKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).DeleteVersionKeyValueStores), varargs...)
+}
+
 // UpdateKeyValueConfiguration mocks base method.
 func (m *MockNatsManagerServiceClient) UpdateKeyValueConfiguration(ctx context.Context, in *natspb.UpdateKeyValueConfigurationRequest, opts ...grpc.CallOption) (*natspb.UpdateKeyValueConfigurationResponse, error) {
 	m.ctrl.T.Helper()
@@ -287,6 +307,21 @@ func (m *MockNatsManagerServiceServer) DeleteStreams(arg0 context.Context, arg1 
 func (mr *MockNatsManagerServiceServerMockRecorder) DeleteStreams(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStreams", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).DeleteStreams), arg0, arg1)
+}
+
+// DeleteVersionKeyValueStores mocks base method.
+func (m *MockNatsManagerServiceServer) DeleteVersionKeyValueStores(arg0 context.Context, arg1 *natspb.DeleteVersionKeyValueStoresRequest) (*natspb.DeleteResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteVersionKeyValueStores", arg0, arg1)
+	ret0, _ := ret[0].(*natspb.DeleteResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteVersionKeyValueStores indicates an expected call of DeleteVersionKeyValueStores.
+func (mr *MockNatsManagerServiceServerMockRecorder) DeleteVersionKeyValueStores(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteVersionKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).DeleteVersionKeyValueStores), arg0, arg1)
 }
 
 // UpdateKeyValueConfiguration mocks base method.

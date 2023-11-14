@@ -130,6 +130,23 @@ func (n *NatsService) CreateGlobalKeyValueStore(
 	return &natspb.CreateGlobalKeyValueStoreResponse{GlobalKeyValueStore: keyValueStore}, nil
 }
 
+func (n *NatsService) DeleteVersionKeyValueStores(
+	_ context.Context,
+	req *natspb.DeleteVersionKeyValueStoresRequest,
+) (*natspb.DeleteResponse, error) {
+	n.logger.Info("DeleteVersionKeyValueStores request received")
+
+	err := n.manager.DeleteVersionKeyValueStores(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
+	if err != nil {
+		n.logger.Errorf("Error deleting version's key-value stores: %s", err)
+		return nil, err
+	}
+
+	return &natspb.DeleteResponse{
+		Message: fmt.Sprintf("Key-value stores for version %q on product %s deleted", req.VersionTag, req.ProductId),
+	}, nil
+}
+
 func (n *NatsService) UpdateKeyValueConfiguration(
 	_ context.Context,
 	req *natspb.UpdateKeyValueConfigurationRequest,

@@ -366,3 +366,32 @@ func (s *NatsServiceTestSuite) TestUpdateKeyValueConfiguration_Error() {
 	_, err := s.natsService.UpdateKeyValueConfiguration(ctx, req)
 	s.Require().ErrorIs(err, expectedError)
 }
+
+func (s *NatsServiceTestSuite) TestDeleteVersionKeyValueStores() {
+	req := &natspb.DeleteVersionKeyValueStoresRequest{
+		ProductId:  productID,
+		VersionTag: versionTag,
+		Workflows:  protoWorkflows,
+	}
+
+	expectedEntityWorkflows := entityWorkflows
+
+	s.natsManagerMock.EXPECT().
+		DeleteVersionKeyValueStores(productID, versionTag, expectedEntityWorkflows).
+		Return(nil)
+
+	clientResponse, err := s.natsService.DeleteVersionKeyValueStores(nil, req)
+	s.Require().NoError(err)
+	s.NotEmpty(clientResponse.Message)
+}
+
+func (s *NatsServiceTestSuite) TestDeleteVersionKeyValueStoresError() {
+	req := &natspb.DeleteVersionKeyValueStoresRequest{}
+
+	s.natsManagerMock.EXPECT().
+		DeleteVersionKeyValueStores(gomock.Any(), gomock.Any(), gomock.Any()).
+		Return(errors.New("mock error"))
+
+	_, err := s.natsService.DeleteVersionKeyValueStores(nil, req)
+	s.Require().Error(err)
+}

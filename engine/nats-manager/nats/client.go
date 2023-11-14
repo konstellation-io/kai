@@ -122,6 +122,11 @@ func (n *NatsClient) DeleteObjectStore(objectStore string) error {
 	return n.js.DeleteObjectStore(objectStore)
 }
 
+func (n *NatsClient) DeleteKeyValueStore(keyValueStore string) error {
+	n.logger.Infof("Deleting key-value store %q", keyValueStore)
+	return n.js.DeleteKeyValue(keyValueStore)
+}
+
 // GetStreamNames returns the list of streams' names.
 // The optional param `optFilter` accepts 0 or 1 value.
 func (n *NatsClient) GetStreamNames(optFilter ...*regexp.Regexp) ([]string, error) {

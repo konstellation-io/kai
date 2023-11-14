@@ -469,3 +469,25 @@ func (s *ClientTestSuite) TestNatsClient_CreateCreateKeyValueStore_ErrorWhenDupl
 	err = s.natsClient.CreateKeyValueStore(testKeyValueStore)
 	s.Assert().ErrorIs(err, natslib.ErrStreamNameAlreadyInUse)
 }
+
+func (s *ClientTestSuite) TestNatsClient_DeleteKeyValueStore() {
+	testKeyValueStore := "test-kv-store"
+
+	_, err := s.js.CreateKeyValue(&natslib.KeyValueConfig{
+		Bucket: testKeyValueStore,
+	})
+	s.Require().NoError(err)
+
+	err = s.natsClient.DeleteKeyValueStore(testKeyValueStore)
+	s.Assert().NoError(err)
+
+	keyValueStores := s.js.KeyValueStores()
+	s.Assert().Nil(<-keyValueStores)
+}
+
+func (s *ClientTestSuite) TestNatsClient_DeleteKeyValueStore_KeyValueStoreNotFound() {
+	testKeyValueStore := "test-kv-store"
+
+	err := s.natsClient.DeleteKeyValueStore(testKeyValueStore)
+	s.Assert().ErrorIs(err, natslib.ErrStreamNotFound)
+}
