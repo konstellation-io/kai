@@ -79,6 +79,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "minio.secretName" .Subcharts.minio }}
                   key: rootPassword
+            - name: KAI_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "redis.auth.secretName" . }}
+                  key: {{ include "redis.auth.secretPasswordKey" . }}
           ports:
             - containerPort: 8080
               protocol: TCP
