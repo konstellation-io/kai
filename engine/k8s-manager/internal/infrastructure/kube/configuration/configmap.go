@@ -30,9 +30,10 @@ func getFluentBitConfig() map[string]string {
 	return map[string]string{
 		"parsers.conf": `
 [PARSER]
-    Name multiline_pattern
+    Name log_parser
     Format regex
-    Regex ^(?<logtime>\d{4}\-\d{2}\-\d{2}T\d{1,2}\:\d{1,2}\:\d{1,2}(\.\d+Z|\+0000)) (?<level>(ERROR|WARN|INFO|DEBUG)) (?<capture>.*)
+    Regex ^(?<logtime>[^\s]*)\s+(?<level>[^\s]*)\s+(?<issuer>\[.*\])\s+(?<origin>[^\s]*)\s+(?<message>\S+(\s\S+)*)\s+(?<metadata_json>{.*})$
+    Decode_Field json metadata_json
 `,
 
 		"fluent-bit.conf": `
@@ -52,28 +53,28 @@ func getFluentBitConfig() map[string]string {
 
 [INPUT]
     Name        tail
-    Tag         mongo_writer_logs.${KAI_PRODUCT_ID}
+    Tag         tail.log
     Buffer_Chunk_Size 1k
     Path        /var/log/app/*.log
-    Multiline On
-    Parser_Firstline multiline_pattern
 
 [FILTER]
-    Name record_modifier
-    Match *
-    Record versionTag ${KAI_VERSION_TAG}
-    Record processName ${KAI_PROCESS_NAME}
-    Record workflowName ${KAI_WORKFLOW_NAME}
+    Name parser
+    Match tail.log
+    Key_Name log
+    Parser log_parser
+    Reserve_Data True
 
-[FILTER]
-    Name  stdout
+[OUTPUT]
+    Name stdout
     Match *
 
 [OUTPUT]
-    Name  nats
-    Match *
-    Host  ${KAI_MESSAGING_HOST}
-    Port  ${KAI_MESSAGING_PORT}
+    Name loki
+    Match tail.log
+    Host kai-local-loki
+    Port 3100
+    labels service=kai-product-version
+    label_keys $product_id, $version_id, $workflow_id, $process_id, $request_id, $level, $issuer
 `,
 	}
 }

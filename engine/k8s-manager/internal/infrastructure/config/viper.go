@@ -132,7 +132,7 @@ func setDefaultValues() {
 	viper.SetDefault(ProcessTimeoutKey, 5*time.Minute)
 
 	viper.SetDefault(FluentBitImageKey, "fluent/fluent-bit")
-	viper.SetDefault(FluentBitTagKey, "1.3")
+	viper.SetDefault(FluentBitTagKey, "2.2.0")
 	viper.SetDefault(FluentBitPullPolicyKey, "IfNotPresent")
 
 	userHome, ok := os.LookupEnv("HOME")

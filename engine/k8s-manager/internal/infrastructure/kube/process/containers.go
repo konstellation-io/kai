@@ -40,8 +40,7 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 			},
 			{
 				Name:      "app-log-volume",
-				ReadOnly:  true,
-				MountPath: "/app/logs",
+				MountPath: "/var/log/app",
 			},
 		},
 		Resources: getContainerResources(process.EnableGpu, process.ResourceLimits),
