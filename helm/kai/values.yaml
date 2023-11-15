@@ -158,8 +158,19 @@ k8sManager:
       className: "kong"
       # -- The annotations that all the generated ingresses for the entrypoints will have
       # @default -- See `entrypoints.ingress.annotations` in [values.yaml](./values.yaml)
-      annotations:
+      annotations: {}
       # konghq.com/protocol: grpc,grpcs
+  workflows:
+    sidecars:
+      fluentbit:
+        image:
+          # -- Image repository for Fuent Bit sidecar
+          repository: fluent/fluent-bit
+          # -- Image tag for Fuent Bit sidecar
+          tag: 2.2.0
+          # -- Image pull policy for Fuent Bit sidecar
+          pullPolicy: IfNotPresent
+
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##

@@ -29,3 +29,6 @@ data:
   KAI_KEYCLOAK_BASE_URL: "http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}"
   KAI_KEYCLOAK_REALM: "{{ .Values.keycloak.realmName }}"
   KAI_KEYCLOAK_MINIO_CLIENT_ID: "{{ .Values.keycloak.minio.oidcClient.clientId }}"
+  KAI_FLUENTBIT_IMAGE_REPOSITORY: {{ .Values.k8sManager.workflows.sidecars.fluentbit.image.repository }}
+  KAI_FLUENTBIT_IMAGE_TAG: {{ .Values.k8sManager.workflows.sidecars.fluentbit.image.tag }}
+  KAI_FLUENTBIT_IMAGE_PULLPOLICY: {{ .Values.k8sManager.workflows.sidecars.fluentbit.image.pullPolicy }}
