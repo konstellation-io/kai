@@ -77,6 +77,20 @@ func (mr *MockNatsClientMockRecorder) CreateStream(streamConfig interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStream", reflect.TypeOf((*MockNatsClient)(nil).CreateStream), streamConfig)
 }
 
+// DeleteKeyValueStore mocks base method.
+func (m *MockNatsClient) DeleteKeyValueStore(keyValueStore string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteKeyValueStore", keyValueStore)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteKeyValueStore indicates an expected call of DeleteKeyValueStore.
+func (mr *MockNatsClientMockRecorder) DeleteKeyValueStore(keyValueStore interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteKeyValueStore", reflect.TypeOf((*MockNatsClient)(nil).DeleteKeyValueStore), keyValueStore)
+}
+
 // DeleteObjectStore mocks base method.
 func (m *MockNatsClient) DeleteObjectStore(stream string) error {
 	m.ctrl.T.Helper()

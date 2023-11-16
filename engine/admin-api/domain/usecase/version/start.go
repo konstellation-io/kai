@@ -96,6 +96,8 @@ func (h *Handler) createVersionResources(
 
 	kvStoreCfg.GlobalKeyValueStore = product.KeyValueStore
 
+	compensations.AddCompensation(h.deleteKeyValueStoresFunc(product.ID, version))
+
 	versionCfg, err := entity.NewVersionConfig(versionStreamCfg, objectStoreCfg, kvStoreCfg)
 	if err != nil {
 		return err
@@ -238,6 +240,12 @@ func (h *Handler) deleteStreamFunc(productID string, version *entity.Version) fu
 func (h *Handler) deleteObjectStoresFunc(productID string, version *entity.Version) func() error {
 	return func() error {
 		return h.natsManagerService.DeleteObjectStores(context.Background(), productID, version.Tag)
+	}
+}
+
+func (h *Handler) deleteKeyValueStoresFunc(productID string, version *entity.Version) func() error {
+	return func() error {
+		return h.natsManagerService.DeleteVersionKeyValueStores(context.Background(), productID, version)
 	}
 }
 

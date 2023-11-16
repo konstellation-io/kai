@@ -63,6 +63,24 @@ config:
           accessKeyID: ""
           # -- S3 Secret Access Key if no secret is used
           secretAccessKey: ""
+  ## Use only when `redis.enabled: false`
+  ## Only apply when use your own redis URL/URLs
+  redis:
+    # -- architecture. Allowed values: `standalone` or `replication`. Only apply when use your own redis URL/URLs
+    architecture: standalone
+    auth:
+      # -- Name of the secret that contains the redis password
+      existingSecret: ""
+      # -- Name of the key in the secret that contains the redis password
+      existingSecretPasswordKey: ""
+      # -- Redis password if no existingSecret is used and `redis.enabled: false`
+      password: ""
+    master:
+      # -- Redis Master endpoint url. Change this to your own URL when `redis.enabled: false`
+      url: redis://{{ include "redis-master.fullname" . }}:{{ .Values.redis.master.service.ports.redis }}
+    replicas:
+      # -- Redis Replicas endpoint url. Change this to your own URL when `redis.enabled: false`
+      url: redis://{{ include "redis-replicas.fullname" . }}:{{ .Values.redis.replica.service.ports.redis }}
   loki:
     # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Set loki as default datasource for Grafana.
     isDefault: true
@@ -80,7 +98,6 @@ config:
     # -- Only when `prometheus.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
     datasource:
       jsonData: "{}"
-
 adminApi:
   # -- Default application log level
   logLevel: INFO
@@ -88,7 +105,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.49
+    tag: 0.2.0-develop.51
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
@@ -141,7 +158,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.49
+    tag: 0.2.0-develop.51
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -367,7 +384,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.49
+    tag: 0.2.0-develop.51
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -639,7 +656,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.49
+    tag: 0.2.0-develop.51
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
@@ -1022,7 +1039,6 @@ redis:
   # -- architecture. Allowed values: `standalone` or `replication`
   architecture: standalone
   auth:
-    enabled: true
     # @default -- random 10-character alphanumeric string if not set
     password: ""
     ## NOTE: When existingSecret is set, the previous `auth.password` parameter is ignored

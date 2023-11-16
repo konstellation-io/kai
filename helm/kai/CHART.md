@@ -20,7 +20,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.49"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.51"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -64,6 +64,12 @@
 | config.prometheus.datasource | object | `{"jsonData":"{}"}` | Only when `prometheus.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config. |
 | config.prometheus.isDefault | bool | `false` | Only when `prometheus.enabled: true` and `grafana.enabled: true`. Set prometheus as default datasource for Grafana. |
 | config.prometheus.url | string | `"http://{{ include \"prometheus.fullname\" .Subcharts.prometheus }}-{{ .Values.prometheus.server.name }}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}"` | Prometheus endpoint url. Change this to your own URL when `prometheus.enabled: false` |
+| config.redis.architecture | string | `"standalone"` | architecture. Allowed values: `standalone` or `replication`. Only apply when use your own redis URL/URLs |
+| config.redis.auth.existingSecret | string | `""` | Name of the secret that contains the redis password |
+| config.redis.auth.existingSecretPasswordKey | string | `""` | Name of the key in the secret that contains the redis password |
+| config.redis.auth.password | string | `""` | Redis password if no existingSecret is used and `redis.enabled: false` |
+| config.redis.master.url | string | `"redis://{{ include \"redis-master.fullname\" . }}:{{ .Values.redis.master.service.ports.redis }}"` | Redis Master endpoint url. Change this to your own URL when `redis.enabled: false` |
+| config.redis.replicas.url | string | `"redis://{{ include \"redis-replicas.fullname\" . }}:{{ .Values.redis.replica.service.ports.redis }}"` | Redis Replicas endpoint url. Change this to your own URL when `redis.enabled: false` |
 | config.tls.certSecretName | string | `""` | An existing secret containing a valid wildcard certificate for the value provissioned in `.config.baseDomainName`. Required if `config.tls.enabled = true` |
 | config.tls.enabled | bool | `false` | Whether to enable TLS |
 | developmentMode | bool | `false` | Whether to setup developement mode |
@@ -103,7 +109,7 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.49"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.51"` | Image tag |
 | k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
@@ -230,7 +236,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.49"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.51"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -262,7 +268,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.49"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.51"` | Image tag |
 | prometheus.alertmanager.enabled | bool | `true` | Whether to enable alertmanager |
 | prometheus.alertmanager.image.tag | string | `"v0.26.0"` | alertmanager server version |
 | prometheus.alertmanager.persistence.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |
@@ -289,7 +295,6 @@
 | prometheus.server.service.type | string | `"ClusterIP"` | Service type |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | redis.architecture | string | `"standalone"` | architecture. Allowed values: `standalone` or `replication` |
-| redis.auth.enabled | bool | `true` |  |
 | redis.auth.existingSecret | string | `""` | The name of an existing secret with Redis credentials |
 | redis.auth.existingSecretPasswordKey | string | `""` | Password key to be retrieved from existing secret |
 | redis.auth.password | string | `""` |  |

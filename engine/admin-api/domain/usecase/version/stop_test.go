@@ -28,6 +28,7 @@ func (s *versionSuite) TestStop_OK() {
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(ctx, productID, vers).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStopping).Return(nil)
 
 	// go rutine expected to be called
@@ -173,6 +174,7 @@ func (s *versionSuite) TestStop_CheckNonBlockingErrorLogging() {
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(ctx, productID, vers).Return(nil)
 
 	// GIVEN first set status errors
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStopping).
@@ -256,6 +258,7 @@ func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(ctx, productID, vers).Return(nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStopping).Return(nil)
 
 	// go rutine expected to be called
