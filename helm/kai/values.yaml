@@ -186,6 +186,14 @@ k8sManager:
           tag: 2.2.0
           # -- Image pull policy for Fuent Bit sidecar
           pullPolicy: IfNotPresent
+      telegraf:
+        image:
+          # -- Image repository for Fuent Bit sidecar
+          repository: telegraf
+          # -- Image tag for Fuent Bit sidecar
+          tag: 1.28.5
+          # -- Image pull policy for Fuent Bit sidecar
+          pullPolicy: IfNotPresent
 
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/

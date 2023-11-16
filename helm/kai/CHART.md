@@ -114,6 +114,9 @@
 | k8sManager.processes.sidecars.fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for Fuent Bit sidecar |
 | k8sManager.processes.sidecars.fluentbit.image.repository | string | `"fluent/fluent-bit"` | Image repository for Fuent Bit sidecar |
 | k8sManager.processes.sidecars.fluentbit.image.tag | string | `"2.2.0"` | Image tag for Fuent Bit sidecar |
+| k8sManager.processes.sidecars.telegraf.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for Fuent Bit sidecar |
+| k8sManager.processes.sidecars.telegraf.image.repository | string | `"telegraf"` | Image repository for Fuent Bit sidecar |
+| k8sManager.processes.sidecars.telegraf.image.tag | string | `"1.28.5"` | Image tag for Fuent Bit sidecar |
 | k8sManager.processes.triggers.ingress.annotations | object | `{}` | The annotations that all the generated ingresses for the entrypoints will have |
 | k8sManager.processes.triggers.ingress.className | string | `"kong"` | The ingressClassName to use for the enypoints' generated ingresses |
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |

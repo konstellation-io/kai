@@ -32,3 +32,6 @@ data:
   KAI_FLUENTBIT_IMAGE_REPOSITORY: {{ .Values.k8sManager.processes.sidecars.fluentbit.image.repository }}
   KAI_FLUENTBIT_IMAGE_TAG: {{ .Values.k8sManager.processes.sidecars.fluentbit.image.tag }}
   KAI_FLUENTBIT_IMAGE_PULLPOLICY: {{ .Values.k8sManager.processes.sidecars.fluentbit.image.pullPolicy }}
+  KAI_TELEGRAF_IMAGE_REPOSITORY: {{ .Values.k8sManager.processes.sidecars.telegraf.image.repository }}
+  KAI_TELEGRAF_IMAGE_TAG: {{ .Values.k8sManager.processes.sidecars.telegraf.image.tag }}
+  KAI_TELEGRAF_IMAGE_PULLPOLICY: {{ .Values.k8sManager.processes.sidecars.telegraf.image.pullPolicy }}
