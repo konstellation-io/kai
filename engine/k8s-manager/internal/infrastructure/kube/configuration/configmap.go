@@ -71,11 +71,14 @@ func getFluentBitConfig() map[string]string {
     Match tail.log
     Host kai-local-loki
     Port 3100
-    labels service=kai-product-version, product_id=${KAI_PRODUCT_ID}, version_tag=${KAI_VERSION_TAG}, workflow_name=${KAI_WORKFLOW_NAME}, process_name=${KAI_PROCESS_NAME}
+    labels service=` + labelsService + `
     label_keys $subject, $request_id, $L, $N
 `,
 	}
 }
+
+//nolint:lll // false positive
+const labelsService = `kai-product-version, product_id=${KAI_PRODUCT_ID}, version_tag=${KAI_VERSION_TAG}, workflow_name=${KAI_WORKFLOW_NAME}, process_name=${KAI_PROCESS_NAME}`
 
 func mergeConfigs(configs ...map[string]string) map[string]string {
 	fullConfig := map[string]string{}
