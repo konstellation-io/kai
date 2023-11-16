@@ -30,12 +30,6 @@ func getFluentBitConfig() map[string]string {
 	return map[string]string{
 		"parsers.conf": `
 [PARSER]
-    Name log_parser
-    Format regex
-    Regex ^(?<logtime>[^\s]*)\s+(?<level>[^\s]*)\s+(?<issuer>\[.*\])\s+(?<origin>[^\s]*)\s+(?<message>\S+(\s\S+)*)\s+(?<metadata_json>{.*})$
-    Decode_Field json metadata_json
-
-[PARSER]
     Name json_parser
     Format json
 `,
@@ -77,8 +71,8 @@ func getFluentBitConfig() map[string]string {
     Match tail.log
     Host kai-local-loki
     Port 3100
-    labels service=kai-product-version
-    label_keys $product_id, $version_id, $workflow_id, $process_id, $request_id, $L, $N
+    labels service=kai-product-version, product_id=${KAI_PRODUCT_ID}, version_tag=${KAI_VERSION_TAG}, workflow_name=${KAI_WORKFLOW_NAME}, process_name=${KAI_PROCESS_NAME}
+    label_keys $subject, $request_id, $L, $N
 `,
 	}
 }
