@@ -49,7 +49,7 @@ releases:
   - name: cnpg
     <<: *default
     chart: cnpg/cloudnative-pg
-    version: 0.18.0
+    version: 0.19.1
     namespace: cnpg-system
 
   - name: postgres-database
