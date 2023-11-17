@@ -89,7 +89,9 @@ func (os *MinioObjectStorage) UploadImageSources(ctx context.Context, product, i
 func (os *MinioObjectStorage) DeleteImageSources(ctx context.Context, product, image string) error {
 	os.logger.Info("Deleting image's sources", "product", product, "image", image)
 
-	return os.client.RemoveObject(ctx, product, image, minio.RemoveObjectOptions{})
+	return os.client.RemoveObject(ctx, product, image, minio.RemoveObjectOptions{
+		ForceDelete: true,
+	})
 }
 
 func (os *MinioObjectStorage) getPolicy(bucket string) []byte {
