@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
@@ -131,7 +132,7 @@ func (kn KubeNetwork) getIngressRules(
 }
 
 func (kn KubeNetwork) isGrpc(svc corev1.Service) bool {
-	return svc.Labels["protocol"] == "grpc"
+	return svc.Labels["protocol"] == string(domain.NetworkingProtocolGRPC)
 }
 
 func (kn KubeNetwork) getGRPCHost(workflow, process, httpHost string) string {

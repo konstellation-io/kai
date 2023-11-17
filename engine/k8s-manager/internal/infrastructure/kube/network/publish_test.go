@@ -20,8 +20,6 @@ import (
 const (
 	_httpEndpointFormat = "%s.%s/%s-%s"
 	_grpcEndpointFormat = "%s.%s.%s.%s"
-	_httpProtocol       = "http"
-	_grpcProtocol       = "grpc"
 )
 
 func (s *networkSuite) TestPublish() {
@@ -34,7 +32,7 @@ func (s *networkSuite) TestPublish() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   _httpProtocol,
+				Protocol:   domain.NetworkingProtocolHTTP,
 				TargetPort: 8080,
 			},
 		},
@@ -74,7 +72,7 @@ func (s *networkSuite) TestPublish_GRPCTrigger() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   _grpcProtocol,
+				Protocol:   domain.NetworkingProtocolGRPC,
 				TargetPort: 8080,
 			},
 		},
@@ -116,7 +114,7 @@ func (s *networkSuite) TestPublish_WithTLS() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   _httpProtocol,
+				Protocol:   domain.NetworkingProtocolHTTP,
 				TargetPort: 8080,
 			},
 		},
@@ -159,7 +157,7 @@ func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   _httpProtocol,
+				Protocol:   domain.NetworkingProtocolHTTP,
 				TargetPort: 8080,
 			},
 		},
