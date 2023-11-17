@@ -36,6 +36,7 @@ items:
               controller: null
               blockownerdeletion: null
         finalizers: []
+        zzz_deprecatedclustername: ""
         managedfields: []
       spec:
         scaletargetref:
