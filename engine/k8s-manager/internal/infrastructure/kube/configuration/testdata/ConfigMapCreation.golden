@@ -95,7 +95,7 @@ data:
             client_user: test-minio-user
             client_password: test-minio-password
             ssl: false
-            string: test-minio-bucket
+            bucket: test-minio-bucket
         auth:
             endpoint: test-auth-endpoint
             client: test-auth-client-id
