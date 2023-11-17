@@ -30,6 +30,7 @@ items:
         annotations: {}
         ownerreferences: []
         finalizers: []
+        zzz_deprecatedclustername: ""
         managedfields: []
       spec:
         replicas: null
@@ -62,6 +63,7 @@ items:
                 annotations: {}
                 ownerreferences: []
                 finalizers: []
+                zzz_deprecatedclustername: ""
                 managedfields: []
             spec:
                 volumes:
@@ -178,7 +180,6 @@ items:
                       resources:
                         limits: {}
                         requests: {}
-                        claims: []
                       volumemounts:
                         - name: version-conf-files
                           readonly: true
@@ -242,7 +243,6 @@ items:
                                 format: BinarySI
                             nvidia.com/gpu:
                                 format: DecimalSI
-                        claims: []
                       volumemounts:
                         - name: version-conf-files
                           readonly: true
@@ -313,9 +313,6 @@ items:
                 topologyspreadconstraints: []
                 sethostnameasfqdn: null
                 os: null
-                hostusers: null
-                schedulinggates: []
-                resourceclaims: []
         strategy:
             type: ""
             rollingupdate: null
