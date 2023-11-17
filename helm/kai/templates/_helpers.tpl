@@ -145,6 +145,42 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- printf "%s-redis-replicas" (include "kai.fullname" .) -}}
 {{- end }}
 
+{{/*
+redis master URL
+*/}}
+{{- define "redis.master.url" -}}
+{{- if .Values.redis.enabled -}}
+    {{- tpl .Values.config.redis.master.url . | quote -}}
+{{- else -}}
+    {{- .Values.config.redis.master.url -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+redis replicas URL
+*/}}
+{{- define "redis.replicas.url" -}}
+{{- if .Values.redis.enabled -}}
+    {{- tpl .Values.config.redis.replicas.url . | quote -}}
+{{- else -}}
+    {{- .Values.config.redis.replicas.url -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+redis secret name
+*/}}
+{{- define "redis.auth.secretName" -}}
+{{ default (printf "%s-redis" (include "kai.fullname" .)) .Values.config.redis.auth.existingSecret }}
+{{- end -}}
+
+{{/*
+redis password
+*/}}
+{{- define "redis.auth.secretPasswordKey" -}}
+{{ default "redis-password" .Values.config.redis.auth.existingSecretPasswordKey }}
+{{- end -}}
+
 {{/* Fullname suffixed with minio-config */}}
 {{- define "minio-config.fullname" -}}
 {{- printf "%s-minio-config" (include "kai.fullname" .) -}}

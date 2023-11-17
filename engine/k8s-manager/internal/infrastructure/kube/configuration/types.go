@@ -42,7 +42,7 @@ type MinioConfig struct {
 	ClientUser     string `yaml:"client_user"`
 	ClientPassword string `yaml:"client_password"`
 	SSL            bool   `yaml:"ssl"`
-	Bucket         string `yaml:"string"`
+	Bucket         string `yaml:"bucket"`
 }
 
 type AuthConfig struct {

@@ -16,29 +16,29 @@
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| adminApi.affinity | object | `{}` | Assign custom affinity rules to the Admin API pods |
+| adminApi.affinity | object | `{}` | Assign custom affinity rules to the Admin API pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.49"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.50"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
-| adminApi.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| adminApi.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | adminApi.storage.class | string | `"standard"` | Storage class name |
 | adminApi.storage.path | string | `"/admin-api-files"` | Persistent volume mount point. This will define Admin API app workdir too. |
 | adminApi.storage.size | string | `"1Gi"` | Storage class size |
-| adminApi.tolerations | list | `[]` | Tolerations for use with node taints |
-| chronograf.affinity | object | `{}` | Assign custom affinity rules to the Chronograf pods |
+| adminApi.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| chronograf.affinity | object | `{}` | Assign custom affinity rules to the Chronograf pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | chronograf.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | chronograf.image.repository | string | `"chronograf"` | Image repository |
 | chronograf.image.tag | string | `"1.8.4"` | Image tag |
-| chronograf.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| chronograf.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | chronograf.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
 | chronograf.persistence.enabled | bool | `true` | Whether to enable persistence |
 | chronograf.persistence.size | string | `"2Gi"` | Storage size |
 | chronograf.persistence.storageClass | string | `"standard"` | Storage class name |
-| chronograf.tolerations | list | `[]` | Tolerations for use with node taints |
+| chronograf.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.baseDomainName | string | `"kai.local"` | Base domain name for Admin API and K8S Manager apps |
 | config.loki.datasource | object | `{"jsonData":"{}","uid":""}` | Only when `loki.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config. |
@@ -64,6 +64,12 @@
 | config.prometheus.datasource | object | `{"jsonData":"{}"}` | Only when `prometheus.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config. |
 | config.prometheus.isDefault | bool | `false` | Only when `prometheus.enabled: true` and `grafana.enabled: true`. Set prometheus as default datasource for Grafana. |
 | config.prometheus.url | string | `"http://{{ include \"prometheus.fullname\" .Subcharts.prometheus }}-{{ .Values.prometheus.server.name }}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}"` | Prometheus endpoint url. Change this to your own URL when `prometheus.enabled: false` |
+| config.redis.architecture | string | `"standalone"` | architecture. Allowed values: `standalone` or `replication`. Only apply when use your own redis URL/URLs |
+| config.redis.auth.existingSecret | string | `""` | Name of the secret that contains the redis password |
+| config.redis.auth.existingSecretPasswordKey | string | `""` | Name of the key in the secret that contains the redis password |
+| config.redis.auth.password | string | `""` | Redis password if no existingSecret is used and `redis.enabled: false` |
+| config.redis.master.url | string | `"redis://{{ include \"redis-master.fullname\" . }}:{{ .Values.redis.master.service.ports.redis }}"` | Redis Master endpoint url. Change this to your own URL when `redis.enabled: false` |
+| config.redis.replicas.url | string | `"redis://{{ include \"redis-replicas.fullname\" . }}:{{ .Values.redis.replica.service.ports.redis }}"` | Redis Replicas endpoint url. Change this to your own URL when `redis.enabled: false` |
 | config.tls.certSecretName | string | `""` | An existing secret containing a valid wildcard certificate for the value provissioned in `.config.baseDomainName`. Required if `config.tls.enabled = true` |
 | config.tls.enabled | bool | `false` | Whether to enable TLS |
 | developmentMode | bool | `false` | Whether to setup developement mode |
@@ -89,26 +95,26 @@
 | grafana.service.type | string | `"ClusterIP"` | Service type |
 | grafana.sidecar | object | `{"datasources":{"enabled":true,"label":"grafana_datasource","labelValue":"1","maxLines":1000}}` | sidecar config (required for datasource config section in loki and prometheus) |
 | influxdb.address | string | `"http://kai-influxdb/"` |  |
-| influxdb.affinity | object | `{}` | Assign custom affinity rules to the InfluxDB pods |
+| influxdb.affinity | object | `{}` | Assign custom affinity rules to the InfluxDB pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | influxdb.config.http | object | `{"auth-enabled":false,"enabled":true,"flux-enabled":true}` | [Details](https://docs.influxdata.com/influxdb/v1.8/administration/config/#http) |
 | influxdb.image.tag | string | `"1.8.1"` | Image tag |
 | influxdb.initScripts.enabled | bool | `true` | Boolean flag to enable and disable initscripts. See https://github.com/influxdata/helm-charts/tree/master/charts/influxdb#configure-the-chart for more info |
 | influxdb.initScripts.scripts | object | `{"init.iql":"CREATE DATABASE \"kai\"\n"}` | Init scripts |
-| influxdb.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| influxdb.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | influxdb.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
 | influxdb.persistence.enabled | bool | `true` | Whether to enable persistence. See https://github.com/influxdata/helm-charts/tree/master/charts/influxdb#configure-the-chart for more info |
 | influxdb.persistence.size | string | `"10Gi"` | Storage size |
 | influxdb.persistence.storageClass | string | `"standard"` | Storage class name |
-| influxdb.tolerations | list | `[]` | Tolerations for use with node taints |
-| k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods |
+| influxdb.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.49"` | Image tag |
-| k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| k8sManager.image.tag | string | `"0.2.0-develop.50"` | Image tag |
+| k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
 | k8sManager.serviceAccount.name | string | `""` | The name of the service account. @default: A pre-generated name based on the chart relase fullname sufixed by `-k8s-manager` |
-| k8sManager.tolerations | list | `[]` | Tolerations for use with node taints |
+| k8sManager.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | k8sManager.triggers.ingress.annotations | string | See `entrypoints.ingress.annotations` in [values.yaml](./values.yaml) | The annotations that all the generated ingresses for the entrypoints will have |
 | k8sManager.triggers.ingress.className | string | `"kong"` | The ingressClassName to use for the enypoints' generated ingresses |
 | kapacitor.enabled | bool | `false` | Whether to enable Kapacitor |
@@ -216,22 +222,22 @@
 | minio.rootUser | string | Randomly generated value | Sets Root user |
 | minio.service.port | string | `"9000"` | Internal port number for MinIO S3 API service |
 | minio.service.type | string | `"ClusterIP"` | Service type |
-| mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods |
+| mongoExpress.affinity | object | `{}` | Assign custom affinity rules to the Mongo Express pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoExpress.connectionString.secretKey | string | `""` | The name of the secret key that contains the MongoDB connection string. |
 | mongoExpress.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
 | mongoExpress.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoExpress.image.repository | string | `"mongo-express"` | Image repository |
 | mongoExpress.image.tag | string | `"0.54.0"` | Image tag |
-| mongoExpress.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
-| mongoExpress.tolerations | list | `[]` | Tolerations for use with node taints |
-| mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods |
+| mongoExpress.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| mongoExpress.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.49"` | Image tag |
-| mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
-| mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints |
+| mongoWriter.image.tag | string | `"0.2.0-develop.50"` | Image tag |
+| mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
-| nats.affinity | object | `{}` | Assign custom affinity rules to the NATS pods |
+| nats.affinity | object | `{}` | Assign custom affinity rules to the NATS pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | nats.client.port | int | `4222` | Port for client connections |
 | nats.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | nats.image.repository | string | `"nats"` | Image repository |
@@ -255,11 +261,11 @@
 | nats.logging.debug | bool | `false` | Whether to enable logging debug mode |
 | nats.logging.logtime | bool | `true` | Timestamp log entries |
 | nats.logging.trace | bool | `false` | Whether to enable logging trace mode |
-| nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
-| nats.tolerations | list | `[]` | Tolerations for use with node taints |
+| nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.49"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.50"` | Image tag |
 | prometheus.alertmanager.enabled | bool | `true` | Whether to enable alertmanager |
 | prometheus.alertmanager.image.tag | string | `"v0.26.0"` | alertmanager server version |
 | prometheus.alertmanager.persistence.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |
@@ -286,7 +292,6 @@
 | prometheus.server.service.type | string | `"ClusterIP"` | Service type |
 | rbac.create | bool | `true` | Whether to create the roles for the services that could use custom Service Accounts |
 | redis.architecture | string | `"standalone"` | architecture. Allowed values: `standalone` or `replication` |
-| redis.auth.enabled | bool | `true` |  |
 | redis.auth.existingSecret | string | `""` | The name of an existing secret with Redis credentials |
 | redis.auth.existingSecretPasswordKey | string | `""` | Password key to be retrieved from existing secret |
 | redis.auth.password | string | `""` |  |
@@ -314,7 +319,7 @@
 | redis.tls.autoGenerated | bool | `false` | Enable autogenerated certificates |
 | redis.tls.enabled | bool | `false` | Enabled Enable TLS traffic |
 | redis.tls.existingSecret | string | `""` | The name of the existing secret that contains the TLS certificates |
-| registry.affinity | object | `{}` | Assign custom affinity rules to the pods |
+| registry.affinity | object | `{}` | Assign custom affinity rules to the pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | registry.auth.password | string | password | Registry password |
 | registry.auth.user | string | user | Registry username |
 | registry.config | string | `""` | A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/. |
@@ -330,7 +335,7 @@
 | registry.imagePullSecrets | list | `[]` | Image pull secrets |
 | registry.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | registry.ingress.className | string | `"kong"` | The name of the ingress class to use |
-| registry.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| registry.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | registry.podAnnotations | object | `{}` | Pod annotations |
 | registry.podSecurityContext | object | `{}` | Pod security context |
 | registry.resources | object | `{}` | Container resources |
@@ -345,4 +350,4 @@
 | registry.storage.path | string | `"/var/lib/registry"` | Persistent volume mount point. This will define Registry app workdir too. |
 | registry.storage.size | string | `"10Gi"` | Storage size |
 | registry.storage.storageClass | string | `""` | Storage class name |
-| registry.tolerations | list | `[]` | Tolerations for use with node taints |
+| registry.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |

@@ -318,6 +318,7 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 
 	s.natsManagerService.EXPECT().DeleteObjectStores(gomock.Any(), productID, vers.Tag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteStreams(gomock.Any(), productID, vers.Tag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(gomock.Any(), productID, vers).Return(nil)
 
 	s.versionRepo.EXPECT().SetErrorStatusWithError(gomock.Any(), productID, vers.Tag, errStrMatcher).
 		DoAndReturn(func(a1, a2, a3, a4 interface{}) error {
@@ -371,6 +372,7 @@ func (s *versionSuite) TestStart_ErrorRegisteringUserActivity() {
 
 	s.natsManagerService.EXPECT().DeleteObjectStores(gomock.Any(), productID, vers.Tag).Return(nil)
 	s.natsManagerService.EXPECT().DeleteStreams(gomock.Any(), productID, vers.Tag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(gomock.Any(), productID, vers).Return(nil)
 	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(nil)
 	s.versionRepo.EXPECT().SetErrorStatusWithError(gomock.Any(), productID, vers.Tag, errStrMatcher).
 		DoAndReturn(func(a1, a2, a3, a4 interface{}) error {

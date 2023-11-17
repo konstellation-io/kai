@@ -115,3 +115,25 @@ func (n *Client) DeleteObjectStores(ctx context.Context, productID, versionTag s
 
 	return nil
 }
+
+// DeleteVersionKeyValueStores calls nats-manager to delete NATS Key Value Stores for given version.
+func (n *Client) DeleteVersionKeyValueStores(
+	ctx context.Context,
+	productID string,
+	version *entity.Version,
+) error {
+	req := natspb.DeleteVersionKeyValueStoresRequest{
+		ProductId:  productID,
+		VersionTag: version.Tag,
+		Workflows:  n.mapWorkflowsToDTO(version.Workflows),
+	}
+
+	_, err := n.client.DeleteVersionKeyValueStores(ctx, &req)
+	if err != nil {
+		return fmt.Errorf(
+			"error deleting product %q version %q NATS key value stores: %w", productID, version.Tag, err,
+		)
+	}
+
+	return nil
+}
