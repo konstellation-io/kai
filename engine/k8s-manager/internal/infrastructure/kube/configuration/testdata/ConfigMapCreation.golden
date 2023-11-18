@@ -19,7 +19,6 @@ objectmeta:
     annotations: {}
     ownerreferences: []
     finalizers: []
-    zzz_deprecatedclustername: ""
     managedfields: []
 immutable: null
 data:
