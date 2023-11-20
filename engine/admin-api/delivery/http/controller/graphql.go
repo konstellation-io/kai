@@ -31,7 +31,6 @@ type GraphQLController struct {
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
-	metricsInteractor      *usecase.MetricsInteractor
 	serverInfoGetter       *usecase.ServerInfoGetter
 	processService         *usecase.ProcessService
 }
@@ -43,7 +42,6 @@ type Params struct {
 	UserInteractor         *usecase.UserInteractor
 	UserActivityInteractor usecase.UserActivityInteracter
 	VersionInteractor      *version.Handler
-	MetricsInteractor      *usecase.MetricsInteractor
 	ServerInfoGetter       *usecase.ServerInfoGetter
 	ProcessService         *usecase.ProcessService
 }
@@ -58,7 +56,6 @@ func NewGraphQLController(
 		params.UserInteractor,
 		params.UserActivityInteractor,
 		params.VersionInteractor,
-		params.MetricsInteractor,
 		params.ServerInfoGetter,
 		params.ProcessService,
 	}
@@ -83,7 +80,6 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 		UserInteractor:         g.userInteractor,
 		UserActivityInteractor: g.userActivityInteractor,
 		VersionInteractor:      g.versionInteractor,
-		MetricsInteractor:      g.metricsInteractor,
 		ServerInfoGetter:       g.serverInfoGetter,
 		ProcessService:         g.processService,
 	})

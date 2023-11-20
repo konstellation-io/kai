@@ -75,8 +75,6 @@ type versionSuite struct {
 	natsManagerService     *mocks.MockNatsManagerService
 	userActivityInteractor *mocks.MockUserActivityInteracter
 	accessControl          *mocks.MockAccessControl
-	dashboardService       *mocks.MockDashboardService
-	processLogRepo         *mocks.MockProcessLogRepository
 
 	observedLogs *observer.ObservedLogs
 }
@@ -103,8 +101,6 @@ func (s *versionSuite) SetupSuite() {
 	s.natsManagerService = mocks.NewMockNatsManagerService(s.ctrl)
 	s.userActivityInteractor = mocks.NewMockUserActivityInteracter(s.ctrl)
 	s.accessControl = mocks.NewMockAccessControl(s.ctrl)
-	s.dashboardService = mocks.NewMockDashboardService(s.ctrl)
-	s.processLogRepo = mocks.NewMockProcessLogRepository(s.ctrl)
 
 	s.handler = version.NewHandler(&version.HandlerParams{
 		Logger:                 logger,
@@ -114,7 +110,6 @@ func (s *versionSuite) SetupSuite() {
 		NatsManagerService:     s.natsManagerService,
 		UserActivityInteractor: s.userActivityInteractor,
 		AccessControl:          s.accessControl,
-		ProcessLogRepo:         s.processLogRepo,
 	})
 }
 
