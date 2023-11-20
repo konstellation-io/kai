@@ -105,7 +105,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.52
+    tag: 0.2.0-develop.54
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
@@ -158,7 +158,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.52
+    tag: 0.2.0-develop.54
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -169,14 +169,31 @@ k8sManager:
     name: ""
     # -- The Service Account annotations
     annotations: {}
-  triggers:
-    ingress:
-      # -- The ingressClassName to use for the enypoints' generated ingresses
-      className: "kong"
-      # -- The annotations that all the generated ingresses for the entrypoints will have
-      # @default -- See `entrypoints.ingress.annotations` in [values.yaml](./values.yaml)
-      annotations:
-      # konghq.com/protocol: grpc,grpcs
+  processes:
+    triggers:
+      ingress:
+        # -- The ingressClassName to use for the enypoints' generated ingresses
+        className: "kong"
+        # -- The annotations that all the generated ingresses for the entrypoints will have
+        annotations: {}
+        # konghq.com/protocol: grpc,grpcs
+    sidecars:
+      fluentbit:
+        image:
+          # -- Image repository for Fuent Bit sidecar
+          repository: fluent/fluent-bit
+          # -- Image tag for Fuent Bit sidecar
+          tag: 2.2.0
+          # -- Image pull policy for Fuent Bit sidecar
+          pullPolicy: IfNotPresent
+      telegraf:
+        image:
+          # -- Image repository for Fuent Bit sidecar
+          repository: telegraf
+          # -- Image tag for Fuent Bit sidecar
+          tag: 1.28.5
+          # -- Image pull policy for Fuent Bit sidecar
+          pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
@@ -373,7 +390,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.52
+    tag: 0.2.0-develop.54
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -645,7 +662,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.52
+    tag: 0.2.0-develop.54
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
@@ -658,6 +675,8 @@ registry:
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # -- Specifies whether a service account should be created
     create: true

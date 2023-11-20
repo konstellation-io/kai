@@ -42,7 +42,22 @@ func (e VersionStatus) String() string {
 	return string(e)
 }
 
-func (v Version) CanBeStarted() bool {
+func (v *Version) SetPublishStatus(publicationAuthor string) {
+	now := time.Now()
+
+	v.Status = VersionStatusPublished
+	v.PublicationAuthor = &publicationAuthor
+	v.PublicationDate = &now
+}
+
+func (v *Version) UnsetPublishStatus() {
+	v.Status = VersionStatusStarted
+	v.PublicationAuthor = nil
+	v.PublicationAuthor = nil
+	v.PublicationDate = nil
+}
+
+func (v *Version) CanBeStarted() bool {
 	switch v.Status {
 	case VersionStatusCreated, VersionStatusStopped, VersionStatusError, VersionStatusCritical:
 		return true
@@ -51,7 +66,7 @@ func (v Version) CanBeStarted() bool {
 	}
 }
 
-func (v Version) CanBeStopped() bool {
+func (v *Version) CanBeStopped() bool {
 	return v.Status == VersionStatusStarted
 }
 

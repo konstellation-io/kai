@@ -67,7 +67,7 @@ func main() {
 func initGraphqlController(
 	cfg *config.Config, oldLogger logging2.Logger, logger logr.Logger, mongodbClient *mongo.Client,
 ) *controller.GraphQLController {
-	productRepo := mongodb.NewProductRepoMongoDB(cfg, oldLogger, mongodbClient)
+	productRepo := mongodb.NewProductRepoMongoDB(logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, oldLogger, mongodbClient)
 	versionMongoRepo := versionrepository.New(cfg, oldLogger, mongodbClient)
 	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, oldLogger, mongodbClient)

@@ -74,6 +74,7 @@ func getFluentBitConfig() map[string]string {
     Match *
     Host  ${KAI_MESSAGING_HOST}
     Port  ${KAI_MESSAGING_PORT}
+
 `,
 	}
 }
