@@ -13,14 +13,9 @@ data:
   KAI_ADMIN_CORS_ENABLED: "{{ .Values.config.admin.corsEnabled }}"
   KAI_SERVICES_K8S_MANAGER: "{{ include "k8s-manager.fullname" . }}:50051"
   KAI_SERVICES_NATS_MANAGER: "{{ include "nats-manager.fullname" . }}:50051"
-  KAI_MONGODB_MONGOEXPRESS_ADDRESS: http://{{ include "mongoExpress.fullname" . }}
   KAI_BASE_DOMAIN_NAME: "{{ .Values.config.baseDomainName }}"
   KAI_ADMIN_STORAGE_PATH: "{{ .Values.adminApi.storage.path }}"
   KAI_ADMIN_API_ADDRESS: ":8080"
-  # InfluxDB
-  KAI_INFLUXDB_ADDRESS: "{{ include "kai-influxdb.influxURL" . }}"
-  # Chronograf
-  KAI_CHRONOGRAF_ADDRESS: "http://{{ include "chronograf.fullname" . }}"
   # Keycloak
   KAI_KEYCLOAK_BASE_URL: "http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}"
   KAI_KEYCLOAK_MASTER_REALM: "master"
@@ -36,6 +31,8 @@ data:
   KAI_MINIO_TIER_NAME: {{ include "minio-config.tier.name" . }}
   # Loki
   KAI_LOKI_ADDRESS: {{ include "loki.url" . }}
+  KAI_LOKI_HOST: {{ include "loki.fullname" .Subcharts.loki }}
+  KAI_LOKI_PORT: {{ include "loki.url" . }}{{ .Values.loki.loki.server.http_listen_port }}
   # Prometheus
   KAI_PROMETHEUS_ADDRESS: {{ include "prometheus.url" . }}
   # Redis

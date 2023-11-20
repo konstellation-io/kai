@@ -17,7 +17,6 @@ type Handler struct {
 	natsManagerService     service.NatsManagerService
 	userActivityInteractor usecase.UserActivityInteracter
 	accessControl          auth.AccessControl
-	processLogRepo         repository.ProcessLogRepository
 }
 
 type HandlerParams struct {
@@ -28,7 +27,6 @@ type HandlerParams struct {
 	NatsManagerService     service.NatsManagerService
 	UserActivityInteractor usecase.UserActivityInteracter
 	AccessControl          auth.AccessControl
-	ProcessLogRepo         repository.ProcessLogRepository
 }
 
 // NewHandler creates a new interactor.
@@ -41,6 +39,5 @@ func NewHandler(params *HandlerParams) *Handler {
 		params.NatsManagerService,
 		params.UserActivityInteractor,
 		params.AccessControl,
-		params.ProcessLogRepo,
 	}
 }
