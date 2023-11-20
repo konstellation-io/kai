@@ -329,7 +329,6 @@ func (r *Resolver) RegisteredProcess() RegisteredProcessResolver {
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type productResolver struct{ *Resolver }
-type subscriptionResolver struct{ *Resolver }
 type userActivityResolver struct{ *Resolver }
 type versionResolver struct{ *Resolver }
 type registeredProcessResolver struct{ *Resolver }
