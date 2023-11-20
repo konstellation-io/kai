@@ -18,10 +18,8 @@ import (
 )
 
 const (
-	_httpEndpointFormat = "%s.%s.%s/%s-%s"
-	_grpcEndpointFormat = "%s.%s.%s.%s.%s"
-	_httpProtocol       = "http"
-	_grpcProtocol       = "grpc"
+	_httpEndpointFormat = "%s.%s/%s-%s"
+	_grpcEndpointFormat = "%s.%s.%s.%s"
 )
 
 func (s *networkSuite) TestPublish() {
@@ -34,7 +32,7 @@ func (s *networkSuite) TestPublish() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   _httpProtocol,
+				Protocol:   domain.NetworkingProtocolHTTP,
 				TargetPort: 8080,
 			},
 		},
@@ -74,7 +72,7 @@ func (s *networkSuite) TestPublish_GRPCTrigger() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   _grpcProtocol,
+				Protocol:   domain.NetworkingProtocolGRPC,
 				TargetPort: 8080,
 			},
 		},
@@ -116,7 +114,7 @@ func (s *networkSuite) TestPublish_WithTLS() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   _httpProtocol,
+				Protocol:   domain.NetworkingProtocolHTTP,
 				TargetPort: 8080,
 			},
 		},
@@ -159,7 +157,7 @@ func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
 			Name: _process,
 			Networking: &domain.Networking{
 				SourcePort: 8080,
-				Protocol:   _httpProtocol,
+				Protocol:   domain.NetworkingProtocolHTTP,
 				TargetPort: 8080,
 			},
 		},
@@ -190,19 +188,17 @@ func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
 }
 
 func (s *networkSuite) getHTTPEndpoint() string {
-	version := strings.ReplaceAll(_version, ".", "-")
 	product := strings.ReplaceAll(_product, ".", "-")
 	workflow := strings.ReplaceAll(_workflow, ".", "-")
 	process := strings.ReplaceAll(_process, ".", "-")
 
-	return fmt.Sprintf(_httpEndpointFormat, version, product, viper.GetString(config.BaseDomainNameKey), workflow, process)
+	return fmt.Sprintf(_httpEndpointFormat, product, viper.GetString(config.BaseDomainNameKey), workflow, process)
 }
 
 func (s *networkSuite) getGRPCEndpoint() string {
-	version := strings.ReplaceAll(_version, ".", "-")
 	product := strings.ReplaceAll(_product, ".", "-")
 	workflow := strings.ReplaceAll(_workflow, ".", "-")
 	process := strings.ReplaceAll(_process, ".", "-")
 
-	return fmt.Sprintf(_grpcEndpointFormat, process, workflow, version, product, viper.GetString(config.BaseDomainNameKey))
+	return fmt.Sprintf(_grpcEndpointFormat, process, workflow, product, viper.GetString(config.BaseDomainNameKey))
 }
