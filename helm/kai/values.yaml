@@ -105,7 +105,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.52
+    tag: 0.2.0-develop.53
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
@@ -158,7 +158,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.52
+    tag: 0.2.0-develop.53
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -194,7 +194,6 @@ k8sManager:
           tag: 1.28.5
           # -- Image pull policy for Fuent Bit sidecar
           pullPolicy: IfNotPresent
-
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
@@ -391,7 +390,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.52
+    tag: 0.2.0-develop.53
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -663,7 +662,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.52
+    tag: 0.2.0-develop.53
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
