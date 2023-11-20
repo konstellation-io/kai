@@ -4,6 +4,7 @@ package gql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -13,6 +14,10 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+)
+
+var (
+	ErrNotImplemented = errors.New("endpoint not implemented")
 )
 
 //nolint:gochecknoglobals // needs to be global to be used in the resolver
@@ -255,22 +260,7 @@ func (r *queryResolver) Logs(
 	filters entity.LogFilters,
 	cursor *string,
 ) (*LogPage, error) {
-	loggedUser := ctx.Value("user").(*entity.User)
-
-	searchResult, err := r.versionInteractor.SearchLogs(ctx, loggedUser, productID, filters, cursor)
-	if err != nil {
-		return nil, err
-	}
-
-	nextCursor := new(string)
-	if searchResult.Cursor != "" {
-		*nextCursor = searchResult.Cursor
-	}
-
-	return &LogPage{
-		Cursor: nextCursor,
-		Items:  searchResult.Logs,
-	}, nil
+	return nil, ErrNotImplemented
 }
 
 func (r *queryResolver) ServerInfo(ctx context.Context) (*entity.ServerInfo, error) {
@@ -300,8 +290,7 @@ func (r *productResolver) EntrypointAddress(_ context.Context, _ *entity.Product
 
 func (r *subscriptionResolver) WatchProcessLogs(ctx context.Context, productID, versionTag string,
 	filters entity.LogFilters) (<-chan *entity.ProcessLog, error) {
-	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.WatchProcessLogs(ctx, loggedUser, productID, versionTag, filters)
+	return nil, ErrNotImplemented
 }
 
 func (r *userActivityResolver) Date(_ context.Context, obj *entity.UserActivity) (string, error) {

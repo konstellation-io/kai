@@ -28,10 +28,7 @@ var (
 type ProductInteractor struct {
 	logger            logr.Logger
 	productRepo       repository.ProductRepo
-	measurementRepo   repository.MeasurementRepo
 	versionRepo       repository.VersionRepo
-	metricRepo        repository.MetricRepo
-	processLogRepo    repository.ProcessLogRepository
 	processRepo       repository.ProcessRepository
 	userActivity      UserActivityInteracter
 	accessControl     auth.AccessControl
@@ -44,10 +41,7 @@ type ProductInteractor struct {
 type ProductInteractorOpts struct {
 	Logger            logr.Logger
 	ProductRepo       repository.ProductRepo
-	MeasurementRepo   repository.MeasurementRepo
 	VersionRepo       repository.VersionRepo
-	MetricRepo        repository.MetricRepo
-	ProcessLogRepo    repository.ProcessLogRepository
 	ProcessRepo       repository.ProcessRepository
 	UserActivity      UserActivityInteracter
 	AccessControl     auth.AccessControl
@@ -62,10 +56,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 	return &ProductInteractor{
 		ps.Logger,
 		ps.ProductRepo,
-		ps.MeasurementRepo,
 		ps.VersionRepo,
-		ps.MetricRepo,
-		ps.ProcessLogRepo,
 		ps.ProcessRepo,
 		ps.UserActivity,
 		ps.AccessControl,
@@ -164,13 +155,6 @@ func (i *ProductInteractor) CreateProduct(
 
 	newProduct.MinioConfiguration = minioConfiguration
 
-	err = i.measurementRepo.CreateDatabase(newProduct.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	i.logger.V(0).Info("Measurement database created for product")
-
 	err = i.createDatabaseIndexes(ctx, name)
 	if err != nil {
 		return nil, err
@@ -187,17 +171,7 @@ func (i *ProductInteractor) CreateProduct(
 }
 
 func (i *ProductInteractor) createDatabaseIndexes(ctx context.Context, productID string) error {
-	err := i.metricRepo.CreateIndexes(ctx, productID)
-	if err != nil {
-		return err
-	}
-
-	err = i.processLogRepo.CreateIndexes(ctx, productID)
-	if err != nil {
-		return err
-	}
-
-	err = i.versionRepo.CreateIndexes(ctx, productID)
+	err := i.versionRepo.CreateIndexes(ctx, productID)
 	if err != nil {
 		return err
 	}

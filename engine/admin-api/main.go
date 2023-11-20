@@ -7,7 +7,6 @@ import (
 	"github.com/go-logr/zapr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/casbinauth"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
@@ -63,14 +62,12 @@ func main() {
 	app.Start()
 }
 
-//nolint:funlen //future refactor
 func initGraphqlController(
 	cfg *config.Config, oldLogger logging2.Logger, logger logr.Logger, mongodbClient *mongo.Client,
 ) *controller.GraphQLController {
 	productRepo := mongodb.NewProductRepoMongoDB(logger, mongodbClient)
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, oldLogger, mongodbClient)
 	versionMongoRepo := versionrepository.New(cfg, oldLogger, mongodbClient)
-	processLogRepo := mongodb.NewProcessLogMongoDBRepo(cfg, oldLogger, mongodbClient)
 	processRepo := processrepository.New(cfg, oldLogger, mongodbClient)
 	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, oldLogger, mongodbClient)
 
@@ -130,10 +127,7 @@ func initGraphqlController(
 	productInteractor := usecase.NewProductInteractor(&usecase.ProductInteractorOpts{
 		Logger:            logger,
 		ProductRepo:       productRepo,
-		MeasurementRepo:   influx.NewMeasurementRepoInfluxDB(cfg, oldLogger),
 		VersionRepo:       versionMongoRepo,
-		MetricRepo:        metricRepo,
-		ProcessLogRepo:    processLogRepo,
 		ProcessRepo:       processRepo,
 		UserActivity:      userActivityInteractor,
 		AccessControl:     accessControl,
@@ -159,7 +153,6 @@ func initGraphqlController(
 			NatsManagerService:     natsManagerService,
 			UserActivityInteractor: userActivityInteractor,
 			AccessControl:          accessControl,
-			ProcessLogRepo:         processLogRepo,
 		},
 	)
 

@@ -34,10 +34,7 @@ type productSuite struct {
 
 	logger            logr.Logger
 	productRepo       *mocks.MockProductRepo
-	measurementRepo   *mocks.MockMeasurementRepo
 	versionRepo       *mocks.MockVersionRepo
-	metricRepo        *mocks.MockMetricRepo
-	processLogRepo    *mocks.MockProcessLogRepository
 	processRepo       *mocks.MockProcessRepository
 	userActivityRepo  *mocks.MockUserActivityRepo
 	accessControl     *mocks.MockAccessControl
@@ -57,10 +54,7 @@ func (s *productSuite) SetupSuite() {
 	s.logger = testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	s.productRepo = mocks.NewMockProductRepo(ctrl)
 	s.userActivityRepo = mocks.NewMockUserActivityRepo(ctrl)
-	s.measurementRepo = mocks.NewMockMeasurementRepo(ctrl)
 	s.versionRepo = mocks.NewMockVersionRepo(ctrl)
-	s.metricRepo = mocks.NewMockMetricRepo(ctrl)
-	s.processLogRepo = mocks.NewMockProcessLogRepository(ctrl)
 	s.processRepo = mocks.NewMockProcessRepository(ctrl)
 	s.accessControl = mocks.NewMockAccessControl(ctrl)
 	s.objectStorage = mocks.NewMockObjectStorage(s.T())
@@ -77,10 +71,7 @@ func (s *productSuite) SetupSuite() {
 	productInteractorOpts := usecase.ProductInteractorOpts{
 		Logger:            s.logger,
 		ProductRepo:       s.productRepo,
-		MeasurementRepo:   s.measurementRepo,
 		VersionRepo:       s.versionRepo,
-		MetricRepo:        s.metricRepo,
-		ProcessLogRepo:    s.processLogRepo,
 		ProcessRepo:       s.processRepo,
 		UserActivity:      userActivity,
 		AccessControl:     s.accessControl,
@@ -140,10 +131,7 @@ func (s *productSuite) TestCreateProduct() {
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
 	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
-	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
 	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
 
@@ -238,32 +226,6 @@ func (s *productSuite) TestCreateProduct_FailsIfProductWithSameNameAlreadyExists
 	s.Require().Nil(product)
 }
 
-func (s *productSuite) TestCreateProduct_ErrorCreatingMeasurementsDatabase() {
-
-	ctx := context.Background()
-
-	user := testhelpers.NewUserBuilder().Build()
-	productID := "test-product"
-	productName := "test-product"
-	productDescription := "This is a product description"
-
-	expectedError := errors.New("error creating database")
-
-	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
-	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Times(1).Return(nil)
-	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
-	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
-	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
-	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(expectedError)
-	// s.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
-
-	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	s.Require().ErrorIs(err, expectedError)
-}
-
 func (s *productSuite) TestCreateProduct_ErrorCheckingProductIDInRepo() {
 
 	ctx := context.Background()
@@ -299,62 +261,6 @@ func (s *productSuite) TestCreateProduct_ErrorCheckingProductNameInRepo() {
 	s.Require().ErrorIs(err, repoError)
 }
 
-func (s *productSuite) TestCreateProduct_ErrorCreatingMetricsRepoIndexes() {
-
-	ctx := context.Background()
-
-	user := testhelpers.NewUserBuilder().Build()
-	productID := "test-product"
-	productName := "test-product"
-	productDescription := "This is a product description"
-
-	expectedError := errors.New("error creating collection indexes")
-
-	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
-	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
-	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
-	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
-
-	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
-
-	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	s.Require().ErrorIs(err, expectedError)
-}
-
-func (s *productSuite) TestCreateProduct_ErrorCreatingProcessLogRepoIndexes() {
-
-	ctx := context.Background()
-
-	user := testhelpers.NewUserBuilder().Build()
-	productID := "test-product"
-	productName := "test-product"
-	productDescription := "This is a product description"
-
-	expectedError := errors.New("error creating collection indexes")
-
-	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
-	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
-
-	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
-	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
-	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
-
-	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
-
-	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
-	s.Require().ErrorIs(err, expectedError)
-}
-
 func (s *productSuite) TestCreateProduct_ErrorCreatingVersionRepoIndexes() {
 
 	ctx := context.Background()
@@ -376,9 +282,6 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingVersionRepoIndexes() {
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
 	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
 
-	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
@@ -405,9 +308,6 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
 	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
 
-	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 
@@ -452,9 +352,6 @@ func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
 	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
 
-	s.measurementRepo.EXPECT().CreateDatabase(productID).Return(nil)
-	s.metricRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.processLogRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.productRepo.EXPECT().Create(ctx, newProduct).Return(nil, expectedError)
