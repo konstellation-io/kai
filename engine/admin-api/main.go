@@ -69,7 +69,6 @@ func initGraphqlController(
 	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, oldLogger, mongodbClient)
 	versionMongoRepo := versionrepository.New(cfg, oldLogger, mongodbClient)
 	processRepo := processrepository.New(cfg, oldLogger, mongodbClient)
-	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, oldLogger, mongodbClient)
 
 	ccK8sManager, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -156,13 +155,6 @@ func initGraphqlController(
 		},
 	)
 
-	metricsInteractor := usecase.NewMetricsInteractor(
-		oldLogger,
-		productRepo,
-		accessControl,
-		metricRepo,
-	)
-
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
 
 	processService := usecase.NewProcessService(logger, k8sService, processRepo, minioOjectStorage)
@@ -175,7 +167,6 @@ func initGraphqlController(
 			UserInteractor:         userInteractor,
 			UserActivityInteractor: userActivityInteractor,
 			VersionInteractor:      versionInteractor,
-			MetricsInteractor:      metricsInteractor,
 			ServerInfoGetter:       serverInfoGetter,
 			ProcessService:         processService,
 		},

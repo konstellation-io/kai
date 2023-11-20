@@ -75,7 +75,6 @@ type versionSuite struct {
 	natsManagerService     *mocks.MockNatsManagerService
 	userActivityInteractor *mocks.MockUserActivityInteracter
 	accessControl          *mocks.MockAccessControl
-	dashboardService       *mocks.MockDashboardService
 
 	observedLogs *observer.ObservedLogs
 }
@@ -102,7 +101,6 @@ func (s *versionSuite) SetupSuite() {
 	s.natsManagerService = mocks.NewMockNatsManagerService(s.ctrl)
 	s.userActivityInteractor = mocks.NewMockUserActivityInteracter(s.ctrl)
 	s.accessControl = mocks.NewMockAccessControl(s.ctrl)
-	s.dashboardService = mocks.NewMockDashboardService(s.ctrl)
 
 	s.handler = version.NewHandler(&version.HandlerParams{
 		Logger:                 logger,

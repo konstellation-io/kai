@@ -5,7 +5,6 @@ package gql
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -37,7 +36,6 @@ type Resolver struct {
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
-	metricsInteractor      *usecase.MetricsInteractor
 	serverInfoGetter       *usecase.ServerInfoGetter
 	processService         *usecase.ProcessService
 	cfg                    *config.Config
@@ -52,7 +50,6 @@ func NewGraphQLResolver(params Params) *Resolver {
 		params.UserInteractor,
 		params.UserActivityInteractor,
 		params.VersionInteractor,
-		params.MetricsInteractor,
 		params.ServerInfoGetter,
 		params.ProcessService,
 		params.Cfg,
@@ -203,11 +200,6 @@ func (r *mutationResolver) RevokeUserProductGrants(
 	return &entity.User{ID: input.TargetID}, nil
 }
 
-func (r *queryResolver) Metrics(ctx context.Context, productID, versionTag, startDate, endDate string) (*entity.Metrics, error) {
-	loggedUser := ctx.Value("user").(*entity.User)
-	return r.metricsInteractor.GetMetrics(ctx, loggedUser, productID, versionTag, startDate, endDate)
-}
-
 func (r *queryResolver) Product(ctx context.Context, id string) (*entity.Product, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 	return r.productInteractor.GetByID(ctx, loggedUser, id)
@@ -276,23 +268,6 @@ func (r *productResolver) CreationDate(_ context.Context, obj *entity.Product) (
 	return obj.CreationDate.Format(time.RFC3339), nil
 }
 
-func (r *productResolver) MeasurementsURL(_ context.Context, _ *entity.Product) (string, error) {
-	return fmt.Sprintf("%s/measurements/%s", r.cfg.Admin.BaseURL, r.cfg.K8s.Namespace), nil
-}
-
-func (r *productResolver) DatabaseURL(_ context.Context, _ *entity.Product) (string, error) {
-	return fmt.Sprintf("%s/database/%s", r.cfg.Admin.BaseURL, r.cfg.K8s.Namespace), nil
-}
-
-func (r *productResolver) EntrypointAddress(_ context.Context, _ *entity.Product) (string, error) {
-	return fmt.Sprintf("entrypoint.%s", r.cfg.BaseDomainName), nil
-}
-
-func (r *subscriptionResolver) WatchProcessLogs(ctx context.Context, productID, versionTag string,
-	filters entity.LogFilters) (<-chan *entity.ProcessLog, error) {
-	return nil, ErrNotImplemented
-}
-
 func (r *userActivityResolver) Date(_ context.Context, obj *entity.UserActivity) (string, error) {
 	return obj.Date.Format(time.RFC3339), nil
 }
@@ -339,9 +314,6 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 // Product returns ProductResolver implementation.
 func (r *Resolver) Product() ProductResolver { return &productResolver{r} }
-
-// Subscription returns SubscriptionResolver implementation.
-func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
 
 // UserActivity returns UserActivityResolver implementation.
 func (r *Resolver) UserActivity() UserActivityResolver { return &userActivityResolver{r} }
