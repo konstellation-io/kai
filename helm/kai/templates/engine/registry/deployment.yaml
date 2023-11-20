@@ -9,6 +9,8 @@ spec:
   selector:
     matchLabels:
       {{- include "registry.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: {{ .Values.registry.deploymentStrategy.type }}
   template:
     metadata:
       annotations:
