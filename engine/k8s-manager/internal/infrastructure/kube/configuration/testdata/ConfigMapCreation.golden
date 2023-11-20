@@ -23,7 +23,7 @@ objectmeta:
     managedfields: []
 immutable: null
 data:
-    fluent-bit.conf: |4
+    fluent-bit.conf: |4+
         [SERVICE]
             Flush        1
             Verbose      1
@@ -62,6 +62,7 @@ data:
             Match *
             Host  ${KAI_MESSAGING_HOST}
             Port  ${KAI_MESSAGING_PORT}
+
     parsers.conf: |4
         [PARSER]
             Name multiline_pattern
