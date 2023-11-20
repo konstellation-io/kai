@@ -37,7 +37,6 @@ releases:
   - name: "mongodb-operator"
     <<: *default
     chart: mongodb/community-operator
-    version: 0.8.3
     namespace: kai
 
   - name: "mongodb-database"
