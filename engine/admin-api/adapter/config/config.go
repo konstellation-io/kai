@@ -26,21 +26,12 @@ type Config struct {
 		CORSEnabled bool   `yaml:"corsEnabled" envconfig:"KAI_ADMIN_CORS_ENABLED"`
 		StoragePath string `yaml:"storagePath" envconfig:"KAI_ADMIN_STORAGE_PATH"`
 	} `yaml:"admin"`
+
 	MongoDB struct {
-		Address             string `yaml:"address" envconfig:"KAI_MONGODB_URI"`
-		DBName              string `yaml:"dbName"`
-		RuntimeDataUser     string `yaml:"runtimeDataUser" envconfig:"KAI_MONGODB_MONGOEXPRESS_USERNAME"`
-		KRTBucket           string `yaml:"krtBucket"`
-		MongoExpressAddress string `yaml:"mongoExpressAddress" envconfig:"KAI_MONGODB_MONGOEXPRESS_ADDRESS"`
+		Address   string `yaml:"address" envconfig:"KAI_MONGODB_URI"`
+		DBName    string `yaml:"dbName"`
+		KRTBucket string `yaml:"krtBucket"`
 	} `yaml:"mongodb"`
-
-	InfluxDB struct {
-		Address string `yaml:"address" envconfig:"KAI_INFLUXDB_ADDRESS"`
-	} `yaml:"influxdb"`
-
-	Chronograf struct {
-		Address string `yaml:"address" envconfig:"KAI_CHRONOGRAF_ADDRESS"`
-	} `yaml:"chronograf"`
 
 	K8s struct {
 		Namespace string `yaml:"namespace" envconfig:"POD_NAMESPACE"`

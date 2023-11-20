@@ -56,14 +56,6 @@ func NewApp(
 	r.Any("", gqlController.GraphQLHandler)
 	r.GET("/playground", gqlController.PlaygroundHandler)
 
-	m := e.Group("/measurements")
-	m.Use(jwtAuthMiddleware)
-	m.Use(kaimiddleware.ChronografProxy(cfg.Chronograf.Address))
-
-	d := e.Group("/database")
-	d.Use(jwtAuthMiddleware)
-	d.Use(kaimiddleware.MongoExpressProxy(cfg.MongoDB.MongoExpressAddress))
-
 	return &App{
 		e,
 		cfg,

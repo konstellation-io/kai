@@ -15,12 +15,6 @@ type Query {
     lastId: String
   ): [UserActivity!]!
   logs(productID: ID!, filters: LogFilters!, cursor: String): LogPage!
-  metrics(
-    productID: ID!
-    versionTag: String!
-    startDate: String!
-    endDate: String!
-  ): Metrics
   serverInfo: ServerInfo!
 }
 
@@ -63,14 +57,6 @@ type RegisteredProcess {
 
 type User {
   id: ID!
-}
-
-type Subscription {
-  watchProcessLogs(
-    productID: ID!
-    versionTag: String!
-    filters: LogFilters!
-  ): ProcessLog!
 }
 
 input CreateProductInput {
@@ -138,9 +124,6 @@ type Product {
   id: ID!
   name: String!
   description: String!
-  measurementsUrl: String!
-  databaseUrl: String!
-  entrypointAddress: String!
   creationAuthor: String!
   creationDate: String!
 }
@@ -268,36 +251,4 @@ type ProcessLog {
 type LogPage {
   cursor: String
   items: [ProcessLog!]!
-}
-
-type Metrics {
-  values: MetricsValues!
-  charts: MetricsCharts!
-}
-
-type MetricsValues {
-  accuracy: MetricsAccuracy!
-  missing: Int!
-  newLabels: Int!
-}
-
-type MetricsAccuracy {
-  total: Int!
-  micro: Int!
-  macro: Int!
-  weighted: Int!
-}
-
-type MetricsCharts {
-  confusionMatrix: [MetricChartData!]!
-  seriesAccuracy: [MetricChartData!]!
-  seriesRecall: [MetricChartData!]!
-  seriesSupport: [MetricChartData!]!
-  successVsFails: [MetricChartData!]!
-}
-
-type MetricChartData {
-  x: String!
-  y: String!
-  z: String!
 }
