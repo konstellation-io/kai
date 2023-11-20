@@ -332,6 +332,7 @@
 | registry.configSecret.key | string | `""` | The name of the secret key that contains the registry config file |
 | registry.configSecret.name | string | `""` | Takes precedence over 'registry.config'. The name of the secret that contains the registry config file. |
 | registry.containerPort | int | `5000` | The container port |
+| registry.deploymentStrategy.type | string | `"Recreate"` |  |
 | registry.extraVolumeMounts | list | `[]` | Extra volume mounts for the registry deployment |
 | registry.extraVolumes | list | `[]` | Extra volumes for the registry deployment |
 | registry.host | string | `"registry.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
@@ -356,5 +357,4 @@
 | registry.storage.path | string | `"/var/lib/registry"` | Persistent volume mount point. This will define Registry app workdir too. |
 | registry.storage.size | string | `"10Gi"` | Storage size |
 | registry.storage.storageClass | string | `""` | Storage class name |
-| registry.strategy.type | string | `"RollingUpdate"` |  |
 | registry.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
