@@ -72,7 +72,7 @@ func getFluentBitConfig() map[string]string {
     Host kai-local-loki
     Port 3100
     labels service=` + labelsService + `
-    label_keys $subject, $request_id, $L, $N
+    label_keys $request_id, $level, $logger
 `,
 	}
 }
