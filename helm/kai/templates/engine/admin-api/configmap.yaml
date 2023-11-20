@@ -31,6 +31,8 @@ data:
   KAI_MINIO_TIER_NAME: {{ include "minio-config.tier.name" . }}
   # Loki
   KAI_LOKI_ADDRESS: {{ include "loki.url" . }}
+  KAI_LOKI_HOST: {{ include "loki.fullname" .Subcharts.loki }}
+  KAI_LOKI_PORT: {{ include "loki.url" . }}{{ .Values.loki.loki.server.http_listen_port }}
   # Prometheus
   KAI_PROMETHEUS_ADDRESS: {{ include "prometheus.url" . }}
   # Redis
