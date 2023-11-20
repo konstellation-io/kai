@@ -81,11 +81,11 @@ func getFluentBitConfig() map[string]string {
 
 func getTelegrafConfig() map[string]string {
 	return map[string]string{
-		"telegraf.conf": fmt.Sprintf(`
+		"telegraf.conf": `
 [[inputs.opentelemetry]]
 [[outputs.prometheus_client]]
 listen = ":9273"
-`),
+`,
 	}
 }
 

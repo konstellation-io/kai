@@ -67,6 +67,10 @@ data:
             Name multiline_pattern
             Format regex
             Regex ^(?<logtime>\d{4}\-\d{2}\-\d{2}T\d{1,2}\:\d{1,2}\:\d{1,2}(\.\d+Z|\+0000)) (?<level>(ERROR|WARN|INFO|DEBUG)) (?<capture>.*)
+    telegraf.conf: |4
+        [[inputs.opentelemetry]]
+        [[outputs.prometheus_client]]
+        listen = ":9273"
     test-product-v1-0-0-test-workflow-test-process: |
         metadata:
             product_id: test-product

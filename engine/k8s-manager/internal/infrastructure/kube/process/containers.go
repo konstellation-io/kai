@@ -104,6 +104,7 @@ func (kp *KubeProcess) getFluentBitContainer(spec *processSpec) corev1.Container
 
 func (kp *KubeProcess) getTelegrafContainer() corev1.Container {
 	telegrafImage := fmt.Sprintf("%s:%s", viper.GetString(config.TelegrafImageKey), viper.GetString(config.TelegrafTagKey))
+
 	return corev1.Container{
 		Name:            "telegraf",
 		Image:           telegrafImage,
