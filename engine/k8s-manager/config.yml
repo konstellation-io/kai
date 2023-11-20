@@ -1,10 +1,10 @@
 kubernetes:
   isInsideCluster: true
-baseDomainName: 'local'
+baseDomainName: "local"
 server:
-  port: '50051'
+  port: "50051"
 nats:
-  url: 'kai-local-nats:4222'
+  url: "kai-local-nats:4222"
 fluentbit:
   image: fluent/fluent-bit
   tag: 2.2.0
