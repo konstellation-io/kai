@@ -20,7 +20,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.53"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.57"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -42,8 +42,9 @@
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.baseDomainName | string | `"kai.local"` | Base domain name for Admin API and K8S Manager apps |
 | config.loki.datasource | object | `{"jsonData":"{}","uid":""}` | Only when `loki.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config. |
+| config.loki.host | string | `"{{ include \"loki.singleBinaryFullname\" .Subcharts.loki }}"` | Loki endpoint url. Change this to your own URL when `loki.enabled: false` |
 | config.loki.isDefault | bool | `true` | Only when `loki.enabled: true` and `grafana.enabled: true`. Set loki as default datasource for Grafana. |
-| config.loki.url | string | `"http://{{ include \"loki.fullname\" .Subcharts.loki }}:{{ .Values.loki.loki.server.http_listen_port }}"` | Loki endpoint url. Change this to your own URL when `loki.enabled: false` |
+| config.loki.port | string | `"{{ .Values.loki.loki.server.http_listen_port }}"` |  |
 | config.minio.defaultRegion | string | us-east-1 | Default region (only affect to Minio buckets) |
 | config.minio.tier.aws | object | `{"auth":{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""},"endpointURL":"","region":""}` | Transition Objects from MinIO to AWS S3 |
 | config.minio.tier.aws.auth | object | `{"accessKeyID":"","secretAccessKey":"","secretKeyNames":{"accessKey":"","secretKey":""},"secretName":""}` | AWS authentication config @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey) |
@@ -109,7 +110,7 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.53"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.57"` | Image tag |
 | k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | k8sManager.processes.sidecars.fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for Fuent Bit sidecar |
 | k8sManager.processes.sidecars.fluentbit.image.repository | string | `"fluent/fluent-bit"` | Image repository for Fuent Bit sidecar |
@@ -239,7 +240,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.53"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.57"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -271,7 +272,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.53"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.57"` | Image tag |
 | prometheus.alertmanager.enabled | bool | `true` | Whether to enable alertmanager |
 | prometheus.alertmanager.image.tag | string | `"v0.26.0"` | alertmanager server version |
 | prometheus.alertmanager.persistence.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |
