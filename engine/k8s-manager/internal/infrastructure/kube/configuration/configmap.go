@@ -22,7 +22,7 @@ func GetAppConfig(version domain.Version, processesConfig map[string]string) api
 			Name:   configMapName,
 			Labels: labels,
 		},
-		Data: mergeConfigs(processesConfig, getFluentBitConfig()),
+		Data: mergeConfigs(processesConfig, getFluentBitConfig(), getTelegrafConfig()),
 	}
 }
 
@@ -79,11 +79,21 @@ func getFluentBitConfig() map[string]string {
 	}
 }
 
+func getTelegrafConfig() map[string]string {
+	return map[string]string{
+		"telegraf.conf": fmt.Sprintf(`
+[[inputs.opentelemetry]]
+[[outputs.prometheus_client]]
+listen = ":9273"
+`),
+	}
+}
+
 func mergeConfigs(configs ...map[string]string) map[string]string {
 	fullConfig := map[string]string{}
 
-	for _, config := range configs {
-		for key, val := range config {
+	for _, cfg := range configs {
+		for key, val := range cfg {
 			fullConfig[key] = val
 		}
 	}

@@ -50,6 +50,12 @@ const (
 	FluentBitTagKey        = "fluentbit.tag"
 	FluentBitPullPolicyKey = "fluentbit.pullPolicy"
 
+	TelegrafImageKey      = "telegraf.image"
+	TelegrafTagKey        = "telegraf.tag"
+	TelegrafPullPolicyKey = "telegraf.pullPolicy"
+
+	PrometheusURLKey = "prometheus.url"
+
 	configType = "yaml"
 
 	_defaultServerPort     = 50051
@@ -104,6 +110,12 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(FluentBitTagKey, "FLUENTBIT_IMAGE_TAG")
 	viper.RegisterAlias(FluentBitPullPolicyKey, "FLUENTBIT_IMAGE_PULLPOLICY")
 
+	viper.RegisterAlias(TelegrafImageKey, "TELEGRAF_IMAGE_REPOSITORY")
+	viper.RegisterAlias(TelegrafTagKey, "TELEGRAF_IMAGE_TAG")
+	viper.RegisterAlias(TelegrafPullPolicyKey, "TELEGRAF_IMAGE_PULLPOLICY")
+
+	viper.RegisterAlias(PrometheusURLKey, "PROMETHEUS_URL")
+
 	viper.AutomaticEnv()
 
 	setDefaultValues()
@@ -134,6 +146,10 @@ func setDefaultValues() {
 	viper.SetDefault(FluentBitImageKey, "fluent/fluent-bit")
 	viper.SetDefault(FluentBitTagKey, "1.3")
 	viper.SetDefault(FluentBitPullPolicyKey, "IfNotPresent")
+
+	viper.SetDefault(TelegrafImageKey, "telegraf")
+	viper.SetDefault(TelegrafTagKey, "1.28.5")
+	viper.SetDefault(TelegrafPullPolicyKey, "IfNotPresent")
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {

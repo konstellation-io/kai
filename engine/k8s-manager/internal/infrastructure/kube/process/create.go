@@ -84,7 +84,7 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 					Containers:   kp.getContainers(configMapName, spec),
 					NodeSelector: kp.getNodeSelector(spec.Process.EnableGpu),
 					Tolerations:  kp.getTolerations(spec.Process.EnableGpu),
-					Volumes:      GetVolumes(configMapName, processIdentifier),
+					Volumes:      kp.getVolumes(configMapName, processIdentifier),
 				},
 			},
 		},
@@ -103,8 +103,9 @@ func (kp *KubeProcess) getProcessLabels(process *processSpec) map[string]string 
 
 func (kp *KubeProcess) getContainers(configmapName string, spec *processSpec) []corev1.Container {
 	return []corev1.Container{
-		getFluentBitContainer(spec),
-		getAppContainer(configmapName, spec.Process),
+		kp.getFluentBitContainer(spec),
+		kp.getAppContainer(configmapName, spec.Process),
+		kp.getTelegrafContainer(),
 	}
 }
 

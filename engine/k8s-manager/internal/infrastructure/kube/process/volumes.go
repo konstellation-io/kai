@@ -9,7 +9,7 @@ const (
 	appLogsVolume    = "app-log-volume"
 )
 
-func GetVolumes(configRef, configKey string) []corev1.Volume {
+func (kp *KubeProcess) getVolumes(configRef, configKey string) []corev1.Volume {
 	return []corev1.Volume{
 		{
 			Name: versionConfFiles,
@@ -30,6 +30,10 @@ func GetVolumes(configRef, configKey string) []corev1.Volume {
 						{
 							Key:  "fluent-bit.conf",
 							Path: "fluent-bit.conf",
+						},
+						{
+							Key:  "telegraf.conf",
+							Path: "telegraf.conf",
 						},
 					},
 				},
