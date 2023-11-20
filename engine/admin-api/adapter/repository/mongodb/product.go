@@ -5,7 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	"github.com/go-logr/logr"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -14,17 +15,23 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 )
 
+const (
+	_productRepoTimeout = 60 * time.Second
+)
+
+var (
+	ErrUpdateProductNotFound = errors.New("the product to be updated does not exist")
+)
+
 type ProductRepoMongoDB struct {
-	cfg        *config.Config
-	logger     logging.Logger
+	logger     logr.Logger
 	collection *mongo.Collection
 }
 
-func NewProductRepoMongoDB(cfg *config.Config, logger logging.Logger, client *mongo.Client) *ProductRepoMongoDB {
-	collection := client.Database(cfg.MongoDB.DBName).Collection("products")
+func NewProductRepoMongoDB(logger logr.Logger, client *mongo.Client) *ProductRepoMongoDB {
+	collection := client.Database(viper.GetString(config.MongoDBKaiDatabaseKey)).Collection("products")
 
 	productRepo := &ProductRepoMongoDB{
-		cfg,
 		logger,
 		collection,
 	}
@@ -41,7 +48,7 @@ func (r *ProductRepoMongoDB) createIndexes() {
 		},
 	})
 	if err != nil {
-		r.logger.Errorf("error creating products collection indexes: %s", err)
+		r.logger.Error(err, "Error creating products collection indexes")
 	}
 }
 
@@ -108,7 +115,7 @@ func (r *ProductRepoMongoDB) FindAll(ctx context.Context) ([]*entity.Product, er
 }
 
 func (r *ProductRepoMongoDB) FindByIDs(ctx context.Context, ids []string) ([]*entity.Product, error) {
-	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, _productRepoTimeout)
 	defer cancel()
 
 	cursor, err := r.collection.Find(ctx, bson.M{"_id": bson.M{"$in": ids}})
@@ -124,4 +131,24 @@ func (r *ProductRepoMongoDB) FindByIDs(ctx context.Context, ids []string) ([]*en
 	}
 
 	return products, nil
+}
+
+func (r *ProductRepoMongoDB) Update(ctx context.Context, product *entity.Product) error {
+	ctx, cancel := context.WithTimeout(ctx, _productRepoTimeout)
+	defer cancel()
+
+	resp, err := r.collection.ReplaceOne(
+		ctx,
+		bson.M{"_id": product.ID},
+		product,
+	)
+	if err != nil {
+		return err
+	}
+
+	if resp.ModifiedCount == 0 {
+		return ErrUpdateProductNotFound
+	}
+
+	return nil
 }

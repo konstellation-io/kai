@@ -17,12 +17,12 @@ objectmeta:
     annotations: {}
     ownerreferences: []
     finalizers: []
-    zzz_deprecatedclustername: ""
     managedfields: []
 spec:
     parallelism: null
     completions: null
     activedeadlineseconds: null
+    podfailurepolicy: null
     backofflimit: 0
     selector: null
     manualselector: null
@@ -42,7 +42,6 @@ spec:
             annotations: {}
             ownerreferences: []
             finalizers: []
-            zzz_deprecatedclustername: ""
             managedfields: []
         spec:
             volumes:
@@ -116,6 +115,8 @@ spec:
                   resources:
                     limits: {}
                     requests: {}
+                    claims: []
+                  resizepolicy: []
                   volumemounts:
                     - name: registry-auth-secret
                       readonly: false
@@ -168,6 +169,9 @@ spec:
             topologyspreadconstraints: []
             sethostnameasfqdn: null
             os: null
+            hostusers: null
+            schedulinggates: []
+            resourceclaims: []
     ttlsecondsafterfinished: 100
     completionmode: null
     suspend: null

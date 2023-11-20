@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
@@ -38,7 +39,7 @@ func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.Publish
 
 	ingressName := kn.getIngressName(params.Product, params.Version)
 
-	ingressRules, publishedEndpoints := kn.getIngressRules(params.Product, params.Version, servicesToPublish)
+	ingressRules, publishedEndpoints := kn.getIngressRules(params.Product, servicesToPublish)
 
 	ingress := &networkingv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
@@ -98,10 +99,10 @@ func (kn KubeNetwork) getIngressName(product, version string) string {
 }
 
 func (kn KubeNetwork) getIngressRules(
-	product, version string, servicesToPublish *corev1.ServiceList,
+	product string, servicesToPublish *corev1.ServiceList,
 ) (rules []networkingv1.IngressRule, endpoints map[string]string) {
 	var (
-		httpHost = kn.getHTTPHost(product, version)
+		httpHost = kn.getHTTPHost(product)
 
 		httpPaths          = make([]networkingv1.HTTPIngressPath, 0, len(servicesToPublish.Items))
 		publishedEndpoints = make(map[string]string, len(servicesToPublish.Items))
@@ -131,7 +132,7 @@ func (kn KubeNetwork) getIngressRules(
 }
 
 func (kn KubeNetwork) isGrpc(svc corev1.Service) bool {
-	return svc.Labels["protocol"] == "grpc"
+	return svc.Labels["protocol"] == string(domain.NetworkingProtocolGRPC)
 }
 
 func (kn KubeNetwork) getGRPCHost(workflow, process, httpHost string) string {
@@ -164,10 +165,8 @@ func (kn KubeNetwork) getGRPCIngressRule(grpcHost, serviceName string) networkin
 	}
 }
 
-func (kn KubeNetwork) getHTTPHost(product, version string) string {
-	return fmt.Sprintf("%s.%s.%s",
-		replaceDotsWithHyphen(version), replaceDotsWithHyphen(product), viper.GetString(config.BaseDomainNameKey),
-	)
+func (kn KubeNetwork) getHTTPHost(product string) string {
+	return fmt.Sprintf("%s.%s", replaceDotsWithHyphen(product), viper.GetString(config.BaseDomainNameKey))
 }
 
 func (kn KubeNetwork) getHTTPIngressRule(httpHost string, httpPaths []networkingv1.HTTPIngressPath) networkingv1.IngressRule {

@@ -30,7 +30,6 @@ items:
         annotations: {}
         ownerreferences: []
         finalizers: []
-        zzz_deprecatedclustername: ""
         managedfields: []
       spec:
         replicas: null
@@ -63,7 +62,6 @@ items:
                 annotations: {}
                 ownerreferences: []
                 finalizers: []
-                zzz_deprecatedclustername: ""
                 managedfields: []
             spec:
                 volumes:
@@ -180,6 +178,8 @@ items:
                       resources:
                         limits: {}
                         requests: {}
+                        claims: []
+                      resizepolicy: []
                       volumemounts:
                         - name: version-conf-files
                           readonly: true
@@ -239,6 +239,8 @@ items:
                                 format: DecimalSI
                             memory:
                                 format: BinarySI
+                        claims: []
+                      resizepolicy: []
                       volumemounts:
                         - name: version-conf-files
                           readonly: true
@@ -298,6 +300,9 @@ items:
                 topologyspreadconstraints: []
                 sethostnameasfqdn: null
                 os: null
+                hostusers: null
+                schedulinggates: []
+                resourceclaims: []
         strategy:
             type: ""
             rollingupdate: null

@@ -29,14 +29,13 @@ items:
             konghq.com/strip-path: "true"
         ownerreferences: []
         finalizers: []
-        zzz_deprecatedclustername: ""
         managedfields: []
       spec:
         ingressclassname: ""
         defaultbackend: null
         tls: []
         rules:
-            - host: test-process.test-workflow.v1-0-0.test-product.test
+            - host: test-process.test-workflow.test-product.test
               ingressrulevalue:
                 http:
                     paths:

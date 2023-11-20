@@ -23,3 +23,7 @@ func WaitOrTimeout(wg *sync.WaitGroup, timeout time.Duration) error {
 		return ErrWaitGroupTimeout
 	}
 }
+
+func StrPointer(str string) *string {
+	return &str
+}

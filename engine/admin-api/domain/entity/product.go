@@ -19,6 +19,7 @@ type Product struct {
 	Owner              string             `bson:"owner"`
 	MinioConfiguration MinioConfiguration `bson:"minioConfiguration"`
 	KeyValueStore      string             `bson:"keyValueStore"`
+	PublishedVersion   *string            `bson:"publishedVersion"`
 }
 
 type MinioConfiguration struct {
@@ -28,6 +29,18 @@ type MinioConfiguration struct {
 	Bucket   string `bson:"bucket"`
 }
 
-func (r *Product) Validate() error {
-	return validate.Struct(r)
+func (p *Product) Validate() error {
+	return validate.Struct(p)
+}
+
+func (p *Product) HasVersionPublished() bool {
+	return p.PublishedVersion != nil
+}
+
+func (p *Product) UpdatePublishedVersion(publishedVersion string) {
+	p.PublishedVersion = &publishedVersion
+}
+
+func (p *Product) RemovePublishedVersion() {
+	p.PublishedVersion = nil
 }
