@@ -100,9 +100,9 @@ func Init(configFilePath string) error {
 
 	viper.RegisterAlias(AutoscaleCPUPercentageKey, "AUTOSCALE_CPU_PERCENTAGE")
 
-	viper.RegisterAlias(FluentBitImageKey, "FLUENTBIT_IMAGE")
-	viper.RegisterAlias(FluentBitTagKey, "FLUENTBIT_TAG")
-	viper.RegisterAlias(FluentBitPullPolicyKey, "FLUENTBIT_PULLPOLICY")
+	viper.RegisterAlias(FluentBitImageKey, "FLUENTBIT_IMAGE_REPOSITORY")
+	viper.RegisterAlias(FluentBitTagKey, "FLUENTBIT_IMAGE_TAG")
+	viper.RegisterAlias(FluentBitPullPolicyKey, "FLUENTBIT_IMAGE_PULLPOLICY")
 
 	viper.AutomaticEnv()
 
