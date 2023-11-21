@@ -57,8 +57,8 @@ data:
         [OUTPUT]
             Name loki
             Match tail.log
-            Host kai-local-loki
-            Port 3100
+            Host ${KAI_LOKI_HOST}
+            Port ${KAI_LOKI_PORT}
             labels service=kai-product-version, product_id=${KAI_PRODUCT_ID}, version_tag=${KAI_VERSION_TAG}, workflow_name=${KAI_WORKFLOW_NAME}, process_name=${KAI_PROCESS_NAME}
             label_keys $request_id, $level, $logger
     parsers.conf: |4
