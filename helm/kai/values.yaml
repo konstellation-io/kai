@@ -84,8 +84,10 @@ config:
   loki:
     # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Set loki as default datasource for Grafana.
     isDefault: true
-    # -- Loki endpoint url. Change this to your own URL when `loki.enabled: false`
-    url: http://{{ include "loki.fullname" .Subcharts.loki }}:{{ .Values.loki.loki.server.http_listen_port }}
+    # -- Loki host. Change this to your own URL when `loki.enabled: false`
+    host: '{{ include "loki.singleBinaryFullname" .Subcharts.loki }}'
+    # -- Loki port. Change this to your own URL when `loki.enabled: false`
+    port: '{{ .Values.loki.loki.server.http_listen_port }}'
     # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
     datasource:
       jsonData: "{}"
