@@ -53,6 +53,7 @@ const (
 	TelegrafImageKey      = "telegraf.image"
 	TelegrafTagKey        = "telegraf.tag"
 	TelegrafPullPolicyKey = "telegraf.pullPolicy"
+	TelegrafMetricsPort   = "telegraf.port"
 
 	PrometheusURLKey = "prometheus.url"
 
@@ -113,6 +114,7 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(TelegrafImageKey, "TELEGRAF_IMAGE_REPOSITORY")
 	viper.RegisterAlias(TelegrafTagKey, "TELEGRAF_IMAGE_TAG")
 	viper.RegisterAlias(TelegrafPullPolicyKey, "TELEGRAF_IMAGE_PULLPOLICY")
+	viper.RegisterAlias(TelegrafMetricsPort, "TELEGRAF_METRICS_PORT")
 
 	viper.RegisterAlias(PrometheusURLKey, "PROMETHEUS_URL")
 
@@ -150,6 +152,7 @@ func setDefaultValues() {
 	viper.SetDefault(TelegrafImageKey, "telegraf")
 	viper.SetDefault(TelegrafTagKey, "1.28.5")
 	viper.SetDefault(TelegrafPullPolicyKey, "IfNotPresent")
+	viper.SetDefault(TelegrafMetricsPort, 9191)
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {

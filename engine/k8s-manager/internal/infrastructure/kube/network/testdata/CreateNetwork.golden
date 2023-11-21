@@ -29,6 +29,10 @@ items:
             version: v1.0.0
             workflow: test-workflow
         annotations:
+            kai.prometheus/path: /metrics
+            kai.prometheus/port: "0"
+            kai.prometheus/scheme: https
+            kai.prometheus/scrape: "true"
             konghq.com/protocol: grpc
         ownerreferences: []
         finalizers: []
@@ -42,6 +46,15 @@ items:
               targetport:
                 type: 0
                 intval: 80
+                strval: ""
+              nodeport: 0
+            - name: metrics
+              protocol: ""
+              appprotocol: null
+              port: 0
+              targetport:
+                type: 0
+                intval: 0
                 strval: ""
               nodeport: 0
         selector:

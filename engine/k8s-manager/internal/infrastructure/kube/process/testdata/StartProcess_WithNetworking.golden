@@ -279,7 +279,12 @@ items:
                       command: []
                       args: []
                       workingdir: ""
-                      ports: []
+                      ports:
+                        - name: ""
+                          hostport: 0
+                          containerport: 0
+                          protocol: ""
+                          hostip: ""
                       envfrom: []
                       env: []
                       resources:

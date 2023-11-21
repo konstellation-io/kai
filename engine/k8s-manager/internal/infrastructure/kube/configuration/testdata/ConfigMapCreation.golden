@@ -70,7 +70,7 @@ data:
     telegraf.conf: |4
         [[inputs.opentelemetry]]
         [[outputs.prometheus_client]]
-        listen = ":9273"
+        listen = ":9191"
     test-product-v1-0-0-test-workflow-test-process: |
         metadata:
             product_id: test-product

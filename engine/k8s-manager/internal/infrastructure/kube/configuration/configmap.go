@@ -84,7 +84,7 @@ func getTelegrafConfig() map[string]string {
 		"telegraf.conf": `
 [[inputs.opentelemetry]]
 [[outputs.prometheus_client]]
-listen = ":9273"
+listen = ":9191"
 `,
 	}
 }
