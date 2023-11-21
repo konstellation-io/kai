@@ -993,11 +993,13 @@ prometheus:
         - ReadWriteOnce
       # -- Storage size
       size: 2Gi
-    # -- Additional scrape configs for KAI components
+    ## Additional scrape configs for KAI telegraf metrics
     extraConfigmapMounts:
+      # -- name for volumes and volumeMount config
       - name: additional-scrape-configs
         mountPath: /etc/config/additional-scrape-configs/
         subPath: ""
+        # -- name of the configmap
         configMap: prometheus-additional-scrape-configs
         readOnly: true
     service:

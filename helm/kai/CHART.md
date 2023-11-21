@@ -284,7 +284,8 @@
 | prometheus.prometheus-node-exporter.enabled | bool | `false` |  |
 | prometheus.prometheus-pushgateway.enabled | bool | `false` |  |
 | prometheus.scrapeConfigFiles | list | `["/etc/config/additional-scrape-configs/*.yaml"]` | Files to get additional scrapeConfigs. This allows scrape configs defined in `prometheus.server.extraConfigmapMounts` |
-| prometheus.server.extraConfigmapMounts | list | `[{"configMap":"prometheus-additional-scrape-configs","mountPath":"/etc/config/additional-scrape-configs/","name":"additional-scrape-configs","readOnly":true,"subPath":""}]` | Additional scrape configs for KAI components |
+| prometheus.server.extraConfigmapMounts[0] | object | `{"configMap":"prometheus-additional-scrape-configs","mountPath":"/etc/config/additional-scrape-configs/","name":"additional-scrape-configs","readOnly":true,"subPath":""}` | name for volumes and volumeMount config |
+| prometheus.server.extraConfigmapMounts[0].configMap | string | `"prometheus-additional-scrape-configs"` | name of the configmap |
 | prometheus.server.image.tag | string | `"v2.47.2"` | prometheus server version |
 | prometheus.server.ingress.annotations | object | `{}` | Ingress annotations |
 | prometheus.server.ingress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
