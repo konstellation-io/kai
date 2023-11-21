@@ -69,8 +69,8 @@ func getFluentBitConfig() map[string]string {
 [OUTPUT]
     Name loki
     Match tail.log
-    Host kai-local-loki
-    Port 3100
+    Host ${KAI_LOKI_HOST}
+    Port ${KAI_LOKI_PORT}
     labels service=` + labelsService + `
     label_keys $request_id, $level, $logger
 `,
