@@ -163,6 +163,13 @@ k8sManager:
     tag: 0.2.0-develop.59
     # -- Image pull policy
     pullPolicy: IfNotPresent
+  imageBuilder:
+    # -- Image repository for image builder's jobs
+    image: gcr.io/kaniko-project/executor
+    # -- Image tag for image builder's jobs
+    tag: v1.18.0
+    # -- Image pull policy for image builder's jobs
+    pullPolicy: IfNotPresent
   serviceAccount:
     # -- Whether to create the Service Account
     create: true
