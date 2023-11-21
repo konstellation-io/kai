@@ -488,14 +488,32 @@ Registry auth secret name
 {{- end -}}
 
 {{/*
+Loki Host
+*/}}
+{{- define "loki.host" -}}
+{{- if .Values.loki.enabled -}}
+    {{- tpl .Values.config.loki.host . -}}
+{{- else -}}
+    {{- .Values.config.loki.host -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Loki Port
+*/}}
+{{- define "loki.port" -}}
+{{- if .Values.loki.enabled -}}
+    {{- tpl .Values.config.loki.port . | quote -}}
+{{- else -}}
+    {{- .Values.config.loki.port | quote -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Loki URL
 */}}
 {{- define "loki.url" -}}
-{{- if .Values.loki.enabled -}}
-    {{- tpl .Values.config.loki.url . | quote -}}
-{{- else -}}
-    {{- .Values.config.loki.url -}}
-{{- end -}}
+{{- printf "http://%s:%s" (include "loki.host" . ) (trimSuffix "\"" (include "loki.port" . ) | trimPrefix "\"") -}}
 {{- end -}}
 
 {{/*

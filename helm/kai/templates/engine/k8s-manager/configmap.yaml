@@ -35,3 +35,5 @@ data:
   KAI_TELEGRAF_IMAGE_REPOSITORY: {{ .Values.k8sManager.processes.sidecars.telegraf.image.repository }}
   KAI_TELEGRAF_IMAGE_TAG: {{ .Values.k8sManager.processes.sidecars.telegraf.image.tag }}
   KAI_TELEGRAF_IMAGE_PULLPOLICY: {{ .Values.k8sManager.processes.sidecars.telegraf.image.pullPolicy }}
+  KAI_LOKI_HOST: {{ include "loki.host" . }}
+  KAI_LOKI_PORT: {{ include "loki.port" . }}

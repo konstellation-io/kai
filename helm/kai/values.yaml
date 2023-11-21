@@ -84,8 +84,10 @@ config:
   loki:
     # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Set loki as default datasource for Grafana.
     isDefault: true
-    # -- Loki endpoint url. Change this to your own URL when `loki.enabled: false`
-    url: http://{{ include "loki.fullname" .Subcharts.loki }}:{{ .Values.loki.loki.server.http_listen_port }}
+    # -- Loki host. Change this to your own URL when `loki.enabled: false`
+    host: '{{ include "loki.singleBinaryFullname" .Subcharts.loki }}'
+    # -- Loki port. Change this to your own URL when `loki.enabled: false`
+    port: '{{ .Values.loki.loki.server.http_listen_port }}'
     # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
     datasource:
       jsonData: "{}"
@@ -105,7 +107,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.57
+    tag: 0.2.0-develop.59
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
@@ -158,7 +160,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.57
+    tag: 0.2.0-develop.59
     # -- Image pull policy
     pullPolicy: IfNotPresent
   serviceAccount:
@@ -390,7 +392,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.57
+    tag: 0.2.0-develop.59
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -662,7 +664,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.57
+    tag: 0.2.0-develop.59
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
