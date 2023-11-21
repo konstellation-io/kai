@@ -30,8 +30,6 @@ data:
   KAI_MINIO_TIER_ENABLED: "{{ .Values.config.minio.tier.enabled }}"
   KAI_MINIO_TIER_NAME: {{ include "minio-config.tier.name" . }}
   # Loki
-  KAI_LOKI_HOST: {{ include "loki.host" . }}
-  KAI_LOKI_PORT: {{ include "loki.port" . }}
   KAI_LOKI_ADDRESS: {{ include "loki.url" . }}
   # Prometheus
   KAI_PROMETHEUS_ADDRESS: {{ include "prometheus.url" . }}
