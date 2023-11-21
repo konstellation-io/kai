@@ -111,9 +111,9 @@
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
 | k8sManager.image.tag | string | `"0.2.0-develop.59"` | Image tag |
-| k8sManager.imageBuilder.image | string | `"gcr.io/kaniko-project/executor"` | Image repository for image builder's jobs |
-| k8sManager.imageBuilder.pullPolicy | string | `"IfNotPresent"` | Image pull policy for image builder's jobs |
-| k8sManager.imageBuilder.tag | string | `"v1.18.0"` | Image tag for image builder's jobs |
+| k8sManager.imageBuilder.image.repository | string | `"gcr.io/kaniko-project/executor"` | Image repository for image builder's jobs |
+| k8sManager.imageBuilder.image.tag | string | `"v1.18.0"` | Image tag for image builder's jobs |
+| k8sManager.imageBuilder.pullPolicy | string | `"IfNotPresent"` |  |
 | k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | k8sManager.processes.sidecars.fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for Fuent Bit sidecar |
 | k8sManager.processes.sidecars.fluentbit.image.repository | string | `"fluent/fluent-bit"` | Image repository for Fuent Bit sidecar |

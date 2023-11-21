@@ -82,9 +82,9 @@ func Init(configFilePath string) error {
 
 	viper.RegisterAlias(ImageRegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
 	viper.RegisterAlias(ImageRegistryInsecureKey, "REGISTRY_INSECURE")
-	viper.RegisterAlias(ImageBuilderImageKey, "IMAGE_BUILDER_IMAGE")
-	viper.RegisterAlias(ImageBuilderTagKey, "IMAGE_BUILDER_TAG")
-	viper.RegisterAlias(ImageBuilderPullPolicyKey, "IMAGE_BUILDER_PULLPOLICY")
+	viper.RegisterAlias(ImageBuilderImageKey, "IMAGE_BUILDER_IMAGE_REPOSITORY")
+	viper.RegisterAlias(ImageBuilderTagKey, "IMAGE_BUILDER_IMAGE_TAG")
+	viper.RegisterAlias(ImageBuilderPullPolicyKey, "IMAGE_BUILDER_IMAGE_PULLPOLICY")
 
 	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT_URL")
 	viper.RegisterAlias(MinioAccessKeyIDKey, "MINIO_ROOT_USER")
