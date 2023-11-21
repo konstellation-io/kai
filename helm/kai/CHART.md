@@ -280,10 +280,11 @@
 | prometheus.alertmanager.persistence.size | string | `"2Gi"` | Storage size |
 | prometheus.alertmanager.persistence.storageClass | string | `""` | Storage class name |
 | prometheus.enabled | bool | `true` | Whether to enable Prometheus |
-| prometheus.extraScrapeConfigs | string | `"- job_name: 'kai-service-endpoints'\n  scrape_interval: 1s\n  scrape_timeout: 1s\n  kubernetes_sd_configs:\n  - role: endpoints\n  relabel_configs:\n  - source_labels: [__meta_kubernetes_service_annotation_kai_prometheus_scrape]\n    action: keep\n    regex: true\n  - source_labels: [__meta_kubernetes_service_annotation_kai_prometheus_scheme]\n    action: replace\n    target_label: __scheme__\n    regex: (https?)\n  - source_labels: [__meta_kubernetes_service_annotation_kai_prometheus_path]\n    action: replace\n    target_label: __metrics_path__\n    regex: (.+)\n  - source_labels: [__address__, __meta_kubernetes_service_annotation_kai_prometheus_port]\n    action: replace\n    target_label: __address__\n    regex: ([^:]+)(?::\\d+)?;(\\d+)\n    replacement: $1:$2\n  - source_labels: [__meta_kubernetes_namespace]\n    action: replace\n    target_label: kubernetes_namespace\n  - source_labels: [__meta_kubernetes_service_name]\n    action: replace\n    target_label: kubernetes_service\n  - source_labels: [__meta_kubernetes_pod_name]\n    action: replace\n    target_label: kubernetes_pod\n"` |  |
 | prometheus.kube-state-metrics.enabled | bool | `false` |  |
 | prometheus.prometheus-node-exporter.enabled | bool | `false` |  |
 | prometheus.prometheus-pushgateway.enabled | bool | `false` |  |
+| prometheus.scrapeConfigFiles | list | `["/etc/config/additional-scrape-configs/*.yaml"]` | Files to get additional scrapeConfigs. This allows scrape configs defined in `prometheus.server.extraConfigmapMounts` |
+| prometheus.server.extraConfigmapMounts | list | `[{"configMap":"prometheus-additional-scrape-configs","mountPath":"/etc/config/additional-scrape-configs/","name":"additional-scrape-configs","readOnly":true,"subPath":""}]` | Additional scrape configs for KAI components |
 | prometheus.server.image.tag | string | `"v2.47.2"` | prometheus server version |
 | prometheus.server.ingress.annotations | object | `{}` | Ingress annotations |
 | prometheus.server.ingress.enabled | bool | `true` | Enable ingress for MinIO Web Console |

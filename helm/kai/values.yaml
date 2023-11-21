@@ -993,6 +993,13 @@ prometheus:
         - ReadWriteOnce
       # -- Storage size
       size: 2Gi
+    # -- Additional scrape configs for KAI components
+    extraConfigmapMounts:
+      - name: additional-scrape-configs
+        mountPath: /etc/config/additional-scrape-configs/
+        subPath: ""
+        configMap: prometheus-additional-scrape-configs
+        readOnly: true
     service:
       # -- Service type
       type: ClusterIP
@@ -1012,39 +1019,9 @@ prometheus:
         - prometheus.kai.local
       # -- Ingress TLS configuration
       tls: []
-  ## -- Define extra scrape configs for kai components
-  extraScrapeConfigs: |
-    - job_name: 'kai-service-endpoints'
-      scrape_interval: 1s
-      scrape_timeout: 1s
-      kubernetes_sd_configs:
-      - role: endpoints
-      relabel_configs:
-      - source_labels: [__meta_kubernetes_service_annotation_kai_prometheus_scrape]
-        action: keep
-        regex: true
-      - source_labels: [__meta_kubernetes_service_annotation_kai_prometheus_scheme]
-        action: replace
-        target_label: __scheme__
-        regex: (https?)
-      - source_labels: [__meta_kubernetes_service_annotation_kai_prometheus_path]
-        action: replace
-        target_label: __metrics_path__
-        regex: (.+)
-      - source_labels: [__address__, __meta_kubernetes_service_annotation_kai_prometheus_port]
-        action: replace
-        target_label: __address__
-        regex: ([^:]+)(?::\d+)?;(\d+)
-        replacement: $1:$2
-      - source_labels: [__meta_kubernetes_namespace]
-        action: replace
-        target_label: kubernetes_namespace
-      - source_labels: [__meta_kubernetes_service_name]
-        action: replace
-        target_label: kubernetes_service
-      - source_labels: [__meta_kubernetes_pod_name]
-        action: replace
-        target_label: kubernetes_pod
+  # -- Files to get additional scrapeConfigs. This allows scrape configs defined in `prometheus.server.extraConfigmapMounts`
+  scrapeConfigFiles:
+  - /etc/config/additional-scrape-configs/*.yaml
   ## Alertmanager complete values https://github.com/prometheus-community/helm-charts/tree/main/charts/alertmanager
   alertmanager:
     # -- Whether to enable alertmanager
