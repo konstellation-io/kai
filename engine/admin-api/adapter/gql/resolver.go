@@ -12,6 +12,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 )
 
@@ -38,6 +39,7 @@ type Resolver struct {
 	versionInteractor      *version.Handler
 	serverInfoGetter       *usecase.ServerInfoGetter
 	processService         *usecase.ProcessService
+	logsService            logs.LogsUsecase
 	cfg                    *config.Config
 }
 
@@ -52,6 +54,7 @@ func NewGraphQLResolver(params Params) *Resolver {
 		params.VersionInteractor,
 		params.ServerInfoGetter,
 		params.ProcessService,
+		params.LogsUsecase,
 		params.Cfg,
 	}
 }
@@ -248,11 +251,9 @@ func (r *queryResolver) UserActivityList(
 
 func (r *queryResolver) Logs(
 	ctx context.Context,
-	productID string,
 	filters entity.LogFilters,
-	cursor *string,
-) (*LogPage, error) {
-	return nil, ErrNotImplemented
+) ([]*entity.Log, error) {
+	return r.logsService.GetLogs(filters)
 }
 
 func (r *queryResolver) ServerInfo(ctx context.Context) (*entity.ServerInfo, error) {
@@ -306,6 +307,18 @@ func (r *registeredProcessResolver) UploadDate(_ context.Context, obj *entity.Re
 	return obj.UploadDate.Format(time.RFC3339), nil
 }
 
+func (r *logFiltersResolver) From(_ context.Context, obj *entity.LogFilters, from string) error {
+	var err error
+	obj.From, err = time.Parse(time.RFC3339, from)
+	return err
+}
+
+func (r *logFiltersResolver) To(_ context.Context, obj *entity.LogFilters, to string) error {
+	var err error
+	obj.To, err = time.Parse(time.RFC3339, to)
+	return err
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -326,9 +339,13 @@ func (r *Resolver) RegisteredProcess() RegisteredProcessResolver {
 	return &registeredProcessResolver{r}
 }
 
+// LogFilters returns LogFiltersResolver implementation.
+func (r *Resolver) LogFilters() LogFiltersResolver { return &logFiltersResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type productResolver struct{ *Resolver }
 type userActivityResolver struct{ *Resolver }
 type versionResolver struct{ *Resolver }
 type registeredProcessResolver struct{ *Resolver }
+type logFiltersResolver struct{ *Resolver }

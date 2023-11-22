@@ -37,6 +37,10 @@ type Config struct {
 		Namespace string `yaml:"namespace" envconfig:"POD_NAMESPACE"`
 	} `yaml:"k8s"`
 
+	Loki struct {
+		Address string `yaml:"address" envconfig:"KAI_LOKI_ADDRESS"`
+	} `yaml:"loki"`
+
 	Services struct {
 		K8sManager  string `yaml:"k8sManager" envconfig:"KAI_SERVICES_K8S_MANAGER"`
 		NatsManager string `yaml:"natsManager" envconfig:"KAI_SERVICES_NATS_MANAGER"`

@@ -42,6 +42,7 @@ type ResolverRoot interface {
 	RegisteredProcess() RegisteredProcessResolver
 	UserActivity() UserActivityResolver
 	Version() VersionResolver
+	LogFilters() LogFiltersResolver
 }
 
 type DirectiveRoot struct {
@@ -58,9 +59,14 @@ type ComplexityRoot struct {
 		Value func(childComplexity int) int
 	}
 
-	LogPage struct {
-		Cursor func(childComplexity int) int
-		Items  func(childComplexity int) int
+	Label struct {
+		Key   func(childComplexity int) int
+		Value func(childComplexity int) int
+	}
+
+	Log struct {
+		FormatedLog func(childComplexity int) int
+		Labels      func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -87,17 +93,6 @@ type ComplexityRoot struct {
 		Type          func(childComplexity int) int
 	}
 
-	ProcessLog struct {
-		Date         func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Level        func(childComplexity int) int
-		Message      func(childComplexity int) int
-		ProcessID    func(childComplexity int) int
-		ProcessName  func(childComplexity int) int
-		WorkflowID   func(childComplexity int) int
-		WorkflowName func(childComplexity int) int
-	}
-
 	Product struct {
 		CreationAuthor func(childComplexity int) int
 		CreationDate   func(childComplexity int) int
@@ -112,7 +107,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Logs                func(childComplexity int, productID string, filters entity.LogFilters, cursor *string) int
+		Logs                func(childComplexity int, filters entity.LogFilters) int
 		Product             func(childComplexity int, id string) int
 		Products            func(childComplexity int) int
 		RegisteredProcesses func(childComplexity int, productID string, processType *string) int
@@ -197,7 +192,7 @@ type QueryResolver interface {
 	Versions(ctx context.Context, productID string) ([]*entity.Version, error)
 	RegisteredProcesses(ctx context.Context, productID string, processType *string) ([]*entity.RegisteredProcess, error)
 	UserActivityList(ctx context.Context, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) ([]*entity.UserActivity, error)
-	Logs(ctx context.Context, productID string, filters entity.LogFilters, cursor *string) (*LogPage, error)
+	Logs(ctx context.Context, filters entity.LogFilters) ([]*entity.Log, error)
 	ServerInfo(ctx context.Context) (*entity.ServerInfo, error)
 }
 type RegisteredProcessResolver interface {
@@ -212,6 +207,11 @@ type VersionResolver interface {
 	CreationAuthor(ctx context.Context, obj *entity.Version) (string, error)
 	PublicationDate(ctx context.Context, obj *entity.Version) (*string, error)
 	PublicationAuthor(ctx context.Context, obj *entity.Version) (*string, error)
+}
+
+type LogFiltersResolver interface {
+	From(ctx context.Context, obj *entity.LogFilters, data string) error
+	To(ctx context.Context, obj *entity.LogFilters, data string) error
 }
 
 type executableSchema struct {
@@ -257,19 +257,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ConfigurationVariable.Value(childComplexity), true
 
-	case "LogPage.cursor":
-		if e.complexity.LogPage.Cursor == nil {
+	case "Label.key":
+		if e.complexity.Label.Key == nil {
 			break
 		}
 
-		return e.complexity.LogPage.Cursor(childComplexity), true
+		return e.complexity.Label.Key(childComplexity), true
 
-	case "LogPage.items":
-		if e.complexity.LogPage.Items == nil {
+	case "Label.value":
+		if e.complexity.Label.Value == nil {
 			break
 		}
 
-		return e.complexity.LogPage.Items(childComplexity), true
+		return e.complexity.Label.Value(childComplexity), true
+
+	case "Log.formatedLog":
+		if e.complexity.Log.FormatedLog == nil {
+			break
+		}
+
+		return e.complexity.Log.FormatedLog(childComplexity), true
+
+	case "Log.labels":
+		if e.complexity.Log.Labels == nil {
+			break
+		}
+
+		return e.complexity.Log.Labels(childComplexity), true
 
 	case "Mutation.createProduct":
 		if e.complexity.Mutation.CreateProduct == nil {
@@ -442,62 +456,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Process.Type(childComplexity), true
 
-	case "ProcessLog.date":
-		if e.complexity.ProcessLog.Date == nil {
-			break
-		}
-
-		return e.complexity.ProcessLog.Date(childComplexity), true
-
-	case "ProcessLog.id":
-		if e.complexity.ProcessLog.ID == nil {
-			break
-		}
-
-		return e.complexity.ProcessLog.ID(childComplexity), true
-
-	case "ProcessLog.level":
-		if e.complexity.ProcessLog.Level == nil {
-			break
-		}
-
-		return e.complexity.ProcessLog.Level(childComplexity), true
-
-	case "ProcessLog.message":
-		if e.complexity.ProcessLog.Message == nil {
-			break
-		}
-
-		return e.complexity.ProcessLog.Message(childComplexity), true
-
-	case "ProcessLog.processId":
-		if e.complexity.ProcessLog.ProcessID == nil {
-			break
-		}
-
-		return e.complexity.ProcessLog.ProcessID(childComplexity), true
-
-	case "ProcessLog.processName":
-		if e.complexity.ProcessLog.ProcessName == nil {
-			break
-		}
-
-		return e.complexity.ProcessLog.ProcessName(childComplexity), true
-
-	case "ProcessLog.workflowId":
-		if e.complexity.ProcessLog.WorkflowID == nil {
-			break
-		}
-
-		return e.complexity.ProcessLog.WorkflowID(childComplexity), true
-
-	case "ProcessLog.workflowName":
-		if e.complexity.ProcessLog.WorkflowName == nil {
-			break
-		}
-
-		return e.complexity.ProcessLog.WorkflowName(childComplexity), true
-
 	case "Product.creationAuthor":
 		if e.complexity.Product.CreationAuthor == nil {
 			break
@@ -557,7 +515,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Logs(childComplexity, args["productID"].(string), args["filters"].(entity.LogFilters), args["cursor"].(*string)), true
+		return e.complexity.Query.Logs(childComplexity, args["filters"].(entity.LogFilters)), true
 
 	case "Query.product":
 		if e.complexity.Query.Product == nil {
@@ -981,7 +939,7 @@ type Query {
     toDate: String
     lastId: String
   ): [UserActivity!]!
-  logs(productID: ID!, filters: LogFilters!, cursor: String): LogPage!
+  logs(filters: LogFilters!): [Log]!
   serverInfo: ServerInfo!
 }
 
@@ -1188,36 +1146,24 @@ enum UserActivityType {
 }
 
 input LogFilters {
-  startDate: String!
-  endDate: String
-  search: String
-  levels: [LogLevel!]
-  processIds: [ID!]
-  versionsIds: [ID!]
-  workflowsNames: [ID!]
-}
-
-enum LogLevel {
-  ERROR
-  WARN
-  INFO
-  DEBUG
-}
-
-type ProcessLog {
-  id: ID!
-  date: String!
-  processId: String
+  productID: String!
+  versionID: String!
+  from: String!
+  to: String!
+  workflowID: String
   processName: String
-  workflowId: String
-  workflowName: String
-  message: String!
-  level: LogLevel!
+  requestID: String
+  limit: Int
 }
 
-type LogPage {
-  cursor: String
-  items: [ProcessLog!]!
+type Label {
+  key: String!
+  value: String!
+}
+
+type Log {
+	formatedLog: String!
+	labels:      [Label!]!
 }
 `, BuiltIn: false},
 }
@@ -1380,33 +1326,15 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_logs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["productID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["productID"] = arg0
-	var arg1 entity.LogFilters
+	var arg0 entity.LogFilters
 	if tmp, ok := rawArgs["filters"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filters"))
-		arg1, err = ec.unmarshalNLogFilters2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogFilters(ctx, tmp)
+		arg0, err = ec.unmarshalNLogFilters2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogFilters(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["filters"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["cursor"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cursor"))
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["cursor"] = arg2
+	args["filters"] = arg0
 	return args, nil
 }
 
@@ -1762,8 +1690,8 @@ func (ec *executionContext) fieldContext_ConfigurationVariable_value(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _LogPage_cursor(ctx context.Context, field graphql.CollectedField, obj *LogPage) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LogPage_cursor(ctx, field)
+func (ec *executionContext) _Label_key(ctx context.Context, field graphql.CollectedField, obj *entity.Label) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Label_key(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1776,48 +1704,7 @@ func (ec *executionContext) _LogPage_cursor(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Cursor, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LogPage_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LogPage",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LogPage_items(ctx context.Context, field graphql.CollectedField, obj *LogPage) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LogPage_items(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Items, nil
+		return obj.Key, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1829,37 +1716,157 @@ func (ec *executionContext) _LogPage_items(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*entity.ProcessLog)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNProcessLog2ᚕᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessLogᚄ(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_LogPage_items(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Label_key(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "LogPage",
+		Object:     "Label",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Label_value(ctx context.Context, field graphql.CollectedField, obj *entity.Label) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Label_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Label_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Label",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Log_formatedLog(ctx context.Context, field graphql.CollectedField, obj *entity.Log) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Log_formatedLog(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FormatedLog, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Log_formatedLog(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Log",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Log_labels(ctx context.Context, field graphql.CollectedField, obj *entity.Log) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Log_labels(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]entity.Label)
+	fc.Result = res
+	return ec.marshalNLabel2ᚕgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLabelᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Log_labels(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Log",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_ProcessLog_id(ctx, field)
-			case "date":
-				return ec.fieldContext_ProcessLog_date(ctx, field)
-			case "processId":
-				return ec.fieldContext_ProcessLog_processId(ctx, field)
-			case "processName":
-				return ec.fieldContext_ProcessLog_processName(ctx, field)
-			case "workflowId":
-				return ec.fieldContext_ProcessLog_workflowId(ctx, field)
-			case "workflowName":
-				return ec.fieldContext_ProcessLog_workflowName(ctx, field)
-			case "message":
-				return ec.fieldContext_ProcessLog_message(ctx, field)
-			case "level":
-				return ec.fieldContext_ProcessLog_level(ctx, field)
+			case "key":
+				return ec.fieldContext_Label_key(ctx, field)
+			case "value":
+				return ec.fieldContext_Label_value(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ProcessLog", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Label", field.Name)
 		},
 	}
 	return fc, nil
@@ -2894,346 +2901,6 @@ func (ec *executionContext) fieldContext_Process_status(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _ProcessLog_id(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessLog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProcessLog_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProcessLog_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProcessLog",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProcessLog_date(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessLog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProcessLog_date(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Date, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProcessLog_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProcessLog",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProcessLog_processId(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessLog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProcessLog_processId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ProcessID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProcessLog_processId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProcessLog",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProcessLog_processName(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessLog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProcessLog_processName(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ProcessName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProcessLog_processName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProcessLog",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProcessLog_workflowId(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessLog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProcessLog_workflowId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.WorkflowID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProcessLog_workflowId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProcessLog",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProcessLog_workflowName(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessLog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProcessLog_workflowName(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.WorkflowName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProcessLog_workflowName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProcessLog",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProcessLog_message(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessLog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProcessLog_message(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Message, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProcessLog_message(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProcessLog",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProcessLog_level(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessLog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProcessLog_level(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Level, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(entity.LogLevel)
-	fc.Result = res
-	return ec.marshalNLogLevel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogLevel(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProcessLog_level(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProcessLog",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type LogLevel does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *entity.Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_id(ctx, field)
 	if err != nil {
@@ -3973,7 +3640,7 @@ func (ec *executionContext) _Query_logs(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Logs(rctx, fc.Args["productID"].(string), fc.Args["filters"].(entity.LogFilters), fc.Args["cursor"].(*string))
+		return ec.resolvers.Query().Logs(rctx, fc.Args["filters"].(entity.LogFilters))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3985,9 +3652,9 @@ func (ec *executionContext) _Query_logs(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*LogPage)
+	res := resTmp.([]*entity.Log)
 	fc.Result = res
-	return ec.marshalNLogPage2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐLogPage(ctx, field.Selections, res)
+	return ec.marshalNLog2ᚕᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLog(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_logs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3998,12 +3665,12 @@ func (ec *executionContext) fieldContext_Query_logs(ctx context.Context, field g
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "cursor":
-				return ec.fieldContext_LogPage_cursor(ctx, field)
-			case "items":
-				return ec.fieldContext_LogPage_items(ctx, field)
+			case "formatedLog":
+				return ec.fieldContext_Log_formatedLog(ctx, field)
+			case "labels":
+				return ec.fieldContext_Log_labels(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type LogPage", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Log", field.Name)
 		},
 	}
 	defer func() {
@@ -7465,76 +7132,89 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"startDate", "endDate", "search", "levels", "processIds", "versionsIds", "workflowsNames"}
+	fieldsInOrder := [...]string{"productID", "versionID", "from", "to", "workflowID", "processName", "requestID", "limit"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "startDate":
+		case "productID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.StartDate = data
-		case "endDate":
+			it.ProductID = data
+		case "versionID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionID"))
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.EndDate = data
-		case "search":
+			it.VersionID = data
+		case "from":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("from"))
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Search = data
-		case "levels":
+			if err = ec.resolvers.LogFilters().From(ctx, &it, data); err != nil {
+				return it, err
+			}
+		case "to":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("levels"))
-			data, err := ec.unmarshalOLogLevel2ᚕgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogLevelᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("to"))
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Levels = data
-		case "processIds":
+			if err = ec.resolvers.LogFilters().To(ctx, &it, data); err != nil {
+				return it, err
+			}
+		case "workflowID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processIds"))
-			data, err := ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("workflowID"))
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.ProcessIDs = data
-		case "versionsIds":
+			it.WorkflowID = data
+		case "processName":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionsIds"))
-			data, err := ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processName"))
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.VersionsIDs = data
-		case "workflowsNames":
+			it.ProcessName = data
+		case "requestID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("workflowsNames"))
-			data, err := ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("requestID"))
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.WorkflowsNames = data
+			it.RequestID = data
+		case "limit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			data, err := ec.unmarshalOInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Limit = data
 		}
 	}
 
@@ -7993,21 +7673,68 @@ func (ec *executionContext) _ConfigurationVariable(ctx context.Context, sel ast.
 	return out
 }
 
-var logPageImplementors = []string{"LogPage"}
+var labelImplementors = []string{"Label"}
 
-func (ec *executionContext) _LogPage(ctx context.Context, sel ast.SelectionSet, obj *LogPage) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, logPageImplementors)
+func (ec *executionContext) _Label(ctx context.Context, sel ast.SelectionSet, obj *entity.Label) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, labelImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("LogPage")
-		case "cursor":
-			out.Values[i] = ec._LogPage_cursor(ctx, field, obj)
-		case "items":
-			out.Values[i] = ec._LogPage_items(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("Label")
+		case "key":
+			out.Values[i] = ec._Label_key(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "value":
+			out.Values[i] = ec._Label_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var logImplementors = []string{"Log"}
+
+func (ec *executionContext) _Log(ctx context.Context, sel ast.SelectionSet, obj *entity.Log) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, logImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Log")
+		case "formatedLog":
+			out.Values[i] = ec._Log_formatedLog(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "labels":
+			out.Values[i] = ec._Log_labels(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -8186,68 +7913,6 @@ func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "status":
 			out.Values[i] = ec._Process_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var processLogImplementors = []string{"ProcessLog"}
-
-func (ec *executionContext) _ProcessLog(ctx context.Context, sel ast.SelectionSet, obj *entity.ProcessLog) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, processLogImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ProcessLog")
-		case "id":
-			out.Values[i] = ec._ProcessLog_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "date":
-			out.Values[i] = ec._ProcessLog_date(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "processId":
-			out.Values[i] = ec._ProcessLog_processId(ctx, field, obj)
-		case "processName":
-			out.Values[i] = ec._ProcessLog_processName(ctx, field, obj)
-		case "workflowId":
-			out.Values[i] = ec._ProcessLog_workflowId(ctx, field, obj)
-		case "workflowName":
-			out.Values[i] = ec._ProcessLog_workflowName(ctx, field, obj)
-		case "message":
-			out.Values[i] = ec._ProcessLog_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "level":
-			out.Values[i] = ec._ProcessLog_level(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -9689,39 +9354,95 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) marshalNLabel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLabel(ctx context.Context, sel ast.SelectionSet, v entity.Label) graphql.Marshaler {
+	return ec._Label(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLabel2ᚕgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLabelᚄ(ctx context.Context, sel ast.SelectionSet, v []entity.Label) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLabel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLabel(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNLog2ᚕᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLog(ctx context.Context, sel ast.SelectionSet, v []*entity.Log) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOLog2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLog(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalNLogFilters2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogFilters(ctx context.Context, v interface{}) (entity.LogFilters, error) {
 	res, err := ec.unmarshalInputLogFilters(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNLogLevel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogLevel(ctx context.Context, v interface{}) (entity.LogLevel, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := entity.LogLevel(tmp)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNLogLevel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogLevel(ctx context.Context, sel ast.SelectionSet, v entity.LogLevel) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) marshalNLogPage2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐLogPage(ctx context.Context, sel ast.SelectionSet, v LogPage) graphql.Marshaler {
-	return ec._LogPage(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNLogPage2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐLogPage(ctx context.Context, sel ast.SelectionSet, v *LogPage) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._LogPage(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNProcess2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcess(ctx context.Context, sel ast.SelectionSet, v entity.Process) graphql.Marshaler {
@@ -9770,60 +9491,6 @@ func (ec *executionContext) marshalNProcess2ᚕgithubᚗcomᚋkonstellationᚑio
 	}
 
 	return ret
-}
-
-func (ec *executionContext) marshalNProcessLog2ᚕᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessLogᚄ(ctx context.Context, sel ast.SelectionSet, v []*entity.ProcessLog) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNProcessLog2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessLog(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNProcessLog2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessLog(ctx context.Context, sel ast.SelectionSet, v *entity.ProcessLog) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ProcessLog(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNProcessStatus2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessStatus(ctx context.Context, v interface{}) (entity.ProcessStatus, error) {
@@ -10733,109 +10400,21 @@ func (ec *executionContext) marshalOConfigurationVariable2ᚕgithubᚗcomᚋkons
 	return ret
 }
 
-func (ec *executionContext) unmarshalOID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	return res
+}
+
+func (ec *executionContext) marshalOLog2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLog(ctx context.Context, sel ast.SelectionSet, v *entity.Log) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
-	}
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) unmarshalOLogLevel2ᚕgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogLevelᚄ(ctx context.Context, v interface{}) ([]entity.LogLevel, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]entity.LogLevel, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNLogLevel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogLevel(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOLogLevel2ᚕgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogLevelᚄ(ctx context.Context, sel ast.SelectionSet, v []entity.LogLevel) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNLogLevel2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLogLevel(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
+	return ec._Log(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalORegisteredProcess2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐRegisteredProcess(ctx context.Context, sel ast.SelectionSet, v *entity.RegisteredProcess) graphql.Marshaler {

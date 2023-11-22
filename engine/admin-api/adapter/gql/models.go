@@ -4,7 +4,6 @@ package gql
 
 import (
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 type CreateProductInput struct {
@@ -16,11 +15,6 @@ type CreateProductInput struct {
 type CreateVersionInput struct {
 	File      graphql.Upload `json:"file"`
 	ProductID string         `json:"productID"`
-}
-
-type LogPage struct {
-	Cursor *string              `json:"cursor,omitempty"`
-	Items  []*entity.ProcessLog `json:"items"`
 }
 
 type PublishVersionInput struct {

@@ -14,7 +14,7 @@ type Query {
     toDate: String
     lastId: String
   ): [UserActivity!]!
-  logs(productID: ID!, filters: LogFilters!, cursor: String): LogPage!
+  logs(filters: LogFilters!): [Log]!
   serverInfo: ServerInfo!
 }
 
@@ -221,34 +221,22 @@ enum UserActivityType {
 }
 
 input LogFilters {
-  startDate: String!
-  endDate: String
-  search: String
-  levels: [LogLevel!]
-  processIds: [ID!]
-  versionsIds: [ID!]
-  workflowsNames: [ID!]
-}
-
-enum LogLevel {
-  ERROR
-  WARN
-  INFO
-  DEBUG
-}
-
-type ProcessLog {
-  id: ID!
-  date: String!
-  processId: String
+  productID: String!
+  versionID: String!
+  from: String!
+  to: String!
+  workflowID: String
   processName: String
-  workflowId: String
-  workflowName: String
-  message: String!
-  level: LogLevel!
+  requestID: String
+  limit: Int
 }
 
-type LogPage {
-  cursor: String
-  items: [ProcessLog!]!
+type Label {
+  key: String!
+  value: String!
+}
+
+type Log {
+	formatedLog: String!
+	labels:      [Label!]!
 }
