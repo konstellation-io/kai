@@ -86,7 +86,7 @@ spec:
             initcontainers: []
             containers:
                 - name: kaniko
-                  image: ""
+                  image: gcr.io/kaniko-project/executor:v1.18.0
                   command: []
                   args:
                     - --context=s3://test/test.local/test-image:v1.0.0
@@ -131,7 +131,7 @@ spec:
                   lifecycle: null
                   terminationmessagepath: ""
                   terminationmessagepolicy: ""
-                  imagepullpolicy: ""
+                  imagepullpolicy: IfNotPresent
                   securitycontext: null
                   stdin: false
                   stdinonce: false

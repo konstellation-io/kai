@@ -22,6 +22,8 @@ const (
 	//nolint:gosec // False positive
 	ImageRegistryAuthSecretKey = "registry.authSecret"
 	ImageBuilderImageKey       = "registry.imageBuilder.image"
+	ImageBuilderTagKey         = "registry.imageBuilder.tag"
+	ImageBuilderPullPolicyKey  = "registry.imageBuilder.pullPolicy"
 	ImageBuilderLogLevel       = "registry.imageBuilder.logLevel"
 	ImageRegistryInsecureKey   = "registry.insecure"
 
@@ -50,6 +52,9 @@ const (
 	FluentBitTagKey        = "fluentbit.tag"
 	FluentBitPullPolicyKey = "fluentbit.pullPolicy"
 
+	LokiHostKey = "loki.host"
+	LokiPortKey = "loki.port"
+
 	configType = "yaml"
 
 	_defaultServerPort     = 50051
@@ -64,6 +69,7 @@ func Init(configFilePath string) error {
 	viper.AddConfigPath(configDir)
 	viper.SetConfigName(fileNameWithoutExt)
 	viper.SetConfigType(configType)
+	viper.AutomaticEnv()
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -80,7 +86,9 @@ func Init(configFilePath string) error {
 
 	viper.RegisterAlias(ImageRegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
 	viper.RegisterAlias(ImageRegistryInsecureKey, "REGISTRY_INSECURE")
-	viper.RegisterAlias(ImageBuilderImageKey, "IMAGE_BUILDER_IMAGE")
+	viper.RegisterAlias(ImageBuilderImageKey, "IMAGE_BUILDER_IMAGE_REPOSITORY")
+	viper.RegisterAlias(ImageBuilderTagKey, "IMAGE_BUILDER_IMAGE_TAG")
+	viper.RegisterAlias(ImageBuilderPullPolicyKey, "IMAGE_BUILDER_IMAGE_PULLPOLICY")
 
 	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT_URL")
 	viper.RegisterAlias(MinioAccessKeyIDKey, "MINIO_ROOT_USER")
@@ -104,7 +112,8 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(FluentBitTagKey, "FLUENTBIT_IMAGE_TAG")
 	viper.RegisterAlias(FluentBitPullPolicyKey, "FLUENTBIT_IMAGE_PULLPOLICY")
 
-	viper.AutomaticEnv()
+	viper.RegisterAlias(LokiHostKey, "LOKI_HOST")
+	viper.RegisterAlias(LokiPortKey, "LOKI_PORT")
 
 	setDefaultValues()
 
@@ -113,26 +122,28 @@ func Init(configFilePath string) error {
 
 func setDefaultValues() {
 	viper.SetDefault("releaseName", "kai")
-	viper.SetDefault("server.port", _defaultServerPort)
+	viper.SetDefault(ServerPortKey, _defaultServerPort)
 	viper.SetDefault(TriggersTLSEnabledKey, false)
 	viper.SetDefault(TLSSecretNameKey, "")
 	viper.SetDefault(TriggersRequestTimeoutKey, _defaultRequestTimeout)
 	viper.SetDefault(TriggersIngressClassNameKey, "kong")
 
-	viper.SetDefault(ImageBuilderImageKey, "gcr.io/kaniko-project/executor:latest")
+	viper.SetDefault(ImageBuilderImageKey, "gcr.io/kaniko-project/executor")
+	viper.SetDefault(ImageBuilderTagKey, "v1.18.0")
+	viper.SetDefault(ImageBuilderPullPolicyKey, "IfNotPresent")
 	viper.SetDefault(ImageBuilderLogLevel, "error")
 
 	viper.SetDefault(MinioRegionKey, "us-east-1")
 	viper.SetDefault(MinioSSLEnabledKey, false)
 
-	viper.SetDefault("kubernetes.isInsideCluster", true)
+	viper.SetDefault(IsInsideClusterKey, true)
 	viper.SetDefault(KubeNamespaceKey, "kai")
 
 	viper.SetDefault(AutoscaleCPUPercentageKey, 80)
 	viper.SetDefault(ProcessTimeoutKey, 5*time.Minute)
 
 	viper.SetDefault(FluentBitImageKey, "fluent/fluent-bit")
-	viper.SetDefault(FluentBitTagKey, "1.3")
+	viper.SetDefault(FluentBitTagKey, "2.2.0")
 	viper.SetDefault(FluentBitPullPolicyKey, "IfNotPresent")
 
 	userHome, ok := os.LookupEnv("HOME")
