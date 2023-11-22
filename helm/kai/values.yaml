@@ -100,8 +100,9 @@ config:
     # -- Only when `prometheus.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
     datasource:
       jsonData: "{}"
-    # -- Enable creation of configmap that contains custom prometheus scrape configs for KAI metrics. Usefull to use with external prometheus instance.
+    ## Scrape configs used by KAI
     kaiScrapeConfigs:
+      # -- Enable creation of configmap that contains custom prometheus scrape configs for KAI metrics. Usefull to use with external prometheus instance. If `prometheus.enabled: true` this cannot be disabled
       enabled: true
       # -- configmap name for additional scrape configs
       configmapName: prometheus-additional-scrape-configs

@@ -64,8 +64,8 @@
 | config.mongodb.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
 | config.prometheus.datasource | object | `{"jsonData":"{}"}` | Only when `prometheus.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config. |
 | config.prometheus.isDefault | bool | `false` | Only when `prometheus.enabled: true` and `grafana.enabled: true`. Set prometheus as default datasource for Grafana. |
-| config.prometheus.kaiScrapeConfigs | object | `{"configmapName":"prometheus-additional-scrape-configs","enabled":true}` | Enable creation of configmap that contains custom prometheus scrape configs for KAI metrics. Usefull to use with external prometheus instance. |
 | config.prometheus.kaiScrapeConfigs.configmapName | string | `"prometheus-additional-scrape-configs"` | configmap name for additional scrape configs |
+| config.prometheus.kaiScrapeConfigs.enabled | bool | `true` | Enable creation of configmap that contains custom prometheus scrape configs for KAI metrics. Usefull to use with external prometheus instance. If `prometheus.enabled: true` this cannot be disabled |
 | config.prometheus.url | string | `"http://{{ include \"prometheus.fullname\" .Subcharts.prometheus }}-{{ .Values.prometheus.server.name }}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}"` | Prometheus endpoint url. Change this to your own URL when `prometheus.enabled: false` |
 | config.redis.architecture | string | `"standalone"` | architecture. Allowed values: `standalone` or `replication`. Only apply when use your own redis URL/URLs |
 | config.redis.auth.existingSecret | string | `""` | Name of the secret that contains the redis password |
