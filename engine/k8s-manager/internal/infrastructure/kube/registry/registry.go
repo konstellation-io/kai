@@ -104,9 +104,10 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(productID, jobName, imageWithDe
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:    "kaniko",
-							Image:   viper.GetString(config.ImageBuilderImageKey),
-							Command: nil,
+							Name:            "kaniko",
+							Image:           fmt.Sprintf("%s:%s", viper.GetString(config.ImageBuilderImageKey), viper.GetString(config.ImageBuilderTagKey)),
+							ImagePullPolicy: corev1.PullPolicy(viper.GetString(config.ImageBuilderPullPolicyKey)),
+							Command:         nil,
 							Args: []string{
 								fmt.Sprintf("--context=s3://%s/%s", productID, imageWithDestination),
 								fmt.Sprintf("--insecure=%s", viper.GetString(config.ImageRegistryInsecureKey)),

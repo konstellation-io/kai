@@ -164,10 +164,10 @@ items:
                       ports: []
                       envfrom: []
                       env:
-                        - name: KAI_MESSAGING_HOST
+                        - name: KAI_LOKI_HOST
                           value: ""
                           valuefrom: null
-                        - name: KAI_MESSAGING_PORT
+                        - name: KAI_LOKI_PORT
                           value: ""
                           valuefrom: null
                         - name: KAI_PRODUCT_ID
@@ -260,8 +260,8 @@ items:
                           mountpropagation: null
                           subpathexpr: ""
                         - name: app-log-volume
-                          readonly: true
-                          mountpath: /app/logs
+                          readonly: false
+                          mountpath: /var/log/app
                           subpath: ""
                           mountpropagation: null
                           subpathexpr: ""
