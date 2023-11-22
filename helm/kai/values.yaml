@@ -100,6 +100,11 @@ config:
     # -- Only when `prometheus.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
     datasource:
       jsonData: "{}"
+    # -- Enable creation of configmap that contains custom prometheus scrape configs for KAI metrics. Usefull to use with external prometheus instance.
+    kaiScrapeConfigs:
+      enabled: true
+      # -- configmap name for additional scrape configs
+      configmapName: prometheus-additional-scrape-configs
 adminApi:
   # -- Default application log level
   logLevel: INFO
@@ -1007,7 +1012,7 @@ prometheus:
       - name: additional-scrape-configs
         mountPath: /etc/config/additional-scrape-configs/
         subPath: ""
-        # -- name of the configmap
+        # -- name of the configmap. Must be the same name set in `config.prometheus.kaiScrapeConfigs.configmapName`
         configMap: prometheus-additional-scrape-configs
         readOnly: true
     service:

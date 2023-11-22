@@ -1,8 +1,8 @@
-{{- if .Values.prometheus.enabled }}
+{{- if and .Values.prometheus.enabled .Values.config.prometheus.kaiScrapeConfigs.enabled}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: prometheus-additional-scrape-configs
+  name: {{ .Values.config.prometheus.kaiScrapeConfigs.configmapName }}
   labels:
     {{- include "prometheus-additional-scrape-configs.labels" . | nindent 4 }}
 data:
