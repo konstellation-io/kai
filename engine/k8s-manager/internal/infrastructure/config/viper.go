@@ -52,6 +52,9 @@ const (
 	FluentBitTagKey        = "fluentbit.tag"
 	FluentBitPullPolicyKey = "fluentbit.pullPolicy"
 
+	LokiHostKey = "loki.host"
+	LokiPortKey = "loki.port"
+
 	configType = "yaml"
 
 	_defaultServerPort     = 50051
@@ -66,6 +69,7 @@ func Init(configFilePath string) error {
 	viper.AddConfigPath(configDir)
 	viper.SetConfigName(fileNameWithoutExt)
 	viper.SetConfigType(configType)
+	viper.AutomaticEnv()
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -108,7 +112,8 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(FluentBitTagKey, "FLUENTBIT_IMAGE_TAG")
 	viper.RegisterAlias(FluentBitPullPolicyKey, "FLUENTBIT_IMAGE_PULLPOLICY")
 
-	viper.AutomaticEnv()
+	viper.RegisterAlias(LokiHostKey, "LOKI_HOST")
+	viper.RegisterAlias(LokiPortKey, "LOKI_PORT")
 
 	setDefaultValues()
 
@@ -138,7 +143,7 @@ func setDefaultValues() {
 	viper.SetDefault(ProcessTimeoutKey, 5*time.Minute)
 
 	viper.SetDefault(FluentBitImageKey, "fluent/fluent-bit")
-	viper.SetDefault(FluentBitTagKey, "1.3")
+	viper.SetDefault(FluentBitTagKey, "2.2.0")
 	viper.SetDefault(FluentBitPullPolicyKey, "IfNotPresent")
 
 	userHome, ok := os.LookupEnv("HOME")

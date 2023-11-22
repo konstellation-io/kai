@@ -40,8 +40,7 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 			},
 			{
 				Name:      "app-log-volume",
-				ReadOnly:  true,
-				MountPath: "/app/logs",
+				MountPath: "/var/log/app",
 			},
 		},
 		Resources: getContainerResources(process.EnableGpu, process.ResourceLimits),
@@ -61,8 +60,8 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 func getFluentBitContainer(spec *processSpec) corev1.Container {
 	fluentBitImage := fmt.Sprintf("%s:%s", viper.GetString(config.FluentBitImageKey), viper.GetString(config.FluentBitTagKey))
 	envVars := []corev1.EnvVar{
-		{Name: "KAI_MESSAGING_HOST", Value: viper.GetString("messaging.host")},
-		{Name: "KAI_MESSAGING_PORT", Value: viper.GetString("messaging.port")},
+		{Name: "KAI_LOKI_HOST", Value: viper.GetString(config.LokiHostKey)},
+		{Name: "KAI_LOKI_PORT", Value: viper.GetString(config.LokiPortKey)},
 		{Name: "KAI_PRODUCT_ID", Value: spec.Product},
 		{Name: "KAI_VERSION_TAG", Value: spec.Version},
 		{Name: "KAI_WORKFLOW_NAME", Value: spec.Workflow},
