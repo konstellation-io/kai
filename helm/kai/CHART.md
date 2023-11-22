@@ -20,7 +20,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.59"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.60"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -64,6 +64,8 @@
 | config.mongodb.connectionString.secretName | string | `""` | The name of the secret that contains a key with the MongoDB connection string. |
 | config.prometheus.datasource | object | `{"jsonData":"{}"}` | Only when `prometheus.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config. |
 | config.prometheus.isDefault | bool | `false` | Only when `prometheus.enabled: true` and `grafana.enabled: true`. Set prometheus as default datasource for Grafana. |
+| config.prometheus.kaiScrapeConfigs.configmapName | string | `"prometheus-additional-scrape-configs"` | configmap name for additional scrape configs |
+| config.prometheus.kaiScrapeConfigs.enabled | bool | `true` | Enable creation of configmap that contains custom prometheus scrape configs for KAI metrics. Usefull to use with external prometheus instance. If `prometheus.enabled: true` this cannot be disabled |
 | config.prometheus.url | string | `"http://{{ include \"prometheus.fullname\" .Subcharts.prometheus }}-{{ .Values.prometheus.server.name }}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}"` | Prometheus endpoint url. Change this to your own URL when `prometheus.enabled: false` |
 | config.redis.architecture | string | `"standalone"` | architecture. Allowed values: `standalone` or `replication`. Only apply when use your own redis URL/URLs |
 | config.redis.auth.existingSecret | string | `""` | Name of the secret that contains the redis password |
@@ -110,7 +112,7 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.59"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.60"` | Image tag |
 | k8sManager.imageBuilder.image.repository | string | `"gcr.io/kaniko-project/executor"` | Image repository for image builder's jobs |
 | k8sManager.imageBuilder.image.tag | string | `"v1.18.0"` | Image tag for image builder's jobs |
 | k8sManager.imageBuilder.pullPolicy | string | `"IfNotPresent"` |  |
@@ -243,7 +245,7 @@
 | mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.59"` | Image tag |
+| mongoWriter.image.tag | string | `"0.2.0-develop.60"` | Image tag |
 | mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
@@ -275,7 +277,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.59"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.60"` | Image tag |
 | prometheus.alertmanager.enabled | bool | `true` | Whether to enable alertmanager |
 | prometheus.alertmanager.image.tag | string | `"v0.26.0"` | alertmanager server version |
 | prometheus.alertmanager.persistence.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |
@@ -286,6 +288,9 @@
 | prometheus.kube-state-metrics.enabled | bool | `false` |  |
 | prometheus.prometheus-node-exporter.enabled | bool | `false` |  |
 | prometheus.prometheus-pushgateway.enabled | bool | `false` |  |
+| prometheus.scrapeConfigFiles | list | `["/etc/config/additional-scrape-configs/*.yaml"]` | Files to get additional scrapeConfigs. This allows scrape configs defined in `prometheus.server.extraConfigmapMounts` |
+| prometheus.server.extraConfigmapMounts[0] | object | `{"configMap":"prometheus-additional-scrape-configs","mountPath":"/etc/config/additional-scrape-configs/","name":"additional-scrape-configs","readOnly":true,"subPath":""}` | name for volumes and volumeMount config |
+| prometheus.server.extraConfigmapMounts[0].configMap | string | `"prometheus-additional-scrape-configs"` | name of the configmap. Must be the same name set in `config.prometheus.kaiScrapeConfigs.configmapName` |
 | prometheus.server.image.tag | string | `"v2.47.2"` | prometheus server version |
 | prometheus.server.ingress.annotations | object | `{}` | Ingress annotations |
 | prometheus.server.ingress.enabled | bool | `true` | Enable ingress for MinIO Web Console |
