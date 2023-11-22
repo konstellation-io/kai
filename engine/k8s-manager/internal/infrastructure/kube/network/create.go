@@ -94,7 +94,7 @@ func (kn KubeNetwork) getServiceAnnotations(protocol domain.NetworkingProtocol) 
 func (kn KubeNetwork) getPrometheusAnnotations() map[string]string {
 	return map[string]string{
 		"kai.prometheus/scrape": "true",
-		"kai.prometheus/scheme": "https",
+		"kai.prometheus/scheme": "http",
 		"kai.prometheus/path":   "/metrics",
 		"kai.prometheus/port":   strconv.Itoa(viper.GetInt(config.TelegrafMetricsPort)),
 	}
