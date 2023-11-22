@@ -64,10 +64,9 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 			APIVersion: "apps/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        processIdentifier,
-			Namespace:   kp.namespace,
-			Labels:      labels,
-			Annotations: kp.getPrometheusAnnotations(),
+			Name:      processIdentifier,
+			Namespace: kp.namespace,
+			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -75,7 +74,8 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels,
+					Labels:      labels,
+					Annotations: kp.getPrometheusAnnotations(),
 				},
 				Spec: corev1.PodSpec{
 					ImagePullSecrets: []corev1.LocalObjectReference{
