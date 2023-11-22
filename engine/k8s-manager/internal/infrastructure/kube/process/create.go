@@ -3,6 +3,7 @@ package process
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
@@ -63,9 +64,10 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 			APIVersion: "apps/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      processIdentifier,
-			Namespace: kp.namespace,
-			Labels:    labels,
+			Name:        processIdentifier,
+			Namespace:   kp.namespace,
+			Labels:      labels,
+			Annotations: kp.getPrometheusAnnotations(),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -112,6 +114,15 @@ func (kp *KubeProcess) getContainers(configmapName string, spec *processSpec) []
 func (kp *KubeProcess) createProcessDeployment(ctx context.Context, configMapName string, spec *processSpec) (*appsv1.Deployment, error) {
 	return kp.client.AppsV1().Deployments(kp.namespace).
 		Create(ctx, kp.getDeploymentSpec(configMapName, spec), metav1.CreateOptions{})
+}
+
+func (kp *KubeProcess) getPrometheusAnnotations() map[string]string {
+	return map[string]string{
+		"kai.prometheus/scrape": "true",
+		"kai.prometheus/scheme": "http",
+		"kai.prometheus/path":   "/metrics",
+		"kai.prometheus/port":   strconv.Itoa(viper.GetInt(config.TelegrafMetricsPort)),
+	}
 }
 
 func getDeploymentName(product, version, workflow, process string) string {

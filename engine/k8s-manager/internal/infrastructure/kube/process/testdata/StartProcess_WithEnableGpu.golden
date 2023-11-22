@@ -27,7 +27,11 @@ items:
             type: task
             version: v1.0.0
             workflow: test-workflow
-        annotations: {}
+        annotations:
+            kai.prometheus/path: /metrics
+            kai.prometheus/port: "0"
+            kai.prometheus/scheme: http
+            kai.prometheus/scrape: "true"
         ownerreferences: []
         finalizers: []
         managedfields: []

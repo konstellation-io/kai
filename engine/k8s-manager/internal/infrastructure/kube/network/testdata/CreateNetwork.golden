@@ -29,10 +29,6 @@ items:
             version: v1.0.0
             workflow: test-workflow
         annotations:
-            kai.prometheus/path: /metrics
-            kai.prometheus/port: "0"
-            kai.prometheus/scheme: http
-            kai.prometheus/scrape: "true"
             konghq.com/protocol: grpc
         ownerreferences: []
         finalizers: []

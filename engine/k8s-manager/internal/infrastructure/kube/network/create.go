@@ -3,7 +3,6 @@ package network
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
@@ -82,22 +81,13 @@ func (kn KubeNetwork) getServiceLabels(product, version, workflow, process, prot
 }
 
 func (kn KubeNetwork) getServiceAnnotations(protocol domain.NetworkingProtocol) map[string]string {
-	annotations := kn.getPrometheusAnnotations()
+	annotations := make(map[string]string)
 
 	if protocol == domain.NetworkingProtocolGRPC {
 		annotations[_serviceProtocolAnnotation] = strings.ToLower(string(domain.NetworkingProtocolGRPC))
 	}
 
 	return annotations
-}
-
-func (kn KubeNetwork) getPrometheusAnnotations() map[string]string {
-	return map[string]string{
-		"kai.prometheus/scrape": "true",
-		"kai.prometheus/scheme": "http",
-		"kai.prometheus/path":   "/metrics",
-		"kai.prometheus/port":   strconv.Itoa(viper.GetInt(config.TelegrafMetricsPort)),
-	}
 }
 
 func (kn KubeNetwork) getServiceName(product, version, workflow, process string) string {
