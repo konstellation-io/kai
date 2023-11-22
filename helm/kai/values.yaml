@@ -107,7 +107,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.59
+    tag: 0.2.0-develop.60
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
@@ -160,7 +160,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.59
+    tag: 0.2.0-develop.60
     # -- Image pull policy
     pullPolicy: IfNotPresent
   imageBuilder:
@@ -400,7 +400,7 @@ mongoWriter:
     # -- Image repository
     repository: konstellation/kai-mongo-writer
     # -- Image tag
-    tag: 0.2.0-develop.59
+    tag: 0.2.0-develop.60
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
@@ -672,7 +672,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.59
+    tag: 0.2.0-develop.60
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
