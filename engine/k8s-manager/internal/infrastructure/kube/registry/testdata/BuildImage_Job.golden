@@ -89,7 +89,7 @@ spec:
                   image: gcr.io/kaniko-project/executor:v1.18.0
                   command: []
                   args:
-                    - --context=s3://test/test.local/test-image:v1.0.0
+                    - --context=s3://test/.kai/test.local/test-image:v1.0.0
                     - --insecure=
                     - --verbosity=error
                     - --destination=test.local/test-image:v1.0.0

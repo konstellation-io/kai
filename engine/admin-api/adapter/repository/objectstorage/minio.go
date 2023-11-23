@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"path"
 
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -11,6 +12,10 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 	"github.com/spf13/viper"
+)
+
+const (
+	_kaiFolder = ".kai"
 )
 
 type MinioObjectStorage struct {
@@ -81,7 +86,9 @@ func (os *MinioObjectStorage) UploadImageSources(ctx context.Context, product, i
 
 	object := bytes.NewReader(sources)
 
-	_, err := os.client.PutObject(ctx, product, image, object, object.Size(), minio.PutObjectOptions{})
+	imagePath := path.Join(_kaiFolder, image)
+
+	_, err := os.client.PutObject(ctx, product, imagePath, object, object.Size(), minio.PutObjectOptions{})
 
 	return err
 }
@@ -89,7 +96,9 @@ func (os *MinioObjectStorage) UploadImageSources(ctx context.Context, product, i
 func (os *MinioObjectStorage) DeleteImageSources(ctx context.Context, product, image string) error {
 	os.logger.Info("Deleting image's sources", "product", product, "image", image)
 
-	return os.client.RemoveObject(ctx, product, image, minio.RemoveObjectOptions{
+	imagePath := path.Join(_kaiFolder, image)
+
+	return os.client.RemoveObject(ctx, product, imagePath, minio.RemoveObjectOptions{
 		ForceDelete: true,
 	})
 }
