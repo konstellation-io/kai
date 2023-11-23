@@ -58,9 +58,11 @@ func (s *VersionServiceTestSuite) TestStart() {
 		GlobalKeyValueStore:  "test-global-kv-store",
 		VersionKeyValueStore: "test-kv-store",
 		MinioConfiguration: &versionpb.MinioConfiguration{
-			User:     "test-minio-user",
-			Password: "test-minio-password",
-			Bucket:   "test-minio-bucket",
+			Bucket: "test-minio-bucket",
+		},
+		ServiceAccount: &versionpb.ServiceAccount{
+			Username: "test-user",
+			Password: "test-password",
 		},
 		Workflows: []*versionpb.Workflow{
 			{
@@ -106,9 +108,11 @@ func (s *VersionServiceTestSuite) TestStart() {
 		GlobalKeyValueStore:  req.GlobalKeyValueStore,
 		VersionKeyValueStore: req.VersionKeyValueStore,
 		MinioConfiguration: domain.MinioConfiguration{
-			User:     req.MinioConfiguration.User,
-			Password: req.MinioConfiguration.Password,
-			Bucket:   req.MinioConfiguration.Bucket,
+			Bucket: req.MinioConfiguration.Bucket,
+		},
+		ServiceAccount: domain.ServiceAccount{
+			Username: req.ServiceAccount.Username,
+			Password: req.ServiceAccount.Password,
 		},
 		Workflows: []*domain.Workflow{
 			{
