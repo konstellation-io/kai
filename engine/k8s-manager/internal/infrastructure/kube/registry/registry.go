@@ -23,6 +23,8 @@ import (
 type jobStatus int32
 
 const (
+	_kaiFolder = ".kai"
+
 	_jobStatusUnknown = iota
 	_jobStatusFailed
 	_jobStatusComplete
@@ -104,11 +106,12 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(productID, jobName, imageWithDe
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:    "kaniko",
-							Image:   viper.GetString(config.ImageBuilderImageKey),
-							Command: nil,
+							Name:            "kaniko",
+							Image:           fmt.Sprintf("%s:%s", viper.GetString(config.ImageBuilderImageKey), viper.GetString(config.ImageBuilderTagKey)),
+							ImagePullPolicy: corev1.PullPolicy(viper.GetString(config.ImageBuilderPullPolicyKey)),
+							Command:         nil,
 							Args: []string{
-								fmt.Sprintf("--context=s3://%s/%s", productID, imageWithDestination),
+								fmt.Sprintf("--context=s3://%s/%s/%s", productID, _kaiFolder, imageWithDestination),
 								fmt.Sprintf("--insecure=%s", viper.GetString(config.ImageRegistryInsecureKey)),
 								fmt.Sprintf("--verbosity=%s", viper.GetString(config.ImageBuilderLogLevel)),
 								fmt.Sprintf("--destination=%s", imageWithDestination),

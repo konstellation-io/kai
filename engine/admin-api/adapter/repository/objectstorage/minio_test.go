@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path"
 	"strings"
 	"testing"
 
@@ -25,6 +26,7 @@ import (
 
 const (
 	_testBucket = "test-bucket"
+	_kaiPath    = ".kai"
 )
 
 type ObjectStorageSuite struct {
@@ -188,7 +190,9 @@ func (s *ObjectStorageSuite) TestUploadImageSources() {
 	err = s.objectStorage.UploadImageSources(ctx, product, image, sources)
 	s.Assert().NoError(err)
 
-	actualImage, err := s.client.GetObject(ctx, product, image, minio.GetObjectOptions{})
+	imagePath := path.Join(_kaiPath, image)
+
+	actualImage, err := s.client.GetObject(ctx, product, imagePath, minio.GetObjectOptions{})
 	s.Require().NoError(err)
 
 	content, err := io.ReadAll(actualImage)

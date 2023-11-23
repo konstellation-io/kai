@@ -45,6 +45,9 @@ func TestBuildImage_SucceedJob(t *testing.T) {
 	viper.Set(config.KubeNamespaceKey, _namespace)
 	viper.Set(config.ImageRegistryURLKey, fmt.Sprintf("http://%s", _registryHost))
 	viper.Set(config.ImageBuilderLogLevel, "error")
+	viper.Set(config.ImageBuilderImageKey, "gcr.io/kaniko-project/executor")
+	viper.Set(config.ImageBuilderTagKey, "v1.18.0")
+	viper.Set(config.ImageBuilderPullPolicyKey, "IfNotPresent")
 
 	imageBuilder := registry.NewKanikoImageBuilder(logger, clientset)
 

@@ -114,6 +114,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}
 
+{{/*
+prometheus-additional-scrape-configs labels
+*/}}
+{{- define "prometheus-additional-scrape-configs.labels" -}}
+{{ include "kai.labels" . }}
+app.kubernetes.io/name: {{ include "kai.name" . }}-scrape-configs
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
 {{/* Fullname suffixed with grafana-datasources */}}
 {{- define "grafana-datasources.fullname" -}}
 {{- printf "%s-grafana-datasources" (include "kai.fullname" .) -}}
@@ -124,13 +133,6 @@ grafana-datasources labels
 */}}
 {{- define "grafana-datasources.labels" -}}
 {{ include "kai.labels" . }}
-{{ include "grafana-datasources.selectorLabels" . }}
-{{- end }}
-
-{{/*
-grafana-datasources selector labels
-*/}}
-{{- define "grafana-datasources.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "kai.name" . }}-grafana-datasources
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}

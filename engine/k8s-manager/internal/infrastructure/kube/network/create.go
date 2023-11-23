@@ -7,6 +7,8 @@ import (
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
+	"github.com/spf13/viper"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,6 +17,7 @@ import (
 
 const (
 	_servicePortName           = "trigger"
+	_metricsPortName           = "metrics"
 	_serviceProtocolAnnotation = "konghq.com/protocol"
 )
 
@@ -44,6 +47,11 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 					Name:       _servicePortName,
 					TargetPort: intstr.FromInt(networking.TargetPort),
 					Port:       int32(networking.SourcePort),
+				},
+				{
+					Name:       _metricsPortName,
+					TargetPort: intstr.FromInt(viper.GetInt(config.TelegrafMetricsPort)),
+					Port:       viper.GetInt32(config.TelegrafMetricsPort),
 				},
 			},
 		},
@@ -75,10 +83,8 @@ func (kn KubeNetwork) getServiceLabels(product, version, workflow, process, prot
 func (kn KubeNetwork) getServiceAnnotations(protocol domain.NetworkingProtocol) map[string]string {
 	annotations := make(map[string]string)
 
-	switch protocol {
-	case domain.NetworkingProtocolGRPC:
+	if protocol == domain.NetworkingProtocolGRPC {
 		annotations[_serviceProtocolAnnotation] = strings.ToLower(string(domain.NetworkingProtocolGRPC))
-	default:
 	}
 
 	return annotations
