@@ -13,6 +13,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/websocket v1.5.0
+	github.com/grafana/loki v1.6.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459
 	github.com/konstellation-io/krt v0.1.7
@@ -155,7 +156,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/grafana/loki v1.6.1
 	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
