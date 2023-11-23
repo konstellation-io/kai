@@ -6,6 +6,14 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
+var (
+	productIDKey    = "product_id"
+	versionTagKey   = "version_tag"
+	workflowNameKey = "workflow_name"
+	processNameKey  = "process_name"
+	requestIDKey    = "request_id"
+)
+
 func setFilterDefaults(lf *entity.LogFilters) {
 	if lf.Limit == 0 {
 		lf.Limit = 100
@@ -15,14 +23,26 @@ func setFilterDefaults(lf *entity.LogFilters) {
 func getQuery(lf entity.LogFilters) string {
 	setFilterDefaults(&lf)
 
-	query := fmt.Sprintf("{product_id=\"%s\"}", lf.ProductID)
+	const madatoryQueryPart = "{%s=\"%s\", %s=\"%s\""
+	const optionalQueryPart = ", %s=\"%s\""
 
-	if lf.VersionID != "" {
-		query += fmt.Sprintf(",version_id=\"%s\"", lf.VersionID)
+	// mandatory part of the query
+	query := fmt.Sprintf(madatoryQueryPart, productIDKey, lf.ProductID, versionTagKey, lf.VersionID)
+
+	// optional part of the query
+	if lf.WorkflowName != "" {
+		query += fmt.Sprintf(optionalQueryPart, workflowNameKey, lf.WorkflowName)
 	}
+
+	if lf.ProcessName != "" {
+		query += fmt.Sprintf(optionalQueryPart, processNameKey, lf.ProcessName)
+	}
+
+	if lf.RequestID != "" {
+		query += fmt.Sprintf(optionalQueryPart, requestIDKey, lf.RequestID)
+	}
+
+	query += "}"
 
 	return query
 }
-
-//query := `{product_id="rest-poc-2",version_id="v1.0.1"}`
-//query := `{version="v1.0.0",name="mysql-backup"}`

@@ -15,12 +15,12 @@ type Log struct {
 }
 
 type LogFilters struct {
-	ProductID   string
-	VersionID   string
-	From        time.Time
-	To          time.Time
-	WorkflowID  string
-	ProcessName string
-	RequestID   string
-	Limit       int
+	ProductID    string
+	VersionID    string
+	From         time.Time
+	To           time.Time
+	WorkflowName string
+	ProcessName  string
+	RequestID    string
+	Limit        int
 }

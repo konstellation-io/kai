@@ -225,7 +225,7 @@ input LogFilters {
   versionID: String!
   from: String!
   to: String!
-  workflowID: String
+  workflowName: String
   processName: String
   requestID: String
   limit: Int

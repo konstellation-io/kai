@@ -1150,7 +1150,7 @@ input LogFilters {
   versionID: String!
   from: String!
   to: String!
-  workflowID: String
+  workflowName: String
   processName: String
   requestID: String
   limit: Int
@@ -7132,7 +7132,7 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"productID", "versionID", "from", "to", "workflowID", "processName", "requestID", "limit"}
+	fieldsInOrder := [...]string{"productID", "versionID", "from", "to", "workflowName", "processName", "requestID", "limit"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7179,15 +7179,15 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			if err = ec.resolvers.LogFilters().To(ctx, &it, data); err != nil {
 				return it, err
 			}
-		case "workflowID":
+		case "workflowName":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("workflowID"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("workflowName"))
 			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.WorkflowID = data
+			it.WorkflowName = data
 		case "processName":
 			var err error
 
