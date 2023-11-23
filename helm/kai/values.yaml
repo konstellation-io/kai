@@ -434,44 +434,6 @@ mongoWriter:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
-mongoExpress:
-  image:
-    # -- Image repository
-    repository: mongo-express
-    # -- Image tag
-    tag: "0.54.0"
-    # -- Image pull policy
-    pullPolicy: IfNotPresent
-  connectionString:
-    # -- The name of the secret that contains a key with the MongoDB connection string.
-    secretName: ""
-    # --The name of the secret key that contains the MongoDB connection string.
-    secretKey: ""
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-  # -- Assign custom affinity rules to the Mongo Express pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-  # nodeAffinity:
-  #   requiredDuringSchedulingIgnoredDuringExecution:
-  #     nodeSelectorTerms:
-  #     - matchExpressions:
-  #       - key: kubernetes.io/e2e-az-name
-  #         operator: In
-  #         values:
-  #         - e2e-az1
-  #         - e2e-az2
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
 nats:
   image:
     # -- Image repository
@@ -555,32 +517,11 @@ nats:
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
   tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-chronograf:
-  image:
-    # -- Image repository
-    repository: chronograf
-    # -- Image tag
-    tag: 1.8.4
-    # -- Image pull policy
-    pullPolicy: IfNotPresent
-  persistence:
-    # -- Whether to enable persistence
-    enabled: true
-    # -- Storage class name
-    storageClass: "standard"
-    # -- Access mode for the volume
-    accessMode: ReadWriteOnce
-    # -- Storage size
-    size: 2Gi
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
   nodeSelector: {}
-  # -- Assign custom affinity rules to the Chronograf pods
+  # -- Assign custom affinity rules to the Nats pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
   affinity: {}
@@ -602,77 +543,6 @@ chronograf:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
-influxdb:
-  image:
-    # -- Image tag
-    tag: 1.8.1
-  config:
-    # -- [Details](https://docs.influxdata.com/influxdb/v1.8/administration/config/#http)
-    http:
-      enabled: true
-      flux-enabled: true
-      auth-enabled: false
-  persistence:
-    # -- Whether to enable persistence. See https://github.com/influxdata/helm-charts/tree/master/charts/influxdb#configure-the-chart for more info
-    enabled: true
-    # -- Storage class name
-    storageClass: "standard"
-    # -- Access mode for the volume
-    accessMode: ReadWriteOnce
-    # -- Storage size
-    size: 10Gi
-  initScripts:
-    # -- Boolean flag to enable and disable initscripts. See https://github.com/influxdata/helm-charts/tree/master/charts/influxdb#configure-the-chart for more info
-    enabled: true
-    # -- Init scripts
-    scripts:
-      init.iql: |
-        CREATE DATABASE "kai"
-  address: http://kai-influxdb/
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-  # -- Assign custom affinity rules to the InfluxDB pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-  # nodeAffinity:
-  #   requiredDuringSchedulingIgnoredDuringExecution:
-  #     nodeSelectorTerms:
-  #     - matchExpressions:
-  #       - key: kubernetes.io/e2e-az-name
-  #         operator: In
-  #         values:
-  #         - e2e-az1
-  #         - e2e-az2
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-## Using default values from https://github.com/influxdata/helm-charts/blob/master/charts/kapacitor/values.yaml
-kapacitor:
-  # -- Whether to enable Kapacitor
-  enabled: false
-  ## If kapacitor enabled, set influxURL=http://<chart_release>-influxdb:8086
-  ## Where <chart_release> is the release name by with the chart is deployed
-  #
-  #influxURL: http://kai-local-influxdb:8086
-
-  ## Persistence is disabled by default
-  ##
-  persistence:
-    # -- Whether to enable persistence [Details](https://github.com/influxdata/helm-charts/blob/master/charts/kapacitor/values.yaml)
-    enabled: false
-    # persistence:
-    #   enabled: true
-    #   storageClass: default
-    #   accessMode: ReadWriteOnce
-    #   size: 1Gi
 natsManager:
   image:
     # -- Image repository

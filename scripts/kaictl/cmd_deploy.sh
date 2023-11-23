@@ -91,7 +91,6 @@ create_namespace() {
 }
 
 deploy_helm_chart() {
-  export KAI_INFLUX_URL="http://${RELEASE_NAME}-influxdb:8086"
   echo_info "📦 Applying helm chart..."
   helmfile -f scripts/helmfile/helmfile.yaml deps
   helmfile -f scripts/helmfile/helmfile.yaml sync

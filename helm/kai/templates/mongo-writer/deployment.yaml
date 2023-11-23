@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/engine/mongo-writer/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/mongo-writer/configmap.yaml") . | sha256sum }}
       labels:
         {{- include "mongo-writer.labels" . | nindent 8 }}
     spec:
