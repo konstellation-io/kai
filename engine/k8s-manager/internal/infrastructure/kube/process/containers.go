@@ -12,7 +12,7 @@ import (
 
 const _configFilesVolume = "version-conf-files"
 
-func getAppContainer(configMapName string, process *domain.Process) corev1.Container {
+func (kp *KubeProcess) getAppContainer(configMapName string, process *domain.Process) corev1.Container {
 	container := corev1.Container{
 		Name:            process.Name,
 		Image:           process.Image,
@@ -57,7 +57,7 @@ func getAppContainer(configMapName string, process *domain.Process) corev1.Conta
 	return container
 }
 
-func getFluentBitContainer(spec *processSpec) corev1.Container {
+func (kp *KubeProcess) getFluentBitContainer(spec *processSpec) corev1.Container {
 	fluentBitImage := fmt.Sprintf("%s:%s", viper.GetString(config.FluentBitImageKey), viper.GetString(config.FluentBitTagKey))
 	envVars := []corev1.EnvVar{
 		{Name: "KAI_LOKI_HOST", Value: viper.GetString(config.LokiHostKey)},
@@ -96,6 +96,32 @@ func getFluentBitContainer(spec *processSpec) corev1.Container {
 				Name:      "app-log-volume",
 				ReadOnly:  true,
 				MountPath: "/var/log/app",
+			},
+		},
+	}
+}
+
+func (kp *KubeProcess) getTelegrafContainer() corev1.Container {
+	telegrafImage := fmt.Sprintf("%s:%s", viper.GetString(config.TelegrafImageKey), viper.GetString(config.TelegrafTagKey))
+
+	return corev1.Container{
+		Name:            "telegraf",
+		Image:           telegrafImage,
+		ImagePullPolicy: corev1.PullPolicy(viper.GetString(config.TelegrafPullPolicyKey)),
+		EnvFrom:         nil,
+		Env:             nil,
+		Resources:       corev1.ResourceRequirements{},
+		VolumeMounts: []corev1.VolumeMount{
+			{
+				Name:      _configFilesVolume,
+				ReadOnly:  true,
+				MountPath: "/etc/telegraf/telegraf.conf",
+				SubPath:   "telegraf.conf",
+			},
+		},
+		Ports: []corev1.ContainerPort{
+			{
+				ContainerPort: viper.GetInt32(config.TelegrafMetricsPort),
 			},
 		},
 	}

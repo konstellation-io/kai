@@ -22,11 +22,14 @@ func GetAppConfig(version domain.Version, processesConfig map[string]string) api
 			Name:   configMapName,
 			Labels: labels,
 		},
-		Data: mergeConfigs(processesConfig, getFluentBitConfig()),
+		Data: mergeConfigs(processesConfig, getFluentBitConfig(), getTelegrafConfig()),
 	}
 }
 
 func getFluentBitConfig() map[string]string {
+	const labelsService = `kai-product-version, product_id=${KAI_PRODUCT_ID}, version_tag=${KAI_VERSION_TAG}, ` +
+		`workflow_name=${KAI_WORKFLOW_NAME}, process_name=${KAI_PROCESS_NAME}`
+
 	return map[string]string{
 		"parsers.conf": `
 [PARSER]
@@ -77,14 +80,21 @@ func getFluentBitConfig() map[string]string {
 	}
 }
 
-//nolint:lll // false positive
-const labelsService = `kai-product-version, product_id=${KAI_PRODUCT_ID}, version_tag=${KAI_VERSION_TAG}, workflow_name=${KAI_WORKFLOW_NAME}, process_name=${KAI_PROCESS_NAME}`
+func getTelegrafConfig() map[string]string {
+	return map[string]string{
+		"telegraf.conf": `
+[[inputs.opentelemetry]]
+[[outputs.prometheus_client]]
+listen = ":9191"
+`,
+	}
+}
 
 func mergeConfigs(configs ...map[string]string) map[string]string {
 	fullConfig := map[string]string{}
 
-	for _, config := range configs {
-		for key, val := range config {
+	for _, cfg := range configs {
+		for key, val := range cfg {
 			fullConfig[key] = val
 		}
 	}
