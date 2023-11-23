@@ -94,8 +94,8 @@ data:
                 bucket: test-process-kv-store
         minio:
             endpoint: test-minio-endpoint
-            client_user: test-minio-user
-            client_password: test-minio-password
+            client_user: test-user
+            client_password: test-password
             ssl: false
             bucket: test-minio-bucket
         auth:
@@ -103,4 +103,8 @@ data:
             client: test-auth-client-id
             client_secret: test-auth-client-secret
             realm: test-auth-realm
+        predictions:
+            endpoint: ""
+            username: test-user
+            password: test-password
 binarydata: {}
