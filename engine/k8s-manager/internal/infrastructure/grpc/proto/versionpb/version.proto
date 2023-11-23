@@ -45,12 +45,16 @@ message StartRequest {
   string version_key_value_store = 4;
   repeated Workflow workflows = 5;
   MinioConfiguration minio_configuration = 6;
+  ServiceAccount service_account = 7;
 }
 
 message MinioConfiguration {
-  string user = 1;
+  string bucket = 1;
+}
+
+message ServiceAccount {
+  string username = 1;
   string password = 2;
-  string bucket = 3;
 }
 
 message StopRequest {

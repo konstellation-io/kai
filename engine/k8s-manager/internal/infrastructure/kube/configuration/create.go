@@ -85,8 +85,8 @@ func (kc KubeConfiguration) getProcessConfig(
 		},
 		Minio: MinioConfig{
 			Endpoint:       viper.GetString(config.MinioEndpointKey),
-			ClientUser:     version.MinioConfiguration.User,
-			ClientPassword: version.MinioConfiguration.Password,
+			ClientUser:     version.ServiceAccount.Username,
+			ClientPassword: version.ServiceAccount.Password,
 			SSL:            viper.GetBool(config.MinioSSLEnabledKey),
 			Bucket:         version.MinioConfiguration.Bucket,
 		},
@@ -95,6 +95,11 @@ func (kc KubeConfiguration) getProcessConfig(
 			Client:       viper.GetString(config.AuthClientIDKey),
 			ClientSecret: viper.GetString(config.AuthClientSecretKey),
 			Realm:        viper.GetString(config.AuthRealmKey),
+		},
+		Predictions: PredictionsConfig{
+			Endpoint: viper.GetString(config.PredictionsEndpointKey),
+			Username: version.ServiceAccount.Username,
+			Password: version.ServiceAccount.Password,
 		},
 	}
 }

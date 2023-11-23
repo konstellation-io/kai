@@ -6,6 +6,7 @@ type ProcessConfig struct {
 	CentralizedConfig CentralizedConfig `yaml:"centralized_configuration"`
 	Minio             MinioConfig       `yaml:"minio"`
 	Auth              AuthConfig        `yaml:"auth"`
+	Predictions       PredictionsConfig `yaml:"predictions"`
 }
 
 type Metadata struct {
@@ -50,4 +51,10 @@ type AuthConfig struct {
 	Client       string `yaml:"client"`
 	ClientSecret string `yaml:"client_secret"`
 	Realm        string `yaml:"realm"`
+}
+
+type PredictionsConfig struct {
+	Endpoint string `yaml:"endpoint"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }

@@ -50,6 +50,9 @@ const (
 	FluentBitTagKey        = "fluentbit.tag"
 	FluentBitPullPolicyKey = "fluentbit.pullPolicy"
 
+	PredictionsEndpointKey = "predictions.endpoint"
+	PredictionsPasswordKey = "predictions.password"
+
 	configType = "yaml"
 
 	_defaultServerPort     = 50051
@@ -103,6 +106,9 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(FluentBitImageKey, "FLUENTBIT_IMAGE_REPOSITORY")
 	viper.RegisterAlias(FluentBitTagKey, "FLUENTBIT_IMAGE_TAG")
 	viper.RegisterAlias(FluentBitPullPolicyKey, "FLUENTBIT_IMAGE_PULLPOLICY")
+
+	viper.RegisterAlias(PredictionsEndpointKey, "REDIS_MASTER_ADDRESS")
+	viper.RegisterAlias(PredictionsPasswordKey, "REDIS_PASSWORD")
 
 	viper.AutomaticEnv()
 

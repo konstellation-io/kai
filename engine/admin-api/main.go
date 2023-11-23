@@ -11,6 +11,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/redis"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
@@ -123,17 +124,23 @@ func initGraphqlController(
 
 	minioOjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
 
+	redisClient, err := redis.NewRedisClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	productInteractor := usecase.NewProductInteractor(&usecase.ProductInteractorOpts{
-		Logger:            logger,
-		ProductRepo:       productRepo,
-		VersionRepo:       versionMongoRepo,
-		ProcessRepo:       processRepo,
-		UserActivity:      userActivityInteractor,
-		AccessControl:     accessControl,
-		ObjectStorage:     minioOjectStorage,
-		NatsService:       natsManagerService,
-		UserRegistry:      keycloakUserRegistry,
-		PasswordGenerator: passwordGenerator,
+		Logger:               logger,
+		ProductRepo:          productRepo,
+		VersionRepo:          versionMongoRepo,
+		ProcessRepo:          processRepo,
+		UserActivity:         userActivityInteractor,
+		AccessControl:        accessControl,
+		ObjectStorage:        minioOjectStorage,
+		NatsService:          natsManagerService,
+		UserRegistry:         keycloakUserRegistry,
+		PasswordGenerator:    passwordGenerator,
+		PredictionRepository: redis.NewPredictionRepository(redisClient),
 	})
 
 	userInteractor := usecase.NewUserInteractor(

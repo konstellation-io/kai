@@ -8,6 +8,7 @@ type Version struct {
 
 	Workflows          []*Workflow
 	MinioConfiguration MinioConfiguration
+	ServiceAccount     ServiceAccount
 }
 
 type Workflow struct {
@@ -18,7 +19,10 @@ type Workflow struct {
 }
 
 type MinioConfiguration struct {
-	User     string
+	Bucket string
+}
+
+type ServiceAccount struct {
+	Username string
 	Password string
-	Bucket   string
 }

@@ -42,6 +42,7 @@ type productSuite struct {
 	userRegistry      *mocks.MockUserRegistry
 	passwordGenerator password.PasswordGenerator
 	natsService       *mocks.MockNatsManagerService
+	predictionRepo    *mocks.MockPredictionRepo
 }
 
 func TestProductSuite(t *testing.T) {
@@ -61,6 +62,7 @@ func (s *productSuite) SetupSuite() {
 	s.userRegistry = mocks.NewMockUserRegistry(ctrl)
 	s.passwordGenerator = password.NewMockGenerator(_testPassword, nil)
 	s.natsService = mocks.NewMockNatsManagerService(ctrl)
+	s.predictionRepo = mocks.NewMockPredictionRepo(s.T())
 
 	userActivity := usecase.NewUserActivityInteractor(
 		s.logger,
@@ -69,16 +71,17 @@ func (s *productSuite) SetupSuite() {
 	)
 
 	productInteractorOpts := usecase.ProductInteractorOpts{
-		Logger:            s.logger,
-		ProductRepo:       s.productRepo,
-		VersionRepo:       s.versionRepo,
-		ProcessRepo:       s.processRepo,
-		UserActivity:      userActivity,
-		AccessControl:     s.accessControl,
-		ObjectStorage:     s.objectStorage,
-		UserRegistry:      s.userRegistry,
-		PasswordGenerator: s.passwordGenerator,
-		NatsService:       s.natsService,
+		Logger:               s.logger,
+		ProductRepo:          s.productRepo,
+		VersionRepo:          s.versionRepo,
+		ProcessRepo:          s.processRepo,
+		UserActivity:         userActivity,
+		AccessControl:        s.accessControl,
+		ObjectStorage:        s.objectStorage,
+		UserRegistry:         s.userRegistry,
+		PasswordGenerator:    s.passwordGenerator,
+		NatsService:          s.natsService,
+		PredictionRepository: s.predictionRepo,
 	}
 	s.productInteractor = usecase.NewProductInteractor(&productInteractorOpts)
 }
@@ -115,10 +118,12 @@ func (s *productSuite) TestCreateProduct() {
 		CreationDate: time.Time{},
 		Owner:        user.ID,
 		MinioConfiguration: entity.MinioConfiguration{
-			User:     productID,
+			Bucket: productID,
+		},
+		ServiceAccount: entity.ServiceAccount{
+			Username: productID,
 			Group:    productID,
 			Password: _testPassword,
-			Bucket:   productID,
 		},
 		KeyValueStore: _testKvStore,
 	}
@@ -133,6 +138,9 @@ func (s *productSuite) TestCreateProduct() {
 	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
 	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
+	s.predictionRepo.EXPECT().
+		CreateUser(ctx, productID, expectedProduct.ServiceAccount.Username, expectedProduct.ServiceAccount.Password).
+		Return(nil)
 	s.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
@@ -332,10 +340,12 @@ func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
 		Owner:        user.ID,
 		CreationDate: time.Time{},
 		MinioConfiguration: entity.MinioConfiguration{
-			User:     productID,
+			Bucket: productID,
+		},
+		ServiceAccount: entity.ServiceAccount{
+			Username: productID,
 			Group:    productID,
 			Password: _testPassword,
-			Bucket:   productID,
 		},
 		KeyValueStore: _testKvStore,
 	}

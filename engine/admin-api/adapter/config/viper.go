@@ -32,6 +32,9 @@ const (
 	KeycloakPolicyAttributeKey = "keycloak.attributes.policy"
 
 	MongoDBKaiDatabaseKey = "mongodb.dbName"
+
+	RedisEndpointKey = "redis.endpoint"
+	RedisPasswordKey = "redis.password"
 )
 
 func InitConfig() error {
@@ -67,6 +70,9 @@ func loadConfig() error {
 	viper.RegisterAlias(KeycloakRealmKey, "KEYCLOAK_REALM")
 	viper.RegisterAlias(KeycloakURLKey, "KEYCLOAK_BASE_URL")
 	viper.RegisterAlias(KeycloakPolicyAttributeKey, "KEYCLOAK_POLICY_ATTRIBUTE")
+
+	viper.RegisterAlias(RedisEndpointKey, "REDIS_MASTER_ADDRESS")
+	viper.RegisterAlias(RedisPasswordKey, "REDIS_PASSWORD")
 
 	viper.AutomaticEnv()
 

@@ -19,10 +19,12 @@ func NewProductBuilder() *ProductBuilder {
 			Description:   "Test description",
 			KeyValueStore: faker.UUIDHyphenated(),
 			MinioConfiguration: entity.MinioConfiguration{
-				User:     productID,
+				Bucket: productID,
+			},
+			ServiceAccount: entity.ServiceAccount{
+				Username: productID,
 				Password: faker.Password(),
 				Group:    productID,
-				Bucket:   productID,
 			},
 		},
 	}

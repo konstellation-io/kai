@@ -56,9 +56,11 @@ func (k *K8sVersionService) Start(
 		GlobalKeyValueStore:  versionConfig.KeyValueStores.GlobalKeyValueStore,
 		VersionKeyValueStore: versionConfig.KeyValueStores.VersionKeyValueStore,
 		MinioConfiguration: &versionpb.MinioConfiguration{
-			User:     product.MinioConfiguration.User,
-			Password: product.MinioConfiguration.Password,
-			Bucket:   product.MinioConfiguration.Bucket,
+			Bucket: product.MinioConfiguration.Bucket,
+		},
+		ServiceAccount: &versionpb.ServiceAccount{
+			Username: product.ServiceAccount.Username,
+			Password: product.ServiceAccount.Password,
 		},
 	}
 
