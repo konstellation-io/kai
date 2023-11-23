@@ -3,6 +3,7 @@ package process
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
@@ -73,7 +74,8 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels,
+					Labels:      labels,
+					Annotations: kp.getPrometheusAnnotations(),
 				},
 				Spec: corev1.PodSpec{
 					ImagePullSecrets: []corev1.LocalObjectReference{
@@ -84,7 +86,7 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 					Containers:   kp.getContainers(configMapName, spec),
 					NodeSelector: kp.getNodeSelector(spec.Process.EnableGpu),
 					Tolerations:  kp.getTolerations(spec.Process.EnableGpu),
-					Volumes:      GetVolumes(configMapName, processIdentifier),
+					Volumes:      kp.getVolumes(configMapName, processIdentifier),
 				},
 			},
 		},
@@ -103,14 +105,24 @@ func (kp *KubeProcess) getProcessLabels(process *processSpec) map[string]string 
 
 func (kp *KubeProcess) getContainers(configmapName string, spec *processSpec) []corev1.Container {
 	return []corev1.Container{
-		getFluentBitContainer(spec),
-		getAppContainer(configmapName, spec.Process),
+		kp.getFluentBitContainer(spec),
+		kp.getAppContainer(configmapName, spec.Process),
+		kp.getTelegrafContainer(),
 	}
 }
 
 func (kp *KubeProcess) createProcessDeployment(ctx context.Context, configMapName string, spec *processSpec) (*appsv1.Deployment, error) {
 	return kp.client.AppsV1().Deployments(kp.namespace).
 		Create(ctx, kp.getDeploymentSpec(configMapName, spec), metav1.CreateOptions{})
+}
+
+func (kp *KubeProcess) getPrometheusAnnotations() map[string]string {
+	return map[string]string{
+		"kai.prometheus/scrape": "true",
+		"kai.prometheus/scheme": "http",
+		"kai.prometheus/path":   "/metrics",
+		"kai.prometheus/port":   strconv.Itoa(viper.GetInt(config.TelegrafMetricsPort)),
+	}
 }
 
 func getDeploymentName(product, version, workflow, process string) string {

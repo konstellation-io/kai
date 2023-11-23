@@ -44,6 +44,15 @@ items:
                 intval: 80
                 strval: ""
               nodeport: 0
+            - name: metrics
+              protocol: ""
+              appprotocol: null
+              port: 0
+              targetport:
+                type: 0
+                intval: 0
+                strval: ""
+              nodeport: 0
         selector:
             process: test-process
             product: test-product
