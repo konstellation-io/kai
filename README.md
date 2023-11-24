@@ -1,7 +1,5 @@
 - [KAI (Konstellation AI)](#kai-konstellation-runtime-engine)
   - [Engine](#engine)
-  - [Runtime](#runtime)
-  - [Runners](#runners)
 - [Architecture](#architecture)
   - [Engine](#engine-1)
   - [Runtime](#runtime-1)
@@ -18,8 +16,7 @@
 
 # KAI (Konstellation AI)
 
-Konstellation AI is an application that allow to run AI/ML models for inference based on the content of a
-`.krt` file.
+Konstellation AI is a platform to manage the lifecycle of AI solutions.
 
 ## Engine
 
@@ -29,22 +26,17 @@ Konstellation AI is an application that allow to run AI/ML models for inference 
 |  K8s Manager | [![coverage][k8s-manager-coverage]][k8s-manager-coverage-link] | [![bugs][k8s-manager-bugs]][k8s-manager-bugs-link] | [![mr][k8s-manager-mr]][k8s-manager-mr-link] | [![report][k8s-manager-report-badge]][k8s-manager-report-badge] |
 |  NATS Manager | [![coverage][nats-manager-coverage]][nats-manager-coverage-link] | [![bugs][nats-manager-bugs]][nats-manager-bugs-link] | [![mr][nats-manager-mr]][nats-manager-mr-link] | [![report][nats-manager-report-badge]][nats-manager-report-badge] |
 
-## Runners
-
-Each language has a specialized runner associated with it. They are located at
-the [kai-sdk repo](https://github.com/konstellation-io/kai-sdk). You must clone that repository in a folder
-named `runners` at the root level inside this repository.
-
 # Helm Chart
 
 Refer to chart's [README](helm/kai/README.md).
+
 # Architecture
 
 KAI design is based on a microservice pattern to be run on top of a Kubernetes cluster.
 
 The following diagram shows the main components and how they relate with each other.
 
-![Architecture](.github/images/kai-architecture.jpg)
+![Architecture](.github/images/kai-architecture.png) 
 
 Below are described the main concepts of KAI.
 
@@ -63,53 +55,99 @@ The Engine is composed of the following components:
 
 ### KRT
 
-_Konstellation Runtime Transport_ is a compressed file containing the definition of a runtime version, including the
-code that must be executed, and a YAML file called `kai.yaml` describing the desired workflows definitions.
+_Konstellation Runtime Transport_ file is a yaml file describing the desired workflows definitions.
 
-The generic structure of a `kai.yaml` is as follows:
+The generic structure of a `krt.yaml` is as follows:
 
 ```yaml
-version: my-project-v1
-description: This is the new version that solves some problems.
-entrypoint:
-  proto: public_input.proto
-  image: konstellation/kai-runtime-entrypoint:latest
-
-config:
-  variables:
-    - API_KEY
-    - API_SECRET
-  files:
-    - HTTPS_CERT
-
-nodes:
-  - name: ETL
-    image: konstellation/kai-py:latest
-    src: src/etl/execute_etl.py
-
-  - name: Execute DL Model
-    image: konstellation/kai-py:latest
-    src: src/execute_model/execute_model.py
-
-  - name: Create Output
-    image: konstellation/kai-py:latest
-    src: src/output/output.py
-
-  - name: Client Metrics
-    image: konstellation/kai-py:latest
-    src: src/client_metrics/client_metrics.py
-
+version: 'v1.0.0'
+description: 'Training workflow github event based'
 workflows:
-  - name: New prediction
-    entrypoint: MakePrediction
-    sequential:
-      - ETL
-      - Execute DL Model
-      - Create Output
-  - name: Save Client Metrics
-    entrypoint: SaveClientMetric
-    sequential:
-      - Client Metrics
+  - name: 'training-workflow'
+    type: training
+    processes:
+      - name: 'github-trigger'
+        image: 'registry.kai.local/demo_github-trigger-mock:v1'
+        type: 'trigger'
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100M
+            limit: 200M
+        config:
+          webhook_events: push
+          github_secret: secret
+        networking:
+          targetPort: 3000
+          destinationPort: 3000
+
+      - name: 'splitter'
+        image: 'registry.kai.local/demo_splitter:v1'
+        type: 'task'
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100M
+            limit: 200M
+        subscriptions:
+          - github-trigger
+
+      - name: 'training-go'
+        image: 'registry.kai.local/demo_training-go:v1'
+        type: 'task'
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100M
+            limit: 200M
+        subscriptions:
+          - splitter.go
+
+      - name: 'training-py'
+        image: 'registry.kai.local/demo_training-py:v1'
+        type: 'task'
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100M
+            limit: 200M
+        subscriptions:
+          - splitter.py
+
+      - name: 'validation'
+        image: 'registry.kai.local/demo_validation:v1'
+        type: 'task'
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100M
+            limit: 200M
+        subscriptions:
+          - 'training-go'
+          - 'training-py'
+
+      - name: 'exit'
+        image: 'registry.kai.local/demo_exit:v1'
+        type: 'exit'
+        resourceLimits:
+          CPU:
+            request: 100m
+            limit: 200m
+          memory:
+            request: 100M
+            limit: 200M
+        subscriptions:
+          - 'validation'
 
 ```
 
@@ -195,9 +233,9 @@ It will install everything in the namespace specified in your development `.kaic
 
 As part of **KAI** server we deploy a Docker registry that is published via _ingress_ using http, which is consider insecure.
 
-Due Kubernetes does not trust on insecure registries, if you want to perform local development or to run this on other insecure environments you need to configure your cluster to accept this registry hostname to be accepted. (check `.Values.registry.host` value in the chart's [values.yaml](./helm/kai/values.yaml) file).
+As Kubernetes does not trust on insecure registries, if you want to perform local development or to run this on other insecure environments you need to configure your cluster to accept this registry hostname to be accepted. (check `.Values.registry.host` value in the chart's [values.yaml](./helm/kai/values.yaml) file).
 
-To configure this for local develpment just update the value of the `MINIKUBE_INSECURE_REGISTRY_CIDR` environment variable inside the `.kaictl.conf` file to fit your local CIDR. If you created a previous **KAI** development environment you will need to destroy it and recreate again.
+To configure this for local development just update the value of the `MINIKUBE_INSECURE_REGISTRY_CIDR` environment variable inside the `.kaictl.conf` file to fit your local CIDR. If you created a previous **KAI** development environment you will need to destroy it and recreate again.
 
 ### Hosts Configuration
 
