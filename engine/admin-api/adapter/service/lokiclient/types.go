@@ -1,10 +1,8 @@
 package lokiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"strconv"
 	"time"
 )
@@ -26,44 +24,8 @@ type Streams []Stream
 
 // Stream represents a log stream.  It includes a set of log entries and their labels.
 type Stream struct {
-	Labels  LabelSet `json:"stream"`
-	Entries []Entry  `json:"values"`
-}
-
-type LabelSet map[string]string
-
-// Map coerces LabelSet into a map[string]string. This is useful for working with adapter types.
-func (l LabelSet) Map() map[string]string {
-	return l
-}
-
-// String implements the String interface. It returns a formatted/sorted set of label key/value pairs.
-func (l LabelSet) String() string {
-	var b bytes.Buffer
-
-	keys := make([]string, 0, len(l))
-	for k := range l {
-		keys = append(keys, k)
-	}
-
-	sort.Strings(keys)
-
-	b.WriteByte('{')
-
-	for i, k := range keys {
-		if i > 0 {
-			b.WriteByte(',')
-			b.WriteByte(' ')
-		}
-
-		b.WriteString(k)
-		b.WriteByte('=')
-		b.WriteString(strconv.Quote(l[k]))
-	}
-
-	b.WriteByte('}')
-
-	return b.String()
+	Labels  map[string]string `json:"stream"`
+	Entries []Entry           `json:"values"`
 }
 
 // Entry represents a log entry. It includes a log message and the time it occurred at.
