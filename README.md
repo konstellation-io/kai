@@ -29,12 +29,6 @@ Konstellation AI is an application that allow to run AI/ML models for inference 
 |  K8s Manager | [![coverage][k8s-manager-coverage]][k8s-manager-coverage-link] | [![bugs][k8s-manager-bugs]][k8s-manager-bugs-link] | [![mr][k8s-manager-mr]][k8s-manager-mr-link] | [![report][k8s-manager-report-badge]][k8s-manager-report-badge] |
 |  NATS Manager | [![coverage][nats-manager-coverage]][nats-manager-coverage-link] | [![bugs][nats-manager-bugs]][nats-manager-bugs-link] | [![mr][nats-manager-mr]][nats-manager-mr-link] | [![report][nats-manager-report-badge]][nats-manager-report-badge] |
 
-## Runtime
-
-|  Component  | Coverage  |  Bugs  |  Maintainability Rating  |  Go report  |
-| :---------: | :-----:   |  :---: |  :--------------------:  |  :---: |
-|  Mongo Writer  | [![coverage][mongo-writer-coverage]][mongo-writer-coverage-link] | [![bugs][mongo-writer-bugs]][mongo-writer-bugs-link] | [![mr][mongo-writer-mr]][mongo-writer-mr-link] | [![report][mongo-writer-report-badge]][mongo-writer-report-badge] |
-
 ## Runners
 
 Each language has a specialized runner associated with it. They are located at
@@ -64,7 +58,6 @@ The Engine is composed of the following components:
 
 * [Admin API](engine/admin-api/README.md)
 * [K8s Manager](engine/k8s-manager/README.md)
-* [Mongo Writer](engine/mongo-writer/README.md)
 * MongoDB
 * NATS-Streaming
 
@@ -286,22 +279,6 @@ release will be build and released.
 
 [nats-manager-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_nats-manager
 
-[mongo-writer-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_mongo_writer&metric=coverage
-
-[mongo-writer-coverage-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_mongo_writer
-
-[mongo-writer-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_mongo_writer&metric=bugs
-
-[mongo-writer-bugs-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_mongo_writer
-
-[mongo-writer-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_mongo_writer&metric=ncloc
-
-[mongo-writer-loc-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_mongo_writer
-
-[mongo-writer-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_mongo_writer&metric=sqale_rating
-
-[mongo-writer-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_mongo_writer
-
 [admin-api-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/engine/admin-api
 
 [admin-api-report-link]: https://goreportcard.com/report/github.com/konstellation-io/kli/engine/admin-api
@@ -313,7 +290,3 @@ release will be build and released.
 [nats-manager-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/engine/nats-manager
 
 [nats-manager-report-link]: https://goreportcard.com/report/github.com/konstellation-io/kli/engine/nats-manager
-
-[mongo-writer-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/engine/nats-manager
-
-[mongo-writer-report-link]: https://goreportcard.com/report/github.com/konstellation-io/kli/engine/nats-manager

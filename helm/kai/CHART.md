@@ -242,12 +242,6 @@
 | mongoExpress.image.tag | string | `"0.54.0"` | Image tag |
 | mongoExpress.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | mongoExpress.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
-| mongoWriter.affinity | object | `{}` | Assign custom affinity rules to the Mongo Writter pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
-| mongoWriter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
-| mongoWriter.image.repository | string | `"konstellation/kai-mongo-writer"` | Image repository |
-| mongoWriter.image.tag | string | `"0.2.0-develop.60"` | Image tag |
-| mongoWriter.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
-| mongoWriter.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
 | nats.affinity | object | `{}` | Assign custom affinity rules to the NATS pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | nats.client.port | int | `4222` | Port for client connections |
