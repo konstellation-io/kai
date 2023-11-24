@@ -6,7 +6,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-var (
+const (
 	productIDKey    = "product_id"
 	versionTagKey   = "version_tag"
 	workflowNameKey = "workflow_name"
@@ -14,17 +14,11 @@ var (
 	requestIDKey    = "request_id"
 )
 
-func setFilterDefaults(lf *entity.LogFilters) {
-	if lf.Limit == 0 {
-		lf.Limit = 100
-	}
-}
-
 func getQuery(lf entity.LogFilters) string {
-	setFilterDefaults(&lf)
-
-	const madatoryQueryPart = "{%s=\"%s\", %s=\"%s\""
-	const optionalQueryPart = ", %s=\"%s\""
+	const (
+		madatoryQueryPart = "{%s=\"%s\", %s=\"%s\""
+		optionalQueryPart = ", %s=\"%s\""
+	)
 
 	// mandatory part of the query
 	query := fmt.Sprintf(madatoryQueryPart, productIDKey, lf.ProductID, versionTagKey, lf.VersionID)

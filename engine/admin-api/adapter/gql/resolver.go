@@ -310,12 +310,14 @@ func (r *registeredProcessResolver) UploadDate(_ context.Context, obj *entity.Re
 func (r *logFiltersResolver) From(_ context.Context, obj *entity.LogFilters, from string) error {
 	var err error
 	obj.From, err = time.Parse(time.RFC3339, from)
+
 	return err
 }
 
 func (r *logFiltersResolver) To(_ context.Context, obj *entity.LogFilters, to string) error {
 	var err error
 	obj.To, err = time.Parse(time.RFC3339, to)
+
 	return err
 }
 

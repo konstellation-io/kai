@@ -1150,10 +1150,10 @@ input LogFilters {
   versionID: String!
   from: String!
   to: String!
+  limit: Int!
   workflowName: String
   processName: String
   requestID: String
-  limit: Int
 }
 
 type Label {
@@ -7132,7 +7132,7 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"productID", "versionID", "from", "to", "workflowName", "processName", "requestID", "limit"}
+	fieldsInOrder := [...]string{"productID", "versionID", "from", "to", "limit", "workflowName", "processName", "requestID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7179,6 +7179,15 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			if err = ec.resolvers.LogFilters().To(ctx, &it, data); err != nil {
 				return it, err
 			}
+		case "limit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Limit = data
 		case "workflowName":
 			var err error
 
@@ -7206,15 +7215,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 				return it, err
 			}
 			it.RequestID = data
-		case "limit":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
-			data, err := ec.unmarshalOInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Limit = data
 		}
 	}
 
@@ -9339,6 +9339,21 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNInt2int32(ctx context.Context, v interface{}) (int32, error) {
 	res, err := graphql.UnmarshalInt32(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -10398,16 +10413,6 @@ func (ec *executionContext) marshalOConfigurationVariable2ᚕgithubᚗcomᚋkons
 	wg.Wait()
 
 	return ret
-}
-
-func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
-	return res
 }
 
 func (ec *executionContext) marshalOLog2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐLog(ctx context.Context, sel ast.SelectionSet, v *entity.Log) graphql.Marshaler {

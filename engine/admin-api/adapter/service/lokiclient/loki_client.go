@@ -3,11 +3,11 @@ package lokiclient
 import (
 	"encoding/json"
 	"fmt"
-	"time"
+	"io"
+	"net/http"
+	"net/url"
+	"strconv"
 
-	"github.com/grafana/loki/pkg/logcli/client"
-	"github.com/grafana/loki/pkg/loghttp"
-	"github.com/grafana/loki/pkg/logproto"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
@@ -16,66 +16,64 @@ import (
 var _ service.LogsService = (*Client)(nil)
 
 type Client struct {
-	lokiClient client.Client
+	queryRangeURL string
 }
 
 func NewClient(cfg *config.Config) *Client {
-	defaultClient := client.DefaultClient{}
-	defaultClient.Address = cfg.Loki.Address
+	queryRangeURL := fmt.Sprintf("%s/loki/api/v1/query_range", cfg.Loki.Address)
 
 	return &Client{
-		lokiClient: &defaultClient,
+		queryRangeURL: queryRangeURL,
 	}
-}
-
-type logJSON struct {
-	Message string `json:"msg"`
-	Level   string `json:"level"`
-	Logger  string `json:"logger"`
-}
-
-func formatLog(timestamp time.Time, logData logJSON) string {
-	return fmt.Sprintf("%s %s %s %s", timestamp, logData.Level, logData.Logger, logData.Message)
 }
 
 func (c Client) GetLogs(lf entity.LogFilters) ([]*entity.Log, error) {
 	results := make([]*entity.Log, 0)
 
-	query := getQuery(lf)
+	params := url.Values{}
+	params.Add("query", getQuery(lf))
+	params.Add("limit", fmt.Sprintf("%d", lf.Limit))
+	params.Add("start", strconv.FormatInt(lf.From.UnixNano(), 10))
+	params.Add("end", strconv.FormatInt(lf.To.UnixNano(), 10))
 
-	queryRes, err := c.lokiClient.QueryRange(
-		query,
-		lf.Limit,
-		lf.From,
-		lf.To,
-		logproto.BACKWARD,
-		0,
-		0,
-		false,
-	)
+	fullQuery := c.queryRangeURL + "?" + params.Encode()
+
+	resp, err := http.Get(fullQuery)
+	if err != nil {
+		return results, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return results, err
 	}
 
-	dataResult := queryRes.Data.Result
-	switch dataResult.Type() {
-	case loghttp.ResultTypeStream:
-		series := dataResult.(loghttp.Streams)
-		for _, s := range series {
-			for _, e := range s.Entries {
-				logData := logJSON{}
-				err = json.Unmarshal([]byte(e.Line), &logData)
-				if err != nil {
-					return results, err
-				}
-				results = append(results, &entity.Log{
-					FormatedLog: formatLog(e.Timestamp, logData),
-					Labels:      getLabels(s.Labels),
-				})
+	lokiResponse := Response{}
+
+	err = json.Unmarshal(body, &lokiResponse)
+	if err != nil {
+		return results, err
+	}
+
+	if lokiResponse.Data.ResultType != "streams" {
+		return results, fmt.Errorf(`result type %q is not expected "stream" type`, lokiResponse.Data.ResultType)
+	}
+
+	for _, s := range lokiResponse.Data.Result {
+		for _, e := range s.Entries {
+			logData := logJSON{}
+
+			err = json.Unmarshal([]byte(e.Line), &logData)
+			if err != nil {
+				return results, err
 			}
+
+			results = append(results, &entity.Log{
+				FormatedLog: logData.formatLog(e.Timestamp),
+				Labels:      getLabels(s.Labels),
+			})
 		}
-	default:
-		return results, fmt.Errorf(`result type %q is not expected "stream" type`, dataResult.Type())
 	}
 
 	return results, nil

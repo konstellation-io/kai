@@ -225,10 +225,10 @@ input LogFilters {
   versionID: String!
   from: String!
   to: String!
+  limit: Int!
   workflowName: String
   processName: String
   requestID: String
-  limit: Int
 }
 
 type Label {
