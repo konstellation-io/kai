@@ -1,6 +1,7 @@
 package lokiclient
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -36,9 +37,15 @@ func (c Client) GetLogs(lf entity.LogFilters) ([]*entity.Log, error) {
 	params.Add("start", strconv.FormatInt(lf.From.UnixNano(), 10))
 	params.Add("end", strconv.FormatInt(lf.To.UnixNano(), 10))
 
+	ctx := context.Background()
 	fullQuery := c.queryRangeURL + "?" + params.Encode()
 
-	resp, err := http.Get(fullQuery)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullQuery, http.NoBody)
+	if err != nil {
+		return results, err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return results, err
 	}
@@ -54,10 +61,6 @@ func (c Client) GetLogs(lf entity.LogFilters) ([]*entity.Log, error) {
 	err = json.Unmarshal(body, &lokiResponse)
 	if err != nil {
 		return results, err
-	}
-
-	if lokiResponse.Data.ResultType != "streams" {
-		return results, fmt.Errorf(`result type %q is not expected "stream" type`, lokiResponse.Data.ResultType)
 	}
 
 	for _, s := range lokiResponse.Data.Result {
