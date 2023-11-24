@@ -80,11 +80,6 @@ func (s *RedisPredictionRepositorySuite) TearDownSuite() {
 	s.Require().NoError(err)
 }
 
-//func (s *RedisPredictionRepositorySuite) SetupTest() {
-//	err := s.redisClient.FlushAll(context.Background()).Err()
-//	s.Require().Error(err)
-//}
-
 func (s *RedisPredictionRepositorySuite) TearDownTest() {
 	ctx := context.Background()
 	err := s.redisClient.FlushAll(ctx).Err()
