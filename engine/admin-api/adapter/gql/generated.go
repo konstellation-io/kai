@@ -1154,6 +1154,8 @@ input LogFilters {
   workflowName: String
   processName: String
   requestID: String
+  level: String
+  logger: String
 }
 
 type Label {
@@ -7132,7 +7134,7 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"productID", "versionID", "from", "to", "limit", "workflowName", "processName", "requestID"}
+	fieldsInOrder := [...]string{"productID", "versionID", "from", "to", "limit", "workflowName", "processName", "requestID", "level", "logger"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7215,6 +7217,24 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 				return it, err
 			}
 			it.RequestID = data
+		case "level":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("level"))
+			data, err := ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Level = data
+		case "logger":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("logger"))
+			data, err := ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Logger = data
 		}
 	}
 

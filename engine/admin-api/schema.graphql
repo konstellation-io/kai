@@ -229,6 +229,8 @@ input LogFilters {
   workflowName: String
   processName: String
   requestID: String
+  level: String
+  logger: String
 }
 
 type Label {
