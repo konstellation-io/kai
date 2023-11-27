@@ -24,7 +24,7 @@ $ helm install [RELEASE_NAME] konstellation-io/kai
 
 *See [helm repo](https://helm.sh/docs/helm/helm_repo/) and [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.*
 
-## Dependencies
+## Included dependencies
 
 * minio
 * grafana
@@ -32,7 +32,7 @@ $ helm install [RELEASE_NAME] konstellation-io/kai
 * prometheus
 * redis
 
-except for **minio** everything else is an optional dependency. To disable it during installation, set `<component_name>.enabled`, to `false`.
+except for **minio** everything else is an externalizable dependency. If disabled, remember that you need to add the required config for using these components from your own infrastructure; you can do it by setting `config.<dependency_name>` needed parameters. If you want an unattended deployment, just leave the default config (`<dependency_name>.enabled: true`) which will install and configure everything for you in the target cluster.
 
 ## Uninstall chart
 

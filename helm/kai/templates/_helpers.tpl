@@ -269,27 +269,6 @@ nats url
 {{- printf "%s:%d" (include "nats.host" .) (.Values.nats.client.port | int) -}}
 {{- end -}}
 
-{{/* Fullname suffixed with mongo-writer */}}
-{{- define "mongo-writer.fullname" -}}
-{{- printf "%s-mongo-writer" (include "kai.fullname" .) -}}
-{{- end }}
-
-{{/*
-mongo-writer labels
-*/}}
-{{- define "mongo-writer.labels" -}}
-{{ include "kai.labels" . }}
-{{ include "mongo-writer.selectorLabels" . }}
-{{- end }}
-
-{{/*
-mongo-writer selector labels
-*/}}
-{{- define "mongo-writer.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kai.name" . }}-mongo-writer
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
 {{/* Fullname suffixed with nats-manager */}}
 {{- define "nats-manager.fullname" -}}
 {{- printf "%s-nats-manager" (include "kai.fullname" .) -}}
