@@ -4,13 +4,6 @@ description: KAI
 name: kai
 version: 0.2.0
 dependencies:
-  - name: influxdb
-    version: "4.8.1"
-    repository: https://helm.influxdata.com/
-  - name: kapacitor
-    version: "1.4.6"
-    repository: https://helm.influxdata.com/
-    condition: kapacitor.enabled
   - name: minio
     version: "5.0.14"
     repository: https://charts.min.io/
