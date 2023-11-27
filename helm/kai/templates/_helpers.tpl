@@ -63,27 +63,6 @@ app.kubernetes.io/name: {{ include "kai.name" . }}-admin-api
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/* Fullname suffixed with chronograf */}}
-{{- define "chronograf.fullname" -}}
-{{- printf "%s-chronograf" (include "kai.fullname" .) -}}
-{{- end }}
-
-{{/*
-Chronograf labels
-*/}}
-{{- define "chronograf.labels" -}}
-{{ include "kai.labels" . }}
-{{ include "chronograf.selectorLabels" . }}
-{{- end }}
-
-{{/*
-Chronograf selector labels
-*/}}
-{{- define "chronograf.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kai.name" . }}-chronograf
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
 {{/* Fullname suffixed with k8s-manager */}}
 {{- define "k8s-manager.fullname" -}}
 {{- printf "%s-k8s-manager" (include "kai.fullname" .) -}}
@@ -288,78 +267,6 @@ nats url
 */}}
 {{- define "nats.url" -}}
 {{- printf "%s:%d" (include "nats.host" .) (.Values.nats.client.port | int) -}}
-{{- end -}}
-
-{{/* Fullname suffixed with mongo-writer */}}
-{{- define "mongo-writer.fullname" -}}
-{{- printf "%s-mongo-writer" (include "kai.fullname" .) -}}
-{{- end }}
-
-{{/*
-mongo-writer labels
-*/}}
-{{- define "mongo-writer.labels" -}}
-{{ include "kai.labels" . }}
-{{ include "mongo-writer.selectorLabels" . }}
-{{- end }}
-
-{{/*
-mongo-writer selector labels
-*/}}
-{{- define "mongo-writer.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kai.name" . }}-mongo-writer
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-Mongo Express name
-*/}}
-{{- define "mongoExpress.fullname" -}}
-{{ printf "%s-mongo-express" $.Release.Name }}
-{{- end }}
-
-{{/*
-Mongo Express labels
-*/}}
-{{- define "mongoExpress.labels" -}}
-{{ include "kai.labels" . }}
-{{ include "mongoExpress.selectorLabels" . }}
-{{- end }}
-
-{{/*
-Mongo Express selector labels
-*/}}
-{{- define "mongoExpress.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kai.name" . }}-mongo-express
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-Create InfluxDB URL.
-*/}}
-{{- define "kai-influxdb.influxURL" -}}
-  {{- printf "http://%s-influxdb:8086" .Release.Name -}}
-{{- end -}}
-{{/*
-Create a default fully qualified InfluxDB service name for InfluxDB.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "kai-influxdb.fullname" -}}
-{{- if .Values.influxdb.fullnameOverride -}}
-{{- .Values.influxdb.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default "influxdb" .Values.influxdb.nameOverride -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create a default fully qualified Kapacitor service name for Chronograph.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "kai-kapacitor.fullname" -}}
-{{- $name := default "kapacitor" .Values.kapacitor.nameOverride -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/* Fullname suffixed with nats-manager */}}

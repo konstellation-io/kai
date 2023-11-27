@@ -24,11 +24,15 @@ $ helm install [RELEASE_NAME] konstellation-io/kai
 
 *See [helm repo](https://helm.sh/docs/helm/helm_repo/) and [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.*
 
-## Dependencies
+## Included dependencies
 
-By default this chart installs [InfluxDB](https://github.com/influxdata/helm-charts/tree/master/charts/influxdb) and [Kapacitor](https://github.com/influxdata/helm-charts/tree/master/charts/kapacitor) chart as dependency.
+* minio
+* grafana
+* loki
+* prometheus
+* redis
 
-However, **Kapacitor** is an optional dependency. To disable a it during installation, set `kapacitor.enabled`, to `false`.
+except for **minio** everything else is an externalizable dependency. If disabled, remember that you need to add the required config for using these components from your own infrastructure; you can do it by setting `config.<dependency_name>` needed parameters. If you want an unattended deployment, just leave the default config (`<dependency_name>.enabled: true`) which will install and configure everything for you in the target cluster.
 
 ## Uninstall chart
 
@@ -146,7 +150,3 @@ This chart needs an external MongoDB compatible database to work. Following user
     * *userAdminAnyDatabase* (admin)
     * *readWriteAnyDatabase* (admin)
     * *dbAdminAnyDatabase* (admin)
-* User: **mongoexpress**
-  * Database: **admin**
-  * Attached Roles:
-    * *readAnyDatabase* (admin)

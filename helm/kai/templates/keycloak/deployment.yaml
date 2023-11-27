@@ -12,8 +12,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/engine/keycloak/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/engine/keycloak/secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/keycloak/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/keycloak/secret.yaml") . | sha256sum }}
       {{- with .Values.keycloak.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -57,42 +57,46 @@ spec:
                   key: {{ include "keycloak.secretPasswordKey" . }}
             - name: KC_DB
               value: {{ .Values.keycloak.db.type }}
-            {{- if .Values.keycloak.db.auth.secretName }}
-            {{- if .Values.keycloak.db.auth.secretUserKey }}
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
+                {{- if .Values.keycloak.db.auth.secretName }}
                   name: {{ .Values.keycloak.db.auth.secretName }}
                   key: {{ .Values.keycloak.db.auth.secretUserKey }}
-            {{- end }}
-            {{- if .Values.keycloak.db.auth.secretPasswordKey}}
+                {{- else }}
+                  name: {{ include "keycloak.secretName" . }}
+                  key: database-user
+                {{- end }}
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
+                {{- if .Values.keycloak.db.auth.secretName}}
                   name: {{ .Values.keycloak.db.auth.secretName }}
                   key: {{ .Values.keycloak.db.auth.secretPasswordKey }}
-            {{- end }}
-            {{- if .Values.keycloak.db.auth.secretDatabaseKey }}
+                {{- else }}
+                  name: {{ include "keycloak.secretName" . }}
+                  key: database-password
+                {{- end }}
+            {{- if and .Values.keycloak.db.auth.secretName .Values.keycloak.db.auth.secretDatabaseKey }}
             - name: KC_DB_URL_DATABASE
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.keycloak.db.auth.secretName }}
                   key: {{ .Values.keycloak.db.auth.secretDatabaseKey }}
             {{- end }}
-            {{- if .Values.keycloak.db.auth.secretHostKey }}
+            {{- if and .Values.keycloak.db.auth.secretName .Values.keycloak.db.auth.secretHostKey }}
             - name: KC_DB_URL_HOST
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.keycloak.db.auth.secretName }}
                   key: {{ .Values.keycloak.db.auth.secretHostKey }}
             {{- end }}
-            {{- if .Values.keycloak.db.auth.secretPortKey }}
+            {{- if and .Values.keycloak.db.auth.secretName .Values.keycloak.db.auth.secretPortKey }}
             - name: KC_DB_URL_PORT
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.keycloak.db.auth.secretName }}
                   key: {{ .Values.keycloak.db.auth.secretPortKey }}
-            {{- end }}
             {{- end }}
           ports:
             {{- if .Values.keycloak.config.httpEnabled }}

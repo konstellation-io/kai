@@ -15,7 +15,6 @@ jobs:
         component:
           - admin-api
           - k8s-manager
-          - mongo-writer
           - nats-manager
     steps:
       - uses: actions/checkout@v4

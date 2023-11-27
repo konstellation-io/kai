@@ -15,7 +15,7 @@ spec:
         {{- include "admin-api.labels" . | nindent 8 }}
         type: admin
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/engine/admin-api/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/admin-api/configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.adminApi.affinity }}
       affinity:
