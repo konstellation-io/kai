@@ -51,7 +51,7 @@ data:
       access: proxy
       url: {{ include "redis.master.url" . }}
       version: 1
-      isDefault: {{ default false .Values.config.redis.isDefault }}
+      isDefault: false
       jsonData:
         client: {{ .Values.redis.architecture }}
       {{- if .Values.redis.auth.enabled }}
