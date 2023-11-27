@@ -71,7 +71,7 @@ func TestLokiClientGetLogs(t *testing.T) {
 
 func TestLokiClientGetFullQuery(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		expectedURL := `/loki/api/v1/query_range?end=1701388800000000000&limit=100&query={product_id="productID", version_tag="versionID", workflow_name="workflowName", process_name="processName", request_id="requestID"}&start=1672531200000000000`
+		expectedURL := `/loki/api/v1/query_range?end=1701388800000000000&limit=100&query={product_id="productID", version_tag="versionID", workflow_name="workflowName", process_name="processName", request_id="requestID", level="info", logger="[LOGGER]"}&start=1672531200000000000`
 
 		actualQuery, err := url.QueryUnescape(req.URL.String())
 		require.NoError(t, err)
@@ -99,6 +99,8 @@ func TestLokiClientGetFullQuery(t *testing.T) {
 		WorkflowName: "workflowName",
 		ProcessName:  "processName",
 		RequestID:    "requestID",
+		Level:        "info",
+		Logger:       "[LOGGER]",
 	}
 
 	lokiClient := lokiclient.NewClient(cfg)

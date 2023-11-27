@@ -12,6 +12,8 @@ const (
 	workflowNameKey = "workflow_name"
 	processNameKey  = "process_name"
 	requestIDKey    = "request_id"
+	levelKey        = "level"
+	loggerKey       = "logger"
 )
 
 func getQuery(lf entity.LogFilters) string {
@@ -34,6 +36,14 @@ func getQuery(lf entity.LogFilters) string {
 
 	if lf.RequestID != "" {
 		query += fmt.Sprintf(optionalQueryPart, requestIDKey, lf.RequestID)
+	}
+
+	if lf.Level != "" {
+		query += fmt.Sprintf(optionalQueryPart, levelKey, lf.Level)
+	}
+
+	if lf.Logger != "" {
+		query += fmt.Sprintf(optionalQueryPart, loggerKey, lf.Logger)
 	}
 
 	query += "}"

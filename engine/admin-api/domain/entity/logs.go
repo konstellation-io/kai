@@ -22,5 +22,7 @@ type LogFilters struct {
 	WorkflowName string
 	ProcessName  string
 	RequestID    string
+	Level        string
+	Logger       string
 	Limit        int
 }
