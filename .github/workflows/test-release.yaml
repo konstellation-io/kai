@@ -170,7 +170,7 @@ jobs:
     - name: Bump chart versions
       if: steps.nyx-infer.outputs.newVersion == 'true'
       run: |
-        ./.ci/utils/publish.sh ${{ steps.nyx-infer.outputs.version }}
+        ./.ci/utils/publish.sh ${{ steps.nyx-infer.outputs.version }} ${{ steps.nyx-infer.outputs.newRelease }}
 
     - name: Nyx make
       uses: mooltiverse/nyx-github-action@main
