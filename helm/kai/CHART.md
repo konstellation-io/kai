@@ -120,6 +120,7 @@
 | keycloak.config.proxy | string | `"edge"` | The proxy address forwarding mode if the server is behind a reverse proxy. Valid values are `none`, `edge`, `reencrypt` and `passthrough` |
 | keycloak.db.auth.database | string | `""` | The database name |
 | keycloak.db.auth.host | string | `""` | The database hostname |
+| keycloak.db.auth.password | string | `""` | The database password |
 | keycloak.db.auth.port | string | `""` | The database port |
 | keycloak.db.auth.secretDatabaseKey | string | `""` | The name of the secret key that contains the database name. Takes precedence over `database` |
 | keycloak.db.auth.secretHostKey | string | `""` | The name of the secret key that contains the database host. |
@@ -127,6 +128,7 @@
 | keycloak.db.auth.secretPasswordKey | string | `""` | The name of the secret key that contains the database password. |
 | keycloak.db.auth.secretPortKey | string | `""` | The name of the secret key that contains the database port. Takes precedence over `host` |
 | keycloak.db.auth.secretUserKey | string | `""` | The name of the secret key that contains the database username. Takes precedence over `port` |
+| keycloak.db.auth.username | string | `""` | The database username |
 | keycloak.db.type | string | `"postgres"` | Keycloak database type |
 | keycloak.extraEnv | object | `{}` | Keycloak extra env vars in the form of a list of key-value pairs |
 | keycloak.extraVolumeMounts | list | `[]` | Extra volume mounts |
