@@ -40,9 +40,9 @@ func (s *RedisPredictionRepositorySuite) SetupSuite() {
 	redisConfContainerPath := "/usr/local/etc/redis"
 
 	req := testcontainers.ContainerRequest{
-		Image: "redis:7.2.3-alpine3.18",
+		Image: "redis/redis-stack-server:7.2.0-v6",
 		Cmd: []string{
-			"redis-server",
+			"redis-stack-server",
 			redisConfContainerPath,
 		},
 		ExposedPorts: []string{"6379/tcp"},
@@ -101,6 +101,7 @@ func (s *RedisPredictionRepositorySuite) TestCreateUser() {
 		ctx      = context.Background()
 		testUser = "test-user"
 	)
+
 	err := s.redisPredictionRepository.CreateUser(ctx, "test-product", testUser, "test-password")
 	s.Require().NoError(err)
 
@@ -122,4 +123,25 @@ func (s *RedisPredictionRepositorySuite) TestCreateUser_ErrInvalidUsername() {
 
 	err := s.redisPredictionRepository.CreateUser(ctx, "test-product", "invalid user", "test-password")
 	s.Require().Error(err)
+}
+
+func (s *RedisPredictionRepositorySuite) TestEnsureIngressCreated() {
+	ctx := context.Background()
+
+	viper.Set(config.RedisPredictionsIndexKey, "predictionsIdx")
+
+	err := s.redisPredictionRepository.EnsurePredictionIndexCreated(ctx)
+	s.Require().NoError(err)
+}
+
+func (s *RedisPredictionRepositorySuite) TestEnsureIngressCreated_DoestFailIfIndexAlreadyExists() {
+	ctx := context.Background()
+
+	viper.Set(config.RedisPredictionsIndexKey, "predictionsIdx")
+
+	err := s.redisPredictionRepository.EnsurePredictionIndexCreated(ctx)
+	s.Require().NoError(err)
+
+	err = s.redisPredictionRepository.EnsurePredictionIndexCreated(ctx)
+	s.Require().NoError(err)
 }

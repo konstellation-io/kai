@@ -33,8 +33,9 @@ const (
 
 	MongoDBKaiDatabaseKey = "mongodb.dbName"
 
-	RedisEndpointKey = "redis.endpoint"
-	RedisPasswordKey = "redis.password"
+	RedisEndpointKey         = "redis.endpoint"
+	RedisPasswordKey         = "redis.password"
+	RedisPredictionsIndexKey = "redis.predictionsIndexName"
 )
 
 func InitConfig() error {
@@ -49,6 +50,7 @@ func setDefaultConfig() {
 	viper.SetDefault(MinioTierTransitionDaysKey, 0)
 	viper.SetDefault(KeycloakPolicyAttributeKey, "policy")
 	viper.SetDefault(MongoDBKaiDatabaseKey, "kai")
+	viper.SetDefault(RedisPredictionsIndexKey, "predictionsIdx")
 }
 
 func loadConfig() error {
@@ -73,6 +75,7 @@ func loadConfig() error {
 
 	viper.RegisterAlias(RedisEndpointKey, "REDIS_MASTER_ADDRESS")
 	viper.RegisterAlias(RedisPasswordKey, "REDIS_PASSWORD")
+	viper.RegisterAlias(RedisPredictionsIndexKey, "REDIS_PREDICTIONS_INDEX")
 
 	viper.AutomaticEnv()
 

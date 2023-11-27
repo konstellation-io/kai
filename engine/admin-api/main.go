@@ -129,6 +129,13 @@ func initGraphqlController(
 		log.Fatal(err)
 	}
 
+	predictionRepo := redis.NewPredictionRepository(redisClient)
+
+	err = predictionRepo.EnsurePredictionIndexCreated()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	productInteractor := usecase.NewProductInteractor(&usecase.ProductInteractorOpts{
 		Logger:               logger,
 		ProductRepo:          productRepo,
@@ -140,7 +147,7 @@ func initGraphqlController(
 		NatsService:          natsManagerService,
 		UserRegistry:         keycloakUserRegistry,
 		PasswordGenerator:    passwordGenerator,
-		PredictionRepository: redis.NewPredictionRepository(redisClient),
+		PredictionRepository: predictionRepo,
 	})
 
 	userInteractor := usecase.NewUserInteractor(
