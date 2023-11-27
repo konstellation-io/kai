@@ -1,11 +1,11 @@
 package configuration
 
 type ProcessConfig struct {
-	Metadata          Metadata          `yaml:"metadata"`
-	Nats              NatsConfig        `yaml:"nats"`
-	CentralizedConfig CentralizedConfig `yaml:"centralized_configuration"`
-	Minio             MinioConfig       `yaml:"minio"`
-	Auth              AuthConfig        `yaml:"auth"`
+	Metadata          Metadata           `yaml:"metadata"`
+	Nats              NatsConfig         `yaml:"nats"`
+	CentralizedConfig CentralizedConfig  `yaml:"centralized_configuration"`
+	Minio             MinioConfig        `yaml:"minio"`
+	Auth              AuthConfig         `yaml:"auth"`
 	Measurements      MeasurementsConfig `yaml:"measurements"`
 }
 
@@ -54,8 +54,8 @@ type AuthConfig struct {
 }
 
 type MeasurementsConfig struct {
-	Endpoint         string `yaml:"endpoint"`
-	Insecure         bool   `yaml:"insecure"`
-	Timeout          int    `yaml:"timeout"`
+	Endpoint        string `yaml:"endpoint"`
+	Insecure        bool   `yaml:"insecure"`
+	Timeout         int    `yaml:"timeout"`
 	MetricsInterval int    `yaml:"metrics_interval"`
 }
