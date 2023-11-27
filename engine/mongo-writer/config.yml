@@ -1,8 +1,0 @@
-logLevel: "debug"
-nats:
-  server: "kai-local-nats:4222"
-mongodb:
-  address: "mongodb://admin:123456@kai-mongo:27017/admin"
-  logsDbName: "kai"
-  dataDbName: "data"
-  connTimeout: 120

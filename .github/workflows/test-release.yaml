@@ -22,7 +22,6 @@ jobs:
     outputs:
       admin-api: ${{ steps.filter.outputs.admin-api }}
       k8s-manager: ${{ steps.filter.outputs.k8s-manager }}
-      mongo-writer: ${{ steps.filter.outputs.mongo-writer }}
       nats-manager: ${{ steps.filter.outputs.nats-manager }}
     steps:
     - name: Checkout
@@ -37,9 +36,6 @@ jobs:
             - '.github/workflows/test-release.yaml'
           k8s-manager:
             - 'engine/k8s-manager/**/*'
-            - '.github/workflows/test-release.yaml'
-          mongo-writer:
-            - 'engine/mongo-writer/**/*'
             - '.github/workflows/test-release.yaml'
           nats-manager:
             - 'engine/nats-manager/**/*'
@@ -57,8 +53,6 @@ jobs:
             changes: ${{ needs.check-folder-changes.outputs.admin-api }}
           - component: k8s-manager
             changes: ${{ needs.check-folder-changes.outputs.k8s-manager }}
-          - component: mongo-writer
-            changes: ${{ needs.check-folder-changes.outputs.mongo-writer }}
           - component: nats-manager
             changes: ${{ needs.check-folder-changes.outputs.nats-manager }}
 
@@ -111,9 +105,6 @@ jobs:
           - component: k8s-manager
             changes: ${{ needs.check-folder-changes.outputs.k8s-manager }}
             sonar_token_secret: SONAR_TOKEN_K8S_MANAGER
-          - component: mongo-writer
-            changes: ${{ needs.check-folder-changes.outputs.mongo-writer }}
-            sonar_token_secret: SONAR_TOKEN_MONGO_WRITER
           - component: nats-manager
             changes: ${{ needs.check-folder-changes.outputs.nats-manager }}
             sonar_token_secret: SONAR_TOKEN_NATS_MANAGER

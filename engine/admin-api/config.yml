@@ -20,10 +20,6 @@ mongodb:
   address: "mongodb://admin:123456@localhost:27017/admin?replicaSet=rs0"
   dbName: "kai"
   krtBucket: "krt"
-influxdb:
-  address: "http://localhost:8086"
-chronograf:
-  address: "http://localhost:8888"
 k8s:
   namespace: ""
 services:
@@ -36,5 +32,4 @@ components:
   mongo-db: "4.2.8"
   nats: "2.8.4"
   keycloak: "21.1.1"
-  influx: "4.8.1"
   registry: "2.8.2"

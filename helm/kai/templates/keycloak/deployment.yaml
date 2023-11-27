@@ -12,8 +12,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/engine/keycloak/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/engine/keycloak/secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/keycloak/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/keycloak/secret.yaml") . | sha256sum }}
       {{- with .Values.keycloak.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
