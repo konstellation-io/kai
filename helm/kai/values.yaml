@@ -320,6 +320,10 @@ keycloak:
       secretPasswordKey: ""
       # -- The name of the secret key that contains the database name. Takes precedence over `database`
       secretDatabaseKey: ""
+      # -- The database username
+      username: ""
+      # -- The database password
+      password: ""
   image:
     # -- The image repository
     repository: quay.io/keycloak/keycloak
