@@ -18,6 +18,8 @@ const (
 	BaseDomainNameKey  = "baseDomainName"
 	IsInsideClusterKey = "kubernetes.isInsideCluster"
 
+	NatsEndpointKey = "nats.url"
+
 	ImageRegistryURLKey = "registry.url"
 	//nolint:gosec // False positive
 	ImageRegistryAuthSecretKey = "registry.authSecret"
@@ -88,7 +90,7 @@ func Init(configFilePath string) error {
 	viper.SetEnvPrefix("KAI")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	viper.RegisterAlias("nats.url", "NATS_URL")
+	viper.RegisterAlias(NatsEndpointKey, "NATS_URL")
 	viper.RegisterAlias(ImageRegistryURLKey, "REGISTRY_URL")
 	viper.RegisterAlias(KubeNamespaceKey, "KUBERNETES_NAMESPACE")
 	viper.RegisterAlias(BaseDomainNameKey, "BASE_DOMAIN_NAME")

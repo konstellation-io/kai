@@ -62,7 +62,7 @@ func (kc KubeConfiguration) getProcessConfig(
 			ProcessType:  process.Type.ToString(),
 		},
 		Nats: NatsConfig{
-			URL:           viper.GetString("nats.url"),
+			URL:           viper.GetString(config.NatsEndpointKey),
 			Stream:        workflow.Stream,
 			Subject:       process.Subject,
 			Subscriptions: process.Subscriptions,
