@@ -67,6 +67,7 @@ func (s *RedisPredictionRepositorySuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	viper.Set(config.RedisEndpointKey, redisEndpoint)
+	viper.Set(config.RedisUsernameKey, "default")
 	viper.Set(config.RedisPasswordKey, "testpassword")
 
 	s.redisClient, err = redis.NewRedisClient()
@@ -126,22 +127,18 @@ func (s *RedisPredictionRepositorySuite) TestCreateUser_ErrInvalidUsername() {
 }
 
 func (s *RedisPredictionRepositorySuite) TestEnsureIngressCreated() {
-	ctx := context.Background()
-
 	viper.Set(config.RedisPredictionsIndexKey, "predictionsIdx")
 
-	err := s.redisPredictionRepository.EnsurePredictionIndexCreated(ctx)
+	err := s.redisPredictionRepository.EnsurePredictionIndexCreated()
 	s.Require().NoError(err)
 }
 
 func (s *RedisPredictionRepositorySuite) TestEnsureIngressCreated_DoestFailIfIndexAlreadyExists() {
-	ctx := context.Background()
-
 	viper.Set(config.RedisPredictionsIndexKey, "predictionsIdx")
 
-	err := s.redisPredictionRepository.EnsurePredictionIndexCreated(ctx)
+	err := s.redisPredictionRepository.EnsurePredictionIndexCreated()
 	s.Require().NoError(err)
 
-	err = s.redisPredictionRepository.EnsurePredictionIndexCreated(ctx)
+	err = s.redisPredictionRepository.EnsurePredictionIndexCreated()
 	s.Require().NoError(err)
 }

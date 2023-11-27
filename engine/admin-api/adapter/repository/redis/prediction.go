@@ -29,7 +29,7 @@ func NewRedisClient() (*redis.Client, error) {
 		return nil, fmt.Errorf("parsing Redis URL: %w", err)
 	}
 
-	opts.Username = "default"
+	opts.Username = viper.GetString(config.RedisUsernameKey)
 	opts.Password = viper.GetString(config.RedisPasswordKey)
 
 	return redis.NewClient(opts), nil
