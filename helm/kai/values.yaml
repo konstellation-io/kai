@@ -911,8 +911,10 @@ redis:
   # -- Whether to enable redis
   enabled: true
   image:
+    # repository
+    repository: redis/redis-stack-server
     # -- Redis server version
-    tag: 7.2.3-debian-11-r0
+    tag: 7.2.0-v6
   # -- architecture. Allowed values: `standalone` or `replication`
   architecture: standalone
   auth:
@@ -947,6 +949,20 @@ redis:
       # -- Internal port number for master redis service
       ports:
         redis: 6379
+    ## Required config to enable redis stack
+    args:
+      - -c
+      - /opt/bitnami/scripts/start-script/start-master.sh
+    # -- Extra volumes for additional config
+    extraVolumes:
+      - name: redis-master-start-script
+        configMap:
+          name: redis-stack-master-config
+          defaultMode: 0755
+    # -- Extra volume mounts for additional config
+    extraVolumeMounts:
+      - name: redis-master-start-script
+        mountPath: /opt/bitnami/scripts/start-script
   replica:
     # -- Number of replicas
     replicaCount: 1
@@ -974,6 +990,20 @@ redis:
       minReplicas: 1
       # -- Max replicas for the pod autoscaling
       maxReplicas: 5
+    ## Required config to enable redis stack
+    args:
+      - -c
+      - /opt/bitnami/scripts/start-script/start-replicas.sh
+    # -- Extra volumes for additional config
+    extraVolumes:
+      - name: redis-replicas-start-script
+        configMap:
+          name: redis-stack-replicas-config
+          defaultMode: 0755
+    # -- Extra volume mounts for additional config
+    extraVolumeMounts:
+      - name: redis-replicas-start-script
+        mountPath: /opt/bitnami/scripts/start-script
   tls:
     # -- Enabled Enable TLS traffic
     enabled: false
