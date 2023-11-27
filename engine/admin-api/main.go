@@ -63,6 +63,7 @@ func main() {
 	app.Start()
 }
 
+//nolint:funlen // Future refactor
 func initGraphqlController(
 	cfg *config.Config, oldLogger logging2.Logger, logger logr.Logger, mongodbClient *mongo.Client,
 ) *controller.GraphQLController {
