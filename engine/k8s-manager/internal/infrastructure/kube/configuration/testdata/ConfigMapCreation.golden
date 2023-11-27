@@ -103,4 +103,9 @@ data:
             client: test-auth-client-id
             client_secret: test-auth-client-secret
             realm: test-auth-realm
+        measurements:
+            endpoint: localhost:0
+            insecure: false
+            timeout: 0
+            metrics_interval: 0
 binarydata: {}
