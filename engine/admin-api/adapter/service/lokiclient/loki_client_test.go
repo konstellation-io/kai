@@ -40,11 +40,11 @@ func TestLokiClientGetLogs(t *testing.T) {
 	require.NoError(t, err)
 
 	logFilters := entity.LogFilters{
-		ProductID: "productID",
-		VersionID: "versionID",
-		From:      fromTime,
-		To:        toTime,
-		Limit:     100,
+		ProductID:  "productID",
+		VersionTag: "versionID",
+		From:       fromTime,
+		To:         toTime,
+		Limit:      100,
 	}
 
 	lokiClient := lokiclient.NewClient(cfg)
@@ -92,7 +92,7 @@ func TestLokiClientGetFullQuery(t *testing.T) {
 
 	logFilters := entity.LogFilters{
 		ProductID:    "productID",
-		VersionID:    "versionID",
+		VersionTag:   "versionID",
 		From:         fromTime,
 		To:           toTime,
 		Limit:        100,

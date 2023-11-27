@@ -23,7 +23,7 @@ func getQuery(lf entity.LogFilters) string {
 	)
 
 	// mandatory part of the query
-	query := fmt.Sprintf(madatoryQueryPart, productIDKey, lf.ProductID, versionTagKey, lf.VersionID)
+	query := fmt.Sprintf(madatoryQueryPart, productIDKey, lf.ProductID, versionTagKey, lf.VersionTag)
 
 	// optional part of the query
 	if lf.WorkflowName != "" {

@@ -16,7 +16,7 @@ type Log struct {
 
 type LogFilters struct {
 	ProductID    string
-	VersionID    string
+	VersionTag   string
 	From         time.Time
 	To           time.Time
 	WorkflowName string

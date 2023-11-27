@@ -7158,7 +7158,7 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
-			it.VersionID = data
+			it.VersionTag = data
 		case "from":
 			var err error
 
