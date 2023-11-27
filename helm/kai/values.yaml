@@ -63,24 +63,6 @@ config:
           accessKeyID: ""
           # -- S3 Secret Access Key if no secret is used
           secretAccessKey: ""
-  ## Use only when `redis.enabled: false`
-  ## Only apply when use your own redis URL/URLs
-  redis:
-    # -- architecture. Allowed values: `standalone` or `replication`. Only apply when use your own redis URL/URLs
-    architecture: standalone
-    auth:
-      # -- Name of the secret that contains the redis password
-      existingSecret: ""
-      # -- Name of the key in the secret that contains the redis password
-      existingSecretPasswordKey: ""
-      # -- Redis password if no existingSecret is used and `redis.enabled: false`
-      password: ""
-    master:
-      # -- Redis Master endpoint url. Change this to your own URL when `redis.enabled: false`
-      url: redis://{{ include "redis-master.fullname" . }}:{{ .Values.redis.master.service.ports.redis }}
-    replicas:
-      # -- Redis Replicas endpoint url. Change this to your own URL when `redis.enabled: false`
-      url: redis://{{ include "redis-replicas.fullname" . }}:{{ .Values.redis.replica.service.ports.redis }}
   loki:
     # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Set loki as default datasource for Grafana.
     isDefault: true
@@ -106,6 +88,26 @@ config:
       enabled: true
       # -- configmap name for additional scrape configs
       configmapName: prometheus-additional-scrape-configs
+  ## Use only when `redis.enabled: false`
+  ## Only apply when use your own redis (external)
+  redis:
+    # -- architecture. Allowed values: `standalone` or `replication`. Only apply when use your own redis. This config allow send replicas urls to admin-api when replication is activated
+    architecture: standalone
+    auth:
+      # -- Whether to enable auth to redis. Only apply when use your own redis. This allow send credentials to admin-api
+      enabled: false
+      # -- Name of the secret that contains the redis password
+      existingSecret: ""
+      # -- Name of the key in the secret that contains the redis password
+      existingSecretPasswordKey: ""
+      # -- Redis password if no existingSecret is used and `redis.enabled: false`. (create a secret with this password and send credentials to admin-api)
+      password: ""
+    master:
+      # -- Redis Master endpoint url. Change this to your own URL when `redis.enabled: false`
+      url: redis://{{ include "redis-master.fullname" . }}:{{ .Values.redis.master.service.ports.redis }}
+    replicas:
+      # -- Redis Replicas endpoint url. Change this to your own URL when `redis.enabled: false`
+      url: redis://{{ include "redis-replicas.fullname" . }}:{{ .Values.redis.replica.service.ports.redis }}
 adminApi:
   # -- Default application log level
   logLevel: INFO
@@ -740,6 +742,8 @@ grafana:
     userKey: admin-user
     # -- Name of the key in the secret that contains the password
     passwordKey: admin-password
+  plugins:
+    - redis-datasource
   persistence:
     # -- Enables persistent storage using PVC
     enabled: false
@@ -909,7 +913,7 @@ prometheus:
 ##
 redis:
   # -- Whether to enable redis
-  enabled: true
+  enabled: false
   image:
     # repository
     repository: redis/redis-stack-server
@@ -918,10 +922,12 @@ redis:
   # -- architecture. Allowed values: `standalone` or `replication`
   architecture: standalone
   auth:
-    # @default -- random 10-character alphanumeric string if not set
+    # -- Whether to enable auth to redis
+    enabled: true
+    # @default -- random 10-character alphanumeric string if not set. Use this password method to autoconfigure grafana datasource.
     password: ""
     ## NOTE: When existingSecret is set, the previous `auth.password` parameter is ignored
-    # -- The name of an existing secret with Redis credentials
+    # -- The name of an existing secret with redis credentials
     existingSecret: ""
     ## NOTE: existingSecretPasswordKey is ignored unless `auth.existingSecret` parameter is set
     # -- Password key to be retrieved from existing secret
