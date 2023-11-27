@@ -59,7 +59,11 @@ items:
                     type: task
                     version: v1.0.0
                     workflow: test-workflow
-                annotations: {}
+                annotations:
+                    kai.prometheus/path: /metrics
+                    kai.prometheus/port: "0"
+                    kai.prometheus/scheme: http
+                    kai.prometheus/scrape: "true"
                 ownerreferences: []
                 finalizers: []
                 managedfields: []
@@ -97,6 +101,9 @@ items:
                                   mode: null
                                 - key: fluent-bit.conf
                                   path: fluent-bit.conf
+                                  mode: null
+                                - key: telegraf.conf
+                                  path: telegraf.conf
                                   mode: null
                             defaultmode: null
                             optional: null
@@ -266,6 +273,43 @@ items:
                       terminationmessagepath: ""
                       terminationmessagepolicy: ""
                       imagepullpolicy: IfNotPresent
+                      securitycontext: null
+                      stdin: false
+                      stdinonce: false
+                      tty: false
+                    - name: telegraf
+                      image: ':'
+                      command: []
+                      args: []
+                      workingdir: ""
+                      ports:
+                        - name: ""
+                          hostport: 0
+                          containerport: 0
+                          protocol: ""
+                          hostip: ""
+                      envfrom: []
+                      env: []
+                      resources:
+                        limits: {}
+                        requests: {}
+                        claims: []
+                      resizepolicy: []
+                      volumemounts:
+                        - name: version-conf-files
+                          readonly: true
+                          mountpath: /etc/telegraf/telegraf.conf
+                          subpath: telegraf.conf
+                          mountpropagation: null
+                          subpathexpr: ""
+                      volumedevices: []
+                      livenessprobe: null
+                      readinessprobe: null
+                      startupprobe: null
+                      lifecycle: null
+                      terminationmessagepath: ""
+                      terminationmessagepolicy: ""
+                      imagepullpolicy: ""
                       securitycontext: null
                       stdin: false
                       stdinonce: false
