@@ -33,7 +33,7 @@ show_build_help() {
 
     options:
       --clean          sends a prune command to remove old docker images and containers. (will keep last 24h).
-      --engine         build only engine components (admin-api, k8s-manager, nats-manager, mongo-writer).
+      --engine         build only engine components (admin-api, k8s-manager, nats-manager).
 
     $(help_global_options)
 "
@@ -63,7 +63,6 @@ build_engine() {
   build_image kai-admin-api engine/admin-api
   build_image kai-k8s-manager engine/k8s-manager
   build_image kai-nats-manager engine/nats-manager
-  build_image kai-mongo-writer engine/mongo-writer
 }
 
 build_image() {
