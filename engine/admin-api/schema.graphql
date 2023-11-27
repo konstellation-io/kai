@@ -222,7 +222,7 @@ enum UserActivityType {
 
 input LogFilters {
   productID: String!
-  versionID: String!
+  versionTag: String!
   from: String!
   to: String!
   limit: Int!

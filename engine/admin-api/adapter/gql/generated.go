@@ -1147,7 +1147,7 @@ enum UserActivityType {
 
 input LogFilters {
   productID: String!
-  versionID: String!
+  versionTag: String!
   from: String!
   to: String!
   limit: Int!
@@ -7134,7 +7134,7 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"productID", "versionID", "from", "to", "limit", "workflowName", "processName", "requestID", "level", "logger"}
+	fieldsInOrder := [...]string{"productID", "versionTag", "from", "to", "limit", "workflowName", "processName", "requestID", "level", "logger"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7150,10 +7150,10 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 				return it, err
 			}
 			it.ProductID = data
-		case "versionID":
+		case "versionTag":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionID"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
