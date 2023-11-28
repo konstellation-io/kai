@@ -109,7 +109,7 @@ func (s *ObjectStorageSuite) TearDownTest() {
 	policies, err := s.adminClient.ListCannedPolicies(ctx)
 	s.Require().NoError(err)
 
-	for name, _ := range policies {
+	for name := range policies {
 		err = s.adminClient.RemoveCannedPolicy(ctx, name)
 		if err != nil && !strings.Contains(err.Error(), "inbuilt policy") {
 			s.Failf(err.Error(), "Error deleting policy non inbuilt policy %q", name)

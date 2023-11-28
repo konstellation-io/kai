@@ -55,10 +55,13 @@ const (
 	LokiHostKey = "loki.host"
 	LokiPortKey = "loki.port"
 
-	TelegrafImageKey      = "telegraf.image"
-	TelegrafTagKey        = "telegraf.tag"
-	TelegrafPullPolicyKey = "telegraf.pullPolicy"
-	TelegrafMetricsPort   = "telegraf.port"
+	TelegrafImageKey               = "telegraf.image"
+	TelegrafTagKey                 = "telegraf.tag"
+	TelegrafPullPolicyKey          = "telegraf.pullPolicy"
+	TelegrafMetricsPortKey         = "telegraf.port"
+	MeasurementsInsecureKey        = "measurements.insecure"
+	MeasurementsTimeoutKey         = "measurements.timeout"
+	MeasurementsMetricsIntervalKey = "measurements.metricsInterval"
 
 	PrometheusURLKey = "prometheus.url"
 
@@ -124,7 +127,10 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(TelegrafImageKey, "TELEGRAF_IMAGE_REPOSITORY")
 	viper.RegisterAlias(TelegrafTagKey, "TELEGRAF_IMAGE_TAG")
 	viper.RegisterAlias(TelegrafPullPolicyKey, "TELEGRAF_IMAGE_PULLPOLICY")
-	viper.RegisterAlias(TelegrafMetricsPort, "TELEGRAF_METRICS_PORT")
+	viper.RegisterAlias(TelegrafMetricsPortKey, "TELEGRAF_METRICS_PORT")
+	viper.RegisterAlias(MeasurementsInsecureKey, "MEASUREMENTS_INSECURE")
+	viper.RegisterAlias(MeasurementsTimeoutKey, "MEASUREMENTS_TIMEOUT")
+	viper.RegisterAlias(MeasurementsMetricsIntervalKey, "MEASUREMENTS_METRICS_INTERVAL")
 
 	viper.RegisterAlias(PrometheusURLKey, "PROMETHEUS_URL")
 
@@ -164,7 +170,10 @@ func setDefaultValues() {
 	viper.SetDefault(TelegrafImageKey, "telegraf")
 	viper.SetDefault(TelegrafTagKey, "1.28.5")
 	viper.SetDefault(TelegrafPullPolicyKey, "IfNotPresent")
-	viper.SetDefault(TelegrafMetricsPort, 9191)
+	viper.SetDefault(TelegrafMetricsPortKey, 9191)
+	viper.SetDefault(MeasurementsInsecureKey, false)
+	viper.SetDefault(MeasurementsTimeoutKey, 5)
+	viper.SetDefault(MeasurementsMetricsIntervalKey, 10)
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {
