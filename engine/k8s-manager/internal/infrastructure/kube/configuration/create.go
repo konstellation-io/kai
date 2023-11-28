@@ -96,6 +96,12 @@ func (kc KubeConfiguration) getProcessConfig(
 			ClientSecret: viper.GetString(config.AuthClientSecretKey),
 			Realm:        viper.GetString(config.AuthRealmKey),
 		},
+		Measurements: MeasurementsConfig{
+			Endpoint:        fmt.Sprintf("localhost:%d", viper.GetInt(config.TelegrafMetricsPortKey)),
+			Insecure:        viper.GetBool(config.MeasurementsInsecureKey),
+			Timeout:         viper.GetInt(config.MeasurementsTimeoutKey),
+			MetricsInterval: viper.GetInt(config.MeasurementsMetricsIntervalKey),
+		},
 	}
 }
 
