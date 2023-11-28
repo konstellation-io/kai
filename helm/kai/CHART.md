@@ -278,7 +278,7 @@
 | redis.auth.existingSecret | string | `""` | The name of an existing secret with redis credentials |
 | redis.auth.existingSecretPasswordKey | string | `""` | Password key to be retrieved from existing secret |
 | redis.auth.password | string | `""` |  |
-| redis.enabled | string | `"truncate"` | Whether to enable redis |
+| redis.enabled | bool | `true` | Whether to enable redis |
 | redis.image.repository | string | `"redis/redis-stack-server"` |  |
 | redis.image.tag | string | `"7.2.0-v6"` | Redis server version |
 | redis.master | object | `{"args":["-c","/opt/bitnami/scripts/start-script/start-master.sh"],"containerPorts":{"redis":6379},"extraVolumeMounts":[{"mountPath":"/opt/bitnami/scripts/start-script","name":"redis-master-start-script"}],"extraVolumes":[{"configMap":{"defaultMode":493,"name":"redis-stack-master-config"},"name":"redis-master-start-script"}],"persistence":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"2Gi","storageClass":""},"service":{"ports":{"redis":6379},"type":"ClusterIP"}}` | number of replicas |

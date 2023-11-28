@@ -913,7 +913,7 @@ prometheus:
 ##
 redis:
   # -- Whether to enable redis
-  enabled: truncate
+  enabled: true
   image:
     # repository
     repository: redis/redis-stack-server
