@@ -56,10 +56,6 @@ get_mongo_pod() {
   kubectl -n ${NAMESPACE} get pod -l app=mongodb-database-svc -o custom-columns=":metadata.name" --no-headers
 }
 
-get_influx_pod() {
-  kubectl -n ${NAMESPACE} get pod -l app.kubernetes.io/name=influxdb -o custom-columns=":metadata.name" --no-headers
-}
-
 minikube_stop() {
   minikube -p "$MINIKUBE_PROFILE" stop
 }

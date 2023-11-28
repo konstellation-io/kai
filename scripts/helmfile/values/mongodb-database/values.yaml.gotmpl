@@ -15,14 +15,6 @@ resources:
   data:
     password: {{ "123456" | b64enc | quote }}
 
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: {{ .Release.Name }}-mongoexpress-password
-  type: Opaque
-  data:
-    password: {{ "123456" | b64enc | quote }}
-
 - apiVersion: mongodbcommunity.mongodb.com/v1
   kind: MongoDBCommunity
   metadata:
@@ -45,16 +37,6 @@ resources:
         db: admin
       scramCredentialsSecretName: {{ .Release.Name }}-admin
       connectionStringSecretName: {{ .Release.Name}}-admin-connection-string
-    - name: mongoexpress
-      db: admin
-      passwordSecretRef:
-        name: {{ .Release.Name }}-mongoexpress-password
-        key: password
-      scramCredentialsSecretName: {{ .Release.Name }}-mongoexpress
-      connectionStringSecretName: {{ .Release.Name}}-mongoexpress-connection-string
-      roles:
-      - name: "readAnyDatabase"
-        db: "admin"
 
     - name: kai
       db: admin

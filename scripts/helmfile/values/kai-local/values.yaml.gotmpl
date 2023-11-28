@@ -4,13 +4,6 @@ config:
     connectionString:
       secretName: mongodb-database-kai-connection-string
       secretKey: connectionString.standard
-mongoExpress:
-  connectionString:
-    secretName: mongodb-database-mongoexpress-connection-string
-    secretKey: connectionString.standard
-kapacitor:
-  enabled: true
-  influxURL: {{ requiredEnv "KAI_INFLUX_URL" | quote }}
 nats:
   limits:
     maxPayload: 8MB
@@ -43,9 +36,6 @@ k8sManager:
   image:
     tag: latest
 natsManager:
-  image:
-    tag: latest
-mongoWriter:
   image:
     tag: latest
 minio:

@@ -1,0 +1,59 @@
+## based on this docs: https://medium.com/@gerkElznik/deploy-redis-stack-using-bitnamis-helm-chart-d8339453352c
+{{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-stack-replicas-config
+  labels:
+    {{- include "redis-stack.labels" . | nindent 4 }}
+data:
+  start-replicas.sh: |
+    #!/usr/bin/dumb-init /bin/bash
+    export BASEDIR=/opt/redis-stack
+    cd ${BASEDIR}
+    export CMD=${BASEDIR}/bin/redis-server
+    get_port() {
+        hostname="$1"
+        type="$2"
+        port_var=$(echo "${hostname^^}_SERVICE_PORT_$type" | sed "s/-/_/g")
+        port=${!port_var}
+        if [ -z "$port" ]; then
+            case $type in
+                "SENTINEL")
+                    echo 26379
+                    ;;
+                "REDIS")
+                    echo 6379
+                    ;;
+            esac
+        else
+            echo $port
+        fi
+    }
+    get_full_hostname() {
+        export hostname="$1"
+        echo "${hostname}.${HEADLESS_SERVICE}"
+    }
+    export REDISPORT=$(get_port "$HOSTNAME" "REDIS")
+    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
+    [[ -f $REDIS_MASTER_PASSWORD_FILE ]] && export REDIS_MASTER_PASSWORD="$(< "${REDIS_MASTER_PASSWORD_FILE}")"
+    if [[ -f /opt/bitnami/redis/mounted-etc/replica.conf ]];then
+        cp /opt/bitnami/redis/mounted-etc/replica.conf /opt/bitnami/redis/etc/replica.conf
+    fi
+    if [[ -f /opt/bitnami/redis/mounted-etc/redis.conf ]];then
+        cp /opt/bitnami/redis/mounted-etc/redis.conf /opt/bitnami/redis/etc/redis.conf
+    fi
+    echo "" >> /opt/bitnami/redis/etc/replica.conf
+    echo "replica-announce-port $REDISPORT" >> /opt/bitnami/redis/etc/replica.conf
+    echo "replica-announce-ip $(get_full_hostname "$HOSTNAME")" >> /opt/bitnami/redis/etc/replica.conf
+    ${CMD} \
+    --port "${REDIS_PORT}" \
+    --requirepass "${REDIS_PASSWORD}" \
+    --masterauth "${REDIS_PASSWORD}" \
+    --include "/opt/bitnami/redis/etc/redis.conf" \
+    --include "/opt/bitnami/redis/etc/replica.conf" \
+    --loadmodule /opt/redis-stack/lib/redisearch.so ${REDISEARCH_ARGS} \
+    --loadmodule /opt/redis-stack/lib/redistimeseries.so ${REDISTIMESERIES_ARGS} \
+    --loadmodule /opt/redis-stack/lib/rejson.so ${REDISJSON_ARGS} \
+    --loadmodule /opt/redis-stack/lib/redisbloom.so ${REDISBLOOM_ARGS}
+{{- end }}

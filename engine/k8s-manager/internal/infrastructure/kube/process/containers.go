@@ -121,7 +121,7 @@ func (kp *KubeProcess) getTelegrafContainer() corev1.Container {
 		},
 		Ports: []corev1.ContainerPort{
 			{
-				ContainerPort: viper.GetInt32(config.TelegrafMetricsPort),
+				ContainerPort: viper.GetInt32(config.TelegrafMetricsPortKey),
 			},
 		},
 	}
