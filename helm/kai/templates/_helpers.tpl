@@ -127,6 +127,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+redis-stack labels
+*/}}
+{{- define "redis-stack.labels" -}}
+{{ include "kai.labels" . }}
+app.kubernetes.io/name: {{ include "kai.name" . }}-redis-stack
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
 redis master URL
 */}}
 {{- define "redis.master.url" -}}
@@ -152,14 +161,35 @@ redis replicas URL
 redis secret name
 */}}
 {{- define "redis.auth.secretName" -}}
-{{ default (printf "%s-redis" (include "kai.fullname" .)) .Values.config.redis.auth.existingSecret }}
+{{- if .Values.redis.enabled }}
+    {{- include "redis.secretName" .Subcharts.redis }}
+{{- else -}}
+    {{- default (printf "%s-redis" (include "kai.fullname" .)) .Values.config.redis.auth.existingSecret }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+redis password key
+*/}}
+{{- define "redis.auth.secretPasswordKey" -}}
+{{- if .Values.redis.enabled }}
+    {{- include "redis.secretPasswordKey" .Subcharts.redis }}
+{{- else -}}
+    {{- default "redis-password" .Values.config.redis.auth.existingSecretPasswordKey }}
+{{- end -}}
 {{- end -}}
 
 {{/*
 redis password
 */}}
-{{- define "redis.auth.secretPasswordKey" -}}
-{{ default "redis-password" .Values.config.redis.auth.existingSecretPasswordKey }}
+{{- define "redis.auth.password" -}}
+{{- if .Values.redis.auth.enabled }}
+    {{- if not (empty .Values.redis.auth.password) }}
+        {{- .Values.redis.auth.password -}}
+    {{- else -}}
+        {{- include "getValueFromSecret" (dict "Namespace" .Release.Namespace "Name" (include "redis.secretName" .Subcharts.redis) "Length" 10 "Key" (include "redis.secretPasswordKey" .Subcharts.redis))  -}}
+    {{- end -}}
+{{- end -}}
 {{- end -}}
 
 {{/* Fullname suffixed with minio-config */}}

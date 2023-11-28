@@ -5,7 +5,7 @@ kind: ConfigMap
 metadata:
   name: redis-stack-master-config
   labels:
-    {{- include "prometheus-additional-scrape-configs.labels" . | nindent 4 }}
+    {{- include "redis-stack.labels" . | nindent 4 }}
 data:
   start-master.sh: |
     #!/usr/bin/dumb-init /bin/bash
