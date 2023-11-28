@@ -98,6 +98,9 @@ spec:
                   name: {{ .Values.keycloak.db.auth.secretName }}
                   key: {{ .Values.keycloak.db.auth.secretPortKey }}
             {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "keycloak.fullname" . }}
           ports:
             {{- if .Values.keycloak.config.httpEnabled }}
             - name: http
