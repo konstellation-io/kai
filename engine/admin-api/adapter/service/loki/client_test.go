@@ -1,6 +1,6 @@
 //go:build integration
 
-package lokiclient_test
+package loki_test
 
 import (
 	"net/http"
@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/lokiclient"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/loki"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -47,7 +47,7 @@ func TestLokiClientGetLogs(t *testing.T) {
 		Limit:      100,
 	}
 
-	lokiClient := lokiclient.NewClient(cfg)
+	lokiClient := loki.NewClient(cfg)
 
 	logs, err := lokiClient.GetLogs(logFilters)
 	require.NoError(t, err)
@@ -103,7 +103,7 @@ func TestLokiClientGetFullQuery(t *testing.T) {
 		Logger:       "[LOGGER]",
 	}
 
-	lokiClient := lokiclient.NewClient(cfg)
+	lokiClient := loki.NewClient(cfg)
 
 	_, err = lokiClient.GetLogs(logFilters)
 	require.Error(t, err) //unmarhsall error

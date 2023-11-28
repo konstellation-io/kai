@@ -1,4 +1,4 @@
-package lokiclient
+package loki
 
 import (
 	"encoding/json"

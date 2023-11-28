@@ -11,7 +11,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/lokiclient"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/loki"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
@@ -96,7 +96,7 @@ func initGraphqlController(
 		log.Fatal(err)
 	}
 
-	logsService := lokiclient.NewClient(cfg)
+	logsService := loki.NewClient(cfg)
 
 	accessControl, err := casbinauth.NewCasbinAccessControl(oldLogger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
