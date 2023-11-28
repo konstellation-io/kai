@@ -15,6 +15,7 @@ message Workflow {
   string stream = 2;
   string key_value_store = 3;
   repeated Process processes = 4;
+  string type = 5;
 }
 
 message Process {

@@ -31,6 +31,7 @@ func mapReqWorkflowsToWorkflows(reqWorkflows []*versionpb.Workflow) []*domain.Wo
 			Stream:        workflow.Stream,
 			KeyValueStore: workflow.KeyValueStore,
 			Processes:     mapReqProcessToProcess(workflow.Processes),
+			Type:          workflow.Type,
 		})
 	}
 

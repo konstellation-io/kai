@@ -22,7 +22,6 @@ func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, vers
 
 	for _, workflow := range version.Workflows {
 		for _, process := range workflow.Processes {
-			// This should be a MustMarshal kind of function
 			processYaml, err := yaml.Marshal(kc.getProcessConfig(version, workflow, process))
 			if err != nil {
 				return "", err
@@ -60,6 +59,7 @@ func (kc KubeConfiguration) getProcessConfig(
 			WorkflowName: workflow.Name,
 			ProcessName:  process.Name,
 			ProcessType:  process.Type.ToString(),
+			WorkflowType: workflow.Type,
 		},
 		Nats: NatsConfig{
 			URL:           viper.GetString(config.NatsEndpointKey),

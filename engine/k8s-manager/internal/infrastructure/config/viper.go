@@ -76,6 +76,7 @@ const (
 	_defaultRequestTimeout = 5000
 )
 
+//nolint:funlen // Future refactor
 func Init(configFilePath string) error {
 	configDir := filepath.Dir(configFilePath)
 	configFileName := filepath.Base(configFilePath)
@@ -119,13 +120,11 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(TriggersIngressClassNameKey, "TRIGGERS_INGRESS_CLASS_NAME")
 	viper.RegisterAlias(TriggersRequestTimeoutKey, "TRIGGERS_REQUEST_TIMEOUT")
 	viper.RegisterAlias(TriggersB64IngressesAnnotaionsKey, "TRIGGERS_BASE64_INGRESSES_ANNOTATIONS")
-
 	viper.RegisterAlias(AutoscaleCPUPercentageKey, "AUTOSCALE_CPU_PERCENTAGE")
 
 	viper.RegisterAlias(FluentBitImageKey, "FLUENTBIT_IMAGE_REPOSITORY")
 	viper.RegisterAlias(FluentBitTagKey, "FLUENTBIT_IMAGE_TAG")
 	viper.RegisterAlias(FluentBitPullPolicyKey, "FLUENTBIT_IMAGE_PULLPOLICY")
-
 	viper.RegisterAlias(LokiHostKey, "LOKI_HOST")
 	viper.RegisterAlias(LokiPortKey, "LOKI_PORT")
 
@@ -136,14 +135,12 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(MeasurementsInsecureKey, "MEASUREMENTS_INSECURE")
 	viper.RegisterAlias(MeasurementsTimeoutKey, "MEASUREMENTS_TIMEOUT")
 	viper.RegisterAlias(MeasurementsMetricsIntervalKey, "MEASUREMENTS_METRICS_INTERVAL")
-
 	viper.RegisterAlias(PrometheusURLKey, "PROMETHEUS_URL")
 
 	viper.RegisterAlias(PredictionsEndpointKey, "REDIS_MASTER_ADDRESS")
 	viper.RegisterAlias(PredictionsPasswordKey, "REDIS_PASSWORD")
 
 	viper.AutomaticEnv()
-
 	setDefaultValues()
 
 	return nil

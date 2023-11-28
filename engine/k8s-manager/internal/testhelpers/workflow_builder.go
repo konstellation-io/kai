@@ -12,6 +12,7 @@ func NewWorkflowBuilder() *WorkflowBuilder {
 			Name:          "test-workflow",
 			Stream:        "test-stream",
 			KeyValueStore: "test-workflow-kv-store",
+			Type:          "training",
 			Processes: []*domain.Process{
 				NewProcessBuilder().Build(),
 			},

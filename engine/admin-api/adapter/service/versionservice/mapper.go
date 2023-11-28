@@ -36,6 +36,7 @@ func mapWorkflowsToDTO(workflows []entity.Workflow, versionConfig *entity.Versio
 			Processes:     processesDTO,
 			Stream:        wStreamCfg.Stream,
 			KeyValueStore: wKeyValueCfg.KeyValueStore,
+			Type:          w.Type.String(),
 		})
 	}
 

@@ -73,6 +73,7 @@ func (r *PredictionRepository) EnsurePredictionIndexCreated() error {
 		"$.metadata.version", "AS", "version", "TAG",
 		"$.metadata.workflow", "AS", "workflow", "TAG",
 		"$.metadata.process", "AS", "process", "TAG",
+		"$.metadata.workflowType", "AS", "workflowType", "TAG",
 		"$.metadata.requestID", "AS", "requestID", "TAG",
 		"$.timestamp", "AS", "timestamp", "NUMERIC",
 	)

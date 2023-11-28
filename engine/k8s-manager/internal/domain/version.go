@@ -15,6 +15,7 @@ type Workflow struct {
 	Name          string
 	Stream        string
 	KeyValueStore string
+	Type          string
 	Processes     []*Process
 }
 
