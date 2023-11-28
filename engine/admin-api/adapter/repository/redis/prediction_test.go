@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/docker/go-connections/nat"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/redis"
 	rdb "github.com/redis/go-redis/v9"
@@ -39,13 +40,15 @@ func (s *RedisPredictionRepositorySuite) SetupSuite() {
 
 	redisConfContainerPath := "/usr/local/etc/redis"
 
+	redisExposedPort := "6379/tcp"
+
 	req := testcontainers.ContainerRequest{
 		Image: "redis/redis-stack-server:7.2.0-v6",
 		Cmd: []string{
 			"redis-stack-server",
 			redisConfContainerPath,
 		},
-		ExposedPorts: []string{"6379/tcp"},
+		ExposedPorts: []string{redisExposedPort},
 		WaitingFor:   wait.ForLog("Ready to accept connections tcp"),
 		Mounts: []testcontainers.ContainerMount{
 			{
@@ -63,15 +66,14 @@ func (s *RedisPredictionRepositorySuite) SetupSuite() {
 	})
 	s.Require().NoError(err)
 
-	redisEndpoint, err := s.redisContainer.PortEndpoint(ctx, "6379/tcp", "redis")
+	redisEndpoint, err := s.redisContainer.PortEndpoint(ctx, nat.Port(redisExposedPort), "")
 	s.Require().NoError(err)
 
 	viper.Set(config.RedisEndpointKey, redisEndpoint)
 	viper.Set(config.RedisUsernameKey, "default")
 	viper.Set(config.RedisPasswordKey, "testpassword")
 
-	s.redisClient, err = redis.NewRedisClient()
-	s.Require().NoError(err)
+	s.redisClient = redis.NewRedisClient()
 
 	s.redisPredictionRepository = redis.NewPredictionRepository(s.redisClient)
 }

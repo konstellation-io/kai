@@ -23,16 +23,12 @@ type PredictionRepository struct {
 	client *redis.Client
 }
 
-func NewRedisClient() (*redis.Client, error) {
-	opts, err := redis.ParseURL(viper.GetString(config.RedisEndpointKey))
-	if err != nil {
-		return nil, fmt.Errorf("parsing Redis URL: %w", err)
-	}
-
-	opts.Username = viper.GetString(config.RedisUsernameKey)
-	opts.Password = viper.GetString(config.RedisPasswordKey)
-
-	return redis.NewClient(opts), nil
+func NewRedisClient() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     viper.GetString(config.RedisEndpointKey),
+		Username: viper.GetString(config.RedisUsernameKey),
+		Password: viper.GetString(config.RedisPasswordKey),
+	})
 }
 
 func NewPredictionRepository(client *redis.Client) *PredictionRepository {

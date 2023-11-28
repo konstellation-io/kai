@@ -63,7 +63,6 @@ func main() {
 	app.Start()
 }
 
-//nolint:funlen // Future refactor
 func initGraphqlController(
 	cfg *config.Config, oldLogger logging2.Logger, logger logr.Logger, mongodbClient *mongo.Client,
 ) *controller.GraphQLController {
@@ -125,12 +124,7 @@ func initGraphqlController(
 
 	minioOjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
 
-	redisClient, err := redis.NewRedisClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	predictionRepo := redis.NewPredictionRepository(redisClient)
+	predictionRepo := redis.NewPredictionRepository(redis.NewRedisClient())
 
 	err = predictionRepo.EnsurePredictionIndexCreated()
 	if err != nil {
