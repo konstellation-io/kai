@@ -140,7 +140,7 @@ redis master URL
 */}}
 {{- define "redis.master.url" -}}
 {{- if .Values.redis.enabled -}}
-    {{- tpl .Values.config.redis.master.url . | quote -}}
+    {{- tpl .Values.config.redis.master.url . }}
 {{- else -}}
     {{- .Values.config.redis.master.url -}}
 {{- end -}}
@@ -151,7 +151,7 @@ redis replicas URL
 */}}
 {{- define "redis.replicas.url" -}}
 {{- if .Values.redis.enabled -}}
-    {{- tpl .Values.config.redis.replicas.url . | quote -}}
+    {{- tpl .Values.config.redis.replicas.url . }}
 {{- else -}}
     {{- .Values.config.redis.replicas.url -}}
 {{- end -}}
