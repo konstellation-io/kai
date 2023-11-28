@@ -68,7 +68,6 @@ const (
 	PrometheusURLKey = "prometheus.url"
 
 	PredictionsEndpointKey = "predictions.endpoint"
-	PredictionsPasswordKey = "predictions.password"
 
 	configType = "yaml"
 
@@ -138,7 +137,6 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(PrometheusURLKey, "PROMETHEUS_URL")
 
 	viper.RegisterAlias(PredictionsEndpointKey, "REDIS_MASTER_ADDRESS")
-	viper.RegisterAlias(PredictionsPasswordKey, "REDIS_PASSWORD")
 
 	viper.AutomaticEnv()
 	setDefaultValues()
