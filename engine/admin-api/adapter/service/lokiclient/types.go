@@ -14,6 +14,9 @@ type Response struct {
 }
 
 // Data is the data structure returned by Loki's API.
+//
+// Dev notes: We made the assumption result type will always be "Streams" as we
+// only make query_range requests.
 type Data struct {
 	ResultType string      `json:"resultType"`
 	Result     Streams     `json:"result"`
