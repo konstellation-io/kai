@@ -115,7 +115,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.71
+    tag: 0.2.0-develop.72
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
@@ -168,7 +168,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.71
+    tag: 0.2.0-develop.72
     # -- Image pull policy
     pullPolicy: IfNotPresent
   imageBuilder:
@@ -490,28 +490,6 @@ nats:
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
   tolerations: []
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-  # -- Assign custom affinity rules to the Nats pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-  # nodeAffinity:
-  #   requiredDuringSchedulingIgnoredDuringExecution:
-  #     nodeSelectorTerms:
-  #     - matchExpressions:
-  #       - key: kubernetes.io/e2e-az-name
-  #         operator: In
-  #         values:
-  #         - e2e-az1
-  #         - e2e-az2
-
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
   # - key: "key"
   #   operator: "Equal"
   #   value: "value"
@@ -521,7 +499,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.71
+    tag: 0.2.0-develop.72
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:

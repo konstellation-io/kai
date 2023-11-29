@@ -12,6 +12,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/redis"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/loki"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
@@ -21,6 +22,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	logging2 "github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/sethvargo/go-password/password"
 	"github.com/spf13/viper"
@@ -95,6 +97,8 @@ func initGraphqlController(
 		log.Fatal(err)
 	}
 
+	logsService := loki.NewClient(cfg)
+
 	accessControl, err := casbinauth.NewCasbinAccessControl(oldLogger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -165,8 +169,8 @@ func initGraphqlController(
 	)
 
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
-
 	processService := usecase.NewProcessService(logger, k8sService, processRepo, minioOjectStorage)
+	logsUseCase := logs.NewLogsInteractor(logsService)
 
 	return controller.NewGraphQLController(
 		controller.Params{
@@ -178,6 +182,7 @@ func initGraphqlController(
 			VersionInteractor:      versionInteractor,
 			ServerInfoGetter:       serverInfoGetter,
 			ProcessService:         processService,
+			LogsUsecase:            logsUseCase,
 		},
 	)
 }

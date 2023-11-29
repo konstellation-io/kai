@@ -5,6 +5,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/labstack/echo"
 
@@ -33,6 +34,7 @@ type GraphQLController struct {
 	versionInteractor      *version.Handler
 	serverInfoGetter       *usecase.ServerInfoGetter
 	processService         *usecase.ProcessService
+	LogsUsecase            logs.LogsUsecase
 }
 
 type Params struct {
@@ -44,6 +46,7 @@ type Params struct {
 	VersionInteractor      *version.Handler
 	ServerInfoGetter       *usecase.ServerInfoGetter
 	ProcessService         *usecase.ProcessService
+	LogsUsecase            logs.LogsUsecase
 }
 
 func NewGraphQLController(
@@ -58,6 +61,7 @@ func NewGraphQLController(
 		params.VersionInteractor,
 		params.ServerInfoGetter,
 		params.ProcessService,
+		params.LogsUsecase,
 	}
 }
 
@@ -82,6 +86,7 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 		VersionInteractor:      g.versionInteractor,
 		ServerInfoGetter:       g.serverInfoGetter,
 		ProcessService:         g.processService,
+		LogsUsecase:            g.LogsUsecase,
 	})
 
 	h.ServeHTTP(c.Response(), r.WithContext(ctx))

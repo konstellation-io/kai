@@ -69,9 +69,9 @@ func (r *PredictionRepository) EnsurePredictionIndexCreated() error {
 		"$.metadata.version", "AS", "version", "TAG",
 		"$.metadata.workflow", "AS", "workflow", "TAG",
 		"$.metadata.process", "AS", "process", "TAG",
-		"$.metadata.workflowType", "AS", "workflowType", "TAG",
-		"$.metadata.requestID", "AS", "requestID", "TAG",
-		"$.timestamp", "AS", "timestamp", "NUMERIC",
+		"$.metadata.workflow_type", "AS", "workflow_type", "TAG",
+		"$.metadata.request_id", "AS", "request_id", "TAG",
+		"$.creation_date", "AS", "creation_date", "NUMERIC",
 	)
 	if err := command.Err(); err != nil {
 		if r.isIndexAlreadyExistsError(err) {

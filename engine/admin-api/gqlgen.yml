@@ -48,3 +48,10 @@ models:
     fields:
       uploadDate:
         resolver: true
+  LogFilters:
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.LogFilters
+    fields:
+      from:
+        resolver: true
+      to:
+        resolver: true
