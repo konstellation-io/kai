@@ -22,7 +22,7 @@ func NewVersionStarter(logger logr.Logger, orchStarter service.ContainerService)
 	}
 }
 
-func (s *VersionStarter) StartVersion(ctx context.Context, version domain.Version) error {
+func (s *VersionStarter) StartVersion(ctx context.Context, version *domain.Version) error {
 	s.logger.Info("Running version starter", "product", version.Product, "version", version.Tag)
 
 	compensations := compensator.New()
@@ -38,7 +38,11 @@ func (s *VersionStarter) StartVersion(ctx context.Context, version domain.Versio
 	return nil
 }
 
-func (s *VersionStarter) createVersionResources(ctx context.Context, version domain.Version, compensations *compensator.Compensator) error {
+func (s *VersionStarter) createVersionResources(
+	ctx context.Context,
+	version *domain.Version,
+	compensations *compensator.Compensator,
+) error {
 	configName, err := s.containerService.CreateVersionConfiguration(ctx, version)
 	if err != nil {
 		return fmt.Errorf("create version configuration: %w", err)
@@ -84,19 +88,19 @@ func (s *VersionStarter) createVersionResources(ctx context.Context, version dom
 	return nil
 }
 
-func (s *VersionStarter) deleteConfigurationFunc(version domain.Version) compensator.Compensation {
+func (s *VersionStarter) deleteConfigurationFunc(version *domain.Version) compensator.Compensation {
 	return func() error {
 		return s.containerService.DeleteConfiguration(context.Background(), version.Product, version.Tag)
 	}
 }
 
-func (s *VersionStarter) deleteProcessesFunc(version domain.Version) compensator.Compensation {
+func (s *VersionStarter) deleteProcessesFunc(version *domain.Version) compensator.Compensation {
 	return func() error {
 		return s.containerService.DeleteProcesses(context.Background(), version.Product, version.Tag)
 	}
 }
 
-func (s *VersionStarter) deleteNetworkFunc(version domain.Version) compensator.Compensation {
+func (s *VersionStarter) deleteNetworkFunc(version *domain.Version) compensator.Compensation {
 	return func() error {
 		return s.containerService.DeleteNetwork(context.Background(), version.Product, version.Tag)
 	}

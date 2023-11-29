@@ -12,7 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, version domain.Version) (string, error) {
+func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, version *domain.Version) (string, error) {
 	kc.logger.Info("Creating version config files",
 		"product", version.Product,
 		"version", version.Tag,
@@ -48,7 +48,7 @@ func (kc KubeConfiguration) getFullProcessIdentifier(product, version, workflow,
 }
 
 func (kc KubeConfiguration) getProcessConfig(
-	version domain.Version,
+	version *domain.Version,
 	workflow *domain.Workflow,
 	process *domain.Process,
 ) ProcessConfig {
@@ -59,7 +59,7 @@ func (kc KubeConfiguration) getProcessConfig(
 			WorkflowName: workflow.Name,
 			ProcessName:  process.Name,
 			ProcessType:  process.Type.ToString(),
-			WorkflowType: workflow.Type,
+			WorkflowType: workflow.Type.ToString(),
 		},
 		Nats: NatsConfig{
 			URL:           viper.GetString(config.NatsEndpointKey),
@@ -110,7 +110,7 @@ func (kc KubeConfiguration) getProcessConfig(
 	}
 }
 
-func getProcessesAmount(v domain.Version) int {
+func getProcessesAmount(v *domain.Version) int {
 	amount := 0
 	for _, w := range v.Workflows {
 		amount += len(w.Processes)

@@ -10,12 +10,20 @@ enum ProcessType {
   ProcessTypeExit = 3;
 }
 
+enum WorkflowType {
+  WorkflowTypeUnknown = 0;
+  WorkflowTypeData = 1;
+  WorkflowTypeTraining = 2;
+  WorkflowTypeServing = 3;
+  WorkflowTypeFeedback = 4;
+}
+
 message Workflow {
   string name = 1;
   string stream = 2;
   string key_value_store = 3;
   repeated Process processes = 4;
-  string type = 5;
+  WorkflowType type = 5;
 }
 
 message Process {

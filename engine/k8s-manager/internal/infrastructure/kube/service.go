@@ -48,7 +48,7 @@ func (k *K8sContainerService) DeleteProcesses(ctx context.Context, product, vers
 	return k.processService.DeleteProcesses(ctx, product, version)
 }
 
-func (k *K8sContainerService) CreateVersionConfiguration(ctx context.Context, version domain.Version) (string, error) {
+func (k *K8sContainerService) CreateVersionConfiguration(ctx context.Context, version *domain.Version) (string, error) {
 	return k.configurationService.CreateVersionConfiguration(ctx, version)
 }
 func (k *K8sContainerService) DeleteConfiguration(ctx context.Context, product, version string) error {
@@ -71,6 +71,6 @@ func (k *K8sContainerService) UnpublishNetwork(ctx context.Context, product, ver
 	return k.networkService.UnpublishNetwork(ctx, product, version)
 }
 
-func (k *K8sContainerService) WaitProcesses(ctx context.Context, version domain.Version) error {
+func (k *K8sContainerService) WaitProcesses(ctx context.Context, version *domain.Version) error {
 	return k.processService.WaitProcesses(ctx, version)
 }

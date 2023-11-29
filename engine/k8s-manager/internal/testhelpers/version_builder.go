@@ -5,11 +5,11 @@ import (
 )
 
 type VersionBuilder struct {
-	version domain.Version
+	version *domain.Version
 }
 
-func defaultVersion() domain.Version {
-	return domain.Version{
+func defaultVersion() *domain.Version {
+	return &domain.Version{
 		Product:              "test-product",
 		Tag:                  "v1.0.0",
 		VersionKeyValueStore: "v1.0.0-kv-store",
@@ -32,7 +32,7 @@ func NewVersionBuilder() *VersionBuilder {
 	}
 }
 
-func (b *VersionBuilder) Build() domain.Version {
+func (b *VersionBuilder) Build() *domain.Version {
 	return b.version
 }
 

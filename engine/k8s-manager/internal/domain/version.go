@@ -11,14 +11,6 @@ type Version struct {
 	ServiceAccount     ServiceAccount
 }
 
-type Workflow struct {
-	Name          string
-	Stream        string
-	KeyValueStore string
-	Type          string
-	Processes     []*Process
-}
-
 type MinioConfiguration struct {
 	Bucket string
 }

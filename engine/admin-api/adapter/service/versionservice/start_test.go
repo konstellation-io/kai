@@ -129,7 +129,7 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 				Name:          workflow.Name,
 				Stream:        versionConfig.Streams.Workflows[workflow.Name].Stream,
 				KeyValueStore: versionConfig.KeyValueStores.Workflows[workflow.Name].KeyValueStore,
-				Type:          workflow.Type.String(),
+				Type:          versionpb.WorkflowType_WorkflowTypeTraining,
 				Processes: []*versionpb.Process{
 					{
 						Name:          process.Name,

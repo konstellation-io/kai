@@ -5,8 +5,8 @@ import (
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/grpc/proto/versionpb"
 )
 
-func mapRequestToVersion(req *versionpb.StartRequest) domain.Version {
-	return domain.Version{
+func mapRequestToVersion(req *versionpb.StartRequest) *domain.Version {
+	return &domain.Version{
 		Product:              req.ProductId,
 		Tag:                  req.VersionTag,
 		GlobalKeyValueStore:  req.GlobalKeyValueStore,
@@ -31,7 +31,7 @@ func mapReqWorkflowsToWorkflows(reqWorkflows []*versionpb.Workflow) []*domain.Wo
 			Stream:        workflow.Stream,
 			KeyValueStore: workflow.KeyValueStore,
 			Processes:     mapReqProcessToProcess(workflow.Processes),
-			Type:          workflow.Type,
+			Type:          mapReqWorkflowTypeToDomain(workflow.Type),
 		})
 	}
 
@@ -80,6 +80,21 @@ func mapReqProcessToProcess(reqProcesses []*versionpb.Process) []*domain.Process
 	}
 
 	return processes
+}
+
+func mapReqWorkflowTypeToDomain(workflowType versionpb.WorkflowType) domain.WorkflowType {
+	switch workflowType {
+	case versionpb.WorkflowType_WorkflowTypeTraining:
+		return domain.WorkflowTypeTraining
+	case versionpb.WorkflowType_WorkflowTypeData:
+		return domain.WorkflowTypeData
+	case versionpb.WorkflowType_WorkflowTypeServing:
+		return domain.WorkflowTypeServing
+	case versionpb.WorkflowType_WorkflowTypeFeedback:
+		return domain.WorkflowTypeFeedback
+	default:
+		return domain.WorkflowTypeUnknown
+	}
 }
 
 func mapReqProcessTypeTpProcessType(processType versionpb.ProcessType) domain.ProcessType {
