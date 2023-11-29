@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -29,6 +30,7 @@ type Params struct {
 	VersionInteractor      *version.Handler
 	ServerInfoGetter       *usecase.ServerInfoGetter
 	ProcessService         *usecase.ProcessService
+	LogsUsecase            logs.LogsUsecase
 }
 
 func NewHTTPHandler(params Params) http.Handler {

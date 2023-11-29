@@ -239,7 +239,7 @@ func (mr *MockVersionService_WatchProcessStatusClientMockRecorder) Recv() *gomoc
 }
 
 // RecvMsg mocks base method.
-func (m_2 *MockVersionService_WatchProcessStatusClient) RecvMsg(m interface{}) error {
+func (m_2 *MockVersionService_WatchProcessStatusClient) RecvMsg(m any) error {
 	m_2.ctrl.T.Helper()
 	ret := m_2.ctrl.Call(m_2, "RecvMsg", m)
 	ret0, _ := ret[0].(error)
@@ -253,7 +253,7 @@ func (mr *MockVersionService_WatchProcessStatusClientMockRecorder) RecvMsg(m int
 }
 
 // SendMsg mocks base method.
-func (m_2 *MockVersionService_WatchProcessStatusClient) SendMsg(m interface{}) error {
+func (m_2 *MockVersionService_WatchProcessStatusClient) SendMsg(m any) error {
 	m_2.ctrl.T.Helper()
 	ret := m_2.ctrl.Call(m_2, "SendMsg", m)
 	ret0, _ := ret[0].(error)
@@ -477,7 +477,7 @@ func (mr *MockVersionService_WatchProcessStatusServerMockRecorder) Context() *go
 }
 
 // RecvMsg mocks base method.
-func (m_2 *MockVersionService_WatchProcessStatusServer) RecvMsg(m interface{}) error {
+func (m_2 *MockVersionService_WatchProcessStatusServer) RecvMsg(m any) error {
 	m_2.ctrl.T.Helper()
 	ret := m_2.ctrl.Call(m_2, "RecvMsg", m)
 	ret0, _ := ret[0].(error)
@@ -519,7 +519,7 @@ func (mr *MockVersionService_WatchProcessStatusServerMockRecorder) SendHeader(ar
 }
 
 // SendMsg mocks base method.
-func (m_2 *MockVersionService_WatchProcessStatusServer) SendMsg(m interface{}) error {
+func (m_2 *MockVersionService_WatchProcessStatusServer) SendMsg(m any) error {
 	m_2.ctrl.T.Helper()
 	ret := m_2.ctrl.Call(m_2, "SendMsg", m)
 	ret0, _ := ret[0].(error)
