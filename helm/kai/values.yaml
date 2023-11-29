@@ -490,32 +490,11 @@ nats:
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
   tolerations: []
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-  # -- Assign custom affinity rules to the Nats pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-  # nodeAffinity:
-  #   requiredDuringSchedulingIgnoredDuringExecution:
-  #     nodeSelectorTerms:
-  #     - matchExpressions:
-  #       - key: kubernetes.io/e2e-az-name
-  #         operator: In
-  #         values:
-  #         - e2e-az1
-  #         - e2e-az2
-
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
   # - key: "key"
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+
 natsManager:
   image:
     # -- Image repository
