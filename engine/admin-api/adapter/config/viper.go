@@ -78,7 +78,6 @@ func loadConfig() error {
 	viper.RegisterAlias(RedisEndpointKey, "REDIS_MASTER_ADDRESS")
 	viper.RegisterAlias(RedisUsernameKey, "REDIS_USERNAME")
 	viper.RegisterAlias(RedisPasswordKey, "REDIS_PASSWORD")
-	viper.RegisterAlias(RedisPredictionsIndexKey, "REDIS_PREDICTIONS_INDEX")
 
 	viper.AutomaticEnv()
 
