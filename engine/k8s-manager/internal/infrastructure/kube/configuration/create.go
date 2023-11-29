@@ -106,6 +106,7 @@ func (kc KubeConfiguration) getProcessConfig(
 			Endpoint: viper.GetString(config.PredictionsEndpointKey),
 			Username: version.ServiceAccount.Username,
 			Password: version.ServiceAccount.Password,
+			Index:    viper.GetString(config.PredictionsIndexKey),
 		},
 	}
 }

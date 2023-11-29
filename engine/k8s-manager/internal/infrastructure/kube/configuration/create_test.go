@@ -33,6 +33,7 @@ func TestConfigCreation(t *testing.T) {
 	viper.Set(config.AuthRealmKey, "test-auth-realm")
 	viper.Set(config.AuthClientIDKey, "test-auth-client-id")
 	viper.Set(config.AuthClientSecretKey, "test-auth-client-secret")
+	viper.Set(config.PredictionsIndexKey, "predictionsIdx")
 
 	version := testhelpers.NewVersionBuilder().Build()
 

@@ -113,4 +113,5 @@ data:
             endpoint: ""
             username: test-user
             password: test-password
+            index: predictionsIdx
 binarydata: {}

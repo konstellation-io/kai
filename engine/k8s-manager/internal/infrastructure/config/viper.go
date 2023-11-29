@@ -68,6 +68,7 @@ const (
 	PrometheusURLKey = "prometheus.url"
 
 	PredictionsEndpointKey = "predictions.endpoint"
+	PredictionsIndexKey    = "predictions.indexName"
 
 	configType = "yaml"
 
@@ -137,6 +138,7 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(PrometheusURLKey, "PROMETHEUS_URL")
 
 	viper.RegisterAlias(PredictionsEndpointKey, "REDIS_MASTER_ADDRESS")
+	viper.RegisterAlias(PredictionsIndexKey, "REDIS_PREDICTIONS_INDEX")
 
 	viper.AutomaticEnv()
 	setDefaultValues()
@@ -177,6 +179,8 @@ func setDefaultValues() {
 	viper.SetDefault(MeasurementsInsecureKey, false)
 	viper.SetDefault(MeasurementsTimeoutKey, 5)
 	viper.SetDefault(MeasurementsMetricsIntervalKey, 10)
+
+	viper.SetDefault(PredictionsIndexKey, "predictionsIdx")
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {
