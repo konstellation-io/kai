@@ -36,10 +36,26 @@ func mapWorkflowsToDTO(workflows []entity.Workflow, versionConfig *entity.Versio
 			Processes:     processesDTO,
 			Stream:        wStreamCfg.Stream,
 			KeyValueStore: wKeyValueCfg.KeyValueStore,
+			Type:          mapWorkflowTypeToDTO(w.Type),
 		})
 	}
 
 	return workflowsDTO, nil
+}
+
+func mapWorkflowTypeToDTO(workflowType entity.WorkflowType) versionpb.WorkflowType {
+	switch workflowType {
+	case entity.WorkflowTypeServing:
+		return versionpb.WorkflowType_WorkflowTypeServing
+	case entity.WorkflowTypeTraining:
+		return versionpb.WorkflowType_WorkflowTypeTraining
+	case entity.WorkflowTypeFeedback:
+		return versionpb.WorkflowType_WorkflowTypeFeedback
+	case entity.WorkflowTypeData:
+		return versionpb.WorkflowType_WorkflowTypeData
+	default:
+		return versionpb.WorkflowType_WorkflowTypeUnknown
+	}
 }
 
 func mapProcessesToDTO(

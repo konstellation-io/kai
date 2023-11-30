@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func GetAppConfig(version domain.Version, processesConfig map[string]string) apiv1.ConfigMap {
+func GetAppConfig(version *domain.Version, processesConfig map[string]string) apiv1.ConfigMap {
 	labels := map[string]string{
 		"product": version.Product,
 		"version": version.Tag,

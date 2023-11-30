@@ -22,11 +22,11 @@ var (
 	ErrTimeoutWaitingProcesses = errors.New("error timeout waiting processes")
 )
 
-func (kp *KubeProcess) WaitProcesses(ctx context.Context, version domain.Version) error {
+func (kp *KubeProcess) WaitProcesses(ctx context.Context, version *domain.Version) error {
 	return kp.watchForVersionDeployments(ctx, version)
 }
 
-func (kp *KubeProcess) watchForVersionDeployments(ctx context.Context, version domain.Version) error {
+func (kp *KubeProcess) watchForVersionDeployments(ctx context.Context, version *domain.Version) error {
 	wCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 

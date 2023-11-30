@@ -18,6 +18,8 @@ const (
 	BaseDomainNameKey  = "baseDomainName"
 	IsInsideClusterKey = "kubernetes.isInsideCluster"
 
+	NatsEndpointKey = "nats.url"
+
 	ImageRegistryURLKey = "registry.url"
 	//nolint:gosec // False positive
 	ImageRegistryAuthSecretKey = "registry.authSecret"
@@ -65,12 +67,16 @@ const (
 
 	PrometheusURLKey = "prometheus.url"
 
+	PredictionsEndpointKey = "predictions.endpoint"
+	PredictionsIndexKey    = "predictions.indexName"
+
 	configType = "yaml"
 
 	_defaultServerPort     = 50051
 	_defaultRequestTimeout = 5000
 )
 
+//nolint:funlen // Future refactor
 func Init(configFilePath string) error {
 	configDir := filepath.Dir(configFilePath)
 	configFileName := filepath.Base(configFilePath)
@@ -88,7 +94,7 @@ func Init(configFilePath string) error {
 	viper.SetEnvPrefix("KAI")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	viper.RegisterAlias("nats.url", "NATS_URL")
+	viper.RegisterAlias(NatsEndpointKey, "NATS_URL")
 	viper.RegisterAlias(ImageRegistryURLKey, "REGISTRY_URL")
 	viper.RegisterAlias(KubeNamespaceKey, "KUBERNETES_NAMESPACE")
 	viper.RegisterAlias(BaseDomainNameKey, "BASE_DOMAIN_NAME")
@@ -114,13 +120,11 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(TriggersIngressClassNameKey, "TRIGGERS_INGRESS_CLASS_NAME")
 	viper.RegisterAlias(TriggersRequestTimeoutKey, "TRIGGERS_REQUEST_TIMEOUT")
 	viper.RegisterAlias(TriggersB64IngressesAnnotaionsKey, "TRIGGERS_BASE64_INGRESSES_ANNOTATIONS")
-
 	viper.RegisterAlias(AutoscaleCPUPercentageKey, "AUTOSCALE_CPU_PERCENTAGE")
 
 	viper.RegisterAlias(FluentBitImageKey, "FLUENTBIT_IMAGE_REPOSITORY")
 	viper.RegisterAlias(FluentBitTagKey, "FLUENTBIT_IMAGE_TAG")
 	viper.RegisterAlias(FluentBitPullPolicyKey, "FLUENTBIT_IMAGE_PULLPOLICY")
-
 	viper.RegisterAlias(LokiHostKey, "LOKI_HOST")
 	viper.RegisterAlias(LokiPortKey, "LOKI_PORT")
 
@@ -131,11 +135,12 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(MeasurementsInsecureKey, "MEASUREMENTS_INSECURE")
 	viper.RegisterAlias(MeasurementsTimeoutKey, "MEASUREMENTS_TIMEOUT")
 	viper.RegisterAlias(MeasurementsMetricsIntervalKey, "MEASUREMENTS_METRICS_INTERVAL")
-
 	viper.RegisterAlias(PrometheusURLKey, "PROMETHEUS_URL")
 
-	viper.AutomaticEnv()
+	viper.RegisterAlias(PredictionsEndpointKey, "REDIS_MASTER_ADDRESS")
+	viper.RegisterAlias(PredictionsIndexKey, "REDIS_PREDICTIONS_INDEX")
 
+	viper.AutomaticEnv()
 	setDefaultValues()
 
 	return nil
@@ -174,6 +179,8 @@ func setDefaultValues() {
 	viper.SetDefault(MeasurementsInsecureKey, false)
 	viper.SetDefault(MeasurementsTimeoutKey, 5)
 	viper.SetDefault(MeasurementsMetricsIntervalKey, 10)
+
+	viper.SetDefault(PredictionsIndexKey, "predictionsIdx")
 
 	userHome, ok := os.LookupEnv("HOME")
 	if ok {

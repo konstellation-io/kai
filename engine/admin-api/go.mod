@@ -19,6 +19,7 @@ require (
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/minio/madmin-go/v3 v3.0.27
 	github.com/minio/minio-go/v7 v7.0.63
+	github.com/redis/go-redis/v9 v9.3.0
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/viper v1.16.0
@@ -36,6 +37,8 @@ require (
 require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect

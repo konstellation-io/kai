@@ -53,6 +53,11 @@ spec:
                   key: rootPassword
             - name: KAI_KEYCLOAK_MINIO_CLIENT_SECRET
               value: "{{ .Values.keycloak.minio.oidcClient.secret }}"
+            - name: KAI_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "redis.auth.secretName" . }}
+                  key: {{ include "redis.auth.secretPasswordKey" . }}
           ports:
             - containerPort: 50051
               protocol: TCP

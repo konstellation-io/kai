@@ -36,19 +36,21 @@ type ProductInteractor struct {
 	natsService       service.NatsManagerService
 	userRegistry      service.UserRegistry
 	passwordGenerator password.PasswordGenerator
+	predictionRepo    repository.PredictionRepository
 }
 
 type ProductInteractorOpts struct {
-	Logger            logr.Logger
-	ProductRepo       repository.ProductRepo
-	VersionRepo       repository.VersionRepo
-	ProcessRepo       repository.ProcessRepository
-	UserActivity      UserActivityInteracter
-	AccessControl     auth.AccessControl
-	ObjectStorage     repository.ObjectStorage
-	NatsService       service.NatsManagerService
-	UserRegistry      service.UserRegistry
-	PasswordGenerator password.PasswordGenerator
+	Logger               logr.Logger
+	ProductRepo          repository.ProductRepo
+	VersionRepo          repository.VersionRepo
+	ProcessRepo          repository.ProcessRepository
+	UserActivity         UserActivityInteracter
+	AccessControl        auth.AccessControl
+	ObjectStorage        repository.ObjectStorage
+	NatsService          service.NatsManagerService
+	UserRegistry         service.UserRegistry
+	PasswordGenerator    password.PasswordGenerator
+	PredictionRepository repository.PredictionRepository
 }
 
 // NewProductInteractor creates a new ProductInteractor.
@@ -64,6 +66,7 @@ func NewProductInteractor(ps *ProductInteractorOpts) *ProductInteractor {
 		ps.NatsService,
 		ps.UserRegistry,
 		ps.PasswordGenerator,
+		ps.PredictionRepository,
 	}
 }
 
@@ -122,10 +125,13 @@ func (i *ProductInteractor) CreateProduct(
 	newProduct.KeyValueStore = globalKeyValueStore
 
 	minioConfiguration := entity.MinioConfiguration{
-		User:     productID,
+		Bucket: productID,
+	}
+
+	serviceAccount := entity.ServiceAccount{
+		Username: productID,
 		Group:    productID,
 		Password: i.passwordGenerator.MustGenerate(32, 8, 8, true, true),
-		Bucket:   productID,
 	}
 
 	err = i.objectStorage.CreateBucket(ctx, minioConfiguration.Bucket)
@@ -138,22 +144,28 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, fmt.Errorf("creating object storage policy: %w", err)
 	}
 
-	err = i.userRegistry.CreateGroupWithPolicy(ctx, minioConfiguration.Group, policyName)
+	err = i.userRegistry.CreateGroupWithPolicy(ctx, serviceAccount.Group, policyName)
 	if err != nil {
 		return nil, err
 	}
 
 	err = i.userRegistry.CreateUserWithinGroup(
 		ctx,
-		minioConfiguration.User,
-		minioConfiguration.Password,
-		minioConfiguration.Group,
+		serviceAccount.Username,
+		serviceAccount.Password,
+		serviceAccount.Group,
 	)
 	if err != nil {
 		return nil, err
 	}
 
+	err = i.predictionRepo.CreateUser(ctx, productID, serviceAccount.Username, serviceAccount.Password)
+	if err != nil {
+		return nil, fmt.Errorf("creating user in prediction's repository: %w", err)
+	}
+
 	newProduct.MinioConfiguration = minioConfiguration
+	newProduct.ServiceAccount = serviceAccount
 
 	err = i.createDatabaseIndexes(ctx, name)
 	if err != nil {

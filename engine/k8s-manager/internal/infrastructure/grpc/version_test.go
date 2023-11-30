@@ -58,13 +58,16 @@ func (s *VersionServiceTestSuite) TestStart() {
 		GlobalKeyValueStore:  "test-global-kv-store",
 		VersionKeyValueStore: "test-kv-store",
 		MinioConfiguration: &versionpb.MinioConfiguration{
-			User:     "test-minio-user",
-			Password: "test-minio-password",
-			Bucket:   "test-minio-bucket",
+			Bucket: "test-minio-bucket",
+		},
+		ServiceAccount: &versionpb.ServiceAccount{
+			Username: "test-user",
+			Password: "test-password",
 		},
 		Workflows: []*versionpb.Workflow{
 			{
 				Name: "test-workflow",
+				Type: versionpb.WorkflowType_WorkflowTypeTraining,
 				Processes: []*versionpb.Process{
 					{
 						Name:          "test-process",
@@ -100,19 +103,22 @@ func (s *VersionServiceTestSuite) TestStart() {
 		},
 	}
 
-	expectedVersion := domain.Version{
+	expectedVersion := &domain.Version{
 		Product:              req.ProductId,
 		Tag:                  req.VersionTag,
 		GlobalKeyValueStore:  req.GlobalKeyValueStore,
 		VersionKeyValueStore: req.VersionKeyValueStore,
 		MinioConfiguration: domain.MinioConfiguration{
-			User:     req.MinioConfiguration.User,
-			Password: req.MinioConfiguration.Password,
-			Bucket:   req.MinioConfiguration.Bucket,
+			Bucket: req.MinioConfiguration.Bucket,
+		},
+		ServiceAccount: domain.ServiceAccount{
+			Username: req.ServiceAccount.Username,
+			Password: req.ServiceAccount.Password,
 		},
 		Workflows: []*domain.Workflow{
 			{
 				Name: req.Workflows[0].Name,
+				Type: domain.WorkflowTypeTraining,
 				Processes: []*domain.Process{
 					{
 						Name:          req.Workflows[0].Processes[0].Name,

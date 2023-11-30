@@ -11,6 +11,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/redis"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/loki"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
@@ -127,17 +128,25 @@ func initGraphqlController(
 
 	minioOjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
 
+	predictionRepo := redis.NewPredictionRepository(redis.NewRedisClient())
+
+	err = predictionRepo.EnsurePredictionIndexCreated()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	productInteractor := usecase.NewProductInteractor(&usecase.ProductInteractorOpts{
-		Logger:            logger,
-		ProductRepo:       productRepo,
-		VersionRepo:       versionMongoRepo,
-		ProcessRepo:       processRepo,
-		UserActivity:      userActivityInteractor,
-		AccessControl:     accessControl,
-		ObjectStorage:     minioOjectStorage,
-		NatsService:       natsManagerService,
-		UserRegistry:      keycloakUserRegistry,
-		PasswordGenerator: passwordGenerator,
+		Logger:               logger,
+		ProductRepo:          productRepo,
+		VersionRepo:          versionMongoRepo,
+		ProcessRepo:          processRepo,
+		UserActivity:         userActivityInteractor,
+		AccessControl:        accessControl,
+		ObjectStorage:        minioOjectStorage,
+		NatsService:          natsManagerService,
+		UserRegistry:         keycloakUserRegistry,
+		PasswordGenerator:    passwordGenerator,
+		PredictionRepository: predictionRepo,
 	})
 
 	userInteractor := usecase.NewUserInteractor(
@@ -160,9 +169,7 @@ func initGraphqlController(
 	)
 
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
-
 	processService := usecase.NewProcessService(logger, k8sService, processRepo, minioOjectStorage)
-
 	logsUseCase := logs.NewLogsInteractor(logsService)
 
 	return controller.NewGraphQLController(

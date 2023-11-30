@@ -43,7 +43,9 @@ func (v *VersionService) Start(
 ) (*versionpb.Response, error) {
 	v.logger.Info("Start request received")
 
-	err := v.starter.StartVersion(ctx, mapRequestToVersion(req))
+	version := mapRequestToVersion(req)
+
+	err := v.starter.StartVersion(ctx, version)
 	if err != nil {
 		return nil, fmt.Errorf("start version %q in product %q: %w", req.VersionTag, req.ProductId, err)
 	}

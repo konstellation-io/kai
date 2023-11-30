@@ -7,6 +7,7 @@ type ProcessConfig struct {
 	Minio             MinioConfig        `yaml:"minio"`
 	Auth              AuthConfig         `yaml:"auth"`
 	Measurements      MeasurementsConfig `yaml:"measurements"`
+	Predictions       PredictionsConfig  `yaml:"predictions"`
 }
 
 type Metadata struct {
@@ -16,6 +17,7 @@ type Metadata struct {
 	ProcessName  string `yaml:"process_name"`
 	BasePath     string `yaml:"base_path"`
 	ProcessType  string `yaml:"process_type"`
+	WorkflowType string `yaml:"workflow_type"`
 }
 
 type CentralizedConfig struct {
@@ -58,4 +60,11 @@ type MeasurementsConfig struct {
 	Insecure        bool   `yaml:"insecure"`
 	Timeout         int    `yaml:"timeout"`
 	MetricsInterval int    `yaml:"metrics_interval"`
+}
+
+type PredictionsConfig struct {
+	Endpoint string `yaml:"endpoint"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Index    string `yaml:"index"`
 }

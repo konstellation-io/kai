@@ -40,3 +40,4 @@ data:
   KAI_IMAGE_BUILDER_IMAGE_REPOSITORY: {{ .Values.k8sManager.imageBuilder.image.repository }}
   KAI_IMAGE_BUILDER_IMAGE_TAG: {{ .Values.k8sManager.imageBuilder.image.tag }}
   KAI_IMAGE_BUILDER_IMAGE_PULLPOLICY: {{ .Values.k8sManager.imageBuilder.image.pullPolicy }}
+  KAI_REDIS_MASTER_ADDRESS: {{ include "redis.master.url" . }}
