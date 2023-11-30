@@ -408,7 +408,7 @@ func TestStartVersion_ErrorWaitingProcesses_ErrorExecutingCompensation(t *testin
 	assert.ErrorIs(t, err, expectedErr)
 }
 
-func getVersionWithNetworking(t *testing.T) domain.Version {
+func getVersionWithNetworking(t *testing.T) *domain.Version {
 	t.Helper()
 	processes := []*domain.Process{
 		testhelpers.NewProcessBuilder().
@@ -431,7 +431,7 @@ func mockCreateProcess(
 	t *testing.T,
 	containerSvc *mocks.ContainerServiceMock,
 	configName string,
-	version domain.Version,
+	version *domain.Version,
 	process domain.Process,
 ) {
 	t.Helper()

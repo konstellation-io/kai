@@ -20,13 +20,17 @@ type Product struct {
 	MinioConfiguration MinioConfiguration `bson:"minioConfiguration"`
 	KeyValueStore      string             `bson:"keyValueStore"`
 	PublishedVersion   *string            `bson:"publishedVersion"`
+	ServiceAccount     ServiceAccount     `bson:"serviceAccount"`
 }
 
 type MinioConfiguration struct {
-	User     string `bson:"user"`
-	Group    string `bson:"group"`
+	Bucket string `bson:"bucket"`
+}
+
+type ServiceAccount struct {
+	Username string `bson:"username"`
 	Password string `bson:"password"`
-	Bucket   string `bson:"bucket"`
+	Group    string `bson:"group"`
 }
 
 func (p *Product) Validate() error {

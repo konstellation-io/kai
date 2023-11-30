@@ -49,7 +49,7 @@ data:
     - name: Redis
       type: redis-datasource
       access: proxy
-      url: {{ include "redis.master.url" . }}
+      url: redis://{{ include "redis.master.url" . }}
       version: 1
       isDefault: false
       jsonData:

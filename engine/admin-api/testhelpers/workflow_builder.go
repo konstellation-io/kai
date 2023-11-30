@@ -10,7 +10,7 @@ func NewWorkflowBuilder() *WorkflowBuilder {
 	return &WorkflowBuilder{
 		entity.Workflow{
 			Name: "test-workflow-name",
-			Type: entity.WorkflowTypeData,
+			Type: entity.WorkflowTypeTraining,
 			Processes: []entity.Process{
 				NewProcessBuilder().Build(),
 			},

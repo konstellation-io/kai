@@ -12,7 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, version domain.Version) (string, error) {
+func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, version *domain.Version) (string, error) {
 	kc.logger.Info("Creating version config files",
 		"product", version.Product,
 		"version", version.Tag,
@@ -22,7 +22,6 @@ func (kc KubeConfiguration) CreateVersionConfiguration(ctx context.Context, vers
 
 	for _, workflow := range version.Workflows {
 		for _, process := range workflow.Processes {
-			// This should be a MustMarshal kind of function
 			processYaml, err := yaml.Marshal(kc.getProcessConfig(version, workflow, process))
 			if err != nil {
 				return "", err
@@ -49,7 +48,7 @@ func (kc KubeConfiguration) getFullProcessIdentifier(product, version, workflow,
 }
 
 func (kc KubeConfiguration) getProcessConfig(
-	version domain.Version,
+	version *domain.Version,
 	workflow *domain.Workflow,
 	process *domain.Process,
 ) ProcessConfig {
@@ -60,9 +59,10 @@ func (kc KubeConfiguration) getProcessConfig(
 			WorkflowName: workflow.Name,
 			ProcessName:  process.Name,
 			ProcessType:  process.Type.ToString(),
+			WorkflowType: workflow.Type.ToString(),
 		},
 		Nats: NatsConfig{
-			URL:           viper.GetString("nats.url"),
+			URL:           viper.GetString(config.NatsEndpointKey),
 			Stream:        workflow.Stream,
 			Subject:       process.Subject,
 			Subscriptions: process.Subscriptions,
@@ -85,8 +85,8 @@ func (kc KubeConfiguration) getProcessConfig(
 		},
 		Minio: MinioConfig{
 			Endpoint:       viper.GetString(config.MinioEndpointKey),
-			ClientUser:     version.MinioConfiguration.User,
-			ClientPassword: version.MinioConfiguration.Password,
+			ClientUser:     version.ServiceAccount.Username,
+			ClientPassword: version.ServiceAccount.Password,
 			SSL:            viper.GetBool(config.MinioSSLEnabledKey),
 			Bucket:         version.MinioConfiguration.Bucket,
 		},
@@ -102,10 +102,16 @@ func (kc KubeConfiguration) getProcessConfig(
 			Timeout:         viper.GetInt(config.MeasurementsTimeoutKey),
 			MetricsInterval: viper.GetInt(config.MeasurementsMetricsIntervalKey),
 		},
+		Predictions: PredictionsConfig{
+			Endpoint: viper.GetString(config.PredictionsEndpointKey),
+			Username: version.ServiceAccount.Username,
+			Password: version.ServiceAccount.Password,
+			Index:    viper.GetString(config.PredictionsIndexKey),
+		},
 	}
 }
 
-func getProcessesAmount(v domain.Version) int {
+func getProcessesAmount(v *domain.Version) int {
 	amount := 0
 	for _, w := range v.Workflows {
 		amount += len(w.Processes)

@@ -6,7 +6,7 @@ import (
 )
 
 type VersionStarterService interface {
-	StartVersion(ctx context.Context, version domain.Version) error
+	StartVersion(ctx context.Context, version *domain.Version) error
 }
 
 type VersionStopperService interface {

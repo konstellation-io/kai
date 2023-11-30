@@ -10,11 +10,20 @@ enum ProcessType {
   ProcessTypeExit = 3;
 }
 
+enum WorkflowType {
+  WorkflowTypeUnknown = 0;
+  WorkflowTypeData = 1;
+  WorkflowTypeTraining = 2;
+  WorkflowTypeServing = 3;
+  WorkflowTypeFeedback = 4;
+}
+
 message Workflow {
   string name = 1;
   string stream = 2;
   string key_value_store = 3;
   repeated Process processes = 4;
+  WorkflowType type = 5;
 }
 
 message Process {
@@ -45,12 +54,16 @@ message StartRequest {
   string version_key_value_store = 4;
   repeated Workflow workflows = 5;
   MinioConfiguration minio_configuration = 6;
+  ServiceAccount service_account = 7;
 }
 
 message MinioConfiguration {
-  string user = 1;
+  string bucket = 1;
+}
+
+message ServiceAccount {
+  string username = 1;
   string password = 2;
-  string bucket = 3;
 }
 
 message StopRequest {

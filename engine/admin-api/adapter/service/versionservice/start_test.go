@@ -129,6 +129,7 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 				Name:          workflow.Name,
 				Stream:        versionConfig.Streams.Workflows[workflow.Name].Stream,
 				KeyValueStore: versionConfig.KeyValueStores.Workflows[workflow.Name].KeyValueStore,
+				Type:          versionpb.WorkflowType_WorkflowTypeTraining,
 				Processes: []*versionpb.Process{
 					{
 						Name:          process.Name,
@@ -163,9 +164,11 @@ func (s *StartVersionTestSuite) TestStartVersion() {
 			},
 		},
 		MinioConfiguration: &versionpb.MinioConfiguration{
-			User:     product.MinioConfiguration.User,
-			Password: product.MinioConfiguration.Password,
-			Bucket:   product.MinioConfiguration.Bucket,
+			Bucket: product.MinioConfiguration.Bucket,
+		},
+		ServiceAccount: &versionpb.ServiceAccount{
+			Username: product.ServiceAccount.Username,
+			Password: product.ServiceAccount.Password,
 		},
 	}
 

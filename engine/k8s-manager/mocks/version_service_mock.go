@@ -81,11 +81,11 @@ func (_c *VersionServiceMock_PublishVersion_Call) RunAndReturn(run func(context.
 }
 
 // StartVersion provides a mock function with given fields: ctx, version
-func (_m *VersionServiceMock) StartVersion(ctx context.Context, version domain.Version) error {
+func (_m *VersionServiceMock) StartVersion(ctx context.Context, version *domain.Version) error {
 	ret := _m.Called(ctx, version)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.Version) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Version) error); ok {
 		r0 = rf(ctx, version)
 	} else {
 		r0 = ret.Error(0)
@@ -101,14 +101,14 @@ type VersionServiceMock_StartVersion_Call struct {
 
 // StartVersion is a helper method to define mock.On call
 //   - ctx context.Context
-//   - version domain.Version
+//   - version *domain.Version
 func (_e *VersionServiceMock_Expecter) StartVersion(ctx interface{}, version interface{}) *VersionServiceMock_StartVersion_Call {
 	return &VersionServiceMock_StartVersion_Call{Call: _e.mock.On("StartVersion", ctx, version)}
 }
 
-func (_c *VersionServiceMock_StartVersion_Call) Run(run func(ctx context.Context, version domain.Version)) *VersionServiceMock_StartVersion_Call {
+func (_c *VersionServiceMock_StartVersion_Call) Run(run func(ctx context.Context, version *domain.Version)) *VersionServiceMock_StartVersion_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(domain.Version))
+		run(args[0].(context.Context), args[1].(*domain.Version))
 	})
 	return _c
 }
@@ -118,7 +118,7 @@ func (_c *VersionServiceMock_StartVersion_Call) Return(_a0 error) *VersionServic
 	return _c
 }
 
-func (_c *VersionServiceMock_StartVersion_Call) RunAndReturn(run func(context.Context, domain.Version) error) *VersionServiceMock_StartVersion_Call {
+func (_c *VersionServiceMock_StartVersion_Call) RunAndReturn(run func(context.Context, *domain.Version) error) *VersionServiceMock_StartVersion_Call {
 	_c.Call.Return(run)
 	return _c
 }

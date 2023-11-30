@@ -111,21 +111,21 @@ func (_c *ContainerServiceMock_CreateProcess_Call) RunAndReturn(run func(context
 }
 
 // CreateVersionConfiguration provides a mock function with given fields: ctx, version
-func (_m *ContainerServiceMock) CreateVersionConfiguration(ctx context.Context, version domain.Version) (string, error) {
+func (_m *ContainerServiceMock) CreateVersionConfiguration(ctx context.Context, version *domain.Version) (string, error) {
 	ret := _m.Called(ctx, version)
 
 	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.Version) (string, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Version) (string, error)); ok {
 		return rf(ctx, version)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, domain.Version) string); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Version) string); ok {
 		r0 = rf(ctx, version)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, domain.Version) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *domain.Version) error); ok {
 		r1 = rf(ctx, version)
 	} else {
 		r1 = ret.Error(1)
@@ -141,14 +141,14 @@ type ContainerServiceMock_CreateVersionConfiguration_Call struct {
 
 // CreateVersionConfiguration is a helper method to define mock.On call
 //   - ctx context.Context
-//   - version domain.Version
+//   - version *domain.Version
 func (_e *ContainerServiceMock_Expecter) CreateVersionConfiguration(ctx interface{}, version interface{}) *ContainerServiceMock_CreateVersionConfiguration_Call {
 	return &ContainerServiceMock_CreateVersionConfiguration_Call{Call: _e.mock.On("CreateVersionConfiguration", ctx, version)}
 }
 
-func (_c *ContainerServiceMock_CreateVersionConfiguration_Call) Run(run func(ctx context.Context, version domain.Version)) *ContainerServiceMock_CreateVersionConfiguration_Call {
+func (_c *ContainerServiceMock_CreateVersionConfiguration_Call) Run(run func(ctx context.Context, version *domain.Version)) *ContainerServiceMock_CreateVersionConfiguration_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(domain.Version))
+		run(args[0].(context.Context), args[1].(*domain.Version))
 	})
 	return _c
 }
@@ -158,7 +158,7 @@ func (_c *ContainerServiceMock_CreateVersionConfiguration_Call) Return(_a0 strin
 	return _c
 }
 
-func (_c *ContainerServiceMock_CreateVersionConfiguration_Call) RunAndReturn(run func(context.Context, domain.Version) (string, error)) *ContainerServiceMock_CreateVersionConfiguration_Call {
+func (_c *ContainerServiceMock_CreateVersionConfiguration_Call) RunAndReturn(run func(context.Context, *domain.Version) (string, error)) *ContainerServiceMock_CreateVersionConfiguration_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -395,11 +395,11 @@ func (_c *ContainerServiceMock_UnpublishNetwork_Call) RunAndReturn(run func(cont
 }
 
 // WaitProcesses provides a mock function with given fields: ctx, version
-func (_m *ContainerServiceMock) WaitProcesses(ctx context.Context, version domain.Version) error {
+func (_m *ContainerServiceMock) WaitProcesses(ctx context.Context, version *domain.Version) error {
 	ret := _m.Called(ctx, version)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.Version) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Version) error); ok {
 		r0 = rf(ctx, version)
 	} else {
 		r0 = ret.Error(0)
@@ -415,14 +415,14 @@ type ContainerServiceMock_WaitProcesses_Call struct {
 
 // WaitProcesses is a helper method to define mock.On call
 //   - ctx context.Context
-//   - version domain.Version
+//   - version *domain.Version
 func (_e *ContainerServiceMock_Expecter) WaitProcesses(ctx interface{}, version interface{}) *ContainerServiceMock_WaitProcesses_Call {
 	return &ContainerServiceMock_WaitProcesses_Call{Call: _e.mock.On("WaitProcesses", ctx, version)}
 }
 
-func (_c *ContainerServiceMock_WaitProcesses_Call) Run(run func(ctx context.Context, version domain.Version)) *ContainerServiceMock_WaitProcesses_Call {
+func (_c *ContainerServiceMock_WaitProcesses_Call) Run(run func(ctx context.Context, version *domain.Version)) *ContainerServiceMock_WaitProcesses_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(domain.Version))
+		run(args[0].(context.Context), args[1].(*domain.Version))
 	})
 	return _c
 }
@@ -432,7 +432,7 @@ func (_c *ContainerServiceMock_WaitProcesses_Call) Return(_a0 error) *ContainerS
 	return _c
 }
 
-func (_c *ContainerServiceMock_WaitProcesses_Call) RunAndReturn(run func(context.Context, domain.Version) error) *ContainerServiceMock_WaitProcesses_Call {
+func (_c *ContainerServiceMock_WaitProcesses_Call) RunAndReturn(run func(context.Context, *domain.Version) error) *ContainerServiceMock_WaitProcesses_Call {
 	_c.Call.Return(run)
 	return _c
 }
