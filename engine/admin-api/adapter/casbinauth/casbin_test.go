@@ -6,11 +6,10 @@ import (
 	"path"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/casbinauth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,18 +21,14 @@ var (
 )
 
 func TestNewCasbinAccessControl_ErrorInitEnforcer(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 
 	_, err := casbinauth.NewCasbinAccessControl(logger, "this is a invalid model", casbinPolicy)
 	require.Error(t, err)
 }
 
 func TestGetUserProducts(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 
 	authorizer, err := casbinauth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
 	require.NoError(t, err)
@@ -55,9 +50,7 @@ func TestGetUserProducts(t *testing.T) {
 }
 
 func TestGetUserProducts_AdminUser(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 
 	authorizer, err := casbinauth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
 	require.NoError(t, err)
@@ -76,9 +69,7 @@ func TestGetUserProducts_AdminUser(t *testing.T) {
 }
 
 func TestIsadmin(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 
 	authorizer, err := casbinauth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
 	require.NoError(t, err)
@@ -109,9 +100,7 @@ func TestIsadmin(t *testing.T) {
 }
 
 func TestIsadmin_WithOptAdminRole(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 
 	customAdminRole := "admin"
 

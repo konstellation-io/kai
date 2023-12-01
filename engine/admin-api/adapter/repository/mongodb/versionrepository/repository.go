@@ -5,32 +5,28 @@ import (
 	"errors"
 	"time"
 
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 const versionsCollectionName = "versions"
 
 type VersionRepoMongoDB struct {
-	cfg    *config.Config
-	logger logging.Logger
+	logger logr.Logger
 	client *mongo.Client
 }
 
 func New(
-	cfg *config.Config,
-	logger logging.Logger,
+	logger logr.Logger,
 	client *mongo.Client,
 ) *VersionRepoMongoDB {
 	versions := &VersionRepoMongoDB{
-		cfg,
 		logger,
 		client,
 	}
@@ -40,7 +36,7 @@ func New(
 
 func (r *VersionRepoMongoDB) CreateIndexes(ctx context.Context, productID string) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
-	r.logger.Infof("MongoDB creating indexes for %s collection...", versionsCollectionName)
+	r.logger.Info("MongoDB creating indexes", "collection", versionsCollectionName)
 
 	indexes := []mongo.IndexModel{
 		{

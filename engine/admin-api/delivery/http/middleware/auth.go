@@ -3,13 +3,13 @@ package middleware
 import (
 	"strings"
 
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/httperrors"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/labstack/echo"
 )
 
-func NewJwtAuthMiddleware(logger logging.Logger, tokenParser *token.Parser) echo.MiddlewareFunc {
+func NewJwtAuthMiddleware(logger logr.Logger, tokenParser *token.Parser) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			authHeader := c.Request().Header.Get("Authorization")
@@ -17,10 +17,10 @@ func NewJwtAuthMiddleware(logger logging.Logger, tokenParser *token.Parser) echo
 
 			user, err := tokenParser.GetUser(plainToken)
 			if err != nil {
-				logger.Warn("No token found in context")
+				logger.Info("No token found in context")
 
 				if c.Get("operationName") == "info" {
-					logger.Debug("Unauthorized request to info endpoint")
+					logger.V(0).Info("Unauthorized request to info endpoint")
 					return next(c)
 				}
 

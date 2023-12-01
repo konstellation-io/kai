@@ -17,7 +17,7 @@ auth:
   secureCookie: false
   cookieDomain: "kai.local"
 mongodb:
-  address: "mongodb://admin:123456@localhost:27017/admin?replicaSet=rs0"
+  endpoint: "mongodb://admin:123456@localhost:27017/admin?replicaSet=rs0"
   dbName: "kai"
   krtBucket: "krt"
 k8s:

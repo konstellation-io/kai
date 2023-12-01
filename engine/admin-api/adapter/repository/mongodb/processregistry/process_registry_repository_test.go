@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -16,9 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
 var (
@@ -28,7 +27,6 @@ var (
 
 type ProcessRegistryRepositoryTestSuite struct {
 	suite.Suite
-	cfg                 *config.Config
 	mongoDBContainer    testcontainers.Container
 	mongoClient         *mongo.Client
 	processRegistryRepo *ProcessRegistryRepoMongoDB
@@ -40,10 +38,7 @@ func TestGocloakTestSuite(t *testing.T) {
 
 func (s *ProcessRegistryRepositoryTestSuite) SetupSuite() {
 	ctx := context.Background()
-	cfg := &config.Config{}
-	logger := simplelogger.New(simplelogger.LevelInfo)
-
-	cfg.MongoDB.KRTBucket = "krt"
+	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 
 	req := testcontainers.ContainerRequest{
 		Image:        "mongo:latest",
@@ -71,10 +66,9 @@ func (s *ProcessRegistryRepositoryTestSuite) SetupSuite() {
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 	s.Require().NoError(err)
 
-	s.cfg = cfg
 	s.mongoDBContainer = mongoDBContainer
 	s.mongoClient = client
-	s.processRegistryRepo = NewProcessRegistryRepoMongoDB(cfg, logger, client)
+	s.processRegistryRepo = NewProcessRegistryRepoMongoDB(logger, client)
 
 	err = s.processRegistryRepo.CreateIndexes(context.Background(), productID)
 	s.Require().NoError(err)

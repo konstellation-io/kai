@@ -7,11 +7,10 @@ import (
 	"io"
 	"time"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 )
 
 //go:generate mockgen -source=../proto/versionpb/version_grpc.pb.go -destination=../../../mocks/${GOFILE} -package=mocks
@@ -22,16 +21,14 @@ import (
 const _requestTimeout = 5 * time.Minute
 
 type K8sVersionService struct {
-	cfg    *config.Config
 	client versionpb.VersionServiceClient
-	logger logging.Logger
+	logger logr.Logger
 }
 
 var _ service.VersionService = (*K8sVersionService)(nil)
 
-func New(cfg *config.Config, logger logging.Logger, client versionpb.VersionServiceClient) (*K8sVersionService, error) {
+func New(logger logr.Logger, client versionpb.VersionServiceClient) (*K8sVersionService, error) {
 	return &K8sVersionService{
-		cfg,
 		client,
 		logger,
 	}, nil
@@ -129,30 +126,30 @@ func (k *K8sVersionService) WatchProcessStatus(ctx context.Context, productID, v
 		defer close(ch)
 
 		for {
-			k.logger.Debug("[VersionService.WatchProcessStatus] waiting for stream.Recv()...")
+			k.logger.V(0).Info("[VersionService.WatchProcessStatus] waiting for stream.Recv()...")
 
 			msg, err := stream.Recv()
 
 			if errors.Is(stream.Context().Err(), context.Canceled) {
-				k.logger.Debug("[VersionService.WatchProcessStatus] Context canceled.")
+				k.logger.V(0).Info("[VersionService.WatchProcessStatus] Context canceled.")
 				return
 			}
 
 			if errors.Is(err, io.EOF) {
-				k.logger.Debug("[VersionService.WatchProcessStatus] EOF msg received.")
+				k.logger.V(0).Info("[VersionService.WatchProcessStatus] EOF msg received.")
 				return
 			}
 
 			if err != nil {
-				k.logger.Errorf("[VersionService.WatchProcessStatus] Unexpected error: %s", err)
+				k.logger.Error(err, "[VersionService.WatchProcessStatus] Unexpected error")
 				return
 			}
 
-			k.logger.Debug("[VersionService.WatchProcessStatus] Message received")
+			k.logger.V(0).Info("[VersionService.WatchProcessStatus] Message received")
 
 			status := entity.ProcessStatus(msg.GetStatus())
 			if !status.IsValid() {
-				k.logger.Errorf("[VersionService.WatchProcessStatus] Invalid node status: %s", status)
+				k.logger.Error(err, "[VersionService.WatchProcessStatus] Invalid node status", "status", status)
 				continue
 			}
 

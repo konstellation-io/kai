@@ -15,7 +15,7 @@ data:
   KAI_SERVICES_NATS_MANAGER: "{{ include "nats-manager.fullname" . }}:50051"
   KAI_BASE_DOMAIN_NAME: "{{ .Values.config.baseDomainName }}"
   KAI_ADMIN_STORAGE_PATH: "{{ .Values.adminApi.storage.path }}"
-  KAI_ADMIN_API_ADDRESS: ":8080"
+  KAI_ADMIN_API_PORT: "8080"
   # Keycloak
   KAI_KEYCLOAK_BASE_URL: "http://{{ include "keycloak.fullname" . }}:{{ .Values.keycloak.service.ports.http }}"
   KAI_KEYCLOAK_MASTER_REALM: "master"
