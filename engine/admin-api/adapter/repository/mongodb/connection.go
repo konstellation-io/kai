@@ -26,7 +26,7 @@ func NewMongoDB(logger logr.Logger) *MongoDB {
 }
 
 func (m *MongoDB) Connect() (*mongo.Client, error) {
-	m.logger.V(0).Info("Connecting to MongoDB", "endpoint", viper.GetString(config.MongoDBEndpointKey))
+	m.logger.V(2).Info("Connecting to MongoDB", "endpoint", viper.GetString(config.MongoDBEndpointKey))
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(viper.GetString(config.MongoDBEndpointKey)))
 	if err != nil {
@@ -45,7 +45,7 @@ func (m *MongoDB) Connect() (*mongo.Client, error) {
 	ctx, cancel = context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	m.logger.V(0).Info("MongoDB ping...")
+	m.logger.V(2).Info("MongoDB ping...")
 
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {

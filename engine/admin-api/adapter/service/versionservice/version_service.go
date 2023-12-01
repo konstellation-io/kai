@@ -126,17 +126,17 @@ func (k *K8sVersionService) WatchProcessStatus(ctx context.Context, productID, v
 		defer close(ch)
 
 		for {
-			k.logger.V(0).Info("[VersionService.WatchProcessStatus] waiting for stream.Recv()...")
+			k.logger.V(2).Info("[VersionService.WatchProcessStatus] waiting for stream.Recv()...")
 
 			msg, err := stream.Recv()
 
 			if errors.Is(stream.Context().Err(), context.Canceled) {
-				k.logger.V(0).Info("[VersionService.WatchProcessStatus] Context canceled.")
+				k.logger.V(2).Info("[VersionService.WatchProcessStatus] Context canceled.")
 				return
 			}
 
 			if errors.Is(err, io.EOF) {
-				k.logger.V(0).Info("[VersionService.WatchProcessStatus] EOF msg received.")
+				k.logger.V(2).Info("[VersionService.WatchProcessStatus] EOF msg received.")
 				return
 			}
 
@@ -145,7 +145,7 @@ func (k *K8sVersionService) WatchProcessStatus(ctx context.Context, productID, v
 				return
 			}
 
-			k.logger.V(0).Info("[VersionService.WatchProcessStatus] Message received")
+			k.logger.V(2).Info("[VersionService.WatchProcessStatus] Message received")
 
 			status := entity.ProcessStatus(msg.GetStatus())
 			if !status.IsValid() {

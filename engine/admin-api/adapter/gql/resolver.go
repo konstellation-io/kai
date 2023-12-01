@@ -127,7 +127,7 @@ func (r *mutationResolver) notifyVersionStatus(notifyCh chan *entity.Version) {
 		select {
 		case v, ok := <-notifyCh:
 			if !ok {
-				r.logger.V(0).Info("[notifyVersionStatus] received nil on notifyCh. closing notifier")
+				r.logger.V(2).Info("[notifyVersionStatus] received nil on notifyCh. closing notifier")
 				return
 			}
 

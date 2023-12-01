@@ -130,7 +130,7 @@ func (a *CasbinAccessControl) checkGrants(
 			return err
 		}
 
-		a.logger.V(0).Info(
+		a.logger.V(2).Info(
 			"Checking grants", "user", user.ID, "role", realmRole, "action", action, "product", product, "allowed", allowed,
 		)
 

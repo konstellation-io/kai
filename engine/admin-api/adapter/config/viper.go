@@ -52,6 +52,7 @@ const (
 
 func InitConfig() error {
 	viper.SetEnvPrefix("KAI")
+	viper.SetDefault(CfgFilePathKey, "config.yml")
 
 	viper.RegisterAlias(LogLevelKey, "API_LOG_LEVEL")
 	viper.RegisterAlias(ApplicationPortKey, "ADMIN_API_PORT")
@@ -105,7 +106,6 @@ func InitConfig() error {
 }
 
 func setDefaultConfig() {
-	viper.SetDefault(CfgFilePathKey, "config.yml")
 	viper.SetDefault(LogLevelKey, "INFO")
 	viper.SetDefault(VersionStatusTimeoutKey, 20*time.Minute)
 	viper.SetDefault(MinioTierEnabledKey, false)
