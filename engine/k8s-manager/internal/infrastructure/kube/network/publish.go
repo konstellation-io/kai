@@ -114,7 +114,7 @@ func (kn KubeNetwork) getIngressRules(
 		process := svc.Labels["process"]
 
 		if kn.isGrpc(svc) {
-			grpcHost := kn.getGRPCHost(workflow, process, httpHost)
+			grpcHost := kn.getGRPCHost(product, workflow, process)
 			publishedEndpoints[svc.Name] = grpcHost
 			ingressRules = append(ingressRules, kn.getGRPCIngressRule(grpcHost, svc.Name))
 		} else {
@@ -135,8 +135,13 @@ func (kn KubeNetwork) isGrpc(svc corev1.Service) bool {
 	return svc.Labels["protocol"] == string(domain.NetworkingProtocolGRPC)
 }
 
-func (kn KubeNetwork) getGRPCHost(workflow, process, httpHost string) string {
-	return fmt.Sprintf("%s.%s.%s", replaceDotsWithHyphen(process), replaceDotsWithHyphen(workflow), httpHost)
+func (kn KubeNetwork) getGRPCHost(product, workflow, process string) string {
+	return fmt.Sprintf("%s-%s-%s.%s",
+		replaceDotsWithHyphen(product),
+		replaceDotsWithHyphen(workflow),
+		replaceDotsWithHyphen(process),
+		viper.GetString(config.BaseDomainNameKey),
+	)
 }
 
 func (kn KubeNetwork) getGRPCIngressRule(grpcHost, serviceName string) networkingv1.IngressRule {
