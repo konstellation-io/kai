@@ -121,7 +121,7 @@ func (kp *KubeProcess) getPrometheusAnnotations() map[string]string {
 		"kai.prometheus/scrape": "true",
 		"kai.prometheus/scheme": "http",
 		"kai.prometheus/path":   "/metrics",
-		"kai.prometheus/port":   strconv.Itoa(viper.GetInt(config.TelegrafMetricsPortKey)),
+		"kai.prometheus/port":   strconv.Itoa(viper.GetInt(config.TelegrafMetricsOutputPortKey)),
 	}
 }
 
