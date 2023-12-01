@@ -60,6 +60,7 @@ func InitConfig() error {
 
 	viper.RegisterAlias(RegistryHostKey, "REGISTRY_HOST")
 
+	viper.RegisterAlias(MongoDBEndpointKey, "MONGODB_URI")
 	viper.RegisterAlias(MongoDBKaiDatabaseKey, "MONGODB_DATABASE")
 
 	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT_URL")
@@ -87,8 +88,6 @@ func InitConfig() error {
 	viper.RegisterAlias(K8sManagerEndpointKey, "SERVICES_K8S_MANAGER")
 	viper.RegisterAlias(NatsManagerEndpointKey, "SERVICES_NATS_MANAGER")
 
-	viper.AutomaticEnv()
-
 	viper.SetConfigFile(viper.GetString(CfgFilePathKey))
 
 	err := viper.ReadInConfig()
@@ -100,6 +99,7 @@ func InitConfig() error {
 		return fmt.Errorf("read config file: %w", err)
 	}
 
+	viper.AutomaticEnv()
 	setDefaultConfig()
 
 	return nil
