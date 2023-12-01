@@ -19,7 +19,7 @@ import (
 
 const (
 	_httpEndpointFormat = "%s.%s/%s-%s"
-	_grpcEndpointFormat = "%s.%s.%s.%s"
+	_grpcEndpointFormat = "%s-%s-%s.%s"
 )
 
 func (s *networkSuite) TestPublish() {
@@ -200,5 +200,5 @@ func (s *networkSuite) getGRPCEndpoint() string {
 	workflow := strings.ReplaceAll(_workflow, ".", "-")
 	process := strings.ReplaceAll(_process, ".", "-")
 
-	return fmt.Sprintf(_grpcEndpointFormat, process, workflow, product, viper.GetString(config.BaseDomainNameKey))
+	return fmt.Sprintf(_grpcEndpointFormat, product, workflow, process, viper.GetString(config.BaseDomainNameKey))
 }
