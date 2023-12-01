@@ -50,8 +50,8 @@ func (kn KubeNetwork) CreateNetwork(ctx context.Context, params service.CreateNe
 				},
 				{
 					Name:       _metricsPortName,
-					TargetPort: intstr.FromInt(viper.GetInt(config.TelegrafMetricsPortKey)),
-					Port:       viper.GetInt32(config.TelegrafMetricsPortKey),
+					TargetPort: intstr.FromInt(viper.GetInt(config.TelegrafMetricsOutputPortKey)),
+					Port:       viper.GetInt32(config.TelegrafMetricsOutputPortKey),
 				},
 			},
 		},
