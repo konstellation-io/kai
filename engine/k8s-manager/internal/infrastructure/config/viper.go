@@ -116,7 +116,7 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(AuthClientSecretKey, "KEYCLOAK_MINIO_CLIENT_SECRET")
 
 	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_ENABLED")
-	viper.RegisterAlias(TriggersTLSEnabledKey, "TRIGGERS_TLS_CERT_SECRET_NAME")
+	viper.RegisterAlias(TLSSecretNameKey, "TRIGGERS_TLS_CERT_SECRET_NAME")
 	viper.RegisterAlias(TriggersIngressClassNameKey, "TRIGGERS_INGRESS_CLASS_NAME")
 	viper.RegisterAlias(TriggersRequestTimeoutKey, "TRIGGERS_REQUEST_TIMEOUT")
 	viper.RegisterAlias(TriggersB64IngressesAnnotaionsKey, "TRIGGERS_BASE64_INGRESSES_ANNOTATIONS")
