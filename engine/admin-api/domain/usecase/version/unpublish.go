@@ -54,7 +54,7 @@ func (h *Handler) Unpublish(
 		return nil, err
 	}
 
-	product.PublishedVersion = nil
+	product.RemovePublishedVersion()
 
 	err = h.productRepo.Update(context.Background(), product)
 	if err != nil {
