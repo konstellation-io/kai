@@ -49,6 +49,21 @@ func (h *Handler) Unpublish(
 		)
 	}
 
+	product, err := h.productRepo.GetByID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	product.PublishedVersion = nil
+
+	err = h.productRepo.Update(context.Background(), product)
+	if err != nil {
+		h.logger.Error(err, "Error updating product published version",
+			"productID", productID,
+			"publishedVersion", vers.Tag,
+		)
+	}
+
 	err = h.userActivityInteractor.RegisterUnpublishAction(user.Email, productID, vers, comment)
 	if err != nil {
 		h.logger.Error(err, "Error registering user activity",
