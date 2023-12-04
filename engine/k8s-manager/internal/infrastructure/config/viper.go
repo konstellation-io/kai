@@ -60,7 +60,8 @@ const (
 	TelegrafImageKey               = "telegraf.image"
 	TelegrafTagKey                 = "telegraf.tag"
 	TelegrafPullPolicyKey          = "telegraf.pullPolicy"
-	TelegrafMetricsPortKey         = "telegraf.port"
+	TelegrafMetricsOutputPortKey   = "telegraf.output.port"
+	TelegrafMetricsInputPortKey    = "telegraf.input.port"
 	MeasurementsInsecureKey        = "measurements.insecure"
 	MeasurementsTimeoutKey         = "measurements.timeout"
 	MeasurementsMetricsIntervalKey = "measurements.metricsInterval"
@@ -131,7 +132,7 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(TelegrafImageKey, "TELEGRAF_IMAGE_REPOSITORY")
 	viper.RegisterAlias(TelegrafTagKey, "TELEGRAF_IMAGE_TAG")
 	viper.RegisterAlias(TelegrafPullPolicyKey, "TELEGRAF_IMAGE_PULLPOLICY")
-	viper.RegisterAlias(TelegrafMetricsPortKey, "TELEGRAF_METRICS_PORT")
+	viper.RegisterAlias(TelegrafMetricsOutputPortKey, "TELEGRAF_METRICS_PORT")
 	viper.RegisterAlias(MeasurementsInsecureKey, "MEASUREMENTS_INSECURE")
 	viper.RegisterAlias(MeasurementsTimeoutKey, "MEASUREMENTS_TIMEOUT")
 	viper.RegisterAlias(MeasurementsMetricsIntervalKey, "MEASUREMENTS_METRICS_INTERVAL")
@@ -175,8 +176,9 @@ func setDefaultValues() {
 	viper.SetDefault(TelegrafImageKey, "telegraf")
 	viper.SetDefault(TelegrafTagKey, "1.28.5")
 	viper.SetDefault(TelegrafPullPolicyKey, "IfNotPresent")
-	viper.SetDefault(TelegrafMetricsPortKey, 9191)
-	viper.SetDefault(MeasurementsInsecureKey, false)
+	viper.SetDefault(TelegrafMetricsOutputPortKey, 9191)
+	viper.SetDefault(TelegrafMetricsInputPortKey, 4317)
+	viper.SetDefault(MeasurementsInsecureKey, true)
 	viper.SetDefault(MeasurementsTimeoutKey, 5)
 	viper.SetDefault(MeasurementsMetricsIntervalKey, 10)
 
