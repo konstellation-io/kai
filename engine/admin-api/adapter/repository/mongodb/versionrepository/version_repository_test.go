@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -17,9 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
 const (
@@ -30,7 +29,6 @@ const (
 
 type VersionRepositoryTestSuite struct {
 	suite.Suite
-	cfg              *config.Config
 	mongoDBContainer testcontainers.Container
 	mongoClient      *mongo.Client
 	versionRepo      *VersionRepoMongoDB
@@ -42,10 +40,7 @@ func TestVersionRepositoryTestSuite(t *testing.T) {
 
 func (s *VersionRepositoryTestSuite) SetupSuite() {
 	ctx := context.Background()
-	cfg := &config.Config{}
-	logger := simplelogger.New(simplelogger.LevelInfo)
-
-	cfg.MongoDB.KRTBucket = "krt"
+	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 
 	req := testcontainers.ContainerRequest{
 		Image:        "mongo:latest",
@@ -73,10 +68,9 @@ func (s *VersionRepositoryTestSuite) SetupSuite() {
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 	s.Require().NoError(err)
 
-	s.cfg = cfg
 	s.mongoDBContainer = mongoDBContainer
 	s.mongoClient = client
-	s.versionRepo = New(cfg, logger, client)
+	s.versionRepo = New(logger, client)
 
 	err = s.versionRepo.CreateIndexes(context.Background(), productID)
 	s.Require().NoError(err)

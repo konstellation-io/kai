@@ -7,12 +7,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/go-logr/logr"
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 	"github.com/stretchr/testify/suite"
@@ -62,8 +62,7 @@ var (
 
 type NatsManagerTestSuite struct {
 	suite.Suite
-	cfg               *config.Config
-	logger            logging.Logger
+	logger            logr.Logger
 	mockService       *mocks.MockNatsManagerServiceClient
 	natsManagerClient *natsmanager.Client
 }
@@ -74,15 +73,12 @@ func TestNatsManagerTestSuite(t *testing.T) {
 
 func (s *NatsManagerTestSuite) SetupSuite() {
 	mockController := gomock.NewController(s.T())
-	cfg := &config.Config{}
-	logger := mocks.NewMockLogger(mockController)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	service := mocks.NewMockNatsManagerServiceClient(mockController)
 
-	natsManagerClient, err := natsmanager.NewClient(cfg, logger, service)
+	natsManagerClient, err := natsmanager.NewClient(logger, service)
 	s.Require().NoError(err)
 
-	s.cfg = cfg
 	s.logger = logger
 	s.mockService = service
 	s.natsManagerClient = natsManagerClient

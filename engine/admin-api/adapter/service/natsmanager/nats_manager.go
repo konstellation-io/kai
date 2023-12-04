@@ -4,23 +4,20 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 )
 
 //go:generate mockgen -source=../proto/natspb/nats_grpc.pb.go -destination=../../../mocks/${GOFILE} -package=mocks
 
 type Client struct {
-	cfg    *config.Config
 	client natspb.NatsManagerServiceClient
-	logger logging.Logger
+	logger logr.Logger
 }
 
-func NewClient(cfg *config.Config, logger logging.Logger, client natspb.NatsManagerServiceClient) (*Client, error) {
+func NewClient(logger logr.Logger, client natspb.NatsManagerServiceClient) (*Client, error) {
 	return &Client{
-		cfg,
 		client,
 		logger,
 	}, nil

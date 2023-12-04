@@ -1,20 +1,20 @@
 package http
 
 import (
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	kaimiddleware "github.com/konstellation-io/kai/engine/admin-api/delivery/http/middleware"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/spf13/viper"
 )
 
 // App is the top-level struct.
 type App struct {
 	server *echo.Echo
-	cfg    *config.Config
-	logger logging.Logger
+	logger logr.Logger
 }
 
 const logFormat = "${time_rfc3339} INFO remote_ip=${remote_ip}, method=${method}, uri=${uri}, status=${status}" +
@@ -23,16 +23,13 @@ const logFormat = "${time_rfc3339} INFO remote_ip=${remote_ip}, method=${method}
 
 // NewApp creates a new App instance.
 func NewApp(
-	cfg *config.Config,
-	logger logging.Logger,
+	logger logr.Logger,
 	gqlController controller.GraphQL,
 ) *App {
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
 	e.Validator = newCustomValidator()
-
-	e.Static("/static", cfg.Admin.StoragePath)
 
 	e.Use(
 		middleware.RequestID(),
@@ -41,7 +38,7 @@ func NewApp(
 		}),
 	)
 
-	if cfg.Admin.CORSEnabled {
+	if viper.GetBool(config.CORSEnabledKey) {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowCredentials: true,
 		}))
@@ -58,13 +55,12 @@ func NewApp(
 
 	return &App{
 		e,
-		cfg,
 		logger,
 	}
 }
 
 // Start runs the HTTP server.
 func (a *App) Start() {
-	a.logger.Info("HTTP server started on " + a.cfg.Admin.APIAddress)
-	a.server.Logger.Fatal(a.server.Start(a.cfg.Admin.APIAddress))
+	a.logger.Info("HTTP server started", "port", viper.GetString(config.ApplicationPortKey))
+	a.server.Logger.Fatal(a.server.Start(":" + viper.GetString(config.ApplicationPortKey)))
 }

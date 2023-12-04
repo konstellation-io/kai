@@ -7,13 +7,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	"github.com/go-logr/logr"
 	"github.com/labstack/echo"
 )
 
 const _operationNameKey = "operationName"
 
-func NewGraphQLOperationMiddleware(logger logging.Logger) echo.MiddlewareFunc {
+func NewGraphQLOperationMiddleware(logger logr.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			b, err := io.ReadAll(c.Request().Body)

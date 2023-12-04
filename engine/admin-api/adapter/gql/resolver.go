@@ -4,20 +4,14 @@ package gql
 
 import (
 	"context"
-	"errors"
 	"sync"
 	"time"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
-)
-
-var (
-	ErrNotImplemented = errors.New("endpoint not implemented")
 )
 
 //nolint:gochecknoglobals // needs to be global to be used in the resolver
@@ -32,7 +26,7 @@ func initialize() {
 }
 
 type Resolver struct {
-	logger                 logging.Logger
+	logger                 logr.Logger
 	productInteractor      *usecase.ProductInteractor
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
@@ -40,7 +34,6 @@ type Resolver struct {
 	serverInfoGetter       *usecase.ServerInfoGetter
 	processService         *usecase.ProcessService
 	logsService            logs.LogsUsecase
-	cfg                    *config.Config
 }
 
 func NewGraphQLResolver(params Params) *Resolver {
@@ -55,7 +48,6 @@ func NewGraphQLResolver(params Params) *Resolver {
 		params.ServerInfoGetter,
 		params.ProcessService,
 		params.LogsUsecase,
-		params.Cfg,
 	}
 }
 
@@ -92,9 +84,9 @@ func (r *mutationResolver) notifyRegisteredProcessStatus(notifyCh chan *entity.R
 	for registeredProcess := range notifyCh {
 		switch registeredProcess.Status {
 		case entity.RegisterProcessStatusCreated:
-			r.logger.Infof("Process successfully registered with ID: %q", registeredProcess.ID)
+			r.logger.Info("Process successfully registered", "processID", registeredProcess.ID)
 		case entity.RegisterProcessStatusFailed:
-			r.logger.Errorf("Error registering process with ID: %q - %s", registeredProcess.ID, registeredProcess.Logs)
+			r.logger.Info("Failed to register process", "processID", registeredProcess.ID, "error", registeredProcess.Logs)
 		default:
 		}
 	}
@@ -105,7 +97,11 @@ func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionI
 
 	v, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 	if err != nil {
-		r.logger.Errorf("[mutationResolver.StartVersion] errors starting version: %s", err)
+		r.logger.Error(err, "Unable to start version",
+			"productID", input.ProductID,
+			"versionTag", input.VersionTag,
+		)
+
 		return nil, err
 	}
 
@@ -131,7 +127,7 @@ func (r *mutationResolver) notifyVersionStatus(notifyCh chan *entity.Version) {
 		select {
 		case v, ok := <-notifyCh:
 			if !ok {
-				r.logger.Debugf("[notifyVersionStatus] received nil on notifyCh. closing notifier")
+				r.logger.V(2).Info("[notifyVersionStatus] received nil on notifyCh. closing notifier")
 				return
 			}
 
