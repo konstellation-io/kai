@@ -31,10 +31,7 @@ func (s *versionSuite) TestUnpublish_OK() {
 
 	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(nil)
 	s.versionRepo.EXPECT().Update(productID, vers).Return(nil)
-	s.productRepo.EXPECT().Update(ctx, product).DoAndReturn(func(ctx context.Context, product *entity.Product) error {
-		s.Nil(product.PublishedVersion)
-		return nil
-	})
+	s.productRepo.EXPECT().Update(ctx, product)
 	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.Email, productID, vers, "unpublishing").Return(nil)
 
 	// WHEN unpublishing the version
@@ -45,6 +42,7 @@ func (s *versionSuite) TestUnpublish_OK() {
 	s.Equal(entity.VersionStatusStarted, unpublishedVer.Status)
 	s.Nil(unpublishedVer.PublicationAuthor)
 	s.Nil(unpublishedVer.PublicationDate)
+	s.False(product.HasVersionPublished()) // product is a pointer, so it's updated
 }
 
 func (s *versionSuite) TestUnpublish_ErrorUserNotAuthorized() {
