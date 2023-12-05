@@ -67,7 +67,7 @@ func (s *KeycloakSuite) SetupSuite() {
 	})
 	s.Require().NoError(err)
 
-	keycloakEndpoint, err := keycloakContainer.Endpoint(ctx, "http")
+	keycloakEndpoint, err := keycloakContainer.PortEndpoint(ctx, "8080/tcp", "http")
 	s.Require().NoError(err)
 
 	s.keycloakContainer = keycloakContainer

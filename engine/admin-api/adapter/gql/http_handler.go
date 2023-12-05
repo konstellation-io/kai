@@ -10,20 +10,18 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/go-logr/logr"
 	"github.com/gorilla/websocket"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 )
 
 type Params struct {
-	Logger                 logging.Logger
-	Cfg                    *config.Config
+	Logger                 logr.Logger
 	ProductInteractor      *usecase.ProductInteractor
 	UserInteractor         *usecase.UserInteractor
 	UserActivityInteractor usecase.UserActivityInteracter

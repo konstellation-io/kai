@@ -12,6 +12,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
+	"github.com/spf13/viper"
 )
 
 var _ service.LogsService = (*Client)(nil)
@@ -20,8 +21,8 @@ type Client struct {
 	queryRangeURL string
 }
 
-func NewClient(cfg *config.Config) *Client {
-	queryRangeURL := fmt.Sprintf("%s/loki/api/v1/query_range", cfg.Loki.Address)
+func NewClient() *Client {
+	queryRangeURL := fmt.Sprintf("%s/loki/api/v1/query_range", viper.GetString(config.LokiEndpointKey))
 
 	return &Client{
 		queryRangeURL: queryRangeURL,

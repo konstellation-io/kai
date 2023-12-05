@@ -3,29 +3,25 @@ package processregistry
 import (
 	"context"
 
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	"github.com/go-logr/logr"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
 const processRegistryCollectionName = "process_registry"
 
 type ProcessRegistryRepoMongoDB struct {
-	cfg    *config.Config
-	logger logging.Logger
+	logger logr.Logger
 	client *mongo.Client
 }
 
 func NewProcessRegistryRepoMongoDB(
-	cfg *config.Config,
-	logger logging.Logger,
+	logger logr.Logger,
 	client *mongo.Client,
 ) *ProcessRegistryRepoMongoDB {
 	processRegistryRepo := &ProcessRegistryRepoMongoDB{
-		cfg,
 		logger,
 		client,
 	}
@@ -35,7 +31,7 @@ func NewProcessRegistryRepoMongoDB(
 
 func (r *ProcessRegistryRepoMongoDB) CreateIndexes(ctx context.Context, productID string) error {
 	collection := r.client.Database(productID).Collection(processRegistryCollectionName)
-	r.logger.Infof("MongoDB creating indexes for %s collection...", processRegistryCollectionName)
+	r.logger.Info("MongoDB creating indexes for %s collection", "collection", processRegistryCollectionName)
 
 	indexes := []mongo.IndexModel{
 		{

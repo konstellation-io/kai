@@ -8,20 +8,19 @@ import (
 	"io"
 	"testing"
 
+	"github.com/go-logr/logr"
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/stretchr/testify/suite"
 )
 
 type VersionServiceTestSuite struct {
 	suite.Suite
-	cfg              *config.Config
-	logger           logging.Logger
+	logger           logr.Logger
 	mockService      *mocks.MockVersionServiceClient
 	k8sVersionClient *versionservice.K8sVersionService
 }
@@ -32,15 +31,12 @@ func TestK8sManagerTestSuite(t *testing.T) {
 
 func (s *VersionServiceTestSuite) SetupSuite() {
 	mockController := gomock.NewController(s.T())
-	cfg := &config.Config{}
-	logger := mocks.NewMockLogger(mockController)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	service := mocks.NewMockVersionServiceClient(mockController)
 
-	k8sVersionClient, err := versionservice.New(cfg, logger, service)
+	k8sVersionClient, err := versionservice.New(logger, service)
 	s.Require().NoError(err)
 
-	s.cfg = cfg
 	s.logger = logger
 	s.mockService = service
 	s.k8sVersionClient = k8sVersionClient

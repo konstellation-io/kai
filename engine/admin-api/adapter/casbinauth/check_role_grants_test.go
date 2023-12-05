@@ -5,20 +5,17 @@ package casbinauth_test
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/casbinauth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCheckAdminGrants(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 
 	authorizer, err := casbinauth.NewCasbinAccessControl(logger, casbinModel, casbinPolicy)
 	require.NoError(t, err)

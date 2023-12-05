@@ -5,10 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,20 +17,17 @@ import (
 const registeredProcessesCollectionName = "registered_processes"
 
 type ProcessRepositoryMongoDB struct {
-	cfg    *config.Config
-	logger logging.Logger
+	logger logr.Logger
 	client *mongo.Client
 }
 
 var _ repository.ProcessRepository = (*ProcessRepositoryMongoDB)(nil)
 
 func New(
-	cfg *config.Config,
-	logger logging.Logger,
+	logger logr.Logger,
 	client *mongo.Client,
 ) *ProcessRepositoryMongoDB {
 	return &ProcessRepositoryMongoDB{
-		cfg,
 		logger,
 		client,
 	}
@@ -39,7 +35,7 @@ func New(
 
 func (r *ProcessRepositoryMongoDB) CreateIndexes(ctx context.Context, productID string) error {
 	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
-	r.logger.Infof("MongoDB creating indexes for %s collection...", registeredProcessesCollectionName)
+	r.logger.Info("MongoDB creating indexes", "collection", registeredProcessesCollectionName)
 
 	_, err := collection.Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{

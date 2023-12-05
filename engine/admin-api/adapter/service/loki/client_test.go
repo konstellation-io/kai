@@ -12,6 +12,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/loki"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,8 +32,7 @@ func TestLokiClientGetLogs(t *testing.T) {
 	}))
 	defer server.Close()
 
-	cfg := &config.Config{}
-	cfg.Loki.Address = server.URL
+	viper.Set(config.LokiEndpointKey, server.URL)
 
 	fromTime, err := time.Parse(time.RFC3339, "2023-01-01T00:00:00Z")
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestLokiClientGetLogs(t *testing.T) {
 		Limit:      100,
 	}
 
-	lokiClient := loki.NewClient(cfg)
+	lokiClient := loki.NewClient()
 
 	logs, err := lokiClient.GetLogs(logFilters)
 	require.NoError(t, err)
@@ -82,8 +82,7 @@ func TestLokiClientGetFullQuery(t *testing.T) {
 	}))
 	defer server.Close()
 
-	cfg := &config.Config{}
-	cfg.Loki.Address = server.URL
+	viper.Set(config.LokiEndpointKey, server.URL)
 
 	fromTime, err := time.Parse(time.RFC3339, "2023-01-01T00:00:00Z")
 	require.NoError(t, err)
@@ -103,7 +102,7 @@ func TestLokiClientGetFullQuery(t *testing.T) {
 		Logger:       "[LOGGER]",
 	}
 
-	lokiClient := loki.NewClient(cfg)
+	lokiClient := loki.NewClient()
 
 	_, err = lokiClient.GetLogs(logFilters)
 	require.Error(t, err) //unmarhsall error

@@ -7,6 +7,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/go-logr/logr"
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/stretchr/testify/suite"
@@ -25,7 +27,7 @@ type ContextUserManagerSuite struct {
 	suite.Suite
 	mockUserRegistry           *mocks.MockUserRegistry
 	mockAccessControl          *mocks.MockAccessControl
-	mockLogger                 *mocks.MockLogger
+	logger                     logr.Logger
 	mockUserActivityInteractor *mocks.MockUserActivityInteracter
 	userManager                *UserInteractor
 }
@@ -38,11 +40,9 @@ func (s *ContextUserManagerSuite) SetupSuite() {
 	mockController := gomock.NewController(s.T())
 	s.mockUserRegistry = mocks.NewMockUserRegistry(mockController)
 	s.mockAccessControl = mocks.NewMockAccessControl(mockController)
-	s.mockLogger = mocks.NewMockLogger(mockController)
+	s.logger = testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	s.mockUserActivityInteractor = mocks.NewMockUserActivityInteracter(mockController)
-	s.userManager = NewUserInteractor(s.mockLogger, s.mockAccessControl, s.mockUserActivityInteractor, s.mockUserRegistry)
-
-	mocks.AddLoggerExpects(s.mockLogger)
+	s.userManager = NewUserInteractor(s.logger, s.mockAccessControl, s.mockUserActivityInteractor, s.mockUserRegistry)
 }
 
 func (s *ContextUserManagerSuite) GetTestUser() *entity.User {

@@ -4,16 +4,13 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
+	"github.com/go-logr/logr"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/gql"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/labstack/echo"
-
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/gql"
-
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 )
 
 //go:generate mockgen -source=${GOFILE} -destination=../../../mocks/controller_${GOFILE} -package=mocks
@@ -26,8 +23,7 @@ type GraphQL interface {
 }
 
 type GraphQLController struct {
-	cfg                    *config.Config
-	logger                 logging.Logger
+	logger                 logr.Logger
 	productInteractor      *usecase.ProductInteractor
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
@@ -38,8 +34,7 @@ type GraphQLController struct {
 }
 
 type Params struct {
-	Logger                 logging.Logger
-	Cfg                    *config.Config
+	Logger                 logr.Logger
 	ProductInteractor      *usecase.ProductInteractor
 	UserInteractor         *usecase.UserInteractor
 	UserActivityInteractor usecase.UserActivityInteracter
@@ -53,7 +48,6 @@ func NewGraphQLController(
 	params Params,
 ) *GraphQLController {
 	return &GraphQLController{
-		params.Cfg,
 		params.Logger,
 		params.ProductInteractor,
 		params.UserInteractor,
@@ -79,7 +73,6 @@ func (g *GraphQLController) GraphQLHandler(c echo.Context) error {
 
 	h := gql.NewHTTPHandler(gql.Params{
 		Logger:                 g.logger,
-		Cfg:                    g.cfg,
 		ProductInteractor:      g.productInteractor,
 		UserInteractor:         g.userInteractor,
 		UserActivityInteractor: g.userActivityInteractor,

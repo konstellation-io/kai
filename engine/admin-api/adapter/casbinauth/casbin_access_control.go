@@ -2,10 +2,9 @@ package casbinauth
 
 import (
 	"github.com/casbin/casbin/v2"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
-
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
 const _defaultResource = ""
@@ -30,12 +29,12 @@ func WithAdminRole(adminRole string) OptFunc {
 
 type CasbinAccessControl struct {
 	cfg      Opts
-	logger   logging.Logger
+	logger   logr.Logger
 	enforcer *casbin.Enforcer
 }
 
 func NewCasbinAccessControl(
-	logger logging.Logger,
+	logger logr.Logger,
 	modelPath,
 	policyPath string,
 	opts ...OptFunc,
@@ -131,9 +130,8 @@ func (a *CasbinAccessControl) checkGrants(
 			return err
 		}
 
-		a.logger.Infof(
-			"Checking grants userID[%s] role[%s] action[%s] product[%s] allowed[%t]",
-			user.ID, realmRole, action, product, allowed,
+		a.logger.V(2).Info(
+			"Checking grants", "user", user.ID, "role", realmRole, "action", action, "product", product, "allowed", allowed,
 		)
 
 		if allowed {

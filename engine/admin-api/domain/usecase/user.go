@@ -3,15 +3,15 @@ package usecase
 import (
 	"fmt"
 
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"golang.org/x/net/context"
 )
 
 type UserInteractor struct {
-	logger                 logging.Logger
+	logger                 logr.Logger
 	accessControl          auth.AccessControl
 	userActivityInteractor UserActivityInteracter
 	userRegistry           service.UserRegistry
@@ -21,7 +21,7 @@ type UserInteractor struct {
 //
 // UserInteractor is the usecase to manage users.
 func NewUserInteractor(
-	logger logging.Logger,
+	logger logr.Logger,
 	accessControl auth.AccessControl,
 	userActivityInteractor UserActivityInteracter,
 	userRegistry service.UserRegistry,
@@ -67,7 +67,7 @@ func (ui *UserInteractor) UpdateUserProductGrants(
 		return fmt.Errorf("registering user activity: %w", err)
 	}
 
-	ui.logger.Infof("Updated user %q grants for product %q: %v", targetUserID, product, grants)
+	ui.logger.Info("Updated user grants for product", "user", targetUserID, "product", product, "grants", grants)
 
 	return nil
 }
@@ -104,7 +104,7 @@ func (ui *UserInteractor) RevokeUserProductGrants(
 		return fmt.Errorf("registering user activity: %w", err)
 	}
 
-	ui.logger.Infof("Revoked user %q grants for product %q", targetUserID, product)
+	ui.logger.Info("Revoked user grants for product", "user", targetUserID, "product", product)
 
 	return nil
 }

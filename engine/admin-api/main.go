@@ -20,7 +20,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
-	logging2 "github.com/konstellation-io/kai/engine/admin-api/domain/service/logging"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
@@ -33,14 +32,10 @@ import (
 )
 
 func main() {
-	cfg := config.NewConfig()
-
 	err := config.InitConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	oldLogger := logging2.NewLogger(cfg.LogLevel)
 
 	zapLog, err := zap.NewDevelopment()
 	if err != nil {
@@ -49,57 +44,64 @@ func main() {
 
 	logger := zapr.NewLogger(zapLog)
 
-	db := mongodb.NewMongoDB(cfg, oldLogger)
+	db := mongodb.NewMongoDB(logger)
 
-	mongodbClient := db.Connect()
+	mongodbClient, err := db.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	defer db.Disconnect()
 
-	graphqlController := initGraphqlController(cfg, oldLogger, logger, mongodbClient)
+	graphqlController := initGraphqlController(logger, mongodbClient)
 
 	app := http.NewApp(
-		cfg,
-		oldLogger,
+		logger,
 		graphqlController,
 	)
 
 	app.Start()
 }
 
-func initGraphqlController(
-	cfg *config.Config, oldLogger logging2.Logger, logger logr.Logger, mongodbClient *mongo.Client,
-) *controller.GraphQLController {
+//nolint:funlen // Future refactor
+func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *controller.GraphQLController {
 	productRepo := mongodb.NewProductRepoMongoDB(logger, mongodbClient)
-	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, oldLogger, mongodbClient)
-	versionMongoRepo := versionrepository.New(cfg, oldLogger, mongodbClient)
-	processRepo := processrepository.New(cfg, oldLogger, mongodbClient)
+	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(logger, mongodbClient)
+	versionMongoRepo := versionrepository.New(logger, mongodbClient)
+	processRepo := processrepository.New(logger, mongodbClient)
+	logsService := loki.NewClient()
 
-	ccK8sManager, err := grpc.Dial(cfg.Services.K8sManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	ccK8sManager, err := grpc.Dial(
+		viper.GetString(config.K8sManagerEndpointKey),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	k8sManagerClient := versionpb.NewVersionServiceClient(ccK8sManager)
 
-	k8sService, err := versionservice.New(cfg, oldLogger, k8sManagerClient)
+	k8sService, err := versionservice.New(logger, k8sManagerClient)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ccNatsManager, err := grpc.Dial(cfg.Services.NatsManager, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	ccNatsManager, err := grpc.Dial(
+		viper.GetString(config.NatsManagerEndpointKey),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	natsManagerClient := natspb.NewNatsManagerServiceClient(ccNatsManager)
 
-	natsManagerService, err := natsmanager.NewClient(cfg, oldLogger, natsManagerClient)
+	natsManagerService, err := natsmanager.NewClient(logger, natsManagerClient)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	logsService := loki.NewClient(cfg)
-
-	accessControl, err := casbinauth.NewCasbinAccessControl(oldLogger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
+	accessControl, err := casbinauth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -150,7 +152,7 @@ func initGraphqlController(
 	})
 
 	userInteractor := usecase.NewUserInteractor(
-		oldLogger,
+		logger,
 		accessControl,
 		userActivityInteractor,
 		keycloakUserRegistry,
@@ -174,8 +176,7 @@ func initGraphqlController(
 
 	return controller.NewGraphQLController(
 		controller.Params{
-			Logger:                 oldLogger,
-			Cfg:                    cfg,
+			Logger:                 logger,
 			ProductInteractor:      productInteractor,
 			UserInteractor:         userInteractor,
 			UserActivityInteractor: userActivityInteractor,
