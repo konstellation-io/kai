@@ -37,18 +37,17 @@ func (m *MockProcessRepository) EXPECT() *MockProcessRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockProcessRepository) Create(productID string, newRegisteredProcess *entity.RegisteredProcess) (*entity.RegisteredProcess, error) {
+func (m *MockProcessRepository) Create(ctx context.Context, productID string, newRegisteredProcess *entity.RegisteredProcess) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", productID, newRegisteredProcess)
-	ret0, _ := ret[0].(*entity.RegisteredProcess)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Create", ctx, productID, newRegisteredProcess)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockProcessRepositoryMockRecorder) Create(productID, newRegisteredProcess interface{}) *gomock.Call {
+func (mr *MockProcessRepositoryMockRecorder) Create(ctx, productID, newRegisteredProcess interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProcessRepository)(nil).Create), productID, newRegisteredProcess)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProcessRepository)(nil).Create), ctx, productID, newRegisteredProcess)
 }
 
 // CreateIndexes mocks base method.

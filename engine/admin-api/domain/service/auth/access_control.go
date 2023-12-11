@@ -8,23 +8,27 @@ type Action string
 
 const DefaultAdminRole = "ADMIN"
 
-const ActViewProduct Action = "view_product"
-const ActCreateProduct Action = "create_product"
+const (
+	ActViewProduct   Action = "view_product"
+	ActCreateProduct Action = "create_product"
 
-const ActCreateVersion Action = "create_version"
-const ActStartVersion Action = "start_version"
-const ActStartCriticalVersion Action = "start_critical_version"
-const ActStopVersion Action = "stop_version"
-const ActPublishVersion Action = "publish_version"
-const ActUnpublishVersion Action = "unpublish_version"
-const ActEditVersion Action = "edit_version"
-const ActViewVersion Action = "view_version"
+	ActCreateVersion        Action = "create_version"
+	ActStartVersion         Action = "start_version"
+	ActStartCriticalVersion Action = "start_critical_version"
+	ActStopVersion          Action = "stop_version"
+	ActPublishVersion       Action = "publish_version"
+	ActUnpublishVersion     Action = "unpublish_version"
+	ActEditVersion          Action = "edit_version"
+	ActViewVersion          Action = "view_version"
 
-const ActViewMetrics Action = "view_metrics"
-const ActViewServerInfo Action = "view_server_info"
+	ActViewMetrics    Action = "view_metrics"
+	ActViewServerInfo Action = "view_server_info"
 
-const ActViewUserActivities Action = "view_user_activities"
-const ActUpdateUserGrants Action = "update_user_grants"
+	ActViewUserActivities Action = "view_user_activities"
+	ActUpdateUserGrants   Action = "update_user_grants"
+
+	ActRegisterPublicProcess Action = "update_user_grants"
+)
 
 func (e Action) IsValid() bool {
 	switch e {

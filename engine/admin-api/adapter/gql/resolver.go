@@ -11,6 +11,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 )
 
@@ -32,7 +33,7 @@ type Resolver struct {
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
 	serverInfoGetter       *usecase.ServerInfoGetter
-	processService         *usecase.ProcessService
+	processService         *process.Service
 	logsService            logs.LogsUsecase
 }
 
@@ -71,13 +72,30 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterProcessInput) (*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	p, notifyCh, err := r.processService.RegisterProcess(
-		ctx, loggedUser, input.ProductID, input.Version, input.ProcessID, input.ProcessType, input.File.File,
+	return r.processService.RegisterProcess(
+		ctx, loggedUser, process.RegisterProcessOpts{
+			Product:     input.ProductID,
+			Version:     input.Version,
+			Process:     input.ProcessID,
+			ProcessType: entity.ProcessType(input.ProcessType),
+			Sources:     input.File.File,
+		},
 	)
+}
 
-	go r.notifyRegisteredProcessStatus(notifyCh)
+func (r *mutationResolver) RegisterPublicProcess(ctx context.Context, input RegisterPublicProcessInput) (*entity.RegisteredProcess, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
 
-	return p, err
+	return r.processService.RegisterProcess(
+		ctx, loggedUser,
+		process.RegisterProcessOpts{
+			Version:     input.Version,
+			Process:     input.ProcessID,
+			ProcessType: entity.ProcessType(input.ProcessType),
+			IsPublic:    true,
+			Sources:     input.File.File,
+		},
+	)
 }
 
 func (r *mutationResolver) notifyRegisteredProcessStatus(notifyCh chan *entity.RegisteredProcess) {
@@ -229,7 +247,7 @@ func (r *queryResolver) RegisteredProcesses(
 		processTypeFilter = *processType
 	}
 
-	return r.processService.ListByProductAndType(ctx, loggedUser, productID, processTypeFilter)
+	return r.processService.Search(ctx, loggedUser, productID, processTypeFilter)
 }
 
 func (r *queryResolver) UserActivityList(

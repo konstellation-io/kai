@@ -36,6 +36,13 @@ type RegisterProcessInput struct {
 	ProcessType string         `json:"processType"`
 }
 
+type RegisterPublicProcessInput struct {
+	File        graphql.Upload `json:"file"`
+	Version     string         `json:"version"`
+	ProcessID   string         `json:"processID"`
+	ProcessType string         `json:"processType"`
+}
+
 type RevokeUserProductGrantsInput struct {
 	TargetID string  `json:"targetID"`
 	Product  string  `json:"product"`

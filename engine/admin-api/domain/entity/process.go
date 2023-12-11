@@ -90,6 +90,15 @@ const (
 	ProcessStatusError    ProcessStatus = "ERROR"
 )
 
+func (ps ProcessStatus) IsValid() bool {
+	switch ps {
+	case ProcessStatusStarting, ProcessStatusStopped, ProcessStatusStarted, ProcessStatusError:
+		return true
+	default:
+		return false
+	}
+}
+
 func (ps ProcessStatus) String() string {
 	return string(ps)
 }

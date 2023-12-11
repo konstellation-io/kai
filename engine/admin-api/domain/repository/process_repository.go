@@ -10,7 +10,7 @@ import (
 
 type ProcessRepository interface {
 	CreateIndexes(ctx context.Context, productID string) error
-	Create(productID string, newRegisteredProcess *entity.RegisteredProcess) (*entity.RegisteredProcess, error)
+	Create(ctx context.Context, productID string, newRegisteredProcess *entity.RegisteredProcess) error
 	SearchByProduct(ctx context.Context, product string, filter SearchFilter) ([]*entity.RegisteredProcess, error)
 	GlobalSearch(ctx context.Context, filter SearchFilter) ([]*entity.RegisteredProcess, error)
 	Update(ctx context.Context, productID string, newRegisteredProcess *entity.RegisteredProcess) error

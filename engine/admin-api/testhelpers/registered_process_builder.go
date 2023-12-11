@@ -20,7 +20,7 @@ func NewRegisteredProcessBuilder(product string) *RegisteredProcessBuilder {
 		registeredProcess: &entity.RegisteredProcess{
 			Name:       "process-name",
 			Version:    "v1.0.0",
-			Type:       entity.ProcessTypeTask.String(),
+			Type:       entity.ProcessTypeTask,
 			UploadDate: time.Now().Truncate(time.Microsecond).UTC(),
 			Owner:      "user@email.com",
 			Status:     entity.ProcessStatusStarting.String(),
@@ -33,7 +33,7 @@ func (p *RegisteredProcessBuilder) WithName(name string) *RegisteredProcessBuild
 	return p
 }
 
-func (p *RegisteredProcessBuilder) WithType(processType string) *RegisteredProcessBuilder {
+func (p *RegisteredProcessBuilder) WithType(processType entity.ProcessType) *RegisteredProcessBuilder {
 	p.registeredProcess.Type = processType
 	return p
 }

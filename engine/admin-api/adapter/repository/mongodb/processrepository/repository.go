@@ -9,7 +9,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson"
@@ -55,23 +55,20 @@ func (r *MongoDBProcessRepository) CreateIndexes(ctx context.Context, productID 
 }
 
 func (r *MongoDBProcessRepository) Create(
+	ctx context.Context,
 	productID string,
 	newRegisteredProcess *entity.RegisteredProcess,
-) (*entity.RegisteredProcess, error) {
+) error {
 	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
 
 	registeredProcessDTO := mapEntityToDTO(newRegisteredProcess)
 
-	res, err := collection.InsertOne(context.Background(), registeredProcessDTO)
+	_, err := collection.InsertOne(ctx, registeredProcessDTO)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	registeredProcessDTO.ID = res.InsertedID.(string)
-
-	savedRegisteredProcess := mapDTOToEntity(registeredProcessDTO)
-
-	return savedRegisteredProcess, nil
+	return nil
 }
 
 func (r *MongoDBProcessRepository) SearchByProduct(
@@ -105,7 +102,7 @@ func (r *MongoDBProcessRepository) GetByID(ctx context.Context, productID, image
 	res := collection.FindOne(ctx, bson.M{"_id": imageID})
 	if res.Err() != nil {
 		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
-			return nil, usecase.ErrRegisteredProcessNotFound
+			return nil, process.ErrRegisteredProcessNotFound
 		}
 
 		return nil, res.Err()
