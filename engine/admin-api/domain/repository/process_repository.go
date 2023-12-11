@@ -9,12 +9,12 @@ import (
 )
 
 type ProcessRepository interface {
-	CreateIndexes(ctx context.Context, productID string) error
-	Create(ctx context.Context, productID string, newRegisteredProcess *entity.RegisteredProcess) error
+	CreateIndexes(ctx context.Context, registry string) error
+	Create(ctx context.Context, registry string, newRegisteredProcess *entity.RegisteredProcess) error
 	SearchByProduct(ctx context.Context, product string, filter SearchFilter) ([]*entity.RegisteredProcess, error)
 	GlobalSearch(ctx context.Context, filter SearchFilter) ([]*entity.RegisteredProcess, error)
-	Update(ctx context.Context, productID string, newRegisteredProcess *entity.RegisteredProcess) error
-	GetByID(ctx context.Context, productID string, imageID string) (*entity.RegisteredProcess, error)
+	Update(ctx context.Context, registry string, newRegisteredProcess *entity.RegisteredProcess) error
+	GetByID(ctx context.Context, registry string, imageID string) (*entity.RegisteredProcess, error)
 }
 
 type SearchFilter struct {

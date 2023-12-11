@@ -1,3 +1,5 @@
+//go:build unit
+
 package process_test
 
 import (

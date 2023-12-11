@@ -98,18 +98,6 @@ func (r *mutationResolver) RegisterPublicProcess(ctx context.Context, input Regi
 	)
 }
 
-func (r *mutationResolver) notifyRegisteredProcessStatus(notifyCh chan *entity.RegisteredProcess) {
-	for registeredProcess := range notifyCh {
-		switch registeredProcess.Status {
-		case entity.RegisterProcessStatusCreated:
-			r.logger.Info("Process successfully registered", "processID", registeredProcess.ID)
-		case entity.RegisterProcessStatusFailed:
-			r.logger.Info("Failed to register process", "processID", registeredProcess.ID, "error", registeredProcess.Logs)
-		default:
-		}
-	}
-}
-
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 

@@ -21,16 +21,21 @@ func (ps *Service) RegisterProcess(
 ) (*entity.RegisteredProcess, error) {
 	ps.logger.Info("Registering new process")
 
+	var registry string
+
 	if opts.IsPublic {
 		if err := ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess); err != nil {
 			return nil, err
 		}
+
+		registry = viper.GetString(config.GlobalRegistryKey)
+	} else {
+		registry = opts.Product
 	}
 
-	product := opts.Product
-	processID := fmt.Sprintf("%s_%s:%s", product, opts.Process, opts.Version)
+	processID := fmt.Sprintf("%s_%s:%s", registry, opts.Process, opts.Version)
 
-	existingProcess, err := ps.processRepository.GetByID(ctx, product, processID)
+	existingProcess, err := ps.processRepository.GetByID(ctx, registry, processID)
 	if err != nil && !errors.Is(err, ErrRegisteredProcessNotFound) {
 		return nil, err
 	}
@@ -58,18 +63,18 @@ func (ps *Service) RegisterProcess(
 			return nil, ErrProcessAlreadyRegistered
 		}
 
-		err = ps.processRepository.Update(ctx, product, registeredProcess)
+		err = ps.processRepository.Update(ctx, registry, registeredProcess)
 		if err != nil {
 			return nil, fmt.Errorf("updating registered process: %w", err)
 		}
 	} else {
-		err = ps.processRepository.Create(ctx, product, registeredProcess)
+		err = ps.processRepository.Create(ctx, registry, registeredProcess)
 		if err != nil {
 			return nil, fmt.Errorf("saving process registry in db: %w", err)
 		}
 	}
 
-	go ps.uploadProcessToRegistry(product, registeredProcess, opts.Sources)
+	go ps.uploadProcessToRegistry(registry, registeredProcess, opts.Sources)
 
 	return registeredProcess, nil
 }

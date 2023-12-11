@@ -83,11 +83,11 @@ func (r *MongoDBProcessRepository) GlobalSearch(ctx context.Context, filter repo
 	return r.searchInDatabaseWithFilter(ctx, viper.GetString(config.MongoDBKaiDatabaseKey), r.getSearchMongoFilter(filter))
 }
 
-func (r *MongoDBProcessRepository) Update(ctx context.Context, productID string, process *entity.RegisteredProcess) error {
+func (r *MongoDBProcessRepository) Update(ctx context.Context, productID string, p *entity.RegisteredProcess) error {
 	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
 
-	versionDTO := mapEntityToDTO(process)
-	updateResult, err := collection.ReplaceOne(ctx, bson.M{"_id": process.ID}, versionDTO)
+	versionDTO := mapEntityToDTO(p)
+	updateResult, err := collection.ReplaceOne(ctx, bson.M{"_id": p.ID}, versionDTO)
 
 	if updateResult.ModifiedCount == 0 {
 		return version.ErrVersionNotFound
