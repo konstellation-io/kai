@@ -8,7 +8,12 @@ import (
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
 	"github.com/go-logr/logr/testr"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -22,6 +27,7 @@ import (
 )
 
 var (
+	_kaiProduct        = "kai"
 	productID          = "productID"
 	ownerID            = "ownerID"
 	processVersion     = "v1.0.0"
@@ -32,10 +38,10 @@ type ProcessRepositoryTestSuite struct {
 	suite.Suite
 	mongoDBContainer testcontainers.Container
 	mongoClient      *mongo.Client
-	processRepo      *ProcessRepositoryMongoDB
+	processRepo      *MongoDBProcessRepository
 }
 
-func TestGocloakTestSuite(t *testing.T) {
+func TestProcessRepositoryTestSuite(t *testing.T) {
 	suite.Run(t, new(ProcessRepositoryTestSuite))
 }
 
@@ -75,9 +81,16 @@ func (s *ProcessRepositoryTestSuite) SetupSuite() {
 
 	err = s.processRepo.CreateIndexes(context.Background(), productID)
 	s.Require().NoError(err)
+
+	viper.Set(config.MongoDBKaiDatabaseKey, _kaiProduct)
+
+	monkey.Patch(time.Now, func() time.Time {
+		return time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+	})
 }
 
 func (s *ProcessRepositoryTestSuite) TearDownSuite() {
+	monkey.UnpatchAll()
 	s.Require().NoError(s.mongoDBContainer.Terminate(context.Background()))
 }
 
@@ -115,7 +128,7 @@ func (s *ProcessRepositoryTestSuite) TestCreate() {
 	s.Require().NoError(err)
 }
 
-func (s *ProcessRepositoryTestSuite) TestListByProductAndType() {
+func (s *ProcessRepositoryTestSuite) TestSearchByProduct() {
 	ctx := context.Background()
 
 	testTriggerProcess := &entity.RegisteredProcess{
@@ -159,25 +172,49 @@ func (s *ProcessRepositoryTestSuite) TestListByProductAndType() {
 		s.Require().NoError(err)
 	}
 
-	registeredProcesses, err := s.processRepo.ListByProductAndType(ctx, productID, "task")
+	registeredProcesses, err := s.processRepo.SearchByProduct(ctx, productID, repository.SearchFilter{
+		ProcessType: entity.ProcessTypeTask,
+	})
 	s.Require().NoError(err)
 
 	s.Require().Len(registeredProcesses, 1)
 	s.Equal(testTaskProcess, registeredProcesses[0])
 
-	registeredProcesses, err = s.processRepo.ListByProductAndType(ctx, productID, "")
+	registeredProcesses, err = s.processRepo.SearchByProduct(ctx, productID, repository.SearchFilter{})
 	s.Require().NoError(err)
 
 	s.Require().Len(registeredProcesses, 3)
 }
 
-func (s *ProcessRepositoryTestSuite) TestListByProductWithUnexistingProduct() {
+func (s *ProcessRepositoryTestSuite) TestSearchByProductWithUnexistingProduct() {
 	ctx := context.Background()
 
-	registeredProcesses, err := s.processRepo.ListByProductAndType(ctx, "unexisting", "task")
+	registeredProcesses, err := s.processRepo.SearchByProduct(ctx, "non-existent", repository.SearchFilter{
+		ProcessType: entity.ProcessTypeTask,
+	})
 	s.Require().NoError(err)
 
 	s.Empty(registeredProcesses)
+}
+
+func (s *ProcessRepositoryTestSuite) TestGlobalSearch() {
+	ctx := context.Background()
+
+	testGlobalProcess := testhelpers.NewRegisteredProcessBuilder(_kaiProduct).Build()
+
+	expectedProcesses := []*entity.RegisteredProcess{
+		testGlobalProcess,
+	}
+
+	_, err := s.processRepo.Create(_kaiProduct, testGlobalProcess)
+	s.Require().NoError(err)
+
+	actualProcesses, err := s.processRepo.GlobalSearch(ctx, repository.SearchFilter{
+		ProcessType: entity.ProcessTypeTask,
+	})
+	s.Require().NoError(err)
+
+	s.Assert().Equal(expectedProcesses, actualProcesses)
 }
 
 func (s *ProcessRepositoryTestSuite) TestUpdate() {

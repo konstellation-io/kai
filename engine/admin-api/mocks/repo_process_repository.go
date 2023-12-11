@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	repository "github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 )
 
 // MockProcessRepository is a mock of ProcessRepository interface.
@@ -79,19 +80,34 @@ func (mr *MockProcessRepositoryMockRecorder) GetByID(ctx, productID, imageID int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProcessRepository)(nil).GetByID), ctx, productID, imageID)
 }
 
-// ListByProductAndType mocks base method.
-func (m *MockProcessRepository) ListByProductAndType(ctx context.Context, productID, processType string) ([]*entity.RegisteredProcess, error) {
+// GlobalSearch mocks base method.
+func (m *MockProcessRepository) GlobalSearch(ctx context.Context, filter repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListByProductAndType", ctx, productID, processType)
+	ret := m.ctrl.Call(m, "GlobalSearch", ctx, filter)
 	ret0, _ := ret[0].([]*entity.RegisteredProcess)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListByProductAndType indicates an expected call of ListByProductAndType.
-func (mr *MockProcessRepositoryMockRecorder) ListByProductAndType(ctx, productID, processType interface{}) *gomock.Call {
+// GlobalSearch indicates an expected call of GlobalSearch.
+func (mr *MockProcessRepositoryMockRecorder) GlobalSearch(ctx, filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByProductAndType", reflect.TypeOf((*MockProcessRepository)(nil).ListByProductAndType), ctx, productID, processType)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GlobalSearch", reflect.TypeOf((*MockProcessRepository)(nil).GlobalSearch), ctx, filter)
+}
+
+// SearchByProduct mocks base method.
+func (m *MockProcessRepository) SearchByProduct(ctx context.Context, product string, filter repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchByProduct", ctx, product, filter)
+	ret0, _ := ret[0].([]*entity.RegisteredProcess)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchByProduct indicates an expected call of SearchByProduct.
+func (mr *MockProcessRepositoryMockRecorder) SearchByProduct(ctx, product, filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchByProduct", reflect.TypeOf((*MockProcessRepository)(nil).SearchByProduct), ctx, product, filter)
 }
 
 // Update mocks base method.

@@ -25,6 +25,9 @@ func (s *versionSuite) TestPublish_OK() {
 		Build()
 	product := testhelpers.NewProductBuilder().Build()
 
+	product2 := testhelpers.NewProductBuilder().Build()
+	product2.PublishedVersion = &vers.Tag
+
 	expectedURLs := map[string]string{
 		"test-trigger": "test-url",
 	}
@@ -35,7 +38,7 @@ func (s *versionSuite) TestPublish_OK() {
 
 	s.versionService.EXPECT().Publish(ctx, product.ID, vers.Tag).Return(expectedURLs, nil)
 	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
-	s.productRepo.EXPECT().Update(ctx, product).Return(nil)
+	s.productRepo.EXPECT().Update(ctx, product2).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterPublishAction(user.Email, product.ID, vers, "publishing").Return(nil)
 
 	// WHEN publishing the version

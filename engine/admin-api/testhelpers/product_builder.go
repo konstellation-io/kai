@@ -1,7 +1,6 @@
 package testhelpers
 
 import (
-	"github.com/bxcodec/faker/v3"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
@@ -10,20 +9,20 @@ type ProductBuilder struct {
 }
 
 func NewProductBuilder() *ProductBuilder {
-	productID := faker.UUIDHyphenated()
+	productID := "faker.UUIDHyphenated()"
 
 	return &ProductBuilder{
 		product: &entity.Product{
 			ID:            productID,
-			Name:          faker.Name(),
+			Name:          "faker.Name()",
 			Description:   "Test description",
-			KeyValueStore: faker.UUIDHyphenated(),
+			KeyValueStore: "faker.UUIDHyphenated()",
 			MinioConfiguration: entity.MinioConfiguration{
 				Bucket: productID,
 			},
 			ServiceAccount: entity.ServiceAccount{
 				Username: productID,
-				Password: faker.Password(),
+				Password: "faker.Password()",
 				Group:    productID,
 			},
 		},

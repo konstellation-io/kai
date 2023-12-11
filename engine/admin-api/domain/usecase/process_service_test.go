@@ -15,6 +15,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
@@ -394,33 +395,27 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_UpdateError() {
 }
 
 func (s *ProcessServiceTestSuite) TestListByProduct_WithTypeFilter() {
-	ctx := context.Background()
+	var (
+		ctx               = context.Background()
+		filter            = repository.SearchFilter{ProcessType: entity.ProcessTypeTrigger}
+		productProcesses  = []*entity.RegisteredProcess{testhelpers.NewRegisteredProcessBuilder(productID).Build()}
+		kaiProcesses      = []*entity.RegisteredProcess{testhelpers.NewRegisteredProcessBuilder("kai").Build()}
+		expectedProcesses = append(productProcesses, kaiProcesses...)
+	)
 
-	typeFilter := entity.ProcessTypeTrigger.String()
-	expectedRegisteredProcess := []*entity.RegisteredProcess{
-		{
-			ID:         "test-id",
-			Name:       processName,
-			Version:    version,
-			Type:       processType,
-			Image:      "image",
-			UploadDate: time.Now(),
-			Owner:      userID,
-		},
-	}
+	s.processRepo.EXPECT().SearchByProduct(ctx, productID, filter).Return(productProcesses, nil)
+	s.processRepo.EXPECT().GlobalSearch(ctx, filter).Return(kaiProcesses, nil)
 
-	s.processRepo.EXPECT().ListByProductAndType(ctx, productID, typeFilter).Return(expectedRegisteredProcess, nil)
-
-	returnedRegisteredProcess, err := s.processService.ListByProductAndType(ctx, user, productID, typeFilter)
+	returnedRegisteredProcess, err := s.processService.ListByProductAndType(ctx, user, productID, filter.ProcessType.String())
 	s.Require().NoError(err)
 
-	s.Equal(expectedRegisteredProcess, returnedRegisteredProcess)
+	s.Equal(expectedProcesses, returnedRegisteredProcess)
 }
 
 func (s *ProcessServiceTestSuite) TestListByProduct_NoTypeFilter() {
 	ctx := context.Background()
 
-	typeFilter := ""
+	filter := repository.SearchFilter{}
 	expectedRegisteredProcess := []*entity.RegisteredProcess{
 		{
 			ID:         "test-id",
@@ -433,7 +428,8 @@ func (s *ProcessServiceTestSuite) TestListByProduct_NoTypeFilter() {
 		},
 	}
 
-	s.processRepo.EXPECT().ListByProductAndType(ctx, productID, typeFilter).Return(expectedRegisteredProcess, nil)
+	s.processRepo.EXPECT().SearchByProduct(ctx, productID, filter).Return(expectedRegisteredProcess, nil)
+	s.processRepo.EXPECT().GlobalSearch(ctx, filter).Return(nil, nil)
 
 	returnedRegisteredProcess, err := s.processService.ListByProductAndType(ctx, user, productID, "")
 	s.Require().NoError(err)

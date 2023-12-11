@@ -13,8 +13,6 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/konstellation-io/kai/libs/simplelogger v0.0.0-20230512110508-04d20c901459
 	github.com/konstellation-io/krt v0.1.7
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/minio/madmin-go/v3 v3.0.27
@@ -31,7 +29,6 @@ require (
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.57.1
 	google.golang.org/protobuf v1.30.0
-	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -87,7 +84,7 @@ require (
 	github.com/creasty/defaults v1.7.0 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v24.0.7+incompatible // indirect; 24.0 branch
-	github.com/docker/go-connections v0.4.1-0.20210727194412-58542c764a11 // indirect
+	github.com/docker/go-connections v0.4.1-0.20210727194412-58542c764a11
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-resty/resty/v2 v2.7.0 // indirect

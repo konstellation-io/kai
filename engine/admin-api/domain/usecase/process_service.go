@@ -168,6 +168,39 @@ func (ps *ProcessService) uploadProcessToRegistry(
 	notifyStatusCh <- registeredProcess
 }
 
+func (ps *ProcessService) ListByProductAndType(
+	ctx context.Context,
+	user *entity.User,
+	productID, processType string,
+) ([]*entity.RegisteredProcess, error) {
+	log := fmt.Sprintf("Retrieving process for product %q", productID)
+	if processType != "" {
+		log = fmt.Sprintf("%s with process type filter %q", log, processType)
+	}
+
+	ps.logger.Info(log)
+
+	filter := repository.SearchFilter{
+		ProcessType: entity.ProcessType(processType),
+	}
+
+	if err := filter.Validate(); err != nil {
+		return nil, fmt.Errorf("validating list filter: %w", err)
+	}
+
+	productProcesses, err := ps.processRepository.SearchByProduct(ctx, productID, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	kaiProcesses, err := ps.processRepository.GlobalSearch(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(productProcesses, kaiProcesses...), nil
+}
+
 func (ps *ProcessService) uploadingProcessError(
 	ctx context.Context,
 	product string,
@@ -185,23 +218,4 @@ func (ps *ProcessService) uploadingProcessError(
 	}
 
 	notifyStatusCh <- registeredProcess
-}
-
-func (ps *ProcessService) ListByProductAndType(
-	ctx context.Context,
-	user *entity.User,
-	productID, processType string,
-) ([]*entity.RegisteredProcess, error) {
-	log := fmt.Sprintf("Retrieving process for product %q", productID)
-	if processType != "" {
-		log = fmt.Sprintf("%s with process type filter %q", log, processType)
-	}
-
-	ps.logger.Info(log)
-
-	if processType != "" && !entity.ProcessType(processType).IsValid() {
-		return nil, fmt.Errorf("%w: %s", ErrInvalidProcessType, processType)
-	}
-
-	return ps.processRepository.ListByProductAndType(ctx, productID, processType)
 }

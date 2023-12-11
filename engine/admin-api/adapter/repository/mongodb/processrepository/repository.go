@@ -6,34 +6,36 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const registeredProcessesCollectionName = "registered_processes"
 
-type ProcessRepositoryMongoDB struct {
+type MongoDBProcessRepository struct {
 	logger logr.Logger
 	client *mongo.Client
 }
 
-var _ repository.ProcessRepository = (*ProcessRepositoryMongoDB)(nil)
+var _ repository.ProcessRepository = (*MongoDBProcessRepository)(nil)
 
 func New(
 	logger logr.Logger,
 	client *mongo.Client,
-) *ProcessRepositoryMongoDB {
-	return &ProcessRepositoryMongoDB{
+) *MongoDBProcessRepository {
+	return &MongoDBProcessRepository{
 		logger,
 		client,
 	}
 }
 
-func (r *ProcessRepositoryMongoDB) CreateIndexes(ctx context.Context, productID string) error {
+func (r *MongoDBProcessRepository) CreateIndexes(ctx context.Context, productID string) error {
 	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
 	r.logger.Info("MongoDB creating indexes", "collection", registeredProcessesCollectionName)
 
@@ -52,7 +54,7 @@ func (r *ProcessRepositoryMongoDB) CreateIndexes(ctx context.Context, productID 
 	return err
 }
 
-func (r *ProcessRepositoryMongoDB) Create(
+func (r *MongoDBProcessRepository) Create(
 	productID string,
 	newRegisteredProcess *entity.RegisteredProcess,
 ) (*entity.RegisteredProcess, error) {
@@ -72,45 +74,19 @@ func (r *ProcessRepositoryMongoDB) Create(
 	return savedRegisteredProcess, nil
 }
 
-func (r *ProcessRepositoryMongoDB) ListByProductAndType(
+func (r *MongoDBProcessRepository) SearchByProduct(
 	ctx context.Context,
-	productID, processType string,
+	product string,
+	filter repository.SearchFilter,
 ) ([]*entity.RegisteredProcess, error) {
-	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
-
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
-
-	var registeredProcesses []*entity.RegisteredProcess
-
-	var filter bson.M
-	if processType != "" {
-		filter = bson.M{"type": processType}
-	} else {
-		filter = bson.M{}
-	}
-
-	cur, err := collection.Find(ctxWithTimeout, filter)
-	if err != nil {
-		return registeredProcesses, err
-	}
-	defer cur.Close(ctxWithTimeout)
-
-	for cur.Next(ctxWithTimeout) {
-		var registeredProcessDTO registeredProcessDTO
-
-		err = cur.Decode(&registeredProcessDTO)
-		if err != nil {
-			return registeredProcesses, err
-		}
-
-		registeredProcesses = append(registeredProcesses, mapDTOToEntity(&registeredProcessDTO))
-	}
-
-	return registeredProcesses, nil
+	return r.searchInDatabaseWithFilter(ctx, product, r.getSearchMongoFilter(filter))
 }
 
-func (r *ProcessRepositoryMongoDB) Update(ctx context.Context, productID string, process *entity.RegisteredProcess) error {
+func (r *MongoDBProcessRepository) GlobalSearch(ctx context.Context, filter repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
+	return r.searchInDatabaseWithFilter(ctx, viper.GetString(config.MongoDBKaiDatabaseKey), r.getSearchMongoFilter(filter))
+}
+
+func (r *MongoDBProcessRepository) Update(ctx context.Context, productID string, process *entity.RegisteredProcess) error {
 	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
 
 	versionDTO := mapEntityToDTO(process)
@@ -123,7 +99,7 @@ func (r *ProcessRepositoryMongoDB) Update(ctx context.Context, productID string,
 	return err
 }
 
-func (r *ProcessRepositoryMongoDB) GetByID(ctx context.Context, productID, imageID string) (*entity.RegisteredProcess, error) {
+func (r *MongoDBProcessRepository) GetByID(ctx context.Context, productID, imageID string) (*entity.RegisteredProcess, error) {
 	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
 
 	res := collection.FindOne(ctx, bson.M{"_id": imageID})
@@ -143,4 +119,46 @@ func (r *ProcessRepositoryMongoDB) GetByID(ctx context.Context, productID, image
 	}
 
 	return mapDTOToEntity(&registeredProcess), nil
+}
+
+func (r *MongoDBProcessRepository) searchInDatabaseWithFilter(
+	ctx context.Context,
+	database string,
+	filter bson.M,
+) ([]*entity.RegisteredProcess, error) {
+	collection := r.client.Database(database).Collection(registeredProcessesCollectionName)
+
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+
+	var registeredProcesses []*entity.RegisteredProcess
+
+	cur, err := collection.Find(ctxWithTimeout, filter)
+	if err != nil {
+		return registeredProcesses, err
+	}
+	defer cur.Close(ctxWithTimeout)
+
+	for cur.Next(ctxWithTimeout) {
+		var dto registeredProcessDTO
+
+		err = cur.Decode(&dto)
+		if err != nil {
+			return registeredProcesses, err
+		}
+
+		registeredProcesses = append(registeredProcesses, mapDTOToEntity(&dto))
+	}
+
+	return registeredProcesses, nil
+}
+
+func (r *MongoDBProcessRepository) getSearchMongoFilter(searchFilter repository.SearchFilter) bson.M {
+	var filter bson.M
+
+	if searchFilter.ProcessType != "" {
+		filter = bson.M{"type": searchFilter.ProcessType}
+	}
+
+	return filter
 }
