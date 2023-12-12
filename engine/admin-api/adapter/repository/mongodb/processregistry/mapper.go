@@ -11,6 +11,7 @@ func mapDTOToEntity(dto *processRegistryDTO) *entity.ProcessRegistry {
 		Image:      dto.Image,
 		UploadDate: dto.UploadDate,
 		Owner:      dto.Owner,
+		IsPublic:   dto.IsPublic,
 	}
 }
 
@@ -23,5 +24,6 @@ func mapEntityToDTO(processEntity *entity.ProcessRegistry) *processRegistryDTO {
 		Image:      processEntity.Image,
 		UploadDate: processEntity.UploadDate,
 		Owner:      processEntity.Owner,
+		IsPublic:   processEntity.IsPublic,
 	}
 }

@@ -15,6 +15,7 @@ func mapDTOToEntity(dto *registeredProcessDTO) *entity.RegisteredProcess {
 		Owner:      dto.Owner,
 		Status:     dto.Status,
 		Logs:       dto.Logs,
+		IsPublic:   dto.IsPublic,
 	}
 }
 

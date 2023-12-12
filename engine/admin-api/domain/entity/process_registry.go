@@ -10,4 +10,5 @@ type ProcessRegistry struct {
 	Image      string
 	UploadDate time.Time
 	Owner      string
+	IsPublic   bool
 }

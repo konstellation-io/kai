@@ -10,4 +10,5 @@ type processRegistryDTO struct {
 	Image      string    `bson:"image"`
 	UploadDate time.Time `bson:"uploadDate"`
 	Owner      string    `bson:"owner"`
+	IsPublic   bool      `bson:"isPublic"`
 }

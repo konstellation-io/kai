@@ -36,7 +36,7 @@ func (e Action) IsValid() bool {
 	case ActCreateProduct, ActStartVersion, ActStopVersion, ActUpdateUserGrants,
 		ActPublishVersion, ActUnpublishVersion, ActEditVersion, ActViewMetrics,
 		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion,
-		ActViewServerInfo, ActStartCriticalVersion:
+		ActViewServerInfo, ActStartCriticalVersion, ActRegisterProcess, ActRegisterPublicProcess:
 		return true
 	}
 
