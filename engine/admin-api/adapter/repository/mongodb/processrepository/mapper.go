@@ -29,5 +29,6 @@ func mapEntityToDTO(processEntity *entity.RegisteredProcess) *registeredProcessD
 		Owner:      processEntity.Owner,
 		Status:     processEntity.Status,
 		Logs:       processEntity.Logs,
+		IsPublic:   processEntity.IsPublic,
 	}
 }
