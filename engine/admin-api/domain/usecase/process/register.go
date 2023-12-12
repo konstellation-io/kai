@@ -30,6 +30,10 @@ func (ps *Service) RegisterProcess(
 
 		registry = viper.GetString(config.GlobalRegistryKey)
 	} else {
+		if err := ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActRegisterProcess); err != nil {
+			return nil, err
+		}
+
 		registry = opts.Product
 	}
 

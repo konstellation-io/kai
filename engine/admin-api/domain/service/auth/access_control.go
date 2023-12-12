@@ -27,7 +27,8 @@ const (
 	ActViewUserActivities Action = "view_user_activities"
 	ActUpdateUserGrants   Action = "update_user_grants"
 
-	ActRegisterPublicProcess Action = "update_user_grants"
+	ActRegisterProcess       Action = "register_process"
+	ActRegisterPublicProcess Action = "register_public_process"
 )
 
 func (e Action) IsValid() bool {

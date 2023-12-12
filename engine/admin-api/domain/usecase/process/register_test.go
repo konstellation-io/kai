@@ -31,6 +31,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	expectedRegisteredProcess := s.getTestProcess(productID, entity.RegisterProcessStatusCreating)
 	expectedCreatedProcess := s.getTestProcess(productID, entity.RegisterProcessStatusCreated)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, process.ErrRegisteredProcessNotFound)
 	s.processRepo.EXPECT().Create(ctx, productID, expectedRegisteredProcess).Return(nil)
 	s.objectStorage.EXPECT().UploadImageSources(ctx, productID, expectedRegisteredProcess.Image, expectedBytes).Return(nil)
@@ -93,6 +94,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_OverrideLatest() {
 		Version: latestVersion,
 	}
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(existingProcess, nil)
 	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcher).Return(nil)
 	s.objectStorage.EXPECT().UploadImageSources(ctx, productID, expectedRegisteredProcess.Image, expectedBytes).Return(nil)
@@ -139,6 +141,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFa
 	expectedUpdatedProcess := s.getTestProcess(productID, entity.RegisterProcessStatusCreated)
 	customMatcherUpdate := newRegisteredProcessMatcher(expectedUpdatedProcess)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(alreadyRegisteredProcess, nil)
 	s.processRepo.EXPECT().Update(ctx, productID, customMatcherCreating).Return(nil).Times(1)
 	s.objectStorage.EXPECT().UploadImageSources(ctx, productID, alreadyRegisteredProcess.Image, expectedBytes).Return(nil)
@@ -176,6 +179,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_GetByIDFails() {
 
 	alreadyRegisteredProcess := s.getTestProcess(productID, entity.RegisterProcessStatusCreating)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(
 		nil, fmt.Errorf("all your base are belong to us"),
 	)
@@ -201,6 +205,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndNot
 
 	alreadyRegisteredProcess := s.getTestProcess(productID, entity.RegisterProcessStatusCreating)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(
 		alreadyRegisteredProcess, nil,
 	)
@@ -231,6 +236,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFa
 	expectedCreatingProcess := s.getTestProcess(productID, entity.RegisterProcessStatusCreating)
 	customMatcherCreating := newRegisteredProcessMatcher(expectedCreatingProcess)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(alreadyRegisteredProcess, nil)
 	s.processRepo.EXPECT().Update(ctx, productID, customMatcherCreating).Return(fmt.Errorf("doctor maligno"))
 
@@ -260,6 +266,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_NoFileError() {
 	expectedUpdatedProcess.Logs = "copying temp file for version: invalid argument"
 	customMatcherUpdate := newRegisteredProcessMatcher(expectedUpdatedProcess)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, process.ErrRegisteredProcessNotFound)
 	s.processRepo.EXPECT().Create(ctx, productID, customMatcher).Return(nil)
 	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(nil)
@@ -300,6 +307,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
 	expectedFailedProcess.Logs = expectedError.Error()
 	customMatcherUpdate := newRegisteredProcessMatcher(expectedFailedProcess)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, processToRegister.ID).Return(nil, process.ErrRegisteredProcessNotFound)
 	s.processRepo.EXPECT().Create(ctx, productID, customMatcher).Return(nil)
 	s.objectStorage.EXPECT().UploadImageSources(ctx, productID, processToRegister.Image, expectedBytes).Return(nil)
@@ -339,6 +347,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 	expectedRegisteredProcess := s.getTestProcess(productID, entity.RegisterProcessStatusCreating)
 	customMatcher := newRegisteredProcessMatcher(expectedRegisteredProcess)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, process.ErrRegisteredProcessNotFound)
 	s.processRepo.EXPECT().Create(ctx, productID, customMatcher).Return(expectedError)
 
@@ -369,6 +378,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_UpdateError() {
 	customMatcher := newRegisteredProcessMatcher(expectedRegisteredProcess)
 	expectedUpdatedProcess := s.getTestProcess(productID, entity.RegisterProcessStatusCreated)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, process.ErrRegisteredProcessNotFound)
 	s.processRepo.EXPECT().Create(ctx, productID, customMatcher).Return(nil)
 	s.objectStorage.EXPECT().UploadImageSources(ctx, productID, expectedRegisteredProcess.Image, expectedBytes).Return(nil)
