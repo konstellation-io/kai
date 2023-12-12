@@ -21,25 +21,29 @@ func (ps *Service) RegisterProcess(
 ) (*entity.RegisteredProcess, error) {
 	ps.logger.Info("Registering new process")
 
-	var registry string
+	if err := opts.Validate(); err != nil {
+		return nil, err
+	}
+
+	var scope string
 
 	if opts.IsPublic {
 		if err := ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess); err != nil {
 			return nil, err
 		}
 
-		registry = viper.GetString(config.GlobalRegistryKey)
+		scope = viper.GetString(config.GlobalRegistryKey)
 	} else {
 		if err := ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActRegisterProcess); err != nil {
 			return nil, err
 		}
 
-		registry = opts.Product
+		scope = opts.Product
 	}
 
-	processID := fmt.Sprintf("%s_%s:%s", registry, opts.Process, opts.Version)
+	processID := fmt.Sprintf("%s_%s:%s", scope, opts.Process, opts.Version)
 
-	existingProcess, err := ps.processRepository.GetByID(ctx, registry, processID)
+	existingProcess, err := ps.processRepository.GetByID(ctx, scope, processID)
 	if err != nil && !errors.Is(err, ErrRegisteredProcessNotFound) {
 		return nil, err
 	}
@@ -55,6 +59,7 @@ func (ps *Service) RegisterProcess(
 		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
 		Owner:      user.Email,
 		Status:     entity.RegisterProcessStatusCreating,
+		IsPublic:   opts.IsPublic,
 	}
 
 	processExists := existingProcess != nil
@@ -67,18 +72,18 @@ func (ps *Service) RegisterProcess(
 			return nil, ErrProcessAlreadyRegistered
 		}
 
-		err = ps.processRepository.Update(ctx, registry, registeredProcess)
+		err = ps.processRepository.Update(ctx, scope, registeredProcess)
 		if err != nil {
 			return nil, fmt.Errorf("updating registered process: %w", err)
 		}
 	} else {
-		err = ps.processRepository.Create(ctx, registry, registeredProcess)
+		err = ps.processRepository.Create(ctx, scope, registeredProcess)
 		if err != nil {
-			return nil, fmt.Errorf("saving process registry in db: %w", err)
+			return nil, fmt.Errorf("saving registered process in db: %w", err)
 		}
 	}
 
-	go ps.uploadProcessToRegistry(registry, registeredProcess, opts.Sources)
+	go ps.uploadProcessToRegistry(scope, registeredProcess, opts.Sources)
 
 	return registeredProcess, nil
 }

@@ -53,6 +53,11 @@ func (p *RegisteredProcessBuilder) WithStatus(status string) *RegisteredProcessB
 	return p
 }
 
+func (p *RegisteredProcessBuilder) WithIsPublic(isPublic bool) *RegisteredProcessBuilder {
+	p.registeredProcess.IsPublic = isPublic
+	return p
+}
+
 func (p *RegisteredProcessBuilder) Build() *entity.RegisteredProcess {
 	p.registeredProcess.ID = fmt.Sprintf("%s_%s:%s", p.product, p.registeredProcess.Name, p.registeredProcess.Version)
 	p.registeredProcess.Image = fmt.Sprintf("%s/%s", viper.GetString(config.RegistryHostKey), p.registeredProcess.ID)

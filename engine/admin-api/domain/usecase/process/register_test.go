@@ -256,36 +256,17 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFa
 func (s *ProcessServiceTestSuite) TestRegisterProcess_NoFileError() {
 	ctx := context.Background()
 
-	testFile, err := os.Open("no-file")
-	s.Require().Error(err)
-
-	expectedRegisteredProcess := s.getTestProcess(productID, entity.RegisterProcessStatusCreating)
-	customMatcher := newRegisteredProcessMatcher(expectedRegisteredProcess)
-
-	expectedUpdatedProcess := s.getTestProcess(productID, entity.RegisterProcessStatusFailed)
-	expectedUpdatedProcess.Logs = "copying temp file for version: invalid argument"
-	customMatcherUpdate := newRegisteredProcessMatcher(expectedUpdatedProcess)
-
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(nil)
-	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, process.ErrRegisteredProcessNotFound)
-	s.processRepo.EXPECT().Create(ctx, productID, customMatcher).Return(nil)
-	s.processRepo.EXPECT().Update(gomock.Any(), productID, customMatcherUpdate).Return(nil)
-
-	returnedRef, err := s.processService.RegisterProcess(
+	_, err := s.processService.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
 			Version:     version,
 			Process:     processName,
 			ProcessType: processType,
-			Sources:     testFile,
+			Sources:     nil,
 		},
 	)
-	s.Require().NoError(err)
-
-	s.Equal(expectedRegisteredProcess, returnedRef)
-
-	s.Equal(entity.RegisterProcessStatusFailed, expectedUpdatedProcess.Status)
+	s.Require().ErrorIs(err, process.ErrMissingSourcesInParams)
 }
 
 func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
@@ -411,8 +392,8 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_Public() {
 	var (
 		ctx                       = context.Background()
 		wg                        = sync.WaitGroup{}
-		processWithCreatingStatus = s.getTestProcess(_publicRegistry, entity.RegisterProcessStatusCreating)
-		processWithCreatedStatus  = s.getTestProcess(_publicRegistry, entity.RegisterProcessStatusCreated)
+		processWithCreatingStatus = s.getTestProcess(_publicRegistry, entity.RegisterProcessStatusCreating, true)
+		processWithCreatedStatus  = s.getTestProcess(_publicRegistry, entity.RegisterProcessStatusCreated, true)
 	)
 
 	wg.Add(1)

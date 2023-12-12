@@ -54,6 +54,7 @@ type RegisteredProcess {
   uploadDate: String!
   owner: String!
   status: String!
+  IsPublic: Boolean!
 }
 
 type User {
@@ -248,6 +249,6 @@ type Label {
 }
 
 type Log {
-	formatedLog: String!
-	labels:      [Label!]!
+  formatedLog: String!
+  labels:      [Label!]!
 }

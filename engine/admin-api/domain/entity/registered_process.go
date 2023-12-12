@@ -19,4 +19,5 @@ type RegisteredProcess struct {
 	Owner      string
 	Status     string
 	Logs       string
+	IsPublic   bool
 }

@@ -110,12 +110,18 @@ func (s *ProcessServiceTestSuite) TearDownTest() {
 	s.objectStorage.ExpectedCalls = nil
 }
 
-func (s *ProcessServiceTestSuite) getTestProcess(registry, status string) *entity.RegisteredProcess {
+func (s *ProcessServiceTestSuite) getTestProcess(registry, status string, isPublicOpt ...bool) *entity.RegisteredProcess {
+	var isPublic bool
+	if len(isPublicOpt) > 0 {
+		isPublic = isPublicOpt[0]
+	}
+
 	return testhelpers.NewRegisteredProcessBuilder(registry).
 		WithName(processName).
 		WithVersion(version).
 		WithType(processType).
 		WithOwner(user.Email).
 		WithStatus(status).
+		WithIsPublic(isPublic).
 		Build()
 }
