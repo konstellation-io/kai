@@ -11,8 +11,6 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
-//go:generate mockgen -source=${GOFILE} -destination=../../mocks/${GOFILE} -package=mocks
-
 var (
 	ErrInvalidProcessType        = errors.New("invalid process type")
 	ErrRegisteredProcessNotFound = errors.New("registered process not found")

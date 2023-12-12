@@ -309,6 +309,10 @@ func (r *registeredProcessResolver) UploadDate(_ context.Context, obj *entity.Re
 	return obj.UploadDate.Format(time.RFC3339), nil
 }
 
+func (r *registeredProcessResolver) Type(_ context.Context, obj *entity.RegisteredProcess) (string, error) {
+	return obj.Type.String(), nil
+}
+
 func (r *logFiltersResolver) From(_ context.Context, obj *entity.LogFilters, from string) error {
 	var err error
 	obj.From, err = time.Parse(time.RFC3339, from)
@@ -352,4 +356,5 @@ type productResolver struct{ *Resolver }
 type userActivityResolver struct{ *Resolver }
 type versionResolver struct{ *Resolver }
 type registeredProcessResolver struct{ *Resolver }
+
 type logFiltersResolver struct{ *Resolver }
