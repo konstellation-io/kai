@@ -54,7 +54,7 @@ type RegisteredProcess {
   uploadDate: String!
   owner: String!
   status: String!
-  IsPublic: Boolean!
+  isPublic: Boolean!
 }
 
 type User {
