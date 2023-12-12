@@ -121,6 +121,7 @@ type ComplexityRoot struct {
 	RegisteredProcess struct {
 		ID         func(childComplexity int) int
 		Image      func(childComplexity int) int
+		IsPublic   func(childComplexity int) int
 		Name       func(childComplexity int) int
 		Owner      func(childComplexity int) int
 		Status     func(childComplexity int) int
@@ -621,6 +622,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RegisteredProcess.Image(childComplexity), true
 
+	case "RegisteredProcess.IsPublic":
+		if e.complexity.RegisteredProcess.IsPublic == nil {
+			break
+		}
+
+		return e.complexity.RegisteredProcess.IsPublic(childComplexity), true
+
 	case "RegisteredProcess.name":
 		if e.complexity.RegisteredProcess.Name == nil {
 			break
@@ -996,6 +1004,7 @@ type RegisteredProcess {
   uploadDate: String!
   owner: String!
   status: String!
+  IsPublic: Boolean!
 }
 
 type User {
@@ -1190,8 +1199,8 @@ type Label {
 }
 
 type Log {
-	formatedLog: String!
-	labels:      [Label!]!
+  formatedLog: String!
+  labels:      [Label!]!
 }
 `, BuiltIn: false},
 }
@@ -2524,6 +2533,8 @@ func (ec *executionContext) fieldContext_Mutation_registerProcess(ctx context.Co
 				return ec.fieldContext_RegisteredProcess_owner(ctx, field)
 			case "status":
 				return ec.fieldContext_RegisteredProcess_status(ctx, field)
+			case "IsPublic":
+				return ec.fieldContext_RegisteredProcess_IsPublic(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type RegisteredProcess", field.Name)
 		},
@@ -2597,6 +2608,8 @@ func (ec *executionContext) fieldContext_Mutation_registerPublicProcess(ctx cont
 				return ec.fieldContext_RegisteredProcess_owner(ctx, field)
 			case "status":
 				return ec.fieldContext_RegisteredProcess_status(ctx, field)
+			case "IsPublic":
+				return ec.fieldContext_RegisteredProcess_IsPublic(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type RegisteredProcess", field.Name)
 		},
@@ -3657,6 +3670,8 @@ func (ec *executionContext) fieldContext_Query_registeredProcesses(ctx context.C
 				return ec.fieldContext_RegisteredProcess_owner(ctx, field)
 			case "status":
 				return ec.fieldContext_RegisteredProcess_status(ctx, field)
+			case "IsPublic":
+				return ec.fieldContext_RegisteredProcess_IsPublic(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type RegisteredProcess", field.Name)
 		},
@@ -4327,6 +4342,50 @@ func (ec *executionContext) fieldContext_RegisteredProcess_status(ctx context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RegisteredProcess_IsPublic(ctx context.Context, field graphql.CollectedField, obj *entity.RegisteredProcess) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RegisteredProcess_IsPublic(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsPublic, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RegisteredProcess_IsPublic(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RegisteredProcess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8637,6 +8696,11 @@ func (ec *executionContext) _RegisteredProcess(ctx context.Context, sel ast.Sele
 			}
 		case "status":
 			out.Values[i] = ec._RegisteredProcess_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "IsPublic":
+			out.Values[i] = ec._RegisteredProcess_IsPublic(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
