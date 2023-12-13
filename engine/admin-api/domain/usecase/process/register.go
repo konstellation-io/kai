@@ -25,67 +25,37 @@ func (ps *Service) RegisterProcess(
 		return nil, err
 	}
 
-	var scope string
-
-	if opts.IsPublic {
-		if err := ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess); err != nil {
-			return nil, err
-		}
-
-		scope = viper.GetString(config.GlobalRegistryKey)
-	} else {
-		if err := ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActRegisterProcess); err != nil {
-			return nil, err
-		}
-
-		scope = opts.Product
+	if err := ps.checkGrants(user, opts); err != nil {
+		return nil, err
 	}
 
-	processID := fmt.Sprintf("%s_%s:%s", scope, opts.Process, opts.Version)
+	scope := ps.getProcessRegisterScope(opts)
+	processToRegister := ps.getProcessToRegister(user, opts, scope)
 
-	existingProcess, err := ps.processRepository.GetByID(ctx, scope, processID)
+	existingProcess, err := ps.processRepository.GetByID(ctx, scope, processToRegister.ID)
 	if err != nil && !errors.Is(err, ErrRegisteredProcessNotFound) {
 		return nil, err
 	}
 
-	processImage := fmt.Sprintf("%s/%s", viper.GetString(config.RegistryHostKey), processID)
-
-	registeredProcess := &entity.RegisteredProcess{
-		ID:         processID,
-		Name:       opts.Process,
-		Version:    opts.Version,
-		Type:       opts.ProcessType,
-		Image:      processImage,
-		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
-		Owner:      user.Email,
-		Status:     entity.RegisterProcessStatusCreating,
-		IsPublic:   opts.IsPublic,
-	}
-
-	processExists := existingProcess != nil
-
-	if processExists {
-		isLatest := opts.Version == "latest"
-		processStatusIsFailed := existingProcess.Status == entity.RegisterProcessStatusFailed
-
-		if !processStatusIsFailed && !isLatest {
+	if existingProcess != nil {
+		if !ps.canProcessBeUpdated(existingProcess) {
 			return nil, ErrProcessAlreadyRegistered
 		}
 
-		err = ps.processRepository.Update(ctx, scope, registeredProcess)
+		err = ps.processRepository.Update(ctx, scope, processToRegister)
 		if err != nil {
 			return nil, fmt.Errorf("updating registered process: %w", err)
 		}
 	} else {
-		err = ps.processRepository.Create(ctx, scope, registeredProcess)
+		err = ps.processRepository.Create(ctx, scope, processToRegister)
 		if err != nil {
 			return nil, fmt.Errorf("saving registered process in db: %w", err)
 		}
 	}
 
-	go ps.uploadProcessToRegistry(scope, registeredProcess, opts.Sources)
+	go ps.uploadProcessToRegistry(scope, processToRegister, opts.Sources)
 
-	return registeredProcess, nil
+	return processToRegister, nil
 }
 
 func (ps *Service) uploadProcessToRegistry(
@@ -162,4 +132,48 @@ func (ps *Service) uploadingProcessError(
 	if err != nil {
 		ps.logger.Error(err, "Error updating registered process", "process ID", registeredProcess.ID)
 	}
+}
+
+func (ps *Service) checkGrants(user *entity.User, opts RegisterProcessOpts) error {
+	if opts.IsPublic {
+		return ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess)
+	}
+
+	return ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActRegisterProcess)
+}
+
+func (ps *Service) getProcessRegisterScope(opts RegisterProcessOpts) string {
+	if opts.IsPublic {
+		return viper.GetString(config.GlobalRegistryKey)
+	}
+
+	return opts.Product
+}
+
+func (ps *Service) canProcessBeUpdated(existingProcess *entity.RegisteredProcess) bool {
+	return existingProcess.Version == "latest" || existingProcess.Status == entity.RegisterProcessStatusFailed
+}
+
+func (ps *Service) getProcessToRegister(user *entity.User, opts RegisterProcessOpts, scope string) *entity.RegisteredProcess {
+	processID := ps.getProcessID(scope, opts.Process, opts.Version)
+
+	return &entity.RegisteredProcess{
+		ID:         processID,
+		Name:       opts.Process,
+		Version:    opts.Version,
+		Type:       opts.ProcessType,
+		Image:      ps.getProcessImage(processID),
+		UploadDate: time.Now().Truncate(time.Millisecond).UTC(),
+		Owner:      user.Email,
+		Status:     entity.RegisterProcessStatusCreating,
+		IsPublic:   opts.IsPublic,
+	}
+}
+
+func (ps *Service) getProcessID(scope, process, version string) string {
+	return fmt.Sprintf("%s_%s:%s", scope, process, version)
+}
+
+func (ps *Service) getProcessImage(processID string) string {
+	return fmt.Sprintf("%s/%s", viper.GetString(config.RegistryHostKey), processID)
 }
