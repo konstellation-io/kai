@@ -18,7 +18,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.78"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-develop.79"` | Image tag |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
@@ -60,8 +60,8 @@
 | config.redis.auth.existingSecret | string | `""` | Name of the secret that contains the redis password |
 | config.redis.auth.existingSecretPasswordKey | string | `""` | Name of the key in the secret that contains the redis password |
 | config.redis.auth.password | string | `""` | Redis password if no existingSecret is used and `redis.enabled: false`. (create a secret with this password and send credentials to admin-api) |
-| config.redis.master.url | string | `"{{ include \"redis-master.fullname\" . }}:{{ .Values.redis.master.service.ports.redis }}"` | Redis Master endpoint url. Change this to your own URL when `redis.enabled: false` |
-| config.redis.replicas.url | string | `"{{ include \"redis-replicas.fullname\" . }}:{{ .Values.redis.replica.service.ports.redis }}"` | Redis Replicas endpoint url. Change this to your own URL when `redis.enabled: false` |
+| config.redis.master.url | string | `"{{ printf \"%s-master\" (include \"common.names.fullname\" .Subcharts.redis) }}:{{ .Values.redis.master.service.ports.redis }}"` | Redis Master endpoint url. Change this to your own URL when `redis.enabled: false` |
+| config.redis.replicas.url | string | `"{{ printf \"%s-replicas\" (include \"common.names.fullname\" .Subcharts.redis) }}:{{ .Values.redis.replica.service.ports.redis }}"` | Redis Replicas endpoint url. Change this to your own URL when `redis.enabled: false` |
 | config.tls.certSecretName | string | `""` | An existing secret containing a valid wildcard certificate for the value provissioned in `.config.baseDomainName`. Required if `config.tls.enabled = true` |
 | config.tls.enabled | bool | `false` | Whether to enable TLS |
 | developmentMode | bool | `false` | Whether to setup developement mode |
@@ -90,7 +90,7 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.78"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-develop.79"` | Image tag |
 | k8sManager.imageBuilder.image.repository | string | `"gcr.io/kaniko-project/executor"` | Image repository for image builder's jobs |
 | k8sManager.imageBuilder.image.tag | string | `"v1.18.0"` | Image tag for image builder's jobs |
 | k8sManager.imageBuilder.pullPolicy | string | `"IfNotPresent"` |  |
@@ -241,7 +241,7 @@
 | nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.78"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-develop.79"` | Image tag |
 | prometheus.alertmanager.enabled | bool | `true` | Whether to enable alertmanager |
 | prometheus.alertmanager.image.tag | string | `"v0.26.0"` | alertmanager server version |
 | prometheus.alertmanager.persistence.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |

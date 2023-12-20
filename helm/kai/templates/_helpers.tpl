@@ -116,16 +116,6 @@ app.kubernetes.io/name: {{ include "kai.name" . }}-grafana-datasources
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/* Fullname suffixed with redis-master */}}
-{{- define "redis-master.fullname" -}}
-{{- printf "%s-redis-master" (include "kai.fullname" .) -}}
-{{- end }}
-
-{{/* Fullname suffixed with redis-replicas */}}
-{{- define "redis-replicas.fullname" -}}
-{{- printf "%s-redis-replicas" (include "kai.fullname" .) -}}
-{{- end }}
-
 {{/*
 redis-stack labels
 */}}

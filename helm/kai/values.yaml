@@ -104,10 +104,10 @@ config:
       password: ""
     master:
       # -- Redis Master endpoint url. Change this to your own URL when `redis.enabled: false`
-      url: '{{ include "redis-master.fullname" . }}:{{ .Values.redis.master.service.ports.redis }}'
+      url: '{{ printf "%s-master" (include "common.names.fullname" .Subcharts.redis) }}:{{ .Values.redis.master.service.ports.redis }}'
     replicas:
       # -- Redis Replicas endpoint url. Change this to your own URL when `redis.enabled: false`
-      url: '{{ include "redis-replicas.fullname" . }}:{{ .Values.redis.replica.service.ports.redis }}'
+      url: '{{ printf "%s-replicas" (include "common.names.fullname" .Subcharts.redis) }}:{{ .Values.redis.replica.service.ports.redis }}'
 adminApi:
   # -- Default application log level
   logLevel: INFO
@@ -115,7 +115,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.78
+    tag: 0.2.0-develop.79
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
@@ -168,7 +168,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.78
+    tag: 0.2.0-develop.79
     # -- Image pull policy
     pullPolicy: IfNotPresent
   imageBuilder:
@@ -499,7 +499,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.78
+    tag: 0.2.0-develop.79
     # -- Image pull policy
     pullPolicy: IfNotPresent
 registry:
