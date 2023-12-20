@@ -24,9 +24,12 @@ const _ = grpc.SupportPackageIsVersion7
 type NatsManagerServiceClient interface {
 	CreateStreams(ctx context.Context, in *CreateStreamsRequest, opts ...grpc.CallOption) (*CreateStreamsResponse, error)
 	CreateObjectStores(ctx context.Context, in *CreateObjectStoresRequest, opts ...grpc.CallOption) (*CreateObjectStoresResponse, error)
+	CreateVersionKeyValueStores(ctx context.Context, in *CreateVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*CreateVersionKeyValueStoresResponse, error)
+	CreateGlobalKeyValueStore(ctx context.Context, in *CreateGlobalKeyValueStoreRequest, opts ...grpc.CallOption) (*CreateGlobalKeyValueStoreResponse, error)
+	UpdateKeyValueConfiguration(ctx context.Context, in *UpdateKeyValueConfigurationRequest, opts ...grpc.CallOption) (*UpdateKeyValueConfigurationResponse, error)
 	DeleteStreams(ctx context.Context, in *DeleteStreamsRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	DeleteObjectStores(ctx context.Context, in *DeleteObjectStoresRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
-	CreateKeyValueStores(ctx context.Context, in *CreateKeyValueStoresRequest, opts ...grpc.CallOption) (*CreateKeyValueStoreResponse, error)
+	DeleteVersionKeyValueStores(ctx context.Context, in *DeleteVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
 
 type natsManagerServiceClient struct {
@@ -55,6 +58,33 @@ func (c *natsManagerServiceClient) CreateObjectStores(ctx context.Context, in *C
 	return out, nil
 }
 
+func (c *natsManagerServiceClient) CreateVersionKeyValueStores(ctx context.Context, in *CreateVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*CreateVersionKeyValueStoresResponse, error) {
+	out := new(CreateVersionKeyValueStoresResponse)
+	err := c.cc.Invoke(ctx, "/nats.NatsManagerService/CreateVersionKeyValueStores", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *natsManagerServiceClient) CreateGlobalKeyValueStore(ctx context.Context, in *CreateGlobalKeyValueStoreRequest, opts ...grpc.CallOption) (*CreateGlobalKeyValueStoreResponse, error) {
+	out := new(CreateGlobalKeyValueStoreResponse)
+	err := c.cc.Invoke(ctx, "/nats.NatsManagerService/CreateGlobalKeyValueStore", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *natsManagerServiceClient) UpdateKeyValueConfiguration(ctx context.Context, in *UpdateKeyValueConfigurationRequest, opts ...grpc.CallOption) (*UpdateKeyValueConfigurationResponse, error) {
+	out := new(UpdateKeyValueConfigurationResponse)
+	err := c.cc.Invoke(ctx, "/nats.NatsManagerService/UpdateKeyValueConfiguration", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *natsManagerServiceClient) DeleteStreams(ctx context.Context, in *DeleteStreamsRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	out := new(DeleteResponse)
 	err := c.cc.Invoke(ctx, "/nats.NatsManagerService/DeleteStreams", in, out, opts...)
@@ -73,9 +103,9 @@ func (c *natsManagerServiceClient) DeleteObjectStores(ctx context.Context, in *D
 	return out, nil
 }
 
-func (c *natsManagerServiceClient) CreateKeyValueStores(ctx context.Context, in *CreateKeyValueStoresRequest, opts ...grpc.CallOption) (*CreateKeyValueStoreResponse, error) {
-	out := new(CreateKeyValueStoreResponse)
-	err := c.cc.Invoke(ctx, "/nats.NatsManagerService/CreateKeyValueStores", in, out, opts...)
+func (c *natsManagerServiceClient) DeleteVersionKeyValueStores(ctx context.Context, in *DeleteVersionKeyValueStoresRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
+	out := new(DeleteResponse)
+	err := c.cc.Invoke(ctx, "/nats.NatsManagerService/DeleteVersionKeyValueStores", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,9 +118,12 @@ func (c *natsManagerServiceClient) CreateKeyValueStores(ctx context.Context, in 
 type NatsManagerServiceServer interface {
 	CreateStreams(context.Context, *CreateStreamsRequest) (*CreateStreamsResponse, error)
 	CreateObjectStores(context.Context, *CreateObjectStoresRequest) (*CreateObjectStoresResponse, error)
+	CreateVersionKeyValueStores(context.Context, *CreateVersionKeyValueStoresRequest) (*CreateVersionKeyValueStoresResponse, error)
+	CreateGlobalKeyValueStore(context.Context, *CreateGlobalKeyValueStoreRequest) (*CreateGlobalKeyValueStoreResponse, error)
+	UpdateKeyValueConfiguration(context.Context, *UpdateKeyValueConfigurationRequest) (*UpdateKeyValueConfigurationResponse, error)
 	DeleteStreams(context.Context, *DeleteStreamsRequest) (*DeleteResponse, error)
 	DeleteObjectStores(context.Context, *DeleteObjectStoresRequest) (*DeleteResponse, error)
-	CreateKeyValueStores(context.Context, *CreateKeyValueStoresRequest) (*CreateKeyValueStoreResponse, error)
+	DeleteVersionKeyValueStores(context.Context, *DeleteVersionKeyValueStoresRequest) (*DeleteResponse, error)
 	mustEmbedUnimplementedNatsManagerServiceServer()
 }
 
@@ -104,14 +137,23 @@ func (UnimplementedNatsManagerServiceServer) CreateStreams(context.Context, *Cre
 func (UnimplementedNatsManagerServiceServer) CreateObjectStores(context.Context, *CreateObjectStoresRequest) (*CreateObjectStoresResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateObjectStores not implemented")
 }
+func (UnimplementedNatsManagerServiceServer) CreateVersionKeyValueStores(context.Context, *CreateVersionKeyValueStoresRequest) (*CreateVersionKeyValueStoresResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVersionKeyValueStores not implemented")
+}
+func (UnimplementedNatsManagerServiceServer) CreateGlobalKeyValueStore(context.Context, *CreateGlobalKeyValueStoreRequest) (*CreateGlobalKeyValueStoreResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateGlobalKeyValueStore not implemented")
+}
+func (UnimplementedNatsManagerServiceServer) UpdateKeyValueConfiguration(context.Context, *UpdateKeyValueConfigurationRequest) (*UpdateKeyValueConfigurationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateKeyValueConfiguration not implemented")
+}
 func (UnimplementedNatsManagerServiceServer) DeleteStreams(context.Context, *DeleteStreamsRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteStreams not implemented")
 }
 func (UnimplementedNatsManagerServiceServer) DeleteObjectStores(context.Context, *DeleteObjectStoresRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteObjectStores not implemented")
 }
-func (UnimplementedNatsManagerServiceServer) CreateKeyValueStores(context.Context, *CreateKeyValueStoresRequest) (*CreateKeyValueStoreResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateKeyValueStores not implemented")
+func (UnimplementedNatsManagerServiceServer) DeleteVersionKeyValueStores(context.Context, *DeleteVersionKeyValueStoresRequest) (*DeleteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVersionKeyValueStores not implemented")
 }
 func (UnimplementedNatsManagerServiceServer) mustEmbedUnimplementedNatsManagerServiceServer() {}
 
@@ -162,6 +204,60 @@ func _NatsManagerService_CreateObjectStores_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NatsManagerService_CreateVersionKeyValueStores_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateVersionKeyValueStoresRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NatsManagerServiceServer).CreateVersionKeyValueStores(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/nats.NatsManagerService/CreateVersionKeyValueStores",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NatsManagerServiceServer).CreateVersionKeyValueStores(ctx, req.(*CreateVersionKeyValueStoresRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NatsManagerService_CreateGlobalKeyValueStore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateGlobalKeyValueStoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NatsManagerServiceServer).CreateGlobalKeyValueStore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/nats.NatsManagerService/CreateGlobalKeyValueStore",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NatsManagerServiceServer).CreateGlobalKeyValueStore(ctx, req.(*CreateGlobalKeyValueStoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NatsManagerService_UpdateKeyValueConfiguration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateKeyValueConfigurationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NatsManagerServiceServer).UpdateKeyValueConfiguration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/nats.NatsManagerService/UpdateKeyValueConfiguration",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NatsManagerServiceServer).UpdateKeyValueConfiguration(ctx, req.(*UpdateKeyValueConfigurationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _NatsManagerService_DeleteStreams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteStreamsRequest)
 	if err := dec(in); err != nil {
@@ -198,20 +294,20 @@ func _NatsManagerService_DeleteObjectStores_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NatsManagerService_CreateKeyValueStores_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateKeyValueStoresRequest)
+func _NatsManagerService_DeleteVersionKeyValueStores_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteVersionKeyValueStoresRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NatsManagerServiceServer).CreateKeyValueStores(ctx, in)
+		return srv.(NatsManagerServiceServer).DeleteVersionKeyValueStores(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/nats.NatsManagerService/CreateKeyValueStores",
+		FullMethod: "/nats.NatsManagerService/DeleteVersionKeyValueStores",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NatsManagerServiceServer).CreateKeyValueStores(ctx, req.(*CreateKeyValueStoresRequest))
+		return srv.(NatsManagerServiceServer).DeleteVersionKeyValueStores(ctx, req.(*DeleteVersionKeyValueStoresRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -232,6 +328,18 @@ var NatsManagerService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NatsManagerService_CreateObjectStores_Handler,
 		},
 		{
+			MethodName: "CreateVersionKeyValueStores",
+			Handler:    _NatsManagerService_CreateVersionKeyValueStores_Handler,
+		},
+		{
+			MethodName: "CreateGlobalKeyValueStore",
+			Handler:    _NatsManagerService_CreateGlobalKeyValueStore_Handler,
+		},
+		{
+			MethodName: "UpdateKeyValueConfiguration",
+			Handler:    _NatsManagerService_UpdateKeyValueConfiguration_Handler,
+		},
+		{
 			MethodName: "DeleteStreams",
 			Handler:    _NatsManagerService_DeleteStreams_Handler,
 		},
@@ -240,8 +348,8 @@ var NatsManagerService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NatsManagerService_DeleteObjectStores_Handler,
 		},
 		{
-			MethodName: "CreateKeyValueStores",
-			Handler:    _NatsManagerService_CreateKeyValueStores_Handler,
+			MethodName: "DeleteVersionKeyValueStores",
+			Handler:    _NatsManagerService_DeleteVersionKeyValueStores_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

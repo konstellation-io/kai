@@ -11,14 +11,21 @@ if [ "$DEBUG" = "1" ]; then
   set -x
 fi
 
+# Dynamic values
+if [ "$(uname)" = "Linux" ]; then
+  MINIKUBE_DRIVER=docker
+elif [ "$(uname)" = "Darwin" ]; then
+  MINIKUBE_DRIVER=hyperkit
+else
+  echo "The operating system could not be determined. Using default minikube behavior"
+fi
+
 # Default values
 VERBOSE=1
 SKIP_BUILD=0
 BUILD_ALL=1
 BUILD_ENGINE=0
 BUILD_RUNTIME=0
-BUILD_RUNNERS=0
-SKIP_FRONTEND_BUILD=0
 HOSTCTL_INSTALLED=0
 MINIKUBE_RESET=0
 MINIKUBE_CLEAN=0
@@ -32,7 +39,7 @@ MONGO_PASS=123456
 # DEV Admin User
 ADMIN_DEV_EMAIL="dev@local.local"
 
-. .kaictl.conf
+. ./.kaictl.conf
 . ./scripts/kaictl/common_functions.sh
 . ./scripts/kaictl/cmd_help.sh
 . ./scripts/kaictl/cmd_minikube.sh
@@ -40,7 +47,6 @@ ADMIN_DEV_EMAIL="dev@local.local"
 . ./scripts/kaictl/cmd_dev.sh
 . ./scripts/kaictl/cmd_build.sh
 . ./scripts/kaictl/cmd_deploy.sh
-. ./scripts/kaictl/cmd_login.sh
 . ./scripts/kaictl/cmd_delete.sh
 . ./scripts/kaictl/cmd_restart.sh
 
@@ -122,12 +128,6 @@ case $COMMAND in
   restart)
     cmd_restart "$@"
     echo_done "Restart done"
-    exit 0
-  ;;
-
-  login)
-    cmd_login "$@"
-    echo_done "Login done"
     exit 0
   ;;
 

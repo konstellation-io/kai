@@ -3,14 +3,13 @@ package entity
 type WorkflowsStreamsConfig map[string]*StreamConfig
 
 type StreamConfig struct {
-	Stream            string
-	Nodes             NodesStreamConfig
-	EntrypointSubject string
+	Stream    string
+	Processes ProcessesStreamConfig
 }
 
-type NodesStreamConfig map[string]NodeStreamConfig
+type ProcessesStreamConfig map[string]ProcessStreamConfig
 
-type NodeStreamConfig struct {
+type ProcessStreamConfig struct {
 	Subject       string
 	Subscriptions []string
 }

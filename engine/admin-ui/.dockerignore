@@ -1,7 +1,0 @@
-.gitignore
-build
-Dockerfile
-Dockerfile.local
-mock-server
-node_modules
-README.md

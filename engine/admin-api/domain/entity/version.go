@@ -4,10 +4,30 @@ import (
 	"time"
 )
 
+type ConfigurationVariable struct {
+	Key   string
+	Value string
+}
+
+type Version struct {
+	Tag         string
+	Description string
+	Config      []ConfigurationVariable
+	Workflows   []Workflow
+
+	CreationDate   time.Time
+	CreationAuthor string
+
+	PublicationDate   *time.Time
+	PublicationAuthor *string
+
+	Status VersionStatus
+	Error  string
+}
+
 type VersionStatus string
 
 const (
-	VersionStatusCreating  VersionStatus = "CREATING"
 	VersionStatusCreated   VersionStatus = "CREATED"
 	VersionStatusStarting  VersionStatus = "STARTING"
 	VersionStatusStarted   VersionStatus = "STARTED"
@@ -15,154 +35,162 @@ const (
 	VersionStatusStopping  VersionStatus = "STOPPING"
 	VersionStatusStopped   VersionStatus = "STOPPED"
 	VersionStatusError     VersionStatus = "ERROR"
+	VersionStatusCritical  VersionStatus = "CRITICAL"
 )
-
-//nolint:gocritic
-func (e VersionStatus) IsValid() bool {
-	return e == VersionStatusCreating || e == VersionStatusCreated || e == VersionStatusStarting ||
-		e == VersionStatusStarted || e == VersionStatusPublished || e == VersionStatusStopping ||
-		e == VersionStatusStopped || e == VersionStatusError
-}
 
 func (e VersionStatus) String() string {
 	return string(e)
 }
 
-type ConfigurationVariableType string
+func (v *Version) SetPublishStatus(publicationAuthor string) {
+	now := time.Now()
 
-const (
-	ConfigurationVariableTypeVariable ConfigurationVariableType = "VARIABLE"
-	ConfigurationVariableTypeFile     ConfigurationVariableType = "FILE"
-)
-
-func (e ConfigurationVariableType) IsValid() bool {
-	return e == ConfigurationVariableTypeVariable || e == ConfigurationVariableTypeFile
+	v.Status = VersionStatusPublished
+	v.PublicationAuthor = &publicationAuthor
+	v.PublicationDate = &now
 }
 
-func (e ConfigurationVariableType) String() string {
-	return string(e)
+func (v *Version) UnsetPublishStatus() {
+	v.Status = VersionStatusStarted
+	v.PublicationAuthor = nil
+	v.PublicationAuthor = nil
+	v.PublicationDate = nil
 }
 
-type Edge struct {
-	ID       string `bson:"id"`
-	FromNode string `bson:"fromNode"`
-	ToNode   string `bson:"toNode"`
-}
-
-type Node struct {
-	ID            string       `bson:"id"`
-	Name          string       `bson:"name"`
-	Image         string       `bson:"image"`
-	Src           string       `bson:"src"`
-	GPU           bool         `bson:"gpu"`
-	Subscriptions []string     `bson:"subscriptions"`
-	Replicas      int32        `bson:"replicas" default:"1"`
-	ObjectStore   *ObjectStore `bson:"objectStore,omitempty"`
-	Status        NodeStatus   `bson:"-"` // This field value is calculated in k8s
-}
-
-type ObjectStore struct {
-	Name  string `bson:"name"`
-	Scope string `bson:"scope"`
-}
-
-type NodeStatus string
-
-const (
-	NodeStatusStarting NodeStatus = "STARTING"
-	NodeStatusStarted  NodeStatus = "STARTED"
-	NodeStatusStopped  NodeStatus = "STOPPED"
-	NodeStatusError    NodeStatus = "ERROR"
-)
-
-func (e NodeStatus) IsValid() bool {
-	return e == NodeStatusStarting || e == NodeStatusStarted || e == NodeStatusStopped || e == NodeStatusError
-}
-
-func (e NodeStatus) String() string {
-	return string(e)
-}
-
-type KrtVersion string
-
-const (
-	KRTVersionV2 KrtVersion = "v2"
-)
-
-func (e KrtVersion) IsValid() bool {
-	return e == KRTVersionV2
-}
-
-func (e KrtVersion) String() string {
-	return string(e)
-}
-
-func ParseKRTVersionFromString(str string) (KrtVersion, bool) {
-	var krtVersionMap = map[string]KrtVersion{
-		KRTVersionV2.String(): KRTVersionV2,
+func (v *Version) CanBeStarted() bool {
+	switch v.Status {
+	case VersionStatusCreated, VersionStatusStopped, VersionStatusError, VersionStatusCritical:
+		return true
+	default:
+		return false
 	}
+}
 
-	c, ok := krtVersionMap[str]
-
-	return c, ok
+func (v *Version) CanBeStopped() bool {
+	return v.Status == VersionStatusStarted
 }
 
 type Workflow struct {
-	ID         string `bson:"id"`
-	Name       string `bson:"name"`
-	Entrypoint string `bson:"entrypoint"`
-	Nodes      []Node `bson:"nodes"`
-	Exitpoint  string `bson:"exitpoint"`
-	Stream     string `bson:"-"`
+	Name      string
+	Type      WorkflowType
+	Config    []ConfigurationVariable
+	Processes []Process
+	Stream    string
 }
 
-type Entrypoint struct {
-	ProtoFile string `bson:"proto"`
-	Image     string `bson:"image"`
-	Src       string `bson:"src"`
+type WorkflowType string
+
+const (
+	WorkflowTypeData     WorkflowType = "data"
+	WorkflowTypeTraining WorkflowType = "training"
+	WorkflowTypeFeedback WorkflowType = "feedback"
+	WorkflowTypeServing  WorkflowType = "serving"
+)
+
+func (wt WorkflowType) String() string {
+	return string(wt)
 }
 
-type ConfigurationVariable struct {
-	Key   string                    `bson:"key"`
-	Value string                    `bson:"value"`
-	Type  ConfigurationVariableType `bson:"type"`
+type Process struct {
+	Name           string
+	Type           ProcessType
+	Image          string
+	Replicas       int32
+	GPU            bool
+	Config         []ConfigurationVariable
+	ObjectStore    *ProcessObjectStore
+	Secrets        []ConfigurationVariable
+	Subscriptions  []string
+	Networking     *ProcessNetworking
+	ResourceLimits *ProcessResourceLimits
+	Status         ProcessStatus
 }
 
-type VersionUserConfig struct {
-	Completed bool                     `bson:"completed"`
-	Vars      []*ConfigurationVariable `bson:"vars"`
+type ProcessType string
+
+const (
+	ProcessTypeTrigger ProcessType = "trigger"
+	ProcessTypeTask    ProcessType = "task"
+	ProcessTypeExit    ProcessType = "exit"
+)
+
+func (pt ProcessType) IsValid() bool {
+	var processTypeMap = map[string]ProcessType{
+		string(ProcessTypeTrigger): ProcessTypeTrigger,
+		string(ProcessTypeTask):    ProcessTypeTask,
+		string(ProcessTypeExit):    ProcessTypeExit,
+	}
+
+	_, ok := processTypeMap[string(pt)]
+
+	return ok
 }
 
-type Version struct {
-	ID          string     `bson:"_id"`
-	KrtVersion  KrtVersion `bson:"krtVersion"`
-	Name        string     `bson:"name"`
-	Description string     `bson:"description"`
-
-	CreationDate   time.Time `bson:"creationDate"`
-	CreationAuthor string    `bson:"creationAuthor"`
-
-	PublicationDate   *time.Time `bson:"publicationDate"`
-	PublicationUserID *string    `bson:"publicationUserId"`
-
-	Status VersionStatus `bson:"status"`
-
-	Config     VersionUserConfig `bson:"config"`
-	Entrypoint Entrypoint        `bson:"entrypoint"`
-	Workflows  []*Workflow       `bson:"workflows"`
-
-	HasDoc bool     `bson:"hasDoc"`
-	Errors []string `bson:"errors"`
+func (pt ProcessType) String() string {
+	return string(pt)
 }
 
-func (v Version) PublishedOrStarted() bool {
-	return v.Status == VersionStatusStarted || v.Status == VersionStatusPublished
+type ProcessObjectStore struct {
+	Name  string
+	Scope ObjectStoreScope
 }
 
-func (v Version) CanBeStarted() bool {
-	return v.Status == VersionStatusCreated || v.Status == VersionStatusStopped
+type ObjectStoreScope string
+
+const (
+	ObjectStoreScopeProduct  ObjectStoreScope = "product"
+	ObjectStoreScopeWorkflow ObjectStoreScope = "workflow"
+)
+
+func (s ObjectStoreScope) String() string {
+	return string(s)
 }
 
-func (v Version) CanBeStopped() bool {
-	return v.Status == VersionStatusStarted
+type ProcessNetworking struct {
+	TargetPort      int
+	DestinationPort int
+	Protocol        NetworkingProtocol
+}
+
+type NetworkingProtocol string
+
+const (
+	NetworkingProtocolHTTP NetworkingProtocol = "HTTP"
+	NetworkingProtocolGRPC NetworkingProtocol = "GRPC"
+)
+
+type ResourceLimit struct {
+	Request string
+	Limit   string
+}
+
+type ProcessResourceLimits struct {
+	CPU    *ResourceLimit
+	Memory *ResourceLimit
+}
+
+type ProcessStatus string
+
+const (
+	ProcessStatusStarting ProcessStatus = "STARTING"
+	ProcessStatusStarted  ProcessStatus = "STARTED"
+	ProcessStatusStopped  ProcessStatus = "STOPPED"
+	ProcessStatusError    ProcessStatus = "ERROR"
+)
+
+func (ps ProcessStatus) IsValid() bool {
+	var processStatusMap = map[string]ProcessStatus{
+		string(ProcessStatusStarting): ProcessStatusStarting,
+		string(ProcessStatusStarted):  ProcessStatusStarted,
+		string(ProcessStatusStopped):  ProcessStatusStopped,
+		string(ProcessStatusError):    ProcessStatusError,
+	}
+
+	_, ok := processStatusMap[string(ps)]
+
+	return ok
+}
+
+func (ps ProcessStatus) String() string {
+	return string(ps)
 }

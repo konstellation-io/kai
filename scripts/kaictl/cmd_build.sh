@@ -16,16 +16,6 @@ cmd_build() {
       BUILD_ALL=0
       shift
     ;;
-    --runners)
-      BUILD_RUNNERS=1
-      BUILD_ALL=0
-      shift
-    ;;
-    --skip-frontend)
-      SKIP_FRONTEND_BUILD=1
-      shift
-    ;;
-
      *)
       shift
       ;;
@@ -43,9 +33,7 @@ show_build_help() {
 
     options:
       --clean          sends a prune command to remove old docker images and containers. (will keep last 24h).
-      --engine         build only engine components (admin-api, k8s-manager, nats-manager, admin-ui, admin-ui-builder, mongo-writer).
-      --runners        build only runners (kai-entrypoint, kai-py, kai-go, krt-files-downloader).
-      --skip-frontend  skip docker build for admin-ui component.
+      --engine         build only engine components (admin-api, k8s-manager, nats-manager).
 
     $(help_global_options)
 "
@@ -58,16 +46,6 @@ build_docker_images() {
   fi
 
   setup_env
-
-  # Runners
-  if [ "$BUILD_RUNNERS" = "1" ] || [ "$BUILD_ALL" = "1" ]; then
-    build_runners
-  fi
-
-  if [ "$SKIP_FRONTEND_BUILD" = "1" ]; then
-    echo_warning "¡¡¡¡¡ started with option $(echo_yellow "--local-frontend or --skip-frontend")."
-    echo "  Now run \`$(echo_light_green "yarn start")\` inside admin-ui"
-  fi
 }
 
 setup_env() {
@@ -85,19 +63,6 @@ build_engine() {
   build_image kai-admin-api engine/admin-api
   build_image kai-k8s-manager engine/k8s-manager
   build_image kai-nats-manager engine/nats-manager
-
-  if [ "$SKIP_FRONTEND_BUILD" != "1" ]; then
-    build_image kai-admin-ui engine/admin-ui
-  fi
-
-  build_image kai-mongo-writer engine/mongo-writer
-}
-
-build_runners() {
-  build_image kai-entrypoint runners/kai-entrypoint
-  build_image kai-py runners/kai-py
-  build_image kai-go runners/kai-go
-  build_image krt-files-downloader runners/krt-files-downloader
 }
 
 build_image() {

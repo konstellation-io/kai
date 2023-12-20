@@ -13,28 +13,12 @@ resolver:
 autobind:
   - github.com/konstellation-io/kai/engine/admin-api/domain/entity
 models:
-  ApiToken:
-    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.APIToken
-    fields:
-      creationDate:
-        resolver: true
-      lastActivity:
-        resolver: true
-
-  Runtime:
-    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.Runtime
+  Product:
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.Product
     fields:
       creationDate:
         resolver: true
       creationAuthor:
-        resolver: true
-      publishedVersion:
-        resolver: true
-      measurementsUrl:
-        resolver: true
-      databaseUrl:
-        resolver: true
-      entrypointAddress:
         resolver: true
   Version:
     model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.Version
@@ -47,17 +31,27 @@ models:
         resolver: true
       publicationAuthor:
         resolver: true
-      date:
-        resolver: true
-  VersionNodeStatus:
-    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.VersionNodeStatus
-    fields:
-      date:
-        resolver: true
   UserActivity:
     model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.UserActivity
     fields:
       date:
         resolver: true
       user:
+        resolver: true
+  ComponentInfo:
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.ComponentInfo
+    fields:
+      status:
+        resolver: true
+  RegisteredProcess:
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.RegisteredProcess
+    fields:
+      uploadDate:
+        resolver: true
+  LogFilters:
+    model: github.com/konstellation-io/kai/engine/admin-api/domain/entity.LogFilters
+    fields:
+      from:
+        resolver: true
+      to:
         resolver: true

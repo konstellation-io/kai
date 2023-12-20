@@ -2,38 +2,35 @@ package mongodb
 
 import (
 	"context"
-	"os"
 	"time"
 
+	"github.com/go-logr/logr"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 type MongoDB struct {
-	cfg    *config.Config
-	logger logging.Logger
+	logger logr.Logger
 	client *mongo.Client
 }
 
-func NewMongoDB(cfg *config.Config, logger logging.Logger) *MongoDB {
+func NewMongoDB(logger logr.Logger) *MongoDB {
 	return &MongoDB{
-		cfg,
 		logger,
 		nil,
 	}
 }
 
-func (m *MongoDB) Connect() *mongo.Client {
-	m.logger.Infof("MongoDB connecting at %s", m.cfg.MongoDB.Address)
+func (m *MongoDB) Connect() (*mongo.Client, error) {
+	m.logger.V(2).Info("Connecting to MongoDB", "endpoint", viper.GetString(config.MongoDBEndpointKey))
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(m.cfg.MongoDB.Address))
+	client, err := mongo.NewClient(options.Client().ApplyURI(viper.GetString(config.MongoDBEndpointKey)))
 	if err != nil {
-		m.logger.Error(err.Error())
-		os.Exit(1)
+		return nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
@@ -41,26 +38,24 @@ func (m *MongoDB) Connect() *mongo.Client {
 
 	err = client.Connect(ctx)
 	if err != nil {
-		m.logger.Error(err.Error())
-		os.Exit(1) //nolint:gocritic
+		return nil, err
 	}
 
 	// Call Ping to verify that the deployment is up and the Client was configured successfully.
 	ctx, cancel = context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	m.logger.Info("MongoDB ping...")
+	m.logger.V(2).Info("MongoDB ping...")
 
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
-		m.logger.Error(err.Error())
-		os.Exit(1)
+		return nil, err
 	}
 
 	m.logger.Info("MongoDB connected")
 	m.client = client
 
-	return client
+	return client, nil
 }
 
 func (m *MongoDB) Disconnect() {
@@ -74,10 +69,9 @@ func (m *MongoDB) Disconnect() {
 	defer cancel()
 
 	err := m.client.Disconnect(ctx)
-
 	if err != nil {
-		m.logger.Error(err.Error())
-		os.Exit(1) //nolint:gocritic
+		m.logger.Error(err, "Error closing MongoDB connection")
+		return
 	}
 
 	m.logger.Info("Connection to MongoDB closed.")

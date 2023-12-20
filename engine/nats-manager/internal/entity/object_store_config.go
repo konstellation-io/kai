@@ -3,7 +3,7 @@ package entity
 type WorkflowsObjectStoresConfig map[string]*WorkflowObjectStoresConfig
 
 type WorkflowObjectStoresConfig struct {
-	Nodes NodesObjectStoresConfig
+	Processes ProcessesObjectStoresConfig
 }
 
-type NodesObjectStoresConfig map[string]string
+type ProcessesObjectStoresConfig map[string]string

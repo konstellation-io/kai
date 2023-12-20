@@ -1,8 +1,0 @@
-$bar-height: 65px;
-
-.workflows {
-  position: absolute;
-  width: 100%;
-  height: calc(100% - #{$bar-height});
-  top: $bar-height;
-}

@@ -3,113 +3,187 @@ package main
 import (
 	"log"
 
-	"go.mongodb.org/mongo-driver/mongo"
-
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/auth"
+	"github.com/go-logr/logr"
+	"github.com/go-logr/zapr"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/casbinauth"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/influx"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/service"
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/version"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/versionrepository"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/objectstorage"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/redis"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/loki"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/user"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
+	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+	"github.com/sethvargo/go-password/password"
+	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
-	cfg := config.NewConfig()
-	logger := logging.NewLogger(cfg.LogLevel)
+	err := config.InitConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	db := mongodb.NewMongoDB(cfg, logger)
+	zapLog, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	mongodbClient := db.Connect()
+	logger := zapr.NewLogger(zapLog)
+
+	db := mongodb.NewMongoDB(logger)
+
+	mongodbClient, err := db.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	defer db.Disconnect()
 
-	userActivityInteractor, runtimeInteractor, userInteractor,
-		versionInteractor, metricsInteractor := initApp(cfg, logger, mongodbClient)
+	graphqlController := initGraphqlController(logger, mongodbClient)
 
 	app := http.NewApp(
-		cfg,
 		logger,
-		runtimeInteractor,
-		userInteractor,
-		userActivityInteractor,
-		versionInteractor,
-		metricsInteractor,
+		graphqlController,
 	)
+
 	app.Start()
 }
 
-func initApp(cfg *config.Config, logger logging.Logger, mongodbClient *mongo.Client) (usecase.UserActivityInteracter,
-	*usecase.RuntimeInteractor, *usecase.UserInteractor, *usecase.VersionInteractor, *usecase.MetricsInteractor) {
-	runtimeRepo := mongodb.NewRuntimeRepoMongoDB(cfg, logger, mongodbClient)
-	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(cfg, logger, mongodbClient)
-	versionMongoRepo := mongodb.NewVersionRepoMongoDB(cfg, logger, mongodbClient)
-	nodeLogRepo := mongodb.NewNodeLogMongoDBRepo(cfg, logger, mongodbClient)
-	metricRepo := mongodb.NewMetricMongoDBRepo(cfg, logger, mongodbClient)
-	measurementRepo := influx.NewMeasurementRepoInfluxDB(cfg, logger)
+//nolint:funlen // Future refactor
+func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *controller.GraphQLController {
+	productRepo := mongodb.NewProductRepoMongoDB(logger, mongodbClient)
+	userActivityRepo := mongodb.NewUserActivityRepoMongoDB(logger, mongodbClient)
+	versionMongoRepo := versionrepository.New(logger, mongodbClient)
+	processRepo := processrepository.New(logger, mongodbClient)
+	logsService := loki.NewClient()
 
-	versionService, err := service.NewK8sVersionClient(cfg, logger)
+	ccK8sManager, err := grpc.Dial(
+		viper.GetString(config.K8sManagerEndpointKey),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	natsManagerService, err := service.NewNatsManagerClient(cfg, logger)
+	k8sManagerClient := versionpb.NewVersionServiceClient(ccK8sManager)
+
+	k8sService, err := versionservice.New(logger, k8sManagerClient)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	accessControl, err := auth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
+	ccNatsManager, err := grpc.Dial(
+		viper.GetString(config.NatsManagerEndpointKey),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	idGenerator := version.NewIDGenerator()
-	docGenerator := version.NewHTTPStaticDocGenerator(cfg, logger)
+	natsManagerClient := natspb.NewNatsManagerServiceClient(ccNatsManager)
+
+	natsManagerService, err := natsmanager.NewClient(logger, natsManagerClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	accessControl, err := casbinauth.NewCasbinAccessControl(logger, "./casbin_rbac_model.conf", "./casbin_rbac_policy.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	keycloakUserRegistry, err := user.NewKeycloakUserRegistry(user.WithClient(viper.GetString(config.KeycloakURLKey)))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	userActivityInteractor := usecase.NewUserActivityInteractor(logger, userActivityRepo, accessControl)
 
-	runtimeInteractor := usecase.NewRuntimeInteractor(
-		cfg,
-		logger,
-		runtimeRepo,
-		measurementRepo,
-		versionMongoRepo,
-		metricRepo,
-		nodeLogRepo,
-		userActivityInteractor,
-		accessControl,
-	)
+	minioClient, err := objectstorage.NewMinioClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	minioAdminClient, err := objectstorage.NewAdminMinioClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	passwordGenerator, err := password.NewGenerator(&password.GeneratorInput{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	minioOjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
+
+	predictionRepo := redis.NewPredictionRepository(redis.NewRedisClient())
+
+	err = predictionRepo.EnsurePredictionIndexCreated()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	productInteractor := usecase.NewProductInteractor(&usecase.ProductInteractorOpts{
+		Logger:               logger,
+		ProductRepo:          productRepo,
+		VersionRepo:          versionMongoRepo,
+		ProcessRepo:          processRepo,
+		UserActivity:         userActivityInteractor,
+		AccessControl:        accessControl,
+		ObjectStorage:        minioOjectStorage,
+		NatsService:          natsManagerService,
+		UserRegistry:         keycloakUserRegistry,
+		PasswordGenerator:    passwordGenerator,
+		PredictionRepository: predictionRepo,
+	})
 
 	userInteractor := usecase.NewUserInteractor(
 		logger,
+		accessControl,
 		userActivityInteractor,
-		accessControl,
+		keycloakUserRegistry,
 	)
 
-	chronografDashboard := service.CreateDashboardService(cfg, logger)
-	versionInteractor := usecase.NewVersionInteractor(
-		cfg,
-		logger,
-		versionMongoRepo,
-		runtimeRepo,
-		versionService,
-		natsManagerService,
-		userActivityInteractor,
-		accessControl,
-		idGenerator,
-		docGenerator,
-		chronografDashboard,
-		nodeLogRepo,
+	versionInteractor := version.NewHandler(
+		&version.HandlerParams{
+			Logger:                 logger,
+			VersionRepo:            versionMongoRepo,
+			ProductRepo:            productRepo,
+			K8sService:             k8sService,
+			NatsManagerService:     natsManagerService,
+			UserActivityInteractor: userActivityInteractor,
+			AccessControl:          accessControl,
+		},
 	)
 
-	metricsInteractor := usecase.NewMetricsInteractor(
-		logger,
-		runtimeRepo,
-		accessControl,
-		metricRepo,
-	)
+	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
+	processService := usecase.NewProcessService(logger, k8sService, processRepo, minioOjectStorage)
+	logsUseCase := logs.NewLogsInteractor(logsService)
 
-	return userActivityInteractor, runtimeInteractor, userInteractor, versionInteractor, metricsInteractor
+	return controller.NewGraphQLController(
+		controller.Params{
+			Logger:                 logger,
+			ProductInteractor:      productInteractor,
+			UserInteractor:         userInteractor,
+			UserActivityInteractor: userActivityInteractor,
+			VersionInteractor:      versionInteractor,
+			ServerInfoGetter:       serverInfoGetter,
+			ProcessService:         processService,
+			LogsUsecase:            logsUseCase,
+		},
+	)
 }

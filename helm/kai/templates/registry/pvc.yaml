@@ -1,0 +1,15 @@
+{{- if .Values.registry.storage.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "registry.fullname" . }}
+  labels:
+    {{- include "registry.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.registry.storage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.registry.storage.size }}
+  storageClassName: {{ .Values.registry.storage.storageClass }}
+{{- end }}

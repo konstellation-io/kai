@@ -1,0 +1,117 @@
+typemeta:
+    kind: ""
+    apiversion: ""
+objectmeta:
+    name: test-product-v1.0.0-conf-files
+    generatename: ""
+    namespace: test
+    selflink: ""
+    uid: ""
+    resourceversion: ""
+    generation: 0
+    creationtimestamp: "0001-01-01T00:00:00Z"
+    deletiontimestamp: null
+    deletiongraceperiodseconds: null
+    labels:
+        product: test-product
+        type: configuration
+        version: v1.0.0
+    annotations: {}
+    ownerreferences: []
+    finalizers: []
+    managedfields: []
+immutable: null
+data:
+    fluent-bit.conf: |4
+        [SERVICE]
+            Flush        1
+            Verbose      1
+
+            Daemon       Off
+            Log_Level    info
+
+            Plugins_File plugins.conf
+            Parsers_File parsers.conf
+
+            HTTP_Server  Off
+            HTTP_Listen  0.0.0.0
+            HTTP_Port    2020
+
+        [INPUT]
+            Name        tail
+            Tag         tail.log
+            Buffer_Chunk_Size 1k
+            Path        /var/log/app/*.log
+
+        [FILTER]
+            Name parser
+            Match tail.log
+            Key_Name log
+            Parser json_parser
+            Reserve_Data True
+
+        [OUTPUT]
+            Name stdout
+            Match *
+
+        [OUTPUT]
+            Name loki
+            Match tail.log
+            Host ${KAI_LOKI_HOST}
+            Port ${KAI_LOKI_PORT}
+            labels service=kai-product-version, product_id=${KAI_PRODUCT_ID}, version_tag=${KAI_VERSION_TAG}, workflow_name=${KAI_WORKFLOW_NAME}, process_name=${KAI_PROCESS_NAME}
+            label_keys $request_id, $level, $logger
+    parsers.conf: |4
+        [PARSER]
+            Name json_parser
+            Format json
+    telegraf.conf: |4
+        [[inputs.opentelemetry]]
+        [[outputs.prometheus_client]]
+        listen = ":9191"
+    test-product-v1-0-0-test-workflow-test-process: |
+        metadata:
+            product_id: test-product
+            version_tag: v1.0.0
+            workflow_name: test-workflow
+            process_name: test-process
+            base_path: ""
+            process_type: task
+            workflow_type: training
+        nats:
+            url: ""
+            stream: test-stream
+            output: test-subject
+            inputs:
+                - other-process
+        centralized_configuration:
+            global:
+                bucket: ""
+            product:
+                bucket: v1.0.0-kv-store
+            workflow:
+                bucket: test-workflow-kv-store
+            process:
+                bucket: test-process-kv-store
+        minio:
+            endpoint: test-minio-endpoint
+            client_user: test-user
+            client_password: test-password
+            ssl: false
+            bucket: test-minio-bucket
+        auth:
+            endpoint: test-auth-endpoint
+            client: test-auth-client-id
+            client_secret: test-auth-client-secret
+            realm: test-auth-realm
+        measurements:
+            endpoint: localhost:0
+            insecure: false
+            timeout: 0
+            metrics_interval: 0
+        predictions:
+            endpoint: ""
+            username: test-user
+            password: test-password
+            index: predictionsIdx
+binarydata: {}

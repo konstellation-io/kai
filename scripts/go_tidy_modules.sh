@@ -8,9 +8,6 @@ go mod tidy
 cd ../k8s-manager
 go mod tidy
 
-cd ../mongo-writer
-go mod tidy
-
 cd ../../libs/krt-utils/
 go mod tidy
 

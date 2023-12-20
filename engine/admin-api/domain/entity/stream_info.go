@@ -1,48 +1,33 @@
 package entity
 
-import "fmt"
+import "errors"
 
-const entrypointNodeName = "entrypoint"
+var ErrProcessStreamNotFound = errors.New("process stream configuration not found")
 
-type VersionStreamsConfig struct {
-	KeyValueStore string
-	Workflows     map[string]*WorkflowStreamConfig
+type VersionStreams struct {
+	Workflows map[string]WorkflowStreamResources
 }
 
-type WorkflowStreamConfig struct {
-	Stream            string
-	Nodes             map[string]*NodeStreamConfig
-	EntrypointSubject string
-	KeyValueStore     string
+type WorkflowStreamResources struct {
+	Stream    string
+	Processes map[string]ProcessStreamConfig
 }
 
-func (w *WorkflowStreamConfig) GetNodeConfig(nodeName string) (*NodeStreamConfig, error) {
-	nodeConfig, ok := w.Nodes[nodeName]
+func (w *WorkflowStreamResources) GetProcessConfig(process string) (*ProcessStreamConfig, error) {
+	processConfig, ok := w.Processes[process]
 	if !ok {
-		//nolint:goerr113 // The error needs to be dynamic
-		return nil, fmt.Errorf("error obtaining stream config for node %q", nodeName)
+		return nil, ErrProcessStreamNotFound
 	}
 
-	return nodeConfig, nil
+	return &processConfig, nil
 }
 
-func (w *WorkflowStreamConfig) GetEntrypointSubject() (string, error) {
-	entrypointConfig, err := w.GetNodeConfig(entrypointNodeName)
-	if err != nil {
-		return "", err
-	}
-
-	return entrypointConfig.Subject, nil
-}
-
-type NodeStreamConfig struct {
+type ProcessStreamConfig struct {
 	Subject       string
-	ObjectStore   *string
-	KeyValueStore string
 	Subscriptions []string
 }
 
 type StreamInfo struct {
-	Stream        string
-	NodesSubjects map[string]string
+	Stream           string
+	ProcesssSubjects map[string]string
 }

@@ -1,93 +1,113 @@
 # -- Provide a name in place of kai for `app.kubernetes.io/name` labels
 nameOverride: ""
-
 # -- Whether to setup developement mode
 developmentMode: false
-
 rbac:
   # -- Whether to create the roles for the services that could use custom Service Accounts
   create: true
-
-mongoExpress:
-  image:
-    # -- Image repository
-    repository: mongo-express
-    # -- Image tag
-    tag: "0.54.0"
-    # -- Image pull policy
-    pullPolicy: IfNotPresent
-  connectionString:
-    # -- The name of the secret that contains a key with the MongoDB connection string.
-    secretName: ""
-    # --The name of the secret key that contains the MongoDB connection string.
-    secretKey: ""
-
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-
-  # -- Assign custom affinity rules to the Mongo Express pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-    # nodeAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #     nodeSelectorTerms:
-    #     - matchExpressions:
-    #       - key: kubernetes.io/e2e-az-name
-    #         operator: In
-    #         values:
-    #         - e2e-az1
-    #         - e2e-az2
-
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-
-# Config from kai/helm
 config:
   # -- Base domain name for Admin API and K8S Manager apps
-  baseDomainName: "local"
+  baseDomainName: "kai.local"
+  tls:
+    # -- Whether to enable TLS
+    enabled: false
+    # -- An existing secret containing a valid wildcard certificate for the value provissioned in `.config.baseDomainName`. Required if `config.tls.enabled = true`
+    certSecretName: ""
   admin:
-    # -- Api Hostname for Admin UI and Admin API
-    apiHost: api.kai.local
-    # -- Frontend Base URL for Admin API
-    frontendBaseURL: http://admin.kai.local
     # -- Whether to enable CORS on Admin API
     corsEnabled: true
-    # -- Email address for sending notifications
-    userEmail: dev@local.local
-  smtp:
-    # -- Whether to enable SMTP server connection
-    enabled: false
-    # -- SMTP server user
-    user: ""
-    # -- SMTP server password
-    pass: ""
-  auth:
-    # -- Verification login link duration
-    verificationCodeDurationInMinutes: 1
-    # -- JWT Sign secret
-    jwtSignSecret: jwt_secret
-    # -- API token secret
-    apiTokenSecret: api_token_secret
-    # -- Whether to enable secure cookie for Admin API
-    secureCookie: false
-    # -- Admin API secure cookie domain
-    cookieDomain: kai.local
   mongodb:
     connectionString:
       # -- The name of the secret that contains a key with the MongoDB connection string.
       secretName: ""
       # --The name of the secret key that contains the MongoDB connection string.
       secretKey: ""
-
+  minio:
+    # -- Default region (only affect to Minio buckets)
+    # @default -- us-east-1
+    defaultRegion: ""
+    # Transition Objects from MinIO to remote storage
+    # @default: Only one type of tier can be set, otherwise the deployment will use the first set tier (1.aws 2.gcp 3.azure) ignoring the rest
+    tier:
+      # -- Whether to enable MinIO Tiering
+      # @default: If is disable MinIO will use only local storage
+      enabled: false
+      # -- Tier name
+      # @default -- KAI-REMOTE-STORAGE
+      name: ""
+      # -- Remote storage bucket name (must exist)
+      remoteBucketName: ""
+      # -- Prefix or path in bucket where object transition will happen (will be created if not exist)
+      # @default -- DATA
+      remotePrefix: ""
+      # -- Transition Objects from MinIO to AWS S3
+      aws:
+        # -- The Region where the remote bucket was created.
+        # @default -- us-east-1
+        region: ""
+        # -- S3 Service endpoint URL
+        # @default -- https://s3.amazonaws.com
+        endpointURL: ""
+        # -- AWS authentication config
+        # @default: first look for the keys in pre-existing kubernetes secret object (secretName and secretKeyNames), if not set, look for the keys in values.yaml (accessKeyID and secretAccessKey)
+        auth:
+          # -- Name of the secret that contains the credentials for S3
+          secretName: ""
+          # -- Secret reference for AWS access keys
+          secretKeyNames:
+            # -- Name of the key in the secret that contains the access key ID
+            accessKey: ""
+            # -- Name of the key in the secret that contains the secret access key
+            secretKey: ""
+          # -- S3 Access Key ID if no secret is used
+          accessKeyID: ""
+          # -- S3 Secret Access Key if no secret is used
+          secretAccessKey: ""
+  loki:
+    # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Set loki as default datasource for Grafana.
+    isDefault: true
+    # -- Loki host. Change this to your own URL when `loki.enabled: false`
+    host: '{{ include "loki.singleBinaryFullname" .Subcharts.loki }}'
+    # -- Loki port. Change this to your own URL when `loki.enabled: false`
+    port: '{{ .Values.loki.loki.server.http_listen_port }}'
+    # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
+    datasource:
+      jsonData: "{}"
+      uid: ""
+  prometheus:
+    # -- Only when `prometheus.enabled: true` and `grafana.enabled: true`. Set prometheus as default datasource for Grafana.
+    isDefault: false
+    # -- Prometheus endpoint url. Change this to your own URL when `prometheus.enabled: false`
+    url: http://{{ include "prometheus.fullname" .Subcharts.prometheus }}-{{ .Values.prometheus.server.name }}:{{ .Values.prometheus.server.service.servicePort }}{{ .Values.prometheus.server.prefixURL }}
+    # -- Only when `prometheus.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
+    datasource:
+      jsonData: "{}"
+    ## Scrape configs used by KAI
+    kaiScrapeConfigs:
+      # -- Enable creation of configmap that contains custom prometheus scrape configs for KAI metrics. Usefull to use with external prometheus instance. If `prometheus.enabled: true` this cannot be disabled
+      enabled: true
+      # -- configmap name for additional scrape configs
+      configmapName: prometheus-additional-scrape-configs
+  ## Use only when `redis.enabled: false`
+  ## Only apply when use your own redis (external)
+  redis:
+    # -- architecture. Allowed values: `standalone` or `replication`. Only apply when use your own redis. This config allow send replicas urls to admin-api when replication is activated
+    architecture: standalone
+    auth:
+      # -- Whether to enable auth to redis. Only apply when use your own redis. This allow send credentials to admin-api
+      enabled: false
+      # -- Name of the secret that contains the redis password
+      existingSecret: ""
+      # -- Name of the key in the secret that contains the redis password
+      existingSecretPasswordKey: ""
+      # -- Redis password if no existingSecret is used and `redis.enabled: false`. (create a secret with this password and send credentials to admin-api)
+      password: ""
+    master:
+      # -- Redis Master endpoint url. Change this to your own URL when `redis.enabled: false`
+      url: '{{ printf "%s-master" (include "common.names.fullname" .Subcharts.redis) }}:{{ .Values.redis.master.service.ports.redis }}'
+    replicas:
+      # -- Redis Replicas endpoint url. Change this to your own URL when `redis.enabled: false`
+      url: '{{ printf "%s-replicas" (include "common.names.fullname" .Subcharts.redis) }}:{{ .Values.redis.replica.service.ports.redis }}'
 adminApi:
   # -- Default application log level
   logLevel: INFO
@@ -95,46 +115,21 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: latest
+    tag: 0.2.0-develop.79
     # -- Image pull policy
     pullPolicy: IfNotPresent
-  tls:
-    # -- Whether to enable TLS
-    enabled: false
-  # -- Hostname
+  # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
   host: api.kai.local
   ingress:
-    ## This Chart has been developed using Nginx Ingress Controller by default.
+    ## This Chart has been developed using Kong Ingress Controller by default.
     ## Using the following default annotations ensures its correct operation.
-    ## Ref: https://kubernetes.github.io/ingress-nginx/
+    ## Ref: https://kubernetes.github.io/ingress-Kong/
     ##
-
     # -- The name of the ingress class to use
-    className: nginx
+    className: kong
     # -- Ingress annotations
     # @default -- See `adminApi.ingress.annotations` in [values.yaml](./values.yaml)
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-body-size: 100000m
-      nginx.org/client-max-body-size: 100000m
-      nginx.org/websocket-services: admin-api
-
-      ## If additional annotations are needed to configure it, provide an additional
-      ## file ensuring they are appended to the default ones.
-      ##
-      ## Example:
-      ##
-      # nginx.ingress.kubernetes.io/proxy-body-size: 100000m
-      # nginx.org/client-max-body-size: 100000m
-      # nginx.org/websocket-services: admin-api
-      # cert-manager.io/issuer: your-issuer
-
-      ## Ensure different annotations are provided when another ingress controller is being used
-      ## (for example, through an additional values.yaml)
-      ## For example, when the ingress controller is Traefik instead of Nginx:
-      ##
-      # traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
-      # kubernetes.io/ingress.class: traefik
-
+    annotations: {}
   storage:
     # -- Storage class name
     class: standard
@@ -142,25 +137,23 @@ adminApi:
     size: 1Gi
     # -- Persistent volume mount point. This will define Admin API app workdir too.
     path: /admin-api-files
-
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
   nodeSelector: {}
-
   # -- Assign custom affinity rules to the Admin API pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
   affinity: {}
-    # nodeAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #     nodeSelectorTerms:
-    #     - matchExpressions:
-    #       - key: kubernetes.io/e2e-az-name
-    #         operator: In
-    #         values:
-    #         - e2e-az1
-    #         - e2e-az2
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/e2e-az-name
+  #         operator: In
+  #         values:
+  #         - e2e-az1
+  #         - e2e-az2
 
   # -- Tolerations for use with node taints
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
@@ -170,79 +163,21 @@ adminApi:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
-
-adminUI:
-  image:
-    # -- Image repository
-    repository: konstellation/kai-admin-ui
-    # -- Image tag
-    tag: latest
-    # -- Image pull policy
-    pullPolicy: IfNotPresent
-  ingress:
-    ## This Chart has been developed using Nginx Ingress Controller by default.
-    ## Using the following default annotations ensures its correct operation.
-    ## Ref: https://kubernetes.github.io/ingress-nginx/
-    ##
-    # -- The name of the ingress class to use
-    className: nginx
-    # -- Ingress annotations
-    annotations: {}
-      ## If additional annotations are needed to configure it, provide an additional
-      ## file ensuring they are appended to the default ones.
-      ##
-      ## Example:
-      ##
-      # kubernetes.io/ingress.class: nginx
-      # cert-manager.io/issuer: your-issuer
-
-      ## Ensure different annotations are provided when another ingress controller is being used
-      ## (for example, through an additional values.yaml)
-      ## For example, when the ingress controller is Traefik instead of Nginx:
-      ##
-      # traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
-      # kubernetes.io/ingress.class: traefik
-  tls:
-    # -- Whether to enable TLS
-    enabled: false
-  # -- Hostname
-  host: admin.kai.local
-
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-
-  # -- Assign custom affinity rules to the Admin UI pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-    # nodeAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #     nodeSelectorTerms:
-    #     - matchExpressions:
-    #       - key: kubernetes.io/e2e-az-name
-    #         operator: In
-    #         values:
-    #         - e2e-az1
-    #         - e2e-az2
-
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-
 k8sManager:
   image:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: latest
+    tag: 0.2.0-develop.79
     # -- Image pull policy
+    pullPolicy: IfNotPresent
+  imageBuilder:
+    image:
+      # -- Image repository for image builder's jobs
+      repository: gcr.io/kaniko-project/executor
+      # -- Image tag for image builder's jobs
+      tag: v1.18.0
+      # -- Image pull policy for image builder's jobs
     pullPolicy: IfNotPresent
   serviceAccount:
     # -- Whether to create the Service Account
@@ -252,83 +187,48 @@ k8sManager:
     name: ""
     # -- The Service Account annotations
     annotations: {}
-  krtFilesDownloader:
-    image:
-      # -- Image repository
-      repository: konstellation/krt-files-downloader
-      # -- Image tag
-      tag: latest
-      # -- Image pull policy
-      pullPolicy: Always
-  generatedEntrypoints:
-    # -- Wether to enable tls
-    tls: false
-    ingress:
-      # -- The ingressClassName to use for the enypoints' generated ingresses
-      className: "nginx"
-      # -- The annotations that all the generated ingresses for the entrypoints will have
-      # @default -- See `entrypoints.ingress.annotations` in [values.yaml](./values.yaml)
-      annotations:
-        ## This Chart has been developed using Nginx Ingress Controller by default.
-        ## Using the following default annotations ensures its correct operation.
-        ## Ref: https://kubernetes.github.io/ingress-nginx/
-        ##
-        nginx.ingress.kubernetes.io/proxy-body-size: 16m
-        nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-        # Based on this snippet:
-        # https://github.com/kubernetes/ingress-nginx/issues/5609#issuecomment-634908849
-        nginx.ingress.kubernetes.io/server-snippet: |
-          error_page 404 = @grpc_unimplemented;
-          error_page 502 503 = @grpc_unavailable;
-          location @grpc_unimplemented {
-              add_header grpc-status 12;
-              add_header grpc-message unimplemented;
-              return 204;
-          }
-          location @grpc_unavailable {
-              add_header grpc-status 14;
-              add_header grpc-message unavailable;
-              return 204;
-          }
-          default_type application/grpc;
-
-        ## If additional annotations are needed to configure it, provide an additional
-        ## file ensuring they are appended to the default ones.
-        ##
-        ## Example:
-        ##
-        # cert-manager.io/issuer: your-issuer
-
-        ## Ensure different annotations are provided when another ingress controller is being used
-        ## (for example, through an additional values.yaml)
-        ## For example, when the ingress controller is Traefik instead of Nginx:
-        ##
-        # traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
-        # kubernetes.io/ingress.class: traefik
-        # traefik.ingress.kubernetes.io/service.serversscheme: h2c
-      tls:
-        # -- TLS certificate secret name. If defined, wildcard for the current application domain must be used.
-        # @default -- If not defined, every created ingress will use an autogenerated certificate name based on the deployed runtimeId and .Values.config.baseDomainName.
-        secretName: ""
-
+  processes:
+    triggers:
+      ingress:
+        # -- The ingressClassName to use for the enypoints' generated ingresses
+        className: "kong"
+        # -- The annotations that all the generated ingresses for the entrypoints will have
+        annotations: {}
+        # konghq.com/protocol: grpc,grpcs
+    sidecars:
+      fluentbit:
+        image:
+          # -- Image repository for Fuent Bit sidecar
+          repository: fluent/fluent-bit
+          # -- Image tag for Fuent Bit sidecar
+          tag: 2.2.0
+          # -- Image pull policy for Fuent Bit sidecar
+          pullPolicy: IfNotPresent
+      telegraf:
+        image:
+          # -- Image repository for Fuent Bit sidecar
+          repository: telegraf
+          # -- Image tag for Fuent Bit sidecar
+          tag: 1.28.5
+          # -- Image pull policy for Fuent Bit sidecar
+          pullPolicy: IfNotPresent
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
   nodeSelector: {}
-
   # -- Assign custom affinity rules to the K8S Manager pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
   affinity: {}
-    # nodeAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #     nodeSelectorTerms:
-    #     - matchExpressions:
-    #       - key: kubernetes.io/e2e-az-name
-    #         operator: In
-    #         values:
-    #         - e2e-az1
-    #         - e2e-az2
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/e2e-az-name
+  #         operator: In
+  #         values:
+  #         - e2e-az1
+  #         - e2e-az2
 
   # -- Tolerations for use with node taints
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
@@ -338,44 +238,175 @@ k8sManager:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+keycloak:
+  # -- Hostname. This will be used to create the ingress rulem and to configure Keycloak and must be a subdomain of `.config.baseDomainName`
+  host: "auth.kai.local"
+  auth:
+    # -- Keycloak admin username
+    adminUser: admin
+    # -- Keycloak admin password
+    adminPassword: "123456"
+    existingSecret:
+      # -- The name of the secret that contains a key with the Keycloak admin password. Existing secret takes precedence over `adminUser` and `adminPassword`
+      name: ""
+      # -- The name of the secret key that contains the Keycloak admin username.
+      userKey: ""
+      # -- The name of the secret key that contains the Keycloak admin password.
+      passwordKey: ""
+  # -- Args to pass to the Keycloak startup command. This takes precedence over options passed through env variables
+  argsOverride: {}
+  # argsOverride:
+  #  - "--hostname-strict-https"
 
-mongoWriter:
+  # -- Keycloak extra env vars in the form of a list of key-value pairs
+  extraEnv: {}
+  # extraEnv:
+  #  KC_HOSTNAME_STRICT_HTTPS: "false"
+  #  KC_FEATURES: "admin-fine-grained-authz"
+
+  # -- The name of the realm that will be crated on Keycloak first startup
+  realmName: "konstellation"
+  kong:
+    # -- The name of the OIDC Kong plugin that should be installed on Kong ingress controller
+    oidcPluginName: "oidc"
+    oidcClient:
+      # -- The name of the OIDC client in Keycloak for Kong
+      clientId: "kong-oidc"
+      # -- The secret for the OIDC client that will be created on Keycloak first startup
+      secret: ""
+  kli:
+    oidcClient:
+      # -- The name of the OIDC client in Keycloak for KLI
+      clientId: "kai-kli-oidc"
+  adminApi:
+    oidcClient:
+      # -- The name of the OIDC client in Keycloak for the master realm admin
+      clientId: "admin-cli"
+  minio:
+    # -- The name of the OIDC client in Keycloak for MinIO
+    oidcClient:
+      # -- The name of the OIDC client in Keycloak for Kong
+      clientId: "minio"
+      # -- The secret for the OIDC client that will be created on Keycloak first startup
+      secret: ""
+  config:
+    # -- Whether to enable metrics
+    metricsEnabled: "false"
+    # -- Whether to enable http
+    httpEnabled: "true"
+    # -- Disables dynamically resolving the hostname from request headers. Should always be set to true in production, unless proxy verifies the Host header.
+    hostnameStrict: "false"
+    # -- The proxy address forwarding mode if the server is behind a reverse proxy. Valid values are `none`, `edge`, `reencrypt` and `passthrough`
+    proxy: edge
+    # -- If the server should expose health check endpoints. If set to "false", container liveness and readiness probes should be disabled.
+    healthEnabled: "true"
+  db:
+    # -- Keycloak database type
+    type: postgres
+    auth:
+      # -- The database name
+      database: ""
+      # -- The database hostname
+      host: ""
+      # -- The database port
+      port: ""
+      # -- The name of the secret that contains the database connection config keys.
+      secretName: ""
+      # -- The name of the secret key that contains the database host.
+      secretHostKey: ""
+      # -- The name of the secret key that contains the database port. Takes precedence over `host`
+      secretPortKey: ""
+      # -- The name of the secret key that contains the database username. Takes precedence over `port`
+      secretUserKey: ""
+      # -- The name of the secret key that contains the database password.
+      secretPasswordKey: ""
+      # -- The name of the secret key that contains the database name. Takes precedence over `database`
+      secretDatabaseKey: ""
+      # -- The database username
+      username: ""
+      # -- The database password
+      password: ""
   image:
-    # -- Image repository
-    repository: konstellation/kai-mongo-writer
-    # -- Image tag
-    tag: latest
-    # -- Image pull policy
+    # -- The image repository
+    repository: quay.io/keycloak/keycloak
+    # -- The image pull policy
     pullPolicy: IfNotPresent
+    # -- The image tag
+    tag: "21.1.1"
+  # -- Image pull secrets
+  imagePullSecrets: []
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+  # -- Pod annotations
+  podAnnotations: {}
+  # -- Pod security context
+  podSecurityContext: {}
+  # fsGroup: 2000
 
+  # Container security Context
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    # -- Service type
+    type: ClusterIP
+    ports:
+      # -- The http port the service will listen on. Only
+      http: 8080
+      # -- The https port the service will listen on
+      https: 8443
+  ingress:
+    ## This Chart has been developed using Kong Ingress Controller by default.
+    ## Using the following default annotations ensures its correct operation.
+    ## Ref: https://kubernetes.github.io/ingress-Kong/
+    ##
+
+    # -- The name of the ingress class to use
+    className: kong
+    # -- Ingress annotations
+    # @default -- See `keycloak.ingress.annotations` in [values.yaml](./values.yaml)
+    annotations: {}
+  # -- Container resources
+  resources: {}
+  # -- Container liveness probe
+  livinessProbe:
+    httpGet:
+      path: /health/live
+      port: http
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+  # -- Container readiness probe
+  readinessProbe:
+    httpGet:
+      path: /health/ready
+      port: http
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
   # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
   nodeSelector: {}
-
-  # -- Assign custom affinity rules to the Mongo Writter pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-    # nodeAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #     nodeSelectorTerms:
-    #     - matchExpressions:
-    #       - key: kubernetes.io/e2e-az-name
-    #         operator: In
-    #         values:
-    #         - e2e-az1
-    #         - e2e-az2
-
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
+  # -- Assign custom tolerations to the Keycloak pods
   tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-
+  # -- Assign custom affinity rules to the Keycloak pods
+  affinity: {}
+  # -- Extra volumes
+  extraVolumes: []
+  # -- Extra volume mounts
+  extraVolumeMounts: []
 nats:
   image:
     # -- Image repository
@@ -409,65 +440,52 @@ nats:
     trace: false
     # -- Timestamp log entries
     logtime: true
-
   limits:
     # -- Maximum number of active client connections.
     # @default -- 64K
     maxConnections:
-
     # -- Maximum numbers of subscriptions per client and leafnode accounts connection.
     # @default -- 0 (unlimited)
     maxSubscriptions:
-
     # -- Maximum length of a protocol line (including combined length of subject and queue group). Increasing this value may require cliet changes. Applies to all traffic
     # @default -- 4KB
     maxControlLine:
-
     # -- Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be equal or smaller to the `max_pending` value.
     # @default -- 1MB
     maxPayload:
-
     # -- Maximum number of seconds the server will block when writing. Once this threshold is exceeded the connection will be closed.
     # @default -- 10s
     writeDeadline:
-
     # -- Maximum number of bytes buffered for a connection Applies to client connections. Note that applications can also set 'PendingLimits' (number of messages and total size) for their subscriptions.
     # @default -- 64MB
     maxPending:
-
     # -- After how many unanswered pings the server will allow before closing the connection.
     # @default -- 2
     maxPings:
-
     # How many seconds should pass before sending a PING
     # to a client that has no activity.
     pingInterval:
-
     # -- Grace period after pod begins shutdown before starting to close client connections
     lameDuckGracePeriod: "10s"
-
     # -- Duration over which to slowly close close client connections after lameDuckGracePeriod has passed
     lameDuckDuration: "30s"
-
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
   nodeSelector: {}
-
   # -- Assign custom affinity rules to the NATS pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
   affinity: {}
-    # nodeAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #     nodeSelectorTerms:
-    #     - matchExpressions:
-    #       - key: kubernetes.io/e2e-az-name
-    #         operator: In
-    #         values:
-    #         - e2e-az1
-    #         - e2e-az2
-
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/e2e-az-name
+  #         operator: In
+  #         values:
+  #         - e2e-az1
+  #         - e2e-az2
   # -- Tolerations for use with node taints
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
@@ -476,136 +494,509 @@ nats:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
-
-chronograf:
-  image:
-    # -- Image repository
-    repository: chronograf
-    # -- Image tag
-    tag: 1.8.4
-    # -- Image pull policy
-    pullPolicy: IfNotPresent
-  persistence:
-    # -- Whether to enable persistence
-    enabled: true
-    # -- Storage class name
-    storageClass: "standard"
-    # -- Access mode for the volume
-    accessMode: ReadWriteOnce
-    # -- Storage size
-    size: 2Gi
-
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-
-  # -- Assign custom affinity rules to the Chronograf pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-    # nodeAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #     nodeSelectorTerms:
-    #     - matchExpressions:
-    #       - key: kubernetes.io/e2e-az-name
-    #         operator: In
-    #         values:
-    #         - e2e-az1
-    #         - e2e-az2
-
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-
-influxdb:
-  image:
-    # -- Image tag
-    tag: 1.8.1
-  config:
-    # -- [Details](https://docs.influxdata.com/influxdb/v1.8/administration/config/#http)
-    http:
-      enabled: true
-      flux-enabled: true
-      auth-enabled: false
-  persistence:
-    # -- Whether to enable persistence. See https://github.com/influxdata/helm-charts/tree/master/charts/influxdb#configure-the-chart for more info
-    enabled: true
-    # -- Storage class name
-    storageClass: "standard"
-    # -- Access mode for the volume
-    accessMode: ReadWriteOnce
-    # -- Storage size
-    size: 10Gi
-  initScripts:
-    # -- Boolean flag to enable and disable initscripts. See https://github.com/influxdata/helm-charts/tree/master/charts/influxdb#configure-the-chart for more info
-    enabled: true
-    # -- Init scripts
-    scripts:
-      init.iql: |+
-        CREATE DATABASE "kai"
-  address: http://kai-influxdb/
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-
-  # -- Assign custom affinity rules to the InfluxDB pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-    # nodeAffinity:
-    #   requiredDuringSchedulingIgnoredDuringExecution:
-    #     nodeSelectorTerms:
-    #     - matchExpressions:
-    #       - key: kubernetes.io/e2e-az-name
-    #         operator: In
-    #         values:
-    #         - e2e-az1
-    #         - e2e-az2
-
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-
-## Using default values from https://github.com/influxdata/helm-charts/blob/master/charts/kapacitor/values.yaml
-##
-kapacitor:
-  # -- Whether to enable Kapacitor
-  enabled: false
-
-  ## If kapacitor enabled, set influxURL=http://<chart_release>-influxdb:8086
-  ## Where <chart_release> is the release name by with the chart is deployed
-  #
-  #influxURL: http://kai-local-influxdb:8086
-
-  ## Persistence is disabled by default
-  ##
-  persistence:
-    # -- Whether to enable persistence [Details](https://github.com/influxdata/helm-charts/blob/master/charts/kapacitor/values.yaml)
-    enabled: false
-
-  # persistence:
-  #   enabled: true
-  #   storageClass: default
-  #   accessMode: ReadWriteOnce
-  #   size: 1Gi
-
 natsManager:
   image:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: latest
+    tag: 0.2.0-develop.79
     # -- Image pull policy
     pullPolicy: IfNotPresent
+registry:
+  image:
+    # -- Image repository
+    repository: registry
+    # -- Image tag
+    tag: 2.8.2
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+  # -- Image pull secrets
+  imagePullSecrets: []
+  deploymentStrategy:
+    type: Recreate
+  serviceAccount:
+    # -- Specifies whether a service account should be created
+    create: true
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+    name: ""
+  # -- Pod annotations
+  podAnnotations: {}
+  # -- Pod security context
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  # Container security Context
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    # -- Service type
+    type: ClusterIP
+    ports:
+      # -- The http port the service will listen on. Only
+      http: 5000
+  # -- A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/.
+  config: ""
+  configSecret:
+    # -- Takes precedence over 'registry.config'. The name of the secret that contains the registry config file.
+    name: ""
+    # -- The name of the secret key that contains the registry config file
+    key: ""
+  auth:
+    # -- Registry username
+    # @default -- user
+    user: ""
+    # -- Registry password
+    # @default -- password
+    password: ""
+  storage:
+    # -- Whether to enable persistence
+    enabled: true
+    # -- Storage class name
+    storageClass: ""
+    # -- Access mode for the volume
+    accessMode: ReadWriteOnce
+    # -- Storage size
+    size: 10Gi
+    # -- Persistent volume mount point. This will define Registry app workdir too.
+    path: /var/lib/registry
+  # -- Container resources
+  resources: {}
+  # -- The container port
+  containerPort: 5000
+  # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
+  host: registry.kai.local
+  ingress:
+    # -- The name of the ingress class to use
+    className: kong
+    # -- Ingress annotations
+    # @default -- See `adminApi.ingress.annotations` in [values.yaml](./values.yaml)
+    annotations: {}
+  # -- Define which Nodes the Pods are scheduled on.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+  # -- Assign custom affinity rules to the pods
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/e2e-az-name
+  #         operator: In
+  #         values:
+  #         - e2e-az1
+  #         - e2e-az2
+  # -- Tolerations for use with node taints
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+  # -- Extra volumes for the registry deployment
+  extraVolumes: []
+  # -- Extra volume mounts for the registry deployment
+  extraVolumeMounts: []
+## The following values are only a small set of options. For a full list see
+## the official MinIO chart at https://github.com/minio/minio/tree/master/helm/minio
+##
+minio:
+  image:
+    # -- Image repository
+    repository: quay.io/minio/minio
+    # -- Image tag
+    tag: RELEASE.2023-09-30T07-02-29Z
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+  mcImage:
+    # -- Image repository
+    repository: quay.io/minio/mc
+    # -- Image tag
+    tag: RELEASE.2023-09-29T16-41-22Z
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+  # -- Sets minio mode
+  mode: standalone
+  # -- Internal port number for MinIO S3 API container
+  minioAPIPort: "9000"
+  # -- Internal port number for MinIO Browser Console container
+  minioConsolePort: "9001"
+  # -- Sets Root user
+  # @default -- Randomly generated value
+  rootUser: ""
+  # -- Sets Root password
+  # @default -- Randomly generated value
+  rootPassword: ""
+  # -- Use an exising secret for root user and password
+  existingSecret: ""
+  # -- Sets pods resources
+  resources:
+    requests:
+      memory: 256Mi
+  persistence:
+    # -- Enables persistent storage using PVC
+    enabled: true
+    # -- Storage class name
+    storageClass: ""
+    # -- Access mode for the volume
+    accessMode: ReadWriteOnce
+    # -- Storage size
+    # @note: If Tier is enabled, ensure enough space to MinIO have time to transfer objects to external storage and free space in local persistence storage
+    size: 10Gi
+  service:
+    # -- Service type
+    type: ClusterIP
+    # -- Internal port number for MinIO S3 API service
+    port: "9000"
+  ingress:
+    # -- Enable ingress for MinIO API
+    enabled: true
+    # -- The name of the ingress class to use
+    ingressClassName: kong
+    # -- Ingress labels
+    labels: {}
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hostnames
+    hosts:
+      - storage.kai.local
+    # -- Ingress TLS configuration
+    tls: []
+  consoleIngress:
+    # -- Enable ingress for MinIO Web Console
+    enabled: true
+    # -- The name of the ingress class to use
+    ingressClassName: kong
+    # -- Ingress labels
+    labels: {}
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hostnames
+    hosts:
+      - storage-console.kai.local
+    # -- Ingress TLS configuration
+    tls: []
+## The following values are only a small set of options. For a full list see
+## the official Grafana chart at https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+##
+grafana:
+  # -- Whether to enable Grafana
+  enabled: true
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
+  image:
+    # -- Grafana version
+    tag: 10.2.0
+  ## Sidecars that collect the configmaps with specified label and stores the included files them into the respective folders
+  # -- sidecar config (required for datasource config section in loki and prometheus)
+  sidecar:
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1"
+      maxLines: 1000
+  # -- Admin user name
+  adminUser: admin
+  # -- Set admin password (ommited if existingSecret is set)
+  # @default -- Randomly generated value
+  adminPassword: ""
+  # -- Use an existing secret for the admin user
+  admin:
+    ## -- Name of the existing secret. (if existingSecret is blank it will not be used)
+    existingSecret: ""
+    # -- Name of the key in the secret that contains the admin user
+    userKey: admin-user
+    # -- Name of the key in the secret that contains the password
+    passwordKey: admin-password
+  plugins:
+    - redis-datasource
+  persistence:
+    # -- Enables persistent storage using PVC
+    enabled: false
+    # -- Storage class name
+    storageClass: ""
+    # -- Access mode for the volume
+    accessMode: ReadWriteOnce
+    # -- Storage size
+    size: 1Gi
+  service:
+    # -- Service type
+    type: ClusterIP
+    # -- Internal port number for Grafana service
+    port: 80
+  ingress:
+    # -- Enable ingress for MinIO Web Console
+    enabled: true
+    # -- The name of the ingress class to use
+    ingressClassName: kong
+    # -- Ingress labels
+    labels: {}
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hostnames
+    hosts:
+      - monitoring.kai.local
+    # -- Ingress TLS configuration
+    tls: []
+## The following values are only a small set of options. For a full list see
+## the official loki chart at https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
+##
+loki:
+  # -- Whether to enable Loki
+  enabled: true
+  singleBinary:
+    replicas: 1
+  test:
+    enabled: false
+  monitoring:
+    # Self monitoring determines whether Loki should scrape its own logs.
+    # This feature currently relies on the Grafana Agent Operator being installed,
+    # -- scrape its own Loki logs
+    selfMonitoring:
+      enabled: false
+      grafanaAgent:
+        installOperator: false
+    ## The Loki canary pushes logs to and queries from this loki installation to test that it's working correctly
+    # -- Whether to enable lokiCanary
+    lokiCanary:
+      enabled: false
+  # Configuration for the gateway
+  gateway:
+    # -- Specifies whether the gateway should be enabled
+    enabled: false
+  loki:
+    image:
+      # -- Loki version
+      tag: 2.9.2
+    server:
+      http_listen_port: 3100
+    # -- Should authentication be enabled
+    auth_enabled: false
+    # -- monolithic loki
+    commonConfig:
+      replication_factor: 1
+    storage:
+      type: 'filesystem'
+    persistence:
+      # -- Enables persistent storage using PVC
+      enabled: false
+      # If defined, storageClassName: <storageClass>.
+      # If set to "-", storageClassName: "", which disables dynamic provisioning.
+      # If empty or set to null, no storageClassName spec is
+      # set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack).
+      # -- Storage class name
+      storageClass: ""
+      # -- Access mode for the volume
+      accessMode: ReadWriteOnce
+      # -- Storage size
+      size: 2Gi
+    service:
+      # -- Service type
+      type: ClusterIP
+      # -- Internal port number for Grafana service
+      port: 3100
+## The following values are only a small set of options. For a full list see
+## the official Prometheus chart at https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
+##
+prometheus:
+  # -- Whether to enable Prometheus
+  enabled: true
+  ## server configuration
+  server:
+    # -- name of the prometheus server
+    name: server
+    image:
+      # -- prometheus server version
+      tag: v2.47.2
+    persistentVolume:
+      # -- Enables persistent storage using PVC
+      enabled: true
+      # -- Storage class name
+      storageClass: ""
+      # -- Access mode for the volume
+      accessModes:
+        - ReadWriteOnce
+      # -- Storage size
+      size: 2Gi
+    ## Additional scrape configs for KAI telegraf metrics
+    extraConfigmapMounts:
+      # -- name for volumes and volumeMount config
+      - name: additional-scrape-configs
+        mountPath: /etc/config/additional-scrape-configs/
+        subPath: ""
+        # -- name of the configmap. Must be the same name set in `config.prometheus.kaiScrapeConfigs.configmapName`
+        configMap: prometheus-additional-scrape-configs
+        readOnly: true
+    service:
+      # -- Service type
+      type: ClusterIP
+      # -- Internal port number for grafana service
+      servicePort: 80
+    ingress:
+      # -- Enable ingress for MinIO Web Console
+      enabled: true
+      # -- The name of the ingress class to use
+      ingressClassName: kong
+      # -- Ingress labels
+      extraLabels: {}
+      # -- Ingress annotations
+      annotations: {}
+      # -- Ingress hostnames
+      hosts:
+        - prometheus.kai.local
+      # -- Ingress TLS configuration
+      tls: []
+  # -- Files to get additional scrapeConfigs. This allows scrape configs defined in `prometheus.server.extraConfigmapMounts`
+  scrapeConfigFiles:
+    - /etc/config/additional-scrape-configs/*.yaml
+  ## Alertmanager complete values https://github.com/prometheus-community/helm-charts/tree/main/charts/alertmanager
+  alertmanager:
+    # -- Whether to enable alertmanager
+    enabled: true
+    image:
+      # -- alertmanager server version
+      tag: v0.26.0
+    persistence:
+      enabled: true
+      # -- Storage class name
+      storageClass: ""
+      # -- Access mode for the volume
+      accessModes:
+        - ReadWriteOnce
+      # -- Storage size
+      size: 2Gi
+  ## Kube-state-metrics complete values  https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-state-metrics
+  kube-state-metrics:
+    enabled: false
+  ## Prometheus-node-exporter complete values  https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-node-exporter
+  prometheus-node-exporter:
+    enabled: false
+  ## Prometheus-pushgateway complete values  https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-pushgateway
+  prometheus-pushgateway:
+    enabled: false
+## The following values are only a small set of options. For a full list see
+## the official Redis chart at https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+##
+redis:
+  # -- Whether to enable redis
+  enabled: true
+  image:
+    # repository
+    repository: redis/redis-stack-server
+    # -- Redis server version
+    tag: 7.2.0-v6
+  # -- architecture. Allowed values: `standalone` or `replication`
+  architecture: standalone
+  auth:
+    # -- Whether to enable auth to redis
+    enabled: true
+    # @default -- random 10-character alphanumeric string if not set. Use this password method to autoconfigure grafana datasource.
+    password: ""
+    ## NOTE: When existingSecret is set, the previous `auth.password` parameter is ignored
+    # -- The name of an existing secret with redis credentials
+    existingSecret: ""
+    ## NOTE: existingSecretPasswordKey is ignored unless `auth.existingSecret` parameter is set
+    # -- Password key to be retrieved from existing secret
+    existingSecretPasswordKey: ""
+  # -- number of replicas
+  master:
+    # -- redis Container port to open on master nodes
+    containerPorts:
+      redis: 6379
+    persistence:
+      enabled: true
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
+      # -- Storage class name
+      storageClass: ""
+      # -- Access mode for the volume
+      accessModes:
+        - ReadWriteOnce
+      # -- Storage size
+      size: 2Gi
+    service:
+      # -- Service type
+      type: ClusterIP
+      # -- Internal port number for master redis service
+      ports:
+        redis: 6379
+    ## Required config to enable redis stack
+    args:
+      - -c
+      - /opt/bitnami/scripts/start-script/start-master.sh
+    # -- Extra volumes for additional config
+    extraVolumes:
+      - name: redis-master-start-script
+        configMap:
+          name: redis-stack-master-config
+          defaultMode: 0755
+    # -- Extra volume mounts for additional config
+    extraVolumeMounts:
+      - name: redis-master-start-script
+        mountPath: /opt/bitnami/scripts/start-script
+  replica:
+    # -- Number of replicas
+    replicaCount: 1
+    persistence:
+      enabled: true
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
+      # -- Storage class name
+      storageClass: ""
+      # -- Access mode for the volume
+      accessModes:
+        - ReadWriteOnce
+      # -- Storage size
+      size: 2Gi
+    service:
+      # -- Service type
+      type: ClusterIP
+      # -- Internal port number for master redis service
+      ports:
+        redis: 6379
+    autoscaling:
+      enabled: false
+      # -- Min replicas for the pod autoscaling
+      minReplicas: 1
+      # -- Max replicas for the pod autoscaling
+      maxReplicas: 5
+    ## Required config to enable redis stack
+    args:
+      - -c
+      - /opt/bitnami/scripts/start-script/start-replicas.sh
+    # -- Extra volumes for additional config
+    extraVolumes:
+      - name: redis-replicas-start-script
+        configMap:
+          name: redis-stack-replicas-config
+          defaultMode: 0755
+    # -- Extra volume mounts for additional config
+    extraVolumeMounts:
+      - name: redis-replicas-start-script
+        mountPath: /opt/bitnami/scripts/start-script
+  tls:
+    # -- Enabled Enable TLS traffic
+    enabled: false
+    # -- Require clients to authenticate
+    authClients: false
+    # -- Enable autogenerated certificates
+    autoGenerated: false
+    # -- The name of the existing secret that contains the TLS certificates
+    existingSecret: ""
+  metrics:
+    # -- Start a sidecar prometheus exporter to expose redis metrics
+    enabled: false

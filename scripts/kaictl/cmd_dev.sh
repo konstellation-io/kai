@@ -17,21 +17,6 @@ cmd_dev() {
         SKIP_BUILD=1
         shift
       ;;
-
-      # Use it when you want to develop on admin-ui outside k8s and using the mock server
-      --frontend-mock)
-        KRE_ADMIN_API_HOST="dev-admin.kai.local:4000"
-        KRE_ADMIN_FRONTEND_BASE_URL="http://dev-admin.kai.local:3000"
-        SKIP_FRONTEND_BUILD=1
-        shift
-      ;;
-
-      # Use it when you want to develop on admin-ui outside k8s
-      --local-frontend)
-        KRE_ADMIN_FRONTEND_BASE_URL="http://dev-admin.kai.local:3000"
-        SKIP_FRONTEND_BUILD=1
-        shift
-      ;;
       --etchost)
         # Automatic update of /etc/hosts
         update_etc_hosts
@@ -67,7 +52,6 @@ cmd_dev() {
     sleep 10
   fi
   deploy
-  cmd_login
 
   if [ "$MINIKUBE_RESET" = "1" ]; then
     show_etc_hosts
@@ -80,8 +64,6 @@ show_dev_help() {
     options:
       --hard, --dracarys  remove all contents of minikube kai profile. $(echo_yellow "(WARNING: will re-build all docker images again)").
       --skip-build        skip all docker images build, useful for non-development environments
-      --frontend-mock     starts a local mock server to avoid calling the actual API during Frontend development.
-      --local-frontend    starts a local server outside from kubernetes for faster development.
 
     $(help_global_options)
 "

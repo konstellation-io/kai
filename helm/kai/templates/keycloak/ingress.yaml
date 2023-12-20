@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+  {{- with .Values.keycloak.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.keycloak.ingress.className }}
+  {{- if .Values.config.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.keycloak.host }}
+      secretName: {{ .Values.config.tls.certSecretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.keycloak.host }}
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "keycloak.fullname" .}}
+                port:
+                  {{- if .Values.keycloak.config.httpEnabled }}
+                  name: http
+                  {{- else }}
+                  name: https
+                  {{- end }}

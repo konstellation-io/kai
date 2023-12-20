@@ -9,16 +9,13 @@ import (
 )
 
 type VersionRepo interface {
-	Create(userID, runtimeID string, version *entity.Version) (*entity.Version, error)
-	CreateIndexes(ctx context.Context, runtimeID string) error
-	GetByID(runtimeID, versionID string) (*entity.Version, error)
-	GetByName(ctx context.Context, runtimeID, name string) (*entity.Version, error)
-	GetByRuntime(runtimeID string) ([]*entity.Version, error)
-	Update(runtimeID string, version *entity.Version) error
-	SetHasDoc(ctx context.Context, runtimeID, versionID string, hasDoc bool) error
-	SetStatus(ctx context.Context, runtimeID, versionID string, status entity.VersionStatus) error
-	GetAll(runtimeID string) ([]*entity.Version, error)
-	SetErrors(ctx context.Context, runtimeID string, version *entity.Version, errorMessages []string) (*entity.Version, error)
-	UploadKRTFile(runtimeID string, version *entity.Version, file string) error
-	ClearPublishedVersion(ctx context.Context, runtimeID string) (*entity.Version, error)
+	Create(userEmail, productID string, version *entity.Version) (*entity.Version, error)
+	CreateIndexes(ctx context.Context, productID string) error
+	GetByTag(ctx context.Context, productID, tag string) (*entity.Version, error)
+	ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error)
+	Update(productID string, version *entity.Version) error
+	// SetStatus updates the status and deletes the error message of the version.
+	SetStatus(ctx context.Context, productID, versionTag string, status entity.VersionStatus) error
+	SetErrorStatusWithError(ctx context.Context, productID, version, errorMessage string) error
+	SetCriticalStatusWithError(ctx context.Context, productID, version, errorMessage string) error
 }

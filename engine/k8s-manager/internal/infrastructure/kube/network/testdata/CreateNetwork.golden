@@ -1,0 +1,81 @@
+typemeta:
+    kind: ""
+    apiversion: ""
+listmeta:
+    selflink: ""
+    resourceversion: ""
+    continue: ""
+    remainingitemcount: null
+items:
+    - typemeta:
+        kind: ""
+        apiversion: ""
+      objectmeta:
+        name: test-product-v1-0-0-test-workflow-test-process
+        generatename: ""
+        namespace: test
+        selflink: ""
+        uid: ""
+        resourceversion: ""
+        generation: 0
+        creationtimestamp: "0001-01-01T00:00:00Z"
+        deletiontimestamp: null
+        deletiongraceperiodseconds: null
+        labels:
+            process: test-process
+            product: test-product
+            protocol: GRPC
+            type: network
+            version: v1.0.0
+            workflow: test-workflow
+        annotations:
+            konghq.com/protocol: grpc
+        ownerreferences: []
+        finalizers: []
+        managedfields: []
+      spec:
+        ports:
+            - name: trigger
+              protocol: ""
+              appprotocol: null
+              port: 80
+              targetport:
+                type: 0
+                intval: 80
+                strval: ""
+              nodeport: 0
+            - name: metrics
+              protocol: ""
+              appprotocol: null
+              port: 0
+              targetport:
+                type: 0
+                intval: 0
+                strval: ""
+              nodeport: 0
+        selector:
+            process: test-process
+            product: test-product
+            version: v1.0.0
+            workflow: test-workflow
+        clusterip: ""
+        clusterips: []
+        type: ClusterIP
+        externalips: []
+        sessionaffinity: ""
+        loadbalancerip: ""
+        loadbalancersourceranges: []
+        externalname: ""
+        externaltrafficpolicy: ""
+        healthchecknodeport: 0
+        publishnotreadyaddresses: false
+        sessionaffinityconfig: null
+        ipfamilies: []
+        ipfamilypolicy: null
+        allocateloadbalancernodeports: null
+        loadbalancerclass: null
+        internaltrafficpolicy: null
+      status:
+        loadbalancer:
+            ingress: []
+        conditions: []

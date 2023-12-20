@@ -1,31 +1,25 @@
 package config
 
 import (
-	"github.com/kelseyhightower/envconfig"
+	"strings"
+
+	"github.com/spf13/viper"
 )
 
-// Config holds the configuration values for the application.
-type Config struct {
-	DevelopmentMode bool `yaml:"developmentMode" envconfig:"KRE_DEVELOPMENT_MODE"`
+const (
+	DevelopmentMode           = "DEVELOPMENT_MODE"
+	NatsManagerPort           = "NATS_MANAGER_PORT"
+	NatsURL                   = "NATS_URL"
+	ObjectStoreDefaultTTLDays = "OBJECT_STORE_DEFAULT_TTL"
+)
 
-	Server struct {
-		Port string `yaml:"port" envconfig:"KRE_NATS_MANAGER_PORT"`
-	} `yaml:"server"`
+func Initialize() {
+	viper.SetDefault(DevelopmentMode, true)
+	viper.SetDefault(NatsManagerPort, 50051)
+	viper.SetDefault(NatsURL, "localhost:4222")
+	viper.SetDefault(ObjectStoreDefaultTTLDays, 5)
 
-	NatsStreaming struct {
-		URL string `yaml:"url" envconfig:"KRE_NATS_URL"`
-	} `yaml:"nats_streaming"`
-}
-
-// NewConfig will read the config.yml file and override values with env vars.
-func NewConfig() *Config {
-	var err error
-	cfg := &Config{}
-
-	err = envconfig.Process("", cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	return cfg
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.SetEnvPrefix("KAI")
+	viper.AutomaticEnv()
 }

@@ -4,26 +4,25 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-logr/logr"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logging"
 )
 
 type UserActivityRepoMongoDB struct {
-	cfg        *config.Config
-	logger     logging.Logger
+	logger     logr.Logger
 	collection *mongo.Collection
 }
 
-func NewUserActivityRepoMongoDB(cfg *config.Config, logger logging.Logger, client *mongo.Client) *UserActivityRepoMongoDB {
-	collection := client.Database(cfg.MongoDB.DBName).Collection("userActivity")
+func NewUserActivityRepoMongoDB(logger logr.Logger, client *mongo.Client) *UserActivityRepoMongoDB {
+	collection := client.Database(viper.GetString(config.MongoDBKaiDatabaseKey)).Collection("userActivity")
 
 	return &UserActivityRepoMongoDB{
-		cfg,
 		logger,
 		collection,
 	}

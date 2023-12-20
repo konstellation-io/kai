@@ -12,30 +12,59 @@ templates:
     # Valid values are "Error", "Warn", "Info", "Debug". The default is "Error"
     # Use "Debug" to make missing files errors invisible at the default log level(--log-level=INFO)
     missingFileHandler: Warn
-    namespace: kai
     values:
     - "values/{{`{{ .Release.Name }}`}}/values.yaml.gotmpl"
     - "values/{{`{{ .Release.Name }}`}}/values.yaml"
 
 repositories:
+  - name: kong
+    url: https://charts.konghq.com
+  - name: cnpg
+    url: https://cloudnative-pg.github.io/charts
   - name: mongodb
     url: https://mongodb.github.io/helm-charts
   - name: bedag
     url: https://bedag.github.io/helm-charts/
 
 releases:
+  - name: kong
+    <<: *default
+    chart: kong/kong
+    version: 2.22.0
+    namespace: kong
+    wait: false
+
   - name: "mongodb-operator"
     <<: *default
     chart: mongodb/community-operator
+    version: 0.8.3
+    namespace: kai
 
   - name: "mongodb-database"
     <<: *default
     chart: bedag/raw
+    namespace: kai
     needs:
     - kai/mongodb-operator
+
+  - name: cnpg
+    <<: *default
+    chart: cnpg/cloudnative-pg
+    version: 0.19.1
+    namespace: cnpg-system
+
+  - name: postgres-database
+    <<: *default
+    chart: bedag/raw
+    namespace: kai
+    needs:
+    - cnpg-system/cnpg
 
   - name: "{{ requiredEnv "RELEASE_NAME" }}"
     <<: *default
     chart: ../../helm/kai
+    namespace: kai
     needs:
     - kai/mongodb-database
+    - kai/postgres-database
+    - kong/kong

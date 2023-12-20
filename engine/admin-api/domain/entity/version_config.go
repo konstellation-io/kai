@@ -1,60 +1,63 @@
 package entity
 
 import (
-	"fmt"
+	"errors"
 )
 
-type VersionConfig struct {
-	KeyValueStore string
+var (
+	ErrNilVersionStreamConfig      = errors.New("stream config cannot be nil")
+	ErrNilKeyValueStoreConfig      = errors.New("key-value store config cannot be nil")
+	ErrWorkflowStreamNotFound      = errors.New("workflow stream config not found")
+	ErrWorkflowKVStoreNotFound     = errors.New("workflow key-value store config not found")
+	ErrWorkflowObjectStoreNotFound = errors.New("workflow key-value store config not found")
+)
 
-	StreamsConfig        *VersionStreamsConfig
-	ObjectStoresConfig   *VersionObjectStoresConfig
-	KeyValueStoresConfig *KeyValueStoresConfig
+type VersionStreamingResources struct {
+	Streams        *VersionStreams
+	ObjectStores   *VersionObjectStores
+	KeyValueStores *KeyValueStores
 }
 
-func NewVersionConfig(streamsConfig *VersionStreamsConfig, objectStoresConfig *VersionObjectStoresConfig,
-	keyValueStoresConfig *KeyValueStoresConfig) *VersionConfig {
-	return &VersionConfig{
-		StreamsConfig:        streamsConfig,
-		ObjectStoresConfig:   objectStoresConfig,
-		KeyValueStoresConfig: keyValueStoresConfig,
-	}
-}
-
-func (w *WorkflowStreamConfig) GetNodeStreamConfig(node string) (*NodeStreamConfig, error) {
-	return w.GetNodeConfig(node)
-}
-
-func (v *VersionConfig) GetNodeObjectStoreConfig(workflow, node string) *string {
-	w, ok := v.ObjectStoresConfig.Workflows[workflow]
-	if !ok {
-		return nil
+func NewVersionConfig(streamsConfig *VersionStreams, objectStoresConfig *VersionObjectStores,
+	keyValueStoresConfig *KeyValueStores) (*VersionStreamingResources, error) {
+	if streamsConfig == nil {
+		return nil, ErrNilVersionStreamConfig
 	}
 
-	n, ok := w[node]
-	if !ok {
-		return nil
+	if keyValueStoresConfig == nil {
+		return nil, ErrNilKeyValueStoreConfig
 	}
 
-	return &n
+	return &VersionStreamingResources{
+		Streams:        streamsConfig,
+		ObjectStores:   objectStoresConfig,
+		KeyValueStores: keyValueStoresConfig,
+	}, nil
 }
 
-func (v *VersionConfig) GetWorkflowStreamConfig(workflow string) (*WorkflowStreamConfig, error) {
-	w, ok := v.StreamsConfig.Workflows[workflow]
+func (v *VersionStreamingResources) GetWorkflowStream(workflow string) (*WorkflowStreamResources, error) {
+	w, ok := v.Streams.Workflows[workflow]
 	if !ok {
-		//nolint:goerr113 // The error needs to be dynamic
-		return nil, fmt.Errorf("workflow %q stream config not found", workflow)
+		return nil, ErrWorkflowStreamNotFound
+	}
+
+	return &w, nil
+}
+
+func (v *VersionStreamingResources) GetWorkflowKeyValueStores(workflow string) (*WorkflowKeyValueStores, error) {
+	w, ok := v.KeyValueStores.Workflows[workflow]
+	if !ok {
+		return nil, ErrWorkflowKVStoreNotFound
 	}
 
 	return w, nil
 }
 
-func (v *VersionConfig) GetWorkflowKeyValueStoresConfig(workflow string) (*WorkflowKeyValueStores, error) {
-	w, ok := v.KeyValueStoresConfig.WorkflowsKeyValueStores[workflow]
+func (v *VersionStreamingResources) GetWorkflowObjectStores(workflow string) (*WorkflowObjectStoresConfig, error) {
+	w, ok := v.ObjectStores.Workflows[workflow]
 	if !ok {
-		//nolint:goerr113 // errors need to be dynamic
-		return nil, fmt.Errorf("workflow %q stream config not found", workflow)
+		return nil, ErrWorkflowObjectStoreNotFound
 	}
 
-	return w, nil
+	return &w, nil
 }

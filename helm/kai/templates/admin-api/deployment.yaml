@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "admin-api.fullname" . }}
+  labels:
+    {{- include "admin-api.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "admin-api.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "admin-api.labels" . | nindent 8 }}
+        type: admin
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/admin-api/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.adminApi.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.adminApi.nodeSelector }}
+      nodeSelector:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.adminApi.tolerations }}
+      tolerations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        fsGroup: 10001
+      initContainers:
+        - name: create-admin-api-files-directory
+          image: alpine:3.10
+          imagePullPolicy: IfNotPresent
+          command:
+          - sh
+          - -c
+          - mkdir -p {{ .Values.adminApi.storage.path }} && chown 10001:10001 {{ .Values.adminApi.storage.path }}
+          volumeMounts:
+            - name: admin-api-storage
+              mountPath: {{ .Values.adminApi.storage.path }}
+      containers:
+        - name: admin-api
+          image: {{ .Values.adminApi.image.repository }}:{{ .Values.adminApi.image.tag }}
+          imagePullPolicy: {{ .Values.adminApi.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "admin-api.fullname" . }}
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KAI_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.mongodb.connectionString.secretName }}
+                  key: {{ .Values.config.mongodb.connectionString.secretKey }}
+            - name: KAI_KEYCLOAK_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.secretUserKey" . }}
+            - name: KAI_KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.secretPasswordKey" . }}
+            - name: KAI_MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootUser
+            - name: KAI_MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" .Subcharts.minio }}
+                  key: rootPassword
+            {{- if or (and .Values.redis.enabled .Values.redis.auth.enabled) .Values.config.redis.auth.enabled }}
+            - name: KAI_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "redis.auth.secretName" . }}
+                  key: {{ include "redis.auth.secretPasswordKey" . }}
+            {{- end }}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+              name: grpc
+          volumeMounts:
+            - name: admin-api-storage
+              mountPath: {{ .Values.adminApi.storage.path }}
+      volumes:
+        - name: admin-api-storage
+          persistentVolumeClaim:
+            claimName: {{ include "admin-api.fullname" . }}

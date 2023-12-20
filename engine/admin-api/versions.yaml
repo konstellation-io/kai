@@ -1,0 +1,8 @@
+aio:
+  version: latest
+keycloak:
+  version: latest
+mongoDB:
+  version: latest
+nats:
+  version: latest

@@ -1,27 +1,11 @@
+kubernetes:
+  isInsideCluster: true
 baseDomainName: "local"
-entrypoint:
-  requestTimeout: "30"
 server:
   port: "50051"
-kubernetes:
-  k8sRuntimeOperator:
-    version: latest
-nats_streaming:
-  url: "kai-nats:4222"
-  host: "kai-nats"
-  port: "4222"
-  storage:
-    className: "standard"
-    size: 1G
-mongo:
-  persistentVolume:
-    storageClass: "standard"
-    size: 5G
-chronograf:
-  persistentVolume:
-    storageClass: "standard"
-    size: 1G
-influxdb:
-  persistentVolume:
-    storageClass: "standard"
-    size: 5G
+nats:
+  url: "kai-local-nats:4222"
+fluentbit:
+  image: fluent/fluent-bit
+  tag: 2.2.0
+configPath: /kai

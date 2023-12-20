@@ -5,4 +5,7 @@
 // You can invoke it from anywhere within your module now using go run github.com/vektah/dataloaden and always get the pinned version.
 package main
 
-import _ "github.com/vektah/dataloaden"
+import (
+	_ "github.com/99designs/gqlgen"
+	_ "github.com/vektah/dataloaden"
+)

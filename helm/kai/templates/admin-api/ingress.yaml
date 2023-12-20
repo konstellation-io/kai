@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "admin-api.fullname" . }}
+  annotations:
+    konghq.com/plugins: {{ include "kai.fullname" . }}-oidc
+    konghq.com/strip-path: "false"
+    {{- with .Values.adminApi.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "admin-api.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.adminApi.ingress.className }}
+  ingressClassName: {{ .Values.adminApi.ingress.className }}
+  {{- end }}
+  {{- if .Values.config.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.adminApi.host }}
+      secretName: {{ .Values.config.tls.certSecretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.adminApi.host }}
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "admin-api.fullname" . }}
+                port:
+                  name: grpc

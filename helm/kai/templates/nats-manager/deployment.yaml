@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nats-manager.fullname" . }}
+  labels:
+    {{- include "nats-manager.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "nats-manager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "nats-manager.labels" . | nindent 8 }}
+      annotations:
+        helm.sh/restart-deployment: {{ randAlphaNum 5 | quote }}
+    spec:
+      containers:
+        - name: nats-manager
+          image: {{ .Values.natsManager.image.repository }}:{{ .Values.natsManager.image.tag }}
+          imagePullPolicy: {{ .Values.natsManager.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "nats-manager.fullname" . }}
+          env:
+            - name: KAI_NATS_MANAGER_PORT
+              value: "50051"
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+          ports:
+            - containerPort: 50051
+              protocol: TCP
+              name: grpc

@@ -1,9 +1,18 @@
 dependencies:
-- name: influxdb
-  repository: https://helm.influxdata.com/
-  version: 4.8.1
-- name: kapacitor
-  repository: https://helm.influxdata.com/
-  version: 1.4.6
-digest: sha256:732f875e494d559a731234ab57252231c8b269752e520267a4ea156e5a725c70
-generated: "2022-11-29T13:44:13.088918953+01:00"
+- name: minio
+  repository: https://charts.min.io/
+  version: 5.0.14
+- name: grafana
+  repository: https://grafana.github.io/helm-charts
+  version: 7.0.3
+- name: loki
+  repository: https://grafana.github.io/helm-charts
+  version: 5.36.3
+- name: prometheus
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 25.4.0
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 18.2.1
+digest: sha256:090a91fd04991463fd8a00bec19dd0b08a913f16698aa14897b6c1745c36cf58
+generated: "2023-11-22T18:19:37.784576+01:00"

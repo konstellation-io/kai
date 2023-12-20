@@ -8,7 +8,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	auth "github.com/konstellation-io/kai/engine/admin-api/domain/usecase/auth"
+	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	auth "github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
 // MockAccessControl is a mock of AccessControl interface.
@@ -26,7 +27,6 @@ type MockAccessControlMockRecorder struct {
 func NewMockAccessControl(ctrl *gomock.Controller) *MockAccessControl {
 	mock := &MockAccessControl{ctrl: ctrl}
 	mock.recorder = &MockAccessControlMockRecorder{mock}
-
 	return mock
 }
 
@@ -35,17 +35,58 @@ func (m *MockAccessControl) EXPECT() *MockAccessControlMockRecorder {
 	return m.recorder
 }
 
-// CheckPermission mocks base method.
-func (m *MockAccessControl) CheckPermission(userID string, resource auth.AccessControlResource, action auth.AccessControlAction) error {
+// CheckProductGrants mocks base method.
+func (m *MockAccessControl) CheckProductGrants(user *entity.User, product string, action auth.Action) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckPermission", userID, resource, action)
+	ret := m.ctrl.Call(m, "CheckProductGrants", user, product, action)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
-// CheckPermission indicates an expected call of CheckPermission.
-func (mr *MockAccessControlMockRecorder) CheckPermission(userID, resource, action interface{}) *gomock.Call {
+// CheckProductGrants indicates an expected call of CheckProductGrants.
+func (mr *MockAccessControlMockRecorder) CheckProductGrants(user, product, action interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckPermission", reflect.TypeOf((*MockAccessControl)(nil).CheckPermission), userID, resource, action)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckProductGrants", reflect.TypeOf((*MockAccessControl)(nil).CheckProductGrants), user, product, action)
+}
+
+// CheckRoleGrants mocks base method.
+func (m *MockAccessControl) CheckRoleGrants(user *entity.User, action auth.Action) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckRoleGrants", user, action)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckRoleGrants indicates an expected call of CheckRoleGrants.
+func (mr *MockAccessControlMockRecorder) CheckRoleGrants(user, action interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckRoleGrants", reflect.TypeOf((*MockAccessControl)(nil).CheckRoleGrants), user, action)
+}
+
+// GetUserProducts mocks base method.
+func (m *MockAccessControl) GetUserProducts(user *entity.User) []string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserProducts", user)
+	ret0, _ := ret[0].([]string)
+	return ret0
+}
+
+// GetUserProducts indicates an expected call of GetUserProducts.
+func (mr *MockAccessControlMockRecorder) GetUserProducts(user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserProducts", reflect.TypeOf((*MockAccessControl)(nil).GetUserProducts), user)
+}
+
+// IsAdmin mocks base method.
+func (m *MockAccessControl) IsAdmin(user *entity.User) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsAdmin", user)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsAdmin indicates an expected call of IsAdmin.
+func (mr *MockAccessControlMockRecorder) IsAdmin(user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAdmin", reflect.TypeOf((*MockAccessControl)(nil).IsAdmin), user)
 }

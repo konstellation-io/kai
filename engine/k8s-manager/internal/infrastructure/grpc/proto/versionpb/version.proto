@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package version;
+option go_package = "./versionpb";
+
+enum ProcessType {
+  ProcessTypeUnknown = 0;
+  ProcessTypeTrigger = 1;
+  ProcessTypeTask = 2;
+  ProcessTypeExit = 3;
+}
+
+enum WorkflowType {
+  WorkflowTypeUnknown = 0;
+  WorkflowTypeData = 1;
+  WorkflowTypeTraining = 2;
+  WorkflowTypeServing = 3;
+  WorkflowTypeFeedback = 4;
+}
+
+message Workflow {
+  string name = 1;
+  string stream = 2;
+  string key_value_store = 3;
+  repeated Process processes = 4;
+  WorkflowType type = 5;
+}
+
+message Process {
+  string name = 1;
+  string image = 2;
+  bool gpu = 3;
+  repeated string subscriptions = 4;
+  string subject = 5;
+  int32 replicas = 6;
+  optional string object_store = 7;
+  string key_value_store = 8;
+  ProcessType type = 9;
+  Network networking = 10;
+  map<string, string> config = 11;
+  ProcessResourceLimits resource_limits = 12;
+}
+
+message Network {
+  int32 target_port = 1;
+  string protocol = 2;
+  int32 source_port = 3;
+}
+
+message StartRequest {
+  string product_id = 1;
+  string version_tag = 2;
+  string global_key_value_store = 3;
+  string version_key_value_store = 4;
+  repeated Workflow workflows = 5;
+  MinioConfiguration minio_configuration = 6;
+  ServiceAccount service_account = 7;
+}
+
+message MinioConfiguration {
+  string bucket = 1;
+}
+
+message ServiceAccount {
+  string username = 1;
+  string password = 2;
+}
+
+message StopRequest {
+  string product = 1;
+  string version_tag = 2;
+}
+
+message PublishRequest {
+  string product = 1;
+  string version_tag = 2;
+}
+
+message UnpublishRequest {
+  string product = 1;
+  string version_tag = 2;
+}
+
+message Response {
+  string message = 1;
+}
+
+message ResourceLimit {
+  string request = 1;
+  string limit = 2;
+}
+
+message ProcessResourceLimits {
+  ResourceLimit cpu = 1;
+  ResourceLimit memory = 2;
+}
+
+message ProcessStatusRequest {
+  string product_id = 1;
+  string version_tag = 2;
+}
+
+message ProcessStatusResponse {
+  string process_id = 1;
+  string status = 2;
+  string name = 3;
+}
+
+message RegisterProcessRequest {
+  string product_id = 1;
+  string process_id = 2;
+  string process_image = 3;
+}
+
+message RegisterProcessResponse {
+  string image_id = 1;
+}
+
+message PublishResponse {
+  map<string, string> network_urls = 1;
+}
+
+service VersionService {
+  rpc Start (StartRequest) returns (Response);
+  rpc Stop (StopRequest) returns (Response);
+  rpc Publish (PublishRequest) returns (PublishResponse);
+  rpc Unpublish (UnpublishRequest) returns (Response);
+  rpc WatchProcessStatus (ProcessStatusRequest) returns (stream ProcessStatusResponse);
+  rpc RegisterProcess (RegisterProcessRequest) returns (RegisterProcessResponse);
+};

@@ -27,7 +27,6 @@ type MockVersionRepoMockRecorder struct {
 func NewMockVersionRepo(ctrl *gomock.Controller) *MockVersionRepo {
 	mock := &MockVersionRepo{ctrl: ctrl}
 	mock.recorder = &MockVersionRepoMockRecorder{mock}
-
 	return mock
 }
 
@@ -36,189 +35,117 @@ func (m *MockVersionRepo) EXPECT() *MockVersionRepoMockRecorder {
 	return m.recorder
 }
 
-// ClearPublishedVersion mocks base method.
-func (m *MockVersionRepo) ClearPublishedVersion(ctx context.Context, runtimeID string) (*entity.Version, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ClearPublishedVersion", ctx, runtimeID)
-	ret0, _ := ret[0].(*entity.Version)
-	ret1, _ := ret[1].(error)
-
-	return ret0, ret1
-}
-
-// ClearPublishedVersion indicates an expected call of ClearPublishedVersion.
-func (mr *MockVersionRepoMockRecorder) ClearPublishedVersion(ctx, runtimeID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClearPublishedVersion", reflect.TypeOf((*MockVersionRepo)(nil).ClearPublishedVersion), ctx, runtimeID)
-}
-
 // Create mocks base method.
-func (m *MockVersionRepo) Create(userID, runtimeID string, version *entity.Version) (*entity.Version, error) {
+func (m *MockVersionRepo) Create(userEmail, productID string, version *entity.Version) (*entity.Version, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", userID, runtimeID, version)
+	ret := m.ctrl.Call(m, "Create", userEmail, productID, version)
 	ret0, _ := ret[0].(*entity.Version)
 	ret1, _ := ret[1].(error)
-
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockVersionRepoMockRecorder) Create(userID, runtimeID, version interface{}) *gomock.Call {
+func (mr *MockVersionRepoMockRecorder) Create(userEmail, productID, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockVersionRepo)(nil).Create), userID, runtimeID, version)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockVersionRepo)(nil).Create), userEmail, productID, version)
 }
 
 // CreateIndexes mocks base method.
-func (m *MockVersionRepo) CreateIndexes(ctx context.Context, runtimeID string) error {
+func (m *MockVersionRepo) CreateIndexes(ctx context.Context, productID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateIndexes", ctx, runtimeID)
+	ret := m.ctrl.Call(m, "CreateIndexes", ctx, productID)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
 // CreateIndexes indicates an expected call of CreateIndexes.
-func (mr *MockVersionRepoMockRecorder) CreateIndexes(ctx, runtimeID interface{}) *gomock.Call {
+func (mr *MockVersionRepoMockRecorder) CreateIndexes(ctx, productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockVersionRepo)(nil).CreateIndexes), ctx, runtimeID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockVersionRepo)(nil).CreateIndexes), ctx, productID)
 }
 
-// GetAll mocks base method.
-func (m *MockVersionRepo) GetAll(runtimeID string) ([]*entity.Version, error) {
+// GetByTag mocks base method.
+func (m *MockVersionRepo) GetByTag(ctx context.Context, productID, tag string) (*entity.Version, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", runtimeID)
+	ret := m.ctrl.Call(m, "GetByTag", ctx, productID, tag)
+	ret0, _ := ret[0].(*entity.Version)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByTag indicates an expected call of GetByTag.
+func (mr *MockVersionRepoMockRecorder) GetByTag(ctx, productID, tag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByTag", reflect.TypeOf((*MockVersionRepo)(nil).GetByTag), ctx, productID, tag)
+}
+
+// ListVersionsByProduct mocks base method.
+func (m *MockVersionRepo) ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListVersionsByProduct", ctx, productID)
 	ret0, _ := ret[0].([]*entity.Version)
 	ret1, _ := ret[1].(error)
-
 	return ret0, ret1
 }
 
-// GetAll indicates an expected call of GetAll.
-func (mr *MockVersionRepoMockRecorder) GetAll(runtimeID interface{}) *gomock.Call {
+// ListVersionsByProduct indicates an expected call of ListVersionsByProduct.
+func (mr *MockVersionRepoMockRecorder) ListVersionsByProduct(ctx, productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockVersionRepo)(nil).GetAll), runtimeID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVersionsByProduct", reflect.TypeOf((*MockVersionRepo)(nil).ListVersionsByProduct), ctx, productID)
 }
 
-// GetByID mocks base method.
-func (m *MockVersionRepo) GetByID(runtimeID, versionId string) (*entity.Version, error) {
+// SetCriticalStatusWithError mocks base method.
+func (m *MockVersionRepo) SetCriticalStatusWithError(ctx context.Context, productID, version, errorMessage string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", runtimeID, versionId)
-	ret0, _ := ret[0].(*entity.Version)
-	ret1, _ := ret[1].(error)
-
-	return ret0, ret1
-}
-
-// GetByID indicates an expected call of GetByID.
-func (mr *MockVersionRepoMockRecorder) GetByID(runtimeID, versionId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockVersionRepo)(nil).GetByID), runtimeID, versionId)
-}
-
-// GetByName mocks base method.
-func (m *MockVersionRepo) GetByName(ctx context.Context, runtimeID, name string) (*entity.Version, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByName", ctx, runtimeID, name)
-	ret0, _ := ret[0].(*entity.Version)
-	ret1, _ := ret[1].(error)
-
-	return ret0, ret1
-}
-
-// GetByName indicates an expected call of GetByName.
-func (mr *MockVersionRepoMockRecorder) GetByName(ctx, runtimeID, name interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByName", reflect.TypeOf((*MockVersionRepo)(nil).GetByName), ctx, runtimeID, name)
-}
-
-// GetByRuntime mocks base method.
-func (m *MockVersionRepo) GetByRuntime(runtimeID string) ([]*entity.Version, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByRuntime", runtimeID)
-	ret0, _ := ret[0].([]*entity.Version)
-	ret1, _ := ret[1].(error)
-
-	return ret0, ret1
-}
-
-// GetByRuntime indicates an expected call of GetByRuntime.
-func (mr *MockVersionRepoMockRecorder) GetByRuntime(runtimeID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByRuntime", reflect.TypeOf((*MockVersionRepo)(nil).GetByRuntime), runtimeID)
-}
-
-// SetErrors mocks base method.
-func (m *MockVersionRepo) SetErrors(ctx context.Context, runtimeID string, version *entity.Version, errorMessages []string) (*entity.Version, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetErrors", ctx, runtimeID, version, errorMessages)
-	ret0, _ := ret[0].(*entity.Version)
-	ret1, _ := ret[1].(error)
-
-	return ret0, ret1
-}
-
-// SetErrors indicates an expected call of SetErrors.
-func (mr *MockVersionRepoMockRecorder) SetErrors(ctx, runtimeID, version, errorMessages interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetErrors", reflect.TypeOf((*MockVersionRepo)(nil).SetErrors), ctx, runtimeID, version, errorMessages)
-}
-
-// SetHasDoc mocks base method.
-func (m *MockVersionRepo) SetHasDoc(ctx context.Context, runtimeID, versionID string, hasDoc bool) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetHasDoc", ctx, runtimeID, versionID, hasDoc)
+	ret := m.ctrl.Call(m, "SetCriticalStatusWithError", ctx, productID, version, errorMessage)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
-// SetHasDoc indicates an expected call of SetHasDoc.
-func (mr *MockVersionRepoMockRecorder) SetHasDoc(ctx, runtimeID, versionID, hasDoc interface{}) *gomock.Call {
+// SetCriticalStatusWithError indicates an expected call of SetCriticalStatusWithError.
+func (mr *MockVersionRepoMockRecorder) SetCriticalStatusWithError(ctx, productID, version, errorMessage interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetHasDoc", reflect.TypeOf((*MockVersionRepo)(nil).SetHasDoc), ctx, runtimeID, versionID, hasDoc)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCriticalStatusWithError", reflect.TypeOf((*MockVersionRepo)(nil).SetCriticalStatusWithError), ctx, productID, version, errorMessage)
+}
+
+// SetErrorStatusWithError mocks base method.
+func (m *MockVersionRepo) SetErrorStatusWithError(ctx context.Context, productID, version, errorMessage string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetErrorStatusWithError", ctx, productID, version, errorMessage)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetErrorStatusWithError indicates an expected call of SetErrorStatusWithError.
+func (mr *MockVersionRepoMockRecorder) SetErrorStatusWithError(ctx, productID, version, errorMessage interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetErrorStatusWithError", reflect.TypeOf((*MockVersionRepo)(nil).SetErrorStatusWithError), ctx, productID, version, errorMessage)
 }
 
 // SetStatus mocks base method.
-func (m *MockVersionRepo) SetStatus(ctx context.Context, runtimeID, versionID string, status entity.VersionStatus) error {
+func (m *MockVersionRepo) SetStatus(ctx context.Context, productID, versionTag string, status entity.VersionStatus) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetStatus", ctx, runtimeID, versionID, status)
+	ret := m.ctrl.Call(m, "SetStatus", ctx, productID, versionTag, status)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
 // SetStatus indicates an expected call of SetStatus.
-func (mr *MockVersionRepoMockRecorder) SetStatus(ctx, runtimeID, versionID, status interface{}) *gomock.Call {
+func (mr *MockVersionRepoMockRecorder) SetStatus(ctx, productID, versionTag, status interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStatus", reflect.TypeOf((*MockVersionRepo)(nil).SetStatus), ctx, runtimeID, versionID, status)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStatus", reflect.TypeOf((*MockVersionRepo)(nil).SetStatus), ctx, productID, versionTag, status)
 }
 
 // Update mocks base method.
-func (m *MockVersionRepo) Update(runtimeID string, version *entity.Version) error {
+func (m *MockVersionRepo) Update(productID string, version *entity.Version) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", runtimeID, version)
+	ret := m.ctrl.Call(m, "Update", productID, version)
 	ret0, _ := ret[0].(error)
-
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockVersionRepoMockRecorder) Update(runtimeID, version interface{}) *gomock.Call {
+func (mr *MockVersionRepoMockRecorder) Update(productID, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockVersionRepo)(nil).Update), runtimeID, version)
-}
-
-// UploadKRTFile mocks base method.
-func (m *MockVersionRepo) UploadKRTFile(runtimeID string, version *entity.Version, file string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadKRTFile", runtimeID, version, file)
-	ret0, _ := ret[0].(error)
-
-	return ret0
-}
-
-// UploadKRTFile indicates an expected call of UploadKRTFile.
-func (mr *MockVersionRepoMockRecorder) UploadKRTFile(runtimeID, version, file interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadKRTFile", reflect.TypeOf((*MockVersionRepo)(nil).UploadKRTFile), runtimeID, version, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockVersionRepo)(nil).Update), productID, version)
 }

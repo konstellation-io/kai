@@ -1,10 +1,11 @@
 scalar Upload
 
 type Query {
-  runtime(id: ID!): Runtime!
-  runtimes: [Runtime!]!
-  version(name: String!, runtimeId: ID!): Version!
-  versions(runtimeId: ID!): [Version!]!
+  product(id: ID!): Product!
+  products: [Product!]!
+  version(productID: ID!, tag: String!): Version!
+  versions(productID: ID!): [Version!]!
+  registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
   userActivityList(
     userEmail: String
     types: [UserActivityType!]
@@ -13,37 +14,52 @@ type Query {
     toDate: String
     lastId: String
   ): [UserActivity!]!
-  logs(runtimeId: ID!, filters: LogFilters!, cursor: String): LogPage!
-  metrics(
-    runtimeId: ID!
-    versionName: String!
-    startDate: String!
-    endDate: String!
-  ): Metrics
+  logs(filters: LogFilters!): [Log]!
+  serverInfo: ServerInfo!
+}
+
+type ServerInfo {
+  components: [ComponentInfo!]!
+}
+
+type ComponentInfo {
+  name: String!
+  version: String!
 }
 
 type Mutation {
-  createRuntime(input: CreateRuntimeInput!): Runtime!
+  createProduct(input: CreateProductInput!): Product!
   createVersion(input: CreateVersionInput!): Version!
   startVersion(input: StartVersionInput!): Version!
   stopVersion(input: StopVersionInput!): Version!
-  publishVersion(input: PublishVersionInput!): Version!
+  publishVersion(input: PublishVersionInput!): [PublishedTrigger!]!
   unpublishVersion(input: UnpublishVersionInput!): Version!
-  updateVersionUserConfiguration(input: UpdateConfigurationInput!): Version!
-  updateAccessLevel(input: UpdateAccessLevelInput!): [String!]! # TODO: refactor
+  updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
+  revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
+  registerProcess(input: RegisterProcessInput!): RegisteredProcess!
 }
 
-type Subscription {
-  watchNodeLogs(
-    runtimeId: ID!
-    versionName: String!
-    filters: LogFilters!
-  ): NodeLog!
-  watchNodeStatus(versionName: String!, runtimeId: ID!): Node!
-  watchVersion: Version!
+type PublishedTrigger {
+  trigger: String!
+  url: String!
 }
 
-input CreateRuntimeInput {
+type RegisteredProcess {
+  id: ID!
+  name: String!
+  version: String!
+  type: String!
+  image: String!
+  uploadDate: String!
+  owner: String!
+  status: String!
+}
+
+type User {
+  id: ID!
+}
+
+input CreateProductInput {
   id: String!
   name: String!
   description: String!
@@ -51,142 +67,78 @@ input CreateRuntimeInput {
 
 input CreateVersionInput {
   file: Upload!
-  runtimeId: ID!
+  productID: ID!
+}
+
+input RegisterProcessInput {
+  file: Upload!
+  version: String!
+  productID: ID!
+  processID: ID!
+  processType: String!
 }
 
 input StartVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
-  runtimeId: ID!
+  productID: ID!
 }
 
 input StopVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
-  runtimeId: ID!
+  productID: ID!
 }
 
 input PublishVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
-  runtimeId: ID!
+  productID: ID!
 }
 
 input UnpublishVersionInput {
-  versionName: String!
+  versionTag: String!
   comment: String!
-  runtimeId: ID!
+  productID: ID!
 }
 
-input UsersInput {
-  userIds: [ID!]!
-  comment: String!
+input UpdateUserProductGrantsInput {
+  targetID: ID!
+  product: String!
+  grants: [String!]!
+  comment: String
 }
 
-input UpdateAccessLevelInput {
-  userIds: [ID!]!
-  accessLevel: AccessLevel!
-  comment: String!
-}
-
-input SettingsInput {
-  authAllowedDomains: [String!]
-  sessionLifetimeInDays: Int
-}
-
-enum AccessLevel {
-  VIEWER
-  MANAGER
-  ADMIN
-}
-
-type ApiToken {
-  id: ID!
-  name: String!
-  creationDate: String!
-  lastActivity: String
+input RevokeUserProductGrantsInput {
+  targetID: ID!
+  product: String!
+  comment: String
 }
 
 type ConfigurationVariable {
   key: String!
   value: String!
-  type: ConfigurationVariableType!
 }
 
-enum ConfigurationVariableType {
-  VARIABLE
-  FILE
-}
-
-input ConfigurationVariablesInput {
-  key: String!
-  value: String!
-}
-
-input UpdateConfigurationInput {
-  versionName: String!
-  runtimeId: ID!
-  configurationVariables: [ConfigurationVariablesInput!]!
-}
-
-type Runtime {
+type Product {
   id: ID!
   name: String!
   description: String!
-  creationDate: String!
-  measurementsUrl: String!
-  databaseUrl: String!
-  entrypointAddress: String!
-  publishedVersion: Version
   creationAuthor: String!
-}
-
-type Node {
-  id: ID!
-  name: String!
-  status: NodeStatus!
-  subscriptions: [String!]
-  replicas: Int!
-}
-
-enum NodeStatus {
-  STARTING
-  STARTED
-  STOPPED
-  ERROR
-}
-
-type Workflow {
-  id: ID!
-  name: String!
-  entrypoint: String
-  exitpoint: String
-  nodes: [Node!]!
-}
-
-enum KrtVersion {
-  v2
+  creationDate: String!
 }
 
 type Version {
-  id: ID!
-  krtVersion: KrtVersion!
-  name: String!
+  tag: String!
   description: String!
-  status: VersionStatus!
+  config: [ConfigurationVariable]
+  workflows: [Workflow!]!
   creationDate: String!
   creationAuthor: String!
   publicationDate: String
   publicationAuthor: String
-  workflows: [Workflow!]!
-  config: VersionUserConfig!
-  hasDoc: Boolean
-  errors: [String!]!
-}
-
-type VersionUserConfig {
-  vars: [ConfigurationVariable!]!
-  completed: Boolean!
+  status: VersionStatus!
+  error: String
 }
 
 enum VersionStatus {
@@ -200,9 +152,43 @@ enum VersionStatus {
   ERROR
 }
 
-type Settings {
-  authAllowedDomains: [String!]!
-  sessionLifetimeInDays: Int!
+type Workflow {
+  name: String!
+  type: WorkflowType!
+  config: [ConfigurationVariable]
+  processes: [Process!]!
+}
+
+enum WorkflowType {
+  DATA
+  TRAINING
+  FEEDBACK
+  SERVING
+}
+
+type Process {
+  name: String!
+  type: ProcessType!
+  image: String!
+  replicas: Int!
+  gpu: Boolean!
+  config: [ConfigurationVariable]
+  secrets: [ConfigurationVariable]
+  subscriptions: [String!]!
+  status: ProcessStatus!
+}
+
+enum ProcessType {
+  TRIGGER
+  TASK
+  EXIT
+}
+
+enum ProcessStatus {
+  STARTING
+  STARTED
+  STOPPED
+  ERROR
 }
 
 type UserActivityVar {
@@ -231,73 +217,28 @@ enum UserActivityType {
   UPDATE_VERSION_CONFIGURATION
   CREATE_USER
   REMOVE_USERS
-  UPDATE_ACCESS_LEVELS
-  REVOKE_SESSIONS
-  GENERATE_API_TOKEN
-  DELETE_API_TOKEN
+  UPDATE_PRODUCT_GRANTS
 }
 
 input LogFilters {
-  startDate: String!
-  endDate: String
-  search: String
-  levels: [LogLevel!]
-  nodeIds: [ID!]
-  versionsIds: [ID!]
-  workflowsNames: [ID!]
-}
-
-enum LogLevel {
-  ERROR
-  WARN
-  INFO
-  DEBUG
-}
-
-type NodeLog {
-  id: ID!
-  date: String!
-  nodeId: String
-  nodeName: String
-  workflowId: String
+  productID: String!
+  versionTag: String!
+  from: String!
+  to: String!
+  limit: Int!
   workflowName: String
-  message: String!
-  level: LogLevel!
+  processName: String
+  requestID: String
+  level: String
+  logger: String
 }
 
-type LogPage {
-  cursor: String
-  items: [NodeLog!]!
+type Label {
+  key: String!
+  value: String!
 }
 
-type Metrics {
-  values: MetricsValues!
-  charts: MetricsCharts!
-}
-
-type MetricsValues {
-  accuracy: MetricsAccuracy!
-  missing: Int!
-  newLabels: Int!
-}
-
-type MetricsAccuracy {
-  total: Int!
-  micro: Int!
-  macro: Int!
-  weighted: Int!
-}
-
-type MetricsCharts {
-  confusionMatrix: [MetricChartData!]!
-  seriesAccuracy: [MetricChartData!]!
-  seriesRecall: [MetricChartData!]!
-  seriesSupport: [MetricChartData!]!
-  successVsFails: [MetricChartData!]!
-}
-
-type MetricChartData {
-  x: String!
-  y: String!
-  z: String!
+type Log {
+	formatedLog: String!
+	labels:      [Label!]!
 }

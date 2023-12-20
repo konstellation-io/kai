@@ -1,0 +1,53 @@
+typemeta:
+    kind: ""
+    apiversion: ""
+listmeta:
+    selflink: ""
+    resourceversion: ""
+    continue: ""
+    remainingitemcount: null
+items:
+    - typemeta:
+        kind: Ingress
+        apiversion: networking.k8s.io/v1
+      objectmeta:
+        name: test-product-v1-0-0
+        generatename: ""
+        namespace: test
+        selflink: ""
+        uid: ""
+        resourceversion: ""
+        generation: 0
+        creationtimestamp: "0001-01-01T00:00:00Z"
+        deletiontimestamp: null
+        deletiongraceperiodseconds: null
+        labels:
+            product: test-product
+            type: network
+            version: v1.0.0
+        annotations:
+            konghq.com/strip-path: "true"
+        ownerreferences: []
+        finalizers: []
+        managedfields: []
+      spec:
+        ingressclassname: ""
+        defaultbackend: null
+        tls: []
+        rules:
+            - host: test-product-test-workflow-test-process.test
+              ingressrulevalue:
+                http:
+                    paths:
+                        - path: /
+                          pathtype: Prefix
+                          backend:
+                            service:
+                                name: test-product-v1-0-0-test-workflow-test-process
+                                port:
+                                    name: trigger
+                                    number: 0
+                            resource: null
+      status:
+        loadbalancer:
+            ingress: []
