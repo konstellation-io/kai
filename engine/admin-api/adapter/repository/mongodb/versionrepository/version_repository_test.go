@@ -158,10 +158,16 @@ func (s *VersionRepositoryTestSuite) TestGetLatest() {
 
 	_, err := s.versionRepo.Create(creatorID, productID, testVersion)
 	s.Require().NoError(err)
+
+	ver, err := s.versionRepo.GetLatest(context.Background(), productID)
+	s.Require().NoError(err)
+
+	s.Equal(testVersion.Tag, ver.Tag)
+
 	_, err = s.versionRepo.Create(creatorID, productID, testVersion2)
 	s.Require().NoError(err)
 
-	ver, err := s.versionRepo.GetLatest(context.Background(), productID)
+	ver, err = s.versionRepo.GetLatest(context.Background(), productID)
 	s.Require().NoError(err)
 
 	s.Equal(testVersion2.Tag, ver.Tag)
