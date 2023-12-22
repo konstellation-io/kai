@@ -209,9 +209,14 @@ func (r *queryResolver) Products(ctx context.Context) ([]*entity.Product, error)
 	return r.productInteractor.FindAll(ctx, loggedUser)
 }
 
-func (r *queryResolver) Version(ctx context.Context, productID, tag string) (*entity.Version, error) {
+func (r *queryResolver) Version(ctx context.Context, productID string, tag *string) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.GetByTag(ctx, loggedUser, productID, tag)
+
+	if tag == nil {
+		return r.versionInteractor.GetLatest(ctx, loggedUser, productID)
+	} else {
+		return r.versionInteractor.GetByTag(ctx, loggedUser, productID, *tag)
+	}
 }
 
 func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*entity.Version, error) {

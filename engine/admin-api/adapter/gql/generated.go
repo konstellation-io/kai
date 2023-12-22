@@ -82,15 +82,34 @@ type ComplexityRoot struct {
 	}
 
 	Process struct {
-		Config        func(childComplexity int) int
-		GPU           func(childComplexity int) int
-		Image         func(childComplexity int) int
-		Name          func(childComplexity int) int
-		Replicas      func(childComplexity int) int
-		Secrets       func(childComplexity int) int
-		Status        func(childComplexity int) int
-		Subscriptions func(childComplexity int) int
-		Type          func(childComplexity int) int
+		Config         func(childComplexity int) int
+		GPU            func(childComplexity int) int
+		Image          func(childComplexity int) int
+		Name           func(childComplexity int) int
+		Networking     func(childComplexity int) int
+		ObjectStore    func(childComplexity int) int
+		Replicas       func(childComplexity int) int
+		ResourceLimits func(childComplexity int) int
+		Secrets        func(childComplexity int) int
+		Status         func(childComplexity int) int
+		Subscriptions  func(childComplexity int) int
+		Type           func(childComplexity int) int
+	}
+
+	ProcessNetworking struct {
+		DestinationPort func(childComplexity int) int
+		Protocol        func(childComplexity int) int
+		TargetPort      func(childComplexity int) int
+	}
+
+	ProcessObjectStore struct {
+		Name  func(childComplexity int) int
+		Scope func(childComplexity int) int
+	}
+
+	ProcessResourceLimits struct {
+		CPU    func(childComplexity int) int
+		Memory func(childComplexity int) int
 	}
 
 	Product struct {
@@ -113,7 +132,7 @@ type ComplexityRoot struct {
 		RegisteredProcesses func(childComplexity int, productID string, processType *string) int
 		ServerInfo          func(childComplexity int) int
 		UserActivityList    func(childComplexity int, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) int
-		Version             func(childComplexity int, productID string, tag string) int
+		Version             func(childComplexity int, productID string, tag *string) int
 		Versions            func(childComplexity int, productID string) int
 	}
 
@@ -126,6 +145,11 @@ type ComplexityRoot struct {
 		Type       func(childComplexity int) int
 		UploadDate func(childComplexity int) int
 		Version    func(childComplexity int) int
+	}
+
+	ResourceLimit struct {
+		Limit   func(childComplexity int) int
+		Request func(childComplexity int) int
 	}
 
 	ServerInfo struct {
@@ -188,7 +212,7 @@ type ProductResolver interface {
 type QueryResolver interface {
 	Product(ctx context.Context, id string) (*entity.Product, error)
 	Products(ctx context.Context) ([]*entity.Product, error)
-	Version(ctx context.Context, productID string, tag string) (*entity.Version, error)
+	Version(ctx context.Context, productID string, tag *string) (*entity.Version, error)
 	Versions(ctx context.Context, productID string) ([]*entity.Version, error)
 	RegisteredProcesses(ctx context.Context, productID string, processType *string) ([]*entity.RegisteredProcess, error)
 	UserActivityList(ctx context.Context, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) ([]*entity.UserActivity, error)
@@ -421,12 +445,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Process.Name(childComplexity), true
 
+	case "Process.networking":
+		if e.complexity.Process.Networking == nil {
+			break
+		}
+
+		return e.complexity.Process.Networking(childComplexity), true
+
+	case "Process.objectStore":
+		if e.complexity.Process.ObjectStore == nil {
+			break
+		}
+
+		return e.complexity.Process.ObjectStore(childComplexity), true
+
 	case "Process.replicas":
 		if e.complexity.Process.Replicas == nil {
 			break
 		}
 
 		return e.complexity.Process.Replicas(childComplexity), true
+
+	case "Process.resourceLimits":
+		if e.complexity.Process.ResourceLimits == nil {
+			break
+		}
+
+		return e.complexity.Process.ResourceLimits(childComplexity), true
 
 	case "Process.secrets":
 		if e.complexity.Process.Secrets == nil {
@@ -455,6 +500,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Process.Type(childComplexity), true
+
+	case "ProcessNetworking.destinationPort":
+		if e.complexity.ProcessNetworking.DestinationPort == nil {
+			break
+		}
+
+		return e.complexity.ProcessNetworking.DestinationPort(childComplexity), true
+
+	case "ProcessNetworking.protocol":
+		if e.complexity.ProcessNetworking.Protocol == nil {
+			break
+		}
+
+		return e.complexity.ProcessNetworking.Protocol(childComplexity), true
+
+	case "ProcessNetworking.targetPort":
+		if e.complexity.ProcessNetworking.TargetPort == nil {
+			break
+		}
+
+		return e.complexity.ProcessNetworking.TargetPort(childComplexity), true
+
+	case "ProcessObjectStore.name":
+		if e.complexity.ProcessObjectStore.Name == nil {
+			break
+		}
+
+		return e.complexity.ProcessObjectStore.Name(childComplexity), true
+
+	case "ProcessObjectStore.scope":
+		if e.complexity.ProcessObjectStore.Scope == nil {
+			break
+		}
+
+		return e.complexity.ProcessObjectStore.Scope(childComplexity), true
+
+	case "ProcessResourceLimits.cpu":
+		if e.complexity.ProcessResourceLimits.CPU == nil {
+			break
+		}
+
+		return e.complexity.ProcessResourceLimits.CPU(childComplexity), true
+
+	case "ProcessResourceLimits.memory":
+		if e.complexity.ProcessResourceLimits.Memory == nil {
+			break
+		}
+
+		return e.complexity.ProcessResourceLimits.Memory(childComplexity), true
 
 	case "Product.creationAuthor":
 		if e.complexity.Product.CreationAuthor == nil {
@@ -577,7 +671,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Version(childComplexity, args["productID"].(string), args["tag"].(string)), true
+		return e.complexity.Query.Version(childComplexity, args["productID"].(string), args["tag"].(*string)), true
 
 	case "Query.versions":
 		if e.complexity.Query.Versions == nil {
@@ -646,6 +740,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RegisteredProcess.Version(childComplexity), true
+
+	case "ResourceLimit.limit":
+		if e.complexity.ResourceLimit.Limit == nil {
+			break
+		}
+
+		return e.complexity.ResourceLimit.Limit(childComplexity), true
+
+	case "ResourceLimit.request":
+		if e.complexity.ResourceLimit.Request == nil {
+			break
+		}
+
+		return e.complexity.ResourceLimit.Request(childComplexity), true
 
 	case "ServerInfo.components":
 		if e.complexity.ServerInfo.Components == nil {
@@ -928,7 +1036,7 @@ var sources = []*ast.Source{
 type Query {
   product(id: ID!): Product!
   products: [Product!]!
-  version(productID: ID!, tag: String!): Version!
+  version(productID: ID!, tag: String): Version!
   versions(productID: ID!): [Version!]!
   registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
   userActivityList(
@@ -1098,8 +1206,11 @@ type Process {
   replicas: Int!
   gpu: Boolean!
   config: [ConfigurationVariable]
+  objectStore: ProcessObjectStore
   secrets: [ConfigurationVariable]
   subscriptions: [String!]!
+  networking: ProcessNetworking
+  resourceLimits: ProcessResourceLimits
   status: ProcessStatus!
 }
 
@@ -1107,6 +1218,37 @@ enum ProcessType {
   TRIGGER
   TASK
   EXIT
+}
+
+type ProcessObjectStore{
+  name: String!
+  scope: ObjectStoreScope!
+}
+
+enum ObjectStoreScope{
+  PRODUCT
+  WORKFLOW
+}
+
+type ProcessNetworking{
+  targetPort: Int!
+  destinationPort: Int!
+  protocol: NetworkingProtocol!
+}
+
+enum NetworkingProtocol{
+  HTTP
+  GRPC
+}
+
+type ProcessResourceLimits{
+  cpu: ResourceLimit
+  memory: ResourceLimit
+}
+
+type ResourceLimit{
+  request: String!
+  limit: String!
 }
 
 enum ProcessStatus {
@@ -1451,10 +1593,10 @@ func (ec *executionContext) field_Query_version_args(ctx context.Context, rawArg
 		}
 	}
 	args["productID"] = arg0
-	var arg1 string
+	var arg1 *string
 	if tmp, ok := rawArgs["tag"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2768,6 +2910,53 @@ func (ec *executionContext) fieldContext_Process_config(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Process_objectStore(ctx context.Context, field graphql.CollectedField, obj *entity.Process) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Process_objectStore(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ObjectStore, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*entity.ProcessObjectStore)
+	fc.Result = res
+	return ec.marshalOProcessObjectStore2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessObjectStore(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Process_objectStore(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Process",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_ProcessObjectStore_name(ctx, field)
+			case "scope":
+				return ec.fieldContext_ProcessObjectStore_scope(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProcessObjectStore", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Process_secrets(ctx context.Context, field graphql.CollectedField, obj *entity.Process) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Process_secrets(ctx, field)
 	if err != nil {
@@ -2859,6 +3048,102 @@ func (ec *executionContext) fieldContext_Process_subscriptions(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Process_networking(ctx context.Context, field graphql.CollectedField, obj *entity.Process) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Process_networking(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Networking, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*entity.ProcessNetworking)
+	fc.Result = res
+	return ec.marshalOProcessNetworking2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessNetworking(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Process_networking(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Process",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "targetPort":
+				return ec.fieldContext_ProcessNetworking_targetPort(ctx, field)
+			case "destinationPort":
+				return ec.fieldContext_ProcessNetworking_destinationPort(ctx, field)
+			case "protocol":
+				return ec.fieldContext_ProcessNetworking_protocol(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProcessNetworking", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Process_resourceLimits(ctx context.Context, field graphql.CollectedField, obj *entity.Process) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Process_resourceLimits(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ResourceLimits, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*entity.ProcessResourceLimits)
+	fc.Result = res
+	return ec.marshalOProcessResourceLimits2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessResourceLimits(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Process_resourceLimits(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Process",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cpu":
+				return ec.fieldContext_ProcessResourceLimits_cpu(ctx, field)
+			case "memory":
+				return ec.fieldContext_ProcessResourceLimits_memory(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProcessResourceLimits", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Process_status(ctx context.Context, field graphql.CollectedField, obj *entity.Process) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Process_status(ctx, field)
 	if err != nil {
@@ -2898,6 +3183,320 @@ func (ec *executionContext) fieldContext_Process_status(ctx context.Context, fie
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ProcessStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProcessNetworking_targetPort(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessNetworking) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProcessNetworking_targetPort(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TargetPort, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProcessNetworking_targetPort(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProcessNetworking",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProcessNetworking_destinationPort(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessNetworking) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProcessNetworking_destinationPort(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DestinationPort, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProcessNetworking_destinationPort(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProcessNetworking",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProcessNetworking_protocol(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessNetworking) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProcessNetworking_protocol(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Protocol, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(entity.NetworkingProtocol)
+	fc.Result = res
+	return ec.marshalNNetworkingProtocol2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐNetworkingProtocol(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProcessNetworking_protocol(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProcessNetworking",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type NetworkingProtocol does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProcessObjectStore_name(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessObjectStore) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProcessObjectStore_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProcessObjectStore_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProcessObjectStore",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProcessObjectStore_scope(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessObjectStore) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProcessObjectStore_scope(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Scope, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(entity.ObjectStoreScope)
+	fc.Result = res
+	return ec.marshalNObjectStoreScope2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐObjectStoreScope(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProcessObjectStore_scope(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProcessObjectStore",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ObjectStoreScope does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProcessResourceLimits_cpu(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessResourceLimits) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProcessResourceLimits_cpu(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CPU, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*entity.ResourceLimit)
+	fc.Result = res
+	return ec.marshalOResourceLimit2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐResourceLimit(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProcessResourceLimits_cpu(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProcessResourceLimits",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "request":
+				return ec.fieldContext_ResourceLimit_request(ctx, field)
+			case "limit":
+				return ec.fieldContext_ResourceLimit_limit(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ResourceLimit", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProcessResourceLimits_memory(ctx context.Context, field graphql.CollectedField, obj *entity.ProcessResourceLimits) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProcessResourceLimits_memory(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Memory, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*entity.ResourceLimit)
+	fc.Result = res
+	return ec.marshalOResourceLimit2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐResourceLimit(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProcessResourceLimits_memory(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProcessResourceLimits",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "request":
+				return ec.fieldContext_ResourceLimit_request(ctx, field)
+			case "limit":
+				return ec.fieldContext_ResourceLimit_limit(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ResourceLimit", field.Name)
 		},
 	}
 	return fc, nil
@@ -3348,7 +3947,7 @@ func (ec *executionContext) _Query_version(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Version(rctx, fc.Args["productID"].(string), fc.Args["tag"].(string))
+		return ec.resolvers.Query().Version(rctx, fc.Args["productID"].(string), fc.Args["tag"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4208,6 +4807,94 @@ func (ec *executionContext) _RegisteredProcess_status(ctx context.Context, field
 func (ec *executionContext) fieldContext_RegisteredProcess_status(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "RegisteredProcess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ResourceLimit_request(ctx context.Context, field graphql.CollectedField, obj *entity.ResourceLimit) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ResourceLimit_request(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Request, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ResourceLimit_request(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ResourceLimit",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ResourceLimit_limit(ctx context.Context, field graphql.CollectedField, obj *entity.ResourceLimit) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ResourceLimit_limit(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Limit, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ResourceLimit_limit(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ResourceLimit",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5256,10 +5943,16 @@ func (ec *executionContext) fieldContext_Workflow_processes(ctx context.Context,
 				return ec.fieldContext_Process_gpu(ctx, field)
 			case "config":
 				return ec.fieldContext_Process_config(ctx, field)
+			case "objectStore":
+				return ec.fieldContext_Process_objectStore(ctx, field)
 			case "secrets":
 				return ec.fieldContext_Process_secrets(ctx, field)
 			case "subscriptions":
 				return ec.fieldContext_Process_subscriptions(ctx, field)
+			case "networking":
+				return ec.fieldContext_Process_networking(ctx, field)
+			case "resourceLimits":
+				return ec.fieldContext_Process_resourceLimits(ctx, field)
 			case "status":
 				return ec.fieldContext_Process_status(ctx, field)
 			}
@@ -7924,6 +8617,8 @@ func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "config":
 			out.Values[i] = ec._Process_config(ctx, field, obj)
+		case "objectStore":
+			out.Values[i] = ec._Process_objectStore(ctx, field, obj)
 		case "secrets":
 			out.Values[i] = ec._Process_secrets(ctx, field, obj)
 		case "subscriptions":
@@ -7931,11 +8626,146 @@ func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "networking":
+			out.Values[i] = ec._Process_networking(ctx, field, obj)
+		case "resourceLimits":
+			out.Values[i] = ec._Process_resourceLimits(ctx, field, obj)
 		case "status":
 			out.Values[i] = ec._Process_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var processNetworkingImplementors = []string{"ProcessNetworking"}
+
+func (ec *executionContext) _ProcessNetworking(ctx context.Context, sel ast.SelectionSet, obj *entity.ProcessNetworking) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, processNetworkingImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProcessNetworking")
+		case "targetPort":
+			out.Values[i] = ec._ProcessNetworking_targetPort(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "destinationPort":
+			out.Values[i] = ec._ProcessNetworking_destinationPort(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "protocol":
+			out.Values[i] = ec._ProcessNetworking_protocol(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var processObjectStoreImplementors = []string{"ProcessObjectStore"}
+
+func (ec *executionContext) _ProcessObjectStore(ctx context.Context, sel ast.SelectionSet, obj *entity.ProcessObjectStore) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, processObjectStoreImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProcessObjectStore")
+		case "name":
+			out.Values[i] = ec._ProcessObjectStore_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "scope":
+			out.Values[i] = ec._ProcessObjectStore_scope(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var processResourceLimitsImplementors = []string{"ProcessResourceLimits"}
+
+func (ec *executionContext) _ProcessResourceLimits(ctx context.Context, sel ast.SelectionSet, obj *entity.ProcessResourceLimits) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, processResourceLimitsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProcessResourceLimits")
+		case "cpu":
+			out.Values[i] = ec._ProcessResourceLimits_cpu(ctx, field, obj)
+		case "memory":
+			out.Values[i] = ec._ProcessResourceLimits_memory(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8431,6 +9261,50 @@ func (ec *executionContext) _RegisteredProcess(ctx context.Context, sel ast.Sele
 			out.Values[i] = ec._RegisteredProcess_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var resourceLimitImplementors = []string{"ResourceLimit"}
+
+func (ec *executionContext) _ResourceLimit(ctx context.Context, sel ast.SelectionSet, obj *entity.ResourceLimit) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, resourceLimitImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ResourceLimit")
+		case "request":
+			out.Values[i] = ec._ResourceLimit_request(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "limit":
+			out.Values[i] = ec._ResourceLimit_limit(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -9480,6 +10354,38 @@ func (ec *executionContext) unmarshalNLogFilters2githubᚗcomᚋkonstellationᚑ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNNetworkingProtocol2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐNetworkingProtocol(ctx context.Context, v interface{}) (entity.NetworkingProtocol, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := entity.NetworkingProtocol(tmp)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNNetworkingProtocol2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐNetworkingProtocol(ctx context.Context, sel ast.SelectionSet, v entity.NetworkingProtocol) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNObjectStoreScope2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐObjectStoreScope(ctx context.Context, v interface{}) (entity.ObjectStoreScope, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := entity.ObjectStoreScope(tmp)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNObjectStoreScope2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐObjectStoreScope(ctx context.Context, sel ast.SelectionSet, v entity.ObjectStoreScope) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNProcess2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcess(ctx context.Context, sel ast.SelectionSet, v entity.Process) graphql.Marshaler {
 	return ec._Process(ctx, sel, &v)
 }
@@ -10442,11 +11348,39 @@ func (ec *executionContext) marshalOLog2ᚖgithubᚗcomᚋkonstellationᚑioᚋk
 	return ec._Log(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOProcessNetworking2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessNetworking(ctx context.Context, sel ast.SelectionSet, v *entity.ProcessNetworking) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ProcessNetworking(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProcessObjectStore2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessObjectStore(ctx context.Context, sel ast.SelectionSet, v *entity.ProcessObjectStore) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ProcessObjectStore(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProcessResourceLimits2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐProcessResourceLimits(ctx context.Context, sel ast.SelectionSet, v *entity.ProcessResourceLimits) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ProcessResourceLimits(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalORegisteredProcess2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐRegisteredProcess(ctx context.Context, sel ast.SelectionSet, v *entity.RegisteredProcess) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._RegisteredProcess(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOResourceLimit2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐResourceLimit(ctx context.Context, sel ast.SelectionSet, v *entity.ResourceLimit) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ResourceLimit(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

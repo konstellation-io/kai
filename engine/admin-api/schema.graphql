@@ -3,7 +3,7 @@ scalar Upload
 type Query {
   product(id: ID!): Product!
   products: [Product!]!
-  version(productID: ID!, tag: String!): Version!
+  version(productID: ID!, tag: String): Version!
   versions(productID: ID!): [Version!]!
   registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
   userActivityList(
@@ -173,8 +173,11 @@ type Process {
   replicas: Int!
   gpu: Boolean!
   config: [ConfigurationVariable]
+  objectStore: ProcessObjectStore
   secrets: [ConfigurationVariable]
   subscriptions: [String!]!
+  networking: ProcessNetworking
+  resourceLimits: ProcessResourceLimits
   status: ProcessStatus!
 }
 
@@ -182,6 +185,37 @@ enum ProcessType {
   TRIGGER
   TASK
   EXIT
+}
+
+type ProcessObjectStore{
+  name: String!
+  scope: ObjectStoreScope!
+}
+
+enum ObjectStoreScope{
+  PRODUCT
+  WORKFLOW
+}
+
+type ProcessNetworking{
+  targetPort: Int!
+  destinationPort: Int!
+  protocol: NetworkingProtocol!
+}
+
+enum NetworkingProtocol{
+  HTTP
+  GRPC
+}
+
+type ProcessResourceLimits{
+  cpu: ResourceLimit
+  memory: ResourceLimit
+}
+
+type ResourceLimit{
+  request: String!
+  limit: String!
 }
 
 enum ProcessStatus {
