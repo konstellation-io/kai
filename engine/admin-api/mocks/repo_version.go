@@ -79,6 +79,21 @@ func (mr *MockVersionRepoMockRecorder) GetByTag(ctx, productID, tag interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByTag", reflect.TypeOf((*MockVersionRepo)(nil).GetByTag), ctx, productID, tag)
 }
 
+// GetLatest mocks base method.
+func (m *MockVersionRepo) GetLatest(ctx context.Context, productID string) (*entity.Version, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLatest", ctx, productID)
+	ret0, _ := ret[0].(*entity.Version)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLatest indicates an expected call of GetLatest.
+func (mr *MockVersionRepoMockRecorder) GetLatest(ctx, productID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatest", reflect.TypeOf((*MockVersionRepo)(nil).GetLatest), ctx, productID)
+}
+
 // ListVersionsByProduct mocks base method.
 func (m *MockVersionRepo) ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
 	m.ctrl.T.Helper()

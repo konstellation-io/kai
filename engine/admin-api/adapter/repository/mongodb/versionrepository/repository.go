@@ -85,6 +85,23 @@ func (r *VersionRepoMongoDB) GetByTag(ctx context.Context, productID, tag string
 	return mapDTOToEntity(versionDTO), err
 }
 
+func (r *VersionRepoMongoDB) GetLatest(ctx context.Context, productID string) (*entity.Version, error) {
+	collection := r.client.Database(productID).Collection(versionsCollectionName)
+
+	versionDTO := &versionDTO{}
+	filter := bson.M{}
+
+	opts := options.FindOne()
+	opts.SetSort(bson.M{"creationDate": -1})
+
+	err := collection.FindOne(ctx, filter, opts).Decode(versionDTO)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, version.ErrVersionNotFound
+	}
+
+	return mapDTOToEntity(versionDTO), err
+}
+
 func (r *VersionRepoMongoDB) Update(productID string, updatedVersion *entity.Version) error {
 	collection := r.client.Database(productID).Collection(versionsCollectionName)
 
