@@ -37,6 +37,7 @@ type Mutation {
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
   registerProcess(input: RegisterProcessInput!): RegisteredProcess!
+  registerPublicProcess(input: RegisterPublicProcessInput!): RegisteredProcess!
 }
 
 type PublishedTrigger {
@@ -53,6 +54,7 @@ type RegisteredProcess {
   uploadDate: String!
   owner: String!
   status: String!
+  isPublic: Boolean!
 }
 
 type User {
@@ -77,6 +79,14 @@ input RegisterProcessInput {
   processID: ID!
   processType: String!
 }
+
+input RegisterPublicProcessInput {
+  file: Upload!
+  version: String!
+  processID: ID!
+  processType: String!
+}
+
 
 input StartVersionInput {
   versionTag: String!
@@ -273,6 +283,6 @@ type Label {
 }
 
 type Log {
-	formatedLog: String!
-	labels:      [Label!]!
+  formatedLog: String!
+  labels:      [Label!]!
 }
