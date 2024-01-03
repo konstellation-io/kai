@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	repository "github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 )
 
 // MockProcessRepository is a mock of ProcessRepository interface.
@@ -36,74 +37,88 @@ func (m *MockProcessRepository) EXPECT() *MockProcessRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockProcessRepository) Create(productID string, newRegisteredProcess *entity.RegisteredProcess) (*entity.RegisteredProcess, error) {
+func (m *MockProcessRepository) Create(ctx context.Context, registry string, newRegisteredProcess *entity.RegisteredProcess) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", productID, newRegisteredProcess)
-	ret0, _ := ret[0].(*entity.RegisteredProcess)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Create", ctx, registry, newRegisteredProcess)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockProcessRepositoryMockRecorder) Create(productID, newRegisteredProcess interface{}) *gomock.Call {
+func (mr *MockProcessRepositoryMockRecorder) Create(ctx, registry, newRegisteredProcess interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProcessRepository)(nil).Create), productID, newRegisteredProcess)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProcessRepository)(nil).Create), ctx, registry, newRegisteredProcess)
 }
 
 // CreateIndexes mocks base method.
-func (m *MockProcessRepository) CreateIndexes(ctx context.Context, productID string) error {
+func (m *MockProcessRepository) CreateIndexes(ctx context.Context, registry string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateIndexes", ctx, productID)
+	ret := m.ctrl.Call(m, "CreateIndexes", ctx, registry)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateIndexes indicates an expected call of CreateIndexes.
-func (mr *MockProcessRepositoryMockRecorder) CreateIndexes(ctx, productID interface{}) *gomock.Call {
+func (mr *MockProcessRepositoryMockRecorder) CreateIndexes(ctx, registry interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockProcessRepository)(nil).CreateIndexes), ctx, productID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndexes", reflect.TypeOf((*MockProcessRepository)(nil).CreateIndexes), ctx, registry)
 }
 
 // GetByID mocks base method.
-func (m *MockProcessRepository) GetByID(ctx context.Context, productID, imageID string) (*entity.RegisteredProcess, error) {
+func (m *MockProcessRepository) GetByID(ctx context.Context, registry, imageID string) (*entity.RegisteredProcess, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", ctx, productID, imageID)
+	ret := m.ctrl.Call(m, "GetByID", ctx, registry, imageID)
 	ret0, _ := ret[0].(*entity.RegisteredProcess)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByID indicates an expected call of GetByID.
-func (mr *MockProcessRepositoryMockRecorder) GetByID(ctx, productID, imageID interface{}) *gomock.Call {
+func (mr *MockProcessRepositoryMockRecorder) GetByID(ctx, registry, imageID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProcessRepository)(nil).GetByID), ctx, productID, imageID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProcessRepository)(nil).GetByID), ctx, registry, imageID)
 }
 
-// ListByProductAndType mocks base method.
-func (m *MockProcessRepository) ListByProductAndType(ctx context.Context, productID, processType string) ([]*entity.RegisteredProcess, error) {
+// GlobalSearch mocks base method.
+func (m *MockProcessRepository) GlobalSearch(ctx context.Context, filter repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListByProductAndType", ctx, productID, processType)
+	ret := m.ctrl.Call(m, "GlobalSearch", ctx, filter)
 	ret0, _ := ret[0].([]*entity.RegisteredProcess)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListByProductAndType indicates an expected call of ListByProductAndType.
-func (mr *MockProcessRepositoryMockRecorder) ListByProductAndType(ctx, productID, processType interface{}) *gomock.Call {
+// GlobalSearch indicates an expected call of GlobalSearch.
+func (mr *MockProcessRepositoryMockRecorder) GlobalSearch(ctx, filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByProductAndType", reflect.TypeOf((*MockProcessRepository)(nil).ListByProductAndType), ctx, productID, processType)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GlobalSearch", reflect.TypeOf((*MockProcessRepository)(nil).GlobalSearch), ctx, filter)
+}
+
+// SearchByProduct mocks base method.
+func (m *MockProcessRepository) SearchByProduct(ctx context.Context, product string, filter repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchByProduct", ctx, product, filter)
+	ret0, _ := ret[0].([]*entity.RegisteredProcess)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchByProduct indicates an expected call of SearchByProduct.
+func (mr *MockProcessRepositoryMockRecorder) SearchByProduct(ctx, product, filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchByProduct", reflect.TypeOf((*MockProcessRepository)(nil).SearchByProduct), ctx, product, filter)
 }
 
 // Update mocks base method.
-func (m *MockProcessRepository) Update(ctx context.Context, productID string, newRegisteredProcess *entity.RegisteredProcess) error {
+func (m *MockProcessRepository) Update(ctx context.Context, registry string, newRegisteredProcess *entity.RegisteredProcess) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, productID, newRegisteredProcess)
+	ret := m.ctrl.Call(m, "Update", ctx, registry, newRegisteredProcess)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockProcessRepositoryMockRecorder) Update(ctx, productID, newRegisteredProcess interface{}) *gomock.Call {
+func (mr *MockProcessRepositoryMockRecorder) Update(ctx, registry, newRegisteredProcess interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProcessRepository)(nil).Update), ctx, productID, newRegisteredProcess)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProcessRepository)(nil).Update), ctx, registry, newRegisteredProcess)
 }

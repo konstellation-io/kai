@@ -3,7 +3,7 @@ scalar Upload
 type Query {
   product(id: ID!): Product!
   products: [Product!]!
-  version(productID: ID!, tag: String!): Version!
+  version(productID: ID!, tag: String): Version!
   versions(productID: ID!): [Version!]!
   registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
   userActivityList(
@@ -37,6 +37,7 @@ type Mutation {
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
   registerProcess(input: RegisterProcessInput!): RegisteredProcess!
+  registerPublicProcess(input: RegisterPublicProcessInput!): RegisteredProcess!
 }
 
 type PublishedTrigger {
@@ -53,6 +54,7 @@ type RegisteredProcess {
   uploadDate: String!
   owner: String!
   status: String!
+  isPublic: Boolean!
 }
 
 type User {
@@ -77,6 +79,14 @@ input RegisterProcessInput {
   processID: ID!
   processType: String!
 }
+
+input RegisterPublicProcessInput {
+  file: Upload!
+  version: String!
+  processID: ID!
+  processType: String!
+}
+
 
 input StartVersionInput {
   versionTag: String!
@@ -173,8 +183,11 @@ type Process {
   replicas: Int!
   gpu: Boolean!
   config: [ConfigurationVariable]
+  objectStore: ProcessObjectStore
   secrets: [ConfigurationVariable]
   subscriptions: [String!]!
+  networking: ProcessNetworking
+  resourceLimits: ProcessResourceLimits
   status: ProcessStatus!
 }
 
@@ -182,6 +195,37 @@ enum ProcessType {
   TRIGGER
   TASK
   EXIT
+}
+
+type ProcessObjectStore{
+  name: String!
+  scope: ObjectStoreScope!
+}
+
+enum ObjectStoreScope{
+  PRODUCT
+  WORKFLOW
+}
+
+type ProcessNetworking{
+  targetPort: Int!
+  destinationPort: Int!
+  protocol: NetworkingProtocol!
+}
+
+enum NetworkingProtocol{
+  HTTP
+  GRPC
+}
+
+type ProcessResourceLimits{
+  cpu: ResourceLimit
+  memory: ResourceLimit
+}
+
+type ResourceLimit{
+  request: String!
+  limit: String!
 }
 
 enum ProcessStatus {
@@ -239,6 +283,6 @@ type Label {
 }
 
 type Log {
-	formatedLog: String!
-	labels:      [Label!]!
+  formatedLog: String!
+  labels:      [Label!]!
 }

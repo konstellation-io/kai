@@ -22,6 +22,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/sethvargo/go-password/password"
 	"github.com/spf13/viper"
@@ -171,7 +172,7 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 	)
 
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
-	processService := usecase.NewProcessService(logger, k8sService, processRepo, minioOjectStorage)
+	processService := process.NewProcessService(logger, k8sService, processRepo, minioOjectStorage, accessControl)
 	logsUseCase := logs.NewLogsInteractor(logsService)
 
 	return controller.NewGraphQLController(
