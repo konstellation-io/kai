@@ -17,7 +17,8 @@ const (
 	ApplicationPortKey      = "application.port"
 	CORSEnabledKey          = "application.corsEnabled"
 
-	RegistryHostKey = "registry.host"
+	RegistryHostKey   = "registry.host"
+	GlobalRegistryKey = "registry.global"
 
 	MinioEndpointKey           = "minio.endpoint"
 	MinioTierEnabledKey        = "minio.tier.enabled"
@@ -112,6 +113,7 @@ func setDefaultConfig() {
 	viper.SetDefault(MinioTierTransitionDaysKey, 0)
 	viper.SetDefault(KeycloakPolicyAttributeKey, "policy")
 	viper.SetDefault(MongoDBKaiDatabaseKey, "kai")
+	viper.SetDefault(GlobalRegistryKey, "kai")
 	viper.SetDefault(RedisUsernameKey, "default")
 	viper.SetDefault(RedisPredictionsIndexKey, "predictionsIdx")
 	viper.SetDefault(CORSEnabledKey, false)
