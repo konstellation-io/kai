@@ -278,6 +278,12 @@ keycloak:
     oidcClient:
       # -- The name of the OIDC client in Keycloak for KLI
       clientId: "kai-kli-oidc"
+  kliCI:
+    oidcClient:
+      # -- The name of the OIDC client in Keycloak for KLI CI
+      clientId: "kai-kli-ci-oidc"
+      # -- The secret for the OIDC client that will be created on Keycloak first startup
+      secret: ""
   adminApi:
     oidcClient:
       # -- The name of the OIDC client in Keycloak for the master realm admin
