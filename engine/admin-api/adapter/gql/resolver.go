@@ -11,6 +11,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 )
 
@@ -32,7 +33,7 @@ type Resolver struct {
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
 	serverInfoGetter       *usecase.ServerInfoGetter
-	processService         *usecase.ProcessService
+	processService         *process.Service
 	logsService            logs.LogsUsecase
 }
 
@@ -71,25 +72,30 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterProcessInput) (*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	p, notifyCh, err := r.processService.RegisterProcess(
-		ctx, loggedUser, input.ProductID, input.Version, input.ProcessID, input.ProcessType, input.File.File,
+	return r.processService.RegisterProcess(
+		ctx, loggedUser, process.RegisterProcessOpts{
+			Product:     input.ProductID,
+			Version:     input.Version,
+			Process:     input.ProcessID,
+			ProcessType: entity.ProcessType(input.ProcessType),
+			Sources:     input.File.File,
+		},
 	)
-
-	go r.notifyRegisteredProcessStatus(notifyCh)
-
-	return p, err
 }
 
-func (r *mutationResolver) notifyRegisteredProcessStatus(notifyCh chan *entity.RegisteredProcess) {
-	for registeredProcess := range notifyCh {
-		switch registeredProcess.Status {
-		case entity.RegisterProcessStatusCreated:
-			r.logger.Info("Process successfully registered", "processID", registeredProcess.ID)
-		case entity.RegisterProcessStatusFailed:
-			r.logger.Info("Failed to register process", "processID", registeredProcess.ID, "error", registeredProcess.Logs)
-		default:
-		}
-	}
+func (r *mutationResolver) RegisterPublicProcess(ctx context.Context, input RegisterPublicProcessInput) (*entity.RegisteredProcess, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+
+	return r.processService.RegisterProcess(
+		ctx, loggedUser,
+		process.RegisterProcessOpts{
+			Version:     input.Version,
+			Process:     input.ProcessID,
+			ProcessType: entity.ProcessType(input.ProcessType),
+			IsPublic:    true,
+			Sources:     input.File.File,
+		},
+	)
 }
 
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
@@ -209,9 +215,14 @@ func (r *queryResolver) Products(ctx context.Context) ([]*entity.Product, error)
 	return r.productInteractor.FindAll(ctx, loggedUser)
 }
 
-func (r *queryResolver) Version(ctx context.Context, productID, tag string) (*entity.Version, error) {
+func (r *queryResolver) Version(ctx context.Context, productID string, tag *string) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.GetByTag(ctx, loggedUser, productID, tag)
+
+	if tag == nil {
+		return r.versionInteractor.GetLatest(ctx, loggedUser, productID)
+	} else {
+		return r.versionInteractor.GetByTag(ctx, loggedUser, productID, *tag)
+	}
 }
 
 func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*entity.Version, error) {
@@ -229,7 +240,7 @@ func (r *queryResolver) RegisteredProcesses(
 		processTypeFilter = *processType
 	}
 
-	return r.processService.ListByProductAndType(ctx, loggedUser, productID, processTypeFilter)
+	return r.processService.Search(ctx, loggedUser, productID, processTypeFilter)
 }
 
 func (r *queryResolver) UserActivityList(
@@ -303,6 +314,10 @@ func (r *registeredProcessResolver) UploadDate(_ context.Context, obj *entity.Re
 	return obj.UploadDate.Format(time.RFC3339), nil
 }
 
+func (r *registeredProcessResolver) Type(_ context.Context, obj *entity.RegisteredProcess) (string, error) {
+	return obj.Type.String(), nil
+}
+
 func (r *logFiltersResolver) From(_ context.Context, obj *entity.LogFilters, from string) error {
 	var err error
 	obj.From, err = time.Parse(time.RFC3339, from)
@@ -346,4 +361,5 @@ type productResolver struct{ *Resolver }
 type userActivityResolver struct{ *Resolver }
 type versionResolver struct{ *Resolver }
 type registeredProcessResolver struct{ *Resolver }
+
 type logFiltersResolver struct{ *Resolver }

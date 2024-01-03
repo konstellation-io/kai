@@ -9,6 +9,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/labstack/echo"
 )
@@ -29,7 +30,7 @@ type GraphQLController struct {
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
 	serverInfoGetter       *usecase.ServerInfoGetter
-	processService         *usecase.ProcessService
+	processService         *process.Service
 	LogsUsecase            logs.LogsUsecase
 }
 
@@ -40,7 +41,7 @@ type Params struct {
 	UserActivityInteractor usecase.UserActivityInteracter
 	VersionInteractor      *version.Handler
 	ServerInfoGetter       *usecase.ServerInfoGetter
-	ProcessService         *usecase.ProcessService
+	ProcessService         *process.Service
 	LogsUsecase            logs.LogsUsecase
 }
 

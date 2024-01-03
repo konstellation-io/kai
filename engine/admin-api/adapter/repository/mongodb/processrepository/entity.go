@@ -12,4 +12,5 @@ type registeredProcessDTO struct {
 	Owner      string    `bson:"owner"`
 	Status     string    `bson:"status"`
 	Logs       string    `bson:"logs"`
+	IsPublic   bool      `bson:"isPublic"`
 }
