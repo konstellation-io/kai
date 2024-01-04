@@ -62,7 +62,7 @@ func (m *NatsManager) CreateVersionKeyValueStores(
 }
 
 func (m *NatsManager) CreateGlobalKeyValueStore(product string) (string, error) {
-	m.logger.Infof("Creating global key-value store for product %q", product)
+	m.logger.Info("Creating global key-value store for product", "product", product)
 
 	keyValueStoreName := m.getProductKeyValueStoreName(product)
 

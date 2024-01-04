@@ -8,8 +8,5 @@ go mod tidy
 cd ../k8s-manager
 go mod tidy
 
-cd ../../libs/krt-utils/
-go mod tidy
-
-cd ../simplelogger/
+cd ../nats-manager
 go mod tidy

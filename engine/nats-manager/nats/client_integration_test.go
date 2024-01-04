@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 	natslib "github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/suite"
@@ -16,7 +17,6 @@ import (
 
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 	"github.com/konstellation-io/kai/engine/nats-manager/nats"
-	"github.com/konstellation-io/kai/libs/simplelogger"
 )
 
 type ClientTestSuite struct {
@@ -57,7 +57,7 @@ func (s *ClientTestSuite) SetupSuite() {
 		log.Fatalf("error connecting to NATS JetStream: %s", err)
 	}
 
-	logger := simplelogger.New(simplelogger.LevelDebug)
+	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	natsClient := nats.New(logger, js)
 
 	s.js = js

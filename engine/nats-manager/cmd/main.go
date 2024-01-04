@@ -5,9 +5,10 @@ import (
 	"log"
 	"net"
 
+	"github.com/go-logr/zapr"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 
-	"github.com/konstellation-io/kai/libs/simplelogger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -19,7 +20,13 @@ import (
 )
 
 func main() {
-	logger := simplelogger.New(simplelogger.LevelDebug)
+	zapLog, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logger := zapr.NewLogger(zapLog)
+
 	logger.Info("Starting NATS manager")
 
 	config.Initialize()
@@ -45,7 +52,7 @@ func main() {
 	natspb.RegisterNatsManagerServiceServer(grpcServer, natsService)
 	reflection.Register(grpcServer)
 
-	logger.Infof("Server listening on port: %d", viper.GetInt(config.NatsManagerPort))
+	logger.Info("Server listening", "port", viper.GetInt(config.NatsManagerPort))
 
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
