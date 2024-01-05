@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
@@ -17,8 +18,7 @@ import (
 func TestCreateStreams(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
@@ -60,8 +60,7 @@ func TestCreateStreams(t *testing.T) {
 func TestCreateStreams_ClientFails(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
@@ -90,7 +89,7 @@ func TestCreateStreams_ClientFails(t *testing.T) {
 func TestCreateStreams_FailsIfNoWorkflowsAreDefined(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	logger := mocks.NewMockLogger(ctrl)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 

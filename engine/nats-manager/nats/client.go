@@ -5,21 +5,21 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/config"
 	"github.com/spf13/viper"
 
 	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 	"github.com/nats-io/nats.go"
 )
 
 type NatsClient struct {
 	js     nats.JetStreamContext
-	logger logging.Logger
+	logger logr.Logger
 }
 
-func New(logger logging.Logger, js nats.JetStreamContext) *NatsClient {
+func New(logger logr.Logger, js nats.JetStreamContext) *NatsClient {
 	return &NatsClient{
 		logger: logger,
 		js:     js,
@@ -41,7 +41,7 @@ func InitJetStreamConnection(url string) (nats.JetStreamContext, error) {
 }
 
 func (n *NatsClient) CreateStream(streamConfig *entity.StreamConfig) error {
-	n.logger.Infof("Creating stream  %q", streamConfig.Stream)
+	n.logger.Info("Creating stream", "stream", streamConfig.Stream)
 
 	subjects := n.getProcessesSubjects(streamConfig.Processes)
 
@@ -85,7 +85,7 @@ func (n *NatsClient) GetObjectStoreNames(optFilter ...*regexp.Regexp) ([]string,
 }
 
 func (n *NatsClient) CreateObjectStore(objectStore string) error {
-	n.logger.Infof("Creating object store %q", objectStore)
+	n.logger.Info("Creating object store", "object-store", objectStore)
 
 	_, err := n.js.CreateObjectStore(&nats.ObjectStoreConfig{
 		Bucket:  objectStore,
@@ -100,7 +100,7 @@ func (n *NatsClient) CreateObjectStore(objectStore string) error {
 }
 
 func (n *NatsClient) CreateKeyValueStore(keyValueStore string) error {
-	n.logger.Infof("Creating key-value store %q", keyValueStore)
+	n.logger.Info("Creating key-value store", "key-value-store", keyValueStore)
 
 	_, err := n.js.CreateKeyValue(&nats.KeyValueConfig{
 		Bucket: keyValueStore,
@@ -113,17 +113,17 @@ func (n *NatsClient) CreateKeyValueStore(keyValueStore string) error {
 }
 
 func (n *NatsClient) DeleteStream(stream string) error {
-	n.logger.Infof("Deleting stream %q", stream)
+	n.logger.Info("Deleting stream", "stream", stream)
 	return n.js.DeleteStream(stream)
 }
 
 func (n *NatsClient) DeleteObjectStore(objectStore string) error {
-	n.logger.Infof("Deleting object store %q", objectStore)
+	n.logger.Info("Deleting object store", "object-store", objectStore)
 	return n.js.DeleteObjectStore(objectStore)
 }
 
 func (n *NatsClient) DeleteKeyValueStore(keyValueStore string) error {
-	n.logger.Infof("Deleting key-value store %q", keyValueStore)
+	n.logger.Info("Deleting key-value store", "key-value-store", keyValueStore)
 	return n.js.DeleteKeyValue(keyValueStore)
 }
 
