@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Release.Name }}-nats
+  name: {{ include "nats.fullname" . }}
   labels:
     {{- include "nats.labels" . | nindent 4 }}
 spec:
@@ -17,6 +17,11 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/nats/configmap.yaml") . | sha256sum }}
     spec:
+      {{- with .Values.nats.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nats.serviceAccountName" . }}
       {{- with .Values.nats.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -59,7 +64,7 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: {{ .Release.Name }}-nats-config
+            name:  {{ include "nats-manager.fullname" . }}
         - name: pid
           emptyDir: {}
   {{- if .Values.nats.jetstream.storage.enabled }}

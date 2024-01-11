@@ -225,6 +225,7 @@
 | nats.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | nats.image.repository | string | `"nats"` | Image repository |
 | nats.image.tag | string | `"2.8.4"` | Image tag |
+| nats.imagePullSecrets | list | `[]` | Image pull secrets |
 | nats.jetstream.memStorage.enabled | bool | `true` | Whether to enable memory storage for Jetstream |
 | nats.jetstream.memStorage.size | string | `"2Gi"` | Memory storage max size for JetStream |
 | nats.jetstream.storage.enabled | bool | `true` | Whether to enable a PersistentVolumeClaim for Jetstream |
@@ -245,6 +246,9 @@
 | nats.logging.logtime | bool | `true` | Timestamp log entries |
 | nats.logging.trace | bool | `false` | Whether to enable logging trace mode |
 | nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| nats.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| nats.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| nats.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | nats.tolerations | list | `[]` | Tolerations for use with node taints |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
