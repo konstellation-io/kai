@@ -7,9 +7,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/go-logr/logr"
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/service"
 	"github.com/konstellation-io/kai/engine/nats-manager/mocks"
 	"github.com/konstellation-io/kai/engine/nats-manager/proto/natspb"
@@ -57,7 +58,7 @@ var (
 
 type NatsServiceTestSuite struct {
 	suite.Suite
-	logger          logging.Logger
+	logger          logr.Logger
 	natsManagerMock *mocks.MockNatsManager
 	natsService     *service.NatsService
 }
@@ -68,14 +69,11 @@ func TestNatsServiceTestSuite(t *testing.T) {
 
 func (s *NatsServiceTestSuite) SetupSuite() {
 	mockController := gomock.NewController(s.T())
-	logger := mocks.NewMockLogger(mockController)
-	mocks.AddLoggerExpects(logger)
+	s.logger = testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 
 	s.natsManagerMock = mocks.NewMockNatsManager(mockController)
 
-	s.natsService = service.NewNatsService(logger, s.natsManagerMock)
-
-	s.logger = logger
+	s.natsService = service.NewNatsService(s.logger, s.natsManagerMock)
 }
 
 func (s *NatsServiceTestSuite) TestCreateStreams() {

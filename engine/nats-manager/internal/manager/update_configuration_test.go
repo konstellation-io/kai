@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/manager"
@@ -14,7 +15,6 @@ import (
 type UpdateConfigurationSuite struct {
 	suite.Suite
 
-	logger      *mocks.MockLogger
 	client      *mocks.MockNatsClient
 	natsManager *manager.NatsManager
 }
@@ -26,11 +26,9 @@ func TestUpdateConfigurationSuite(t *testing.T) {
 func (s *UpdateConfigurationSuite) SetupSuite() {
 	ctrl := gomock.NewController(s.T())
 
-	s.logger = mocks.NewMockLogger(ctrl)
+	logger := testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	s.client = mocks.NewMockNatsClient(ctrl)
-	s.natsManager = manager.NewNatsManager(s.logger, s.client)
-
-	mocks.AddLoggerExpects(s.logger)
+	s.natsManager = manager.NewNatsManager(logger, s.client)
 }
 
 func (s *UpdateConfigurationSuite) TestUpdateKeyValueStoresConfiguration() {

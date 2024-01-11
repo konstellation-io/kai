@@ -5,6 +5,7 @@ package manager_test
 import (
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/manager"
@@ -25,8 +26,7 @@ func TestDeleteKeyValueStores(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 
-	logger := mocks.NewMockLogger(ctrl)
-	logger.EXPECT().Info(gomock.Any()).Return().AnyTimes()
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 

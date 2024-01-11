@@ -4,21 +4,21 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/interfaces"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 	"github.com/konstellation-io/kai/engine/nats-manager/proto/natspb"
 )
 
 // NatsService basic server.
 type NatsService struct {
-	logger  logging.Logger
+	logger  logr.Logger
 	manager interfaces.NatsManager
 	natspb.UnimplementedNatsManagerServiceServer
 }
 
 // NewNatsService instantiates the GRPC server implementation.
 func NewNatsService(
-	logger logging.Logger,
+	logger logr.Logger,
 	manager interfaces.NatsManager,
 ) *NatsService {
 	return &NatsService{
@@ -37,7 +37,7 @@ func (n *NatsService) CreateStreams(
 
 	streamConfig, err := n.manager.CreateStreams(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
 	if err != nil {
-		n.logger.Errorf("Error creating streams: %s", err)
+		n.logger.Error(err, "Error creating streams")
 		return nil, err
 	}
 
@@ -55,7 +55,7 @@ func (n *NatsService) CreateObjectStores(
 
 	objectStores, err := n.manager.CreateObjectStores(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
 	if err != nil {
-		n.logger.Errorf("Error creating object store: %s", err)
+		n.logger.Error(err, "Error creating object store")
 		return nil, err
 	}
 
@@ -73,7 +73,7 @@ func (n *NatsService) DeleteStreams(
 
 	err := n.manager.DeleteStreams(req.ProductId, req.VersionTag)
 	if err != nil {
-		n.logger.Errorf("Error deleting streams: %s", err)
+		n.logger.Error(err, "Error deleting streams")
 		return nil, err
 	}
 
@@ -91,7 +91,7 @@ func (n *NatsService) DeleteObjectStores(
 
 	err := n.manager.DeleteObjectStores(req.ProductId, req.VersionTag)
 	if err != nil {
-		n.logger.Errorf("Error deleting object stores: %s", err)
+		n.logger.Error(err, "Error deleting object stores")
 		return nil, err
 	}
 
@@ -108,7 +108,7 @@ func (n *NatsService) CreateVersionKeyValueStores(
 
 	keyValueStores, err := n.manager.CreateVersionKeyValueStores(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
 	if err != nil {
-		n.logger.Errorf("Error creating version's key-value store: %s", err)
+		n.logger.Error(err, "Error creating version's key-value store")
 		return nil, err
 	}
 
@@ -123,7 +123,7 @@ func (n *NatsService) CreateGlobalKeyValueStore(
 
 	keyValueStore, err := n.manager.CreateGlobalKeyValueStore(req.ProductId)
 	if err != nil {
-		n.logger.Errorf("Error creating global key-value store: %s", err)
+		n.logger.Error(err, "Error creating global key-value store")
 		return nil, err
 	}
 
@@ -138,7 +138,7 @@ func (n *NatsService) DeleteVersionKeyValueStores(
 
 	err := n.manager.DeleteVersionKeyValueStores(req.ProductId, req.VersionTag, n.dtoToWorkflows(req.Workflows))
 	if err != nil {
-		n.logger.Errorf("Error deleting version's key-value stores: %s", err)
+		n.logger.Error(err, "Error deleting version's key-value stores")
 		return nil, err
 	}
 
@@ -155,7 +155,7 @@ func (n *NatsService) UpdateKeyValueConfiguration(
 
 	err := n.manager.UpdateKeyValueStoresConfiguration(n.mapDTOToKeyValueStoreConfigurations(req.KeyValueStoresConfig))
 	if err != nil {
-		n.logger.Errorf("Error creating object store: %s", err)
+		n.logger.Error(err, "Error creating object store")
 		return nil, err
 	}
 
