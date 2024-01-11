@@ -63,6 +63,17 @@ app.kubernetes.io/name: {{ include "kai.name" . }}-admin-api
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{/*
+Admin API serviceaccount name
+*/}}
+{{- define "admin-api.serviceAccountName" -}}
+{{- if .Values.adminApi.serviceAccount.create -}}
+    {{ default (include "admin-api.fullname" .) .Values.adminApi.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.adminApi.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
 {{/* Fullname suffixed with k8s-manager */}}
 {{- define "k8s-manager.fullname" -}}
 {{- printf "%s-k8s-manager" (include "kai.fullname" .) -}}
@@ -309,6 +320,17 @@ nats manager selector labels
 app.kubernetes.io/name: {{ include "kai.name" . }}-nats-manager
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+nats manager serviceaccount name
+*/}}
+{{- define "nats-manager.serviceAccountName" -}}
+{{- if .Values.natsManager.serviceAccount.create -}}
+    {{ default (include "nats-manager.fullname" .) .Values.natsManager.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.natsManager.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
 
 {{/* Fullname suffixed with keycloak */}}
 {{- define "keycloak.fullname" -}}

@@ -14,19 +14,23 @@
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| adminApi.affinity | object | `{}` | Assign custom affinity rules to the Admin API pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
+| adminApi.affinity | object | `{}` | Assign custom affinity rules to the Admin API pods |
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
 | adminApi.image.tag | string | `"0.2.0-develop.81"` | Image tag |
+| adminApi.imagePullSecrets | list | `[]` | Image pull secrets |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
-| adminApi.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| adminApi.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| adminApi.serviceAccount.annotations | object | `{}` |  |
+| adminApi.serviceAccount.create | bool | `true` |  |
+| adminApi.serviceAccount.name | string | `""` |  |
 | adminApi.storage.class | string | `"standard"` | Storage class name |
 | adminApi.storage.path | string | `"/admin-api-files"` | Persistent volume mount point. This will define Admin API app workdir too. |
 | adminApi.storage.size | string | `"1Gi"` | Storage class size |
-| adminApi.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| adminApi.tolerations | list | `[]` | Tolerations for use with node taints |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.baseDomainName | string | `"kai.local"` | Base domain name for Admin API and K8S Manager apps |
 | config.loki.datasource | object | `{"jsonData":"{}","uid":""}` | Only when `loki.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config. |
@@ -87,14 +91,15 @@
 | grafana.service.port | int | `80` | Internal port number for Grafana service |
 | grafana.service.type | string | `"ClusterIP"` | Service type |
 | grafana.sidecar | object | `{"datasources":{"enabled":true,"label":"grafana_datasource","labelValue":"1","maxLines":1000}}` | sidecar config (required for datasource config section in loki and prometheus) |
-| k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
+| k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
 | k8sManager.image.tag | string | `"0.2.0-develop.81"` | Image tag |
 | k8sManager.imageBuilder.image.repository | string | `"gcr.io/kaniko-project/executor"` | Image repository for image builder's jobs |
 | k8sManager.imageBuilder.image.tag | string | `"v1.18.0"` | Image tag for image builder's jobs |
 | k8sManager.imageBuilder.pullPolicy | string | `"IfNotPresent"` |  |
-| k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| k8sManager.imagePullSecrets | list | `[]` | Image pull secrets |
+| k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | k8sManager.processes.sidecars.fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for Fuent Bit sidecar |
 | k8sManager.processes.sidecars.fluentbit.image.repository | string | `"fluent/fluent-bit"` | Image repository for Fuent Bit sidecar |
 | k8sManager.processes.sidecars.fluentbit.image.tag | string | `"2.2.0"` | Image tag for Fuent Bit sidecar |
@@ -106,7 +111,7 @@
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
 | k8sManager.serviceAccount.name | string | `""` | The name of the service account. @default: A pre-generated name based on the chart relase fullname sufixed by `-k8s-manager` |
-| k8sManager.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| k8sManager.tolerations | list | `[]` | Tolerations for use with node taints |
 | keycloak.adminApi.oidcClient.clientId | string | `"admin-cli"` | The name of the OIDC client in Keycloak for the master realm admin |
 | keycloak.affinity | object | `{}` | Assign custom affinity rules to the Keycloak pods |
 | keycloak.argsOverride | object | `{}` | Args to pass to the Keycloak startup command. This takes precedence over options passed through env variables |
@@ -215,7 +220,7 @@
 | minio.service.port | string | `"9000"` | Internal port number for MinIO S3 API service |
 | minio.service.type | string | `"ClusterIP"` | Service type |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
-| nats.affinity | object | `{}` | Assign custom affinity rules to the NATS pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
+| nats.affinity | object | `{}` | Assign custom affinity rules to the NATS pods |
 | nats.client.port | int | `4222` | Port for client connections |
 | nats.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | nats.image.repository | string | `"nats"` | Image repository |
@@ -239,11 +244,15 @@
 | nats.logging.debug | bool | `false` | Whether to enable logging debug mode |
 | nats.logging.logtime | bool | `true` | Timestamp log entries |
 | nats.logging.trace | bool | `false` | Whether to enable logging trace mode |
-| nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
-| nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| nats.tolerations | list | `[]` | Tolerations for use with node taints |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
 | natsManager.image.tag | string | `"0.2.0-develop.81"` | Image tag |
+| natsManager.imagePullSecrets | list | `[]` | Image pull secrets |
+| natsManager.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| natsManager.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| natsManager.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | prometheus.alertmanager.enabled | bool | `true` | Whether to enable alertmanager |
 | prometheus.alertmanager.image.tag | string | `"v0.26.0"` | alertmanager server version |
 | prometheus.alertmanager.persistence.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |
@@ -308,7 +317,7 @@
 | redis.tls.autoGenerated | bool | `false` | Enable autogenerated certificates |
 | redis.tls.enabled | bool | `false` | Enabled Enable TLS traffic |
 | redis.tls.existingSecret | string | `""` | The name of the existing secret that contains the TLS certificates |
-| registry.affinity | object | `{}` | Assign custom affinity rules to the pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
+| registry.affinity | object | `{}` | Assign custom affinity rules to the pods |
 | registry.auth.password | string | password | Registry password |
 | registry.auth.user | string | user | Registry username |
 | registry.config | string | `""` | A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/. |
@@ -325,7 +334,7 @@
 | registry.imagePullSecrets | list | `[]` | Image pull secrets |
 | registry.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | registry.ingress.className | string | `"kong"` | The name of the ingress class to use |
-| registry.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| registry.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | registry.podAnnotations | object | `{}` | Pod annotations |
 | registry.podSecurityContext | object | `{}` | Pod security context |
 | registry.resources | object | `{}` | Container resources |
@@ -340,4 +349,4 @@
 | registry.storage.path | string | `"/var/lib/registry"` | Persistent volume mount point. This will define Registry app workdir too. |
 | registry.storage.size | string | `"10Gi"` | Storage size |
 | registry.storage.storageClass | string | `""` | Storage class name |
-| registry.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| registry.tolerations | list | `[]` | Tolerations for use with node taints |
