@@ -63,6 +63,17 @@ app.kubernetes.io/name: {{ include "kai.name" . }}-admin-api
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{/*
+Admin API serviceaccount name
+*/}}
+{{- define "admin-api.serviceAccountName" -}}
+{{- if .Values.adminApi.serviceAccount.create -}}
+    {{ default (include "admin-api.fullname" .) .Values.adminApi.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.adminApi.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
 {{/* Fullname suffixed with k8s-manager */}}
 {{- define "k8s-manager.fullname" -}}
 {{- printf "%s-k8s-manager" (include "kai.fullname" .) -}}
@@ -259,6 +270,11 @@ minio-config default buckets region
 {{- default "us-east-1" .Values.config.minio.defaultRegion -}}
 {{- end }}
 
+{{/* Fullname suffixed with nats */}}
+{{- define "nats.fullname" -}}
+{{- printf "%s-nats" (include "kai.fullname" .) -}}
+{{- end }}
+
 {{/*
 nats labels
 */}}
@@ -276,10 +292,21 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+nats serviceaccount name
+*/}}
+{{- define "nats.serviceAccountName" -}}
+{{- if .Values.nats.serviceAccount.create -}}
+    {{ default (include "nats.fullname" .) .Values.nats.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.nats.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 nats host
 */}}
 {{- define "nats.host" -}}
-{{- printf "%s-nats" .Release.Name -}}
+{{- include "nats.fullname" . -}}
 {{- end }}
 
 {{/*
@@ -309,6 +336,17 @@ nats manager selector labels
 app.kubernetes.io/name: {{ include "kai.name" . }}-nats-manager
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+nats manager serviceaccount name
+*/}}
+{{- define "nats-manager.serviceAccountName" -}}
+{{- if .Values.natsManager.serviceAccount.create -}}
+    {{ default (include "nats-manager.fullname" .) .Values.natsManager.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.natsManager.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
 
 {{/* Fullname suffixed with keycloak */}}
 {{- define "keycloak.fullname" -}}
