@@ -64,7 +64,7 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name:  {{ include "nats-manager.fullname" . }}
+            name:  {{ include "nats.fullname" . }}
         - name: pid
           emptyDir: {}
   {{- if .Values.nats.jetstream.storage.enabled }}
