@@ -226,7 +226,13 @@ jobs:
 
     - name: Publish chart
       if: needs.release-version.outputs.newRelease == 'true'
-      run: ./.ci/utils/release_chart.sh
+      run: |
+        helm repo add minio https://charts.min.io/
+        helm repo add grafana https://grafana.github.io/helm-charts
+        helm repo add loki https://grafana.github.io/helm-charts
+        helm repo add prometheus https://prometheus-community.github.io/helm-charts
+        helm repo add redis https://charts.bitnami.com/bitnami
+        ./.ci/utils/release_chart.sh
       env:
         REPOSITORY_OWNER: ${{ github.repository_owner }}
         REPOSITORY_NAME: ${{ env.REPOSITORY_NAME }}
