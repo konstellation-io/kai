@@ -16,6 +16,10 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/k8s-manager/configmap.yaml") . | sha256sum }}
     spec:
+      {{- with .Values.k8sManager.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "k8s-manager.serviceAccountName" . }}
       {{- with .Values.k8sManager.affinity }}
       affinity:

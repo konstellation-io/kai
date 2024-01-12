@@ -13,10 +13,11 @@ type RegisteredProcess struct {
 	ID         string
 	Name       string
 	Version    string
-	Type       string
+	Type       ProcessType
 	Image      string
 	UploadDate time.Time
 	Owner      string
 	Status     string
 	Logs       string
+	IsPublic   bool
 }

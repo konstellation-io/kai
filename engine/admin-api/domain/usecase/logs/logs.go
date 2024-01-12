@@ -1,7 +1,5 @@
 package logs
 
-//go:generate mockgen -source=${GOFILE} -destination=../../mocks/logs_${GOFILE} -package=mocks
-
 import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"

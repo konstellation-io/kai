@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/manager"
 	"github.com/konstellation-io/kai/engine/nats-manager/mocks"
@@ -17,8 +18,7 @@ import (
 func TestDeleteStreams(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
@@ -36,8 +36,7 @@ func TestDeleteStreams(t *testing.T) {
 func TestDeleteStreams_ErrorDeletingStream(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 
@@ -53,8 +52,7 @@ func TestDeleteStreams_ErrorDeletingStream(t *testing.T) {
 func TestDeleteStreams_ErrorGettingStreamsNames(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	logger := mocks.NewMockLogger(ctrl)
-	mocks.AddLoggerExpects(logger)
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
 	client := mocks.NewMockNatsClient(ctrl)
 	natsManager := manager.NewNatsManager(logger, client)
 

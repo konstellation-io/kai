@@ -5,10 +5,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/entity"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal/interfaces"
-	"github.com/konstellation-io/kai/engine/nats-manager/internal/logging"
 )
 
 const (
@@ -16,11 +16,11 @@ const (
 )
 
 type NatsManager struct {
-	logger logging.Logger
+	logger logr.Logger
 	client interfaces.NatsClient
 }
 
-func NewNatsManager(logger logging.Logger, client interfaces.NatsClient) *NatsManager {
+func NewNatsManager(logger logr.Logger, client interfaces.NatsClient) *NatsManager {
 	return &NatsManager{
 		logger: logger,
 		client: client,
@@ -144,8 +144,6 @@ func (m *NatsManager) DeleteObjectStores(productID, versionTag string) error {
 	}
 
 	for _, objectStore := range allObjectStores {
-		m.logger.Debugf("Deleting object store %q", objectStore)
-
 		err := m.client.DeleteObjectStore(objectStore)
 		if err != nil {
 			return fmt.Errorf("error deleting object store %q: %w", objectStore, err)

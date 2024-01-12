@@ -18,11 +18,15 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.2.0-develop.79"` | Image tag |
+| adminApi.image.tag | string | `"0.2.0-release.1"` | Image tag |
+| adminApi.imagePullSecrets | list | `[]` | Image pull secrets |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
 | adminApi.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| adminApi.serviceAccount.annotations | object | `{}` |  |
+| adminApi.serviceAccount.create | bool | `true` |  |
+| adminApi.serviceAccount.name | string | `""` |  |
 | adminApi.storage.class | string | `"standard"` | Storage class name |
 | adminApi.storage.path | string | `"/admin-api-files"` | Persistent volume mount point. This will define Admin API app workdir too. |
 | adminApi.storage.size | string | `"1Gi"` | Storage class size |
@@ -90,10 +94,11 @@
 | k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.2.0-develop.79"` | Image tag |
+| k8sManager.image.tag | string | `"0.2.0-release.1"` | Image tag |
 | k8sManager.imageBuilder.image.repository | string | `"gcr.io/kaniko-project/executor"` | Image repository for image builder's jobs |
 | k8sManager.imageBuilder.image.tag | string | `"v1.18.0"` | Image tag for image builder's jobs |
 | k8sManager.imageBuilder.pullPolicy | string | `"IfNotPresent"` |  |
+| k8sManager.imagePullSecrets | list | `[]` | Image pull secrets |
 | k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | k8sManager.processes.sidecars.fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for Fuent Bit sidecar |
 | k8sManager.processes.sidecars.fluentbit.image.repository | string | `"fluent/fluent-bit"` | Image repository for Fuent Bit sidecar |
@@ -143,6 +148,8 @@
 | keycloak.ingress.annotations | object | See `keycloak.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | keycloak.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | keycloak.kli.oidcClient.clientId | string | `"kai-kli-oidc"` | The name of the OIDC client in Keycloak for KLI |
+| keycloak.kliCI.oidcClient.clientId | string | `"kai-kli-ci-oidc"` | The name of the OIDC client in Keycloak for KLI CI |
+| keycloak.kliCI.oidcClient.secret | string | `""` | The secret for the OIDC client that will be created on Keycloak first startup |
 | keycloak.kong.oidcClient.clientId | string | `"kong-oidc"` | The name of the OIDC client in Keycloak for Kong |
 | keycloak.kong.oidcClient.secret | string | `""` | The secret for the OIDC client that will be created on Keycloak first startup |
 | keycloak.kong.oidcPluginName | string | `"oidc"` | The name of the OIDC Kong plugin that should be installed on Kong ingress controller |
@@ -218,6 +225,7 @@
 | nats.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | nats.image.repository | string | `"nats"` | Image repository |
 | nats.image.tag | string | `"2.8.4"` | Image tag |
+| nats.imagePullSecrets | list | `[]` | Image pull secrets |
 | nats.jetstream.memStorage.enabled | bool | `true` | Whether to enable memory storage for Jetstream |
 | nats.jetstream.memStorage.size | string | `"2Gi"` | Memory storage max size for JetStream |
 | nats.jetstream.storage.enabled | bool | `true` | Whether to enable a PersistentVolumeClaim for Jetstream |
@@ -238,10 +246,17 @@
 | nats.logging.logtime | bool | `true` | Timestamp log entries |
 | nats.logging.trace | bool | `false` | Whether to enable logging trace mode |
 | nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| nats.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| nats.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| nats.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.2.0-develop.79"` | Image tag |
+| natsManager.image.tag | string | `"0.2.0-release.1"` | Image tag |
+| natsManager.imagePullSecrets | list | `[]` | Image pull secrets |
+| natsManager.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| natsManager.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| natsManager.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | prometheus.alertmanager.enabled | bool | `true` | Whether to enable alertmanager |
 | prometheus.alertmanager.image.tag | string | `"v0.26.0"` | alertmanager server version |
 | prometheus.alertmanager.persistence.accessModes | list | `["ReadWriteOnce"]` | Access mode for the volume |

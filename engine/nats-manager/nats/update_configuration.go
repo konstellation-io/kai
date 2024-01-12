@@ -6,7 +6,7 @@ import (
 )
 
 func (n *NatsClient) UpdateConfiguration(keyValueStore string, keyValueConfig map[string]string) error {
-	n.logger.Debugf("Updating config to key-value store %q", keyValueStore)
+	n.logger.V(2).Info("Updating config to key-value store", "key-value-store", keyValueStore)
 
 	kvStoreBucket, err := n.js.KeyValue(keyValueStore)
 	if err != nil {

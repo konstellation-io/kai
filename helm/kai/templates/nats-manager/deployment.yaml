@@ -16,6 +16,11 @@ spec:
       annotations:
         helm.sh/restart-deployment: {{ randAlphaNum 5 | quote }}
     spec:
+      {{- with .Values.keycloak.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nats-manager.serviceAccountName" . }}
       containers:
         - name: nats-manager
           image: {{ .Values.natsManager.image.repository }}:{{ .Values.natsManager.image.tag }}

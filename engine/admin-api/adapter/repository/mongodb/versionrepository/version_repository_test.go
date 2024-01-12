@@ -147,6 +147,39 @@ func (s *VersionRepositoryTestSuite) TestGetByTagNotFound() {
 	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
 
+func (s *VersionRepositoryTestSuite) TestGetLatest() {
+	testVersion := &entity.Version{
+		Tag: versionTag,
+	}
+
+	testVersion2 := &entity.Version{
+		Tag: "v2.0.0",
+	}
+
+	_, err := s.versionRepo.Create(creatorID, productID, testVersion)
+	s.Require().NoError(err)
+
+	ver, err := s.versionRepo.GetLatest(context.Background(), productID)
+	s.Require().NoError(err)
+
+	s.Equal(testVersion.Tag, ver.Tag)
+
+	_, err = s.versionRepo.Create(creatorID, productID, testVersion2)
+	s.Require().NoError(err)
+
+	ver, err = s.versionRepo.GetLatest(context.Background(), productID)
+	s.Require().NoError(err)
+
+	s.Equal(testVersion2.Tag, ver.Tag)
+}
+
+func (s *VersionRepositoryTestSuite) TestGetLatestNotFound() {
+	_, err := s.versionRepo.GetLatest(context.Background(), productID)
+	s.Require().Error(err)
+
+	s.True(errors.Is(err, version.ErrVersionNotFound))
+}
+
 func (s *VersionRepositoryTestSuite) TestUpdate() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
