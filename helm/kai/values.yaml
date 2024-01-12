@@ -115,9 +115,19 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.2.0-develop.82
+    tag: 0.2.0-develop.83
     # -- Image pull policy
     pullPolicy: IfNotPresent
+  # -- Image pull secrets
+  imagePullSecrets: []
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
   # -- Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName`
   host: api.kai.local
   ingress:
@@ -168,17 +178,11 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.2.0-develop.82
+    tag: 0.2.0-develop.83
     # -- Image pull policy
     pullPolicy: IfNotPresent
-  imageBuilder:
-    image:
-      # -- Image repository for image builder's jobs
-      repository: gcr.io/kaniko-project/executor
-      # -- Image tag for image builder's jobs
-      tag: v1.18.0
-      # -- Image pull policy for image builder's jobs
-    pullPolicy: IfNotPresent
+  # -- Image pull secrets
+  imagePullSecrets: []
   serviceAccount:
     # -- Whether to create the Service Account
     create: true
@@ -187,6 +191,14 @@ k8sManager:
     name: ""
     # -- The Service Account annotations
     annotations: {}
+  imageBuilder:
+    image:
+      # -- Image repository for image builder's jobs
+      repository: gcr.io/kaniko-project/executor
+      # -- Image tag for image builder's jobs
+      tag: v1.18.0
+      # -- Image pull policy for image builder's jobs
+    pullPolicy: IfNotPresent
   processes:
     triggers:
       ingress:
@@ -421,6 +433,15 @@ nats:
     tag: 2.8.4
     # -- Image pull policy
     pullPolicy: IfNotPresent
+  # -- Image pull secrets
+  imagePullSecrets: []
+  serviceAccount:
+    # -- Specifies whether a service account should be created
+    create: true
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+    name: ""
   client:
     # -- Port for client connections
     port: 4222
@@ -505,9 +526,18 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.2.0-develop.82
+    tag: 0.2.0-develop.83
     # -- Image pull policy
     pullPolicy: IfNotPresent
+  # -- Image pull secrets
+  imagePullSecrets: []
+  serviceAccount:
+    # -- Specifies whether a service account should be created
+    create: true
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+    name: ""
 registry:
   image:
     # -- Image repository
@@ -519,6 +549,7 @@ registry:
   # -- Image pull secrets
   imagePullSecrets: []
   deploymentStrategy:
+    # Deployment Strategy
     type: Recreate
   serviceAccount:
     # -- Specifies whether a service account should be created
