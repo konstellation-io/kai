@@ -37,7 +37,7 @@ func (s *ClientTestSuite) SetupSuite() {
 		Image:        "nats:2.8.1",
 		Cmd:          []string{"-js"},
 		ExposedPorts: []string{"4222/tcp", "8222/tcp"},
-		WaitingFor: wait.ForAll(wait.ForLog("Server is ready"), wait.ForExposedPort()).
+		WaitingFor: wait.ForAll(wait.ForLog("Server is ready")).
 			WithDeadline(time.Minute * 3),
 	}
 
