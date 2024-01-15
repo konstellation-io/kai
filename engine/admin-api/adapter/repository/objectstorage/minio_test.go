@@ -4,11 +4,13 @@ package objectstorage_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"path"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -165,8 +167,28 @@ func (s *ObjectStorageSuite) TestCreateBucketPolicy() {
 	policy, err := s.adminClient.InfoCannedPolicy(ctx, policyName)
 	s.Require().NoError(err)
 
+	// Unmarshal the policy into a map to make it easier to work with
+	var policyMap map[string]interface{}
+	err = json.Unmarshal(policy, &policyMap)
+	s.Require().NoError(err)
+
+	// Sort the "Resource" array within each "Statement" block
+	if statements, ok := policyMap["Statement"].([]interface{}); ok {
+		for _, statement := range statements {
+			if statementMap, ok := statement.(map[string]interface{}); ok {
+				if resources, ok := statementMap["Resource"].([]string); ok {
+					sort.Strings(resources)
+				}
+			}
+		}
+	}
+
+	// Marshal the sorted policy back to a JSON string
+	sortedPolicyBytes, err := json.MarshalIndent(policyMap, "", " ")
+	s.Require().NoError(err)
+
 	g := goldie.New(s.T())
-	g.Assert(s.T(), "CreateBucketPolicy", policy)
+	g.Assert(s.T(), "CreateBucketPolicy", sortedPolicyBytes)
 }
 
 func (s *ObjectStorageSuite) TestCreateBucketPolicy_InvalidResourceInPolicy() {
