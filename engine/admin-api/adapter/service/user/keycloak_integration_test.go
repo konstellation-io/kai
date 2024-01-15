@@ -47,7 +47,7 @@ func (s *KeycloakSuite) SetupSuite() {
 		},
 		ExposedPorts: []string{"8080/tcp"},
 		WaitingFor: wait.ForAll(wait.ForLog("Listening on:"), wait.ForExposedPort()).
-			WithDeadline(time.Minute * 3),
+			WithDeadline(time.Minute * 5),
 		Env: map[string]string{
 			"KEYCLOAK_ADMIN":          _adminUser,
 			"KEYCLOAK_ADMIN_PASSWORD": _adminPassword,
