@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -41,7 +42,8 @@ func (s *ProductRepositorySuite) SetupSuite() {
 			"MONGO_INITDB_ROOT_USERNAME": "root",
 			"MONGO_INITDB_ROOT_PASSWORD": "root",
 		},
-		WaitingFor: wait.ForLog("MongoDB starting"),
+		WaitingFor: wait.ForAll(wait.ForLog("MongoDB starting"), wait.ForExposedPort()).
+			WithDeadline(time.Minute * 3),
 	}
 
 	mongoDBContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{

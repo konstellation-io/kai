@@ -6,6 +6,7 @@ import (
 	"context"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/docker/go-connections/nat"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -49,7 +50,8 @@ func (s *RedisPredictionRepositorySuite) SetupSuite() {
 			redisConfContainerPath,
 		},
 		ExposedPorts: []string{redisExposedPort},
-		WaitingFor:   wait.ForLog("Ready to accept connections tcp"),
+		WaitingFor: wait.ForAll(wait.ForLog("Ready to accept connections tcp"), wait.ForExposedPort()).
+			WithDeadline(time.Minute * 3),
 		Mounts: []testcontainers.ContainerMount{
 			{
 				Source: testcontainers.DockerBindMountSource{

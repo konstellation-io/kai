@@ -11,6 +11,7 @@ import (
 	"path"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -52,8 +53,9 @@ func (s *ObjectStorageSuite) SetupSuite() {
 			"server",
 			"/data",
 		},
-		Env:        map[string]string{},
-		WaitingFor: wait.ForLog("Status:         1 Online, 0 Offline."),
+		Env: map[string]string{},
+		WaitingFor: wait.ForAll(wait.ForLog("Status:         1 Online, 0 Offline."), wait.ForExposedPort()).
+			WithDeadline(time.Minute * 3),
 	}
 
 	minioContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
