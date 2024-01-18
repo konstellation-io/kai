@@ -101,7 +101,7 @@ func (r *mutationResolver) RegisterPublicProcess(ctx context.Context, input Regi
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
+	v, _, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 	if err != nil {
 		r.logger.Error(err, "Unable to start version",
 			"productID", input.ProductID,

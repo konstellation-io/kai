@@ -15,12 +15,10 @@ import (
 func (h *Handler) Start(
 	ctx context.Context,
 	user *entity.User,
-	productID,
-	versionTag,
-	comment string,
-) (*entity.Version, error) {
+	productID, versionTag, comment string,
+) (*entity.Version, chan *entity.Version, error) {
 	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	h.logger.Info("Starting version", "userEmail", user.Email, "versionTag", versionTag, "productID", productID)
@@ -29,21 +27,21 @@ func (h *Handler) Start(
 
 	product, err := h.productRepo.GetByID(ctx, productID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	version, err := h.versionRepo.GetByTag(ctx, productID, versionTag)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if !version.CanBeStarted() {
-		return nil, ErrVersionCannotBeStarted
+		return nil, nil, ErrVersionCannotBeStarted
 	}
 
 	if version.Status == entity.VersionStatusCritical {
 		if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartCriticalVersion); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
@@ -51,18 +49,29 @@ func (h *Handler) Start(
 
 	err = h.versionRepo.SetStatus(ctx, productID, version.Tag, entity.VersionStatusStarting)
 	if err != nil {
-		return nil, fmt.Errorf("setting version status to %q: %w", entity.VersionStatusStarting, err)
+		return nil, nil, fmt.Errorf("setting version status to %q: %w", entity.VersionStatusStarting, err)
 	}
 
+	responseCh := make(chan *entity.Version, 1)
+
 	go func() {
+		defer func() {
+			responseCh <- version
+			close(responseCh)
+		}()
+
 		err = h.createVersionResources(user, product, version, comment, compensations)
 		if err != nil {
 			h.handleStartVersionError(productID, version, err, compensations)
+			version.SetErrorStatus(err)
+
 			return
 		}
+
+		version.SetStartedStatus()
 	}()
 
-	return version, nil
+	return version, responseCh, nil
 }
 
 func (h *Handler) createVersionResources(
@@ -179,6 +188,8 @@ func (h *Handler) handleStartVersionError(
 		return
 	}
 
+	version.SetErrorStatus(startError)
+
 	err = h.versionRepo.SetErrorStatusWithError(ctx, productID, version.Tag, startError.Error())
 	if err != nil {
 		h.logger.Error(err, "Updating version with error", "productID", productID, "versionTag", version.Tag)
@@ -186,6 +197,8 @@ func (h *Handler) handleStartVersionError(
 }
 
 func (h *Handler) handleCriticalError(ctx context.Context, productID string, version *entity.Version, err error) {
+	version.SetErrorStatus(err)
+
 	err = h.versionRepo.SetCriticalStatusWithError(ctx, productID, version.Tag, err.Error())
 	if err != nil {
 		h.logger.Error(err,
