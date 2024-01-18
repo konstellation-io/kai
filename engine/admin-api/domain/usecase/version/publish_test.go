@@ -5,8 +5,6 @@ package version_test
 import (
 	"context"
 	"errors"
-	"sync"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
@@ -33,20 +31,27 @@ func (s *versionSuite) TestPublish_OK() {
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
 
-	s.versionService.EXPECT().Publish(ctx, product.ID, vers.Tag).Return(expectedURLs, nil)
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(expectedURLs, nil)
 	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
-	s.productRepo.EXPECT().Update(ctx, product).Return(nil)
+	s.productRepo.EXPECT().Update(gomock.Any(), product).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterPublishAction(user.Email, product.ID, vers, "publishing").Return(nil)
 
 	// WHEN publishing the version
-	urls, err := s.handler.Publish(ctx, user, product.ID, versionTag, "publishing")
+	publishingVersion, notifyCh, err := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: versionTag,
+		Comment:    "publishing",
+	})
 
-	// THEN the version status is published and the published triggers urls are returned
+	// THEN the version status is publishing
 	s.Require().NoError(err)
-	s.Assert().Equal(expectedURLs, urls)
+	s.Assert().Equal(entity.VersionStatusPublishing, publishingVersion.Status)
 
-	s.Assert().Equal(user.Email, *vers.PublicationAuthor)
-	s.Assert().Equal(entity.VersionStatusPublished, vers.Status)
+	publishedVersion, ok := <-notifyCh
+	s.Require().True(ok)
+
+	s.Assert().Equal(user.Email, *publishedVersion.PublicationAuthor)
+	s.Assert().Equal(entity.VersionStatusPublished, publishedVersion.Status)
 }
 
 func (s *versionSuite) TestPublishing_ErrorUserNotAuthorized() {
@@ -61,7 +66,11 @@ func (s *versionSuite) TestPublishing_ErrorUserNotAuthorized() {
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(expectedError)
 
 	// WHEN publishing the version
-	_, err := s.handler.Publish(ctx, user, product.ID, expectedVer.Tag, "publishing")
+	_, _, err := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: expectedVer.Tag,
+		Comment:    "publishing",
+	})
 
 	// THEN an error is returned
 	s.Assert().ErrorIs(err, expectedError)
@@ -81,7 +90,11 @@ func (s *versionSuite) TestPublish_ErrorVersionNotFound() {
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, expectedVer.Tag).Return(nil, expectedError)
 
 	// WHEN unpublishing the version
-	_, err := s.handler.Publish(ctx, user, product.ID, expectedVer.Tag, "publishing")
+	_, _, err := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: expectedVer.Tag,
+		Comment:    "publishing",
+	})
 
 	// THEN an error is returned
 	s.Assert().ErrorIs(err, expectedError)
@@ -102,7 +115,11 @@ func (s *versionSuite) TestPublish_ErrorVersionCannotBePublished() {
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
 
 	// WHEN unpublishing the version
-	_, err := s.handler.Publish(ctx, user, product.ID, versionTag, "publishing")
+	_, _, err := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: versionTag,
+		Comment:    "publishing",
+	})
 
 	// THEN an error is returned
 	s.Assert().ErrorIs(err, version.ErrVersionCannotBePublished)
@@ -124,7 +141,11 @@ func (s *versionSuite) TestPublish_ProductWithVersionAlreadyPublished() {
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 
 	// WHEN publishing the version
-	_, err := s.handler.Publish(ctx, user, product.ID, testVersion, "publishing")
+	_, _, err := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: testVersion,
+		Comment:    "publishing",
+	})
 
 	// THEN an error is returned
 	s.Assert().ErrorIs(err, version.ErrProductAlreadyPublished)
@@ -146,13 +167,19 @@ func (s *versionSuite) TestPublish_ErrorPublishingVersion() {
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 
-	s.versionService.EXPECT().Publish(ctx, product.ID, vers.Tag).Return(nil, expectedError)
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil, expectedError)
 
-	// WHEN publishing the version
-	_, err := s.handler.Publish(ctx, user, product.ID, vers.Tag, "publishing")
+	// WHEN no error in the initial return (the versionService publish is executed if a goroutine)
+	_, notifyCh, _ := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: vers.Tag,
+		Comment:    "publishing",
+	})
 
-	// THEN an error is returned
-	s.Assert().ErrorIs(err, expectedError)
+	failedVersion, ok := <-notifyCh
+	s.Require().True(ok)
+
+	s.Equal(entity.VersionStatusStarted, failedVersion.Status)
 }
 
 func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
@@ -173,14 +200,11 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
 
 	expectedError := errors.New("error registering user activity")
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
 
-	s.versionService.EXPECT().Publish(ctx, product.ID, vers.Tag).Return(expectedURLs, nil)
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(expectedURLs, nil)
 
 	versionMatcher := newVersionMatcher(vers)
 
@@ -190,19 +214,20 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
 	s.userActivityInteractor.EXPECT().RegisterPublishAction(user.Email, product.ID, gomock.Any(), "publishing").
 		Return(expectedError)
 
-	s.versionService.EXPECT().Unpublish(gomock.Any(), product.ID, versionMatcher).
-		DoAndReturn(func(_, _, _ interface{}) error {
-			wg.Done()
-			return nil
-		})
+	s.versionService.EXPECT().Unpublish(gomock.Any(), product.ID, versionMatcher).Return(nil)
 	// WHEN publishing the version
-	urls, err := s.handler.Publish(ctx, user, product.ID, vers.Tag, "publishing")
+	v, notifyCh, err := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: vers.Tag,
+		Comment:    "publishing",
+	})
 
-	// THEN an error is returned
-	s.Assert().ErrorIs(err, expectedError)
-	s.Assert().Nil(urls)
+	// THEN no error is returned (error happens in goroutine)
+	s.Require().NoError(err)
+	s.Equal(entity.VersionStatusPublishing, v.Status)
 
-	s.Require().NoError(testhelpers.WaitOrTimeout(&wg, 1*time.Second))
+	failedVersion, ok := <-notifyCh
+	s.Require().True(ok)
 
-	s.Assert().Equal(entity.VersionStatusStarted, vers.Status)
+	s.Assert().Equal(entity.VersionStatusStarted, failedVersion.Status)
 }

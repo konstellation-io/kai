@@ -32,7 +32,7 @@ type Mutation {
   createVersion(input: CreateVersionInput!): Version!
   startVersion(input: StartVersionInput!): Version!
   stopVersion(input: StopVersionInput!): Version!
-  publishVersion(input: PublishVersionInput!): [PublishedTrigger!]!
+  publishVersion(input: PublishVersionInput!): Version!
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
@@ -104,6 +104,7 @@ input PublishVersionInput {
   versionTag: String!
   comment: String!
   productID: ID!
+  Force: Boolean!
 }
 
 input UnpublishVersionInput {
@@ -136,6 +137,7 @@ type Product {
   description: String!
   creationAuthor: String!
   creationDate: String!
+  publishedVersion: String!
 }
 
 type Version {
