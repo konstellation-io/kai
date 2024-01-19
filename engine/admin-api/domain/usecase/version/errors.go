@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/pkg/compensator"
 )
 
 const (
@@ -78,4 +79,40 @@ func (h *Handler) handleVersionServiceActionError(
 	vers.Status = entity.VersionStatusError
 	vers.Error = actionErr.Error()
 	notifyStatusCh <- vers
+}
+
+func (h *Handler) handleAsyncVersionError(
+	compensations *compensator.Compensator,
+	productID string,
+	version *entity.Version,
+	versionError error,
+) {
+	h.logger.Error(versionError, "Error with version", "productID", productID, "versionTag", version.Tag)
+
+	ctx := context.Background()
+
+	err := compensations.Execute()
+	if err != nil {
+		h.handleCriticalError(ctx, productID, version, err)
+		return
+	}
+
+	version.SetErrorStatus(versionError)
+
+	err = h.versionRepo.SetErrorStatusWithError(ctx, productID, version.Tag, versionError.Error())
+	if err != nil {
+		h.logger.Error(err, "Updating version with error", "productID", productID, "versionTag", version.Tag)
+	}
+}
+
+func (h *Handler) handleCriticalError(ctx context.Context, productID string, version *entity.Version, criticalError error) {
+	version.SetErrorStatus(criticalError)
+
+	err := h.versionRepo.SetCriticalStatusWithError(ctx, productID, version.Tag, criticalError.Error())
+	if err != nil {
+		h.logger.Error(err,
+			"Error setting status version",
+			"productID", productID, "versionTag", version.Tag, "wantedStatus", entity.VersionStatusCritical,
+		)
+	}
 }

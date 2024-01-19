@@ -153,21 +153,26 @@ func (s *versionSuite) TestPublish_ProductWithVersionAlreadyPublished() {
 
 func (s *versionSuite) TestPublish_ErrorPublishingVersion() {
 	// GIVEN a valid user and a published version, but error during publishing
-	ctx := context.Background()
-	user := testhelpers.NewUserBuilder().Build()
-	vers := testhelpers.NewVersionBuilder().
-		WithStatus(entity.VersionStatusStarted).
-		Build()
+	var (
+		ctx  = context.Background()
+		user = testhelpers.NewUserBuilder().Build()
+		vers = testhelpers.NewVersionBuilder().
+			WithStatus(entity.VersionStatusStarted).
+			Build()
 
-	product := testhelpers.NewProductBuilder().Build()
+		product = testhelpers.NewProductBuilder().Build()
 
-	expectedError := errors.New("publish error in k8s service")
+		expectedError = errors.New("publish error in k8s service")
+		errStrMatcher = newStringContainsMatcher(expectedError.Error())
+	)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 
 	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil, expectedError)
+
+	s.versionRepo.EXPECT().SetErrorStatusWithError(gomock.Any(), product.ID, vers.Tag, errStrMatcher).Return(nil)
 
 	// WHEN no error in the initial return (the versionService publish is executed if a goroutine)
 	_, notifyCh, _ := s.handler.Publish(ctx, user, version.PublishParams{
@@ -179,7 +184,7 @@ func (s *versionSuite) TestPublish_ErrorPublishingVersion() {
 	failedVersion, ok := <-notifyCh
 	s.Require().True(ok)
 
-	s.Equal(entity.VersionStatusStarted, failedVersion.Status)
+	s.Equal(entity.VersionStatusError, failedVersion.Status)
 }
 
 func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
@@ -199,6 +204,7 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
 	}
 
 	expectedError := errors.New("error registering user activity")
+	errStrMatcher := newStringContainsMatcher(expectedError.Error())
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
@@ -222,6 +228,8 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
 		Comment:    "publishing",
 	})
 
+	s.versionRepo.EXPECT().SetErrorStatusWithError(gomock.Any(), product.ID, vers.Tag, errStrMatcher).Return(nil)
+
 	// THEN no error is returned (error happens in goroutine)
 	s.Require().NoError(err)
 	s.Equal(entity.VersionStatusPublishing, v.Status)
@@ -229,5 +237,5 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
 	failedVersion, ok := <-notifyCh
 	s.Require().True(ok)
 
-	s.Assert().Equal(entity.VersionStatusStarted, failedVersion.Status)
+	s.Assert().Equal(entity.VersionStatusError, failedVersion.Status)
 }

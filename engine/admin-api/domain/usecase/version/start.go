@@ -62,7 +62,7 @@ func (h *Handler) Start(
 
 		err = h.createVersionResources(user, product, version, comment, compensations)
 		if err != nil {
-			h.handleStartVersionError(productID, version, err, compensations)
+			h.handleAsyncVersionError(compensations, productID, version, err)
 			version.SetErrorStatus(err)
 
 			return
@@ -170,42 +170,6 @@ func (h *Handler) updateKeyValueConfigurations(
 	}
 
 	return nil
-}
-
-func (h *Handler) handleStartVersionError(
-	productID string,
-	version *entity.Version,
-	startError error,
-	compensations *compensator.Compensator,
-) {
-	h.logger.Error(startError, "Error starting version", "productID", productID, "versionTag", version.Tag)
-
-	ctx := context.Background()
-
-	err := compensations.Execute()
-	if err != nil {
-		h.handleCriticalError(ctx, productID, version, err)
-		return
-	}
-
-	version.SetErrorStatus(startError)
-
-	err = h.versionRepo.SetErrorStatusWithError(ctx, productID, version.Tag, startError.Error())
-	if err != nil {
-		h.logger.Error(err, "Updating version with error", "productID", productID, "versionTag", version.Tag)
-	}
-}
-
-func (h *Handler) handleCriticalError(ctx context.Context, productID string, version *entity.Version, err error) {
-	version.SetErrorStatus(err)
-
-	err = h.versionRepo.SetCriticalStatusWithError(ctx, productID, version.Tag, err.Error())
-	if err != nil {
-		h.logger.Error(err,
-			"Error setting status version",
-			"productID", productID, "versionTag", version.Tag, "wantedStatus", entity.VersionStatusCritical,
-		)
-	}
 }
 
 func (h *Handler) getWorkflowConfigurations(

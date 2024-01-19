@@ -40,6 +40,7 @@ func (h *Handler) Publish(
 		return nil, nil, err
 	}
 
+	// if force, unpublish published version and publish the new one
 	if product.HasVersionPublished() {
 		return nil, nil, ErrProductAlreadyPublished
 	}
@@ -49,15 +50,13 @@ func (h *Handler) Publish(
 		return nil, nil, err
 	}
 
-	if v.Status != entity.VersionStatusStarted {
+	if v.Status != entity.VersionStatusStarted && !params.Force {
 		return nil, nil, ErrVersionCannotBePublished
 	}
 
 	compensations := compensator.New()
 
 	v.SetPublishingStatus(user.Email)
-
-	compensations.AddCompensation(func() error { v.SetStartedStatus(); return nil })
 
 	notifyCh := make(chan *entity.Version, 1)
 
@@ -66,7 +65,7 @@ func (h *Handler) Publish(
 
 		err := h.publishVersion(compensations, user, product, v, params.Comment)
 		if err != nil {
-			h.handlePublicationError(err, compensations, product.ID, v)
+			h.handleAsyncVersionError(compensations, product.ID, v, err)
 		}
 
 		notifyCh <- v
@@ -139,22 +138,5 @@ func (h *Handler) removeProductPublishedVersionFunc(product *entity.Product) com
 		product.RemovePublishedVersion()
 
 		return h.productRepo.Update(context.Background(), product)
-	}
-}
-
-func (h *Handler) handlePublicationError(
-	publicationError error,
-	compensations *compensator.Compensator,
-	productID string,
-	version *entity.Version,
-) {
-	h.logger.Error(publicationError, "Error during version publication, executing compensations...",
-		"product", productID,
-		"version", version.Tag,
-	)
-
-	err := compensations.Execute()
-	if err != nil {
-		h.handleCriticalError(context.Background(), productID, version, err)
 	}
 }

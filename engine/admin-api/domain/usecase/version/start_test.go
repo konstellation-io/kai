@@ -408,5 +408,6 @@ func (s *versionSuite) getTestKeyValueConfigurations(
 			Configuration: process.Config,
 		},
 	}
+
 	return configurationsToUpdate
 }
