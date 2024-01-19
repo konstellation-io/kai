@@ -63,7 +63,7 @@ func (h *Handler) Publish(
 	go func() {
 		defer close(notifyCh)
 
-		err := h.publishVersion(compensations, user, product, v, params.Comment)
+		err := h.publishVersion(compensations, user, product, v, params.Comment, params.Force)
 		if err != nil {
 			h.handleAsyncVersionError(compensations, product.ID, v, err)
 		}
@@ -80,14 +80,32 @@ func (h *Handler) publishVersion(
 	product *entity.Product,
 	version *entity.Version,
 	comment string,
+	force bool,
 ) error {
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration(config.VersionStatusTimeoutKey))
 	defer cancel()
+
+	if force && version.Status != entity.VersionStatusStarted {
+		_, startNotifyCh, err := h.Start(ctx, user, product.ID, version.Tag, comment)
+		if err != nil {
+			return fmt.Errorf("start version: %w", err)
+		}
+
+		startedVersion := <-startNotifyCh
+
+		if startedVersion.Status == entity.VersionStatusError || startedVersion.Status == entity.VersionStatusCritical {
+			return fmt.Errorf("starting version: %s", startedVersion.Error) // TODO: check if this wrap is necessary
+		}
+	}
 
 	triggerURLs, err := h.k8sService.Publish(ctx, product.ID, version.Tag)
 	if err != nil {
 		return err
 	}
+
+	//compensations.AddCompensation(func() error {
+	//	err := h.k8sService.Unpublish(ctx, product.ID, version)
+	//})
 
 	_ = triggerURLs
 

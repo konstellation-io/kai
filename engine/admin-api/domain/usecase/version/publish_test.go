@@ -100,7 +100,7 @@ func (s *versionSuite) TestPublish_ErrorVersionNotFound() {
 	s.Assert().ErrorIs(err, expectedError)
 }
 
-func (s *versionSuite) TestPublish_ErrorVersionCannotBePublished() {
+func (s *versionSuite) TestPublish_ErrorVersionCannotBePublished_NoForce() {
 	// GIVEN a valid user and a version that cannot be unpublished
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
@@ -125,7 +125,7 @@ func (s *versionSuite) TestPublish_ErrorVersionCannotBePublished() {
 	s.Assert().ErrorIs(err, version.ErrVersionCannotBePublished)
 }
 
-func (s *versionSuite) TestPublish_ProductWithVersionAlreadyPublished() {
+func (s *versionSuite) TestPublish_ProductWithVersionAlreadyPublished_NoForce() {
 	// GIVEN a valid user and a product with a published version
 	var (
 		ctx         = context.Background()
@@ -238,4 +238,63 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
 	s.Require().True(ok)
 
 	s.Assert().Equal(entity.VersionStatusError, failedVersion.Status)
+}
+
+func (s *versionSuite) TestPublish_VersionIsNotStarted_Forced() {
+	// GIVEN a valid user and a non started version
+	var (
+		ctx     = context.Background()
+		user    = testhelpers.NewUserBuilder().Build()
+		product = testhelpers.NewProductBuilder().Build()
+		vers    = testhelpers.NewVersionBuilder().
+			WithTag(versionTag).
+			WithStatus(entity.VersionStatusCreated).
+			Build()
+	)
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
+
+	s.mockStartVersion(user, product, vers)
+
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil, nil)
+	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
+	s.productRepo.EXPECT().Update(gomock.Any(), product).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterPublishAction(user.Email, product.ID, vers, "publishing").Return(nil)
+
+	// WHEN publish the version with the param Force set to true
+	_, notifyCh, err := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: versionTag,
+		Comment:    "publishing",
+		Force:      true,
+	})
+
+	// THEN an error is returned
+	s.Require().NoError(err)
+
+	startedVersion, ok := <-notifyCh
+	s.Require().True(ok)
+
+	s.Equal(entity.VersionStatusPublished, startedVersion.Status)
+}
+
+func (s *versionSuite) mockStartVersion(user *entity.User, product *entity.Product, vers *entity.Version) {
+	versionStreamResources := s.getVersionStreamingResources(vers)
+	keyValueStoreResources := versionStreamResources.KeyValueStores
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActStartVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(gomock.Any(), product.ID, versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(gomock.Any(), product.ID).Times(1).Return(product, nil)
+
+	s.natsManagerService.EXPECT().CreateStreams(gomock.Any(), product.ID, vers).Return(versionStreamResources.Streams, nil)
+	s.natsManagerService.EXPECT().CreateObjectStores(gomock.Any(), product.ID, vers).Return(versionStreamResources.ObjectStores, nil)
+	s.natsManagerService.EXPECT().CreateVersionKeyValueStores(gomock.Any(), product.ID, vers).Return(keyValueStoreResources, nil)
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), product.ID, vers.Tag, entity.VersionStatusStarting).Return(nil)
+
+	// goroutine calls
+	s.versionService.EXPECT().Start(gomock.Any(), product, vers, versionStreamResources).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), product.ID, vers.Tag, entity.VersionStatusStarted).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStartAction(user.Email, product.ID, vers, gomock.Any()).Return(nil)
 }

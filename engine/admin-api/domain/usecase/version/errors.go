@@ -19,7 +19,7 @@ var (
 	ErrVersionNotFound            = errors.New("error version not found")
 	ErrVersionDuplicated          = errors.New("error version duplicated")
 	ErrUserNotAuthorized          = errors.New("error user not authorized")
-	ErrVersionCannotBeStarted     = errors.New("error version cannot be started, status must be 'created', 'stopped' or 'error'")
+	ErrVersionCannotBeStarted     = errors.New("error version cannot be started, status must be 'created', 'stopped', 'publishing' or 'error'")
 	ErrVersionCannotBeStopped     = errors.New("error version cannot be stopped, status must be 'started'")
 	ErrVersionCannotBePublished   = errors.New("error publishing version, status must be 'started'")
 	ErrVersionCannotBeUnpublished = errors.New("error unpublishing version, status must be 'published'")

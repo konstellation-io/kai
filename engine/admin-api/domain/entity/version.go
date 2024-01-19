@@ -75,7 +75,7 @@ func (v *Version) UnsetPublishStatus() {
 
 func (v *Version) CanBeStarted() bool {
 	switch v.Status {
-	case VersionStatusCreated, VersionStatusStopped, VersionStatusError, VersionStatusCritical:
+	case VersionStatusCreated, VersionStatusStopped, VersionStatusError, VersionStatusCritical, VersionStatusPublishing:
 		return true
 	default:
 		return false
