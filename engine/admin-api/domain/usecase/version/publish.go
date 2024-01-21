@@ -14,6 +14,8 @@ import (
 
 var (
 	ErrProductAlreadyPublished = errors.New("product already has a published version")
+	ErrVersionAlreadyPublished = errors.New("version already published")
+	ErrVersionBeingPublished   = errors.New("version is already being published")
 )
 
 type PublishParams struct {
@@ -43,6 +45,10 @@ func (h *Handler) Publish(
 	v, err := h.versionRepo.GetByTag(ctx, params.ProductID, params.VersionTag)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if v.Status == entity.VersionStatusPublished {
+		return nil, nil, ErrVersionAlreadyPublished
 	}
 
 	if !params.Force {

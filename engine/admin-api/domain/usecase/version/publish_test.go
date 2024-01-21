@@ -329,6 +329,62 @@ func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced() {
 	s.Equal(entity.VersionStatusPublished, startedVersion.Status)
 }
 
+func (s *versionSuite) TestPublish_FailsIfTheVersionIsAlreadyPublished() {
+	// GIVEN a valid user and a non started version
+	var (
+		ctx     = context.Background()
+		user    = testhelpers.NewUserBuilder().Build()
+		product = testhelpers.NewProductBuilder().
+			Build()
+		vers = testhelpers.NewVersionBuilder().
+			WithTag(versionTag).
+			WithStatus(entity.VersionStatusPublished).
+			Build()
+	)
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
+
+	// WHEN publish the version with the param Force set to true
+	_, _, err := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: versionTag,
+		Comment:    "publishing",
+	})
+
+	// THEN an error is returned
+	s.Require().ErrorIs(err, version.ErrVersionAlreadyPublished)
+}
+
+func (s *versionSuite) TestPublish_FailsIfTheVersionIsBeingPublished() {
+	// GIVEN a valid user and a non started version
+	var (
+		ctx     = context.Background()
+		user    = testhelpers.NewUserBuilder().Build()
+		product = testhelpers.NewProductBuilder().
+			Build()
+		vers = testhelpers.NewVersionBuilder().
+			WithTag(versionTag).
+			WithStatus(entity.VersionStatusPublishing).
+			Build()
+	)
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
+
+	// WHEN publish the version with the param Force set to true
+	_, _, err := s.handler.Publish(ctx, user, version.PublishParams{
+		ProductID:  product.ID,
+		VersionTag: versionTag,
+		Comment:    "publishing",
+	})
+
+	// THEN an error is returned
+	s.Require().ErrorIs(err, version.ErrVersionBeingPublished)
+}
+
 func (s *versionSuite) mockStartVersion(user *entity.User, product *entity.Product, vers *entity.Version) {
 	versionStreamResources := s.getVersionStreamingResources(vers)
 	keyValueStoreResources := versionStreamResources.KeyValueStores

@@ -104,7 +104,7 @@ input PublishVersionInput {
   versionTag: String!
   comment: String!
   productID: ID!
-  Force: Boolean!
+  force: Boolean!
 }
 
 input UnpublishVersionInput {

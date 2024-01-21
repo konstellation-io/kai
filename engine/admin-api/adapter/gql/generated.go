@@ -1170,7 +1170,7 @@ input PublishVersionInput {
   versionTag: String!
   comment: String!
   productID: ID!
-  Force: Boolean!
+  force: Boolean!
 }
 
 input UnpublishVersionInput {
@@ -8190,7 +8190,7 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"versionTag", "comment", "productID", "Force"}
+	fieldsInOrder := [...]string{"versionTag", "comment", "productID", "force"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8224,10 +8224,10 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 				return it, err
 			}
 			it.ProductID = data
-		case "Force":
+		case "force":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Force"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("force"))
 			data, err := ec.unmarshalNBoolean2bool(ctx, v)
 			if err != nil {
 				return it, err
