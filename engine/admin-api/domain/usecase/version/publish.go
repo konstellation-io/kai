@@ -40,23 +40,37 @@ func (h *Handler) Publish(
 		return nil, nil, err
 	}
 
-	// if force, unpublish published version and publish the new one
-	if product.HasVersionPublished() {
-		return nil, nil, ErrProductAlreadyPublished
-	}
-
 	v, err := h.versionRepo.GetByTag(ctx, params.ProductID, params.VersionTag)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if v.Status != entity.VersionStatusStarted && !params.Force {
-		return nil, nil, ErrVersionCannotBePublished
+	if !params.Force {
+		if product.HasVersionPublished() {
+			return nil, nil, ErrProductAlreadyPublished
+		}
+
+		if v.Status != entity.VersionStatusStarted {
+			return nil, nil, ErrVersionIsNotStarted
+		}
 	}
 
-	compensations := compensator.New()
+	//if product.HasVersionPublished() {
+	//	if !params.Force {
+	//		return nil, nil, ErrProductAlreadyPublished
+	//	}
+	//
+	//	_, err := h.Unpublish(ctx, user, params.ProductID, *product.PublishedVersion, params.Comment)
+	//	if err != nil {
+	//		return nil, nil, fmt.Errorf("unpublishing previous version: %w", err)
+	//	}
+	//}
+	//
+	//if v.Status != entity.VersionStatusStarted && !params.Force {
+	//	return nil, nil, ErrVersionIsNotStarted
+	//}
 
-	v.SetPublishingStatus(user.Email)
+	compensations := compensator.New()
 
 	notifyCh := make(chan *entity.Version, 1)
 
@@ -85,29 +99,57 @@ func (h *Handler) publishVersion(
 	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration(config.VersionStatusTimeoutKey))
 	defer cancel()
 
-	if force && version.Status != entity.VersionStatusStarted {
-		_, startNotifyCh, err := h.Start(ctx, user, product.ID, version.Tag, comment)
-		if err != nil {
-			return fmt.Errorf("start version: %w", err)
+	if force {
+		if product.HasVersionPublished() {
+
+			publishedVersion := *product.PublishedVersion
+			fmt.Println(*product.PublishedVersion)
+			fmt.Println("here")
+
+			_, err := h.Unpublish(ctx, user, product.ID, publishedVersion, comment)
+			if err != nil {
+				return fmt.Errorf("unpublishing previous version: %w", err)
+			}
+			fmt.Println(publishedVersion)
+			fmt.Println("here2")
+
+			compensations.AddCompensation(func() error {
+				fmt.Println(publishedVersion)
+				_, _, err := h.Publish(ctx, user, PublishParams{
+					ProductID:  product.ID,
+					VersionTag: publishedVersion,
+					Comment:    comment,
+					Force:      true,
+				})
+				return err
+			})
+
+			//_, _, err = h.Stop(ctx, user, product.ID, publishedVersion, comment)
+			//if err != nil {
+			//	return fmt.Errorf("stopping previous version: %w", err)
+			//}
 		}
 
-		startedVersion := <-startNotifyCh
+		if version.Status != entity.VersionStatusStarted {
+			_, startNotifyCh, err := h.Start(ctx, user, product.ID, version.Tag, comment)
+			if err != nil {
+				return fmt.Errorf("start version: %w", err)
+			}
 
-		if startedVersion.Status == entity.VersionStatusError || startedVersion.Status == entity.VersionStatusCritical {
-			return fmt.Errorf("starting version: %s", startedVersion.Error) // TODO: check if this wrap is necessary
+			startedVersion := <-startNotifyCh
+
+			if startedVersion.Status == entity.VersionStatusError || startedVersion.Status == entity.VersionStatusCritical {
+				return fmt.Errorf("starting version: %s", startedVersion.Error) // TODO: check if this wrap is necessary
+			}
+
+			compensations.AddCompensation(func() error { _, _, err := h.Stop(ctx, user, product.ID, version.Tag, comment); return err })
 		}
 	}
 
-	triggerURLs, err := h.k8sService.Publish(ctx, product.ID, version.Tag)
+	_, err := h.k8sService.Publish(ctx, product.ID, version.Tag)
 	if err != nil {
 		return err
 	}
-
-	//compensations.AddCompensation(func() error {
-	//	err := h.k8sService.Unpublish(ctx, product.ID, version)
-	//})
-
-	_ = triggerURLs
 
 	compensations.AddCompensation(h.unpublishVersionFunc(product.ID, version))
 
