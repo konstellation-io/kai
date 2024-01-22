@@ -164,14 +164,6 @@ func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVers
 		return nil, err
 	}
 
-	//publishedTriggers := make([]*PublishedTrigger, 0, len(urls))
-	//for trigger, url := range urls {
-	//	publishedTriggers = append(publishedTriggers, &PublishedTrigger{
-	//		Trigger: trigger,
-	//		URL:     url,
-	//	})
-	//}
-
 	return v, nil
 }
 

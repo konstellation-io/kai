@@ -104,6 +104,7 @@ func (k *K8sVersionService) Publish(ctx context.Context, productID, version stri
 	defer cancel()
 
 	_, err := k.client.Publish(ctx, &req)
+
 	return err
 }
 
