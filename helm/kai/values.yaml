@@ -593,6 +593,16 @@ registry:
     # -- Registry password
     # @default -- password
     password: ""
+  netrc:
+    # -- Netrc repository
+    # @default -- repository
+    repository: ""
+    # -- Netrc username
+    # @default -- user
+    user: ""
+    # -- Netrc token
+    # @default -- token
+    token: ""
   storage:
     # -- Whether to enable persistence
     enabled: true

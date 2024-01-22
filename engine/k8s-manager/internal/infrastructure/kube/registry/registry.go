@@ -32,7 +32,8 @@ const (
 	_ttlSecondsAfterFinishedJob = 100
 
 	//nolint:gosec // False positive
-	_registryAuthSecretVolume = "registry-auth-secret"
+	_registryAuthSecretVolume  = "registry-auth-secret"
+	_registryNetrcSecretVolume = "registry-netrc-secret"
 )
 
 var (
@@ -143,12 +144,17 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(productID, jobName, imageWithDe
 									Name:      _registryAuthSecretVolume,
 									MountPath: "/kaniko/.docker",
 								},
+								{
+									Name:      _registryNetrcSecretVolume,
+									MountPath: "/kaniko/.netrc",
+								},
 							},
 						},
 					},
 					RestartPolicy: corev1.RestartPolicyNever,
 					Volumes: []corev1.Volume{
 						ib.getRegistryAuthVolume(),
+						ib.getRegistryNetrcVolume(),
 					},
 				},
 			},
@@ -166,6 +172,23 @@ func (ib *KanikoImageBuilder) getRegistryAuthVolume() corev1.Volume {
 					{
 						Key:  ".dockerconfigjson",
 						Path: "config.json",
+					},
+				},
+			},
+		},
+	}
+}
+
+func (ib *KanikoImageBuilder) getRegistryNetrcVolume() corev1.Volume {
+	return corev1.Volume{
+		Name: _registryNetrcSecretVolume,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: viper.GetString(config.ImageRegistryAuthSecretKey),
+				Items: []corev1.KeyToPath{
+					{
+						Key:  ".netrcconfig",
+						Path: ".netrc",
 					},
 				},
 			},
