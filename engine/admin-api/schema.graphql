@@ -137,7 +137,7 @@ type Product {
   description: String!
   creationAuthor: String!
   creationDate: String!
-  publishedVersion: String!
+  publishedVersion: String
 }
 
 type Version {

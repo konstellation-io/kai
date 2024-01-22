@@ -36,12 +36,11 @@ func (m *MockVersionService) EXPECT() *MockVersionServiceMockRecorder {
 }
 
 // Publish mocks base method.
-func (m *MockVersionService) Publish(ctx context.Context, productID, versionTag string) (map[string]string, error) {
+func (m *MockVersionService) Publish(ctx context.Context, productID, versionTag string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Publish", ctx, productID, versionTag)
-	ret0, _ := ret[0].(map[string]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Publish indicates an expected call of Publish.

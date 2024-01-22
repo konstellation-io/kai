@@ -23,15 +23,11 @@ func (s *versionSuite) TestPublish_OK() {
 		Build()
 	product := testhelpers.NewProductBuilder().Build()
 
-	expectedURLs := map[string]string{
-		"test-trigger": "test-url",
-	}
-
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
 
-	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(expectedURLs, nil)
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil)
 	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
 	s.productRepo.EXPECT().Update(gomock.Any(), product).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterPublishAction(user.Email, product.ID, vers, "publishing").Return(nil)
@@ -173,7 +169,7 @@ func (s *versionSuite) TestPublish_ErrorPublishingVersion() {
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 
-	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil, expectedError)
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(expectedError)
 
 	s.versionRepo.EXPECT().SetErrorStatusWithError(gomock.Any(), product.ID, vers.Tag, errStrMatcher).Return(nil)
 
@@ -202,10 +198,6 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
 		WithPublishedVersion(nil).
 		Build()
 
-	expectedURLs := map[string]string{
-		"test-trigger": "test-url",
-	}
-
 	expectedError := errors.New("error registering user activity")
 	errStrMatcher := newStringContainsMatcher(expectedError.Error())
 
@@ -213,7 +205,7 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
 
-	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(expectedURLs, nil)
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil)
 
 	versionMatcher := newVersionMatcher(vers)
 
@@ -261,7 +253,7 @@ func (s *versionSuite) TestPublish_VersionIsNotStarted_Forced() {
 
 	s.mockStartVersion(user, product, vers)
 
-	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil, nil)
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil)
 	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
 	s.productRepo.EXPECT().Update(gomock.Any(), product).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterPublishAction(user.Email, product.ID, vers, "publishing").Return(nil)
@@ -307,7 +299,7 @@ func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced() {
 
 	s.mockUnpublishVersion(user, product, oldVersion)
 
-	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil, nil)
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil)
 	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
 	s.productRepo.EXPECT().Update(gomock.Any(), product).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterPublishAction(user.Email, product.ID, vers, "publishing").Return(nil)

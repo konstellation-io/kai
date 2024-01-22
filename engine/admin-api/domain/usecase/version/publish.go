@@ -51,6 +51,10 @@ func (h *Handler) Publish(
 		return nil, nil, ErrVersionAlreadyPublished
 	}
 
+	if v.Status == entity.VersionStatusPublishing {
+		return nil, nil, ErrVersionBeingPublished
+	}
+
 	if !params.Force {
 		if product.HasVersionPublished() {
 			return nil, nil, ErrProductAlreadyPublished
@@ -152,7 +156,7 @@ func (h *Handler) publishVersion(
 		}
 	}
 
-	_, err := h.k8sService.Publish(ctx, product.ID, version.Tag)
+	err := h.k8sService.Publish(ctx, product.ID, version.Tag)
 	if err != nil {
 		return err
 	}
