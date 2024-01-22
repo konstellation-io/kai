@@ -31,9 +31,8 @@ const (
 
 	_ttlSecondsAfterFinishedJob = 100
 
-	//nolint:gosec // False positive
-	_registryAuthSecretVolume  = "registry-auth-secret"
-	_registryNetrcSecretVolume = "registry-netrc-secret"
+	_registryAuthSecretVolume  = "registry-auth-secret"  //nolint:gosec // False positive
+	_registryNetrcSecretVolume = "registry-netrc-secret" //nolint:gosec // False positive
 )
 
 var (
