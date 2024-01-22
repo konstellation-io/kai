@@ -16,7 +16,7 @@ spec:
       annotations:
         helm.sh/restart-deployment: {{ randAlphaNum 5 | quote }}
     spec:
-      {{- with .Values.keycloak.imagePullSecrets }}
+      {{- with .Values.natsManager.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
