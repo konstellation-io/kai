@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 
 	"github.com/go-logr/logr"
@@ -24,6 +26,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+	"github.com/minio/minio-go/v7"
 	"github.com/sethvargo/go-password/password"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -131,6 +134,11 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 
 	minioOjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
 
+	err = ensureKAIBucketExists(minioOjectStorage, minioClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	predictionRepo := redis.NewPredictionRepository(redis.NewRedisClient())
 
 	err = predictionRepo.EnsurePredictionIndexCreated()
@@ -187,4 +195,30 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 			LogsUsecase:            logsUseCase,
 		},
 	)
+}
+
+func ensureKAIBucketExists(storage *objectstorage.MinioObjectStorage, client *minio.Client) error {
+	ctx := context.Background()
+	kaiBucket := viper.GetString(config.GlobalRegistryKey)
+
+	exists, err := client.BucketExists(ctx, kaiBucket)
+	if err != nil {
+		return fmt.Errorf("checking if kai bucket exists: %w", err)
+	}
+
+	if exists {
+		return nil
+	}
+
+	err = storage.CreateBucket(ctx, kaiBucket)
+	if err != nil {
+		return fmt.Errorf("creating kai bucket: %w", err)
+	}
+
+	_, err = storage.CreateBucketPolicy(ctx, kaiBucket)
+	if err != nil {
+		return fmt.Errorf("creating kai object storage policy: %w", err)
+	}
+
+	return nil
 }
