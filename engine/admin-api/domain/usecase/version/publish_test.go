@@ -372,3 +372,59 @@ func (s *versionSuite) TestPublish_FailsIfTheVersionIsAlreadyPublished() {
 	// THEN an error is returned
 	s.Require().ErrorIs(err, version.ErrVersionAlreadyPublished)
 }
+
+func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction_CompensationError() {
+	// GIVEN a valid user and a published version, but error during publishing
+	ctx := context.Background()
+	user := testhelpers.NewUserBuilder().Build()
+	vers := testhelpers.NewVersionBuilder().
+		WithStatus(entity.VersionStatusStarted).
+		Build()
+
+	product := testhelpers.NewProductBuilder().
+		WithPublishedVersion(nil).
+		Build()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	expectedError := errors.New("error registering user activity")
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
+
+	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(nil, nil)
+
+	versionMatcher := newVersionMatcher(vers)
+
+	s.productRepo.EXPECT().Update(ctx, product).Return(nil)
+	s.versionRepo.EXPECT().Update(product.ID, versionMatcher).Return(nil)
+
+	s.userActivityInteractor.EXPECT().RegisterPublishAction(user.Email, product.ID, gomock.Any(), "publishing").
+		Return(expectedError)
+
+	// Compensations
+	s.versionService.EXPECT().Unpublish(gomock.Any(), product.ID, vers).Return(errors.New("unpublish error"))
+	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
+	s.productRepo.EXPECT().Update(gomock.Any(), product).Return(nil)
+	s.versionRepo.EXPECT().SetCriticalStatusWithError(gomock.Any(), product.ID, vers.Tag, "unpublish error").
+		DoAndReturn(func(_, _, _, _ any) error {
+			wg.Done()
+
+			return nil
+		})
+
+	// WHEN
+	urls, err := s.handler.Publish(ctx, user, version.PublishOpts{
+		ProductID:  product.ID,
+		VersionTag: vers.Tag,
+		Comment:    "publishing",
+	})
+
+	// THEN
+	s.Assert().ErrorIs(err, expectedError)
+	s.Assert().Nil(urls)
+
+	s.Require().NoError(testhelpers.WaitOrTimeout(&wg, 1*time.Second))
+}
