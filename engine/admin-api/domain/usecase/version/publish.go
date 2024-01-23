@@ -5,20 +5,17 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/pkg/compensator"
-	"github.com/spf13/viper"
 )
 
 var (
 	ErrProductAlreadyPublished = errors.New("product already has a published version")
 	ErrVersionAlreadyPublished = errors.New("version already published")
-	ErrVersionBeingPublished   = errors.New("version is already being published")
 )
 
-type PublishParams struct {
+type PublishOpts struct {
 	ProductID  string
 	VersionTag string
 	Comment    string
@@ -26,178 +23,146 @@ type PublishParams struct {
 }
 
 // Publish set a Version as published on DB and K8s.
-func (h *Handler) Publish(
-	ctx context.Context,
-	user *entity.User,
-	params PublishParams,
-) (*entity.Version, chan *entity.Version, error) {
-	if err := h.accessControl.CheckProductGrants(user, params.ProductID, auth.ActPublishVersion); err != nil {
-		return nil, nil, err
+func (h *Handler) Publish(ctx context.Context, user *entity.User, opts PublishOpts) (map[string]string, error) {
+	if err := h.accessControl.CheckProductGrants(user, opts.ProductID, auth.ActPublishVersion); err != nil {
+		return nil, err
 	}
 
-	h.logger.Info("Publishing version", "user", user.Email, "product", params.ProductID, "version", params.VersionTag)
+	h.logger.Info("Publishing version", "user", user.Email, "product", opts.ProductID, "version", opts.VersionTag)
 
-	product, err := h.productRepo.GetByID(ctx, params.ProductID)
+	product, err := h.productRepo.GetByID(ctx, opts.ProductID)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	v, err := h.versionRepo.GetByTag(ctx, params.ProductID, params.VersionTag)
+	version, err := h.versionRepo.GetByTag(ctx, opts.ProductID, opts.VersionTag)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	if v.Status == entity.VersionStatusPublished {
-		return nil, nil, ErrVersionAlreadyPublished
+	if version.Status == entity.VersionStatusPublished {
+		return nil, ErrVersionAlreadyPublished
 	}
 
-	if v.Status == entity.VersionStatusPublishing {
-		return nil, nil, ErrVersionBeingPublished
-	}
-
-	if !params.Force {
-		if product.HasVersionPublished() {
-			return nil, nil, ErrProductAlreadyPublished
-		}
-
-		if v.Status != entity.VersionStatusStarted {
-			return nil, nil, ErrVersionIsNotStarted
-		}
+	if version.Status != entity.VersionStatusStarted {
+		return nil, ErrVersionIsNotStarted
 	}
 
 	compensations := compensator.New()
 
-	notifyCh := make(chan *entity.Version, 1)
-
-	go func() {
-		defer close(notifyCh)
-
-		err := h.publishVersion(compensations, user, product, v, params.Comment, params.Force)
-		if err != nil {
-			h.handleAsyncVersionError(compensations, product.ID, v, err)
+	if product.HasVersionPublished() {
+		if !opts.Force {
+			return nil, ErrProductAlreadyPublished
 		}
 
-		notifyCh <- v
-	}()
+		publishedVersion := *product.PublishedVersion
 
-	return v, notifyCh, nil
+		err := h.versionRepo.SetStatus(ctx, product.ID, publishedVersion, entity.VersionStatusStarted)
+		if err != nil {
+			return nil, err
+		}
+
+		compensations.AddCompensation(func() error {
+			return h.versionRepo.SetStatus(context.Background(), product.ID, publishedVersion, entity.VersionStatusPublished)
+		})
+	}
+
+	urls, err := h.publishVersion(ctx, compensations, user, product, version, opts.Comment)
+	if err != nil {
+		go h.handlePublicationError(err, compensations, product.ID, version)
+		return nil, err
+	}
+
+	return urls, nil
 }
 
 func (h *Handler) publishVersion(
+	ctx context.Context,
 	compensations *compensator.Compensator,
 	user *entity.User,
 	product *entity.Product,
 	version *entity.Version,
 	comment string,
-	force bool,
-) error {
-	ctx, cancel := context.WithTimeout(context.Background(), viper.GetDuration(config.VersionStatusTimeoutKey))
-	defer cancel()
-
-	if force {
-		err := h.forcePublishPreviousActions(ctx, compensations, user, product, version, comment)
-		if err != nil {
-			return err
-		}
-	}
-
-	err := h.k8sService.Publish(ctx, product.ID, version.Tag)
+) (map[string]string, error) {
+	triggerURLs, err := h.k8sService.Publish(ctx, product.ID, version.Tag)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	compensations.AddCompensation(h.unpublishVersionFunc(product.ID, version))
+	compensations.AddCompensation(h.rollbackPublishVersionFunc(product, version))
 
+	err = h.updateVersionStatusToPublished(compensations, user, product, version)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.updateProductPublishedVersion(ctx, compensations, product, version)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.userActivityInteractor.RegisterPublishAction(user.Email, product.ID, version, comment)
+	if err != nil {
+		return nil, fmt.Errorf("registering publish action: %w", err)
+	}
+
+	return triggerURLs, nil
+}
+
+func (h *Handler) updateVersionStatusToPublished(
+	compensations *compensator.Compensator,
+	user *entity.User,
+	product *entity.Product,
+	version *entity.Version,
+) error {
 	version.SetPublishStatus(user.Email)
 
-	err = h.versionRepo.Update(product.ID, version)
+	err := h.versionRepo.Update(product.ID, version)
 	if err != nil {
 		return fmt.Errorf("updating version: %w", err)
 	}
 
 	compensations.AddCompensation(h.setVersionUnpublishStatusFunc(product.ID, version))
 
+	return nil
+}
+
+func (h *Handler) updateProductPublishedVersion(
+	ctx context.Context,
+	compensations *compensator.Compensator,
+	product *entity.Product,
+	version *entity.Version,
+) error {
+	rollbackProductPublishedVersionFunc := h.rollbackProductPublishedVersionFunc(product)
+
 	product.UpdatePublishedVersion(version.Tag)
 
-	err = h.productRepo.Update(ctx, product)
+	err := h.productRepo.Update(ctx, product)
 	if err != nil {
 		return fmt.Errorf("updating product's published version: %w", err)
 	}
 
-	compensations.AddCompensation(h.removeProductPublishedVersionFunc(product))
-
-	err = h.userActivityInteractor.RegisterPublishAction(user.Email, product.ID, version, comment)
-	if err != nil {
-		return fmt.Errorf("registering publish action: %w", err)
-	}
+	compensations.AddCompensation(rollbackProductPublishedVersionFunc)
 
 	return nil
 }
 
-func (h *Handler) forcePublishPreviousActions(
-	ctx context.Context,
-	compensations *compensator.Compensator,
-	user *entity.User,
-	product *entity.Product,
-	version *entity.Version,
-	comment string,
-) error {
+func (h *Handler) rollbackPublishVersionFunc(product *entity.Product, version *entity.Version) compensator.Compensation {
 	if product.HasVersionPublished() {
-		err := h.tearDownPreviousVersion(ctx, compensations, user, product, comment)
-		if err != nil {
-			return err
+		previouslyPublishedVersion := *product.PublishedVersion
+
+		return func() error {
+			_, err := h.k8sService.Publish(context.Background(), product.ID, previouslyPublishedVersion)
+			if err != nil {
+				return err
+			}
+
+			return nil
 		}
 	}
 
-	if version.Status != entity.VersionStatusStarted {
-		err := h.startVersionSync(ctx, user, product.ID, version.Tag, comment)
-		if err != nil {
-			return err
-		}
-
-		compensations.AddCompensation(func() error { _, _, err := h.Stop(ctx, user, product.ID, version.Tag, comment); return err })
-	}
-
-	return nil
-}
-
-func (h *Handler) tearDownPreviousVersion(
-	ctx context.Context,
-	compensations *compensator.Compensator,
-	user *entity.User,
-	product *entity.Product,
-	comment string,
-) error {
-	publishedVersion := *product.PublishedVersion
-
-	_, err := h.Unpublish(ctx, user, product.ID, publishedVersion, comment)
-	if err != nil {
-		return fmt.Errorf("unpublishing previous version: %w", err)
-	}
-
-	compensations.AddCompensation(func() error {
-		_, _, err := h.Publish(ctx, user, PublishParams{
-			ProductID:  product.ID,
-			VersionTag: publishedVersion,
-			Comment:    comment,
-			Force:      true,
-		})
-		return err
-	})
-
-	// _, _, err = h.Stop(ctx, user, product.ID, publishedVersion, comment)
-	// if err != nil {
-	// 	 return fmt.Errorf("stopping previous version: %w", err)
-	// }
-
-	compensations.AddCompensation(h.startVersionSyncFunc(user, product.ID, publishedVersion, comment))
-
-	return nil
-}
-
-func (h *Handler) unpublishVersionFunc(productID string, version *entity.Version) compensator.Compensation {
 	return func() error {
-		return h.k8sService.Unpublish(context.Background(), productID, version)
+		return h.k8sService.Unpublish(context.Background(), product.ID, version)
 	}
 }
 
@@ -209,7 +174,17 @@ func (h *Handler) setVersionUnpublishStatusFunc(productID string, version *entit
 	}
 }
 
-func (h *Handler) removeProductPublishedVersionFunc(product *entity.Product) compensator.Compensation {
+func (h *Handler) rollbackProductPublishedVersionFunc(product *entity.Product) compensator.Compensation {
+	if product.HasVersionPublished() {
+		previouslyPublishedVersion := *product.PublishedVersion
+
+		return func() error {
+			product.UpdatePublishedVersion(previouslyPublishedVersion)
+
+			return h.productRepo.Update(context.Background(), product)
+		}
+	}
+
 	return func() error {
 		product.RemovePublishedVersion()
 
@@ -217,23 +192,19 @@ func (h *Handler) removeProductPublishedVersionFunc(product *entity.Product) com
 	}
 }
 
-func (h *Handler) startVersionSync(ctx context.Context, user *entity.User, productID, versionTag, comment string) error {
-	_, startNotifyCh, err := h.Start(ctx, user, productID, versionTag, comment)
+func (h *Handler) handlePublicationError(
+	publicationError error,
+	compensations *compensator.Compensator,
+	productID string,
+	version *entity.Version,
+) {
+	h.logger.Error(publicationError, "Error during version publication, executing compensations...",
+		"productID", productID,
+		"versionTag", version.Tag,
+	)
+
+	err := compensations.Execute()
 	if err != nil {
-		return fmt.Errorf("start version: %w", err)
-	}
-
-	startedVersion := <-startNotifyCh
-
-	if startedVersion.Status == entity.VersionStatusError || startedVersion.Status == entity.VersionStatusCritical {
-		return fmt.Errorf("starting version: %s", startedVersion.Error) //nolint:goerr113 // future refactor
-	}
-
-	return nil
-}
-
-func (h *Handler) startVersionSyncFunc(user *entity.User, productID, publishedVersion, comment string) compensator.Compensation {
-	return func() error {
-		return h.startVersionSync(context.Background(), user, productID, publishedVersion, comment)
+		h.handleCriticalError(context.Background(), productID, version, err)
 	}
 }

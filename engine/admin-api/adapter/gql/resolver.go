@@ -151,10 +151,10 @@ func (r *mutationResolver) UnpublishVersion(ctx context.Context, input Unpublish
 	return r.versionInteractor.Unpublish(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 }
 
-func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVersionInput) (*entity.Version, error) {
+func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVersionInput) ([]*PublishedTrigger, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, _, err := r.versionInteractor.Publish(ctx, loggedUser, version.PublishParams{
+	urls, err := r.versionInteractor.Publish(ctx, loggedUser, version.PublishOpts{
 		ProductID:  input.ProductID,
 		VersionTag: input.VersionTag,
 		Comment:    input.Comment,
@@ -164,7 +164,15 @@ func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVers
 		return nil, err
 	}
 
-	return v, nil
+	publishedTriggers := make([]*PublishedTrigger, 0, len(urls))
+	for trigger, url := range urls {
+		publishedTriggers = append(publishedTriggers, &PublishedTrigger{
+			Trigger: trigger,
+			URL:     url,
+		})
+	}
+
+	return publishedTriggers, nil
 }
 
 func (r *mutationResolver) UpdateUserProductGrants(

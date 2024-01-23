@@ -28,15 +28,14 @@ type Version struct {
 type VersionStatus string
 
 const (
-	VersionStatusCreated    VersionStatus = "CREATED"
-	VersionStatusStarting   VersionStatus = "STARTING"
-	VersionStatusStarted    VersionStatus = "STARTED"
-	VersionStatusPublishing VersionStatus = "PUBLISHING"
-	VersionStatusPublished  VersionStatus = "PUBLISHED"
-	VersionStatusStopping   VersionStatus = "STOPPING"
-	VersionStatusStopped    VersionStatus = "STOPPED"
-	VersionStatusError      VersionStatus = "ERROR"
-	VersionStatusCritical   VersionStatus = "CRITICAL"
+	VersionStatusCreated   VersionStatus = "CREATED"
+	VersionStatusStarting  VersionStatus = "STARTING"
+	VersionStatusStarted   VersionStatus = "STARTED"
+	VersionStatusPublished VersionStatus = "PUBLISHED"
+	VersionStatusStopping  VersionStatus = "STOPPING"
+	VersionStatusStopped   VersionStatus = "STOPPED"
+	VersionStatusError     VersionStatus = "ERROR"
+	VersionStatusCritical  VersionStatus = "CRITICAL"
 )
 
 func (e VersionStatus) String() string {
@@ -51,11 +50,6 @@ func (v *Version) SetStartedStatus() {
 func (v *Version) SetErrorStatus(err error) {
 	v.Status = VersionStatusError
 	v.Error = err.Error()
-}
-
-func (v *Version) SetPublishingStatus(publicationAuthor string) {
-	v.Status = VersionStatusPublishing
-	v.PublicationAuthor = &publicationAuthor
 }
 
 func (v *Version) SetPublishStatus(publicationAuthor string) {
@@ -75,7 +69,7 @@ func (v *Version) UnsetPublishStatus() {
 
 func (v *Version) CanBeStarted() bool {
 	switch v.Status {
-	case VersionStatusCreated, VersionStatusStopped, VersionStatusError, VersionStatusCritical, VersionStatusPublishing:
+	case VersionStatusCreated, VersionStatusStopped, VersionStatusError, VersionStatusCritical:
 		return true
 	default:
 		return false

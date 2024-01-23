@@ -94,7 +94,7 @@ func (k *K8sVersionService) Unpublish(ctx context.Context, productID string, ver
 	return err
 }
 
-func (k *K8sVersionService) Publish(ctx context.Context, productID, version string) error {
+func (k *K8sVersionService) Publish(ctx context.Context, productID, version string) (map[string]string, error) {
 	req := versionpb.PublishRequest{
 		Product:    productID,
 		VersionTag: version,
@@ -103,9 +103,12 @@ func (k *K8sVersionService) Publish(ctx context.Context, productID, version stri
 	ctx, cancel := context.WithTimeout(ctx, _requestTimeout)
 	defer cancel()
 
-	_, err := k.client.Publish(ctx, &req)
+	res, err := k.client.Publish(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	return res.NetworkUrls, err
 }
 
 func (k *K8sVersionService) WatchProcessStatus(ctx context.Context, productID, versionTag string) (<-chan *entity.Process, error) {
