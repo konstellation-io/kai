@@ -180,7 +180,10 @@ func (kn KubeNetwork) getHTTPHost(product string) string {
 	return fmt.Sprintf("%s.%s", replaceDotsWithHyphen(product), viper.GetString(config.BaseDomainNameKey))
 }
 
-func (kn KubeNetwork) getHTTPIngressRule(httpHost string, httpPaths []applynetworkingv1.HTTPIngressPathApplyConfiguration) applynetworkingv1.IngressRuleApplyConfiguration {
+func (kn KubeNetwork) getHTTPIngressRule(
+	httpHost string,
+	httpPaths []applynetworkingv1.HTTPIngressPathApplyConfiguration,
+) applynetworkingv1.IngressRuleApplyConfiguration {
 	return applynetworkingv1.IngressRuleApplyConfiguration{
 		Host: pointer.String(httpHost),
 		IngressRuleValueApplyConfiguration: applynetworkingv1.IngressRuleValueApplyConfiguration{
