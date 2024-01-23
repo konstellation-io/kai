@@ -284,6 +284,67 @@ func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced() {
 	s.Equal(entity.VersionStatusPublished, vers.Status)
 }
 
+func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced_RegisterActionError() {
+	// GIVEN a valid user and a non started version
+	var (
+		ctx        = context.Background()
+		user       = testhelpers.NewUserBuilder().Build()
+		oldVersion = testhelpers.NewVersionBuilder().
+				WithTag("old-version").
+				WithStatus(entity.VersionStatusPublished).
+				Build()
+		product = testhelpers.NewProductBuilder().
+			WithPublishedVersion(&oldVersion.Tag).
+			Build()
+
+		vers = testhelpers.NewVersionBuilder().
+			WithTag(versionTag).
+			WithStatus(entity.VersionStatusStarted).
+			Build()
+		expectedURLs = map[string]string{
+			"test-trigger": "test-url",
+		}
+
+		wg = sync.WaitGroup{}
+	)
+
+	wg.Add(1)
+
+	expecterError := errors.New("register action error")
+
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
+
+	s.versionRepo.EXPECT().SetStatus(ctx, product.ID, oldVersion.Tag, entity.VersionStatusStarted).Return(nil)
+
+	s.versionService.EXPECT().Publish(ctx, product.ID, vers.Tag).Return(expectedURLs, nil)
+	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
+
+	s.productRepo.EXPECT().Update(ctx, product).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterPublishAction(user.Email, product.ID, vers, "publishing").Return(expecterError)
+
+	s.versionService.EXPECT().Publish(ctx, product.ID, oldVersion.Tag).Return(expectedURLs, nil)
+	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), product.ID, oldVersion.Tag, entity.VersionStatusPublished).Return(nil)
+	s.productRepo.EXPECT().Update(gomock.Any(), product).DoAndReturn(func(_, _ any) error {
+		wg.Done()
+		return nil
+	})
+
+	// WHEN publish the version with the param Force set to true
+	_, err := s.handler.Publish(ctx, user, version.PublishOpts{
+		ProductID:  product.ID,
+		VersionTag: vers.Tag,
+		Comment:    "publishing",
+		Force:      true,
+	})
+
+	// THEN an error is returned
+	s.Require().ErrorIs(err, expecterError)
+	s.Require().NoError(testhelpers.WaitOrTimeout(&wg, _waitGroupTimeout))
+}
+
 func (s *versionSuite) TestPublish_FailsIfTheVersionIsAlreadyPublished() {
 	// GIVEN a valid user and a non started version
 	var (
