@@ -89,7 +89,7 @@ func (h *Handler) publishVersion(
 		return nil, err
 	}
 
-	compensations.AddCompensation(h.rollbackPublishVersionFunc(product, version))
+	compensations.AddCompensation(h.rollbackPublishedVersionFunc(product, version))
 
 	err = h.updateVersionStatusToPublished(compensations, user, product, version)
 	if err != nil {
@@ -147,7 +147,7 @@ func (h *Handler) updateProductPublishedVersion(
 	return nil
 }
 
-func (h *Handler) rollbackPublishVersionFunc(product *entity.Product, version *entity.Version) compensator.Compensation {
+func (h *Handler) rollbackPublishedVersionFunc(product *entity.Product, version *entity.Version) compensator.Compensation {
 	if product.HasVersionPublished() {
 		previouslyPublishedVersion := *product.PublishedVersion
 
