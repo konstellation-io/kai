@@ -54,14 +54,11 @@ func (s *VersionServiceTestSuite) TestPublish() {
 		"test-trigger": "test-url",
 	}
 
-	s.mockService.EXPECT().Publish(gomock.Any(), req).Return(&versionpb.PublishResponse{
-		NetworkUrls: expectedURLs,
-	}, nil)
+	s.mockService.EXPECT().Publish(gomock.Any(), req).Return(&versionpb.PublishResponse{NetworkUrls: expectedURLs}, nil)
 
-	actualURLs, err := s.k8sVersionClient.Publish(ctx, productID, version.Tag)
+	urls, err := s.k8sVersionClient.Publish(ctx, productID, version.Tag)
 	s.Require().NoError(err)
-
-	s.Assert().Equal(expectedURLs, actualURLs)
+	s.Equal(expectedURLs, urls)
 }
 
 func (s *VersionServiceTestSuite) TestPublish_ClientError() {

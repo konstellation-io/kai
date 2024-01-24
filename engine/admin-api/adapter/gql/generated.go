@@ -114,11 +114,12 @@ type ComplexityRoot struct {
 	}
 
 	Product struct {
-		CreationAuthor func(childComplexity int) int
-		CreationDate   func(childComplexity int) int
-		Description    func(childComplexity int) int
-		ID             func(childComplexity int) int
-		Name           func(childComplexity int) int
+		CreationAuthor   func(childComplexity int) int
+		CreationDate     func(childComplexity int) int
+		Description      func(childComplexity int) int
+		ID               func(childComplexity int) int
+		Name             func(childComplexity int) int
+		PublishedVersion func(childComplexity int) int
 	}
 
 	PublishedTrigger struct {
@@ -601,6 +602,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Product.Name(childComplexity), true
+
+	case "Product.publishedVersion":
+		if e.complexity.Product.PublishedVersion == nil {
+			break
+		}
+
+		return e.complexity.Product.PublishedVersion(childComplexity), true
 
 	case "PublishedTrigger.trigger":
 		if e.complexity.PublishedTrigger.Trigger == nil {
@@ -1162,6 +1170,7 @@ input PublishVersionInput {
   versionTag: String!
   comment: String!
   productID: ID!
+  force: Boolean!
 }
 
 input UnpublishVersionInput {
@@ -1194,6 +1203,7 @@ type Product {
   description: String!
   creationAuthor: String!
   creationDate: String!
+  publishedVersion: String
 }
 
 type Version {
@@ -2115,6 +2125,8 @@ func (ec *executionContext) fieldContext_Mutation_createProduct(ctx context.Cont
 				return ec.fieldContext_Product_creationAuthor(ctx, field)
 			case "creationDate":
 				return ec.fieldContext_Product_creationDate(ctx, field)
+			case "publishedVersion":
+				return ec.fieldContext_Product_publishedVersion(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
 		},
@@ -3849,6 +3861,47 @@ func (ec *executionContext) fieldContext_Product_creationDate(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Product_publishedVersion(ctx context.Context, field graphql.CollectedField, obj *entity.Product) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Product_publishedVersion(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PublishedVersion, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Product_publishedVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PublishedTrigger_trigger(ctx context.Context, field graphql.CollectedField, obj *PublishedTrigger) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_PublishedTrigger_trigger(ctx, field)
 	if err != nil {
@@ -3986,6 +4039,8 @@ func (ec *executionContext) fieldContext_Query_product(ctx context.Context, fiel
 				return ec.fieldContext_Product_creationAuthor(ctx, field)
 			case "creationDate":
 				return ec.fieldContext_Product_creationDate(ctx, field)
+			case "publishedVersion":
+				return ec.fieldContext_Product_publishedVersion(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
 		},
@@ -4053,6 +4108,8 @@ func (ec *executionContext) fieldContext_Query_products(ctx context.Context, fie
 				return ec.fieldContext_Product_creationAuthor(ctx, field)
 			case "creationDate":
 				return ec.fieldContext_Product_creationDate(ctx, field)
+			case "publishedVersion":
+				return ec.fieldContext_Product_publishedVersion(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
 		},
@@ -8114,7 +8171,7 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"versionTag", "comment", "productID"}
+	fieldsInOrder := [...]string{"versionTag", "comment", "productID", "force"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8148,6 +8205,15 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 				return it, err
 			}
 			it.ProductID = data
+		case "force":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("force"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Force = data
 		}
 	}
 
@@ -9123,6 +9189,8 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "publishedVersion":
+			out.Values[i] = ec._Product_publishedVersion(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
