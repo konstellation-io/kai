@@ -134,7 +134,7 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 
 	minioOjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
 
-	err = ensureKAIBucketExists(minioOjectStorage, minioClient)
+	err = ensureKAIBucketExists(logger, minioOjectStorage, minioClient, keycloakUserRegistry)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -197,27 +197,48 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 	)
 }
 
-func ensureKAIBucketExists(storage *objectstorage.MinioObjectStorage, client *minio.Client) error {
+func ensureKAIBucketExists(
+	logger logr.Logger,
+	storage *objectstorage.MinioObjectStorage,
+	minoClient *minio.Client,
+	userRegistry *user.KeycloakUserRegistry,
+) error {
 	ctx := context.Background()
 	kaiBucket := viper.GetString(config.GlobalRegistryKey)
 
-	exists, err := client.BucketExists(ctx, kaiBucket)
+	exists, err := minoClient.BucketExists(ctx, kaiBucket)
 	if err != nil {
 		return fmt.Errorf("checking if kai bucket exists: %w", err)
 	}
 
-	if exists {
-		return nil
+	var policyName string
+
+	if !exists {
+		logger.Info("Creating KAI bucket in object storage", "bucket", kaiBucket)
+
+		err = storage.CreateBucket(ctx, kaiBucket)
+		if err != nil {
+			return fmt.Errorf("creating kai bucket: %w", err)
+		}
+
+		policyName, err = storage.CreateBucketPolicy(ctx, kaiBucket)
+		if err != nil {
+			return fmt.Errorf("creating kai object storage policy: %w", err)
+		}
 	}
 
-	err = storage.CreateBucket(ctx, kaiBucket)
+	groupExists, err := userRegistry.GroupExists(ctx, kaiBucket)
 	if err != nil {
-		return fmt.Errorf("creating kai bucket: %w", err)
+		return fmt.Errorf("checking if kai group exists in user registry: %w", err)
 	}
 
-	_, err = storage.CreateBucketPolicy(ctx, kaiBucket)
-	if err != nil {
-		return fmt.Errorf("creating kai object storage policy: %w", err)
+	if !groupExists {
+		logger.Info("Creating KAI group in user registry", "group", kaiBucket)
+
+		err = userRegistry.CreateGroupWithPolicy(ctx, kaiBucket, policyName)
+		if err != nil {
+			return fmt.Errorf("creating kai group in user registry: %w", err)
+		}
 	}
 
 	return nil
