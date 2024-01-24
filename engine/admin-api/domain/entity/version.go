@@ -42,6 +42,16 @@ func (e VersionStatus) String() string {
 	return string(e)
 }
 
+func (v *Version) SetStartedStatus() {
+	v.Status = VersionStatusStarted
+	v.cleanError()
+}
+
+func (v *Version) SetErrorStatus(err error) {
+	v.Status = VersionStatusError
+	v.Error = err.Error()
+}
+
 func (v *Version) SetPublishStatus(publicationAuthor string) {
 	now := time.Now()
 
@@ -76,6 +86,10 @@ type Workflow struct {
 	Config    []ConfigurationVariable
 	Processes []Process
 	Stream    string
+}
+
+func (v *Version) cleanError() {
+	v.Error = ""
 }
 
 type WorkflowType string

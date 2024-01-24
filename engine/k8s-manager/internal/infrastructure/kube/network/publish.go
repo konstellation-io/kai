@@ -7,6 +7,9 @@ import (
 	"path"
 	"strings"
 
+	applymetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
+	applynetworkingv1 "k8s.io/client-go/applyconfigurations/networking/v1"
+
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/application/service"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/config"
@@ -22,6 +25,7 @@ const (
 	_apiVersion              = "networking.k8s.io/v1"
 	_kindIngress             = "Ingress"
 	_kongStripPathAnnotation = "konghq.com/strip-path"
+	_fieldManager            = "k8s-manager"
 )
 
 func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.PublishNetworkParams) (map[string]string, error) {
@@ -37,17 +41,17 @@ func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.Publish
 		return nil, fmt.Errorf("parsing ingress annotations: %w", err)
 	}
 
-	ingressName := kn.getIngressName(params.Product, params.Version)
+	ingressName := kn.getIngressName(params.Product)
 
 	ingressRules, publishedEndpoints := kn.getIngressRules(params.Product, servicesToPublish)
 
-	ingress := &networkingv1.Ingress{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: _apiVersion,
-			Kind:       _kindIngress,
+	ingress := &applynetworkingv1.IngressApplyConfiguration{
+		TypeMetaApplyConfiguration: applymetav1.TypeMetaApplyConfiguration{
+			APIVersion: pointer.String(_apiVersion),
+			Kind:       pointer.String(_kindIngress),
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: ingressName,
+		ObjectMetaApplyConfiguration: &applymetav1.ObjectMetaApplyConfiguration{
+			Name: &ingressName,
 			Labels: map[string]string{
 				"product": params.Product,
 				"version": params.Version,
@@ -55,14 +59,16 @@ func (kn KubeNetwork) PublishNetwork(ctx context.Context, params service.Publish
 			},
 			Annotations: annotations,
 		},
-		Spec: networkingv1.IngressSpec{
+		Spec: &applynetworkingv1.IngressSpecApplyConfiguration{
 			IngressClassName: pointer.String(viper.GetString(config.TriggersIngressClassNameKey)),
 			Rules:            ingressRules,
 			TLS:              kn.getIngressTLSConfiguration(ingressRules, ingressName),
 		},
 	}
 
-	_, err = kn.client.NetworkingV1().Ingresses(kn.namespace).Create(ctx, ingress, metav1.CreateOptions{})
+	_, err = kn.client.NetworkingV1().Ingresses(kn.namespace).Apply(ctx, ingress, metav1.ApplyOptions{
+		FieldManager: _fieldManager,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("creating ingress: %w", err)
 	}
@@ -94,19 +100,19 @@ func (kn KubeNetwork) getIngressAnnotations() (map[string]string, error) {
 	return mergeAnnotations(annotationsMap, defaultAnnotations), nil
 }
 
-func (kn KubeNetwork) getIngressName(product, version string) string {
-	return strings.ReplaceAll(fmt.Sprintf("%s-%s", product, version), ".", "-")
+func (kn KubeNetwork) getIngressName(product string) string {
+	return strings.ReplaceAll(product, ".", "-")
 }
 
 func (kn KubeNetwork) getIngressRules(
 	product string, servicesToPublish *corev1.ServiceList,
-) (rules []networkingv1.IngressRule, endpoints map[string]string) {
+) (rules []applynetworkingv1.IngressRuleApplyConfiguration, endpoints map[string]string) {
 	var (
 		httpHost = kn.getHTTPHost(product)
 
-		httpPaths          = make([]networkingv1.HTTPIngressPath, 0, len(servicesToPublish.Items))
+		httpPaths          = make([]applynetworkingv1.HTTPIngressPathApplyConfiguration, 0, len(servicesToPublish.Items))
 		publishedEndpoints = make(map[string]string, len(servicesToPublish.Items))
-		ingressRules       []networkingv1.IngressRule
+		ingressRules       []applynetworkingv1.IngressRuleApplyConfiguration
 	)
 
 	for _, svc := range servicesToPublish.Items {
@@ -144,22 +150,22 @@ func (kn KubeNetwork) getGRPCHost(product, workflow, process string) string {
 	)
 }
 
-func (kn KubeNetwork) getGRPCIngressRule(grpcHost, serviceName string) networkingv1.IngressRule {
+func (kn KubeNetwork) getGRPCIngressRule(grpcHost, serviceName string) applynetworkingv1.IngressRuleApplyConfiguration {
 	pathType := networkingv1.PathTypePrefix
 
-	return networkingv1.IngressRule{
-		Host: grpcHost,
-		IngressRuleValue: networkingv1.IngressRuleValue{
-			HTTP: &networkingv1.HTTPIngressRuleValue{
-				Paths: []networkingv1.HTTPIngressPath{
+	return applynetworkingv1.IngressRuleApplyConfiguration{
+		Host: pointer.String(grpcHost),
+		IngressRuleValueApplyConfiguration: applynetworkingv1.IngressRuleValueApplyConfiguration{
+			HTTP: &applynetworkingv1.HTTPIngressRuleValueApplyConfiguration{
+				Paths: []applynetworkingv1.HTTPIngressPathApplyConfiguration{
 					{
-						Path:     "/",
+						Path:     pointer.String("/"),
 						PathType: &pathType,
-						Backend: networkingv1.IngressBackend{
-							Service: &networkingv1.IngressServiceBackend{
-								Name: serviceName,
-								Port: networkingv1.ServiceBackendPort{
-									Name: _servicePortName,
+						Backend: &applynetworkingv1.IngressBackendApplyConfiguration{
+							Service: &applynetworkingv1.IngressServiceBackendApplyConfiguration{
+								Name: pointer.String(serviceName),
+								Port: &applynetworkingv1.ServiceBackendPortApplyConfiguration{
+									Name: pointer.String(_servicePortName),
 								},
 							},
 						},
@@ -174,11 +180,14 @@ func (kn KubeNetwork) getHTTPHost(product string) string {
 	return fmt.Sprintf("%s.%s", replaceDotsWithHyphen(product), viper.GetString(config.BaseDomainNameKey))
 }
 
-func (kn KubeNetwork) getHTTPIngressRule(httpHost string, httpPaths []networkingv1.HTTPIngressPath) networkingv1.IngressRule {
-	return networkingv1.IngressRule{
-		Host: httpHost,
-		IngressRuleValue: networkingv1.IngressRuleValue{
-			HTTP: &networkingv1.HTTPIngressRuleValue{
+func (kn KubeNetwork) getHTTPIngressRule(
+	httpHost string,
+	httpPaths []applynetworkingv1.HTTPIngressPathApplyConfiguration,
+) applynetworkingv1.IngressRuleApplyConfiguration {
+	return applynetworkingv1.IngressRuleApplyConfiguration{
+		Host: pointer.String(httpHost),
+		IngressRuleValueApplyConfiguration: applynetworkingv1.IngressRuleValueApplyConfiguration{
+			HTTP: &applynetworkingv1.HTTPIngressRuleValueApplyConfiguration{
 				Paths: httpPaths,
 			},
 		},
@@ -189,24 +198,27 @@ func (kn KubeNetwork) getTriggerPath(workflow, process string) string {
 	return fmt.Sprintf("/%s-%s", replaceDotsWithHyphen(workflow), replaceDotsWithHyphen(process))
 }
 
-func (kn KubeNetwork) getTriggerIngressPath(triggerPath, serviceName string) networkingv1.HTTPIngressPath {
+func (kn KubeNetwork) getTriggerIngressPath(triggerPath, serviceName string) applynetworkingv1.HTTPIngressPathApplyConfiguration {
 	pathType := networkingv1.PathTypePrefix
 
-	return networkingv1.HTTPIngressPath{
-		Path:     triggerPath,
+	return applynetworkingv1.HTTPIngressPathApplyConfiguration{
+		Path:     pointer.String(triggerPath),
 		PathType: &pathType,
-		Backend: networkingv1.IngressBackend{
-			Service: &networkingv1.IngressServiceBackend{
-				Name: serviceName,
-				Port: networkingv1.ServiceBackendPort{
-					Name: _servicePortName,
+		Backend: &applynetworkingv1.IngressBackendApplyConfiguration{
+			Service: &applynetworkingv1.IngressServiceBackendApplyConfiguration{
+				Name: pointer.String(serviceName),
+				Port: &applynetworkingv1.ServiceBackendPortApplyConfiguration{
+					Name: pointer.String(_servicePortName),
 				},
 			},
 		},
 	}
 }
 
-func (kn KubeNetwork) getIngressTLSConfiguration(rules []networkingv1.IngressRule, ingressName string) []networkingv1.IngressTLS {
+func (kn KubeNetwork) getIngressTLSConfiguration(
+	rules []applynetworkingv1.IngressRuleApplyConfiguration,
+	ingressName string,
+) []applynetworkingv1.IngressTLSApplyConfiguration {
 	if !viper.GetBool(config.TriggersTLSEnabledKey) {
 		return nil
 	}
@@ -221,13 +233,13 @@ func (kn KubeNetwork) getIngressTLSConfiguration(rules []networkingv1.IngressRul
 	publishedHosts := make([]string, 0, len(rules))
 
 	for _, rule := range rules {
-		publishedHosts = append(publishedHosts, rule.Host)
+		publishedHosts = append(publishedHosts, *rule.Host)
 	}
 
-	return []networkingv1.IngressTLS{
+	return []applynetworkingv1.IngressTLSApplyConfiguration{
 		{
 			Hosts:      publishedHosts,
-			SecretName: tlsSecretName,
+			SecretName: pointer.String(tlsSecretName),
 		},
 	}
 }
