@@ -113,7 +113,7 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(productID, jobName, imageWithDe
 							Args: []string{
 								fmt.Sprintf("--context=s3://%s/%s/%s", productID, _kaiFolder, imageWithDestination),
 								fmt.Sprintf("--insecure=%s", viper.GetString(config.ImageRegistryInsecureKey)),
-								fmt.Sprintf("--verbosity=%s", viper.GetString(config.ImageBuilderLogLevel)),
+								fmt.Sprintf("--verbosity=%s", "debug"),
 								fmt.Sprintf("--destination=%s", imageWithDestination),
 							},
 							Env: []corev1.EnvVar{
@@ -183,7 +183,7 @@ func (ib *KanikoImageBuilder) getRegistryNetrcVolume() corev1.Volume {
 		Name: _registryNetrcSecretVolume,
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
-				SecretName: viper.GetString(config.ImageRegistryAuthSecretKey),
+				SecretName: viper.GetString(config.ImageRegistryNetrcSecretKey),
 				Items: []corev1.KeyToPath{
 					{
 						Key:  ".netrcconfig",

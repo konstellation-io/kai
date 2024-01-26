@@ -22,12 +22,13 @@ const (
 
 	ImageRegistryURLKey = "registry.url"
 	//nolint:gosec // False positive
-	ImageRegistryAuthSecretKey = "registry.authSecret"
-	ImageBuilderImageKey       = "registry.imageBuilder.image"
-	ImageBuilderTagKey         = "registry.imageBuilder.tag"
-	ImageBuilderPullPolicyKey  = "registry.imageBuilder.pullPolicy"
-	ImageBuilderLogLevel       = "registry.imageBuilder.logLevel"
-	ImageRegistryInsecureKey   = "registry.insecure"
+	ImageRegistryAuthSecretKey  = "registry.authSecret"
+	ImageRegistryNetrcSecretKey = "registry.netrcSecret"
+	ImageBuilderImageKey        = "registry.imageBuilder.image"
+	ImageBuilderTagKey          = "registry.imageBuilder.tag"
+	ImageBuilderPullPolicyKey   = "registry.imageBuilder.pullPolicy"
+	ImageBuilderLogLevel        = "registry.imageBuilder.logLevel"
+	ImageRegistryInsecureKey    = "registry.insecure"
 
 	MinioEndpointKey        = "minio.endpoint"
 	MinioAccessKeyIDKey     = "minio.accessKeyID"
@@ -101,6 +102,7 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(BaseDomainNameKey, "BASE_DOMAIN_NAME")
 
 	viper.RegisterAlias(ImageRegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
+	viper.RegisterAlias(ImageRegistryNetrcSecretKey, "REGISTRY_NETRC_SECRET_NAME")
 	viper.RegisterAlias(ImageRegistryInsecureKey, "REGISTRY_INSECURE")
 	viper.RegisterAlias(ImageBuilderImageKey, "IMAGE_BUILDER_IMAGE_REPOSITORY")
 	viper.RegisterAlias(ImageBuilderTagKey, "IMAGE_BUILDER_IMAGE_TAG")

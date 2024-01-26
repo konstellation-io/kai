@@ -476,7 +476,7 @@ NETRC service account token
 {{- end -}}
 
 {{/*
-Registry auth secret name
+NETRC secret name
 */}}
 {{- define "registry.netrc.secretName" -}}
 {{- printf "%s-netrc" (include "registry.fullname" . ) -}}

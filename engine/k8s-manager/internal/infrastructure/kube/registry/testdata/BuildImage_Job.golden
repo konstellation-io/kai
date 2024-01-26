@@ -129,7 +129,7 @@ spec:
                   args:
                     - --context=s3://test/.kai/test.local/test-image:v1.0.0
                     - --insecure=
-                    - --verbosity=error
+                    - --verbosity=debug
                     - --destination=test.local/test-image:v1.0.0
                   workingdir: ""
                   ports: []
