@@ -101,7 +101,7 @@ func (r *mutationResolver) RegisterPublicProcess(ctx context.Context, input Regi
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	v, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
+	v, _, err := r.versionInteractor.Start(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 	if err != nil {
 		r.logger.Error(err, "Unable to start version",
 			"productID", input.ProductID,
@@ -154,7 +154,12 @@ func (r *mutationResolver) UnpublishVersion(ctx context.Context, input Unpublish
 func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVersionInput) ([]*PublishedTrigger, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	urls, err := r.versionInteractor.Publish(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
+	urls, err := r.versionInteractor.Publish(ctx, loggedUser, version.PublishOpts{
+		ProductID:  input.ProductID,
+		VersionTag: input.VersionTag,
+		Comment:    input.Comment,
+		Force:      input.Force,
+	})
 	if err != nil {
 		return nil, err
 	}

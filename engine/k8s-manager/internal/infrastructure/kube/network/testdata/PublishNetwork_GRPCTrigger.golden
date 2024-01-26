@@ -11,7 +11,7 @@ items:
         kind: Ingress
         apiversion: networking.k8s.io/v1
       objectmeta:
-        name: test-product-v1-0-0
+        name: test-product
         generatename: ""
         namespace: test
         selflink: ""
