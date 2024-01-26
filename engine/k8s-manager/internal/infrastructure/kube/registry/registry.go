@@ -113,7 +113,7 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(productID, jobName, imageWithDe
 							Args: []string{
 								fmt.Sprintf("--context=s3://%s/%s/%s", productID, _kaiFolder, imageWithDestination),
 								fmt.Sprintf("--insecure=%s", viper.GetString(config.ImageRegistryInsecureKey)),
-								fmt.Sprintf("--verbosity=%s", "debug"),
+								fmt.Sprintf("--verbosity=%s", viper.GetString(config.ImageBuilderLogLevel)),
 								fmt.Sprintf("--destination=%s", imageWithDestination),
 							},
 							Env: []corev1.EnvVar{
