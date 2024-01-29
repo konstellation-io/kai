@@ -201,7 +201,7 @@ k8sManager:
       pullPolicy: IfNotPresent
     netrc:
       # -- Whether to create .netrc file for authentication for private dependency repositories
-      enabled: true
+      enabled: false
       # -- .netrc file content. Ref: https://everything.curl.dev/usingcurl/netrc
       content: ""
       ## example:
