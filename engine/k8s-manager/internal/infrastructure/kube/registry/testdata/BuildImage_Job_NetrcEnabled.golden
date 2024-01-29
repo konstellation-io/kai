@@ -83,6 +83,44 @@ spec:
                     storageos: null
                     csi: null
                     ephemeral: null
+                - name: registry-netrc-secret
+                  volumesource:
+                    hostpath: null
+                    emptydir: null
+                    gcepersistentdisk: null
+                    awselasticblockstore: null
+                    gitrepo: null
+                    secret:
+                        secretname: netrc-secret-name
+                        items:
+                            - key: .netrcconfig
+                              path: .netrc
+                              mode: null
+                        defaultmode: null
+                        optional: null
+                    nfs: null
+                    iscsi: null
+                    glusterfs: null
+                    persistentvolumeclaim: null
+                    rbd: null
+                    flexvolume: null
+                    cinder: null
+                    cephfs: null
+                    flocker: null
+                    downwardapi: null
+                    fc: null
+                    azurefile: null
+                    configmap: null
+                    vspherevolume: null
+                    quobyte: null
+                    azuredisk: null
+                    photonpersistentdisk: null
+                    projected: null
+                    portworxvolume: null
+                    scaleio: null
+                    storageos: null
+                    csi: null
+                    ephemeral: null
             initcontainers: []
             containers:
                 - name: kaniko
@@ -121,6 +159,12 @@ spec:
                     - name: registry-auth-secret
                       readonly: false
                       mountpath: /kaniko/.docker
+                      subpath: ""
+                      mountpropagation: null
+                      subpathexpr: ""
+                    - name: registry-netrc-secret
+                      readonly: false
+                      mountpath: /kaniko/.netrc
                       subpath: ""
                       mountpropagation: null
                       subpathexpr: ""

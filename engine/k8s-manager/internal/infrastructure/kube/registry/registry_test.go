@@ -238,6 +238,61 @@ func updateJobStatus(ctx context.Context, clientset *fake.Clientset, job *batchv
 	return err
 }
 
+func TestBuildImage_SucceedJob_NetrcEnabled(t *testing.T) {
+	var (
+		logger    = testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+		clientset = fake.NewSimpleClientset()
+		ctx       = context.Background()
+	)
+
+	viper.Set(config.KubeNamespaceKey, _namespace)
+	viper.Set(config.ImageRegistryURLKey, fmt.Sprintf("http://%s", _registryHost))
+	viper.Set(config.ImageBuilderLogLevel, "error")
+	viper.Set(config.ImageBuilderImageKey, "gcr.io/kaniko-project/executor")
+	viper.Set(config.ImageBuilderTagKey, "v1.18.0")
+	viper.Set(config.ImageBuilderPullPolicyKey, "IfNotPresent")
+	viper.Set(config.ImageBuilderNetrcEnabledKey, true)
+	viper.Set(config.ImageBuilderNetrcSecretKey, "netrc-secret-name")
+
+	imageBuilder := registry.NewKanikoImageBuilder(logger, clientset)
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+
+	go func() {
+		imageRef, err := imageBuilder.BuildImage(ctx, _product, _imageName, _expectedImageRef)
+		require.NoError(t, err)
+		assert.Equal(t, _expectedImageRef, imageRef)
+		wg.Done()
+	}()
+
+	time.Sleep(500 * time.Millisecond)
+
+	// Check if the job is created
+	job, err := clientset.BatchV1().Jobs(_namespace).Get(ctx, "image-builder-test-image-v1-0-0", metav1.GetOptions{})
+	require.NoError(t, err)
+
+	jobYaml, err := yaml.Marshal(job)
+	require.NoError(t, err)
+
+	g := goldie.New(t)
+	g.Assert(t, "BuildImage_Job_NetrcEnabled", jobYaml)
+
+	// Update job status to complete
+	err = updateJobStatus(ctx, clientset, job, &batchv1.JobCondition{
+		Type:   batchv1.JobComplete,
+		Status: corev1.ConditionTrue,
+	})
+	require.NoError(t, err)
+
+	wg.Wait()
+
+	// Check if Job is deleted
+	_, err = clientset.BatchV1().Jobs(_namespace).Get(ctx, job.Name, metav1.GetOptions{})
+	require.True(t, errors.IsNotFound(err))
+}
+
 func waitTimeout(wg *sync.WaitGroup, timeout time.Duration) bool {
 	c := make(chan struct{})
 	go func() {

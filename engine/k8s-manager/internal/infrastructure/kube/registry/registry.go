@@ -138,27 +138,47 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(productID, jobName, imageWithDe
 									Value: "true",
 								},
 							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      _registryAuthSecretVolume,
-									MountPath: "/kaniko/.docker",
-								},
-								{
-									Name:      _registryNetrcSecretVolume,
-									MountPath: "/kaniko/.netrc",
-								},
-							},
+							VolumeMounts: ib.getImageBuilderVolumeMounts(),
 						},
 					},
 					RestartPolicy: corev1.RestartPolicyNever,
-					Volumes: []corev1.Volume{
-						ib.getRegistryAuthVolume(),
-						ib.getRegistryNetrcVolume(),
-					},
+					Volumes:       ib.getImageBuilderVolumesDefinition(),
 				},
 			},
 		},
 	}
+}
+
+func (ib *KanikoImageBuilder) getImageBuilderVolumeMounts() []corev1.VolumeMount {
+	commonVolumeMounts := []corev1.VolumeMount{
+		{
+			Name:      _registryAuthSecretVolume,
+			MountPath: "/kaniko/.docker",
+		},
+	}
+
+	if viper.GetBool(config.ImageBuilderNetrcEnabledKey) {
+		return append(commonVolumeMounts,
+			corev1.VolumeMount{
+				Name:      _registryNetrcSecretVolume,
+				MountPath: "/kaniko/.netrc",
+			},
+		)
+	}
+
+	return commonVolumeMounts
+}
+
+func (ib *KanikoImageBuilder) getImageBuilderVolumesDefinition() []corev1.Volume {
+	commonVolumes := []corev1.Volume{
+		ib.getRegistryAuthVolume(),
+	}
+
+	if viper.GetBool(config.ImageBuilderNetrcEnabledKey) {
+		return append(commonVolumes, ib.getRegistryNetrcVolume())
+	}
+
+	return commonVolumes
 }
 
 func (ib *KanikoImageBuilder) getRegistryAuthVolume() corev1.Volume {
@@ -183,7 +203,7 @@ func (ib *KanikoImageBuilder) getRegistryNetrcVolume() corev1.Volume {
 		Name: _registryNetrcSecretVolume,
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
-				SecretName: viper.GetString(config.ImageRegistryNetrcSecretKey),
+				SecretName: viper.GetString(config.ImageBuilderNetrcSecretKey),
 				Items: []corev1.KeyToPath{
 					{
 						Key:  ".netrcconfig",
