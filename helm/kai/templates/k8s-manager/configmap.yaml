@@ -23,7 +23,9 @@ data:
   KAI_NATS_HOST: "{{ include "nats.host" . }}"
   KAI_REGISTRY_HOST: "{{ .Values.registry.host }}"
   KAI_REGISTRY_AUTH_SECRET_NAME: "{{ include "registry.auth.secretName" . }}"
-  KAI_REGISTRY_NETRC_SECRET_NAME: "{{ include "registry.netrc.secretName" . }}"
+  {{- if .Values.k8sManager.imageBuilder.netrc.enabled }}
+  KAI_REGISTRY_NETRC_SECRET_NAME: "{{ include "k8s-manager.netrc.secretName" . }}"
+  {{- end }}
   KAI_REGISTRY_INSECURE: "{{ not .Values.config.tls.enabled }}"
   KAI_MINIO_ENDPOINT_URL: "{{ include "minio.fullname" .Subcharts.minio }}:{{ .Values.minio.service.port }}"
   KAI_MINIO_REGION: {{ include "minio-config.region" . }}
