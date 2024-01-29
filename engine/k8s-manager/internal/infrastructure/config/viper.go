@@ -29,8 +29,7 @@ const (
 	ImageBuilderPullPolicyKey   = "registry.imageBuilder.pullPolicy"
 	ImageBuilderLogLevel        = "registry.imageBuilder.logLevel"
 	ImageBuilderNetrcEnabledKey = "registry.imageBuilder.netrc.enabled"
-	//nolint:gosec // False positive
-	ImageBuilderNetrcSecretKey = "registry.imageBuilder.netrc.secretName"
+	ImageBuilderNetrcSecretKey  = "registry.imageBuilder.netrc.secretName"
 
 	MinioEndpointKey        = "minio.endpoint"
 	MinioAccessKeyIDKey     = "minio.accessKeyID"
