@@ -22,7 +22,8 @@ const (
 
 	ImageRegistryURLKey = "registry.url"
 	//nolint:gosec // False positive
-	ImageRegistryAuthSecretKey  = "registry.authSecret"
+	ImageRegistryAuthSecretKey = "registry.authSecret"
+	//nolint:gosec // False positive
 	ImageRegistryNetrcSecretKey = "registry.netrcSecret"
 	ImageBuilderImageKey        = "registry.imageBuilder.image"
 	ImageBuilderTagKey          = "registry.imageBuilder.tag"
