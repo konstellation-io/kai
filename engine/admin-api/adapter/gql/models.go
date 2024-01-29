@@ -21,6 +21,7 @@ type PublishVersionInput struct {
 	VersionTag string `json:"versionTag"`
 	Comment    string `json:"comment"`
 	ProductID  string `json:"productID"`
+	Force      bool   `json:"force"`
 }
 
 type PublishedTrigger struct {

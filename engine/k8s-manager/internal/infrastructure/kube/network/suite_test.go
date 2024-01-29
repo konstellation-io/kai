@@ -14,8 +14,13 @@ import (
 	"github.com/konstellation-io/kai/engine/k8s-manager/internal/infrastructure/kube"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
+	networkingv1 "k8s.io/api/networking/v1"
+	kubeerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/fake"
+	kubetesting "k8s.io/client-go/testing"
 )
 
 const (
@@ -48,6 +53,44 @@ func (s *networkSuite) SetupSuite() {
 
 	s.logger = testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	s.clientset = fake.NewSimpleClientset()
+
+	s.clientset.PrependReactor(
+		"patch",
+		"ingresses",
+		func(action kubetesting.Action) (handled bool, ret runtime.Object, err error) {
+			pa := action.(kubetesting.PatchAction)
+			if pa.GetPatchType() == types.ApplyPatchType {
+				// Apply patches are supposed to upsert, but fake client fails if the object doesn't exist,
+				// if an apply patch occurs for a deployment that doesn't yet exist, create it.
+				// However, we already hold the fakeclient lock, so we can't use the front door.
+				rfunc := kubetesting.ObjectReaction(s.clientset.Tracker())
+				_, obj, err := rfunc(
+					kubetesting.NewGetAction(pa.GetResource(), pa.GetNamespace(), pa.GetName()),
+				)
+				if kubeerrors.IsNotFound(err) || obj == nil {
+					_, _, _ = rfunc(
+						kubetesting.NewCreateAction(
+							pa.GetResource(),
+							pa.GetNamespace(),
+							&networkingv1.Ingress{
+								ObjectMeta: metav1.ObjectMeta{
+									Name:      pa.GetName(),
+									Namespace: pa.GetNamespace(),
+								},
+							},
+						),
+					)
+				}
+				return rfunc(kubetesting.NewPatchAction(
+					pa.GetResource(),
+					pa.GetNamespace(),
+					pa.GetName(),
+					types.StrategicMergePatchType,
+					pa.GetPatch()))
+			}
+			return false, nil, nil
+		})
+
 	s.service = kube.NewK8sContainerService(s.logger, s.clientset)
 
 	viper.Set(config.KubeNamespaceKey, s.namespace)

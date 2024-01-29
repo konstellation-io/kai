@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 
 	"github.com/go-logr/logr"
@@ -24,6 +26,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
+	"github.com/minio/minio-go/v7"
 	"github.com/sethvargo/go-password/password"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -131,6 +134,11 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 
 	minioOjectStorage := objectstorage.NewMinioObjectStorage(logger, minioClient, minioAdminClient)
 
+	err = ensureKAIBucketExists(logger, minioOjectStorage, minioClient, keycloakUserRegistry)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	predictionRepo := redis.NewPredictionRepository(redis.NewRedisClient())
 
 	err = predictionRepo.EnsurePredictionIndexCreated()
@@ -187,4 +195,51 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 			LogsUsecase:            logsUseCase,
 		},
 	)
+}
+
+func ensureKAIBucketExists(
+	logger logr.Logger,
+	storage *objectstorage.MinioObjectStorage,
+	minoClient *minio.Client,
+	userRegistry *user.KeycloakUserRegistry,
+) error {
+	ctx := context.Background()
+	kaiBucket := viper.GetString(config.GlobalRegistryKey)
+
+	exists, err := minoClient.BucketExists(ctx, kaiBucket)
+	if err != nil {
+		return fmt.Errorf("checking if kai bucket exists: %w", err)
+	}
+
+	var policyName string
+
+	if !exists {
+		logger.Info("Creating KAI bucket in object storage", "bucket", kaiBucket)
+
+		err = storage.CreateBucket(ctx, kaiBucket)
+		if err != nil {
+			return fmt.Errorf("creating kai bucket: %w", err)
+		}
+
+		policyName, err = storage.CreateBucketPolicy(ctx, kaiBucket)
+		if err != nil {
+			return fmt.Errorf("creating kai object storage policy: %w", err)
+		}
+	}
+
+	groupExists, err := userRegistry.GroupExists(ctx, kaiBucket)
+	if err != nil {
+		return fmt.Errorf("checking if kai group exists in user registry: %w", err)
+	}
+
+	if !groupExists {
+		logger.Info("Creating KAI group in user registry", "group", kaiBucket)
+
+		err = userRegistry.CreateGroupWithPolicy(ctx, kaiBucket, policyName)
+		if err != nil {
+			return fmt.Errorf("creating kai group in user registry: %w", err)
+		}
+	}
+
+	return nil
 }

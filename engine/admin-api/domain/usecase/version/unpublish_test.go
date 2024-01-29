@@ -31,7 +31,7 @@ func (s *versionSuite) TestUnpublish_OK() {
 
 	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(nil)
 	s.versionRepo.EXPECT().Update(productID, vers).Return(nil)
-	s.productRepo.EXPECT().Update(ctx, product)
+	s.productRepo.EXPECT().Update(ctx, product).Return(nil)
 	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.Email, productID, vers, "unpublishing").Return(nil)
 
 	// WHEN unpublishing the version

@@ -104,6 +104,7 @@ input PublishVersionInput {
   versionTag: String!
   comment: String!
   productID: ID!
+  force: Boolean!
 }
 
 input UnpublishVersionInput {
@@ -136,6 +137,7 @@ type Product {
   description: String!
   creationAuthor: String!
   creationDate: String!
+  publishedVersion: String
 }
 
 type Version {
