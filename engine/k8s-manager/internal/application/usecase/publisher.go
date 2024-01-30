@@ -26,3 +26,9 @@ func (vp *VersionPublisher) PublishVersion(ctx context.Context, product, version
 		Version: version,
 	})
 }
+
+func (vp *VersionPublisher) GetPublishedTriggers(ctx context.Context, product string) (map[string]string, error) {
+	vp.logger.Info("Getting published triggers", "product", product)
+
+	return vp.networkPublisher.GetPublishedTriggers(ctx, product)
+}

@@ -31,8 +31,8 @@ func NewProcessBuilder() *ProcessBuilder {
 	}
 }
 
-func (pb *ProcessBuilder) WithID(id string) *ProcessBuilder {
-	pb.process.Name = id
+func (pb *ProcessBuilder) WithName(name string) *ProcessBuilder {
+	pb.process.Name = name
 	return pb
 }
 

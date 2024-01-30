@@ -31,7 +31,7 @@ const (
 	_process     = "test-process"
 )
 
-var fullProcessIdentifier = strings.ReplaceAll(fmt.Sprintf("%s-%s-%s-%s", _product, _version, _workflow, _process), ".", "-")
+var _fullProcessIdentifier = getFullProcessIdentifier(_product, _version, _workflow, _process)
 
 type networkSuite struct {
 	suite.Suite
@@ -114,4 +114,8 @@ func (s *networkSuite) TearDownTest() {
 		err = s.clientset.NetworkingV1().Ingresses(s.namespace).Delete(ctx, ingress.Name, metav1.DeleteOptions{})
 		s.Require().NoError(err)
 	}
+}
+
+func getFullProcessIdentifier(product, version, workflow, process string) string {
+	return strings.ReplaceAll(fmt.Sprintf("%s-%s-%s-%s", product, version, workflow, process), ".", "-")
 }

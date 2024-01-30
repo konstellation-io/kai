@@ -112,6 +112,10 @@ message RegisterProcessRequest {
   string process_image = 3;
 }
 
+message GetPublishedTriggersRequest {
+  string product_id = 1;
+}
+
 message RegisterProcessResponse {
   string image_id = 1;
 }
@@ -127,4 +131,5 @@ service VersionService {
   rpc Unpublish (UnpublishRequest) returns (Response);
   rpc WatchProcessStatus (ProcessStatusRequest) returns (stream ProcessStatusResponse);
   rpc RegisterProcess (RegisterProcessRequest) returns (RegisterProcessResponse);
+  rpc GetPublishedTriggers (GetPublishedTriggersRequest) returns (PublishResponse);
 };
