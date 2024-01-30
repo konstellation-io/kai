@@ -198,7 +198,16 @@ k8sManager:
       # -- Image tag for image builder's jobs
       tag: v1.18.0
       # -- Image pull policy for image builder's jobs
-    pullPolicy: IfNotPresent
+      pullPolicy: IfNotPresent
+    netrc:
+      # -- Whether to create .netrc file for authentication for private dependency repositories
+      enabled: false
+      # -- .netrc file content. Ref: https://everything.curl.dev/usingcurl/netrc
+      content: ""
+      ## example:
+      # content: |
+      #   machine booster    login baxter  password swordfish
+      #   machine wooster    login francis password sw0rdf1sh
   processes:
     triggers:
       ingress:
