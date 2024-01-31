@@ -214,3 +214,24 @@ func (s *VersionServiceTestSuite) TestRegisterProcess_ClientError() {
 	_, err := s.k8sVersionClient.RegisterProcess(ctx, expectedProductID, expectedProcessID, expectedProcessImage)
 	s.ErrorIs(err, expectedError)
 }
+
+func (s *VersionServiceTestSuite) TestGetPublishedTriggers() {
+	ctx := context.Background()
+	testProduct := "test-product-id"
+	expectedTrigger := []entity.PublishedTrigger{
+		{
+			Trigger: "test-trigger",
+			URL:     "test-url",
+		},
+	}
+
+	s.mockService.EXPECT().GetPublishedTriggers(ctx, &versionpb.GetPublishedTriggersRequest{
+		ProductId: testProduct,
+	}).Return(&versionpb.PublishResponse{
+		NetworkUrls: map[string]string{"test-trigger": "test-url"},
+	}, nil)
+
+	actual, err := s.k8sVersionClient.GetPublishedTriggers(ctx, testProduct)
+	s.NoError(err)
+	s.Equal(expectedTrigger, actual)
+}
