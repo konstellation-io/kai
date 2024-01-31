@@ -31,8 +31,8 @@ const (
 
 	_ttlSecondsAfterFinishedJob = 100
 
-	//nolint:gosec // False positive
-	_registryAuthSecretVolume = "registry-auth-secret"
+	_registryAuthSecretVolume  = "registry-auth-secret"  //nolint:gosec // False positive
+	_registryNetrcSecretVolume = "registry-netrc-secret" //nolint:gosec // False positive
 )
 
 var (
@@ -138,22 +138,47 @@ func (ib *KanikoImageBuilder) getImageBuilderJob(productID, jobName, imageWithDe
 									Value: "true",
 								},
 							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      _registryAuthSecretVolume,
-									MountPath: "/kaniko/.docker",
-								},
-							},
+							VolumeMounts: ib.getImageBuilderVolumeMounts(),
 						},
 					},
 					RestartPolicy: corev1.RestartPolicyNever,
-					Volumes: []corev1.Volume{
-						ib.getRegistryAuthVolume(),
-					},
+					Volumes:       ib.getImageBuilderVolumesDefinition(),
 				},
 			},
 		},
 	}
+}
+
+func (ib *KanikoImageBuilder) getImageBuilderVolumeMounts() []corev1.VolumeMount {
+	commonVolumeMounts := []corev1.VolumeMount{
+		{
+			Name:      _registryAuthSecretVolume,
+			MountPath: "/kaniko/.docker",
+		},
+	}
+
+	if viper.GetBool(config.ImageBuilderNetrcEnabledKey) {
+		return append(commonVolumeMounts,
+			corev1.VolumeMount{
+				Name:      _registryNetrcSecretVolume,
+				MountPath: "/kaniko/.netrc",
+			},
+		)
+	}
+
+	return commonVolumeMounts
+}
+
+func (ib *KanikoImageBuilder) getImageBuilderVolumesDefinition() []corev1.Volume {
+	commonVolumes := []corev1.Volume{
+		ib.getRegistryAuthVolume(),
+	}
+
+	if viper.GetBool(config.ImageBuilderNetrcEnabledKey) {
+		return append(commonVolumes, ib.getRegistryNetrcVolume())
+	}
+
+	return commonVolumes
 }
 
 func (ib *KanikoImageBuilder) getRegistryAuthVolume() corev1.Volume {
@@ -166,6 +191,23 @@ func (ib *KanikoImageBuilder) getRegistryAuthVolume() corev1.Volume {
 					{
 						Key:  ".dockerconfigjson",
 						Path: "config.json",
+					},
+				},
+			},
+		},
+	}
+}
+
+func (ib *KanikoImageBuilder) getRegistryNetrcVolume() corev1.Volume {
+	return corev1.Volume{
+		Name: _registryNetrcSecretVolume,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: viper.GetString(config.ImageBuilderNetrcSecretKey),
+				Items: []corev1.KeyToPath{
+					{
+						Key:  ".netrcconfig",
+						Path: ".netrc",
 					},
 				},
 			},
