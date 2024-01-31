@@ -202,7 +202,7 @@ type MutationResolver interface {
 	CreateVersion(ctx context.Context, input CreateVersionInput) (*entity.Version, error)
 	StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error)
 	StopVersion(ctx context.Context, input StopVersionInput) (*entity.Version, error)
-	PublishVersion(ctx context.Context, input PublishVersionInput) ([]*PublishedTrigger, error)
+	PublishVersion(ctx context.Context, input PublishVersionInput) ([]*entity.PublishedTrigger, error)
 	UnpublishVersion(ctx context.Context, input UnpublishVersionInput) (*entity.Version, error)
 	UpdateUserProductGrants(ctx context.Context, input UpdateUserProductGrantsInput) (*entity.User, error)
 	RevokeUserProductGrants(ctx context.Context, input RevokeUserProductGrantsInput) (*entity.User, error)
@@ -2402,9 +2402,9 @@ func (ec *executionContext) _Mutation_publishVersion(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*PublishedTrigger)
+	res := resTmp.([]*entity.PublishedTrigger)
 	fc.Result = res
-	return ec.marshalNPublishedTrigger2ᚕᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐPublishedTriggerᚄ(ctx, field.Selections, res)
+	return ec.marshalNPublishedTrigger2ᚕᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐPublishedTriggerᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_publishVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3902,7 +3902,7 @@ func (ec *executionContext) fieldContext_Product_publishedVersion(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _PublishedTrigger_trigger(ctx context.Context, field graphql.CollectedField, obj *PublishedTrigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _PublishedTrigger_trigger(ctx context.Context, field graphql.CollectedField, obj *entity.PublishedTrigger) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_PublishedTrigger_trigger(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3946,7 +3946,7 @@ func (ec *executionContext) fieldContext_PublishedTrigger_trigger(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _PublishedTrigger_url(ctx context.Context, field graphql.CollectedField, obj *PublishedTrigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _PublishedTrigger_url(ctx context.Context, field graphql.CollectedField, obj *entity.PublishedTrigger) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_PublishedTrigger_url(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -9216,7 +9216,7 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 
 var publishedTriggerImplementors = []string{"PublishedTrigger"}
 
-func (ec *executionContext) _PublishedTrigger(ctx context.Context, sel ast.SelectionSet, obj *PublishedTrigger) graphql.Marshaler {
+func (ec *executionContext) _PublishedTrigger(ctx context.Context, sel ast.SelectionSet, obj *entity.PublishedTrigger) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, publishedTriggerImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -10869,7 +10869,7 @@ func (ec *executionContext) unmarshalNPublishVersionInput2githubᚗcomᚋkonstel
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNPublishedTrigger2ᚕᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐPublishedTriggerᚄ(ctx context.Context, sel ast.SelectionSet, v []*PublishedTrigger) graphql.Marshaler {
+func (ec *executionContext) marshalNPublishedTrigger2ᚕᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐPublishedTriggerᚄ(ctx context.Context, sel ast.SelectionSet, v []*entity.PublishedTrigger) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -10893,7 +10893,7 @@ func (ec *executionContext) marshalNPublishedTrigger2ᚕᚖgithubᚗcomᚋkonste
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPublishedTrigger2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐPublishedTrigger(ctx, sel, v[i])
+			ret[i] = ec.marshalNPublishedTrigger2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐPublishedTrigger(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10913,7 +10913,7 @@ func (ec *executionContext) marshalNPublishedTrigger2ᚕᚖgithubᚗcomᚋkonste
 	return ret
 }
 
-func (ec *executionContext) marshalNPublishedTrigger2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐPublishedTrigger(ctx context.Context, sel ast.SelectionSet, v *PublishedTrigger) graphql.Marshaler {
+func (ec *executionContext) marshalNPublishedTrigger2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐPublishedTrigger(ctx context.Context, sel ast.SelectionSet, v *entity.PublishedTrigger) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

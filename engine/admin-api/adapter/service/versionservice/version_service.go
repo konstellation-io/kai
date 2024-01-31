@@ -175,3 +175,12 @@ func (k *K8sVersionService) RegisterProcess(ctx context.Context, productID, proc
 
 	return res.ImageId, nil
 }
+
+func (k *K8sVersionService) GetPublishedTriggers(ctx context.Context, productID string) ([]entity.PublishedTrigger, error) {
+	res, err := k.client.GetPublishedTriggers(ctx, &versionpb.GetPublishedTriggersRequest{ProductId: productID})
+	if err != nil {
+		return nil, err
+	}
+
+	return mapDTOToPublishedTriggers(res.NetworkUrls), nil
+}

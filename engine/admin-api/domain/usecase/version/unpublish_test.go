@@ -18,24 +18,24 @@ func (s *versionSuite) TestUnpublish_OK() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusPublished).
 		Build()
 	product := testhelpers.NewProductBuilder().
 		WithPublishedVersion(&vers.Tag).
 		Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(product, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(product, nil)
 
-	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(nil)
-	s.versionRepo.EXPECT().Update(productID, vers).Return(nil)
+	s.versionService.EXPECT().Unpublish(ctx, _productID, vers).Return(nil)
+	s.versionRepo.EXPECT().Update(_productID, vers).Return(nil)
 	s.productRepo.EXPECT().Update(ctx, product).Return(nil)
-	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.Email, productID, vers, "unpublishing").Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.Email, _productID, vers, "unpublishing").Return(nil)
 
 	// WHEN unpublishing the version
-	unpublishedVer, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
+	unpublishedVer, err := s.handler.Unpublish(ctx, user, _productID, _versionTag, "unpublishing")
 
 	// THEN the version status is started, publication fields are cleared, and it's not published
 	s.NoError(err)
@@ -49,14 +49,14 @@ func (s *versionSuite) TestUnpublish_ErrorUserNotAuthorized() {
 	// GIVEN an unauthorized user and a published version
 	ctx := context.Background()
 	badUser := testhelpers.NewUserBuilder().Build()
-	expectedVer := &entity.Version{Tag: versionTag}
+	expectedVer := &entity.Version{Tag: _versionTag}
 
-	s.accessControl.EXPECT().CheckProductGrants(badUser, productID, auth.ActUnpublishVersion).Return(
+	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActUnpublishVersion).Return(
 		fmt.Errorf("git good"),
 	)
 
 	// WHEN unpublishing the version
-	_, err := s.handler.Unpublish(ctx, badUser, productID, expectedVer.Tag, "unpublishing")
+	_, err := s.handler.Unpublish(ctx, badUser, _productID, expectedVer.Tag, "unpublishing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -66,13 +66,13 @@ func (s *versionSuite) TestUnpublish_ErrorVersionNotFound() {
 	// GIVEN a valid user and a version not found
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
-	expectedVer := &entity.Version{Tag: versionTag}
+	expectedVer := &entity.Version{Tag: _versionTag}
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, expectedVer.Tag).Return(nil, fmt.Errorf("no version found"))
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, expectedVer.Tag).Return(nil, fmt.Errorf("no version found"))
 
 	// WHEN unpublishing the version
-	_, err := s.handler.Unpublish(ctx, user, productID, expectedVer.Tag, "unpublishing")
+	_, err := s.handler.Unpublish(ctx, user, _productID, expectedVer.Tag, "unpublishing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -83,15 +83,15 @@ func (s *versionSuite) TestUnpublish_ErrorVersionCannotBeUnpublished() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
 	// WHEN unpublishing the version
-	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
+	_, err := s.handler.Unpublish(ctx, user, _productID, _versionTag, "unpublishing")
 
 	// THEN an error is returned
 	s.ErrorIs(err, version.ErrVersionCannotBeUnpublished)
@@ -102,19 +102,19 @@ func (s *versionSuite) TestUnpublish_ErrorProductNotFound() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusPublished).
 		Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, fmt.Errorf("no product found"))
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(nil, fmt.Errorf("no product found"))
 
-	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(nil)
-	s.versionRepo.EXPECT().Update(productID, vers).Return(nil)
+	s.versionService.EXPECT().Unpublish(ctx, _productID, vers).Return(nil)
+	s.versionRepo.EXPECT().Update(_productID, vers).Return(nil)
 
 	// WHEN unpublishing the version
-	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
+	_, err := s.handler.Unpublish(ctx, user, _productID, _versionTag, "unpublishing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -125,18 +125,18 @@ func (s *versionSuite) TestUnpublish_ErrorUnpublishingVersion() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusPublished).
 		Build()
 	unpubErr := errors.New("unpublish error in k8s service")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
-	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(unpubErr)
+	s.versionService.EXPECT().Unpublish(ctx, _productID, vers).Return(unpubErr)
 
 	// WHEN unpublishing the version
-	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
+	_, err := s.handler.Unpublish(ctx, user, _productID, _versionTag, "unpublishing")
 
 	// THEN an error is returned
 	s.ErrorIs(err, version.ErrUnpublishingVersion)
@@ -147,7 +147,7 @@ func (s *versionSuite) TestUnpublish_CheckNonBlockingErrorLogging() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusPublished).
 		Build()
 	product := testhelpers.NewProductBuilder().
@@ -158,17 +158,17 @@ func (s *versionSuite) TestUnpublish_CheckNonBlockingErrorLogging() {
 	updateProductErr := errors.New("error updating product published version")
 	registerActionErr := errors.New("error registering unpublish action")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActUnpublishVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(product, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
+	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(product, nil)
 
-	s.versionService.EXPECT().Unpublish(ctx, productID, vers).Return(nil)
-	s.versionRepo.EXPECT().Update(productID, vers).Return(setStatusErr)
+	s.versionService.EXPECT().Unpublish(ctx, _productID, vers).Return(nil)
+	s.versionRepo.EXPECT().Update(_productID, vers).Return(setStatusErr)
 	s.productRepo.EXPECT().Update(ctx, product).Return(updateProductErr)
-	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.Email, productID, vers, "unpublishing").Return(registerActionErr)
+	s.userActivityInteractor.EXPECT().RegisterUnpublishAction(user.Email, _productID, vers, "unpublishing").Return(registerActionErr)
 
 	// WHEN unpublishing the version
-	_, err := s.handler.Unpublish(ctx, user, productID, versionTag, "unpublishing")
+	_, err := s.handler.Unpublish(ctx, user, _productID, _versionTag, "unpublishing")
 	s.NoError(err)
 
 	s.Require().Len(s.observedLogs.All(), 4)

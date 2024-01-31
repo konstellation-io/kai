@@ -19,25 +19,25 @@ func (s *versionSuite) TestStop_OK() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(ctx, productID, vers).Return(nil)
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStopping).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, _productID, _versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(ctx, _productID, vers).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(ctx, _productID, vers.Tag, entity.VersionStatusStopping).Return(nil)
 
 	// go rutine expected to be called
-	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(nil)
-	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStopped).Return(nil)
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, productID, vers, "testing").Return(nil)
+	s.versionService.EXPECT().Stop(gomock.Any(), _productID, vers).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), _productID, vers.Tag, entity.VersionStatusStopped).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, _productID, vers, "testing").Return(nil)
 
 	// WHEN stopping the version
-	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
+	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, _productID, _versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status is stopping
@@ -53,16 +53,16 @@ func (s *versionSuite) TestStop_ErrorUserNotAuthorized() {
 	// GIVEN an unauthorized user and a version
 	ctx := context.Background()
 	badUser := testhelpers.NewUserBuilder().Build()
-	expectedVer := &entity.Version{Tag: versionTag}
+	expectedVer := &entity.Version{Tag: _versionTag}
 	versionMatcher := newVersionMatcher(expectedVer)
 
-	s.accessControl.EXPECT().CheckProductGrants(badUser, productID, auth.ActStopVersion).Return(
+	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActStopVersion).Return(
 		fmt.Errorf("git good"),
 	)
-	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.Email, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.Email, _productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, badUser, productID, expectedVer.Tag, "testing")
+	_, _, err := s.handler.Stop(ctx, badUser, _productID, expectedVer.Tag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -72,15 +72,15 @@ func (s *versionSuite) TestStop_ErrorVersionNotFound() {
 	// GIVEN a valid user and a version not found
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
-	expectedVer := &entity.Version{Tag: versionTag}
+	expectedVer := &entity.Version{Tag: _versionTag}
 	versionMatcher := newVersionMatcher(expectedVer)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, expectedVer.Tag).Return(nil, fmt.Errorf("no version found"))
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, productID, versionMatcher, version.ErrVersionNotFound.Error()).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, expectedVer.Tag).Return(nil, fmt.Errorf("no version found"))
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, _productID, versionMatcher, version.ErrVersionNotFound.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, expectedVer.Tag, "testing")
+	_, _, err := s.handler.Stop(ctx, user, _productID, expectedVer.Tag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -91,18 +91,18 @@ func (s *versionSuite) TestStop_ErrorInvalidVersionStatus() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusStopped).
 		Build()
 	versionMatcher := newVersionMatcher(vers)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, productID, versionMatcher, version.ErrVersionCannotBeStopped.Error()).Return(nil)
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, _productID, versionMatcher, version.ErrVersionCannotBeStopped.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
+	_, _, err := s.handler.Stop(ctx, user, _productID, _versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -114,19 +114,19 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingStreams() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 	versionMatcher := newVersionMatcher(vers)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(fmt.Errorf("error deleting streams"))
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, productID, versionMatcher, version.ErrDeletingNATSResources.Error()).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(fmt.Errorf("error deleting streams"))
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, _productID, versionMatcher, version.ErrDeletingNATSResources.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
+	_, _, err := s.handler.Stop(ctx, user, _productID, _versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -137,20 +137,20 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingObjectStores() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 	versionMatcher := newVersionMatcher(vers)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(fmt.Errorf("error deleting object stores"))
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, productID, versionMatcher, version.ErrDeletingNATSResources.Error()).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, _productID, _versionTag).Return(fmt.Errorf("error deleting object stores"))
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, _productID, versionMatcher, version.ErrDeletingNATSResources.Error()).Return(nil)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
+	_, _, err := s.handler.Stop(ctx, user, _productID, _versionTag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -161,7 +161,7 @@ func (s *versionSuite) TestStop_CheckNonBlockingErrorLogging() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 
@@ -169,28 +169,28 @@ func (s *versionSuite) TestStop_CheckNonBlockingErrorLogging() {
 	setStatusErrStarted := errors.New("not again")
 	registerActionErr := errors.New("this is the end")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(ctx, productID, vers).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, _productID, _versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(ctx, _productID, vers).Return(nil)
 
 	// GIVEN first set status errors
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStopping).
+	s.versionRepo.EXPECT().SetStatus(ctx, _productID, vers.Tag, entity.VersionStatusStopping).
 		Return(setStatusErrStarting)
 
 	// go rutine expected calls
-	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(nil)
+	s.versionService.EXPECT().Stop(gomock.Any(), _productID, vers).Return(nil)
 	// GIVEN second set status errors
-	s.versionRepo.EXPECT().SetStatus(gomock.Any(), productID, vers.Tag, entity.VersionStatusStopped).
+	s.versionRepo.EXPECT().SetStatus(gomock.Any(), _productID, vers.Tag, entity.VersionStatusStopped).
 		Return(setStatusErrStarted)
 	// GIVEN register stop action errors
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, productID, vers, "testing").
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, _productID, vers, "testing").
 		Return(registerActionErr)
 
 	// WHEN stopping the version
-	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
+	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, _productID, _versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status first is stopping
@@ -216,22 +216,22 @@ func (s *versionSuite) TestStop_ErrorUserNotAuthorized_ErrorRegisterAction() {
 	// GIVEN an unauthorized user and a version
 	ctx := context.Background()
 	badUser := testhelpers.NewUserBuilder().Build()
-	expectedVer := &entity.Version{Tag: versionTag}
+	expectedVer := &entity.Version{Tag: _versionTag}
 	versionMatcher := newVersionMatcher(expectedVer)
 
 	customErr := errors.New("oh no")
 	registerActionErr := errors.New("a bad day")
 
-	s.accessControl.EXPECT().CheckProductGrants(badUser, productID, auth.ActStopVersion).Return(
+	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActStopVersion).Return(
 		customErr,
 	)
 	// Given error registering action
-	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.Email, productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(
+	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.Email, _productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(
 		registerActionErr,
 	)
 
 	// WHEN stopping the version
-	_, _, err := s.handler.Stop(ctx, badUser, productID, expectedVer.Tag, "testing")
+	_, _, err := s.handler.Stop(ctx, badUser, _productID, expectedVer.Tag, "testing")
 
 	// THEN an error is returned
 	s.Error(err)
@@ -247,29 +247,29 @@ func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 	errStoppingVersion := "error stopping version"
 	setErrorErr := errors.New("error setting error")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActStopVersion).Return(nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, productID, versionTag).Return(vers, nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
-	s.natsManagerService.EXPECT().DeleteStreams(ctx, productID, versionTag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, productID, versionTag).Return(nil)
-	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(ctx, productID, vers).Return(nil)
-	s.versionRepo.EXPECT().SetStatus(ctx, productID, vers.Tag, entity.VersionStatusStopping).Return(nil)
+	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteObjectStores(ctx, _productID, _versionTag).Return(nil)
+	s.natsManagerService.EXPECT().DeleteVersionKeyValueStores(ctx, _productID, vers).Return(nil)
+	s.versionRepo.EXPECT().SetStatus(ctx, _productID, vers.Tag, entity.VersionStatusStopping).Return(nil)
 
 	// go rutine expected to be called
-	s.versionService.EXPECT().Stop(gomock.Any(), productID, vers).Return(fmt.Errorf(errStoppingVersion))
-	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, productID, vers, version.ErrStoppingVersion.Error()).Return(nil)
+	s.versionService.EXPECT().Stop(gomock.Any(), _productID, vers).Return(fmt.Errorf(errStoppingVersion))
+	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, _productID, vers, version.ErrStoppingVersion.Error()).Return(nil)
 
 	// Given set status
-	s.versionRepo.EXPECT().SetErrorStatusWithError(gomock.Any(), productID, vers.Tag, errStoppingVersion).Return(setErrorErr)
+	s.versionRepo.EXPECT().SetErrorStatusWithError(gomock.Any(), _productID, vers.Tag, errStoppingVersion).Return(setErrorErr)
 
 	// WHEN stopping the version
-	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, productID, versionTag, "testing")
+	stoppingVer, notifyChn, err := s.handler.Stop(ctx, user, _productID, _versionTag, "testing")
 	s.NoError(err)
 
 	// THEN the version status is stopping

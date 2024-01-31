@@ -20,7 +20,7 @@ func (s *versionSuite) TestPublish_OK() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 	product := testhelpers.NewProductBuilder().Build()
@@ -30,7 +30,7 @@ func (s *versionSuite) TestPublish_OK() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
 	s.versionService.EXPECT().Publish(gomock.Any(), product.ID, vers.Tag).Return(expectedURLs, nil)
 	s.versionRepo.EXPECT().Update(product.ID, vers).Return(nil)
@@ -40,7 +40,7 @@ func (s *versionSuite) TestPublish_OK() {
 	// WHEN publishing the version
 	actualURLs, err := s.handler.Publish(ctx, user, version.PublishOpts{
 		ProductID:  product.ID,
-		VersionTag: versionTag,
+		VersionTag: _versionTag,
 		Comment:    "publishing",
 	})
 
@@ -56,7 +56,7 @@ func (s *versionSuite) TestPublishing_ErrorUserNotAuthorized() {
 	// GIVEN an unauthorized user and a started version
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
-	expectedVer := &entity.Version{Tag: versionTag}
+	expectedVer := &entity.Version{Tag: _versionTag}
 	product := testhelpers.NewProductBuilder().Build()
 
 	expectedError := errors.New("unauthorized")
@@ -103,19 +103,19 @@ func (s *versionSuite) TestPublish_ErrorVersionNotStarted_NoForce() {
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	vers := testhelpers.NewVersionBuilder().
-		WithTag(versionTag).
+		WithTag(_versionTag).
 		WithStatus(entity.VersionStatusCreated).
 		Build()
 	product := testhelpers.NewProductBuilder().Build()
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
 	// WHEN unpublishing the version
 	_, err := s.handler.Publish(ctx, user, version.PublishOpts{
 		ProductID:  product.ID,
-		VersionTag: versionTag,
+		VersionTag: _versionTag,
 		Comment:    "publishing",
 	})
 
@@ -132,7 +132,7 @@ func (s *versionSuite) TestPublish_ProductWithVersionAlreadyPublished_NoForce() 
 			WithPublishedVersion(testhelpers.StrPointer("another-version")).
 			Build()
 		vers = testhelpers.NewVersionBuilder().
-			WithTag(versionTag).
+			WithTag(_versionTag).
 			WithStatus(entity.VersionStatusStarted).
 			Build()
 	)
@@ -250,7 +250,7 @@ func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced() {
 			Build()
 
 		vers = testhelpers.NewVersionBuilder().
-			WithTag(versionTag).
+			WithTag(_versionTag).
 			WithStatus(entity.VersionStatusStarted).
 			Build()
 		expectedURLs = map[string]string{
@@ -260,7 +260,7 @@ func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
 	s.versionRepo.EXPECT().SetStatus(ctx, product.ID, oldVersion.Tag, entity.VersionStatusStarted).Return(nil)
 
@@ -298,7 +298,7 @@ func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced_RegisterAction
 			Build()
 
 		vers = testhelpers.NewVersionBuilder().
-			WithTag(versionTag).
+			WithTag(_versionTag).
 			WithStatus(entity.VersionStatusStarted).
 			Build()
 		expectedURLs = map[string]string{
@@ -314,7 +314,7 @@ func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced_RegisterAction
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
 	s.versionRepo.EXPECT().SetStatus(ctx, product.ID, oldVersion.Tag, entity.VersionStatusStarted).Return(nil)
 
@@ -353,19 +353,19 @@ func (s *versionSuite) TestPublish_FailsIfTheVersionIsAlreadyPublished() {
 		product = testhelpers.NewProductBuilder().
 			Build()
 		vers = testhelpers.NewVersionBuilder().
-			WithTag(versionTag).
+			WithTag(_versionTag).
 			WithStatus(entity.VersionStatusPublished).
 			Build()
 	)
 
 	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
-	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, versionTag).Return(vers, nil)
+	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
 	// WHEN publish the version with the param Force set to true
 	_, err := s.handler.Publish(ctx, user, version.PublishOpts{
 		ProductID:  product.ID,
-		VersionTag: versionTag,
+		VersionTag: _versionTag,
 		Comment:    "publishing",
 	})
 
