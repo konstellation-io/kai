@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	echo "github.com/labstack/echo"
+	echo "github.com/labstack/echo/v4"
 )
 
 // MockGraphQL is a mock of GraphQL interface.
