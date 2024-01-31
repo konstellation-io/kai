@@ -125,7 +125,10 @@ func (v *VersionService) Unpublish(
 	}, nil
 }
 
-func (v *VersionService) GetPublishedTriggers(ctx context.Context, req *versionpb.GetPublishedTriggersRequest) (*versionpb.PublishResponse, error) {
+func (v *VersionService) GetPublishedTriggers(
+	ctx context.Context,
+	req *versionpb.GetPublishedTriggersRequest,
+) (*versionpb.PublishResponse, error) {
 	v.logger.Info("GetPublishedTriggers request received")
 
 	publishedTriggers, err := v.publisher.GetPublishedTriggers(ctx, req.ProductId)
