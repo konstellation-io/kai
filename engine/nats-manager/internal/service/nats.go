@@ -163,3 +163,20 @@ func (n *NatsService) UpdateKeyValueConfiguration(
 		Message: "Configurations successfully updated!",
 	}, nil
 }
+
+func (n *NatsService) DeleteGlobalKeyValueStore(
+	_ context.Context,
+	req *natspb.DeleteGlobalKeyValueStoreRequest,
+) (*natspb.DeleteResponse, error) {
+	n.logger.Info("DeleteVersionKeyValueStores request received")
+
+	err := n.manager.DeleteGlobalKeyValueStore(req.ProductId)
+	if err != nil {
+		n.logger.Error(err, "Error deleting global key-value store", "product", req.ProductId)
+		return nil, err
+	}
+
+	return &natspb.DeleteResponse{
+		Message: fmt.Sprintf("Global key-value store for product %q deleted", req.ProductId),
+	}, nil
+}

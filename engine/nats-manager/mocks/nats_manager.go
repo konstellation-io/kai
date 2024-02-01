@@ -94,6 +94,20 @@ func (mr *MockNatsManagerMockRecorder) CreateVersionKeyValueStores(productID, ve
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVersionKeyValueStores", reflect.TypeOf((*MockNatsManager)(nil).CreateVersionKeyValueStores), productID, versionTag, workflows)
 }
 
+// DeleteGlobalKeyValueStore mocks base method.
+func (m *MockNatsManager) DeleteGlobalKeyValueStore(productID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteGlobalKeyValueStore", productID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteGlobalKeyValueStore indicates an expected call of DeleteGlobalKeyValueStore.
+func (mr *MockNatsManagerMockRecorder) DeleteGlobalKeyValueStore(productID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGlobalKeyValueStore", reflect.TypeOf((*MockNatsManager)(nil).DeleteGlobalKeyValueStore), productID)
+}
+
 // DeleteObjectStores mocks base method.
 func (m *MockNatsManager) DeleteObjectStores(productID, versionTag string) error {
 	m.ctrl.T.Helper()

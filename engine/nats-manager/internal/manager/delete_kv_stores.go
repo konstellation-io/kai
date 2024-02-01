@@ -45,3 +45,16 @@ func (m *NatsManager) DeleteVersionKeyValueStores(
 
 	return nil
 }
+
+func (m *NatsManager) DeleteGlobalKeyValueStore(productID string) error {
+	m.logger.Info("Deleting global key-value store")
+
+	keyValueStore := m.getProductKeyValueStoreName(productID)
+
+	err := m.client.DeleteKeyValueStore(keyValueStore)
+	if err != nil {
+		return fmt.Errorf("deleting global key-value store %q: %w", keyValueStore, err)
+	}
+
+	return nil
+}
