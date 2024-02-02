@@ -167,7 +167,6 @@ func (s *productSuite) TestCreateProduct_FailsIfUserHasNotPermission() {
 }
 
 func (s *productSuite) TestCreateProduct_FailsIfProductHasAnInvalidField() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -184,7 +183,6 @@ func (s *productSuite) TestCreateProduct_FailsIfProductHasAnInvalidField() {
 }
 
 func (s *productSuite) TestCreateProduct_FailsIfProductWithSameIDAlreadyExists() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -209,7 +207,6 @@ func (s *productSuite) TestCreateProduct_FailsIfProductWithSameIDAlreadyExists()
 }
 
 func (s *productSuite) TestCreateProduct_FailsIfProductWithSameNameAlreadyExists() {
-
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 
@@ -235,7 +232,6 @@ func (s *productSuite) TestCreateProduct_FailsIfProductWithSameNameAlreadyExists
 }
 
 func (s *productSuite) TestCreateProduct_ErrorCheckingProductIDInRepo() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -252,7 +248,6 @@ func (s *productSuite) TestCreateProduct_ErrorCheckingProductIDInRepo() {
 }
 
 func (s *productSuite) TestCreateProduct_ErrorCheckingProductNameInRepo() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -270,7 +265,6 @@ func (s *productSuite) TestCreateProduct_ErrorCheckingProductNameInRepo() {
 }
 
 func (s *productSuite) TestCreateProduct_ErrorCreatingVersionRepoIndexes() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -297,7 +291,6 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingVersionRepoIndexes() {
 }
 
 func (s *productSuite) TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -324,7 +317,6 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes
 }
 
 func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -371,7 +363,6 @@ func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
 }
 
 func (s *productSuite) TestGetByID() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -395,7 +386,6 @@ func (s *productSuite) TestGetByID() {
 }
 
 func (s *productSuite) TestFindAll() {
-
 	ctx := context.Background()
 
 	productID := "test-product"

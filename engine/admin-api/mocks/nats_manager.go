@@ -116,6 +116,26 @@ func (mr *MockNatsManagerServiceClientMockRecorder) CreateVersionKeyValueStores(
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVersionKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).CreateVersionKeyValueStores), varargs...)
 }
 
+// DeleteGlobalKeyValueStore mocks base method.
+func (m *MockNatsManagerServiceClient) DeleteGlobalKeyValueStore(ctx context.Context, in *natspb.DeleteGlobalKeyValueStoreRequest, opts ...grpc.CallOption) (*natspb.DeleteResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteGlobalKeyValueStore", varargs...)
+	ret0, _ := ret[0].(*natspb.DeleteResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteGlobalKeyValueStore indicates an expected call of DeleteGlobalKeyValueStore.
+func (mr *MockNatsManagerServiceClientMockRecorder) DeleteGlobalKeyValueStore(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGlobalKeyValueStore", reflect.TypeOf((*MockNatsManagerServiceClient)(nil).DeleteGlobalKeyValueStore), varargs...)
+}
+
 // DeleteObjectStores mocks base method.
 func (m *MockNatsManagerServiceClient) DeleteObjectStores(ctx context.Context, in *natspb.DeleteObjectStoresRequest, opts ...grpc.CallOption) (*natspb.DeleteResponse, error) {
 	m.ctrl.T.Helper()
@@ -277,6 +297,21 @@ func (m *MockNatsManagerServiceServer) CreateVersionKeyValueStores(arg0 context.
 func (mr *MockNatsManagerServiceServerMockRecorder) CreateVersionKeyValueStores(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVersionKeyValueStores", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).CreateVersionKeyValueStores), arg0, arg1)
+}
+
+// DeleteGlobalKeyValueStore mocks base method.
+func (m *MockNatsManagerServiceServer) DeleteGlobalKeyValueStore(arg0 context.Context, arg1 *natspb.DeleteGlobalKeyValueStoreRequest) (*natspb.DeleteResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteGlobalKeyValueStore", arg0, arg1)
+	ret0, _ := ret[0].(*natspb.DeleteResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteGlobalKeyValueStore indicates an expected call of DeleteGlobalKeyValueStore.
+func (mr *MockNatsManagerServiceServerMockRecorder) DeleteGlobalKeyValueStore(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGlobalKeyValueStore", reflect.TypeOf((*MockNatsManagerServiceServer)(nil).DeleteGlobalKeyValueStore), arg0, arg1)
 }
 
 // DeleteObjectStores mocks base method.
