@@ -66,6 +66,15 @@ func (os *MinioObjectStorage) CreateBucket(ctx context.Context, bucket string) e
 	return nil
 }
 
+func (os *MinioObjectStorage) DeleteBucket(ctx context.Context, bucket string) error {
+	err := os.client.RemoveBucketWithOptions(ctx, bucket, minio.RemoveBucketOptions{ForceDelete: true})
+	if err != nil {
+		return fmt.Errorf("deleting MinIO bucket %q: %w", bucket, err)
+	}
+
+	return nil
+}
+
 func (os *MinioObjectStorage) CreateBucketPolicy(ctx context.Context, bucket string) (string, error) {
 	policyName := bucket
 
@@ -79,6 +88,15 @@ func (os *MinioObjectStorage) CreateBucketPolicy(ctx context.Context, bucket str
 	}
 
 	return policyName, nil
+}
+
+func (os *MinioObjectStorage) DeleteBucketPolicy(ctx context.Context, policyName string) error {
+	err := os.adminClient.RemoveCannedPolicy(ctx, policyName)
+	if err != nil {
+		return fmt.Errorf("deleting bucket policy %q: %w", policyName, err)
+	}
+
+	return nil
 }
 
 func (os *MinioObjectStorage) UploadImageSources(ctx context.Context, product, image string, sources []byte) error {

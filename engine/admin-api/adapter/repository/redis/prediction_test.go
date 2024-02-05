@@ -128,6 +128,37 @@ func (s *RedisPredictionRepositorySuite) TestCreateUser_ErrInvalidUsername() {
 	s.Require().Error(err)
 }
 
+func (s *RedisPredictionRepositorySuite) TestDeleteUser() {
+	var (
+		ctx  = context.Background()
+		user = "test-user"
+	)
+
+	err := s.redisPredictionRepository.CreateUser(ctx, "test-product", user, "test-password")
+	s.Require().NoError(err)
+
+	err = s.redisPredictionRepository.DeleteUser(ctx, user)
+	s.NoError(err)
+
+	res, err := s.redisClient.Do(ctx, "ACL", "USERS").Result()
+	s.Require().NoError(err)
+	s.NotContains(res, user)
+}
+
+func (s *RedisPredictionRepositorySuite) TestDeleteUser_UserDoesNotExist() {
+	var (
+		ctx  = context.Background()
+		user = "test-user"
+	)
+
+	err := s.redisPredictionRepository.DeleteUser(ctx, user)
+	s.NoError(err)
+
+	res, err := s.redisClient.Do(ctx, "ACL", "USERS").Result()
+	s.Require().NoError(err)
+	s.NotContains(res, user)
+}
+
 func (s *RedisPredictionRepositorySuite) TestEnsureIngressCreated() {
 	viper.Set(config.RedisPredictionsIndexKey, "predictionsIdx")
 

@@ -102,7 +102,7 @@ func (i *ProductInteractor) CreateProduct(
 
 	createdProduct, err := i.createProductResources(ctx, compensations, newProduct)
 	if err != nil {
-		//go i.executeCompensations(compensations)
+		go i.executeCompensations(compensations)
 		return nil, err
 	}
 
@@ -122,7 +122,7 @@ func (i *ProductInteractor) createProductResources(
 	}
 
 	compensations.AddCompensation(func() error {
-		return i.natsService.DeleteGlobalKeyValueStore(ctx, newProduct.ID)
+		return i.natsService.DeleteGlobalKeyValueStore(context.Background(), newProduct.ID)
 	})
 
 	newProduct.KeyValueStore = globalKeyValueStore
@@ -142,15 +142,27 @@ func (i *ProductInteractor) createProductResources(
 		return nil, fmt.Errorf("creating object storage bucket: %w", err)
 	}
 
+	compensations.AddCompensation(func() error {
+		return i.objectStorage.DeleteBucket(context.Background(), minioConfiguration.Bucket)
+	})
+
 	policyName, err := i.objectStorage.CreateBucketPolicy(ctx, newProduct.ID)
 	if err != nil {
 		return nil, fmt.Errorf("creating object storage policy: %w", err)
 	}
 
+	compensations.AddCompensation(func() error {
+		return i.objectStorage.DeleteBucketPolicy(context.Background(), policyName)
+	})
+
 	err = i.userRegistry.CreateGroupWithPolicy(ctx, serviceAccount.Group, policyName)
 	if err != nil {
 		return nil, err
 	}
+
+	compensations.AddCompensation(func() error {
+		return i.userRegistry.DeleteGroup(context.Background(), newProduct.ID)
+	})
 
 	err = i.userRegistry.CreateUserWithinGroup(
 		ctx,
@@ -162,10 +174,18 @@ func (i *ProductInteractor) createProductResources(
 		return nil, err
 	}
 
+	compensations.AddCompensation(func() error {
+		return i.userRegistry.DeleteUser(context.Background(), newProduct.ID)
+	})
+
 	err = i.predictionRepo.CreateUser(ctx, newProduct.ID, serviceAccount.Username, serviceAccount.Password)
 	if err != nil {
 		return nil, fmt.Errorf("creating user in prediction's repository: %w", err)
 	}
+
+	compensations.AddCompensation(func() error {
+		return i.predictionRepo.DeleteUser(context.Background(), newProduct.ID)
+	})
 
 	newProduct.MinioConfiguration = minioConfiguration
 	newProduct.ServiceAccount = serviceAccount
@@ -174,6 +194,10 @@ func (i *ProductInteractor) createProductResources(
 	if err != nil {
 		return nil, err
 	}
+
+	compensations.AddCompensation(func() error {
+		return i.productRepo.DeleteDatabase(context.Background(), newProduct.ID)
+	})
 
 	createdProduct, err := i.productRepo.Create(ctx, newProduct)
 	if err != nil {
