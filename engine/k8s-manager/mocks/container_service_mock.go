@@ -295,6 +295,61 @@ func (_c *ContainerServiceMock_DeleteProcesses_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// GetPublishedTriggers provides a mock function with given fields: ctx, product
+func (_m *ContainerServiceMock) GetPublishedTriggers(ctx context.Context, product string) (map[string]string, error) {
+	ret := _m.Called(ctx, product)
+
+	var r0 map[string]string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (map[string]string, error)); ok {
+		return rf(ctx, product)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) map[string]string); ok {
+		r0 = rf(ctx, product)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]string)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, product)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ContainerServiceMock_GetPublishedTriggers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPublishedTriggers'
+type ContainerServiceMock_GetPublishedTriggers_Call struct {
+	*mock.Call
+}
+
+// GetPublishedTriggers is a helper method to define mock.On call
+//   - ctx context.Context
+//   - product string
+func (_e *ContainerServiceMock_Expecter) GetPublishedTriggers(ctx interface{}, product interface{}) *ContainerServiceMock_GetPublishedTriggers_Call {
+	return &ContainerServiceMock_GetPublishedTriggers_Call{Call: _e.mock.On("GetPublishedTriggers", ctx, product)}
+}
+
+func (_c *ContainerServiceMock_GetPublishedTriggers_Call) Run(run func(ctx context.Context, product string)) *ContainerServiceMock_GetPublishedTriggers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ContainerServiceMock_GetPublishedTriggers_Call) Return(_a0 map[string]string, _a1 error) *ContainerServiceMock_GetPublishedTriggers_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ContainerServiceMock_GetPublishedTriggers_Call) RunAndReturn(run func(context.Context, string) (map[string]string, error)) *ContainerServiceMock_GetPublishedTriggers_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PublishNetwork provides a mock function with given fields: ctx, params
 func (_m *ContainerServiceMock) PublishNetwork(ctx context.Context, params service.PublishNetworkParams) (map[string]string, error) {
 	ret := _m.Called(ctx, params)

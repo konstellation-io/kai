@@ -37,6 +37,26 @@ func (m *MockVersionServiceClient) EXPECT() *MockVersionServiceClientMockRecorde
 	return m.recorder
 }
 
+// GetPublishedTriggers mocks base method.
+func (m *MockVersionServiceClient) GetPublishedTriggers(ctx context.Context, in *versionpb.GetPublishedTriggersRequest, opts ...grpc.CallOption) (*versionpb.PublishResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetPublishedTriggers", varargs...)
+	ret0, _ := ret[0].(*versionpb.PublishResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPublishedTriggers indicates an expected call of GetPublishedTriggers.
+func (mr *MockVersionServiceClientMockRecorder) GetPublishedTriggers(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublishedTriggers", reflect.TypeOf((*MockVersionServiceClient)(nil).GetPublishedTriggers), varargs...)
+}
+
 // Publish mocks base method.
 func (m *MockVersionServiceClient) Publish(ctx context.Context, in *versionpb.PublishRequest, opts ...grpc.CallOption) (*versionpb.PublishResponse, error) {
 	m.ctrl.T.Helper()
@@ -301,6 +321,21 @@ func NewMockVersionServiceServer(ctrl *gomock.Controller) *MockVersionServiceSer
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockVersionServiceServer) EXPECT() *MockVersionServiceServerMockRecorder {
 	return m.recorder
+}
+
+// GetPublishedTriggers mocks base method.
+func (m *MockVersionServiceServer) GetPublishedTriggers(arg0 context.Context, arg1 *versionpb.GetPublishedTriggersRequest) (*versionpb.PublishResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPublishedTriggers", arg0, arg1)
+	ret0, _ := ret[0].(*versionpb.PublishResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPublishedTriggers indicates an expected call of GetPublishedTriggers.
+func (mr *MockVersionServiceServerMockRecorder) GetPublishedTriggers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublishedTriggers", reflect.TypeOf((*MockVersionServiceServer)(nil).GetPublishedTriggers), arg0, arg1)
 }
 
 // Publish mocks base method.

@@ -15,4 +15,5 @@ type VersionService interface {
 	Unpublish(ctx context.Context, productID string, version *entity.Version) error
 	WatchProcessStatus(ctx context.Context, productID, versionTag string) (<-chan *entity.Process, error)
 	RegisterProcess(ctx context.Context, productID, processID, processImage string) (string, error)
+	GetPublishedTriggers(ctx context.Context, productID string) ([]entity.PublishedTrigger, error)
 }

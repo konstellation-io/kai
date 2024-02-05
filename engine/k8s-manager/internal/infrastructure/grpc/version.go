@@ -124,3 +124,19 @@ func (v *VersionService) Unpublish(
 		Message: fmt.Sprintf("Version %q on product %q unpublished", req.VersionTag, req.Product),
 	}, nil
 }
+
+func (v *VersionService) GetPublishedTriggers(
+	ctx context.Context,
+	req *versionpb.GetPublishedTriggersRequest,
+) (*versionpb.PublishResponse, error) {
+	v.logger.Info("GetPublishedTriggers request received")
+
+	publishedTriggers, err := v.publisher.GetPublishedTriggers(ctx, req.ProductId)
+	if err != nil {
+		return nil, fmt.Errorf("getting published triggers: %w", err)
+	}
+
+	return &versionpb.PublishResponse{
+		NetworkUrls: publishedTriggers,
+	}, nil
+}

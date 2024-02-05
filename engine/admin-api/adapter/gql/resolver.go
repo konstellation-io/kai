@@ -151,7 +151,7 @@ func (r *mutationResolver) UnpublishVersion(ctx context.Context, input Unpublish
 	return r.versionInteractor.Unpublish(ctx, loggedUser, input.ProductID, input.VersionTag, input.Comment)
 }
 
-func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVersionInput) ([]*PublishedTrigger, error) {
+func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVersionInput) ([]*entity.PublishedTrigger, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
 	urls, err := r.versionInteractor.Publish(ctx, loggedUser, version.PublishOpts{
@@ -164,9 +164,9 @@ func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVers
 		return nil, err
 	}
 
-	publishedTriggers := make([]*PublishedTrigger, 0, len(urls))
+	publishedTriggers := make([]*entity.PublishedTrigger, 0, len(urls))
 	for trigger, url := range urls {
-		publishedTriggers = append(publishedTriggers, &PublishedTrigger{
+		publishedTriggers = append(publishedTriggers, &entity.PublishedTrigger{
 			Trigger: trigger,
 			URL:     url,
 		})

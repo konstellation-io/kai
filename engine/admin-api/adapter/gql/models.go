@@ -24,11 +24,6 @@ type PublishVersionInput struct {
 	Force      bool   `json:"force"`
 }
 
-type PublishedTrigger struct {
-	Trigger string `json:"trigger"`
-	URL     string `json:"url"`
-}
-
 type RegisterProcessInput struct {
 	File        graphql.Upload `json:"file"`
 	Version     string         `json:"version"`

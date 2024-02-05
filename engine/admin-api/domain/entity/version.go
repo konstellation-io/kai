@@ -23,6 +23,13 @@ type Version struct {
 
 	Status VersionStatus
 	Error  string
+
+	PublishedTriggers []PublishedTrigger
+}
+
+type PublishedTrigger struct {
+	Trigger string
+	URL     string
 }
 
 type VersionStatus string

@@ -225,3 +225,19 @@ func (s *VersionServiceTestSuite) TestRegisterProcess_Error() {
 	_, err := s.versionGRPCService.RegisterProcess(ctx, req)
 	s.Require().ErrorIs(err, expectedError)
 }
+
+func (s *VersionServiceTestSuite) TestGetPublishedTriggers() {
+	ctx := context.Background()
+	testProduct := "test-product"
+
+	expectedURLs := map[string]string{
+		"test": "url",
+	}
+
+	s.versionServiceMock.EXPECT().GetPublishedTriggers(ctx, testProduct).Return(expectedURLs, nil)
+
+	res, err := s.versionGRPCService.GetPublishedTriggers(ctx, &versionpb.GetPublishedTriggersRequest{ProductId: testProduct})
+	s.Require().NoError(err)
+
+	s.Equal(expectedURLs, res.NetworkUrls)
+}

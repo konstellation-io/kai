@@ -80,8 +80,8 @@ type versionSuite struct {
 }
 
 const (
-	productID  = "productID"
-	versionTag = "v1.0.0"
+	_productID  = "productID"
+	_versionTag = "v1.0.0"
 )
 
 func TestVersionSuite(t *testing.T) {
