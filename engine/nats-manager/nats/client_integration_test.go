@@ -7,6 +7,7 @@ import (
 	"log"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/nats-manager/internal"
@@ -36,7 +37,8 @@ func (s *ClientTestSuite) SetupSuite() {
 		Image:        "nats:2.8.1",
 		Cmd:          []string{"-js"},
 		ExposedPorts: []string{"4222/tcp", "8222/tcp"},
-		WaitingFor:   wait.ForLog("Server is ready"),
+		WaitingFor: wait.ForAll(wait.ForLog("Server is ready")).
+			WithDeadline(time.Minute * 3),
 	}
 
 	natsContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{

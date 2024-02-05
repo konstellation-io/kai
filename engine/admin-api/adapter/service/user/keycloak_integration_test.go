@@ -46,7 +46,8 @@ func (s *KeycloakSuite) SetupSuite() {
 			"--import-realm",
 		},
 		ExposedPorts: []string{"8080/tcp"},
-		WaitingFor:   wait.ForLog("Listening on:"),
+		WaitingFor: wait.ForAll(wait.ForLog("Listening on:")).
+			WithDeadline(time.Minute * 5),
 		Env: map[string]string{
 			"KEYCLOAK_ADMIN":          _adminUser,
 			"KEYCLOAK_ADMIN_PASSWORD": _adminPassword,
