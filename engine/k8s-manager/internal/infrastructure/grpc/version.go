@@ -104,8 +104,6 @@ func (v *VersionService) Publish(
 		return nil, fmt.Errorf("registering process: %w", err)
 	}
 
-	fmt.Println(networkURLs)
-
 	return &versionpb.PublishResponse{
 		NetworkUrls: networkURLs,
 	}, nil

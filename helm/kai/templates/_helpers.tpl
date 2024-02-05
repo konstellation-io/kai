@@ -104,6 +104,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}
 
+{{/* Create the netrc file secret name for the image builder*/}}
+{{- define "k8s-manager.netrc.secretName" -}}
+{{- printf "%s-imagebuilder-netrc" (include "k8s-manager.fullname" . ) -}}
+{{- end -}}
+
 {{/*
 prometheus-additional-scrape-configs labels
 */}}
@@ -453,6 +458,7 @@ Registry auth secret name
 {{- define "registry.auth.secretName" -}}
 {{- printf "%s-auth" (include "registry.fullname" . ) -}}
 {{- end -}}
+
 
 {{/*
 Loki Host

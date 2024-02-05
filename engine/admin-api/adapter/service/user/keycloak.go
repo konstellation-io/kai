@@ -20,6 +20,7 @@ type KeycloakUserRegistry struct {
 
 func WithClient(endpoint string) *gocloak.GoCloak {
 	client := gocloak.NewClient(endpoint)
+
 	return client
 }
 
