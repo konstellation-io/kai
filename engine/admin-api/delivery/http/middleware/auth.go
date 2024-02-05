@@ -6,7 +6,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/httperrors"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func NewJwtAuthMiddleware(logger logr.Logger, tokenParser *token.Parser) echo.MiddlewareFunc {

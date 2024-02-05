@@ -6,8 +6,8 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/controller"
 	kaimiddleware "github.com/konstellation-io/kai/engine/admin-api/delivery/http/middleware"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http/token"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/viper"
 )
 
