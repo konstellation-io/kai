@@ -27,15 +27,11 @@ func (ur *KeycloakUserRegistry) DeleteUser(ctx context.Context, name string) err
 		return err
 	}
 
-	fmt.Println(users)
-
 	if len(users) == 0 {
 		return ErrUserNotFound
 	}
 
 	userID := *users[0].ID
-
-	fmt.Println(userID)
 
 	err = ur.client.DeleteUser(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), userID)
 	if err != nil {
