@@ -393,3 +393,31 @@ func (s *NatsServiceTestSuite) TestDeleteVersionKeyValueStoresError() {
 	_, err := s.natsService.DeleteVersionKeyValueStores(nil, req)
 	s.Require().Error(err)
 }
+
+func (s *NatsServiceTestSuite) TestDeleteGlobalKeyValueStore() {
+	req := &natspb.DeleteGlobalKeyValueStoreRequest{
+		ProductId: productID,
+	}
+
+	s.natsManagerMock.EXPECT().
+		DeleteGlobalKeyValueStore(productID).
+		Return(nil)
+
+	_, err := s.natsService.DeleteGlobalKeyValueStore(context.Background(), req)
+	s.Require().NoError(err)
+}
+
+func (s *NatsServiceTestSuite) TestDeleteGlobalKeyValueStore_Fails() {
+	req := &natspb.DeleteGlobalKeyValueStoreRequest{
+		ProductId: productID,
+	}
+
+	expectedError := errors.New("use-case mock error")
+
+	s.natsManagerMock.EXPECT().
+		DeleteGlobalKeyValueStore(productID).
+		Return(expectedError)
+
+	_, err := s.natsService.DeleteGlobalKeyValueStore(context.Background(), req)
+	s.Require().ErrorIs(err, expectedError)
+}
