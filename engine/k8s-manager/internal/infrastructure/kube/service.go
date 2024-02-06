@@ -74,3 +74,7 @@ func (k *K8sContainerService) UnpublishNetwork(ctx context.Context, product, ver
 func (k *K8sContainerService) WaitProcesses(ctx context.Context, version *domain.Version) error {
 	return k.processService.WaitProcesses(ctx, version)
 }
+
+func (k *K8sContainerService) GetPublishedTriggers(ctx context.Context, product string) (map[string]string, error) {
+	return k.networkService.GetPublishedTriggers(ctx, product)
+}

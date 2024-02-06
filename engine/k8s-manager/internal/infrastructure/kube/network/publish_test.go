@@ -40,7 +40,7 @@ func (s *networkSuite) TestPublish() {
 	s.Require().NoError(err)
 
 	expectedPublishedURLs := map[string]string{
-		fullProcessIdentifier: s.getHTTPEndpoint(),
+		_fullProcessIdentifier: s.getHTTPEndpoint(_product, _workflow, _process),
 	}
 
 	publishedURLs, err := s.service.PublishNetwork(ctx, service.PublishNetworkParams{
@@ -80,7 +80,7 @@ func (s *networkSuite) TestPublish_GRPCTrigger() {
 	s.Require().NoError(err)
 
 	expectedPublishedURLs := map[string]string{
-		fullProcessIdentifier: s.getGRPCEndpoint(),
+		_fullProcessIdentifier: s.getGRPCEndpoint(_product, _workflow, _process),
 	}
 
 	publishedURLs, err := s.service.PublishNetwork(ctx, service.PublishNetworkParams{
@@ -122,7 +122,7 @@ func (s *networkSuite) TestPublish_WithTLS() {
 	s.Require().NoError(err)
 
 	expectedPublishedURLs := map[string]string{
-		fullProcessIdentifier: s.getHTTPEndpoint(),
+		_fullProcessIdentifier: s.getHTTPEndpoint(_product, _workflow, _process),
 	}
 
 	publishedURLs, err := s.service.PublishNetwork(ctx, service.PublishNetworkParams{
@@ -165,7 +165,7 @@ func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
 	s.Require().NoError(err)
 
 	expectedPublishedURLs := map[string]string{
-		fullProcessIdentifier: s.getHTTPEndpoint(),
+		_fullProcessIdentifier: s.getHTTPEndpoint(_product, _workflow, _process),
 	}
 
 	publishedURLs, err := s.service.PublishNetwork(ctx, service.PublishNetworkParams{
@@ -187,18 +187,18 @@ func (s *networkSuite) TestPublish_WithTLS_WithTLSSecret() {
 	g.Assert(s.T(), "PublishNetwork_WithTLS_WithTLSSecret", ingressesYaml)
 }
 
-func (s *networkSuite) getHTTPEndpoint() string {
-	product := strings.ReplaceAll(_product, ".", "-")
-	workflow := strings.ReplaceAll(_workflow, ".", "-")
-	process := strings.ReplaceAll(_process, ".", "-")
+func (s *networkSuite) getHTTPEndpoint(product, workflow, process string) string {
+	parsedProduct := strings.ReplaceAll(product, ".", "-")
+	parsedWorkflow := strings.ReplaceAll(workflow, ".", "-")
+	parsedProcess := strings.ReplaceAll(process, ".", "-")
 
-	return fmt.Sprintf(_httpEndpointFormat, product, viper.GetString(config.BaseDomainNameKey), workflow, process)
+	return fmt.Sprintf(_httpEndpointFormat, parsedProduct, viper.GetString(config.BaseDomainNameKey), parsedWorkflow, parsedProcess)
 }
 
-func (s *networkSuite) getGRPCEndpoint() string {
-	product := strings.ReplaceAll(_product, ".", "-")
-	workflow := strings.ReplaceAll(_workflow, ".", "-")
-	process := strings.ReplaceAll(_process, ".", "-")
+func (s *networkSuite) getGRPCEndpoint(product, workflow, process string) string {
+	parsedProduct := strings.ReplaceAll(product, ".", "-")
+	parsedWorkflow := strings.ReplaceAll(workflow, ".", "-")
+	parsedProcess := strings.ReplaceAll(process, ".", "-")
 
-	return fmt.Sprintf(_grpcEndpointFormat, product, workflow, process, viper.GetString(config.BaseDomainNameKey))
+	return fmt.Sprintf(_grpcEndpointFormat, parsedProduct, parsedWorkflow, parsedProcess, viper.GetString(config.BaseDomainNameKey))
 }

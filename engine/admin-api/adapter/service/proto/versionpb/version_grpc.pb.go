@@ -28,6 +28,7 @@ type VersionServiceClient interface {
 	Unpublish(ctx context.Context, in *UnpublishRequest, opts ...grpc.CallOption) (*Response, error)
 	WatchProcessStatus(ctx context.Context, in *ProcessStatusRequest, opts ...grpc.CallOption) (VersionService_WatchProcessStatusClient, error)
 	RegisterProcess(ctx context.Context, in *RegisterProcessRequest, opts ...grpc.CallOption) (*RegisterProcessResponse, error)
+	GetPublishedTriggers(ctx context.Context, in *GetPublishedTriggersRequest, opts ...grpc.CallOption) (*PublishResponse, error)
 }
 
 type versionServiceClient struct {
@@ -115,6 +116,15 @@ func (c *versionServiceClient) RegisterProcess(ctx context.Context, in *Register
 	return out, nil
 }
 
+func (c *versionServiceClient) GetPublishedTriggers(ctx context.Context, in *GetPublishedTriggersRequest, opts ...grpc.CallOption) (*PublishResponse, error) {
+	out := new(PublishResponse)
+	err := c.cc.Invoke(ctx, "/version.VersionService/GetPublishedTriggers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VersionServiceServer is the server API for VersionService service.
 // All implementations must embed UnimplementedVersionServiceServer
 // for forward compatibility
@@ -125,6 +135,7 @@ type VersionServiceServer interface {
 	Unpublish(context.Context, *UnpublishRequest) (*Response, error)
 	WatchProcessStatus(*ProcessStatusRequest, VersionService_WatchProcessStatusServer) error
 	RegisterProcess(context.Context, *RegisterProcessRequest) (*RegisterProcessResponse, error)
+	GetPublishedTriggers(context.Context, *GetPublishedTriggersRequest) (*PublishResponse, error)
 	mustEmbedUnimplementedVersionServiceServer()
 }
 
@@ -149,6 +160,9 @@ func (UnimplementedVersionServiceServer) WatchProcessStatus(*ProcessStatusReques
 }
 func (UnimplementedVersionServiceServer) RegisterProcess(context.Context, *RegisterProcessRequest) (*RegisterProcessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterProcess not implemented")
+}
+func (UnimplementedVersionServiceServer) GetPublishedTriggers(context.Context, *GetPublishedTriggersRequest) (*PublishResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPublishedTriggers not implemented")
 }
 func (UnimplementedVersionServiceServer) mustEmbedUnimplementedVersionServiceServer() {}
 
@@ -274,6 +288,24 @@ func _VersionService_RegisterProcess_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VersionService_GetPublishedTriggers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPublishedTriggersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VersionServiceServer).GetPublishedTriggers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/version.VersionService/GetPublishedTriggers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VersionServiceServer).GetPublishedTriggers(ctx, req.(*GetPublishedTriggersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VersionService_ServiceDesc is the grpc.ServiceDesc for VersionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -300,6 +332,10 @@ var VersionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RegisterProcess",
 			Handler:    _VersionService_RegisterProcess_Handler,
+		},
+		{
+			MethodName: "GetPublishedTriggers",
+			Handler:    _VersionService_GetPublishedTriggers_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

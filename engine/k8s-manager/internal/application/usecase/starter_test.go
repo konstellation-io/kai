@@ -46,9 +46,9 @@ func TestStartVersion_WithMultipleProcesses(t *testing.T) {
 	containerSvc := mocks.NewContainerServiceMock(t)
 
 	processes := []*domain.Process{
-		testhelpers.NewProcessBuilder().WithID("test-process-1").Build(),
-		testhelpers.NewProcessBuilder().WithID("test-process-2").Build(),
-		testhelpers.NewProcessBuilder().WithID("test-process-3").Build(),
+		testhelpers.NewProcessBuilder().WithName("test-process-1").Build(),
+		testhelpers.NewProcessBuilder().WithName("test-process-2").Build(),
+		testhelpers.NewProcessBuilder().WithName("test-process-3").Build(),
 	}
 
 	workflows := []*domain.Workflow{

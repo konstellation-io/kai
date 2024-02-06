@@ -147,3 +147,16 @@ func mapProcessTypeToDTO(processType entity.ProcessType) versionpb.ProcessType {
 		return versionpb.ProcessType_ProcessTypeUnknown
 	}
 }
+
+func mapDTOToPublishedTriggers(dto map[string]string) []entity.PublishedTrigger {
+	publishedTriggers := make([]entity.PublishedTrigger, 0, len(dto))
+
+	for trigger, url := range dto {
+		publishedTriggers = append(publishedTriggers, entity.PublishedTrigger{
+			Trigger: trigger,
+			URL:     url,
+		})
+	}
+
+	return publishedTriggers
+}

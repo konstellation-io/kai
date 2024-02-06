@@ -41,6 +41,7 @@ type ContainerStopper interface {
 
 type ContainerPublisher interface {
 	PublishNetwork(ctx context.Context, params PublishNetworkParams) (map[string]string, error)
+	GetPublishedTriggers(ctx context.Context, product string) (map[string]string, error)
 }
 
 type ContainerUnpublisher interface {

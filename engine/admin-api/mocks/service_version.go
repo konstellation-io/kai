@@ -35,6 +35,21 @@ func (m *MockVersionService) EXPECT() *MockVersionServiceMockRecorder {
 	return m.recorder
 }
 
+// GetPublishedTriggers mocks base method.
+func (m *MockVersionService) GetPublishedTriggers(ctx context.Context, productID string) ([]entity.PublishedTrigger, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPublishedTriggers", ctx, productID)
+	ret0, _ := ret[0].([]entity.PublishedTrigger)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPublishedTriggers indicates an expected call of GetPublishedTriggers.
+func (mr *MockVersionServiceMockRecorder) GetPublishedTriggers(ctx, productID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublishedTriggers", reflect.TypeOf((*MockVersionService)(nil).GetPublishedTriggers), ctx, productID)
+}
+
 // Publish mocks base method.
 func (m *MockVersionService) Publish(ctx context.Context, productID, versionTag string) (map[string]string, error) {
 	m.ctrl.T.Helper()

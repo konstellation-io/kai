@@ -15,6 +15,7 @@ type VersionStopperService interface {
 
 type VersionPublisherService interface {
 	PublishVersion(ctx context.Context, product, version string) (map[string]string, error)
+	GetPublishedTriggers(ctx context.Context, product string) (map[string]string, error)
 }
 
 type VersionUnpublisherService interface {
