@@ -35,6 +35,9 @@ spec:
             {{- toYaml .Values.registry.securityContext | nindent 12 }}
           image: "{{ .Values.registry.image.repository }}:{{ .Values.registry.image.tag }}"
           imagePullPolicy: {{ .Values.registry.image.pullPolicy }}
+          env:
+          - name: REGISTRY_STORAGE_DELETE_ENABLED
+            value: "true"
           ports:
             - name: http
               containerPort: {{ .Values.registry.containerPort }}

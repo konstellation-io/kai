@@ -154,7 +154,11 @@ func (r *MongoDBProcessRepository) getSearchMongoFilter(searchFilter repository.
 	var filter bson.M
 
 	if searchFilter.ProcessType != "" {
-		filter = bson.M{"type": searchFilter.ProcessType}
+		filter["type"] = searchFilter.ProcessType
+	}
+
+	if searchFilter.ProcessID != "" {
+		filter["_id"] = searchFilter.ProcessID
 	}
 
 	return filter

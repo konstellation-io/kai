@@ -19,6 +19,7 @@ type ProcessRepository interface {
 
 type SearchFilter struct {
 	ProcessType entity.ProcessType
+	ProcessID   string
 }
 
 func (f SearchFilter) Validate() error {

@@ -20,6 +20,12 @@ const (
 	RegistryHostKey   = "registry.host"
 	GlobalRegistryKey = "registry.global"
 
+	ImageRegistryURLKey         = "registry.url"
+	ImageRegistryAuthSecretKey  = "registry.authSecret"
+	ImageRegistryInsecureKey    = "registry.insecure"
+	ImageBuilderNetrcEnabledKey = "registry.imageBuilder.netrc.enabled"
+	ImageBuilderNetrcSecretKey  = "registry.imageBuilder.netrc.secretName"
+
 	MinioEndpointKey           = "minio.endpoint"
 	MinioTierEnabledKey        = "minio.tier.enabled"
 	MinioTierNameKey           = "minio.tier.name"
@@ -63,6 +69,12 @@ func InitConfig() error {
 
 	viper.RegisterAlias(MongoDBEndpointKey, "MONGODB_URI")
 	viper.RegisterAlias(MongoDBKaiDatabaseKey, "MONGODB_DATABASE")
+
+	viper.RegisterAlias(ImageRegistryURLKey, "REGISTRY_URL")
+	viper.RegisterAlias(ImageRegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
+	viper.RegisterAlias(ImageBuilderNetrcEnabledKey, "IMAGE_BUILDER_NETRC_ENABLED")
+	viper.RegisterAlias(ImageBuilderNetrcSecretKey, "IMAGE_BUILDER_NETRC_SECRET_NAME")
+	viper.RegisterAlias(ImageRegistryInsecureKey, "REGISTRY_INSECURE")
 
 	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT_URL")
 	viper.RegisterAlias(MinioTierNameKey, "MINIO_TIER_NAME")

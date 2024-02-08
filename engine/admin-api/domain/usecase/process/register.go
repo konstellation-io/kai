@@ -10,7 +10,6 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/spf13/viper"
 )
 
@@ -25,7 +24,7 @@ func (ps *Service) RegisterProcess(
 		return nil, err
 	}
 
-	if err := ps.checkGrants(user, opts); err != nil {
+	if err := ps.checkGrants(user, opts.IsPublic, opts.Product); err != nil {
 		return nil, err
 	}
 
@@ -134,14 +133,6 @@ func (ps *Service) uploadingProcessError(
 	}
 }
 
-func (ps *Service) checkGrants(user *entity.User, opts RegisterProcessOpts) error {
-	if opts.IsPublic {
-		return ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess)
-	}
-
-	return ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActRegisterProcess)
-}
-
 func (ps *Service) getProcessRegisterScope(opts RegisterProcessOpts) string {
 	if opts.IsPublic {
 		return viper.GetString(config.GlobalRegistryKey)
@@ -168,12 +159,4 @@ func (ps *Service) getProcessToRegister(user *entity.User, opts RegisterProcessO
 		Status:     entity.RegisterProcessStatusCreating,
 		IsPublic:   opts.IsPublic,
 	}
-}
-
-func (ps *Service) getProcessID(scope, process, version string) string {
-	return fmt.Sprintf("%s_%s:%s", scope, process, version)
-}
-
-func (ps *Service) getProcessImage(processID string) string {
-	return fmt.Sprintf("%s/%s", viper.GetString(config.RegistryHostKey), processID)
 }
