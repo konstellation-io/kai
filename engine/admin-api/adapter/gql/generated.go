@@ -72,6 +72,8 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateProduct           func(childComplexity int, input CreateProductInput) int
 		CreateVersion           func(childComplexity int, input CreateVersionInput) int
+		DeleteProcess           func(childComplexity int, input DeleteProcessInput) int
+		DeletePublicProcess     func(childComplexity int, input DeletePublicProcessInput) int
 		PublishVersion          func(childComplexity int, input PublishVersionInput) int
 		RegisterProcess         func(childComplexity int, input RegisterProcessInput) int
 		RegisterPublicProcess   func(childComplexity int, input RegisterPublicProcessInput) int
@@ -209,6 +211,8 @@ type MutationResolver interface {
 	RevokeUserProductGrants(ctx context.Context, input RevokeUserProductGrantsInput) (*entity.User, error)
 	RegisterProcess(ctx context.Context, input RegisterProcessInput) (*entity.RegisteredProcess, error)
 	RegisterPublicProcess(ctx context.Context, input RegisterPublicProcessInput) (*entity.RegisteredProcess, error)
+	DeleteProcess(ctx context.Context, input DeleteProcessInput) (string, error)
+	DeletePublicProcess(ctx context.Context, input DeletePublicProcessInput) (string, error)
 }
 type ProductResolver interface {
 	CreationAuthor(ctx context.Context, obj *entity.Product) (string, error)
@@ -339,6 +343,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateVersion(childComplexity, args["input"].(CreateVersionInput)), true
+
+	case "Mutation.deleteProcess":
+		if e.complexity.Mutation.DeleteProcess == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteProcess_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteProcess(childComplexity, args["input"].(DeleteProcessInput)), true
+
+	case "Mutation.deletePublicProcess":
+		if e.complexity.Mutation.DeletePublicProcess == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletePublicProcess_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePublicProcess(childComplexity, args["input"].(DeletePublicProcessInput)), true
 
 	case "Mutation.publishVersion":
 		if e.complexity.Mutation.PublishVersion == nil {
@@ -966,6 +994,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateProductInput,
 		ec.unmarshalInputCreateVersionInput,
+		ec.unmarshalInputDeleteProcessInput,
+		ec.unmarshalInputDeletePublicProcessInput,
 		ec.unmarshalInputLogFilters,
 		ec.unmarshalInputPublishVersionInput,
 		ec.unmarshalInputRegisterProcessInput,
@@ -1112,6 +1142,8 @@ type Mutation {
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
   registerProcess(input: RegisterProcessInput!): RegisteredProcess!
   registerPublicProcess(input: RegisterPublicProcessInput!): RegisteredProcess!
+  deleteProcess(input: DeleteProcessInput!): ID!
+  deletePublicProcess(input: DeletePublicProcessInput!): ID!
 }
 
 type PublishedTrigger {
@@ -1161,6 +1193,16 @@ input RegisterPublicProcessInput {
   processType: String!
 }
 
+input DeleteProcessInput {
+  productID: ID!
+  processID: ID!
+  version: String!
+}
+
+input DeletePublicProcessInput {
+  processID: ID!
+  version: String!
+}
 
 input StartVersionInput {
   versionTag: String!
@@ -1393,6 +1435,36 @@ func (ec *executionContext) field_Mutation_createVersion_args(ctx context.Contex
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNCreateVersionInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐCreateVersionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteProcess_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 DeleteProcessInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDeleteProcessInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐDeleteProcessInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deletePublicProcess_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 DeletePublicProcessInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDeletePublicProcessInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐDeletePublicProcessInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2793,6 +2865,116 @@ func (ec *executionContext) fieldContext_Mutation_registerPublicProcess(ctx cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_registerPublicProcess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteProcess(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteProcess(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteProcess(rctx, fc.Args["input"].(DeleteProcessInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteProcess(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteProcess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deletePublicProcess(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deletePublicProcess(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePublicProcess(rctx, fc.Args["input"].(DeletePublicProcessInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deletePublicProcess(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deletePublicProcess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -8118,6 +8300,91 @@ func (ec *executionContext) unmarshalInputCreateVersionInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDeleteProcessInput(ctx context.Context, obj interface{}) (DeleteProcessInput, error) {
+	var it DeleteProcessInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"productID", "processID", "version"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "productID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductID = data
+		case "processID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProcessID = data
+		case "version":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Version = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDeletePublicProcessInput(ctx context.Context, obj interface{}) (DeletePublicProcessInput, error) {
+	var it DeletePublicProcessInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"processID", "version"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "processID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProcessID = data
+		case "version":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Version = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj interface{}) (entity.LogFilters, error) {
 	var it entity.LogFilters
 	asMap := map[string]interface{}{}
@@ -8922,6 +9189,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "registerPublicProcess":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_registerPublicProcess(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteProcess":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteProcess(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deletePublicProcess":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deletePublicProcess(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -10625,6 +10906,16 @@ func (ec *executionContext) unmarshalNCreateProductInput2githubᚗcomᚋkonstell
 
 func (ec *executionContext) unmarshalNCreateVersionInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐCreateVersionInput(ctx context.Context, v interface{}) (CreateVersionInput, error) {
 	res, err := ec.unmarshalInputCreateVersionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDeleteProcessInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐDeleteProcessInput(ctx context.Context, v interface{}) (DeleteProcessInput, error) {
+	res, err := ec.unmarshalInputDeleteProcessInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDeletePublicProcessInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐDeletePublicProcessInput(ctx context.Context, v interface{}) (DeletePublicProcessInput, error) {
+	res, err := ec.unmarshalInputDeletePublicProcessInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

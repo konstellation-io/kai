@@ -17,14 +17,9 @@ const (
 	ApplicationPortKey      = "application.port"
 	CORSEnabledKey          = "application.corsEnabled"
 
-	RegistryHostKey   = "registry.host"
-	GlobalRegistryKey = "registry.global"
-
-	ImageRegistryURLKey         = "registry.url"
-	ImageRegistryAuthSecretKey  = "registry.authSecret"
-	ImageRegistryInsecureKey    = "registry.insecure"
-	ImageBuilderNetrcEnabledKey = "registry.imageBuilder.netrc.enabled"
-	ImageBuilderNetrcSecretKey  = "registry.imageBuilder.netrc.secretName"
+	RegistryHostKey       = "registry.host"
+	GlobalRegistryKey     = "registry.global"
+	RegistryAuthSecretKey = "registry.authSecret"
 
 	MinioEndpointKey           = "minio.endpoint"
 	MinioTierEnabledKey        = "minio.tier.enabled"
@@ -66,15 +61,10 @@ func InitConfig() error {
 	viper.RegisterAlias(CORSEnabledKey, "ADMIN_CORS_ENABLED")
 
 	viper.RegisterAlias(RegistryHostKey, "REGISTRY_HOST")
+	viper.RegisterAlias(RegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
 
 	viper.RegisterAlias(MongoDBEndpointKey, "MONGODB_URI")
 	viper.RegisterAlias(MongoDBKaiDatabaseKey, "MONGODB_DATABASE")
-
-	viper.RegisterAlias(ImageRegistryURLKey, "REGISTRY_URL")
-	viper.RegisterAlias(ImageRegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
-	viper.RegisterAlias(ImageBuilderNetrcEnabledKey, "IMAGE_BUILDER_NETRC_ENABLED")
-	viper.RegisterAlias(ImageBuilderNetrcSecretKey, "IMAGE_BUILDER_NETRC_SECRET_NAME")
-	viper.RegisterAlias(ImageRegistryInsecureKey, "REGISTRY_INSECURE")
 
 	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT_URL")
 	viper.RegisterAlias(MinioTierNameKey, "MINIO_TIER_NAME")

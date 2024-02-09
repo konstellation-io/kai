@@ -8,9 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/spf13/viper"
 )
 
 func (ps *Service) RegisterProcess(
@@ -24,11 +22,11 @@ func (ps *Service) RegisterProcess(
 		return nil, err
 	}
 
-	if err := ps.checkGrants(user, opts.IsPublic, opts.Product); err != nil {
+	if err := ps.checkRegisterGrants(user, opts.IsPublic, opts.Product); err != nil {
 		return nil, err
 	}
 
-	scope := ps.getProcessRegisterScope(opts)
+	scope := ps.getProcessRegisterScope(opts.IsPublic, opts.Product)
 	processToRegister := ps.getProcessToRegister(user, opts, scope)
 
 	existingProcess, err := ps.processRepository.GetByID(ctx, scope, processToRegister.ID)
@@ -131,14 +129,6 @@ func (ps *Service) uploadingProcessError(
 	if err != nil {
 		ps.logger.Error(err, "Error updating registered process", "process ID", registeredProcess.ID)
 	}
-}
-
-func (ps *Service) getProcessRegisterScope(opts RegisterProcessOpts) string {
-	if opts.IsPublic {
-		return viper.GetString(config.GlobalRegistryKey)
-	}
-
-	return opts.Product
 }
 
 func (ps *Service) canProcessBeUpdated(existingProcess *entity.RegisteredProcess) bool {

@@ -17,6 +17,17 @@ type CreateVersionInput struct {
 	ProductID string         `json:"productID"`
 }
 
+type DeleteProcessInput struct {
+	ProductID string `json:"productID"`
+	ProcessID string `json:"processID"`
+	Version   string `json:"version"`
+}
+
+type DeletePublicProcessInput struct {
+	ProcessID string `json:"processID"`
+	Version   string `json:"version"`
+}
+
 type PublishVersionInput struct {
 	VersionTag string `json:"versionTag"`
 	Comment    string `json:"comment"`

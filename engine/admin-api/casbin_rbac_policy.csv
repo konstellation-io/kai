@@ -11,6 +11,7 @@ p, USER, unpublish_version
 p, USER, edit_version
 p, USER, view_version
 p, USER, register_process
+p, USER, delete_process
 
 p, USER, view_metrics
 p, USER, view_user_activities
@@ -23,3 +24,4 @@ p, ADMIN, create_product
 p, ADMIN, update_user_grants
 p, ADMIN, start_critical_version
 p, ADMIN, register_public_process
+p, ADMIN, delete_public_process

@@ -96,12 +96,20 @@ func (o DeleteProcessOpts) Validate() error {
 	return nil
 }
 
-func (ps *Service) checkGrants(user *entity.User, isPublic bool, product string) error {
+func (ps *Service) checkRegisterGrants(user *entity.User, isPublic bool, product string) error {
 	if isPublic {
 		return ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess)
 	}
 
 	return ps.accessControl.CheckProductGrants(user, product, auth.ActRegisterProcess)
+}
+
+func (ps *Service) checkDeleteGrants(user *entity.User, isPublic bool, product string) error {
+	if isPublic {
+		return ps.accessControl.CheckRoleGrants(user, auth.ActDeletePublicProcess)
+	}
+
+	return ps.accessControl.CheckProductGrants(user, product, auth.ActDeleteProcess)
 }
 
 func (ps *Service) getProcessID(scope, process, version string) string {
@@ -114,6 +122,14 @@ func (ps *Service) getRepositoryName(product string, process string) string {
 
 func (ps *Service) getProcessImage(processID string) string {
 	return fmt.Sprintf("%s/%s", viper.GetString(config.RegistryHostKey), processID)
+}
+
+func (ps *Service) getProcessRegisterScope(isPublic bool, product string) string {
+	if isPublic {
+		return viper.GetString(config.GlobalRegistryKey)
+	}
+
+	return product
 }
 
 func NewProcessService(

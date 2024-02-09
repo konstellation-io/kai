@@ -98,6 +98,33 @@ func (r *mutationResolver) RegisterPublicProcess(ctx context.Context, input Regi
 	)
 }
 
+func (r *mutationResolver) DeleteProcess(ctx context.Context, input DeleteProcessInput) (string, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+
+	return r.processService.DeleteProcess(
+		ctx, loggedUser,
+		process.DeleteProcessOpts{
+			Product:  input.ProductID,
+			Version:  input.Version,
+			Process:  input.ProcessID,
+			IsPublic: false,
+		},
+	)
+}
+
+func (r *mutationResolver) DeletePublicProcess(ctx context.Context, input DeletePublicProcessInput) (string, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+
+	return r.processService.DeleteProcess(
+		ctx, loggedUser,
+		process.DeleteProcessOpts{
+			Version:  input.Version,
+			Process:  input.ProcessID,
+			IsPublic: true,
+		},
+	)
+}
+
 func (r *mutationResolver) StartVersion(ctx context.Context, input StartVersionInput) (*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 

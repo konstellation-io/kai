@@ -38,6 +38,8 @@ type Mutation {
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
   registerProcess(input: RegisterProcessInput!): RegisteredProcess!
   registerPublicProcess(input: RegisterPublicProcessInput!): RegisteredProcess!
+  deleteProcess(input: DeleteProcessInput!): ID!
+  deletePublicProcess(input: DeletePublicProcessInput!): ID!
 }
 
 type PublishedTrigger {
@@ -87,6 +89,16 @@ input RegisterPublicProcessInput {
   processType: String!
 }
 
+input DeleteProcessInput {
+  productID: ID!
+  processID: ID!
+  version: String!
+}
+
+input DeletePublicProcessInput {
+  processID: ID!
+  version: String!
+}
 
 input StartVersionInput {
   versionTag: String!
