@@ -21,7 +21,7 @@ func (ps *Service) DeleteProcess(
 	user *entity.User,
 	opts DeleteProcessOpts,
 ) (string, error) {
-	ps.logger.Info("Deleting process", "Product", opts.Product, "Version", opts.Version, "Process", opts.Process)
+	ps.logger.Info("Deleting process", "Product", opts.Product, "Version", opts.Version, "Process", opts.Process, "IsPublic", opts.IsPublic)
 
 	if err := opts.Validate(); err != nil {
 		return "", err
@@ -31,15 +31,15 @@ func (ps *Service) DeleteProcess(
 		return "", err
 	}
 
-	processID := ps.getProcessID(opts.Product, opts.Process, opts.Version)
 	scope := ps.getProcessRegisterScope(opts.IsPublic, opts.Product)
+	processID := ps.getProcessID(scope, opts.Process, opts.Version)
 
 	_, err := ps.processRepository.GetByID(ctx, scope, processID)
 	if err != nil {
 		return "", err
 	}
 
-	if err := ps.deleteImageTag(opts); err != nil {
+	if err := ps.deleteImageTag(opts, scope); err != nil {
 		return "", err
 	}
 
@@ -50,14 +50,9 @@ func (ps *Service) DeleteProcess(
 	return processID, nil
 }
 
-func (ps *Service) deleteImageTag(opts DeleteProcessOpts) error {
+func (ps *Service) deleteImageTag(opts DeleteProcessOpts, scope string) error {
 	registryHost := viper.GetString(config.RegistryHostKey)
-	authSecret := viper.GetString(config.RegistryAuthSecretKey)
-	repositoryName := ps.getRepositoryName(opts.Product, opts.Process)
-
-	fmt.Println("--------------------------------")
-	fmt.Println("Using auth secret:", authSecret)
-	fmt.Println("--------------------------------")
+	repositoryName := ps.getRepositoryName(scope, opts.Process)
 
 	client := &http.Client{}
 
@@ -72,7 +67,6 @@ func (ps *Service) deleteImageTag(opts DeleteProcessOpts) error {
 
 	req.Header.Add("Authorization", "Basic "+basicAuth)
 
-	// req.Header.Add("Authorization", "Bearer "+authSecret)
 	req.Header.Add("Accept", "application/vnd.docker.distribution.manifest.v2+json")
 
 	resp, err := client.Do(req)
@@ -87,7 +81,6 @@ func (ps *Service) deleteImageTag(opts DeleteProcessOpts) error {
 		return err
 	}
 
-	//req.Header.Add("Authorization", "Bearer "+authSecret)
 	req.Header.Add("Authorization", "Basic "+basicAuth)
 
 	resp, err = client.Do(req)

@@ -116,8 +116,8 @@ func (ps *Service) getProcessID(scope, process, version string) string {
 	return fmt.Sprintf("%s_%s:%s", scope, process, version)
 }
 
-func (ps *Service) getRepositoryName(product string, process string) string {
-	return fmt.Sprintf("%s_%s", product, process)
+func (ps *Service) getRepositoryName(scope string, process string) string {
+	return fmt.Sprintf("%s_%s", scope, process)
 }
 
 func (ps *Service) getProcessImage(processID string) string {
