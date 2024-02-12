@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -26,6 +27,7 @@ var (
 type ProductRepoMongoDB struct {
 	logger     logr.Logger
 	collection *mongo.Collection
+	client     *mongo.Client
 }
 
 func NewProductRepoMongoDB(logger logr.Logger, client *mongo.Client) *ProductRepoMongoDB {
@@ -34,6 +36,7 @@ func NewProductRepoMongoDB(logger logr.Logger, client *mongo.Client) *ProductRep
 	productRepo := &ProductRepoMongoDB{
 		logger,
 		collection,
+		client,
 	}
 
 	productRepo.createIndexes()
@@ -148,6 +151,15 @@ func (r *ProductRepoMongoDB) Update(ctx context.Context, product *entity.Product
 
 	if resp.ModifiedCount == 0 {
 		return ErrUpdateProductNotFound
+	}
+
+	return nil
+}
+
+func (r *ProductRepoMongoDB) DeleteDatabase(ctx context.Context, name string) error {
+	err := r.client.Database(name).Drop(ctx)
+	if err != nil {
+		return fmt.Errorf("deleting product's %q database: %w", name, err)
 	}
 
 	return nil

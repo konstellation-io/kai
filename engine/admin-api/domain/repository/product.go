@@ -15,5 +15,6 @@ type ProductRepo interface {
 	FindByIDs(ctx context.Context, productIDs []string) ([]*entity.Product, error)
 	GetByID(ctx context.Context, productID string) (*entity.Product, error)
 	GetByName(ctx context.Context, name string) (*entity.Product, error)
-	Update(ctx context.Context, productID *entity.Product) error
+	Update(ctx context.Context, product *entity.Product) error
+	DeleteDatabase(ctx context.Context, productID string) error
 }

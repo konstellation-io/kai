@@ -58,6 +58,15 @@ func (r *PredictionRepository) CreateUser(ctx context.Context, product, username
 	return nil
 }
 
+func (r *PredictionRepository) DeleteUser(ctx context.Context, username string) error {
+	err := r.client.Do(ctx, "ACL", "DELUSER", username).Err()
+	if err != nil {
+		return fmt.Errorf("deleting user %q from Redis: %w", username, err)
+	}
+
+	return nil
+}
+
 func (r *PredictionRepository) EnsurePredictionIndexCreated() error {
 	command := r.client.Do(context.Background(),
 		"FT.CREATE",

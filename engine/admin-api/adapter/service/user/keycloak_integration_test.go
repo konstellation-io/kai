@@ -134,6 +134,8 @@ func (s *KeycloakSuite) TearDownTest() {
 		gocloak.GetUsersParams{},
 	)
 
+	s.Require().NoError(err)
+
 	for _, user := range users {
 		if *user.ID != *testUser.ID {
 			err = s.keycloakClient.DeleteUser(

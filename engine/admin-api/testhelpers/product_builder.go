@@ -30,8 +30,22 @@ func NewProductBuilder() *ProductBuilder {
 	}
 }
 
+func (pb *ProductBuilder) WithID(id string) *ProductBuilder {
+	pb.product.ID = id
+	pb.product.MinioConfiguration.Bucket = id
+	pb.product.ServiceAccount.Username = id
+	pb.product.ServiceAccount.Group = id
+
+	return pb
+}
+
 func (pb *ProductBuilder) WithPublishedVersion(publishedVersion *string) *ProductBuilder {
 	pb.product.PublishedVersion = publishedVersion
+	return pb
+}
+
+func (pb *ProductBuilder) WithServiceAccount(serviceAccount entity.ServiceAccount) *ProductBuilder {
+	pb.product.ServiceAccount = serviceAccount
 	return pb
 }
 

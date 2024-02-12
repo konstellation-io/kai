@@ -3,6 +3,7 @@
 package manager_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/go-logr/logr/testr"
@@ -43,5 +44,42 @@ func TestDeleteKeyValueStores(t *testing.T) {
 
 	err := natsManager.DeleteVersionKeyValueStores(testProductID, testVersionTag, workflows)
 	require.NoError(t, err)
+}
 
+func TestDeleteGlobalKeyValueStore(t *testing.T) {
+	const (
+		testProductID       = "test-product"
+		globalKeyValueStore = "key-store_test-product"
+	)
+
+	ctrl := gomock.NewController(t)
+
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+	client := mocks.NewMockNatsClient(ctrl)
+	natsManager := manager.NewNatsManager(logger, client)
+
+	client.EXPECT().DeleteKeyValueStore(globalKeyValueStore).Return(nil)
+
+	err := natsManager.DeleteGlobalKeyValueStore(testProductID)
+	require.NoError(t, err)
+}
+
+func TestDeleteGlobalKeyValueStore_ClientError(t *testing.T) {
+	const (
+		testProductID       = "test-product"
+		globalKeyValueStore = "key-store_test-product"
+	)
+
+	expectedErr := errors.New("client error")
+
+	ctrl := gomock.NewController(t)
+
+	logger := testr.NewWithOptions(t, testr.Options{Verbosity: -1})
+	client := mocks.NewMockNatsClient(ctrl)
+	natsManager := manager.NewNatsManager(logger, client)
+
+	client.EXPECT().DeleteKeyValueStore(globalKeyValueStore).Return(expectedErr)
+
+	err := natsManager.DeleteGlobalKeyValueStore(testProductID)
+	require.ErrorIs(t, err, expectedErr)
 }

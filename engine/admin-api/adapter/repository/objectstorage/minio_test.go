@@ -128,6 +128,27 @@ func (s *ObjectStorageSuite) TestCreateBucket() {
 	s.Assert().True(bucketExists)
 }
 
+func (s *ObjectStorageSuite) TestDeleteBucket() {
+	ctx := context.Background()
+
+	err := s.objectStorage.CreateBucket(ctx, _testBucket)
+	s.Require().NoError(err)
+
+	err = s.objectStorage.DeleteBucket(ctx, _testBucket)
+	s.Assert().NoError(err)
+
+	bucketExists, err := s.client.BucketExists(ctx, _testBucket)
+	s.Require().NoError(err)
+	s.Assert().False(bucketExists)
+}
+
+func (s *ObjectStorageSuite) TestDeleteBucket_BucketDoesNotExist() {
+	ctx := context.Background()
+
+	err := s.objectStorage.DeleteBucket(ctx, _testBucket)
+	s.Assert().Error(err)
+}
+
 func (s *ObjectStorageSuite) TestCreateBucket_WithLifecycle_ErrorTierDoesntExist() {
 	ctx := context.Background()
 
