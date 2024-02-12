@@ -84,7 +84,7 @@ func (kp *KubeProcess) getDeploymentSpec(configMapName string, spec *processSpec
 						},
 					},
 					Containers:   kp.getContainers(configMapName, spec),
-					NodeSelector: kp.getNodeSelector(spec.Process.EnableGpu),
+					NodeSelector: kp.getNodeSelector(spec.Process),
 					Tolerations:  kp.getTolerations(spec.Process.EnableGpu),
 					Volumes:      kp.getVolumes(configMapName, processIdentifier),
 				},

@@ -15,6 +15,7 @@ type Process struct {
 	Replicas       int32
 	Networking     *Networking
 	ResourceLimits *ProcessResourceLimits
+	NodeSelectors  map[string]string
 }
 
 func (p *Process) IsTrigger() bool {

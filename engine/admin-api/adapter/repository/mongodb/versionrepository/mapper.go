@@ -23,25 +23,25 @@ func mapDTOToEntity(dto *versionDTO) *entity.Version {
 }
 
 func mapDTOToEntityWorkflows(dtos []workflowDTO) []entity.Workflow {
-	workflows := make([]entity.Workflow, len(dtos))
+	workflows := make([]entity.Workflow, 0, len(dtos))
 
-	for idx, dto := range dtos {
-		workflows[idx] = entity.Workflow{
+	for _, dto := range dtos {
+		workflows = append(workflows, entity.Workflow{
 			Name:      dto.Name,
 			Type:      entity.WorkflowType(dto.Type),
 			Config:    mapDTOConfigToEntityConfig(dto.Config),
 			Processes: mapDTOToEntityProcesses(dto.Processes),
-		}
+		})
 	}
 
 	return workflows
 }
 
 func mapDTOToEntityProcesses(dtos []processDTO) []entity.Process {
-	processes := make([]entity.Process, len(dtos))
+	processes := make([]entity.Process, 0, len(dtos))
 
-	for idx, dto := range dtos {
-		processes[idx] = entity.Process{
+	for _, dto := range dtos {
+		processes = append(processes, entity.Process{
 			Name:           dto.Name,
 			Type:           entity.ProcessType(dto.Type),
 			Image:          dto.Image,
@@ -53,7 +53,8 @@ func mapDTOToEntityProcesses(dtos []processDTO) []entity.Process {
 			Subscriptions:  dto.Subscriptions,
 			Networking:     mapDTOToEntityProcessNetworking(dto.Networking),
 			ResourceLimits: mapDTOToEntityProcessResourceLimits(dto.ResourceLimits),
-		}
+			NodeSelectors:  dto.NodeSelectors,
+		})
 	}
 
 	return processes
@@ -158,11 +159,10 @@ func mapEntityToDTOWorkflows(workflows []entity.Workflow) []workflowDTO {
 }
 
 func mapEntityToDTOProcesses(processes []entity.Process) []processDTO {
-	dtos := make([]processDTO, len(processes))
-	idx := 0
+	dtos := make([]processDTO, 0, len(processes))
 
 	for _, process := range processes {
-		dtos[idx] = processDTO{
+		dtos = append(dtos, processDTO{
 			Name:           process.Name,
 			Type:           process.Type.String(),
 			Image:          process.Image,
@@ -174,8 +174,8 @@ func mapEntityToDTOProcesses(processes []entity.Process) []processDTO {
 			Subscriptions:  process.Subscriptions,
 			Networking:     mapEntityToDTOProcessNetworking(process.Networking),
 			ResourceLimits: mapEntityToDTOProcessResourceLimits(process.ResourceLimits),
-		}
-		idx++
+			NodeSelectors:  process.NodeSelectors,
+		})
 	}
 
 	return dtos

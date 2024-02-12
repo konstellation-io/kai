@@ -39,6 +39,7 @@ message Process {
   Network networking = 10;
   map<string, string> config = 11;
   ProcessResourceLimits resource_limits = 12;
+  map<string, string> node_selectors = 13;
 }
 
 message Network {

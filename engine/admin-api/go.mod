@@ -13,7 +13,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/konstellation-io/krt v0.1.7
+	github.com/konstellation-io/krt v0.1.9-0.20240211152224-65de11cd87fd
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/minio/madmin-go/v3 v3.0.27
 	github.com/minio/minio-go/v7 v7.0.63
