@@ -82,6 +82,10 @@ message DeleteVersionKeyValueStoresRequest {
   repeated Workflow workflows = 3;
 }
 
+message DeleteGlobalKeyValueStoreRequest {
+  string product_id = 1;
+}
+
 message CreateStreamsResponse {
   map<string, WorkflowStreamConfig> workflows = 1;
 }
@@ -125,4 +129,5 @@ service NatsManagerService {
   rpc DeleteStreams (DeleteStreamsRequest) returns (DeleteResponse);
   rpc DeleteObjectStores (DeleteObjectStoresRequest) returns (DeleteResponse);
   rpc DeleteVersionKeyValueStores (DeleteVersionKeyValueStoresRequest) returns (DeleteResponse);
+  rpc DeleteGlobalKeyValueStore (DeleteGlobalKeyValueStoreRequest) returns (DeleteResponse);
 };

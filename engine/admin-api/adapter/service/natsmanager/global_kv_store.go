@@ -19,3 +19,16 @@ func (n *Client) CreateGlobalKeyValueStore(ctx context.Context, product string) 
 
 	return res.GlobalKeyValueStore, err
 }
+
+func (n *Client) DeleteGlobalKeyValueStore(ctx context.Context, product string) error {
+	req := natspb.DeleteGlobalKeyValueStoreRequest{
+		ProductId: product,
+	}
+
+	_, err := n.client.DeleteGlobalKeyValueStore(ctx, &req)
+	if err != nil {
+		return fmt.Errorf("creating global key-value store: %w", err)
+	}
+
+	return err
+}

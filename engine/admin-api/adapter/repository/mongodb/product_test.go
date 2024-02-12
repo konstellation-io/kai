@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -22,6 +23,7 @@ import (
 type ProductRepositorySuite struct {
 	suite.Suite
 	mongoDBContainer   testcontainers.Container
+	mongoClient        *mongo.Client
 	productsCollection *mongo.Collection
 	productRepo        *mongodb.ProductRepoMongoDB
 }
@@ -65,6 +67,7 @@ func (s *ProductRepositorySuite) SetupSuite() {
 	s.mongoDBContainer = mongoDBContainer
 	s.productsCollection = client.Database(viper.GetString(config.MongoDBKaiDatabaseKey)).Collection("products")
 	s.productRepo = mongodb.NewProductRepoMongoDB(logger, client)
+	s.mongoClient = client
 
 	s.Require().NoError(err)
 }
@@ -103,4 +106,19 @@ func (s *ProductRepositorySuite) TestUpdate_ProductDoesntExist() {
 
 	err := s.productRepo.Update(ctx, product)
 	s.Require().Error(err, mongodb.ErrUpdateProductNotFound)
+}
+
+func (s *ProductRepositorySuite) TestDeleteDatabase() {
+	ctx := context.Background()
+	name := "test-database"
+
+	_, err := s.mongoClient.Database(name).Collection("test").InsertOne(ctx, bson.M{"foo": "bar"})
+	s.Require().NoError(err)
+
+	err = s.productRepo.DeleteDatabase(ctx, name)
+	s.NoError(err)
+
+	res, err := s.mongoClient.Database(name).Collection("test").CountDocuments(ctx, bson.M{})
+	s.Require().NoError(err)
+	s.Zero(res)
 }

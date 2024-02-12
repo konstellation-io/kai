@@ -117,6 +117,92 @@ func (_c *MockObjectStorage_CreateBucketPolicy_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// DeleteBucket provides a mock function with given fields: ctx, bucket
+func (_m *MockObjectStorage) DeleteBucket(ctx context.Context, bucket string) error {
+	ret := _m.Called(ctx, bucket)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, bucket)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockObjectStorage_DeleteBucket_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteBucket'
+type MockObjectStorage_DeleteBucket_Call struct {
+	*mock.Call
+}
+
+// DeleteBucket is a helper method to define mock.On call
+//   - ctx context.Context
+//   - bucket string
+func (_e *MockObjectStorage_Expecter) DeleteBucket(ctx interface{}, bucket interface{}) *MockObjectStorage_DeleteBucket_Call {
+	return &MockObjectStorage_DeleteBucket_Call{Call: _e.mock.On("DeleteBucket", ctx, bucket)}
+}
+
+func (_c *MockObjectStorage_DeleteBucket_Call) Run(run func(ctx context.Context, bucket string)) *MockObjectStorage_DeleteBucket_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockObjectStorage_DeleteBucket_Call) Return(_a0 error) *MockObjectStorage_DeleteBucket_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockObjectStorage_DeleteBucket_Call) RunAndReturn(run func(context.Context, string) error) *MockObjectStorage_DeleteBucket_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteBucketPolicy provides a mock function with given fields: ctx, policyName
+func (_m *MockObjectStorage) DeleteBucketPolicy(ctx context.Context, policyName string) error {
+	ret := _m.Called(ctx, policyName)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, policyName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockObjectStorage_DeleteBucketPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteBucketPolicy'
+type MockObjectStorage_DeleteBucketPolicy_Call struct {
+	*mock.Call
+}
+
+// DeleteBucketPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - policyName string
+func (_e *MockObjectStorage_Expecter) DeleteBucketPolicy(ctx interface{}, policyName interface{}) *MockObjectStorage_DeleteBucketPolicy_Call {
+	return &MockObjectStorage_DeleteBucketPolicy_Call{Call: _e.mock.On("DeleteBucketPolicy", ctx, policyName)}
+}
+
+func (_c *MockObjectStorage_DeleteBucketPolicy_Call) Run(run func(ctx context.Context, policyName string)) *MockObjectStorage_DeleteBucketPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockObjectStorage_DeleteBucketPolicy_Call) Return(_a0 error) *MockObjectStorage_DeleteBucketPolicy_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockObjectStorage_DeleteBucketPolicy_Call) RunAndReturn(run func(context.Context, string) error) *MockObjectStorage_DeleteBucketPolicy_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteImageSources provides a mock function with given fields: ctx, product, image
 func (_m *MockObjectStorage) DeleteImageSources(ctx context.Context, product string, image string) error {
 	ret := _m.Called(ctx, product, image)

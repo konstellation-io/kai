@@ -15,4 +15,5 @@ type NatsManager interface {
 	DeleteStreams(productID, versionTag string) error
 	DeleteObjectStores(productID, versionTag string) error
 	DeleteVersionKeyValueStores(productID, versionTag string, workflows []entity.Workflow) error
+	DeleteGlobalKeyValueStore(productID string) error
 }
