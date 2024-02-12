@@ -12,6 +12,8 @@ import (
 )
 
 // TODO
+// Current config doesnt work, admin api is not able to get up
+// Talk about usage of basic user pwd auth rather than token use
 // Ensure config for both registry and admin-api are set up properly
 // Add a test for this function
 // Try it out in a local environment
@@ -52,6 +54,7 @@ func (ps *Service) DeleteProcess(
 
 func (ps *Service) deleteImageTag(opts DeleteProcessOpts, scope string) error {
 	registryHost := viper.GetString(config.RegistryHostKey)
+	authSecret := viper.GetString(config.RegistryAuthSecretKey)
 	repositoryName := ps.getRepositoryName(scope, opts.Process)
 
 	client := &http.Client{}
@@ -60,10 +63,12 @@ func (ps *Service) deleteImageTag(opts DeleteProcessOpts, scope string) error {
 	if err != nil {
 		return err
 	}
-	//
+
+	basicAuth := base64.StdEncoding.EncodeToString([]byte(authSecret))
+
 	//username := "user"
 	//password := "password"
-	basicAuth := base64.StdEncoding.EncodeToString([]byte(authSecret))
+	//basicAuth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 
 	req.Header.Add("Authorization", "Basic "+authSecret)
 
