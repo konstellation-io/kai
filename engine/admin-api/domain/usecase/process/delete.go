@@ -65,12 +65,12 @@ func (ps *Service) deleteImageTag(opts DeleteProcessOpts) error {
 	if err != nil {
 		return err
 	}
+	//
+	//username := "user"
+	//password := "password"
+	basicAuth := base64.StdEncoding.EncodeToString([]byte(authSecret))
 
-	username := "user"
-	password := "password"
-	basicAuth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-
-	req.Header.Add("Authorization", "Basic "+basicAuth)
+	req.Header.Add("Authorization", "Basic "+authSecret)
 
 	// req.Header.Add("Authorization", "Bearer "+authSecret)
 	req.Header.Add("Accept", "application/vnd.docker.distribution.manifest.v2+json")

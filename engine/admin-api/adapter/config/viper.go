@@ -19,7 +19,7 @@ const (
 
 	RegistryHostKey       = "registry.host"
 	GlobalRegistryKey     = "registry.global"
-	RegistryAuthSecretKey = "registry.authSecret"
+	RegistryAuthSecretKey = "registry.basicAuthSecret"
 
 	MinioEndpointKey           = "minio.endpoint"
 	MinioTierEnabledKey        = "minio.tier.enabled"
@@ -61,7 +61,7 @@ func InitConfig() error {
 	viper.RegisterAlias(CORSEnabledKey, "ADMIN_CORS_ENABLED")
 
 	viper.RegisterAlias(RegistryHostKey, "REGISTRY_HOST")
-	viper.RegisterAlias(RegistryAuthSecretKey, "REGISTRY_AUTH_SECRET_NAME")
+	viper.RegisterAlias(RegistryAuthSecretKey, "REGISTRY_BASIC_AUTH")
 
 	viper.RegisterAlias(MongoDBEndpointKey, "MONGODB_URI")
 	viper.RegisterAlias(MongoDBKaiDatabaseKey, "MONGODB_DATABASE")

@@ -602,6 +602,10 @@ registry:
     # -- Registry password
     # @default -- password
     password: ""
+  basicAuth:
+    # -- Registry basic auth secret key
+    # @default -- basic-auth
+    secretKey: ""
   storage:
     # -- Whether to enable persistence
     enabled: true
