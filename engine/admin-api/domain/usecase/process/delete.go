@@ -2,6 +2,7 @@ package process
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 
@@ -65,7 +66,13 @@ func (ps *Service) deleteImageTag(opts DeleteProcessOpts) error {
 		return err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+authSecret)
+	username := "user"
+	password := "password"
+	basicAuth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+
+	req.Header.Add("Authorization", "Basic "+basicAuth)
+
+	// req.Header.Add("Authorization", "Bearer "+authSecret)
 	req.Header.Add("Accept", "application/vnd.docker.distribution.manifest.v2+json")
 
 	resp, err := client.Do(req)
@@ -80,14 +87,15 @@ func (ps *Service) deleteImageTag(opts DeleteProcessOpts) error {
 		return err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+authSecret)
+	//req.Header.Add("Authorization", "Bearer "+authSecret)
+	req.Header.Add("Authorization", "Basic "+basicAuth)
 
 	resp, err = client.Do(req)
 	if err != nil {
 		return err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
 		return fmt.Errorf("failed to delete image: %s", resp.Status)
 	}
 
