@@ -192,6 +192,8 @@ k8sManager:
     # -- The Service Account annotations
     annotations: {}
   imageBuilder:
+    # -- Log level for image builder's jobs
+    logLevel: info
     image:
       # -- Image repository for image builder's jobs
       repository: gcr.io/kaniko-project/executor

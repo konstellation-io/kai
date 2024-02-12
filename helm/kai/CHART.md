@@ -98,6 +98,7 @@
 | k8sManager.imageBuilder.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for image builder's jobs |
 | k8sManager.imageBuilder.image.repository | string | `"gcr.io/kaniko-project/executor"` | Image repository for image builder's jobs |
 | k8sManager.imageBuilder.image.tag | string | `"v1.18.0"` | Image tag for image builder's jobs |
+| k8sManager.imageBuilder.logLevel | string | `"info"` | Log level for image builder's jobs |
 | k8sManager.imageBuilder.netrc.content | string | `""` | .netrc file content. Ref: https://everything.curl.dev/usingcurl/netrc |
 | k8sManager.imageBuilder.netrc.enabled | bool | `false` | Whether to create .netrc file for authentication for private dependency repositories |
 | k8sManager.imagePullSecrets | list | `[]` | Image pull secrets |

@@ -109,6 +109,7 @@ func Init(configFilePath string) error {
 	viper.RegisterAlias(ImageBuilderImageKey, "IMAGE_BUILDER_IMAGE_REPOSITORY")
 	viper.RegisterAlias(ImageBuilderTagKey, "IMAGE_BUILDER_IMAGE_TAG")
 	viper.RegisterAlias(ImageBuilderPullPolicyKey, "IMAGE_BUILDER_IMAGE_PULLPOLICY")
+	viper.RegisterAlias(ImageBuilderLogLevel, "IMAGE_BUILDER_LOGLEVEL")
 
 	viper.RegisterAlias(MinioEndpointKey, "MINIO_ENDPOINT_URL")
 	viper.RegisterAlias(MinioAccessKeyIDKey, "MINIO_ROOT_USER")
@@ -162,7 +163,7 @@ func setDefaultValues() {
 	viper.SetDefault(ImageBuilderImageKey, "gcr.io/kaniko-project/executor")
 	viper.SetDefault(ImageBuilderTagKey, "v1.18.0")
 	viper.SetDefault(ImageBuilderPullPolicyKey, "IfNotPresent")
-	viper.SetDefault(ImageBuilderLogLevel, "error")
+	viper.SetDefault(ImageBuilderLogLevel, "info")
 
 	viper.SetDefault(MinioRegionKey, "us-east-1")
 	viper.SetDefault(MinioSSLEnabledKey, false)
