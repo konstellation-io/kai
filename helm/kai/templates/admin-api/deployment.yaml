@@ -91,6 +91,11 @@ spec:
                   name: {{ include "redis.auth.secretName" . }}
                   key: {{ include "redis.auth.secretPasswordKey" . }}
             {{- end }}
+            - name: KAI_REGISTRY_BASIC_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "registry.basicAuth.secretName" . }}
+                  key: {{ include "registry.basicAuth.secretKey" . }}
           ports:
             - containerPort: 8080
               protocol: TCP

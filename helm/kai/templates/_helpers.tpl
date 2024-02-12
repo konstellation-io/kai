@@ -459,6 +459,19 @@ Registry auth secret name
 {{- printf "%s-auth" (include "registry.fullname" . ) -}}
 {{- end -}}
 
+{{/*
+Registry basic auth secret name
+*/}}
+{{- define "registry.basicAuth.secretName" -}}
+{{- printf "%s-basic-auth" (include "registry.fullname" . ) -}}
+{{- end -}}
+
+{{/*
+Registry basic auth secret key
+*/}}
+{{- define "registry.basicAuth.secretKey" -}}
+{{- default "basic-auth" .Values.registry.basicAuth.secretKey }}
+{{- end -}}
 
 {{/*
 Loki Host
