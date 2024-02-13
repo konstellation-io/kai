@@ -121,7 +121,7 @@ func (ps *Handler) getProcessID(scope, process, version string) string {
 	return fmt.Sprintf("%s_%s:%s", scope, process, version)
 }
 
-func (ps *Handler) getImageName(scope string, process string) string {
+func (ps *Handler) getImageName(scope, process string) string {
 	return fmt.Sprintf("%s_%s", scope, process)
 }
 

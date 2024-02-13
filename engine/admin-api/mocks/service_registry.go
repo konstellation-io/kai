@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -34,15 +35,15 @@ func (m *MockProcessRegistry) EXPECT() *MockProcessRegistryMockRecorder {
 }
 
 // DeleteProcess mocks base method.
-func (m *MockProcessRegistry) DeleteProcess(image, version string) error {
+func (m *MockProcessRegistry) DeleteProcess(ctx context.Context, image, version string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteProcess", image, version)
+	ret := m.ctrl.Call(m, "DeleteProcess", ctx, image, version)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteProcess indicates an expected call of DeleteProcess.
-func (mr *MockProcessRegistryMockRecorder) DeleteProcess(image, version interface{}) *gomock.Call {
+func (mr *MockProcessRegistryMockRecorder) DeleteProcess(ctx, image, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProcess", reflect.TypeOf((*MockProcessRegistry)(nil).DeleteProcess), image, version)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProcess", reflect.TypeOf((*MockProcessRegistry)(nil).DeleteProcess), ctx, image, version)
 }

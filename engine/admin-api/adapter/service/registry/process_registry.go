@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -13,6 +14,11 @@ import (
 
 var _ service.ProcessRegistry = (*ProcessRegistry)(nil)
 
+var (
+	ErrFailedGetManifest = fmt.Errorf("failed to get image manifest")
+	ErrFailedDeleteImage = fmt.Errorf("failed to delete image")
+)
+
 type ProcessRegistry struct {
 }
 
@@ -20,7 +26,7 @@ func NewProcessRegistry() *ProcessRegistry {
 	return &ProcessRegistry{}
 }
 
-func (c ProcessRegistry) DeleteProcess(imageName, version string) error {
+func (c ProcessRegistry) DeleteProcess(ctx context.Context, imageName, version string) error {
 	registryHost := viper.GetString(config.RegistryHostKey)
 	authSecret := viper.GetString(config.RegistryAuthSecretKey)
 
@@ -30,7 +36,7 @@ func (c ProcessRegistry) DeleteProcess(imageName, version string) error {
 
 	client := &http.Client{}
 
-	req, err := http.NewRequest("GET", registryHost+"/v2/"+imageName+"/manifests/"+version, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", registryHost+"/v2/"+imageName+"/manifests/"+version, http.NoBody)
 	if err != nil {
 		return err
 	}
@@ -44,27 +50,31 @@ func (c ProcessRegistry) DeleteProcess(imageName, version string) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to get image manifest: %s", resp.Status)
+		return ErrFailedGetManifest
 	}
 
 	digest := resp.Header.Get("Docker-Content-Digest")
 
-	req, err = http.NewRequest("DELETE", registryHost+"/v2/"+imageName+"/manifests/"+digest, nil)
+	req, err = http.NewRequestWithContext(ctx, "DELETE", registryHost+"/v2/"+imageName+"/manifests/"+digest, http.NoBody)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Add("Authorization", "Basic "+basicAuth)
 
+	req.Body = http.NoBody
+
 	resp, err = client.Do(req)
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		return fmt.Errorf("failed to delete image: %s", resp.Status)
+		return ErrFailedDeleteImage
 	}
 
 	return nil

@@ -25,7 +25,7 @@ func (s *ProcessServiceTestSuite) TestDeleteProcess_WithProduct() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, nil)
-	s.processRegistry.EXPECT().DeleteProcess(imageName, opts.Version).Return(nil)
+	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(nil)
 	s.processRepo.EXPECT().Delete(ctx, opts.Product, processID).Return(nil)
 
 	returnedProcessID, err := s.processService.DeleteProcess(ctx, user, opts)
@@ -48,7 +48,7 @@ func (s *ProcessServiceTestSuite) TestDeleteProcess_Public() {
 
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActDeletePublicProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, _publicRegistry, processID).Return(nil, nil)
-	s.processRegistry.EXPECT().DeleteProcess(imageName, opts.Version).Return(nil)
+	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(nil)
 	s.processRepo.EXPECT().Delete(ctx, _publicRegistry, processID).Return(nil)
 
 	returnedProcessID, err := s.processService.DeleteProcess(ctx, user, opts)
@@ -175,7 +175,7 @@ func (s *ProcessServiceTestSuite) TestDeleteProcess_DeleteProcessError() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, nil)
-	s.processRegistry.EXPECT().DeleteProcess(imageName, opts.Version).Return(fmt.Errorf("error"))
+	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(fmt.Errorf("error"))
 
 	_, err := s.processService.DeleteProcess(ctx, user, opts)
 	s.Require().Error(err)
@@ -196,7 +196,7 @@ func (s *ProcessServiceTestSuite) TestDeleteProcess_DeleteProcessRepoError() {
 
 	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, nil)
-	s.processRegistry.EXPECT().DeleteProcess(imageName, opts.Version).Return(nil)
+	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(nil)
 	s.processRepo.EXPECT().Delete(ctx, opts.Product, processID).Return(fmt.Errorf("error"))
 
 	_, err := s.processService.DeleteProcess(ctx, user, opts)

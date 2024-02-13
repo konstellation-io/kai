@@ -3,6 +3,7 @@
 package registry_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -60,7 +61,7 @@ func TestDeleteProcess(t *testing.T) {
 
 	processRegistry := registry.NewProcessRegistry()
 
-	err := processRegistry.DeleteProcess(imageName, version)
+	err := processRegistry.DeleteProcess(context.Background(), imageName, version)
 	require.NoError(t, err)
 }
 
@@ -97,8 +98,9 @@ func TestDeleteProcess_GetManifestError(t *testing.T) {
 
 	processRegistry := registry.NewProcessRegistry()
 
-	err := processRegistry.DeleteProcess(imageName, version)
+	err := processRegistry.DeleteProcess(context.Background(), imageName, version)
 	require.Error(t, err)
+	assert.ErrorIs(t, err, registry.ErrFailedGetManifest)
 }
 
 func TestDeleteProcess_DeleteManifestError(t *testing.T) {
@@ -146,6 +148,7 @@ func TestDeleteProcess_DeleteManifestError(t *testing.T) {
 
 	processRegistry := registry.NewProcessRegistry()
 
-	err := processRegistry.DeleteProcess(imageName, version)
+	err := processRegistry.DeleteProcess(context.Background(), imageName, version)
 	require.Error(t, err)
+	assert.ErrorIs(t, err, registry.ErrFailedDeleteImage)
 }

@@ -30,7 +30,7 @@ func (ps *Handler) DeleteProcess(
 		return "", err
 	}
 
-	if err := ps.processRegistry.DeleteProcess(imageName, opts.Version); err != nil {
+	if err := ps.processRegistry.DeleteProcess(ctx, imageName, opts.Version); err != nil {
 		return "", err
 	}
 
