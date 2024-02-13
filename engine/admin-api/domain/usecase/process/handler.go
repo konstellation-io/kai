@@ -51,6 +51,10 @@ func (o RegisterProcessOpts) Validate() error {
 		return ErrMissingProductInParams
 	}
 
+	if o.Product != "" && o.IsPublic {
+		return ErrIsPublicAndHasProduct
+	}
+
 	if o.Version == "" {
 		return ErrMissingVersionInParams
 	}

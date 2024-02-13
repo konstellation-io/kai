@@ -171,6 +171,127 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFa
 	s.Require().NoError(testhelpers.WaitOrTimeout(&wg, 1*time.Second))
 }
 
+func (s *ProcessServiceTestSuite) TestRegisterProcess_MissingProductInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processService.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Version:     version,
+			Process:     processName,
+			ProcessType: processType,
+			Sources:     nil,
+		},
+	)
+	s.Require().Error(err)
+	s.Equal(process.ErrMissingProductInParams, err)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_IsPublicAndHasProduct() {
+	ctx := context.Background()
+
+	_, err := s.processService.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:  productID,
+			Version:  version,
+			Process:  processName,
+			IsPublic: true,
+			Sources:  nil,
+		},
+	)
+	s.Require().Error(err)
+	s.Equal(process.ErrIsPublicAndHasProduct, err)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_MissingVersionInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processService.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Process:     processName,
+			ProcessType: processType,
+			Sources:     nil,
+		},
+	)
+	s.Require().Error(err)
+	s.Equal(process.ErrMissingVersionInParams, err)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_MissingProcessInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processService.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Version:     version,
+			ProcessType: processType,
+			Sources:     nil,
+		},
+	)
+	s.Require().Error(err)
+	s.Equal(process.ErrMissingProcessInParams, err)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_InvalidProcessTypeInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processService.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Version:     version,
+			Process:     processName,
+			ProcessType: "invalid",
+			Sources:     nil,
+		},
+	)
+	s.Require().Error(err)
+	s.Equal(process.ErrInvalidProcessType, err)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_MissingSourcesInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processService.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Version:     version,
+			Process:     processName,
+			ProcessType: processType,
+			Sources:     nil,
+		},
+	)
+	s.Require().Error(err)
+	s.Equal(process.ErrMissingSourcesInParams, err)
+}
+
+func (s *ProcessServiceTestSuite) TestRegisterProcess_NoProductGrants() {
+	ctx := context.Background()
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(auth.UnauthorizedError{})
+
+	_, err = s.processService.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Version:     version,
+			Process:     processName,
+			ProcessType: processType,
+			Sources:     testFile,
+		},
+	)
+	s.Require().Error(err)
+	s.Equal(auth.UnauthorizedError{}, err)
+}
+
 func (s *ProcessServiceTestSuite) TestRegisterProcess_GetByIDFails() {
 	ctx := context.Background()
 

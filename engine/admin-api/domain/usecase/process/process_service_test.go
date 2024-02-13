@@ -119,7 +119,7 @@ func (s *ProcessServiceTestSuite) TearDownSuite() {
 
 func (s *ProcessServiceTestSuite) TearDownTest() {
 	// Clean mockery calls to avoid false positives
-	s.objectStorage.ExpectedCalls = nil
+	s.ctrl.Finish()
 }
 
 func (s *ProcessServiceTestSuite) getTestProcess(registry, status string, isPublicOpt ...bool) *entity.RegisteredProcess {
