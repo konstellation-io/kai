@@ -467,13 +467,6 @@ Registry basic auth secret name
 {{- end -}}
 
 {{/*
-Registry basic auth secret key
-*/}}
-{{- define "registry.basicAuth.secretKey" -}}
-{{- default "basic-auth" .Values.registry.basicAuth.secretKey }}
-{{- end -}}
-
-{{/*
 Loki Host
 */}}
 {{- define "loki.host" -}}
