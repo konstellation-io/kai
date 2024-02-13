@@ -62,6 +62,34 @@ func (mr *MockUserRegistryMockRecorder) CreateUserWithinGroup(ctx, name, passwor
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserWithinGroup", reflect.TypeOf((*MockUserRegistry)(nil).CreateUserWithinGroup), ctx, name, password, group)
 }
 
+// DeleteGroup mocks base method.
+func (m *MockUserRegistry) DeleteGroup(ctx context.Context, name string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteGroup", ctx, name)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteGroup indicates an expected call of DeleteGroup.
+func (mr *MockUserRegistryMockRecorder) DeleteGroup(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGroup", reflect.TypeOf((*MockUserRegistry)(nil).DeleteGroup), ctx, name)
+}
+
+// DeleteUser mocks base method.
+func (m *MockUserRegistry) DeleteUser(ctx context.Context, name string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUser", ctx, name)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteUser indicates an expected call of DeleteUser.
+func (mr *MockUserRegistryMockRecorder) DeleteUser(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockUserRegistry)(nil).DeleteUser), ctx, name)
+}
+
 // UpdateUserProductGrants mocks base method.
 func (m *MockUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []string) error {
 	m.ctrl.T.Helper()

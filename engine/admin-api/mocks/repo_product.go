@@ -50,6 +50,20 @@ func (mr *MockProductRepoMockRecorder) Create(ctx, product interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProductRepo)(nil).Create), ctx, product)
 }
 
+// DeleteDatabase mocks base method.
+func (m *MockProductRepo) DeleteDatabase(ctx context.Context, productID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteDatabase", ctx, productID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteDatabase indicates an expected call of DeleteDatabase.
+func (mr *MockProductRepoMockRecorder) DeleteDatabase(ctx, productID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteDatabase", reflect.TypeOf((*MockProductRepo)(nil).DeleteDatabase), ctx, productID)
+}
+
 // FindAll mocks base method.
 func (m *MockProductRepo) FindAll(ctx context.Context) ([]*entity.Product, error) {
 	m.ctrl.T.Helper()
@@ -126,15 +140,15 @@ func (mr *MockProductRepoMockRecorder) GetByName(ctx, name interface{}) *gomock.
 }
 
 // Update mocks base method.
-func (m *MockProductRepo) Update(ctx context.Context, productID *entity.Product) error {
+func (m *MockProductRepo) Update(ctx context.Context, product *entity.Product) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, productID)
+	ret := m.ctrl.Call(m, "Update", ctx, product)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockProductRepoMockRecorder) Update(ctx, productID interface{}) *gomock.Call {
+func (mr *MockProductRepoMockRecorder) Update(ctx, product interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProductRepo)(nil).Update), ctx, productID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProductRepo)(nil).Update), ctx, product)
 }

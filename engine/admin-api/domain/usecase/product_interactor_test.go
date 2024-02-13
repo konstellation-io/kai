@@ -5,6 +5,7 @@ package usecase_test
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
 	"time"
 
@@ -24,6 +25,7 @@ const (
 	_testPassword     = "test-password"
 	_testBucketPolicy = "test-policy"
 	_testKvStore      = "test-kv-store"
+	_wgTimeout        = 1 * time.Second
 )
 
 type productSuite struct {
@@ -140,7 +142,7 @@ func (s *productSuite) TestCreateProduct() {
 	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.predictionRepo.EXPECT().
 		CreateUser(ctx, productID, expectedProduct.ServiceAccount.Username, expectedProduct.ServiceAccount.Password).
-		Return(nil)
+		Return(nil).Times(1)
 	s.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
@@ -167,7 +169,6 @@ func (s *productSuite) TestCreateProduct_FailsIfUserHasNotPermission() {
 }
 
 func (s *productSuite) TestCreateProduct_FailsIfProductHasAnInvalidField() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -184,7 +185,6 @@ func (s *productSuite) TestCreateProduct_FailsIfProductHasAnInvalidField() {
 }
 
 func (s *productSuite) TestCreateProduct_FailsIfProductWithSameIDAlreadyExists() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -209,7 +209,6 @@ func (s *productSuite) TestCreateProduct_FailsIfProductWithSameIDAlreadyExists()
 }
 
 func (s *productSuite) TestCreateProduct_FailsIfProductWithSameNameAlreadyExists() {
-
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 
@@ -235,7 +234,6 @@ func (s *productSuite) TestCreateProduct_FailsIfProductWithSameNameAlreadyExists
 }
 
 func (s *productSuite) TestCreateProduct_ErrorCheckingProductIDInRepo() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -252,7 +250,6 @@ func (s *productSuite) TestCreateProduct_ErrorCheckingProductIDInRepo() {
 }
 
 func (s *productSuite) TestCreateProduct_ErrorCheckingProductNameInRepo() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -270,15 +267,25 @@ func (s *productSuite) TestCreateProduct_ErrorCheckingProductNameInRepo() {
 }
 
 func (s *productSuite) TestCreateProduct_ErrorCreatingVersionRepoIndexes() {
+	var (
+		ctx                = context.Background()
+		user               = testhelpers.NewUserBuilder().Build()
+		productID          = "test-product"
+		productName        = "test-product"
+		productDescription = "This is a product description"
+		expectedProduct    = testhelpers.NewProductBuilder().
+					WithServiceAccount(entity.ServiceAccount{
+				Username: productID,
+				Password: _testPassword,
+				Group:    productID,
+			}).
+			Build()
+		expectedError = errors.New("error creating versions collection indexes")
 
-	ctx := context.Background()
+		wg = sync.WaitGroup{}
+	)
 
-	user := testhelpers.NewUserBuilder().Build()
-	productID := "test-product"
-	productName := "test-product"
-	productDescription := "This is a product description"
-
-	expectedError := errors.New("error creating versions collection indexes")
+	wg.Add(1)
 
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
@@ -289,42 +296,82 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingVersionRepoIndexes() {
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
 	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+	s.predictionRepo.EXPECT().
+		CreateUser(ctx, productID, expectedProduct.ServiceAccount.Username, expectedProduct.ServiceAccount.Password).
+		Return(nil).Times(1)
 
 	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
 
+	// Compensations
+	s.natsService.EXPECT().DeleteGlobalKeyValueStore(ctx, productID).DoAndReturn(func(_, _ any) error {
+		wg.Done()
+		return nil
+	}).Times(1)
+	s.userRegistry.EXPECT().DeleteUser(ctx, productID).Return(nil).Times(1)
+	s.userRegistry.EXPECT().DeleteGroup(ctx, productID).Return(nil).Times(1)
+	s.objectStorage.EXPECT().DeleteBucketPolicy(ctx, _testBucketPolicy).Return(nil).Times(1)
+	s.objectStorage.EXPECT().DeleteBucket(ctx, productID).Return(nil).Times(1)
+	s.predictionRepo.EXPECT().DeleteUser(ctx, productID).Return(nil).Times(1)
+
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 	s.Require().ErrorIs(err, expectedError)
+	s.Assert().NoError(testhelpers.WaitOrTimeout(&wg, _wgTimeout))
 }
 
 func (s *productSuite) TestCreateProduct_ErrorCreatingProcessRegistryRepoIndexes() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
 	productID := "test-product"
 	productName := "test-product"
 	productDescription := "This is a product description"
+	expectedProduct := testhelpers.NewProductBuilder().
+		WithID(productID).
+		WithServiceAccount(entity.ServiceAccount{
+			Username: productID,
+			Password: _testPassword,
+			Group:    productID,
+		}).
+		Build()
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
 
 	expectedError := errors.New("error creating versions collection indexes")
 
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
-	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+	s.productRepo.EXPECT().GetByID(ctx, expectedProduct.ID).Return(nil, usecase.ErrProductNotFound)
 	s.productRepo.EXPECT().GetByName(ctx, productName).Return(nil, usecase.ErrProductNotFound)
-	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, productID).Return(_testKvStore, nil)
-	s.objectStorage.EXPECT().CreateBucket(ctx, productID).Return(nil)
-	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
-	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
-	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+	s.natsService.EXPECT().CreateGlobalKeyValueStore(ctx, expectedProduct.ID).Return(_testKvStore, nil)
+	s.objectStorage.EXPECT().CreateBucket(ctx, expectedProduct.ID).Return(nil)
+	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, expectedProduct.ID).Times(1).Return(_testBucketPolicy, nil)
+	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, expectedProduct.ID, _testBucketPolicy).Times(1).Return(nil)
+	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, expectedProduct.ID, _testPassword, expectedProduct.ID).Times(1).Return(nil)
+	s.predictionRepo.EXPECT().
+		CreateUser(ctx, expectedProduct.ID, expectedProduct.ServiceAccount.Username, expectedProduct.ServiceAccount.Password).
+		Return(nil).Times(1)
 
-	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
-	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(expectedError)
+	s.versionRepo.EXPECT().CreateIndexes(ctx, expectedProduct.ID).Return(nil)
+	s.processRepo.EXPECT().CreateIndexes(ctx, expectedProduct.ID).Return(expectedError)
+
+	// Compensations
+	s.natsService.EXPECT().DeleteGlobalKeyValueStore(ctx, productID).DoAndReturn(func(_, _ any) error {
+		wg.Done()
+		return nil
+	}).Times(1)
+	s.userRegistry.EXPECT().DeleteUser(ctx, productID).Return(nil).Times(1)
+	s.userRegistry.EXPECT().DeleteGroup(ctx, productID).Return(nil).Times(1)
+	s.objectStorage.EXPECT().DeleteBucketPolicy(ctx, _testBucketPolicy).Return(nil).Times(1)
+	s.objectStorage.EXPECT().DeleteBucket(ctx, productID).Return(nil).Times(1)
+	s.predictionRepo.EXPECT().DeleteUser(ctx, productID).Return(nil).Times(1)
 
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 	s.Require().ErrorIs(err, expectedError)
+
+	s.NoError(testhelpers.WaitOrTimeout(&wg, _wgTimeout))
 }
 
 func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -350,6 +397,10 @@ func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
 		KeyValueStore: _testKvStore,
 	}
 
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+
 	expectedError := errors.New("create product error")
 
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)
@@ -361,17 +412,33 @@ func (s *productSuite) TestCreateProduct_FailsIfCreateProductFails() {
 	s.objectStorage.EXPECT().CreateBucketPolicy(ctx, productID).Times(1).Return(_testBucketPolicy, nil)
 	s.userRegistry.EXPECT().CreateGroupWithPolicy(ctx, productID, _testBucketPolicy).Times(1).Return(nil)
 	s.userRegistry.EXPECT().CreateUserWithinGroup(ctx, productID, _testPassword, productID).Times(1).Return(nil)
+	s.predictionRepo.EXPECT().
+		CreateUser(ctx, productID, newProduct.ServiceAccount.Username, newProduct.ServiceAccount.Password).
+		Return(nil).Times(1)
 
 	s.versionRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.processRepo.EXPECT().CreateIndexes(ctx, productID).Return(nil)
 	s.productRepo.EXPECT().Create(ctx, newProduct).Return(nil, expectedError)
 
+	// Compensations
+	s.natsService.EXPECT().DeleteGlobalKeyValueStore(ctx, productID).DoAndReturn(func(_, _ any) error {
+		wg.Done()
+		return nil
+	}).Times(1)
+	s.userRegistry.EXPECT().DeleteUser(ctx, productID).Return(nil).Times(1)
+	s.userRegistry.EXPECT().DeleteGroup(ctx, productID).Return(nil).Times(1)
+	s.objectStorage.EXPECT().DeleteBucketPolicy(ctx, _testBucketPolicy).Return(nil).Times(1)
+	s.objectStorage.EXPECT().DeleteBucket(ctx, productID).Return(nil).Times(1)
+	s.predictionRepo.EXPECT().DeleteUser(ctx, productID).Return(nil).Times(1)
+	s.productRepo.EXPECT().DeleteDatabase(ctx, productID).Return(nil).Times(1)
+
 	_, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 	s.Require().ErrorIs(err, expectedError)
+
+	s.NoError(testhelpers.WaitOrTimeout(&wg, _wgTimeout))
 }
 
 func (s *productSuite) TestGetByID() {
-
 	ctx := context.Background()
 
 	user := testhelpers.NewUserBuilder().Build()
@@ -395,7 +462,6 @@ func (s *productSuite) TestGetByID() {
 }
 
 func (s *productSuite) TestFindAll() {
-
 	ctx := context.Background()
 
 	productID := "test-product"

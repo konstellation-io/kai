@@ -17,4 +17,5 @@ type NatsManagerService interface {
 	DeleteStreams(ctx context.Context, product string, versionTag string) error
 	DeleteObjectStores(ctx context.Context, product, versionTag string) error
 	DeleteVersionKeyValueStores(ctx context.Context, product string, version *entity.Version) error
+	DeleteGlobalKeyValueStore(ctx context.Context, product string) error
 }

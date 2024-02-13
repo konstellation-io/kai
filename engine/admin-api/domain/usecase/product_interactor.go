@@ -12,6 +12,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/pkg/compensator"
 	"github.com/sethvargo/go-password/password"
 )
 
@@ -81,19 +82,9 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	// Sanitize input params
-	productID := i.generateProductID(name)
-	name = strings.TrimSpace(name)
-	description = strings.TrimSpace(description)
+	newProduct := i.buildProductFromParams(user, name, description)
 
-	i.logger.Info("Creating product", "name", name, "ID", productID)
-
-	newProduct := &entity.Product{
-		ID:          productID,
-		Name:        name,
-		Description: description,
-		Owner:       user.ID,
-	}
+	i.logger.Info("Creating product", "name", newProduct.Name, "ID", newProduct.ID)
 
 	// Validation
 	err := newProduct.Validate()
@@ -101,36 +92,48 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	// Check if the Product already exists
-	productFromDB, err := i.productRepo.GetByID(ctx, productID)
-	if productFromDB != nil {
-		return nil, ErrProductDuplicated
-	} else if !errors.Is(err, ErrProductNotFound) {
+	err = i.checkIfProductExists(ctx, newProduct)
+	if err != nil {
 		return nil, err
 	}
 
-	// Check if there is another Product with the same name
-	productFromDB, err = i.productRepo.GetByName(ctx, name)
-	if productFromDB != nil {
-		return nil, ErrProductDuplicatedName
-	} else if !errors.Is(err, ErrProductNotFound) {
+	// Create resources
+	compensations := compensator.New()
+
+	createdProduct, err := i.createProductResources(ctx, compensations, newProduct)
+	if err != nil {
+		go i.executeCompensations(compensations)
 		return nil, err
 	}
 
-	globalKeyValueStore, err := i.natsService.CreateGlobalKeyValueStore(ctx, productID)
+	i.logger.Info("Product stored in the database", "name", createdProduct.Name, "ID", createdProduct.ID)
+
+	return createdProduct, nil
+}
+
+func (i *ProductInteractor) createProductResources(
+	ctx context.Context,
+	compensations *compensator.Compensator,
+	newProduct *entity.Product,
+) (*entity.Product, error) {
+	globalKeyValueStore, err := i.natsService.CreateGlobalKeyValueStore(ctx, newProduct.ID)
 	if err != nil {
 		return nil, fmt.Errorf("creating global key-value store: %w", err)
 	}
 
+	compensations.AddCompensation(func() error {
+		return i.natsService.DeleteGlobalKeyValueStore(context.Background(), newProduct.ID)
+	})
+
 	newProduct.KeyValueStore = globalKeyValueStore
 
 	minioConfiguration := entity.MinioConfiguration{
-		Bucket: productID,
+		Bucket: newProduct.ID,
 	}
 
 	serviceAccount := entity.ServiceAccount{
-		Username: productID,
-		Group:    productID,
+		Username: newProduct.ID,
+		Group:    newProduct.ID,
 		Password: i.passwordGenerator.MustGenerate(32, 8, 8, true, true),
 	}
 
@@ -139,15 +142,27 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, fmt.Errorf("creating object storage bucket: %w", err)
 	}
 
-	policyName, err := i.objectStorage.CreateBucketPolicy(ctx, productID)
+	compensations.AddCompensation(func() error {
+		return i.objectStorage.DeleteBucket(context.Background(), minioConfiguration.Bucket)
+	})
+
+	policyName, err := i.objectStorage.CreateBucketPolicy(ctx, newProduct.ID)
 	if err != nil {
 		return nil, fmt.Errorf("creating object storage policy: %w", err)
 	}
+
+	compensations.AddCompensation(func() error {
+		return i.objectStorage.DeleteBucketPolicy(context.Background(), policyName)
+	})
 
 	err = i.userRegistry.CreateGroupWithPolicy(ctx, serviceAccount.Group, policyName)
 	if err != nil {
 		return nil, err
 	}
+
+	compensations.AddCompensation(func() error {
+		return i.userRegistry.DeleteGroup(context.Background(), newProduct.ID)
+	})
 
 	err = i.userRegistry.CreateUserWithinGroup(
 		ctx,
@@ -159,27 +174,57 @@ func (i *ProductInteractor) CreateProduct(
 		return nil, err
 	}
 
-	err = i.predictionRepo.CreateUser(ctx, productID, serviceAccount.Username, serviceAccount.Password)
+	compensations.AddCompensation(func() error {
+		return i.userRegistry.DeleteUser(context.Background(), newProduct.ID)
+	})
+
+	err = i.predictionRepo.CreateUser(ctx, newProduct.ID, serviceAccount.Username, serviceAccount.Password)
 	if err != nil {
 		return nil, fmt.Errorf("creating user in prediction's repository: %w", err)
 	}
 
+	compensations.AddCompensation(func() error {
+		return i.predictionRepo.DeleteUser(context.Background(), newProduct.ID)
+	})
+
 	newProduct.MinioConfiguration = minioConfiguration
 	newProduct.ServiceAccount = serviceAccount
 
-	err = i.createDatabaseIndexes(ctx, name)
+	err = i.createDatabaseIndexes(ctx, newProduct.Name)
 	if err != nil {
 		return nil, err
 	}
+
+	compensations.AddCompensation(func() error {
+		return i.productRepo.DeleteDatabase(context.Background(), newProduct.ID)
+	})
 
 	createdProduct, err := i.productRepo.Create(ctx, newProduct)
 	if err != nil {
 		return nil, err
 	}
 
-	i.logger.Info("Product stored in the database", "name", createdProduct.Name, "ID", createdProduct.ID)
-
 	return createdProduct, nil
+}
+
+func (i *ProductInteractor) checkIfProductExists(ctx context.Context, newProduct *entity.Product) error {
+	// Check if the Product already exists
+	productFromDB, err := i.productRepo.GetByID(ctx, newProduct.ID)
+	if productFromDB != nil {
+		return ErrProductDuplicated
+	} else if !errors.Is(err, ErrProductNotFound) {
+		return err
+	}
+
+	// Check if there is another Product with the same name
+	productFromDB, err = i.productRepo.GetByName(ctx, newProduct.Name)
+	if productFromDB != nil {
+		return ErrProductDuplicatedName
+	} else if !errors.Is(err, ErrProductNotFound) {
+		return err
+	}
+
+	return nil
 }
 
 func (i *ProductInteractor) createDatabaseIndexes(ctx context.Context, productID string) error {
@@ -232,4 +277,20 @@ func (i *ProductInteractor) generateProductID(name string) string {
 	id = _validCharactersRE.ReplaceAllString(id, "")
 
 	return id
+}
+
+func (i *ProductInteractor) buildProductFromParams(user *entity.User, name, description string) *entity.Product {
+	return &entity.Product{
+		ID:          i.generateProductID(name),
+		Name:        strings.TrimSpace(name),
+		Description: strings.TrimSpace(description),
+		Owner:       user.ID,
+	}
+}
+
+func (i *ProductInteractor) executeCompensations(compensations *compensator.Compensator) {
+	err := compensations.Execute()
+	if err != nil {
+		i.logger.Error(err, "Executing compensations on create product request")
+	}
 }

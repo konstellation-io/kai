@@ -41,3 +41,34 @@ func (s *NatsManagerTestSuite) TestCreateGlobalKeyValueStore_ServiceError() {
 	_, err := s.natsManagerClient.CreateGlobalKeyValueStore(ctx, productID)
 	s.Assert().ErrorIs(err, expectedError)
 }
+
+func (s *NatsManagerTestSuite) TestDeleteGlobalKeyValueStore() {
+	var (
+		ctx       = context.Background()
+		clientReq = &natspb.DeleteGlobalKeyValueStoreRequest{
+			ProductId: productID,
+		}
+	)
+
+	s.mockService.EXPECT().DeleteGlobalKeyValueStore(ctx, clientReq).
+		Return(&natspb.DeleteResponse{Message: "Test message"}, nil)
+
+	err := s.natsManagerClient.DeleteGlobalKeyValueStore(ctx, productID)
+	s.Require().NoError(err)
+}
+
+func (s *NatsManagerTestSuite) TestDeleteGlobalKeyValueStore_ServiceError() {
+	var (
+		ctx       = context.Background()
+		clientReq = &natspb.DeleteGlobalKeyValueStoreRequest{
+			ProductId: productID,
+		}
+		expectedErr = errors.New("service error")
+	)
+
+	s.mockService.EXPECT().DeleteGlobalKeyValueStore(ctx, clientReq).
+		Return(nil, expectedErr)
+
+	err := s.natsManagerClient.DeleteGlobalKeyValueStore(ctx, productID)
+	s.Require().ErrorIs(err, expectedErr)
+}
