@@ -460,13 +460,6 @@ Registry auth secret name
 {{- end -}}
 
 {{/*
-Registry basic auth secret name
-*/}}
-{{- define "registry.basicAuth.secretName" -}}
-{{- printf "%s-basic-auth" (include "registry.fullname" . ) -}}
-{{- end -}}
-
-{{/*
 Loki Host
 */}}
 {{- define "loki.host" -}}
