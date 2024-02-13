@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
@@ -23,9 +24,13 @@ func (c ProcessRegistry) DeleteProcess(imageName, version string) error {
 	registryHost := viper.GetString(config.RegistryHostKey)
 	authSecret := viper.GetString(config.RegistryAuthSecretKey)
 
+	if !strings.HasPrefix(registryHost, "http") {
+		registryHost = "http://" + registryHost
+	}
+
 	client := &http.Client{}
 
-	req, err := http.NewRequest("GET", "http://"+registryHost+"/v2/"+imageName+"/manifests/"+version, nil)
+	req, err := http.NewRequest("GET", registryHost+"/v2/"+imageName+"/manifests/"+version, nil)
 	if err != nil {
 		return err
 	}
@@ -40,9 +45,13 @@ func (c ProcessRegistry) DeleteProcess(imageName, version string) error {
 		return err
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to get image manifest: %s", resp.Status)
+	}
+
 	digest := resp.Header.Get("Docker-Content-Digest")
 
-	req, err = http.NewRequest("DELETE", "http://"+registryHost+"/v2/"+imageName+"/manifests/"+digest, nil)
+	req, err = http.NewRequest("DELETE", registryHost+"/v2/"+imageName+"/manifests/"+digest, nil)
 	if err != nil {
 		return err
 	}
