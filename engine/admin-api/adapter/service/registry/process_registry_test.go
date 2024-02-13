@@ -54,6 +54,7 @@ func TestDeleteProcess(t *testing.T) {
 			t.Error("Unexpected call")
 		}
 	}))
+
 	defer server.Close()
 
 	viper.Set(config.RegistryHostKey, server.URL)
@@ -91,6 +92,7 @@ func TestDeleteProcess_GetManifestError(t *testing.T) {
 			t.Error("Unexpected call")
 		}
 	}))
+
 	defer server.Close()
 
 	viper.Set(config.RegistryHostKey, server.URL)
@@ -141,6 +143,7 @@ func TestDeleteProcess_DeleteManifestError(t *testing.T) {
 			t.Error("Unexpected call")
 		}
 	}))
+
 	defer server.Close()
 
 	viper.Set(config.RegistryHostKey, server.URL)
