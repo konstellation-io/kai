@@ -46,12 +46,13 @@ func (m registeredProcessMatcher) Matches(actual interface{}) bool {
 
 type ProcessServiceTestSuite struct {
 	suite.Suite
-	ctrl           *gomock.Controller
-	processRepo    *mocks.MockProcessRepository
-	versionService *mocks.MockVersionService
-	objectStorage  *mocks.MockObjectStorage
-	processService *process.Handler
-	accessControl  *mocks.MockAccessControl
+	ctrl            *gomock.Controller
+	processRepo     *mocks.MockProcessRepository
+	versionService  *mocks.MockVersionService
+	objectStorage   *mocks.MockObjectStorage
+	processService  *process.Handler
+	accessControl   *mocks.MockAccessControl
+	processRegistry *mocks.MockProcessRegistry
 
 	registryHost string
 }
@@ -89,7 +90,18 @@ func (s *ProcessServiceTestSuite) SetupSuite() {
 	s.versionService = mocks.NewMockVersionService(s.ctrl)
 	s.objectStorage = mocks.NewMockObjectStorage(s.T())
 	s.accessControl = mocks.NewMockAccessControl(s.ctrl)
-	s.processService = process.NewHandler(logger, s.versionService, s.processRepo, s.objectStorage, s.accessControl)
+	s.processRegistry = mocks.NewMockProcessRegistry(s.ctrl)
+
+	s.processService = process.NewHandler(
+		&process.HandlerParams{
+			Logger:            logger,
+			VersionService:    s.versionService,
+			ProcessRepository: s.processRepo,
+			ObjectStorage:     s.objectStorage,
+			AccessControl:     s.accessControl,
+			ProcessRegistry:   s.processRegistry,
+		},
+	)
 
 	s.registryHost = "test.registry"
 

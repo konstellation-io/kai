@@ -2,13 +2,8 @@ package process
 
 import (
 	"context"
-	"encoding/base64"
-	"fmt"
-	"net/http"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/spf13/viper"
 )
 
 // TODO
@@ -35,13 +30,14 @@ func (ps *Handler) DeleteProcess(
 
 	scope := ps.getProcessRegisterScope(opts.IsPublic, opts.Product)
 	processID := ps.getProcessID(scope, opts.Process, opts.Version)
+	imageName := ps.getImageName(scope, opts.Process)
 
 	_, err := ps.processRepository.GetByID(ctx, scope, processID)
 	if err != nil {
 		return "", err
 	}
 
-	if err := ps.deleteImageTag(opts, scope); err != nil {
+	if err := ps.processRegistry.DeleteProcess(imageName, opts.Version); err != nil {
 		return "", err
 	}
 
@@ -50,47 +46,4 @@ func (ps *Handler) DeleteProcess(
 	}
 
 	return processID, nil
-}
-
-func (ps *Handler) deleteImageTag(opts DeleteProcessOpts, scope string) error {
-	registryHost := viper.GetString(config.RegistryHostKey)
-	authSecret := viper.GetString(config.RegistryAuthSecretKey)
-	repositoryName := ps.getRepositoryName(scope, opts.Process)
-
-	client := &http.Client{}
-
-	req, err := http.NewRequest("GET", "http://"+registryHost+"/v2/"+repositoryName+"/manifests/"+opts.Version, nil)
-	if err != nil {
-		return err
-	}
-
-	basicAuth := base64.StdEncoding.EncodeToString([]byte(authSecret))
-
-	req.Header.Add("Authorization", "Basic "+basicAuth)
-	req.Header.Add("Accept", "application/vnd.docker.distribution.manifest.v2+json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	digest := resp.Header.Get("Docker-Content-Digest")
-
-	req, err = http.NewRequest("DELETE", "http://"+registryHost+"/v2/"+repositoryName+"/manifests/"+digest, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Authorization", "Basic "+basicAuth)
-
-	resp, err = client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		return fmt.Errorf("failed to delete image: %s", resp.Status)
-	}
-
-	return nil
 }

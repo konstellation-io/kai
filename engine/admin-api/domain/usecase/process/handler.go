@@ -26,6 +26,7 @@ type Handler struct {
 	versionService    service.VersionService
 	objectStorage     repository.ObjectStorage
 	accessControl     auth.AccessControl
+	processRegistry   service.ProcessRegistry
 }
 
 type RegisterProcessOpts struct {
@@ -116,7 +117,7 @@ func (ps *Handler) getProcessID(scope, process, version string) string {
 	return fmt.Sprintf("%s_%s:%s", scope, process, version)
 }
 
-func (ps *Handler) getRepositoryName(scope string, process string) string {
+func (ps *Handler) getImageName(scope string, process string) string {
 	return fmt.Sprintf("%s_%s", scope, process)
 }
 
@@ -132,18 +133,24 @@ func (ps *Handler) getProcessRegisterScope(isPublic bool, product string) string
 	return product
 }
 
+type HandlerParams struct {
+	Logger            logr.Logger
+	VersionService    service.VersionService
+	ProcessRepository repository.ProcessRepository
+	ObjectStorage     repository.ObjectStorage
+	AccessControl     auth.AccessControl
+	ProcessRegistry   service.ProcessRegistry
+}
+
 func NewHandler(
-	logger logr.Logger,
-	k8sService service.VersionService,
-	processRepository repository.ProcessRepository,
-	objectStorage repository.ObjectStorage,
-	accessControl auth.AccessControl,
+	params *HandlerParams,
 ) *Handler {
 	return &Handler{
-		logger:            logger,
-		versionService:    k8sService,
-		processRepository: processRepository,
-		objectStorage:     objectStorage,
-		accessControl:     accessControl,
+		logger:            params.Logger,
+		processRepository: params.ProcessRepository,
+		versionService:    params.VersionService,
+		objectStorage:     params.ObjectStorage,
+		accessControl:     params.AccessControl,
+		processRegistry:   params.ProcessRegistry,
 	}
 }
