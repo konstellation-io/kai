@@ -33,7 +33,7 @@ type Resolver struct {
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
 	serverInfoGetter       *usecase.ServerInfoGetter
-	processService         *process.Service
+	processService         *process.Handler
 	logsService            logs.LogsUsecase
 }
 

@@ -18,7 +18,7 @@ import (
 // Add a test for this function
 // Try it out in a local environment
 
-func (ps *Service) DeleteProcess(
+func (ps *Handler) DeleteProcess(
 	ctx context.Context,
 	user *entity.User,
 	opts DeleteProcessOpts,
@@ -52,7 +52,7 @@ func (ps *Service) DeleteProcess(
 	return processID, nil
 }
 
-func (ps *Service) deleteImageTag(opts DeleteProcessOpts, scope string) error {
+func (ps *Handler) deleteImageTag(opts DeleteProcessOpts, scope string) error {
 	registryHost := viper.GetString(config.RegistryHostKey)
 	authSecret := viper.GetString(config.RegistryAuthSecretKey)
 	repositoryName := ps.getRepositoryName(scope, opts.Process)
@@ -66,12 +66,7 @@ func (ps *Service) deleteImageTag(opts DeleteProcessOpts, scope string) error {
 
 	basicAuth := base64.StdEncoding.EncodeToString([]byte(authSecret))
 
-	//username := "user"
-	//password := "password"
-	//basicAuth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-
-	req.Header.Add("Authorization", "Basic "+authSecret)
-
+	req.Header.Add("Authorization", "Basic "+basicAuth)
 	req.Header.Add("Accept", "application/vnd.docker.distribution.manifest.v2+json")
 
 	resp, err := client.Do(req)

@@ -20,7 +20,7 @@ var (
 	ErrProcessAlreadyRegistered  = errors.New("process already registered")
 )
 
-type Service struct {
+type Handler struct {
 	logger            logr.Logger
 	processRepository repository.ProcessRepository
 	versionService    service.VersionService
@@ -96,7 +96,7 @@ func (o DeleteProcessOpts) Validate() error {
 	return nil
 }
 
-func (ps *Service) checkRegisterGrants(user *entity.User, isPublic bool, product string) error {
+func (ps *Handler) checkRegisterGrants(user *entity.User, isPublic bool, product string) error {
 	if isPublic {
 		return ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess)
 	}
@@ -104,7 +104,7 @@ func (ps *Service) checkRegisterGrants(user *entity.User, isPublic bool, product
 	return ps.accessControl.CheckProductGrants(user, product, auth.ActRegisterProcess)
 }
 
-func (ps *Service) checkDeleteGrants(user *entity.User, isPublic bool, product string) error {
+func (ps *Handler) checkDeleteGrants(user *entity.User, isPublic bool, product string) error {
 	if isPublic {
 		return ps.accessControl.CheckRoleGrants(user, auth.ActDeletePublicProcess)
 	}
@@ -112,19 +112,19 @@ func (ps *Service) checkDeleteGrants(user *entity.User, isPublic bool, product s
 	return ps.accessControl.CheckProductGrants(user, product, auth.ActDeleteProcess)
 }
 
-func (ps *Service) getProcessID(scope, process, version string) string {
+func (ps *Handler) getProcessID(scope, process, version string) string {
 	return fmt.Sprintf("%s_%s:%s", scope, process, version)
 }
 
-func (ps *Service) getRepositoryName(scope string, process string) string {
+func (ps *Handler) getRepositoryName(scope string, process string) string {
 	return fmt.Sprintf("%s_%s", scope, process)
 }
 
-func (ps *Service) getProcessImage(processID string) string {
+func (ps *Handler) getProcessImage(processID string) string {
 	return fmt.Sprintf("%s/%s", viper.GetString(config.RegistryHostKey), processID)
 }
 
-func (ps *Service) getProcessRegisterScope(isPublic bool, product string) string {
+func (ps *Handler) getProcessRegisterScope(isPublic bool, product string) string {
 	if isPublic {
 		return viper.GetString(config.GlobalRegistryKey)
 	}
@@ -132,14 +132,14 @@ func (ps *Service) getProcessRegisterScope(isPublic bool, product string) string
 	return product
 }
 
-func NewProcessService(
+func NewHandler(
 	logger logr.Logger,
 	k8sService service.VersionService,
 	processRepository repository.ProcessRepository,
 	objectStorage repository.ObjectStorage,
 	accessControl auth.AccessControl,
-) *Service {
-	return &Service{
+) *Handler {
+	return &Handler{
 		logger:            logger,
 		versionService:    k8sService,
 		processRepository: processRepository,

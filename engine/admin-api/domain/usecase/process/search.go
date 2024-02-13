@@ -8,7 +8,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 )
 
-func (ps *Service) Search(
+func (ps *Handler) Search(
 	ctx context.Context,
 	user *entity.User,
 	productID, processType string,

@@ -11,7 +11,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
-func (ps *Service) RegisterProcess(
+func (ps *Handler) RegisterProcess(
 	ctx context.Context,
 	user *entity.User,
 	opts RegisterProcessOpts,
@@ -55,7 +55,7 @@ func (ps *Service) RegisterProcess(
 	return processToRegister, nil
 }
 
-func (ps *Service) uploadProcessToRegistry(
+func (ps *Handler) uploadProcessToRegistry(
 	product string,
 	registeredProcess *entity.RegisteredProcess,
 	sources io.Reader,
@@ -115,7 +115,7 @@ func (ps *Service) uploadProcessToRegistry(
 	ps.logger.Info("Process successfully registered", "processID", registeredProcess.ID)
 }
 
-func (ps *Service) uploadingProcessError(
+func (ps *Handler) uploadingProcessError(
 	ctx context.Context,
 	product string,
 	registeredProcess *entity.RegisteredProcess,
@@ -131,11 +131,11 @@ func (ps *Service) uploadingProcessError(
 	}
 }
 
-func (ps *Service) canProcessBeUpdated(existingProcess *entity.RegisteredProcess) bool {
+func (ps *Handler) canProcessBeUpdated(existingProcess *entity.RegisteredProcess) bool {
 	return existingProcess.Version == "latest" || existingProcess.Status == entity.RegisterProcessStatusFailed
 }
 
-func (ps *Service) getProcessToRegister(user *entity.User, opts RegisterProcessOpts, scope string) *entity.RegisteredProcess {
+func (ps *Handler) getProcessToRegister(user *entity.User, opts RegisterProcessOpts, scope string) *entity.RegisteredProcess {
 	processID := ps.getProcessID(scope, opts.Process, opts.Version)
 
 	return &entity.RegisteredProcess{

@@ -30,7 +30,7 @@ type GraphQLController struct {
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
 	serverInfoGetter       *usecase.ServerInfoGetter
-	processService         *process.Service
+	processService         *process.Handler
 	LogsUsecase            logs.LogsUsecase
 }
 
@@ -41,7 +41,7 @@ type Params struct {
 	UserActivityInteractor usecase.UserActivityInteracter
 	VersionInteractor      *version.Handler
 	ServerInfoGetter       *usecase.ServerInfoGetter
-	ProcessService         *process.Service
+	ProcessService         *process.Handler
 	LogsUsecase            logs.LogsUsecase
 }
 

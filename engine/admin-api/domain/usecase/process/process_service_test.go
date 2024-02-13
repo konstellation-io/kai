@@ -50,7 +50,7 @@ type ProcessServiceTestSuite struct {
 	processRepo    *mocks.MockProcessRepository
 	versionService *mocks.MockVersionService
 	objectStorage  *mocks.MockObjectStorage
-	processService *process.Service
+	processService *process.Handler
 	accessControl  *mocks.MockAccessControl
 
 	registryHost string
@@ -89,7 +89,7 @@ func (s *ProcessServiceTestSuite) SetupSuite() {
 	s.versionService = mocks.NewMockVersionService(s.ctrl)
 	s.objectStorage = mocks.NewMockObjectStorage(s.T())
 	s.accessControl = mocks.NewMockAccessControl(s.ctrl)
-	s.processService = process.NewProcessService(logger, s.versionService, s.processRepo, s.objectStorage, s.accessControl)
+	s.processService = process.NewHandler(logger, s.versionService, s.processRepo, s.objectStorage, s.accessControl)
 
 	s.registryHost = "test.registry"
 
