@@ -93,5 +93,5 @@ create_namespace() {
 deploy_helm_chart() {
   echo_info "📦 Applying helm chart..."
   helmfile -f scripts/helmfile/helmfile.yaml deps
-  helmfile -f scripts/helmfile/helmfile.yaml sync
+  helmfile -f scripts/helmfile/helmfile.yaml sync --skip-deps
 }
