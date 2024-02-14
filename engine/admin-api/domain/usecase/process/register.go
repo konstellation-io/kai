@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
 type RegisterProcessOpts struct {
@@ -59,7 +60,7 @@ func (ps *Handler) RegisterProcess(
 		return nil, err
 	}
 
-	if err := ps.checkRegisterGrants(user, opts.IsPublic, opts.Product); err != nil {
+	if err := ps.checkRegisterGrants(user, opts); err != nil {
 		return nil, err
 	}
 
@@ -90,6 +91,14 @@ func (ps *Handler) RegisterProcess(
 	go ps.uploadProcessToRegistry(scope, processToRegister, opts.Sources)
 
 	return processToRegister, nil
+}
+
+func (ps *Handler) checkRegisterGrants(user *entity.User, opts RegisterProcessOpts) error {
+	if opts.IsPublic {
+		return ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess)
+	}
+
+	return ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActRegisterProcess)
 }
 
 func (ps *Handler) uploadProcessToRegistry(

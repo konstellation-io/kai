@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
 type DeleteProcessOpts struct {
@@ -44,7 +45,7 @@ func (ps *Handler) DeleteProcess(
 		return "", err
 	}
 
-	if err := ps.checkDeleteGrants(user, opts.IsPublic, opts.Product); err != nil {
+	if err := ps.checkDeleteGrants(user, opts); err != nil {
 		return "", err
 	}
 
@@ -66,4 +67,12 @@ func (ps *Handler) DeleteProcess(
 	}
 
 	return processID, nil
+}
+
+func (ps *Handler) checkDeleteGrants(user *entity.User, opts DeleteProcessOpts) error {
+	if opts.IsPublic {
+		return ps.accessControl.CheckRoleGrants(user, auth.ActDeletePublicProcess)
+	}
+
+	return ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActDeleteProcess)
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
@@ -53,22 +52,6 @@ func NewHandler(
 		accessControl:     params.AccessControl,
 		processRegistry:   params.ProcessRegistry,
 	}
-}
-
-func (ps *Handler) checkRegisterGrants(user *entity.User, isPublic bool, product string) error {
-	if isPublic {
-		return ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess)
-	}
-
-	return ps.accessControl.CheckProductGrants(user, product, auth.ActRegisterProcess)
-}
-
-func (ps *Handler) checkDeleteGrants(user *entity.User, isPublic bool, product string) error {
-	if isPublic {
-		return ps.accessControl.CheckRoleGrants(user, auth.ActDeletePublicProcess)
-	}
-
-	return ps.accessControl.CheckProductGrants(user, product, auth.ActDeleteProcess)
 }
 
 func (ps *Handler) getProcessID(scope, process, version string) string {

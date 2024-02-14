@@ -4,7 +4,7 @@ package process_test
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
@@ -63,8 +63,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_MissingProductInDeleteOption
 	opts := process.DeleteProcessOpts{}
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
-	s.Require().Error(err)
-	s.Equal(process.ErrMissingProductInParams, err)
+	s.ErrorIs(err, process.ErrMissingProductInParams)
 }
 
 func (s *ProcessHandlerTestSuite) TestDeleteProcess_MissingVersionInDeleteOptions() {
@@ -75,8 +74,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_MissingVersionInDeleteOption
 	}
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
-	s.Require().Error(err)
-	s.Equal(process.ErrMissingVersionInParams, err)
+	s.ErrorIs(err, process.ErrMissingVersionInParams)
 }
 
 func (s *ProcessHandlerTestSuite) TestDeleteProcess_MissingProcessInDeleteOptions() {
@@ -88,8 +86,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_MissingProcessInDeleteOption
 	}
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
-	s.Require().Error(err)
-	s.Equal(process.ErrMissingProcessInParams, err)
+	s.ErrorIs(err, process.ErrMissingProcessInParams)
 }
 
 func (s *ProcessHandlerTestSuite) TestDeleteProcess_IsPublicAndHasProduct() {
@@ -103,8 +100,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_IsPublicAndHasProduct() {
 	}
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
-	s.Require().Error(err)
-	s.Equal(process.ErrIsPublicAndHasProduct, err)
+	s.ErrorIs(err, process.ErrIsPublicAndHasProduct)
 }
 
 func (s *ProcessHandlerTestSuite) TestDeleteProcess_NoProductGrants() {
@@ -116,12 +112,12 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_NoProductGrants() {
 		Process:  "process-name",
 		IsPublic: false,
 	}
+	expectedErr := errors.New("auth error")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(auth.UnauthorizedError{})
+	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(expectedErr)
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
-	s.Require().Error(err)
-	s.Equal(auth.UnauthorizedError{}, err)
+	s.ErrorIs(err, expectedErr)
 }
 
 func (s *ProcessHandlerTestSuite) TestDeleteProcess_NoRoleGrants() {
@@ -132,12 +128,12 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_NoRoleGrants() {
 		Process:  "process-name",
 		IsPublic: true,
 	}
+	expectedErr := errors.New("auth error")
 
-	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActDeletePublicProcess).Return(auth.UnauthorizedError{})
+	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActDeletePublicProcess).Return(expectedErr)
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
-	s.Require().Error(err)
-	s.Equal(auth.UnauthorizedError{}, err)
+	s.ErrorIs(err, expectedErr)
 }
 
 func (s *ProcessHandlerTestSuite) TestDeleteProcess_GetByIDError() {
@@ -156,8 +152,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_GetByIDError() {
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, process.ErrRegisteredProcessNotFound)
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
-	s.Require().Error(err)
-	s.Equal(process.ErrRegisteredProcessNotFound, err)
+	s.ErrorIs(err, process.ErrRegisteredProcessNotFound)
 }
 
 func (s *ProcessHandlerTestSuite) TestDeleteProcess_DeleteProcessError() {
@@ -169,16 +164,17 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_DeleteProcessError() {
 		Process:  "process-name",
 		IsPublic: false,
 	}
+	expectedErr := errors.New("delete process error")
 
 	imageName := "test-product_process-name"
 	processID := "test-product_process-name:v1.0.0"
 
 	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, nil)
-	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(fmt.Errorf("error"))
+	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(expectedErr)
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
-	s.Require().Error(err)
+	s.ErrorIs(err, expectedErr)
 }
 
 func (s *ProcessHandlerTestSuite) TestDeleteProcess_DeleteProcessRepoError() {
@@ -190,6 +186,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_DeleteProcessRepoError() {
 		Process:  "process-name",
 		IsPublic: false,
 	}
+	expectedErr := errors.New("delete process error")
 
 	imageName := "test-product_process-name"
 	processID := "test-product_process-name:v1.0.0"
@@ -197,8 +194,8 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_DeleteProcessRepoError() {
 	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, nil)
 	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(nil)
-	s.processRepo.EXPECT().Delete(ctx, opts.Product, processID).Return(fmt.Errorf("error"))
+	s.processRepo.EXPECT().Delete(ctx, opts.Product, processID).Return(expectedErr)
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
-	s.Require().Error(err)
+	s.ErrorIs(err, expectedErr)
 }
