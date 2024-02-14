@@ -69,6 +69,7 @@ func (ps *Handler) uploadProcessToRegistry(
 		ps.uploadingProcessError(ctx, product, registeredProcess, fmt.Errorf("creating temp file for process: %w", err))
 		return
 	}
+
 	defer tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
 
