@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
@@ -163,6 +164,9 @@ func (s *VersionRepositoryTestSuite) TestGetLatest() {
 	s.Require().NoError(err)
 
 	s.Equal(testVersion.Tag, ver.Tag)
+
+	//sleep to ensure the creation date is different
+	time.Sleep(1 * time.Millisecond)
 
 	_, err = s.versionRepo.Create(creatorID, productID, testVersion2)
 	s.Require().NoError(err)

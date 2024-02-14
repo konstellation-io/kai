@@ -33,7 +33,7 @@ type Resolver struct {
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
 	serverInfoGetter       *usecase.ServerInfoGetter
-	processService         *process.Service
+	processHandler         *process.Handler
 	logsService            logs.LogsUsecase
 }
 
@@ -47,7 +47,7 @@ func NewGraphQLResolver(params Params) *Resolver {
 		params.UserActivityInteractor,
 		params.VersionInteractor,
 		params.ServerInfoGetter,
-		params.ProcessService,
+		params.ProcessHandler,
 		params.LogsUsecase,
 	}
 }
@@ -72,7 +72,7 @@ func (r *mutationResolver) CreateVersion(ctx context.Context, input CreateVersio
 func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterProcessInput) (*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	return r.processService.RegisterProcess(
+	return r.processHandler.RegisterProcess(
 		ctx, loggedUser, process.RegisterProcessOpts{
 			Product:     input.ProductID,
 			Version:     input.Version,
@@ -86,7 +86,7 @@ func (r *mutationResolver) RegisterProcess(ctx context.Context, input RegisterPr
 func (r *mutationResolver) RegisterPublicProcess(ctx context.Context, input RegisterPublicProcessInput) (*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	return r.processService.RegisterProcess(
+	return r.processHandler.RegisterProcess(
 		ctx, loggedUser,
 		process.RegisterProcessOpts{
 			Version:     input.Version,
@@ -94,6 +94,33 @@ func (r *mutationResolver) RegisterPublicProcess(ctx context.Context, input Regi
 			ProcessType: entity.ProcessType(input.ProcessType),
 			IsPublic:    true,
 			Sources:     input.File.File,
+		},
+	)
+}
+
+func (r *mutationResolver) DeleteProcess(ctx context.Context, input DeleteProcessInput) (string, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+
+	return r.processHandler.DeleteProcess(
+		ctx, loggedUser,
+		process.DeleteProcessOpts{
+			Product:  input.ProductID,
+			Version:  input.Version,
+			Process:  input.ProcessID,
+			IsPublic: false,
+		},
+	)
+}
+
+func (r *mutationResolver) DeletePublicProcess(ctx context.Context, input DeletePublicProcessInput) (string, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+
+	return r.processHandler.DeleteProcess(
+		ctx, loggedUser,
+		process.DeleteProcessOpts{
+			Version:  input.Version,
+			Process:  input.ProcessID,
+			IsPublic: true,
 		},
 	)
 }
@@ -245,7 +272,7 @@ func (r *queryResolver) RegisteredProcesses(
 		processTypeFilter = *processType
 	}
 
-	return r.processService.Search(ctx, loggedUser, productID, processTypeFilter)
+	return r.processHandler.Search(ctx, loggedUser, productID, processTypeFilter)
 }
 
 func (r *queryResolver) UserActivityList(

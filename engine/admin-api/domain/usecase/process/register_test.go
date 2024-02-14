@@ -17,7 +17,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess() {
 	ctx := context.Background()
 	wg := sync.WaitGroup{}
 
@@ -45,7 +45,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 			return nil
 		}).Once()
 
-	returnedProcess, err := s.processService.RegisterProcess(
+	returnedProcess, err := s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -61,7 +61,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess() {
 	s.Require().NoError(testhelpers.WaitOrTimeout(&wg, 1*time.Second))
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_OverrideLatest() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_OverrideLatest() {
 	ctx := context.Background()
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -107,7 +107,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_OverrideLatest() {
 			return nil
 		}).Once()
 
-	returnedProcess, err := s.processService.RegisterProcess(
+	returnedProcess, err := s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -123,7 +123,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_OverrideLatest() {
 	s.Require().NoError(testhelpers.WaitOrTimeout(&wg, 1*time.Second))
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFailedStatus() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFailedStatus() {
 	ctx := context.Background()
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -154,7 +154,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFa
 			return nil
 		}).Once()
 
-	returnedProcess, err := s.processService.RegisterProcess(
+	returnedProcess, err := s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -171,7 +171,123 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFa
 	s.Require().NoError(testhelpers.WaitOrTimeout(&wg, 1*time.Second))
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_GetByIDFails() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingProductInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processHandler.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Version:     version,
+			Process:     processName,
+			ProcessType: processType,
+			Sources:     nil,
+		},
+	)
+	s.ErrorIs(err, process.ErrMissingProductInParams)
+}
+
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_IsPublicAndHasProduct() {
+	ctx := context.Background()
+
+	_, err := s.processHandler.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:  productID,
+			Version:  version,
+			Process:  processName,
+			IsPublic: true,
+			Sources:  nil,
+		},
+	)
+	s.ErrorIs(err, process.ErrIsPublicAndHasProduct)
+}
+
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingVersionInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processHandler.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Process:     processName,
+			ProcessType: processType,
+			Sources:     nil,
+		},
+	)
+	s.ErrorIs(err, process.ErrMissingVersionInParams)
+}
+
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingProcessInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processHandler.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Version:     version,
+			ProcessType: processType,
+			Sources:     nil,
+		},
+	)
+	s.ErrorIs(err, process.ErrMissingProcessInParams)
+}
+
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_InvalidProcessTypeInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processHandler.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Version:     version,
+			Process:     processName,
+			ProcessType: "invalid",
+			Sources:     nil,
+		},
+	)
+	s.ErrorIs(err, entity.ErrInvalidProcessType)
+}
+
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingSourcesInRegisterOptions() {
+	ctx := context.Background()
+
+	_, err := s.processHandler.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Version:     version,
+			Process:     processName,
+			ProcessType: processType,
+			Sources:     nil,
+		},
+	)
+	s.ErrorIs(err, process.ErrMissingSourcesInParams)
+}
+
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_NoProductGrants() {
+	ctx := context.Background()
+
+	expectedErr := errors.New("auth error")
+
+	testFile, err := os.Open(testFileAddr)
+	s.Require().NoError(err)
+
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(expectedErr)
+
+	_, err = s.processHandler.RegisterProcess(
+		ctx, user,
+		process.RegisterProcessOpts{
+			Product:     productID,
+			Version:     version,
+			Process:     processName,
+			ProcessType: processType,
+			Sources:     testFile,
+		},
+	)
+	s.Require().ErrorIs(err, expectedErr)
+}
+
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_GetByIDFails() {
 	ctx := context.Background()
 
 	testFile, err := os.Open(testFileAddr)
@@ -184,7 +300,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_GetByIDFails() {
 		nil, fmt.Errorf("all your base are belong to us"),
 	)
 
-	_, err = s.processService.RegisterProcess(
+	_, err = s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -197,7 +313,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_GetByIDFails() {
 	s.Require().Error(err)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndNotFailed() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndNotFailed() {
 	ctx := context.Background()
 
 	testFile, err := os.Open(testFileAddr)
@@ -210,7 +326,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndNot
 		alreadyRegisteredProcess, nil,
 	)
 
-	_, err = s.processService.RegisterProcess(
+	_, err = s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -225,7 +341,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsAndNot
 	s.ErrorIs(err, process.ErrProcessAlreadyRegistered)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFailedStatus_UpdateError() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFailedStatus_UpdateError() {
 	ctx := context.Background()
 
 	testFile, err := os.Open(testFileAddr)
@@ -240,7 +356,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFa
 	s.processRepo.EXPECT().GetByID(ctx, productID, alreadyRegisteredProcess.ID).Return(alreadyRegisteredProcess, nil)
 	s.processRepo.EXPECT().Update(ctx, productID, customMatcherCreating).Return(fmt.Errorf("doctor maligno"))
 
-	_, err = s.processService.RegisterProcess(
+	_, err = s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -253,10 +369,10 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_ProcessAlreadyExistsWithFa
 	s.Require().Error(err)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_NoFileError() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_NoFileError() {
 	ctx := context.Background()
 
-	_, err := s.processService.RegisterProcess(
+	_, err := s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -269,7 +385,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_NoFileError() {
 	s.Require().ErrorIs(err, process.ErrMissingSourcesInParams)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_K8sServiceError() {
 	ctx := context.Background()
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -302,7 +418,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
 			return nil
 		}).Once()
 
-	returnedRef, err := s.processService.RegisterProcess(
+	returnedRef, err := s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -318,7 +434,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_K8sServiceError() {
 	s.Equal(expectedFailedProcess, returnedRef)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_RepositoryError() {
 	ctx := context.Background()
 
 	testFile, err := os.Open(testFileAddr)
@@ -332,7 +448,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 	s.processRepo.EXPECT().GetByID(ctx, productID, expectedRegisteredProcess.ID).Return(nil, process.ErrRegisteredProcessNotFound)
 	s.processRepo.EXPECT().Create(ctx, productID, customMatcher).Return(expectedError)
 
-	_, err = s.processService.RegisterProcess(
+	_, err = s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -345,7 +461,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_RepositoryError() {
 	s.Require().ErrorIs(err, expectedError)
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_UpdateError() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_UpdateError() {
 	ctx := context.Background()
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -372,7 +488,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_UpdateError() {
 			return nil
 		}).Once()
 
-	returnedProcess, err := s.processService.RegisterProcess(
+	returnedProcess, err := s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Product:     productID,
@@ -388,7 +504,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_UpdateError() {
 	s.Require().NoError(testhelpers.WaitOrTimeout(&wg, 1*time.Second))
 }
 
-func (s *ProcessServiceTestSuite) TestRegisterProcess_Public() {
+func (s *ProcessHandlerTestSuite) TestRegisterProcess_Public() {
 	var (
 		ctx                       = context.Background()
 		wg                        = sync.WaitGroup{}
@@ -417,7 +533,7 @@ func (s *ProcessServiceTestSuite) TestRegisterProcess_Public() {
 			return nil
 		}).Once()
 
-	returnedProcess, err := s.processService.RegisterProcess(
+	returnedProcess, err := s.processHandler.RegisterProcess(
 		ctx, user,
 		process.RegisterProcessOpts{
 			Version:     version,

@@ -16,6 +16,9 @@ spec:
         type: admin
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/admin-api/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/admin-api/secret.yaml") . | sha256sum }}
+        checksum/keycloak-secret: {{ include (print $.Template.BasePath "/keycloak/secret.yaml") . | sha256sum }}
+        checksum/redis-secret: {{ include (print $.Template.BasePath "/redis/redis-secret.yaml") . | sha256sum }}
     spec:
       {{- with .Values.adminApi.imagePullSecrets }}
       imagePullSecrets:
@@ -53,6 +56,8 @@ spec:
           imagePullPolicy: {{ .Values.adminApi.image.pullPolicy }}
           envFrom:
             - configMapRef:
+                name: {{ include "admin-api.fullname" . }}
+            - secretRef:
                 name: {{ include "admin-api.fullname" . }}
           env:
             - name: POD_NAMESPACE

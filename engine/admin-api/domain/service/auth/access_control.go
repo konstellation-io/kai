@@ -29,6 +29,9 @@ const (
 
 	ActRegisterProcess       Action = "register_process"
 	ActRegisterPublicProcess Action = "register_public_process"
+
+	ActDeleteProcess       Action = "delete_process"
+	ActDeletePublicProcess Action = "delete_public_process"
 )
 
 func (e Action) IsValid() bool {
@@ -36,7 +39,8 @@ func (e Action) IsValid() bool {
 	case ActCreateProduct, ActStartVersion, ActStopVersion, ActUpdateUserGrants,
 		ActPublishVersion, ActUnpublishVersion, ActEditVersion, ActViewMetrics,
 		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion,
-		ActViewServerInfo, ActStartCriticalVersion, ActRegisterProcess, ActRegisterPublicProcess:
+		ActViewServerInfo, ActStartCriticalVersion, ActRegisterProcess, ActRegisterPublicProcess,
+		ActDeleteProcess, ActDeletePublicProcess:
 		return true
 	}
 

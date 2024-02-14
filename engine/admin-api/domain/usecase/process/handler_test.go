@@ -44,14 +44,15 @@ func (m registeredProcessMatcher) Matches(actual interface{}) bool {
 	return reflect.DeepEqual(actualCfg, m.expectedRegisteredProcess)
 }
 
-type ProcessServiceTestSuite struct {
+type ProcessHandlerTestSuite struct {
 	suite.Suite
-	ctrl           *gomock.Controller
-	processRepo    *mocks.MockProcessRepository
-	versionService *mocks.MockVersionService
-	objectStorage  *mocks.MockObjectStorage
-	processService *process.Service
-	accessControl  *mocks.MockAccessControl
+	ctrl            *gomock.Controller
+	processRepo     *mocks.MockProcessRepository
+	versionService  *mocks.MockVersionService
+	objectStorage   *mocks.MockObjectStorage
+	processHandler  *process.Handler
+	accessControl   *mocks.MockAccessControl
+	processRegistry *mocks.MockProcessRegistry
 
 	registryHost string
 }
@@ -78,18 +79,29 @@ var (
 	}
 )
 
-func TestProcessTestSuite(t *testing.T) {
-	suite.Run(t, new(ProcessServiceTestSuite))
+func TestProcessHandlerSuite(t *testing.T) {
+	suite.Run(t, new(ProcessHandlerTestSuite))
 }
 
-func (s *ProcessServiceTestSuite) SetupSuite() {
+func (s *ProcessHandlerTestSuite) SetupSuite() {
 	logger := zapr.NewLogger(zap.NewNop())
 	s.ctrl = gomock.NewController(s.T())
 	s.processRepo = mocks.NewMockProcessRepository(s.ctrl)
 	s.versionService = mocks.NewMockVersionService(s.ctrl)
 	s.objectStorage = mocks.NewMockObjectStorage(s.T())
 	s.accessControl = mocks.NewMockAccessControl(s.ctrl)
-	s.processService = process.NewProcessService(logger, s.versionService, s.processRepo, s.objectStorage, s.accessControl)
+	s.processRegistry = mocks.NewMockProcessRegistry(s.ctrl)
+
+	s.processHandler = process.NewHandler(
+		&process.HandlerParams{
+			Logger:            logger,
+			VersionService:    s.versionService,
+			ProcessRepository: s.processRepo,
+			ObjectStorage:     s.objectStorage,
+			AccessControl:     s.accessControl,
+			ProcessRegistry:   s.processRegistry,
+		},
+	)
 
 	s.registryHost = "test.registry"
 
@@ -101,16 +113,16 @@ func (s *ProcessServiceTestSuite) SetupSuite() {
 	})
 }
 
-func (s *ProcessServiceTestSuite) TearDownSuite() {
+func (s *ProcessHandlerTestSuite) TearDownSuite() {
 	monkey.UnpatchAll()
 }
 
-func (s *ProcessServiceTestSuite) TearDownTest() {
+func (s *ProcessHandlerTestSuite) TearDownTest() {
 	// Clean mockery calls to avoid false positives
-	s.objectStorage.ExpectedCalls = nil
+	s.ctrl.Finish()
 }
 
-func (s *ProcessServiceTestSuite) getTestProcess(registry, status string, isPublicOpt ...bool) *entity.RegisteredProcess {
+func (s *ProcessHandlerTestSuite) getTestProcess(registry, status string, isPublicOpt ...bool) *entity.RegisteredProcess {
 	var isPublic bool
 	if len(isPublicOpt) > 0 {
 		isPublic = isPublicOpt[0]

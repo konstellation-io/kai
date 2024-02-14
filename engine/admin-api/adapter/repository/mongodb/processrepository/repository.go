@@ -118,6 +118,17 @@ func (r *MongoDBProcessRepository) GetByID(ctx context.Context, productID, image
 	return mapDTOToEntity(&registeredProcess), nil
 }
 
+func (r *MongoDBProcessRepository) Delete(ctx context.Context, productID, processID string) error {
+	collection := r.client.Database(productID).Collection(registeredProcessesCollectionName)
+
+	_, err := collection.DeleteOne(ctx, bson.M{"_id": processID})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *MongoDBProcessRepository) searchInDatabaseWithFilter(
 	ctx context.Context,
 	database string,

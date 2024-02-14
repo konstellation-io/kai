@@ -327,6 +327,7 @@
 | registry.affinity | object | `{}` | Assign custom affinity rules to the pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | registry.auth.password | string | password | Registry password |
 | registry.auth.user | string | user | Registry username |
+| registry.basicAuth.secretKey | string | basic-auth | Registry basic auth secret key |
 | registry.config | string | `""` | A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/. |
 | registry.configSecret.key | string | `""` | The name of the secret key that contains the registry config file |
 | registry.configSecret.name | string | `""` | Takes precedence over 'registry.config'. The name of the secret that contains the registry config file. |

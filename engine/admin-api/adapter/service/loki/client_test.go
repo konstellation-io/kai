@@ -30,6 +30,7 @@ func TestLokiClientGetLogs(t *testing.T) {
 
 		rw.Write([]byte(responseBody))
 	}))
+
 	defer server.Close()
 
 	viper.Set(config.LokiEndpointKey, server.URL)
@@ -80,6 +81,7 @@ func TestLokiClientGetFullQuery(t *testing.T) {
 
 		rw.Write([]byte(`OK`))
 	}))
+
 	defer server.Close()
 
 	viper.Set(config.LokiEndpointKey, server.URL)

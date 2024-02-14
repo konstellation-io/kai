@@ -8,13 +8,48 @@ import (
 	"os"
 	"time"
 
-	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
-	"github.com/spf13/viper"
 )
 
-func (ps *Service) RegisterProcess(
+type RegisterProcessOpts struct {
+	Product     string
+	Version     string
+	Process     string
+	ProcessType entity.ProcessType
+	IsPublic    bool
+	Sources     io.Reader
+}
+
+func (o RegisterProcessOpts) Validate() error {
+	if o.Product == "" && !o.IsPublic {
+		return ErrMissingProductInParams
+	}
+
+	if o.Product != "" && o.IsPublic {
+		return ErrIsPublicAndHasProduct
+	}
+
+	if o.Version == "" {
+		return ErrMissingVersionInParams
+	}
+
+	if o.Process == "" {
+		return ErrMissingProcessInParams
+	}
+
+	if err := o.ProcessType.Validate(); err != nil {
+		return err
+	}
+
+	if o.Sources == nil {
+		return ErrMissingSourcesInParams
+	}
+
+	return nil
+}
+
+func (ps *Handler) RegisterProcess(
 	ctx context.Context,
 	user *entity.User,
 	opts RegisterProcessOpts,
@@ -25,11 +60,11 @@ func (ps *Service) RegisterProcess(
 		return nil, err
 	}
 
-	if err := ps.checkGrants(user, opts); err != nil {
+	if err := ps.checkRegisterGrants(user, opts); err != nil {
 		return nil, err
 	}
 
-	scope := ps.getProcessRegisterScope(opts)
+	scope := ps.getProcessRegisterScope(opts.IsPublic, opts.Product)
 	processToRegister := ps.getProcessToRegister(user, opts, scope)
 
 	existingProcess, err := ps.processRepository.GetByID(ctx, scope, processToRegister.ID)
@@ -58,7 +93,15 @@ func (ps *Service) RegisterProcess(
 	return processToRegister, nil
 }
 
-func (ps *Service) uploadProcessToRegistry(
+func (ps *Handler) checkRegisterGrants(user *entity.User, opts RegisterProcessOpts) error {
+	if opts.IsPublic {
+		return ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess)
+	}
+
+	return ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActRegisterProcess)
+}
+
+func (ps *Handler) uploadProcessToRegistry(
 	product string,
 	registeredProcess *entity.RegisteredProcess,
 	sources io.Reader,
@@ -120,7 +163,7 @@ func (ps *Service) uploadProcessToRegistry(
 	ps.logger.Info("Process successfully registered", "processID", registeredProcess.ID)
 }
 
-func (ps *Service) uploadingProcessError(
+func (ps *Handler) uploadingProcessError(
 	ctx context.Context,
 	product string,
 	registeredProcess *entity.RegisteredProcess,
@@ -136,27 +179,11 @@ func (ps *Service) uploadingProcessError(
 	}
 }
 
-func (ps *Service) checkGrants(user *entity.User, opts RegisterProcessOpts) error {
-	if opts.IsPublic {
-		return ps.accessControl.CheckRoleGrants(user, auth.ActRegisterPublicProcess)
-	}
-
-	return ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActRegisterProcess)
-}
-
-func (ps *Service) getProcessRegisterScope(opts RegisterProcessOpts) string {
-	if opts.IsPublic {
-		return viper.GetString(config.GlobalRegistryKey)
-	}
-
-	return opts.Product
-}
-
-func (ps *Service) canProcessBeUpdated(existingProcess *entity.RegisteredProcess) bool {
+func (ps *Handler) canProcessBeUpdated(existingProcess *entity.RegisteredProcess) bool {
 	return existingProcess.Version == "latest" || existingProcess.Status == entity.RegisterProcessStatusFailed
 }
 
-func (ps *Service) getProcessToRegister(user *entity.User, opts RegisterProcessOpts, scope string) *entity.RegisteredProcess {
+func (ps *Handler) getProcessToRegister(user *entity.User, opts RegisterProcessOpts, scope string) *entity.RegisteredProcess {
 	processID := ps.getProcessID(scope, opts.Process, opts.Version)
 
 	return &entity.RegisteredProcess{
@@ -170,12 +197,4 @@ func (ps *Service) getProcessToRegister(user *entity.User, opts RegisterProcessO
 		Status:     entity.RegisterProcessStatusCreating,
 		IsPublic:   opts.IsPublic,
 	}
-}
-
-func (ps *Service) getProcessID(scope, process, version string) string {
-	return fmt.Sprintf("%s_%s:%s", scope, process, version)
-}
-
-func (ps *Service) getProcessImage(processID string) string {
-	return fmt.Sprintf("%s/%s", viper.GetString(config.RegistryHostKey), processID)
 }

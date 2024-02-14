@@ -18,6 +18,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/natsmanager"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/natspb"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/proto/versionpb"
+	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/registry"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/user"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/service/versionservice"
 	"github.com/konstellation-io/kai/engine/admin-api/delivery/http"
@@ -180,7 +181,18 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 	)
 
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
-	processService := process.NewProcessService(logger, k8sService, processRepo, minioOjectStorage, accessControl)
+
+	processHandler := process.NewHandler(
+		&process.HandlerParams{
+			Logger:            logger,
+			VersionService:    k8sService,
+			ProcessRepository: processRepo,
+			ObjectStorage:     minioOjectStorage,
+			AccessControl:     accessControl,
+			ProcessRegistry:   registry.NewProcessRegistry(),
+		},
+	)
+
 	logsUseCase := logs.NewLogsInteractor(logsService)
 
 	return controller.NewGraphQLController(
@@ -191,7 +203,7 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 			UserActivityInteractor: userActivityInteractor,
 			VersionInteractor:      versionInteractor,
 			ServerInfoGetter:       serverInfoGetter,
-			ProcessService:         processService,
+			ProcessHandler:         processHandler,
 			LogsUsecase:            logsUseCase,
 		},
 	)

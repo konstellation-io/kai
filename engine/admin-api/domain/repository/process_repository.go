@@ -15,6 +15,7 @@ type ProcessRepository interface {
 	GlobalSearch(ctx context.Context, filter SearchFilter) ([]*entity.RegisteredProcess, error)
 	Update(ctx context.Context, registry string, newRegisteredProcess *entity.RegisteredProcess) error
 	GetByID(ctx context.Context, registry string, imageID string) (*entity.RegisteredProcess, error)
+	Delete(ctx context.Context, registry string, imageID string) error
 }
 
 type SearchFilter struct {

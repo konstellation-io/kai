@@ -459,7 +459,6 @@ Registry auth secret name
 {{- printf "%s-auth" (include "registry.fullname" . ) -}}
 {{- end -}}
 
-
 {{/*
 Loki Host
 */}}

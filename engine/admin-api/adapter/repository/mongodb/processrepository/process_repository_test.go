@@ -282,3 +282,27 @@ func (s *ProcessRepositoryTestSuite) TestGetByID_NoResults() {
 
 	s.ErrorIs(err, process.ErrRegisteredProcessNotFound)
 }
+
+func (s *ProcessRepositoryTestSuite) TestDelete() {
+	ctx := context.Background()
+
+	expectedProcess := &entity.RegisteredProcess{
+		ID:         "process_id",
+		Name:       "test_trigger",
+		Version:    processVersion,
+		Type:       "trigger",
+		Image:      "process_image",
+		UploadDate: testRepoUploadDate,
+		Owner:      ownerID,
+	}
+
+	err := s.processRepo.Create(ctx, productID, expectedProcess)
+	s.Require().NoError(err)
+
+	err = s.processRepo.Delete(ctx, productID, expectedProcess.ID)
+	s.Require().NoError(err)
+
+	_, err = s.processRepo.GetByID(ctx, productID, expectedProcess.ID)
+	s.Require().Error(err)
+	s.ErrorIs(err, process.ErrRegisteredProcessNotFound)
+}
