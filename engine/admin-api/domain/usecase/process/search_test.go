@@ -11,7 +11,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-func (s *ProcessServiceTestSuite) TestListByProduct_WithTypeFilter() {
+func (s *ProcessHandlerTestSuite) TestListByProduct_WithTypeFilter() {
 	var (
 		ctx               = context.Background()
 		filter            = repository.SearchFilter{ProcessType: entity.ProcessTypeTrigger}
@@ -23,13 +23,13 @@ func (s *ProcessServiceTestSuite) TestListByProduct_WithTypeFilter() {
 	s.processRepo.EXPECT().SearchByProduct(ctx, productID, filter).Return(productProcesses, nil)
 	s.processRepo.EXPECT().GlobalSearch(ctx, filter).Return(kaiProcesses, nil)
 
-	returnedRegisteredProcess, err := s.processService.Search(ctx, user, productID, filter.ProcessType.String())
+	returnedRegisteredProcess, err := s.processHandler.Search(ctx, user, productID, filter.ProcessType.String())
 	s.Require().NoError(err)
 
 	s.Equal(expectedProcesses, returnedRegisteredProcess)
 }
 
-func (s *ProcessServiceTestSuite) TestListByProduct_NoTypeFilter() {
+func (s *ProcessHandlerTestSuite) TestListByProduct_NoTypeFilter() {
 	ctx := context.Background()
 
 	filter := repository.SearchFilter{}
@@ -48,17 +48,17 @@ func (s *ProcessServiceTestSuite) TestListByProduct_NoTypeFilter() {
 	s.processRepo.EXPECT().SearchByProduct(ctx, productID, filter).Return(expectedRegisteredProcess, nil)
 	s.processRepo.EXPECT().GlobalSearch(ctx, filter).Return(nil, nil)
 
-	returnedRegisteredProcess, err := s.processService.Search(ctx, user, productID, "")
+	returnedRegisteredProcess, err := s.processHandler.Search(ctx, user, productID, "")
 	s.Require().NoError(err)
 
 	s.Equal(expectedRegisteredProcess, returnedRegisteredProcess)
 }
 
-func (s *ProcessServiceTestSuite) TestListByProduct_InvalidTypeFilterFilter() {
+func (s *ProcessHandlerTestSuite) TestListByProduct_InvalidTypeFilterFilter() {
 	ctx := context.Background()
 
 	typeFilter := "invalid type"
 
-	_, err := s.processService.Search(ctx, user, productID, typeFilter)
+	_, err := s.processHandler.Search(ctx, user, productID, typeFilter)
 	s.Require().Error(err)
 }

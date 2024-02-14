@@ -182,7 +182,7 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 
 	serverInfoGetter := usecase.NewServerInfoGetter(logger, accessControl)
 
-	processService := process.NewHandler(
+	processHandler := process.NewHandler(
 		&process.HandlerParams{
 			Logger:            logger,
 			VersionService:    k8sService,
@@ -203,7 +203,7 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 			UserActivityInteractor: userActivityInteractor,
 			VersionInteractor:      versionInteractor,
 			ServerInfoGetter:       serverInfoGetter,
-			ProcessService:         processService,
+			ProcessHandler:         processHandler,
 			LogsUsecase:            logsUseCase,
 		},
 	)

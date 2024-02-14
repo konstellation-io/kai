@@ -28,7 +28,7 @@ type Params struct {
 	UserActivityInteractor usecase.UserActivityInteracter
 	VersionInteractor      *version.Handler
 	ServerInfoGetter       *usecase.ServerInfoGetter
-	ProcessService         *process.Handler
+	ProcessHandler         *process.Handler
 	LogsUsecase            logs.LogsUsecase
 }
 
