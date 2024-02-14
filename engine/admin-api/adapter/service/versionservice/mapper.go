@@ -87,6 +87,7 @@ func mapProcessesToDTO(
 			Replicas:      p.Replicas,
 			Config:        mapProcessConfigToDTO(p.Config),
 			Type:          mapProcessTypeToDTO(p.Type),
+			NodeSelectors: p.NodeSelectors,
 		}
 
 		processObjectStore := objStoreConfig.Processes.GetProcessObjectStoreConfig(p.Name)

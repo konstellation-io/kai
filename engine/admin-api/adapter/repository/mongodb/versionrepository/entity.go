@@ -47,6 +47,7 @@ type processDTO struct {
 	Subscriptions  []string                   `bson:"subscriptions"`
 	Networking     *processNetworkingDTO      `bson:"networking,omitempty"`
 	ResourceLimits *processResourceLimitsDTO  `bson:"resourceLimits,omitempty"`
+	NodeSelectors  map[string]string          `bson:"nodeSelectors,omitempty"`
 }
 
 type processObjectStoreDTO struct {

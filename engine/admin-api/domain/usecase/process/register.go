@@ -71,6 +71,7 @@ func (ps *Handler) uploadProcessToRegistry(
 	}
 
 	defer tmpFile.Close()
+
 	defer os.Remove(tmpFile.Name())
 
 	_, err = io.Copy(tmpFile, sources)
