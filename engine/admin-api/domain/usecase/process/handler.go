@@ -3,7 +3,6 @@ package process
 import (
 	"errors"
 	"fmt"
-	"io"
 
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
@@ -18,6 +17,11 @@ var (
 	ErrInvalidProcessType        = errors.New("invalid process type")
 	ErrRegisteredProcessNotFound = errors.New("registered process not found")
 	ErrProcessAlreadyRegistered  = errors.New("process already registered")
+	ErrMissingProductInParams    = errors.New("missing product in params")
+	ErrMissingVersionInParams    = errors.New("missing version in params")
+	ErrMissingProcessInParams    = errors.New("missing process in params")
+	ErrMissingSourcesInParams    = errors.New("missing sources in params")
+	ErrIsPublicAndHasProduct     = errors.New("a process cannot be public and come from a product at the same time")
 )
 
 type Handler struct {
@@ -29,76 +33,26 @@ type Handler struct {
 	processRegistry   service.ProcessRegistry
 }
 
-type RegisterProcessOpts struct {
-	Product     string
-	Version     string
-	Process     string
-	ProcessType entity.ProcessType
-	IsPublic    bool
-	Sources     io.Reader
+type HandlerParams struct {
+	Logger            logr.Logger
+	VersionService    service.VersionService
+	ProcessRepository repository.ProcessRepository
+	ObjectStorage     repository.ObjectStorage
+	AccessControl     auth.AccessControl
+	ProcessRegistry   service.ProcessRegistry
 }
 
-var (
-	ErrMissingProductInParams = errors.New("missing product in params")
-	ErrMissingVersionInParams = errors.New("missing version in params")
-	ErrMissingProcessInParams = errors.New("missing process in params")
-	ErrMissingSourcesInParams = errors.New("missing sources in params")
-	ErrIsPublicAndHasProduct  = errors.New("a process cannot be public and come from a product at the same time")
-)
-
-func (o RegisterProcessOpts) Validate() error {
-	if o.Product == "" && !o.IsPublic {
-		return ErrMissingProductInParams
+func NewHandler(
+	params *HandlerParams,
+) *Handler {
+	return &Handler{
+		logger:            params.Logger,
+		processRepository: params.ProcessRepository,
+		versionService:    params.VersionService,
+		objectStorage:     params.ObjectStorage,
+		accessControl:     params.AccessControl,
+		processRegistry:   params.ProcessRegistry,
 	}
-
-	if o.Product != "" && o.IsPublic {
-		return ErrIsPublicAndHasProduct
-	}
-
-	if o.Version == "" {
-		return ErrMissingVersionInParams
-	}
-
-	if o.Process == "" {
-		return ErrMissingProcessInParams
-	}
-
-	if err := o.ProcessType.Validate(); err != nil {
-		return err
-	}
-
-	if o.Sources == nil {
-		return ErrMissingSourcesInParams
-	}
-
-	return nil
-}
-
-type DeleteProcessOpts struct {
-	Product  string
-	Version  string
-	Process  string
-	IsPublic bool
-}
-
-func (o DeleteProcessOpts) Validate() error {
-	if o.Product == "" && !o.IsPublic {
-		return ErrMissingProductInParams
-	}
-
-	if o.Product != "" && o.IsPublic {
-		return ErrIsPublicAndHasProduct
-	}
-
-	if o.Version == "" {
-		return ErrMissingVersionInParams
-	}
-
-	if o.Process == "" {
-		return ErrMissingProcessInParams
-	}
-
-	return nil
 }
 
 func (ps *Handler) checkRegisterGrants(user *entity.User, isPublic bool, product string) error {
@@ -135,26 +89,4 @@ func (ps *Handler) getProcessRegisterScope(isPublic bool, product string) string
 	}
 
 	return product
-}
-
-type HandlerParams struct {
-	Logger            logr.Logger
-	VersionService    service.VersionService
-	ProcessRepository repository.ProcessRepository
-	ObjectStorage     repository.ObjectStorage
-	AccessControl     auth.AccessControl
-	ProcessRegistry   service.ProcessRegistry
-}
-
-func NewHandler(
-	params *HandlerParams,
-) *Handler {
-	return &Handler{
-		logger:            params.Logger,
-		processRepository: params.ProcessRepository,
-		versionService:    params.VersionService,
-		objectStorage:     params.ObjectStorage,
-		accessControl:     params.AccessControl,
-		processRegistry:   params.ProcessRegistry,
-	}
 }

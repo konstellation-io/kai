@@ -6,6 +6,33 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
+type DeleteProcessOpts struct {
+	Product  string
+	Version  string
+	Process  string
+	IsPublic bool
+}
+
+func (o DeleteProcessOpts) Validate() error {
+	if o.Product == "" && !o.IsPublic {
+		return ErrMissingProductInParams
+	}
+
+	if o.Product != "" && o.IsPublic {
+		return ErrIsPublicAndHasProduct
+	}
+
+	if o.Version == "" {
+		return ErrMissingVersionInParams
+	}
+
+	if o.Process == "" {
+		return ErrMissingProcessInParams
+	}
+
+	return nil
+}
+
 func (ps *Handler) DeleteProcess(
 	ctx context.Context,
 	user *entity.User,

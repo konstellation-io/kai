@@ -11,6 +11,43 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
+type RegisterProcessOpts struct {
+	Product     string
+	Version     string
+	Process     string
+	ProcessType entity.ProcessType
+	IsPublic    bool
+	Sources     io.Reader
+}
+
+func (o RegisterProcessOpts) Validate() error {
+	if o.Product == "" && !o.IsPublic {
+		return ErrMissingProductInParams
+	}
+
+	if o.Product != "" && o.IsPublic {
+		return ErrIsPublicAndHasProduct
+	}
+
+	if o.Version == "" {
+		return ErrMissingVersionInParams
+	}
+
+	if o.Process == "" {
+		return ErrMissingProcessInParams
+	}
+
+	if err := o.ProcessType.Validate(); err != nil {
+		return err
+	}
+
+	if o.Sources == nil {
+		return ErrMissingSourcesInParams
+	}
+
+	return nil
+}
+
 func (ps *Handler) RegisterProcess(
 	ctx context.Context,
 	user *entity.User,
