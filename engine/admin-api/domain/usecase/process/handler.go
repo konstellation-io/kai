@@ -13,7 +13,6 @@ import (
 )
 
 var (
-	ErrInvalidProcessType        = errors.New("invalid process type")
 	ErrRegisteredProcessNotFound = errors.New("registered process not found")
 	ErrProcessAlreadyRegistered  = errors.New("process already registered")
 	ErrMissingProductInParams    = errors.New("missing product in params")

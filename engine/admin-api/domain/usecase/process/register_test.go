@@ -245,7 +245,7 @@ func (s *ProcessHandlerTestSuite) TestRegisterProcess_InvalidProcessTypeInRegist
 			Sources:     nil,
 		},
 	)
-	s.ErrorIs(err, process.ErrInvalidProcessType)
+	s.ErrorIs(err, entity.ErrInvalidProcessType)
 }
 
 func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingSourcesInRegisterOptions() {
