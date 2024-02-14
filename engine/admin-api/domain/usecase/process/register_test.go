@@ -183,8 +183,7 @@ func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingProductInRegisterOp
 			Sources:     nil,
 		},
 	)
-	s.Require().Error(err)
-	s.Equal(process.ErrMissingProductInParams, err)
+	s.ErrorIs(err, process.ErrMissingProductInParams)
 }
 
 func (s *ProcessHandlerTestSuite) TestRegisterProcess_IsPublicAndHasProduct() {
@@ -200,8 +199,7 @@ func (s *ProcessHandlerTestSuite) TestRegisterProcess_IsPublicAndHasProduct() {
 			Sources:  nil,
 		},
 	)
-	s.Require().Error(err)
-	s.Equal(process.ErrIsPublicAndHasProduct, err)
+	s.ErrorIs(err, process.ErrIsPublicAndHasProduct)
 }
 
 func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingVersionInRegisterOptions() {
@@ -216,8 +214,7 @@ func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingVersionInRegisterOp
 			Sources:     nil,
 		},
 	)
-	s.Require().Error(err)
-	s.Equal(process.ErrMissingVersionInParams, err)
+	s.ErrorIs(err, process.ErrMissingVersionInParams)
 }
 
 func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingProcessInRegisterOptions() {
@@ -232,8 +229,7 @@ func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingProcessInRegisterOp
 			Sources:     nil,
 		},
 	)
-	s.Require().Error(err)
-	s.Equal(process.ErrMissingProcessInParams, err)
+	s.ErrorIs(err, process.ErrMissingProcessInParams)
 }
 
 func (s *ProcessHandlerTestSuite) TestRegisterProcess_InvalidProcessTypeInRegisterOptions() {
@@ -249,8 +245,7 @@ func (s *ProcessHandlerTestSuite) TestRegisterProcess_InvalidProcessTypeInRegist
 			Sources:     nil,
 		},
 	)
-	s.Require().Error(err)
-	s.Equal(process.ErrInvalidProcessType, err)
+	s.ErrorIs(err, process.ErrInvalidProcessType)
 }
 
 func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingSourcesInRegisterOptions() {
@@ -266,17 +261,18 @@ func (s *ProcessHandlerTestSuite) TestRegisterProcess_MissingSourcesInRegisterOp
 			Sources:     nil,
 		},
 	)
-	s.Require().Error(err)
-	s.Equal(process.ErrMissingSourcesInParams, err)
+	s.ErrorIs(err, process.ErrMissingSourcesInParams)
 }
 
 func (s *ProcessHandlerTestSuite) TestRegisterProcess_NoProductGrants() {
 	ctx := context.Background()
 
+	expectedErr := errors.New("auth error")
+
 	testFile, err := os.Open(testFileAddr)
 	s.Require().NoError(err)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(auth.UnauthorizedError{})
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActRegisterProcess).Return(expectedErr)
 
 	_, err = s.processHandler.RegisterProcess(
 		ctx, user,
@@ -288,8 +284,7 @@ func (s *ProcessHandlerTestSuite) TestRegisterProcess_NoProductGrants() {
 			Sources:     testFile,
 		},
 	)
-	s.Require().Error(err)
-	s.Equal(auth.UnauthorizedError{}, err)
+	s.Require().ErrorIs(err, expectedErr)
 }
 
 func (s *ProcessHandlerTestSuite) TestRegisterProcess_GetByIDFails() {
