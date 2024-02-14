@@ -42,7 +42,7 @@ func (h *Handler) Create(
 		return nil, fmt.Errorf("error creating temp krt file for version: %w", err)
 	}
 
-	krtYml, err := parse.ParseFile(tmpKrtFile.Name())
+	krtYml, err := parse.ParseFileToKrt(tmpKrtFile.Name())
 	if err != nil {
 		return nil, ParsingKRTFileError(err)
 	}

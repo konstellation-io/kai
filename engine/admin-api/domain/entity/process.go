@@ -19,6 +19,7 @@ type Process struct {
 	Networking     *ProcessNetworking
 	ResourceLimits *ProcessResourceLimits
 	Status         ProcessStatus
+	NodeSelectors  map[string]string
 }
 
 type ProcessType string

@@ -1,6 +1,7 @@
 package process
 
 import (
+	"github.com/konstellation-io/kai/engine/k8s-manager/internal/domain"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -11,14 +12,18 @@ const (
 	ResourceNameKstGpu corev1.ResourceName = "konstellation.io/gpu"
 )
 
-func (kp *KubeProcess) getNodeSelector(isGPUEnabled bool) map[string]string {
-	if !isGPUEnabled {
-		return map[string]string{}
+func (kp *KubeProcess) getNodeSelector(process *domain.Process) map[string]string {
+	nodeSelectors := map[string]string{}
+
+	if process.NodeSelectors != nil {
+		nodeSelectors = process.NodeSelectors
 	}
 
-	return map[string]string{
-		ResourceNameKstGpu.String(): "true",
+	if process.EnableGpu {
+		nodeSelectors[ResourceNameKstGpu.String()] = "true"
 	}
+
+	return nodeSelectors
 }
 
 func (kp *KubeProcess) getTolerations(isGPUEnabled bool) []corev1.Toleration {

@@ -66,6 +66,7 @@ func (h *Handler) mapKrtProcessesToVersion(krtProcesses []krt.Process) []entity.
 			Networking:     h.mapKrtNetworkingToVersion(krtProcess.Networking),
 			ResourceLimits: h.mapKrtResourceLimitsToVersion(krtProcess.ResourceLimits),
 			Status:         entity.RegisterProcessStatusCreated,
+			NodeSelectors:  krtProcess.NodeSelectors,
 		}
 	}
 
