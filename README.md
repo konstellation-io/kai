@@ -36,7 +36,7 @@ KAI design is based on a microservice pattern to be run on top of a Kubernetes c
 
 The following diagram shows the main components and how they relate with each other.
 
-![Architecture](.github/images/kai-architecture.png) 
+![Architecture](.github/images/kai-architecture.png)
 
 Below are described the main concepts of KAI.
 
@@ -269,53 +269,53 @@ after passing all the tests, a new `fix tag` will be created increasing the patc
 release will be build and released.
 
 
-[admin-api-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_admin_api&metric=coverage
+[admin-api-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_admin_api&metric=coverage
 
-[admin-api-coverage-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kre_admin_api&metric=Coverage
+[admin-api-coverage-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kai_admin_api&metric=Coverage
 
-[admin-api-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_admin_api&metric=bugs
+[admin-api-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_admin_api&metric=bugs
 
-[admin-api-bugs-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kre_admin_api&metric=Security
+[admin-api-bugs-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kai_admin_api&metric=Security
 
-[admin-api-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_admin_api&metric=ncloc
+[admin-api-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_admin_api&metric=ncloc
 
-[admin-api-loc-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kre_admin_api&metric=Coverage
+[admin-api-loc-link]: https://sonarcloud.io/component_measures?id=konstellation-io_kai_admin_api&metric=Coverage
 
-[admin-api-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_admin_api&metric=sqale_rating
+[admin-api-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_admin_api&metric=sqale_rating
 
-[admin-api-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_admin_api
+[admin-api-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_admin_api
 
-[k8s-manager-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_k8s_manager&metric=coverage
+[k8s-manager-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_k8s_manager&metric=coverage
 
-[k8s-manager-coverage-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_k8s_manager
+[k8s-manager-coverage-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_k8s_manager
 
-[k8s-manager-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_k8s_manager&metric=bugs
+[k8s-manager-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_k8s_manager&metric=bugs
 
-[k8s-manager-bugs-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_k8s_manager
+[k8s-manager-bugs-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_k8s_manager
 
-[k8s-manager-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_k8s_manager&metric=ncloc
+[k8s-manager-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_k8s_manager&metric=ncloc
 
-[k8s-manager-loc-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_k8s_manager
+[k8s-manager-loc-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_k8s_manager
 
-[k8s-manager-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_k8s_manager&metric=sqale_rating
+[k8s-manager-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_k8s_manager&metric=sqale_rating
 
-[k8s-manager-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_k8s_manager
+[k8s-manager-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_k8s_manager
 
-[nats-manager-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_nats-manager&metric=coverage
+[nats-manager-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats-manager&metric=coverage
 
-[nats-manager-coverage-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_nats-manager
+[nats-manager-coverage-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats-manager
 
-[nats-manager-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_nats-manager&metric=bugs
+[nats-manager-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats-manager&metric=bugs
 
-[nats-manager-bugs-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_nats-manager
+[nats-manager-bugs-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats-manager
 
-[nats-manager-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_nats-manager&metric=ncloc
+[nats-manager-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats-manager&metric=ncloc
 
-[nats-manager-loc-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_nats-manager
+[nats-manager-loc-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats-manager
 
-[nats-manager-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kre_nats-manager&metric=sqale_rating
+[nats-manager-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats-manager&metric=sqale_rating
 
-[nats-manager-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kre_nats-manager
+[nats-manager-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats-manager
 
 [admin-api-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/engine/admin-api
 
