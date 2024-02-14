@@ -24,12 +24,9 @@ func TestDeleteProcess(t *testing.T) {
 		digest    = "sha256:1234567890"
 	)
 
-	callCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		callCount++
-
-		switch callCount {
-		case 1:
+		switch req.Method {
+		case http.MethodGet:
 			expectedURL := `/v2/productID_processID/manifests/versionID`
 
 			actualQuery, err := url.QueryUnescape(req.URL.String())
@@ -40,7 +37,7 @@ func TestDeleteProcess(t *testing.T) {
 			rw.Header().Set("Docker-Content-Digest", digest)
 			rw.Write([]byte(`{}`))
 
-		case 2:
+		case http.MethodDelete:
 			expectedURL := `/v2/productID_processID/manifests/sha256:1234567890`
 
 			actualQuery, err := url.QueryUnescape(req.URL.String())
@@ -73,12 +70,8 @@ func TestDeleteProcess_GetManifestError(t *testing.T) {
 		basicAuth = "user:password"
 	)
 
-	callCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		callCount++
-
-		switch callCount {
-		case 1:
+		if req.Method == http.MethodGet {
 			expectedURL := `/v2/productID_processID/manifests/versionID`
 
 			actualQuery, err := url.QueryUnescape(req.URL.String())
@@ -88,7 +81,7 @@ func TestDeleteProcess_GetManifestError(t *testing.T) {
 
 			rw.WriteHeader(http.StatusInternalServerError)
 
-		default:
+		} else {
 			t.Error("Unexpected call")
 		}
 	}))
@@ -101,7 +94,6 @@ func TestDeleteProcess_GetManifestError(t *testing.T) {
 	processRegistry := registry.NewProcessRegistry()
 
 	err := processRegistry.DeleteProcess(context.Background(), imageName, version)
-	require.Error(t, err)
 	assert.ErrorIs(t, err, registry.ErrFailedGetManifest)
 }
 
@@ -113,12 +105,9 @@ func TestDeleteProcess_DeleteManifestError(t *testing.T) {
 		digest    = "sha256:1234567890"
 	)
 
-	callCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		callCount++
-
-		switch callCount {
-		case 1:
+		switch req.Method {
+		case http.MethodGet:
 			expectedURL := `/v2/productID_processID/manifests/version`
 
 			actualQuery, err := url.QueryUnescape(req.URL.String())
@@ -129,7 +118,7 @@ func TestDeleteProcess_DeleteManifestError(t *testing.T) {
 			rw.Header().Set("Docker-Content-Digest", digest)
 			rw.Write([]byte(`{}`))
 
-		case 2:
+		case http.MethodDelete:
 			expectedURL := `/v2/productID_processID/manifests/sha256:1234567890`
 
 			actualQuery, err := url.QueryUnescape(req.URL.String())
@@ -152,6 +141,5 @@ func TestDeleteProcess_DeleteManifestError(t *testing.T) {
 	processRegistry := registry.NewProcessRegistry()
 
 	err := processRegistry.DeleteProcess(context.Background(), imageName, version)
-	require.Error(t, err)
 	assert.ErrorIs(t, err, registry.ErrFailedDeleteImage)
 }
