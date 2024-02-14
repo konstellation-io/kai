@@ -79,7 +79,7 @@ var (
 	}
 )
 
-func TestProcessTestSuite(t *testing.T) {
+func TestProcessHandlerSuite(t *testing.T) {
 	suite.Run(t, new(ProcessHandlerTestSuite))
 }
 
