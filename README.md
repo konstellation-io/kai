@@ -301,21 +301,21 @@ release will be build and released.
 
 [k8s-manager-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_k8s_manager
 
-[nats-manager-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats-manager&metric=coverage
+[nats-manager-coverage]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats_manager&metric=coverage
 
-[nats-manager-coverage-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats-manager
+[nats-manager-coverage-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats_manager
 
-[nats-manager-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats-manager&metric=bugs
+[nats-manager-bugs]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats_manager&metric=bugs
 
-[nats-manager-bugs-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats-manager
+[nats-manager-bugs-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats_manager
 
-[nats-manager-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats-manager&metric=ncloc
+[nats-manager-loc]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats_manager&metric=ncloc
 
-[nats-manager-loc-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats-manager
+[nats-manager-loc-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats_manager
 
-[nats-manager-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats-manager&metric=sqale_rating
+[nats-manager-mr]: https://sonarcloud.io/api/project_badges/measure?project=konstellation-io_kai_nats_manager&metric=sqale_rating
 
-[nats-manager-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats-manager
+[nats-manager-mr-link]: https://sonarcloud.io/dashboard?id=konstellation-io_kai_nats_manager
 
 [admin-api-report-badge]: https://goreportcard.com/badge/github.com/konstellation-io/kai/engine/admin-api
 
