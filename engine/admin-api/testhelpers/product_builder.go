@@ -1,7 +1,7 @@
 package testhelpers
 
 import (
-	"github.com/bxcodec/faker/v3"
+	"github.com/go-faker/faker/v4"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 

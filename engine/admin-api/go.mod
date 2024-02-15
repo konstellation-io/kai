@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.33
 	github.com/bxcodec/faker/v3 v3.8.1
 	github.com/casbin/casbin/v2 v2.8.6
+	github.com/go-faker/faker/v4 v4.3.0
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.4
 	github.com/go-playground/validator v9.31.0+incompatible
