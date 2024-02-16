@@ -264,7 +264,7 @@ func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*enti
 
 func (r *queryResolver) RegisteredProcesses(
 	ctx context.Context, productID string,
-	processName, version, processType *string,
+	processName, processVersion, processType *string,
 ) ([]*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
@@ -274,8 +274,8 @@ func (r *queryResolver) RegisteredProcesses(
 		filter.ProcessName = *processName
 	}
 
-	if version != nil {
-		filter.Version = *version
+	if processVersion != nil {
+		filter.Version = *processVersion
 	}
 
 	if processType != nil {
