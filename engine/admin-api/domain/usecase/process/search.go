@@ -12,7 +12,12 @@ func (ps *Handler) Search(
 	productID string,
 	filter *entity.SearchFilter,
 ) ([]*entity.RegisteredProcess, error) {
-	ps.logger.Info("Retrieving process", "productID", productID, "processType", filter.ProcessType, "processName", filter.ProcessName, "version", filter.Version)
+
+	if filter == nil || *filter == (entity.SearchFilter{}) {
+		ps.logger.Info("Retrieving process with no filter", "productID", productID)
+	} else {
+		ps.logger.Info("Retrieving process with filter", "productID", productID, "processType", filter.ProcessType, "processName", filter.ProcessName, "version", filter.Version)
+	}
 
 	productProcesses, err := ps.processRepository.SearchByProduct(ctx, productID, filter)
 	if err != nil {

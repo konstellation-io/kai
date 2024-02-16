@@ -7,23 +7,22 @@ import (
 	"time"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
 func (s *ProcessHandlerTestSuite) TestListByProduct_WithTypeFilter() {
 	var (
 		ctx               = context.Background()
-		filter            = repository.SearchFilter{ProcessType: entity.ProcessTypeTrigger}
+		filter            = entity.SearchFilter{}
 		productProcesses  = []*entity.RegisteredProcess{testhelpers.NewRegisteredProcessBuilder(productID).Build()}
 		kaiProcesses      = []*entity.RegisteredProcess{testhelpers.NewRegisteredProcessBuilder("kai").Build()}
 		expectedProcesses = append(productProcesses, kaiProcesses...)
 	)
 
-	s.processRepo.EXPECT().SearchByProduct(ctx, productID, filter).Return(productProcesses, nil)
-	s.processRepo.EXPECT().GlobalSearch(ctx, filter).Return(kaiProcesses, nil)
+	s.processRepo.EXPECT().SearchByProduct(ctx, productID, &filter).Return(productProcesses, nil)
+	s.processRepo.EXPECT().GlobalSearch(ctx, &filter).Return(kaiProcesses, nil)
 
-	returnedRegisteredProcess, err := s.processHandler.Search(ctx, user, productID, filter.ProcessType.String())
+	returnedRegisteredProcess, err := s.processHandler.Search(ctx, user, productID, &filter)
 	s.Require().NoError(err)
 
 	s.Equal(expectedProcesses, returnedRegisteredProcess)
@@ -32,7 +31,6 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_WithTypeFilter() {
 func (s *ProcessHandlerTestSuite) TestListByProduct_NoTypeFilter() {
 	ctx := context.Background()
 
-	filter := repository.SearchFilter{}
 	expectedRegisteredProcess := []*entity.RegisteredProcess{
 		{
 			ID:         "test-id",
@@ -45,20 +43,11 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_NoTypeFilter() {
 		},
 	}
 
-	s.processRepo.EXPECT().SearchByProduct(ctx, productID, filter).Return(expectedRegisteredProcess, nil)
-	s.processRepo.EXPECT().GlobalSearch(ctx, filter).Return(nil, nil)
+	s.processRepo.EXPECT().SearchByProduct(ctx, productID, nil).Return(expectedRegisteredProcess, nil)
+	s.processRepo.EXPECT().GlobalSearch(ctx, nil).Return(nil, nil)
 
-	returnedRegisteredProcess, err := s.processHandler.Search(ctx, user, productID, "")
+	returnedRegisteredProcess, err := s.processHandler.Search(ctx, user, productID, nil)
 	s.Require().NoError(err)
 
 	s.Equal(expectedRegisteredProcess, returnedRegisteredProcess)
-}
-
-func (s *ProcessHandlerTestSuite) TestListByProduct_InvalidTypeFilterFilter() {
-	ctx := context.Background()
-
-	typeFilter := "invalid type"
-
-	_, err := s.processHandler.Search(ctx, user, productID, typeFilter)
-	s.Require().Error(err)
 }

@@ -164,6 +164,10 @@ func (r *MongoDBProcessRepository) searchInDatabaseWithFilter(
 func (r *MongoDBProcessRepository) getSearchMongoFilter(searchFilter *entity.SearchFilter) bson.M {
 	filter := make(bson.M, 0)
 
+	if searchFilter == nil {
+		return filter
+	}
+
 	if searchFilter.ProcessName != "" {
 		filter["name"] = searchFilter.ProcessName
 	}
