@@ -21,3 +21,9 @@ type RegisteredProcess struct {
 	Logs       string
 	IsPublic   bool
 }
+
+type SearchFilter struct {
+	ProcessName string
+	Version     string
+	ProcessType ProcessType
+}

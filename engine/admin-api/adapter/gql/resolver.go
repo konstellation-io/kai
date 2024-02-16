@@ -263,16 +263,26 @@ func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*enti
 }
 
 func (r *queryResolver) RegisteredProcesses(
-	ctx context.Context, productID string, processType *string,
+	ctx context.Context, productID string,
+	processName, version, processType *string,
 ) ([]*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	var processTypeFilter string
-	if processType != nil {
-		processTypeFilter = *processType
+	var filter entity.SearchFilter
+
+	if processName != nil {
+		filter.ProcessName = *processName
 	}
 
-	return r.processHandler.Search(ctx, loggedUser, productID, processTypeFilter)
+	if version != nil {
+		filter.Version = *version
+	}
+
+	if processType != nil {
+		filter.ProcessType = entity.ProcessType(*processType)
+	}
+
+	return r.processHandler.Search(ctx, loggedUser, productID, &filter)
 }
 
 func (r *queryResolver) UserActivityList(

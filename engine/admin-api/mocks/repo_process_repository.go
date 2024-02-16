@@ -10,7 +10,6 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
-	repository "github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 )
 
 // MockProcessRepository is a mock of ProcessRepository interface.
@@ -94,7 +93,7 @@ func (mr *MockProcessRepositoryMockRecorder) GetByID(ctx, registry, imageID inte
 }
 
 // GlobalSearch mocks base method.
-func (m *MockProcessRepository) GlobalSearch(ctx context.Context, filter repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
+func (m *MockProcessRepository) GlobalSearch(ctx context.Context, filter *entity.SearchFilter) ([]*entity.RegisteredProcess, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GlobalSearch", ctx, filter)
 	ret0, _ := ret[0].([]*entity.RegisteredProcess)
@@ -109,7 +108,7 @@ func (mr *MockProcessRepositoryMockRecorder) GlobalSearch(ctx, filter interface{
 }
 
 // SearchByProduct mocks base method.
-func (m *MockProcessRepository) SearchByProduct(ctx context.Context, product string, filter repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
+func (m *MockProcessRepository) SearchByProduct(ctx context.Context, product string, filter *entity.SearchFilter) ([]*entity.RegisteredProcess, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchByProduct", ctx, product, filter)
 	ret0, _ := ret[0].([]*entity.RegisteredProcess)
