@@ -133,7 +133,7 @@ type ComplexityRoot struct {
 		Logs                func(childComplexity int, filters entity.LogFilters) int
 		Product             func(childComplexity int, id string) int
 		Products            func(childComplexity int) int
-		RegisteredProcesses func(childComplexity int, productID string, processType *string) int
+		RegisteredProcesses func(childComplexity int, productID string, processName *string, version *string, processType *string) int
 		ServerInfo          func(childComplexity int) int
 		UserActivityList    func(childComplexity int, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) int
 		Version             func(childComplexity int, productID string, tag *string) int
@@ -223,7 +223,7 @@ type QueryResolver interface {
 	Products(ctx context.Context) ([]*entity.Product, error)
 	Version(ctx context.Context, productID string, tag *string) (*entity.Version, error)
 	Versions(ctx context.Context, productID string) ([]*entity.Version, error)
-	RegisteredProcesses(ctx context.Context, productID string, processType *string) ([]*entity.RegisteredProcess, error)
+	RegisteredProcesses(ctx context.Context, productID string, processName *string, version *string, processType *string) ([]*entity.RegisteredProcess, error)
 	UserActivityList(ctx context.Context, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) ([]*entity.UserActivity, error)
 	Logs(ctx context.Context, filters entity.LogFilters) ([]*entity.Log, error)
 	ServerInfo(ctx context.Context) (*entity.ServerInfo, error)
@@ -694,7 +694,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.RegisteredProcesses(childComplexity, args["productID"].(string), args["processType"].(*string)), true
+		return e.complexity.Query.RegisteredProcesses(childComplexity, args["productID"].(string), args["processName"].(*string), args["version"].(*string), args["processType"].(*string)), true
 
 	case "Query.serverInfo":
 		if e.complexity.Query.ServerInfo == nil {
@@ -1109,7 +1109,7 @@ type Query {
   products: [Product!]!
   version(productID: ID!, tag: String): Version!
   versions(productID: ID!): [Version!]!
-  registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
+  registeredProcesses(productID: ID!, processName: String, version: String, processType: String): [RegisteredProcess]!
   userActivityList(
     userEmail: String
     types: [UserActivityType!]
@@ -1651,14 +1651,32 @@ func (ec *executionContext) field_Query_registeredProcesses_args(ctx context.Con
 	}
 	args["productID"] = arg0
 	var arg1 *string
-	if tmp, ok := rawArgs["processType"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processType"))
+	if tmp, ok := rawArgs["processName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processName"))
 		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["processType"] = arg1
+	args["processName"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["version"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["version"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["processType"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processType"))
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["processType"] = arg3
 	return args, nil
 }
 
@@ -4488,7 +4506,7 @@ func (ec *executionContext) _Query_registeredProcesses(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().RegisteredProcesses(rctx, fc.Args["productID"].(string), fc.Args["processType"].(*string))
+		return ec.resolvers.Query().RegisteredProcesses(rctx, fc.Args["productID"].(string), fc.Args["processName"].(*string), fc.Args["version"].(*string), fc.Args["processType"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
