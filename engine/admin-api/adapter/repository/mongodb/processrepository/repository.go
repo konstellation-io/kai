@@ -74,12 +74,12 @@ func (r *MongoDBProcessRepository) Create(
 func (r *MongoDBProcessRepository) SearchByProduct(
 	ctx context.Context,
 	product string,
-	filter *entity.SearchFilter,
+	filter *repository.SearchFilter,
 ) ([]*entity.RegisteredProcess, error) {
 	return r.searchInDatabaseWithFilter(ctx, product, r.getSearchMongoFilter(filter))
 }
 
-func (r *MongoDBProcessRepository) GlobalSearch(ctx context.Context, filter *entity.SearchFilter) ([]*entity.RegisteredProcess, error) {
+func (r *MongoDBProcessRepository) GlobalSearch(ctx context.Context, filter *repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
 	return r.searchInDatabaseWithFilter(ctx, viper.GetString(config.MongoDBKaiDatabaseKey), r.getSearchMongoFilter(filter))
 }
 
@@ -161,7 +161,7 @@ func (r *MongoDBProcessRepository) searchInDatabaseWithFilter(
 	return registeredProcesses, nil
 }
 
-func (r *MongoDBProcessRepository) getSearchMongoFilter(searchFilter *entity.SearchFilter) bson.M {
+func (r *MongoDBProcessRepository) getSearchMongoFilter(searchFilter *repository.SearchFilter) bson.M {
 	filter := make(bson.M, 0)
 
 	if searchFilter == nil {

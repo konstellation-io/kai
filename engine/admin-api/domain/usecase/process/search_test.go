@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
 func (s *ProcessHandlerTestSuite) TestListByProduct_WithTypeFilter() {
 	var (
 		ctx               = context.Background()
-		filter            = entity.SearchFilter{}
+		filter            = repository.SearchFilter{}
 		productProcesses  = []*entity.RegisteredProcess{testhelpers.NewRegisteredProcessBuilder(productID).Build()}
 		kaiProcesses      = []*entity.RegisteredProcess{testhelpers.NewRegisteredProcessBuilder("kai").Build()}
 		expectedProcesses = append(productProcesses, kaiProcesses...)
@@ -50,4 +51,15 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_NoTypeFilter() {
 	s.Require().NoError(err)
 
 	s.Equal(expectedRegisteredProcess, returnedRegisteredProcess)
+}
+
+func (s *ProcessHandlerTestSuite) TestListByProduct_InvalidTypeFilterFilter() {
+	ctx := context.Background()
+
+	filter := repository.SearchFilter{
+		ProcessType: "invalid",
+	}
+
+	_, err := s.processHandler.Search(ctx, user, productID, &filter)
+	s.Require().Error(err)
 }

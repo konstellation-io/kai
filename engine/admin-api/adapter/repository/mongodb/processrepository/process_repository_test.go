@@ -13,6 +13,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb/processrepository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 	"github.com/spf13/viper"
@@ -177,7 +178,7 @@ func (s *ProcessRepositoryTestSuite) TestSearchByProduct_WithFilters() {
 		s.Require().NoError(err)
 	}
 
-	filter := entity.SearchFilter{
+	filter := repository.SearchFilter{
 		ProcessType: entity.ProcessTypeTask,
 	}
 	registeredProcesses, err := s.processRepo.SearchByProduct(ctx, productID, &filter)
@@ -186,7 +187,7 @@ func (s *ProcessRepositoryTestSuite) TestSearchByProduct_WithFilters() {
 	s.Require().Len(registeredProcesses, 1)
 	s.Equal(testTaskProcess, registeredProcesses[0])
 
-	filter = entity.SearchFilter{
+	filter = repository.SearchFilter{
 		ProcessName: testTaskName,
 	}
 	registeredProcesses, err = s.processRepo.SearchByProduct(ctx, productID, &filter)
@@ -195,7 +196,7 @@ func (s *ProcessRepositoryTestSuite) TestSearchByProduct_WithFilters() {
 	s.Require().Len(registeredProcesses, 1)
 	s.Equal(testTaskProcess, registeredProcesses[0])
 
-	filter = entity.SearchFilter{
+	filter = repository.SearchFilter{
 		ProcessName: testTriggerName,
 	}
 	registeredProcesses, err = s.processRepo.SearchByProduct(ctx, productID, &filter)
@@ -203,7 +204,7 @@ func (s *ProcessRepositoryTestSuite) TestSearchByProduct_WithFilters() {
 
 	s.Len(registeredProcesses, 2)
 
-	filter = entity.SearchFilter{
+	filter = repository.SearchFilter{
 		Version: processVersion2,
 	}
 	registeredProcesses, err = s.processRepo.SearchByProduct(ctx, productID, &filter)
@@ -221,7 +222,7 @@ func (s *ProcessRepositoryTestSuite) TestSearchByProduct_WithFilters() {
 func (s *ProcessRepositoryTestSuite) TestSearchByProductWithUnexistingProduct() {
 	ctx := context.Background()
 
-	filter := entity.SearchFilter{
+	filter := repository.SearchFilter{
 		ProcessType: entity.ProcessTypeTrigger,
 	}
 	registeredProcesses, err := s.processRepo.SearchByProduct(ctx, "non-existent", &filter)
@@ -242,7 +243,7 @@ func (s *ProcessRepositoryTestSuite) TestGlobalSearch() {
 	err := s.processRepo.Create(ctx, _kaiProduct, testGlobalProcess)
 	s.Require().NoError(err)
 
-	filter := entity.SearchFilter{
+	filter := repository.SearchFilter{
 		ProcessType: entity.ProcessTypeTask,
 	}
 	actualProcesses, err := s.processRepo.GlobalSearch(ctx, &filter)
@@ -292,7 +293,20 @@ func (s *ProcessRepositoryTestSuite) TestGetByID() {
 		Owner:      ownerID,
 	}
 
+	otherProcess := &entity.RegisteredProcess{
+		ID:         "other_process_id",
+		Name:       "other_test_trigger",
+		Version:    processVersion,
+		Type:       "trigger",
+		Image:      "other_process_image",
+		UploadDate: testRepoUploadDate,
+		Owner:      ownerID,
+	}
+
 	err := s.processRepo.Create(ctx, productID, expectedProcess)
+	s.Require().NoError(err)
+
+	err = s.processRepo.Create(ctx, productID, otherProcess)
 	s.Require().NoError(err)
 
 	actualProcess, err := s.processRepo.GetByID(ctx, productID, expectedProcess.ID)
