@@ -25,7 +25,6 @@ func (ps *Handler) Search(
 	if filter == nil || *filter == (repository.SearchFilter{}) {
 		ps.logger.Info("Retrieving process with no filter", "productID", productID)
 	} else {
-
 		ps.logger.Info(
 			"Retrieving process with filter",
 			"productID", productID, "processType", filter.ProcessType, "processName", filter.ProcessName, "version", filter.Version,
