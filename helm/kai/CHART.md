@@ -173,6 +173,7 @@
 | keycloak.serviceAccount.annotations | object | `{}` |  |
 | keycloak.serviceAccount.create | bool | `true` |  |
 | keycloak.serviceAccount.name | string | `""` |  |
+| keycloak.ssoSessionIdleTimeout | int | `14400` | The time in seconds that a user has to be inactive to expire the session |
 | keycloak.tolerations | list | `[]` | Assign custom tolerations to the Keycloak pods |
 | loki.enabled | bool | `true` | Whether to enable Loki |
 | loki.gateway.enabled | bool | `false` | Specifies whether the gateway should be enabled |

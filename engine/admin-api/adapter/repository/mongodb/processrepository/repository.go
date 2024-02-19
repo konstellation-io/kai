@@ -74,12 +74,12 @@ func (r *MongoDBProcessRepository) Create(
 func (r *MongoDBProcessRepository) SearchByProduct(
 	ctx context.Context,
 	product string,
-	filter repository.SearchFilter,
+	filter *repository.SearchFilter,
 ) ([]*entity.RegisteredProcess, error) {
 	return r.searchInDatabaseWithFilter(ctx, product, r.getSearchMongoFilter(filter))
 }
 
-func (r *MongoDBProcessRepository) GlobalSearch(ctx context.Context, filter repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
+func (r *MongoDBProcessRepository) GlobalSearch(ctx context.Context, filter *repository.SearchFilter) ([]*entity.RegisteredProcess, error) {
 	return r.searchInDatabaseWithFilter(ctx, viper.GetString(config.MongoDBKaiDatabaseKey), r.getSearchMongoFilter(filter))
 }
 
@@ -161,11 +161,23 @@ func (r *MongoDBProcessRepository) searchInDatabaseWithFilter(
 	return registeredProcesses, nil
 }
 
-func (r *MongoDBProcessRepository) getSearchMongoFilter(searchFilter repository.SearchFilter) bson.M {
-	var filter bson.M
+func (r *MongoDBProcessRepository) getSearchMongoFilter(searchFilter *repository.SearchFilter) bson.M {
+	filter := make(bson.M, 0)
+
+	if searchFilter == nil {
+		return filter
+	}
+
+	if searchFilter.ProcessName != "" {
+		filter["name"] = searchFilter.ProcessName
+	}
+
+	if searchFilter.Version != "" {
+		filter["version"] = searchFilter.Version
+	}
 
 	if searchFilter.ProcessType != "" {
-		filter = bson.M{"type": searchFilter.ProcessType}
+		filter["type"] = searchFilter.ProcessType
 	}
 
 	return filter

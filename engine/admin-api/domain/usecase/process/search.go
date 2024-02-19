@@ -2,7 +2,6 @@ package process
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
@@ -11,21 +10,22 @@ import (
 func (ps *Handler) Search(
 	ctx context.Context,
 	user *entity.User,
-	productID, processType string,
+	productID string,
+	filter *repository.SearchFilter,
 ) ([]*entity.RegisteredProcess, error) {
-	log := fmt.Sprintf("Retrieving process for product %q", productID)
-	if processType != "" {
-		log = fmt.Sprintf("%s with process type filter %q", log, processType)
+	if filter == nil || *filter == (repository.SearchFilter{}) {
+		ps.logger.Info("Retrieving process with no filter", "productID", productID)
+	} else {
+		ps.logger.Info(
+			"Retrieving process with filter",
+			"productID", productID, "processType", filter.ProcessType, "processName", filter.ProcessName, "version", filter.Version,
+		)
 	}
 
-	ps.logger.Info(log)
-
-	filter := repository.SearchFilter{
-		ProcessType: entity.ProcessType(processType),
-	}
-
-	if err := filter.Validate(); err != nil {
-		return nil, fmt.Errorf("validating list filter: %w", err)
+	if filter != nil {
+		if err := filter.Validate(); err != nil {
+			return nil, err
+		}
 	}
 
 	productProcesses, err := ps.processRepository.SearchByProduct(ctx, productID, filter)

@@ -5,7 +5,7 @@ type Query {
   products: [Product!]!
   version(productID: ID!, tag: String): Version!
   versions(productID: ID!): [Version!]!
-  registeredProcesses(productID: ID!, processType: String): [RegisteredProcess]!
+  registeredProcesses(productID: ID!, processName: String, version: String, processType: String): [RegisteredProcess]!
   userActivityList(
     userEmail: String
     types: [UserActivityType!]

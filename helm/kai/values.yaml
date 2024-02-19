@@ -289,6 +289,8 @@ keycloak:
 
   # -- The name of the realm that will be crated on Keycloak first startup
   realmName: "konstellation"
+  # -- The time in seconds that a user has to be inactive to expire the session
+  ssoSessionIdleTimeout: 14400
   kong:
     # -- The name of the OIDC Kong plugin that should be installed on Kong ingress controller
     oidcPluginName: "oidc"

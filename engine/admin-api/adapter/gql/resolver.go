@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
@@ -263,16 +264,26 @@ func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*enti
 }
 
 func (r *queryResolver) RegisteredProcesses(
-	ctx context.Context, productID string, processType *string,
+	ctx context.Context, productID string,
+	processName, processVersion, processType *string,
 ) ([]*entity.RegisteredProcess, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	var processTypeFilter string
-	if processType != nil {
-		processTypeFilter = *processType
+	var filter repository.SearchFilter
+
+	if processName != nil {
+		filter.ProcessName = *processName
 	}
 
-	return r.processHandler.Search(ctx, loggedUser, productID, processTypeFilter)
+	if processVersion != nil {
+		filter.Version = *processVersion
+	}
+
+	if processType != nil {
+		filter.ProcessType = entity.ProcessType(*processType)
+	}
+
+	return r.processHandler.Search(ctx, loggedUser, productID, &filter)
 }
 
 func (r *queryResolver) UserActivityList(
