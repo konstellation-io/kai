@@ -23,6 +23,7 @@ import (
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
+		schema:     cfg.Schema,
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
 		complexity: cfg.Complexity,
@@ -30,6 +31,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 }
 
 type Config struct {
+	Schema     *ast.Schema
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
 	Complexity ComplexityRoot
@@ -250,12 +252,16 @@ type LogFiltersResolver interface {
 }
 
 type executableSchema struct {
+	schema     *ast.Schema
 	resolvers  ResolverRoot
 	directives DirectiveRoot
 	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
+	if e.schema != nil {
+		return e.schema
+	}
 	return parsedSchema
 }
 
@@ -1091,14 +1097,14 @@ func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapSchema(parsedSchema), nil
+	return introspection.WrapSchema(ec.Schema()), nil
 }
 
 func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
 var sources = []*ast.Source{
@@ -8230,8 +8236,6 @@ func (ec *executionContext) unmarshalInputCreateProductInput(ctx context.Context
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8239,8 +8243,6 @@ func (ec *executionContext) unmarshalInputCreateProductInput(ctx context.Context
 			}
 			it.ID = data
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8248,8 +8250,6 @@ func (ec *executionContext) unmarshalInputCreateProductInput(ctx context.Context
 			}
 			it.Name = data
 		case "description":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8277,8 +8277,6 @@ func (ec *executionContext) unmarshalInputCreateVersionInput(ctx context.Context
 		}
 		switch k {
 		case "file":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
 			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
@@ -8286,8 +8284,6 @@ func (ec *executionContext) unmarshalInputCreateVersionInput(ctx context.Context
 			}
 			it.File = data
 		case "productID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8315,8 +8311,6 @@ func (ec *executionContext) unmarshalInputDeleteProcessInput(ctx context.Context
 		}
 		switch k {
 		case "productID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8324,8 +8318,6 @@ func (ec *executionContext) unmarshalInputDeleteProcessInput(ctx context.Context
 			}
 			it.ProductID = data
 		case "processID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8333,8 +8325,6 @@ func (ec *executionContext) unmarshalInputDeleteProcessInput(ctx context.Context
 			}
 			it.ProcessID = data
 		case "version":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8362,8 +8352,6 @@ func (ec *executionContext) unmarshalInputDeletePublicProcessInput(ctx context.C
 		}
 		switch k {
 		case "processID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8371,8 +8359,6 @@ func (ec *executionContext) unmarshalInputDeletePublicProcessInput(ctx context.C
 			}
 			it.ProcessID = data
 		case "version":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8400,8 +8386,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 		}
 		switch k {
 		case "productID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8409,8 +8393,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			}
 			it.ProductID = data
 		case "versionTag":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8418,8 +8400,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			}
 			it.VersionTag = data
 		case "from":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("from"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8429,8 +8409,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 				return it, err
 			}
 		case "to":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("to"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8440,8 +8418,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 				return it, err
 			}
 		case "limit":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
@@ -8449,8 +8425,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			}
 			it.Limit = data
 		case "workflowName":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("workflowName"))
 			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
@@ -8458,8 +8432,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			}
 			it.WorkflowName = data
 		case "processName":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processName"))
 			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
@@ -8467,8 +8439,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			}
 			it.ProcessName = data
 		case "requestID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("requestID"))
 			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
@@ -8476,8 +8446,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			}
 			it.RequestID = data
 		case "level":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("level"))
 			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
@@ -8485,8 +8453,6 @@ func (ec *executionContext) unmarshalInputLogFilters(ctx context.Context, obj in
 			}
 			it.Level = data
 		case "logger":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("logger"))
 			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
@@ -8514,8 +8480,6 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 		}
 		switch k {
 		case "versionTag":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8523,8 +8487,6 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 			}
 			it.VersionTag = data
 		case "comment":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comment"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8532,8 +8494,6 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 			}
 			it.Comment = data
 		case "productID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8541,8 +8501,6 @@ func (ec *executionContext) unmarshalInputPublishVersionInput(ctx context.Contex
 			}
 			it.ProductID = data
 		case "force":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("force"))
 			data, err := ec.unmarshalNBoolean2bool(ctx, v)
 			if err != nil {
@@ -8570,8 +8528,6 @@ func (ec *executionContext) unmarshalInputRegisterProcessInput(ctx context.Conte
 		}
 		switch k {
 		case "file":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
 			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
@@ -8579,8 +8535,6 @@ func (ec *executionContext) unmarshalInputRegisterProcessInput(ctx context.Conte
 			}
 			it.File = data
 		case "version":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8588,8 +8542,6 @@ func (ec *executionContext) unmarshalInputRegisterProcessInput(ctx context.Conte
 			}
 			it.Version = data
 		case "productID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8597,8 +8549,6 @@ func (ec *executionContext) unmarshalInputRegisterProcessInput(ctx context.Conte
 			}
 			it.ProductID = data
 		case "processID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8606,8 +8556,6 @@ func (ec *executionContext) unmarshalInputRegisterProcessInput(ctx context.Conte
 			}
 			it.ProcessID = data
 		case "processType":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processType"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8635,8 +8583,6 @@ func (ec *executionContext) unmarshalInputRegisterPublicProcessInput(ctx context
 		}
 		switch k {
 		case "file":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
 			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
@@ -8644,8 +8590,6 @@ func (ec *executionContext) unmarshalInputRegisterPublicProcessInput(ctx context
 			}
 			it.File = data
 		case "version":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8653,8 +8597,6 @@ func (ec *executionContext) unmarshalInputRegisterPublicProcessInput(ctx context
 			}
 			it.Version = data
 		case "processID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8662,8 +8604,6 @@ func (ec *executionContext) unmarshalInputRegisterPublicProcessInput(ctx context
 			}
 			it.ProcessID = data
 		case "processType":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("processType"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8691,8 +8631,6 @@ func (ec *executionContext) unmarshalInputRevokeUserProductGrantsInput(ctx conte
 		}
 		switch k {
 		case "targetID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8700,8 +8638,6 @@ func (ec *executionContext) unmarshalInputRevokeUserProductGrantsInput(ctx conte
 			}
 			it.TargetID = data
 		case "product":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8709,8 +8645,6 @@ func (ec *executionContext) unmarshalInputRevokeUserProductGrantsInput(ctx conte
 			}
 			it.Product = data
 		case "comment":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comment"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8738,8 +8672,6 @@ func (ec *executionContext) unmarshalInputStartVersionInput(ctx context.Context,
 		}
 		switch k {
 		case "versionTag":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8747,8 +8679,6 @@ func (ec *executionContext) unmarshalInputStartVersionInput(ctx context.Context,
 			}
 			it.VersionTag = data
 		case "comment":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comment"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8756,8 +8686,6 @@ func (ec *executionContext) unmarshalInputStartVersionInput(ctx context.Context,
 			}
 			it.Comment = data
 		case "productID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8785,8 +8713,6 @@ func (ec *executionContext) unmarshalInputStopVersionInput(ctx context.Context, 
 		}
 		switch k {
 		case "versionTag":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8794,8 +8720,6 @@ func (ec *executionContext) unmarshalInputStopVersionInput(ctx context.Context, 
 			}
 			it.VersionTag = data
 		case "comment":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comment"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8803,8 +8727,6 @@ func (ec *executionContext) unmarshalInputStopVersionInput(ctx context.Context, 
 			}
 			it.Comment = data
 		case "productID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8832,8 +8754,6 @@ func (ec *executionContext) unmarshalInputUnpublishVersionInput(ctx context.Cont
 		}
 		switch k {
 		case "versionTag":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionTag"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8841,8 +8761,6 @@ func (ec *executionContext) unmarshalInputUnpublishVersionInput(ctx context.Cont
 			}
 			it.VersionTag = data
 		case "comment":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comment"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8850,8 +8768,6 @@ func (ec *executionContext) unmarshalInputUnpublishVersionInput(ctx context.Cont
 			}
 			it.Comment = data
 		case "productID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8879,8 +8795,6 @@ func (ec *executionContext) unmarshalInputUpdateUserProductGrantsInput(ctx conte
 		}
 		switch k {
 		case "targetID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("targetID"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
@@ -8888,8 +8802,6 @@ func (ec *executionContext) unmarshalInputUpdateUserProductGrantsInput(ctx conte
 			}
 			it.TargetID = data
 		case "product":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -8897,8 +8809,6 @@ func (ec *executionContext) unmarshalInputUpdateUserProductGrantsInput(ctx conte
 			}
 			it.Product = data
 		case "grants":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("grants"))
 			data, err := ec.unmarshalNString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -8906,8 +8816,6 @@ func (ec *executionContext) unmarshalInputUpdateUserProductGrantsInput(ctx conte
 			}
 			it.Grants = data
 		case "comment":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comment"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
