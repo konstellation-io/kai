@@ -28,11 +28,17 @@ type DeletePublicProcessInput struct {
 	Version   string `json:"version"`
 }
 
+type Mutation struct {
+}
+
 type PublishVersionInput struct {
 	VersionTag string `json:"versionTag"`
 	Comment    string `json:"comment"`
 	ProductID  string `json:"productID"`
 	Force      bool   `json:"force"`
+}
+
+type Query struct {
 }
 
 type RegisterProcessInput struct {
