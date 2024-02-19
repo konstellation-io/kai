@@ -4,6 +4,7 @@ package process_test
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
@@ -13,7 +14,7 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-func (s *ProcessHandlerTestSuite) TestListByProduct_WithTypeFilter() {
+func (s *ProcessHandlerTestSuite) TestSearch_WithTypeFilter() {
 	var (
 		ctx               = context.Background()
 		filter            = repository.SearchFilter{}
@@ -33,7 +34,7 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_WithTypeFilter() {
 	s.Equal(expectedProcesses, returnedRegisteredProcess)
 }
 
-func (s *ProcessHandlerTestSuite) TestListByProduct_NoTypeFilter() {
+func (s *ProcessHandlerTestSuite) TestSearch_NoTypeFilter() {
 	ctx := context.Background()
 
 	expectedRegisteredProcess := []*entity.RegisteredProcess{
@@ -59,7 +60,7 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_NoTypeFilter() {
 	s.Equal(expectedRegisteredProcess, returnedRegisteredProcess)
 }
 
-func (s *ProcessHandlerTestSuite) TestListByProduct_InvalidTypeFilterFilter() {
+func (s *ProcessHandlerTestSuite) TestSearch_InvalidTypeFilterFilter() {
 	ctx := context.Background()
 
 	filter := repository.SearchFilter{
@@ -73,7 +74,7 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_InvalidTypeFilterFilter() {
 	s.Require().Error(err)
 }
 
-func (s *ProcessHandlerTestSuite) TestListByProduct_ProductDoesNotExist() {
+func (s *ProcessHandlerTestSuite) TestSearch_ProductDoesNotExist() {
 	ctx := context.Background()
 
 	filter := repository.SearchFilter{
@@ -85,4 +86,14 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_ProductDoesNotExist() {
 
 	_, err := s.processHandler.Search(ctx, user, productID, &filter)
 	s.Require().ErrorIs(err, usecase.ErrProductNotFound)
+}
+
+func (s *ProcessHandlerTestSuite) TestSearch_Unauthorized() {
+	ctx := context.Background()
+	expectedError := errors.New("unauthorized")
+
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewRegisteredProcesses).Return(expectedError)
+
+	_, err := s.processHandler.Search(ctx, user, productID, &repository.SearchFilter{})
+	s.Require().ErrorIs(err, expectedError)
 }
