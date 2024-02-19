@@ -126,21 +126,20 @@ func (s *ProcessRepositoryTestSuite) TestCreate() {
 	s.Require().NoError(err)
 
 	s.Equal(expectedProcess, actualProcess)
-
-	//collection := s.mongoClient.Database(productID).Collection(registeredProcessesCollectionName)
-	//filter := bson.M{"_id": createdRegisteredProcess.ID}
-	//
-	//var registeredProcessDTO registeredProcessDTO
-	//err = collection.FindOne(context.Background(), filter).Decode(&registeredProcessDTO)
-	//s.Require().NoError(err)
 }
 
-func (s *ProcessRepositoryTestSuite) TestSearchByProduct() {
+func (s *ProcessRepositoryTestSuite) TestSearchByProduct_WithFilters() {
 	ctx := context.Background()
+
+	var (
+		processVersion2 = "v2.0.0"
+		testTriggerName = "test_trigger"
+		testTaskName    = "test_task"
+	)
 
 	testTriggerProcess := &entity.RegisteredProcess{
 		ID:         "test_trigger_id",
-		Name:       "test_trigger",
+		Name:       testTriggerName,
 		Version:    processVersion,
 		Type:       "trigger",
 		Image:      "test_trigger_image",
@@ -150,8 +149,8 @@ func (s *ProcessRepositoryTestSuite) TestSearchByProduct() {
 
 	testTriggerProcess2 := &entity.RegisteredProcess{
 		ID:         "test_trigger_id_2",
-		Name:       "test_trigger_2",
-		Version:    processVersion,
+		Name:       testTriggerName,
+		Version:    processVersion2,
 		Type:       "trigger",
 		Image:      "test_trigger_image_2",
 		UploadDate: testRepoUploadDate,
@@ -160,7 +159,7 @@ func (s *ProcessRepositoryTestSuite) TestSearchByProduct() {
 
 	testTaskProcess := &entity.RegisteredProcess{
 		ID:         "test_task_id",
-		Name:       "test_task",
+		Name:       testTaskName,
 		Version:    processVersion,
 		Type:       "task",
 		Image:      "test_task_image",
@@ -179,15 +178,42 @@ func (s *ProcessRepositoryTestSuite) TestSearchByProduct() {
 		s.Require().NoError(err)
 	}
 
-	registeredProcesses, err := s.processRepo.SearchByProduct(ctx, productID, repository.SearchFilter{
+	filter := repository.SearchFilter{
 		ProcessType: entity.ProcessTypeTask,
-	})
+	}
+	registeredProcesses, err := s.processRepo.SearchByProduct(ctx, productID, &filter)
 	s.Require().NoError(err)
 
 	s.Require().Len(registeredProcesses, 1)
 	s.Equal(testTaskProcess, registeredProcesses[0])
 
-	registeredProcesses, err = s.processRepo.SearchByProduct(ctx, productID, repository.SearchFilter{})
+	filter = repository.SearchFilter{
+		ProcessName: testTaskName,
+	}
+	registeredProcesses, err = s.processRepo.SearchByProduct(ctx, productID, &filter)
+	s.Require().NoError(err)
+
+	s.Require().Len(registeredProcesses, 1)
+	s.Equal(testTaskProcess, registeredProcesses[0])
+
+	filter = repository.SearchFilter{
+		ProcessName: testTriggerName,
+	}
+	registeredProcesses, err = s.processRepo.SearchByProduct(ctx, productID, &filter)
+	s.Require().NoError(err)
+
+	s.Len(registeredProcesses, 2)
+
+	filter = repository.SearchFilter{
+		Version: processVersion2,
+	}
+	registeredProcesses, err = s.processRepo.SearchByProduct(ctx, productID, &filter)
+	s.Require().NoError(err)
+
+	s.Len(registeredProcesses, 1)
+	s.Equal(testTriggerProcess2, registeredProcesses[0])
+
+	registeredProcesses, err = s.processRepo.SearchByProduct(ctx, productID, nil)
 	s.Require().NoError(err)
 
 	s.Require().Len(registeredProcesses, 3)
@@ -196,9 +222,10 @@ func (s *ProcessRepositoryTestSuite) TestSearchByProduct() {
 func (s *ProcessRepositoryTestSuite) TestSearchByProductWithUnexistingProduct() {
 	ctx := context.Background()
 
-	registeredProcesses, err := s.processRepo.SearchByProduct(ctx, "non-existent", repository.SearchFilter{
-		ProcessType: entity.ProcessTypeTask,
-	})
+	filter := repository.SearchFilter{
+		ProcessType: entity.ProcessTypeTrigger,
+	}
+	registeredProcesses, err := s.processRepo.SearchByProduct(ctx, "non-existent", &filter)
 	s.Require().NoError(err)
 
 	s.Empty(registeredProcesses)
@@ -216,9 +243,10 @@ func (s *ProcessRepositoryTestSuite) TestGlobalSearch() {
 	err := s.processRepo.Create(ctx, _kaiProduct, testGlobalProcess)
 	s.Require().NoError(err)
 
-	actualProcesses, err := s.processRepo.GlobalSearch(ctx, repository.SearchFilter{
+	filter := repository.SearchFilter{
 		ProcessType: entity.ProcessTypeTask,
-	})
+	}
+	actualProcesses, err := s.processRepo.GlobalSearch(ctx, &filter)
 	s.Require().NoError(err)
 
 	s.Assert().Equal(expectedProcesses, actualProcesses)
@@ -265,7 +293,20 @@ func (s *ProcessRepositoryTestSuite) TestGetByID() {
 		Owner:      ownerID,
 	}
 
+	otherProcess := &entity.RegisteredProcess{
+		ID:         "other_process_id",
+		Name:       "other_test_trigger",
+		Version:    processVersion,
+		Type:       "trigger",
+		Image:      "other_process_image",
+		UploadDate: testRepoUploadDate,
+		Owner:      ownerID,
+	}
+
 	err := s.processRepo.Create(ctx, productID, expectedProcess)
+	s.Require().NoError(err)
+
+	err = s.processRepo.Create(ctx, productID, otherProcess)
 	s.Require().NoError(err)
 
 	actualProcess, err := s.processRepo.GetByID(ctx, productID, expectedProcess.ID)
