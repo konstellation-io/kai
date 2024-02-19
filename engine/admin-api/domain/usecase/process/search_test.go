@@ -8,6 +8,8 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
@@ -20,6 +22,8 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_WithTypeFilter() {
 		expectedProcesses = append(productProcesses, kaiProcesses...)
 	)
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewRegisteredProcesses).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, nil)
 	s.processRepo.EXPECT().SearchByProduct(ctx, productID, &filter).Return(productProcesses, nil)
 	s.processRepo.EXPECT().GlobalSearch(ctx, &filter).Return(kaiProcesses, nil)
 
@@ -44,6 +48,8 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_NoTypeFilter() {
 		},
 	}
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewRegisteredProcesses).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, nil)
 	s.processRepo.EXPECT().SearchByProduct(ctx, productID, nil).Return(expectedRegisteredProcess, nil)
 	s.processRepo.EXPECT().GlobalSearch(ctx, nil).Return(nil, nil)
 
@@ -60,6 +66,23 @@ func (s *ProcessHandlerTestSuite) TestListByProduct_InvalidTypeFilterFilter() {
 		ProcessType: "invalid",
 	}
 
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewRegisteredProcesses).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, nil)
+
 	_, err := s.processHandler.Search(ctx, user, productID, &filter)
 	s.Require().Error(err)
+}
+
+func (s *ProcessHandlerTestSuite) TestListByProduct_ProductDoesNotExist() {
+	ctx := context.Background()
+
+	filter := repository.SearchFilter{
+		ProcessType: "invalid",
+	}
+
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewRegisteredProcesses).Return(nil)
+	s.productRepo.EXPECT().GetByID(ctx, productID).Return(nil, usecase.ErrProductNotFound)
+
+	_, err := s.processHandler.Search(ctx, user, productID, &filter)
+	s.Require().ErrorIs(err, usecase.ErrProductNotFound)
 }

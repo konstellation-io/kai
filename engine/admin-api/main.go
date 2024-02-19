@@ -190,6 +190,7 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 			ObjectStorage:     minioOjectStorage,
 			AccessControl:     accessControl,
 			ProcessRegistry:   registry.NewProcessRegistry(),
+			ProductRepository: productRepo,
 		},
 	)
 
