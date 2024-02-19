@@ -1,6 +1,8 @@
 package processrepository
 
-import "time"
+import (
+	"time"
+)
 
 type registeredProcessDTO struct {
 	ID         string    `bson:"_id"`
