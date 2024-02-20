@@ -52,6 +52,7 @@ type ProcessHandlerTestSuite struct {
 	objectStorage   *mocks.MockObjectStorage
 	processHandler  *process.Handler
 	accessControl   *mocks.MockAccessControl
+	productRepo     *mocks.MockProductRepo
 	processRegistry *mocks.MockProcessRegistry
 
 	registryHost string
@@ -91,6 +92,7 @@ func (s *ProcessHandlerTestSuite) SetupSuite() {
 	s.objectStorage = mocks.NewMockObjectStorage(s.T())
 	s.accessControl = mocks.NewMockAccessControl(s.ctrl)
 	s.processRegistry = mocks.NewMockProcessRegistry(s.ctrl)
+	s.productRepo = mocks.NewMockProductRepo(s.ctrl)
 
 	s.processHandler = process.NewHandler(
 		&process.HandlerParams{
@@ -100,6 +102,7 @@ func (s *ProcessHandlerTestSuite) SetupSuite() {
 			ObjectStorage:     s.objectStorage,
 			AccessControl:     s.accessControl,
 			ProcessRegistry:   s.processRegistry,
+			ProductRepository: s.productRepo,
 		},
 	)
 
