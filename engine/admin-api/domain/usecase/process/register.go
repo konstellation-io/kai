@@ -12,6 +12,10 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
+const (
+	_maxImageIDLength = 64
+)
+
 var (
 	ErrProcessNameTooLong = errors.New("process name too long")
 )
@@ -71,7 +75,7 @@ func (ps *Handler) RegisterProcess(
 	scope := ps.getProcessRegisterScope(opts.IsPublic, opts.Product)
 	processToRegister := ps.getProcessToRegister(user, opts, scope)
 
-	if len(processToRegister.Image) > 64 {
+	if len(processToRegister.Image) > _maxImageIDLength {
 		return nil, ErrProcessNameTooLong
 	}
 
