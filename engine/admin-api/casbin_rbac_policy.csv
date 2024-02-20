@@ -10,6 +10,7 @@ p, USER, publish_version
 p, USER, unpublish_version
 p, USER, edit_version
 p, USER, view_version
+p, USER, view_registered_processes
 p, USER, register_process
 p, USER, delete_process
 

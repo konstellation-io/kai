@@ -29,6 +29,7 @@ type Handler struct {
 	objectStorage     repository.ObjectStorage
 	accessControl     auth.AccessControl
 	processRegistry   service.ProcessRegistry
+	productRepository repository.ProductRepo
 }
 
 type HandlerParams struct {
@@ -38,6 +39,7 @@ type HandlerParams struct {
 	ObjectStorage     repository.ObjectStorage
 	AccessControl     auth.AccessControl
 	ProcessRegistry   service.ProcessRegistry
+	ProductRepository repository.ProductRepo
 }
 
 func NewHandler(
@@ -50,6 +52,7 @@ func NewHandler(
 		objectStorage:     params.ObjectStorage,
 		accessControl:     params.AccessControl,
 		processRegistry:   params.ProcessRegistry,
+		productRepository: params.ProductRepository,
 	}
 }
 
