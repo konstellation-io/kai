@@ -27,8 +27,9 @@ const (
 	ActViewUserActivities Action = "view_user_activities"
 	ActUpdateUserGrants   Action = "update_user_grants"
 
-	ActRegisterProcess       Action = "register_process"
-	ActRegisterPublicProcess Action = "register_public_process"
+	ActViewRegisteredProcesses Action = "view_registered_processes"
+	ActRegisterProcess         Action = "register_process"
+	ActRegisterPublicProcess   Action = "register_public_process"
 
 	ActDeleteProcess       Action = "delete_process"
 	ActDeletePublicProcess Action = "delete_public_process"
@@ -40,7 +41,7 @@ func (e Action) IsValid() bool {
 		ActPublishVersion, ActUnpublishVersion, ActEditVersion, ActViewMetrics,
 		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion,
 		ActViewServerInfo, ActStartCriticalVersion, ActRegisterProcess, ActRegisterPublicProcess,
-		ActDeleteProcess, ActDeletePublicProcess:
+		ActDeleteProcess, ActDeletePublicProcess, ActViewRegisteredProcesses:
 		return true
 	}
 
