@@ -164,3 +164,12 @@ func (r *ProductRepoMongoDB) DeleteDatabase(ctx context.Context, name string) er
 
 	return nil
 }
+
+func (r *ProductRepoMongoDB) Delete(ctx context.Context, productID string) error {
+	res, err := r.collection.DeleteOne(ctx, bson.M{"_id": productID})
+	if res.DeletedCount == 0 {
+		return usecase.ErrProductNotFound
+	}
+
+	return err
+}

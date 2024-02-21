@@ -10,6 +10,7 @@ import (
 	"github.com/go-logr/logr/testr"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/repository/mongodb"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
@@ -121,4 +122,27 @@ func (s *ProductRepositorySuite) TestDeleteDatabase() {
 	res, err := s.mongoClient.Database(name).Collection("test").CountDocuments(ctx, bson.M{})
 	s.Require().NoError(err)
 	s.Zero(res)
+}
+
+func (s *ProductRepositorySuite) TestDelete_OK() {
+	ctx := context.Background()
+	product := testhelpers.NewProductBuilder().WithPublishedVersion(testhelpers.StrPointer("test")).Build()
+
+	_, err := s.productsCollection.InsertOne(ctx, product)
+	s.Require().NoError(err)
+
+	err = s.productRepo.Delete(ctx, product.ID)
+	s.Require().NoError(err)
+
+	prod, err := s.productRepo.GetByID(ctx, product.ID)
+	s.ErrorIs(err, usecase.ErrProductNotFound)
+	s.Nil(prod)
+}
+
+func (s *ProductRepositorySuite) TestDelete_ProductNotFound() {
+	ctx := context.Background()
+	product := testhelpers.NewProductBuilder().WithPublishedVersion(testhelpers.StrPointer("test")).Build()
+
+	err := s.productRepo.Delete(ctx, product.ID)
+	s.ErrorIs(err, usecase.ErrProductNotFound)
 }

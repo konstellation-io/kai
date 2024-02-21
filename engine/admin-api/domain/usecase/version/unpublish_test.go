@@ -25,7 +25,7 @@ func (s *versionSuite) TestUnpublish_OK() {
 		WithPublishedVersion(&vers.Tag).
 		Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(product, nil)
 
@@ -51,7 +51,7 @@ func (s *versionSuite) TestUnpublish_ErrorUserNotAuthorized() {
 	badUser := testhelpers.NewUserBuilder().Build()
 	expectedVer := &entity.Version{Tag: _versionTag}
 
-	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActUnpublishVersion).Return(
+	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActManageVersion).Return(
 		fmt.Errorf("git good"),
 	)
 
@@ -68,7 +68,7 @@ func (s *versionSuite) TestUnpublish_ErrorVersionNotFound() {
 	user := testhelpers.NewUserBuilder().Build()
 	expectedVer := &entity.Version{Tag: _versionTag}
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, expectedVer.Tag).Return(nil, fmt.Errorf("no version found"))
 
 	// WHEN unpublishing the version
@@ -87,7 +87,7 @@ func (s *versionSuite) TestUnpublish_ErrorVersionCannotBeUnpublished() {
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
 	// WHEN unpublishing the version
@@ -106,7 +106,7 @@ func (s *versionSuite) TestUnpublish_ErrorProductNotFound() {
 		WithStatus(entity.VersionStatusPublished).
 		Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(nil, fmt.Errorf("no product found"))
 
@@ -130,7 +130,7 @@ func (s *versionSuite) TestUnpublish_ErrorUnpublishingVersion() {
 		Build()
 	unpubErr := errors.New("unpublish error in k8s service")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
 	s.versionService.EXPECT().Unpublish(ctx, _productID, vers).Return(unpubErr)
@@ -158,7 +158,7 @@ func (s *versionSuite) TestUnpublish_CheckNonBlockingErrorLogging() {
 	updateProductErr := errors.New("error updating product published version")
 	registerActionErr := errors.New("error registering unpublish action")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActUnpublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(product, nil)
 

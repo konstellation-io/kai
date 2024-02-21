@@ -1,27 +1,17 @@
-p, USER, view
-p, USER, edit
-
 p, USER, view_product
 
 p, USER, create_version
-p, USER, start_version
-p, USER, stop_version
-p, USER, publish_version
-p, USER, unpublish_version
-p, USER, edit_version
-p, USER, view_version
+p, USER, manage_version
+
 p, USER, register_process
-p, USER, delete_process
+p, USER, delete_registered_process
 
-p, USER, view_metrics
 p, USER, view_user_activities
-
-p, USER, execute
 
 p, MLE, view_server_info
 
 p, ADMIN, create_product
 p, ADMIN, update_user_grants
-p, ADMIN, start_critical_version
+p, ADMIN, manage_critical_version
 p, ADMIN, register_public_process
 p, ADMIN, delete_public_process

@@ -15,7 +15,7 @@ func (h *Handler) Unpublish(
 	versionTag,
 	comment string,
 ) (*entity.Version, error) {
-	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActUnpublishVersion); err != nil {
+	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActManageVersion); err != nil {
 		return nil, err
 	}
 
