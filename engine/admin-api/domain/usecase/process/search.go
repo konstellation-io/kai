@@ -5,6 +5,7 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
 func (ps *Handler) Search(
@@ -13,6 +14,14 @@ func (ps *Handler) Search(
 	productID string,
 	filter *repository.SearchFilter,
 ) ([]*entity.RegisteredProcess, error) {
+	if err := ps.accessControl.CheckProductGrants(user, productID, auth.ActViewRegisteredProcesses); err != nil {
+		return nil, err
+	}
+
+	if _, err := ps.productRepository.GetByID(ctx, productID); err != nil {
+		return nil, err
+	}
+
 	if filter == nil || *filter == (repository.SearchFilter{}) {
 		ps.logger.Info("Retrieving process with no filter", "productID", productID)
 	} else {
