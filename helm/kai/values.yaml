@@ -120,6 +120,9 @@ adminApi:
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # Specifies whether a service account should be created
     create: true
@@ -176,6 +179,9 @@ k8sManager:
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # -- Whether to create the Service Account
     create: true
@@ -359,6 +365,9 @@ keycloak:
     tag: "21.1.1"
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # Specifies whether a service account should be created
     create: true
@@ -537,6 +546,9 @@ natsManager:
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # -- Specifies whether a service account should be created
     create: true
@@ -554,8 +566,8 @@ registry:
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
   deploymentStrategy:
-    # Deployment Strategy
     type: Recreate
   serviceAccount:
     # -- Specifies whether a service account should be created
