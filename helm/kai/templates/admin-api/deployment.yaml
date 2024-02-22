@@ -39,17 +39,6 @@ spec:
       {{- end }}
       securityContext:
         fsGroup: 10001
-      initContainers:
-        - name: create-admin-api-files-directory
-          image: alpine:3.10
-          imagePullPolicy: IfNotPresent
-          command:
-          - sh
-          - -c
-          - mkdir -p {{ .Values.adminApi.storage.path }} && chown 10001:10001 {{ .Values.adminApi.storage.path }}
-          volumeMounts:
-            - name: admin-api-storage
-              mountPath: {{ .Values.adminApi.storage.path }}
       containers:
         - name: admin-api
           image: {{ .Values.adminApi.image.repository }}:{{ .Values.adminApi.image.tag }}
@@ -100,10 +89,3 @@ spec:
             - containerPort: 8080
               protocol: TCP
               name: grpc
-          volumeMounts:
-            - name: admin-api-storage
-              mountPath: {{ .Values.adminApi.storage.path }}
-      volumes:
-        - name: admin-api-storage
-          persistentVolumeClaim:
-            claimName: {{ include "admin-api.fullname" . }}
