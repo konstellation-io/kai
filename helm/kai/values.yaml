@@ -140,13 +140,6 @@ adminApi:
     # -- Ingress annotations
     # @default -- See `adminApi.ingress.annotations` in [values.yaml](./values.yaml)
     annotations: {}
-  storage:
-    # -- Storage class name
-    class: standard
-    # -- Storage class size
-    size: 1Gi
-    # -- Persistent volume mount point. This will define Admin API app workdir too.
-    path: /admin-api-files
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
