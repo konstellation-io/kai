@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	auth "github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
 // MockUserRegistry is a mock of UserRegistry interface.
@@ -91,7 +92,7 @@ func (mr *MockUserRegistryMockRecorder) DeleteUser(ctx, name interface{}) *gomoc
 }
 
 // UpdateUserProductGrants mocks base method.
-func (m *MockUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []string) error {
+func (m *MockUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []auth.Action) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUserProductGrants", ctx, userID, product, grants)
 	ret0, _ := ret[0].(error)

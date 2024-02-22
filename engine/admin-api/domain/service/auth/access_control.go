@@ -50,3 +50,13 @@ type AccessControl interface {
 	IsAdmin(user *entity.User) bool
 	GetUserProducts(user *entity.User) []string
 }
+
+func GetFullAccessToProductGrants() []Action {
+	return []Action{
+		ActViewProduct,
+		ActCreateVersion,
+		ActManageVersion,
+		ActRegisterProcess,
+		ActDeleteRegisteredProcess,
+	}
+}

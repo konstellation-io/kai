@@ -8,6 +8,7 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/spf13/viper"
 )
 
@@ -46,7 +47,7 @@ func NewKeycloakUserRegistry(client *gocloak.GoCloak) (*KeycloakUserRegistry, er
 	}, nil
 }
 
-func (ur *KeycloakUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []string) error {
+func (ur *KeycloakUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []auth.Action) error {
 	err := ur.refreshToken(ctx)
 	if err != nil {
 		return err

@@ -209,13 +209,9 @@ func (i *ProductInteractor) createProductResources(
 		return i.productRepo.Delete(context.Background(), newProduct.ID)
 	})
 
-	i.userRegistry.UpdateUserProductGrants(ctx, user.ID, newProduct.ID, []string{
-		auth.ActViewProduct.String(),
-		auth.ActCreateVersion.String(),
-		auth.ActManageVersion.String(),
-		auth.ActRegisterProcess.String(),
-		auth.ActDeleteRegisteredProcess.String(),
-	})
+	if err := i.userRegistry.UpdateUserProductGrants(ctx, user.ID, newProduct.ID, auth.GetFullAccessToProductGrants()); err != nil {
+		return nil, err
+	}
 
 	return createdProduct, nil
 }

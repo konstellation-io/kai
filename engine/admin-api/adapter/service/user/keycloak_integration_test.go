@@ -11,6 +11,7 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -172,7 +173,7 @@ func (s *KeycloakSuite) TestUpdateUserProductGrantsNoPreviousExisting() {
 		ctx,
 		*user.ID,
 		product,
-		[]string{"grant1", "grant2"},
+		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
 	)
 	s.Require().NoError(err)
 
@@ -188,7 +189,7 @@ func (s *KeycloakSuite) TestUpdateUserProductGrantsNoPreviousExisting() {
 	s.Require().NoError(err)
 
 	expectedResult := map[string]interface{}{
-		product: []interface{}{"grant1", "grant2"},
+		product: []interface{}{auth.ActViewProduct.String(), auth.ActManageVersion.String()},
 	}
 
 	s.Equal(expectedResult, obtainedResult)
@@ -205,7 +206,7 @@ func (s *KeycloakSuite) TestUpdateUserProductGrantsWithPreviousExisting() {
 		ctx,
 		*user.ID,
 		product,
-		[]string{"grant1", "grant2"},
+		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
 	)
 	s.Require().NoError(err)
 
@@ -214,7 +215,7 @@ func (s *KeycloakSuite) TestUpdateUserProductGrantsWithPreviousExisting() {
 		ctx,
 		*user.ID,
 		product,
-		[]string{"grant3"},
+		[]auth.Action{auth.ActRegisterProcess},
 	)
 	s.Require().NoError(err)
 
@@ -230,7 +231,7 @@ func (s *KeycloakSuite) TestUpdateUserProductGrantsWithPreviousExisting() {
 	s.Require().NoError(err)
 
 	expectedResult := map[string]interface{}{
-		product: []interface{}{"grant3"},
+		product: []interface{}{auth.ActRegisterProcess.String()},
 	}
 
 	s.Equal(expectedResult, obtainedResult)
@@ -248,7 +249,7 @@ func (s *KeycloakSuite) TestUpdateUserProductGrantsForOtherProduct() {
 		ctx,
 		*user.ID,
 		product,
-		[]string{"grant1", "grant2"},
+		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
 	)
 	s.Require().NoError(err)
 
@@ -257,7 +258,7 @@ func (s *KeycloakSuite) TestUpdateUserProductGrantsForOtherProduct() {
 		ctx,
 		*user.ID,
 		product2,
-		[]string{"grant3", "grant4"},
+		[]auth.Action{auth.ActRegisterProcess, auth.ActDeleteRegisteredProcess},
 	)
 	s.Require().NoError(err)
 
@@ -273,8 +274,8 @@ func (s *KeycloakSuite) TestUpdateUserProductGrantsForOtherProduct() {
 	s.Require().NoError(err)
 
 	expectedResult := map[string]interface{}{
-		product:  []interface{}{"grant1", "grant2"},
-		product2: []interface{}{"grant3", "grant4"},
+		product:  []interface{}{auth.ActViewProduct.String(), auth.ActManageVersion.String()},
+		product2: []interface{}{auth.ActRegisterProcess.String(), auth.ActDeleteRegisteredProcess.String()},
 	}
 
 	s.Equal(expectedResult, obtainedResult)
@@ -291,7 +292,7 @@ func (s *KeycloakSuite) TestRevokeUserProductGrants() {
 		ctx,
 		*user.ID,
 		product,
-		[]string{"grant1", "grant2"},
+		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
 	)
 	s.Require().NoError(err)
 
@@ -300,7 +301,7 @@ func (s *KeycloakSuite) TestRevokeUserProductGrants() {
 		ctx,
 		*user.ID,
 		product,
-		[]string{},
+		[]auth.Action{},
 	)
 	s.Require().NoError(err)
 
@@ -332,7 +333,7 @@ func (s *KeycloakSuite) TestRevokeUserProductGrantsForOtherProduct() {
 		ctx,
 		*user.ID,
 		product,
-		[]string{"grant1", "grant2"},
+		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
 	)
 	s.Require().NoError(err)
 
@@ -340,7 +341,7 @@ func (s *KeycloakSuite) TestRevokeUserProductGrantsForOtherProduct() {
 		ctx,
 		*user.ID,
 		product2,
-		[]string{"grant3", "grant4"},
+		[]auth.Action{auth.ActRegisterProcess, auth.ActDeleteRegisteredProcess},
 	)
 	s.Require().NoError(err)
 
@@ -349,7 +350,7 @@ func (s *KeycloakSuite) TestRevokeUserProductGrantsForOtherProduct() {
 		ctx,
 		*user.ID,
 		product,
-		[]string{},
+		[]auth.Action{},
 	)
 	s.Require().NoError(err)
 
@@ -365,7 +366,7 @@ func (s *KeycloakSuite) TestRevokeUserProductGrantsForOtherProduct() {
 	s.Require().NoError(err)
 
 	expectedResult := map[string]interface{}{
-		product2: []interface{}{"grant3", "grant4"},
+		product2: []interface{}{auth.ActRegisterProcess.String(), auth.ActDeleteRegisteredProcess.String()},
 	}
 
 	s.Equal(expectedResult, obtainedResult)

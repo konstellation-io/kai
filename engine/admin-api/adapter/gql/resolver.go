@@ -10,6 +10,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
@@ -209,12 +210,18 @@ func (r *mutationResolver) UpdateUserProductGrants(
 ) (*entity.User, error) {
 	user := ctx.Value("user").(*entity.User)
 
+	grants := make([]auth.Action, 0, len(input.Grants))
+
+	for _, grant := range input.Grants {
+		grants = append(grants, auth.Action(grant))
+	}
+
 	err := r.userInteractor.UpdateUserProductGrants(
 		ctx,
 		user,
 		input.TargetID,
 		input.Product,
-		input.Grants,
+		grants,
 		*input.Comment,
 	)
 	if err != nil {

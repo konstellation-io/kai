@@ -39,7 +39,7 @@ func (ui *UserInteractor) UpdateUserProductGrants(
 	user *entity.User,
 	targetUserID,
 	product string,
-	grants []string,
+	grants []auth.Action,
 	comment ...string,
 ) error {
 	if err := ui.accessControl.CheckRoleGrants(user, auth.ActUpdateUserGrants); err != nil {
@@ -83,7 +83,7 @@ func (ui *UserInteractor) RevokeUserProductGrants(
 		return fmt.Errorf("checking role grants: %w", err)
 	}
 
-	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserID, product, []string{})
+	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserID, product, []auth.Action{})
 	if err != nil {
 		return fmt.Errorf("updating grants in user's registry: %w", err)
 	}
@@ -97,7 +97,7 @@ func (ui *UserInteractor) RevokeUserProductGrants(
 		user.ID,
 		targetUserID,
 		product,
-		[]string{},
+		[]auth.Action{},
 		givenComment,
 	)
 	if err != nil {
