@@ -241,15 +241,6 @@ func (i *ProductInteractor) createDatabaseIndexes(ctx context.Context, productID
 	return nil
 }
 
-// Get return product by ID.
-func (i *ProductInteractor) Get(ctx context.Context, user *entity.User, productID string) (*entity.Product, error) {
-	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct); err != nil {
-		return nil, err
-	}
-
-	return i.productRepo.Get(ctx)
-}
-
 // GetByID return a Product by its ID.
 func (i *ProductInteractor) GetByID(ctx context.Context, user *entity.User, productID string) (*entity.Product, error) {
 	if err := i.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct); err != nil {
@@ -260,14 +251,14 @@ func (i *ProductInteractor) GetByID(ctx context.Context, user *entity.User, prod
 }
 
 // FindAll returns a list of all Products.
-func (i *ProductInteractor) FindAll(ctx context.Context, user *entity.User) ([]*entity.Product, error) {
+func (i *ProductInteractor) FindAll(ctx context.Context, user *entity.User, filter *repository.FindAllFilter) ([]*entity.Product, error) {
 	if i.accessControl.IsAdmin(user) {
-		return i.productRepo.FindAll(ctx)
+		return i.productRepo.FindAll(ctx, filter)
 	}
 
-	visibleProducts := i.accessControl.GetUserProducts(user)
+	visibleProducts := i.accessControl.GetUserProductsWithViewAccess(user)
 
-	return i.productRepo.FindByIDs(ctx, visibleProducts)
+	return i.productRepo.FindByIDs(ctx, visibleProducts, filter)
 }
 
 func (i *ProductInteractor) generateProductID(name string) string {

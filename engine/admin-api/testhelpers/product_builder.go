@@ -39,6 +39,11 @@ func (pb *ProductBuilder) WithID(id string) *ProductBuilder {
 	return pb
 }
 
+func (pb *ProductBuilder) WithName(name string) *ProductBuilder {
+	pb.product.Name = name
+	return pb
+}
+
 func (pb *ProductBuilder) WithPublishedVersion(publishedVersion *string) *ProductBuilder {
 	pb.product.PublishedVersion = publishedVersion
 	return pb
