@@ -115,11 +115,14 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.3.0-develop.7
+    tag: 0.3.0-develop.8
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # Specifies whether a service account should be created
     create: true
@@ -171,11 +174,14 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.3.0-develop.7
+    tag: 0.3.0-develop.8
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # -- Whether to create the Service Account
     create: true
@@ -359,6 +365,9 @@ keycloak:
     tag: "21.1.1"
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # Specifies whether a service account should be created
     create: true
@@ -532,11 +541,14 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.3.0-develop.7
+    tag: 0.3.0-develop.8
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # -- Specifies whether a service account should be created
     create: true
@@ -554,8 +566,8 @@ registry:
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
   deploymentStrategy:
-    # Deployment Strategy
     type: Recreate
   serviceAccount:
     # -- Specifies whether a service account should be created

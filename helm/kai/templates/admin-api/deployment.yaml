@@ -9,6 +9,10 @@ spec:
   selector:
     matchLabels:
       {{- include "admin-api.selectorLabels" . | nindent 6 }}
+  {{- with .Values.adminApi.deploymentStrategy}}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:

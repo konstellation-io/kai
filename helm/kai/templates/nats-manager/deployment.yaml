@@ -9,6 +9,10 @@ spec:
   selector:
     matchLabels:
       {{- include "nats-manager.selectorLabels" . | nindent 6 }}
+  {{- with .Values.natsManager.deploymentStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:
