@@ -2,7 +2,7 @@ scalar Upload
 
 type Query {
   product(id: ID!): Product!
-  products: [Product!]!
+  products(productName: String): [Product!]!
   version(productID: ID!, tag: String): Version!
   versions(productID: ID!): [Version!]!
   registeredProcesses(productID: ID!, processName: String, version: String, processType: String): [RegisteredProcess]!
