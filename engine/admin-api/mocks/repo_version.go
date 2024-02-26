@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	repository "github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 )
 
 // MockVersionRepo is a mock of VersionRepo interface.
@@ -95,18 +96,18 @@ func (mr *MockVersionRepoMockRecorder) GetLatest(ctx, productID interface{}) *go
 }
 
 // ListVersionsByProduct mocks base method.
-func (m *MockVersionRepo) ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
+func (m *MockVersionRepo) ListVersionsByProduct(ctx context.Context, productID string, filter *repository.ListVersionsFilter) ([]*entity.Version, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListVersionsByProduct", ctx, productID)
+	ret := m.ctrl.Call(m, "ListVersionsByProduct", ctx, productID, filter)
 	ret0, _ := ret[0].([]*entity.Version)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListVersionsByProduct indicates an expected call of ListVersionsByProduct.
-func (mr *MockVersionRepoMockRecorder) ListVersionsByProduct(ctx, productID interface{}) *gomock.Call {
+func (mr *MockVersionRepoMockRecorder) ListVersionsByProduct(ctx, productID, filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVersionsByProduct", reflect.TypeOf((*MockVersionRepo)(nil).ListVersionsByProduct), ctx, productID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVersionsByProduct", reflect.TypeOf((*MockVersionRepo)(nil).ListVersionsByProduct), ctx, productID, filter)
 }
 
 // SetCriticalStatusWithError mocks base method.

@@ -1,7 +1,12 @@
 package entity
 
 import (
+	"errors"
 	"time"
+)
+
+var (
+	ErrInvalidVersionStatus = errors.New("invalid version status")
 )
 
 type ConfigurationVariable struct {
@@ -45,8 +50,18 @@ const (
 	VersionStatusCritical  VersionStatus = "CRITICAL"
 )
 
-func (e VersionStatus) String() string {
-	return string(e)
+func (vs VersionStatus) String() string {
+	return string(vs)
+}
+
+func (vs VersionStatus) Validate() bool {
+	switch vs {
+	case VersionStatusCreated, VersionStatusStarting, VersionStatusStarted, VersionStatusPublished,
+		VersionStatusStopping, VersionStatusStopped, VersionStatusError, VersionStatusCritical:
+		return true
+	default:
+		return false
+	}
 }
 
 func (v *Version) SetStartedStatus() {

@@ -264,9 +264,16 @@ func (r *queryResolver) Version(ctx context.Context, productID string, tag *stri
 	}
 }
 
-func (r *queryResolver) Versions(ctx context.Context, productID string) ([]*entity.Version, error) {
+func (r *queryResolver) Versions(ctx context.Context, productID string, status *string) ([]*entity.Version, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.versionInteractor.ListVersionsByProduct(ctx, loggedUser, productID)
+
+	var filter repository.ListVersionsFilter
+
+	if status != nil {
+		filter.Status = entity.VersionStatus(*status)
+	}
+
+	return r.versionInteractor.ListVersionsByProduct(ctx, loggedUser, productID, &filter)
 }
 
 func (r *queryResolver) RegisteredProcesses(
