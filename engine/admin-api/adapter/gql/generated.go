@@ -72,18 +72,22 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateProduct           func(childComplexity int, input CreateProductInput) int
-		CreateVersion           func(childComplexity int, input CreateVersionInput) int
-		DeleteProcess           func(childComplexity int, input DeleteProcessInput) int
-		DeletePublicProcess     func(childComplexity int, input DeletePublicProcessInput) int
-		PublishVersion          func(childComplexity int, input PublishVersionInput) int
-		RegisterProcess         func(childComplexity int, input RegisterProcessInput) int
-		RegisterPublicProcess   func(childComplexity int, input RegisterPublicProcessInput) int
-		RevokeUserProductGrants func(childComplexity int, input RevokeUserProductGrantsInput) int
-		StartVersion            func(childComplexity int, input StartVersionInput) int
-		StopVersion             func(childComplexity int, input StopVersionInput) int
-		UnpublishVersion        func(childComplexity int, input UnpublishVersionInput) int
-		UpdateUserProductGrants func(childComplexity int, input UpdateUserProductGrantsInput) int
+		AddMaintainerToProduct      func(childComplexity int, input AddUserToProductInput) int
+		AddUserToProduct            func(childComplexity int, input AddUserToProductInput) int
+		CreateProduct               func(childComplexity int, input CreateProductInput) int
+		CreateVersion               func(childComplexity int, input CreateVersionInput) int
+		DeleteProcess               func(childComplexity int, input DeleteProcessInput) int
+		DeletePublicProcess         func(childComplexity int, input DeletePublicProcessInput) int
+		PublishVersion              func(childComplexity int, input PublishVersionInput) int
+		RegisterProcess             func(childComplexity int, input RegisterProcessInput) int
+		RegisterPublicProcess       func(childComplexity int, input RegisterPublicProcessInput) int
+		RemoveMaintainerFromProduct func(childComplexity int, input RemoveUserFromProductInput) int
+		RemoveUserFromProduct       func(childComplexity int, input RemoveUserFromProductInput) int
+		RevokeUserProductGrants     func(childComplexity int, input RevokeUserProductGrantsInput) int
+		StartVersion                func(childComplexity int, input StartVersionInput) int
+		StopVersion                 func(childComplexity int, input StopVersionInput) int
+		UnpublishVersion            func(childComplexity int, input UnpublishVersionInput) int
+		UpdateUserProductGrants     func(childComplexity int, input UpdateUserProductGrantsInput) int
 	}
 
 	Process struct {
@@ -211,6 +215,10 @@ type MutationResolver interface {
 	UnpublishVersion(ctx context.Context, input UnpublishVersionInput) (*entity.Version, error)
 	UpdateUserProductGrants(ctx context.Context, input UpdateUserProductGrantsInput) (*entity.User, error)
 	RevokeUserProductGrants(ctx context.Context, input RevokeUserProductGrantsInput) (*entity.User, error)
+	AddUserToProduct(ctx context.Context, input AddUserToProductInput) (*entity.User, error)
+	RemoveUserFromProduct(ctx context.Context, input RemoveUserFromProductInput) (*entity.User, error)
+	AddMaintainerToProduct(ctx context.Context, input AddUserToProductInput) (*entity.User, error)
+	RemoveMaintainerFromProduct(ctx context.Context, input RemoveUserFromProductInput) (*entity.User, error)
 	RegisterProcess(ctx context.Context, input RegisterProcessInput) (*entity.RegisteredProcess, error)
 	RegisterPublicProcess(ctx context.Context, input RegisterPublicProcessInput) (*entity.RegisteredProcess, error)
 	DeleteProcess(ctx context.Context, input DeleteProcessInput) (string, error)
@@ -326,6 +334,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Log.Labels(childComplexity), true
 
+	case "Mutation.addMaintainerToProduct":
+		if e.complexity.Mutation.AddMaintainerToProduct == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addMaintainerToProduct_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddMaintainerToProduct(childComplexity, args["input"].(AddUserToProductInput)), true
+
+	case "Mutation.addUserToProduct":
+		if e.complexity.Mutation.AddUserToProduct == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addUserToProduct_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddUserToProduct(childComplexity, args["input"].(AddUserToProductInput)), true
+
 	case "Mutation.createProduct":
 		if e.complexity.Mutation.CreateProduct == nil {
 			break
@@ -409,6 +441,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RegisterPublicProcess(childComplexity, args["input"].(RegisterPublicProcessInput)), true
+
+	case "Mutation.removeMaintainerFromProduct":
+		if e.complexity.Mutation.RemoveMaintainerFromProduct == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeMaintainerFromProduct_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveMaintainerFromProduct(childComplexity, args["input"].(RemoveUserFromProductInput)), true
+
+	case "Mutation.removeUserFromProduct":
+		if e.complexity.Mutation.RemoveUserFromProduct == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeUserFromProduct_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveUserFromProduct(childComplexity, args["input"].(RemoveUserFromProductInput)), true
 
 	case "Mutation.revokeUserProductGrants":
 		if e.complexity.Mutation.RevokeUserProductGrants == nil {
@@ -998,6 +1054,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAddUserToProductInput,
 		ec.unmarshalInputCreateProductInput,
 		ec.unmarshalInputCreateVersionInput,
 		ec.unmarshalInputDeleteProcessInput,
@@ -1006,6 +1063,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPublishVersionInput,
 		ec.unmarshalInputRegisterProcessInput,
 		ec.unmarshalInputRegisterPublicProcessInput,
+		ec.unmarshalInputRemoveUserFromProductInput,
 		ec.unmarshalInputRevokeUserProductGrantsInput,
 		ec.unmarshalInputStartVersionInput,
 		ec.unmarshalInputStopVersionInput,
@@ -1146,6 +1204,10 @@ type Mutation {
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
+  addUserToProduct(input: AddUserToProductInput!): User
+  removeUserFromProduct(input: RemoveUserFromProductInput!): User
+  addMaintainerToProduct(input: AddUserToProductInput!): User
+  removeMaintainerFromProduct(input: RemoveUserFromProductInput!): User
   registerProcess(input: RegisterProcessInput!): RegisteredProcess!
   registerPublicProcess(input: RegisterPublicProcessInput!): RegisteredProcess!
   deleteProcess(input: DeleteProcessInput!): ID!
@@ -1246,6 +1308,16 @@ input RevokeUserProductGrantsInput {
   targetID: ID!
   product: String!
   comment: String
+}
+
+input AddUserToProductInput {
+  email: String!
+  product: String!
+}
+
+input RemoveUserFromProductInput {
+  email: String!
+  product: String!
 }
 
 type ConfigurationVariable {
@@ -1419,6 +1491,36 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_addMaintainerToProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 AddUserToProductInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNAddUserToProductInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐAddUserToProductInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_addUserToProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 AddUserToProductInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNAddUserToProductInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐAddUserToProductInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1516,6 +1618,36 @@ func (ec *executionContext) field_Mutation_registerPublicProcess_args(ctx contex
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNRegisterPublicProcessInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRegisterPublicProcessInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_removeMaintainerFromProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 RemoveUserFromProductInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRemoveUserFromProductInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRemoveUserFromProductInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_removeUserFromProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 RemoveUserFromProductInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRemoveUserFromProductInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRemoveUserFromProductInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2739,6 +2871,230 @@ func (ec *executionContext) fieldContext_Mutation_revokeUserProductGrants(ctx co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_revokeUserProductGrants_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addUserToProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addUserToProduct(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddUserToProduct(rctx, fc.Args["input"].(AddUserToProductInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*entity.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addUserToProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addUserToProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeUserFromProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_removeUserFromProduct(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveUserFromProduct(rctx, fc.Args["input"].(RemoveUserFromProductInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*entity.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeUserFromProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeUserFromProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addMaintainerToProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addMaintainerToProduct(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddMaintainerToProduct(rctx, fc.Args["input"].(AddUserToProductInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*entity.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addMaintainerToProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addMaintainerToProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeMaintainerFromProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_removeMaintainerFromProduct(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveMaintainerFromProduct(rctx, fc.Args["input"].(RemoveUserFromProductInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*entity.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeMaintainerFromProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeMaintainerFromProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -8239,6 +8595,40 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAddUserToProductInput(ctx context.Context, obj interface{}) (AddUserToProductInput, error) {
+	var it AddUserToProductInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email", "product"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "product":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Product = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateProductInput(ctx context.Context, obj interface{}) (CreateProductInput, error) {
 	var it CreateProductInput
 	asMap := map[string]interface{}{}
@@ -8628,6 +9018,40 @@ func (ec *executionContext) unmarshalInputRegisterPublicProcessInput(ctx context
 				return it, err
 			}
 			it.ProcessType = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRemoveUserFromProductInput(ctx context.Context, obj interface{}) (RemoveUserFromProductInput, error) {
+	var it RemoveUserFromProductInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email", "product"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "product":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Product = data
 		}
 	}
 
@@ -9105,6 +9529,22 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "addUserToProduct":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addUserToProduct(ctx, field)
+			})
+		case "removeUserFromProduct":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeUserFromProduct(ctx, field)
+			})
+		case "addMaintainerToProduct":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addMaintainerToProduct(ctx, field)
+			})
+		case "removeMaintainerFromProduct":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeMaintainerFromProduct(ctx, field)
+			})
 		case "registerProcess":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_registerProcess(ctx, field)
@@ -10762,6 +11202,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) unmarshalNAddUserToProductInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐAddUserToProductInput(ctx context.Context, v interface{}) (AddUserToProductInput, error) {
+	res, err := ec.unmarshalInputAddUserToProductInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -11274,6 +11719,11 @@ func (ec *executionContext) marshalNRegisteredProcess2ᚖgithubᚗcomᚋkonstell
 		return graphql.Null
 	}
 	return ec._RegisteredProcess(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNRemoveUserFromProductInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRemoveUserFromProductInput(ctx context.Context, v interface{}) (RemoveUserFromProductInput, error) {
+	res, err := ec.unmarshalInputRemoveUserFromProductInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNRevokeUserProductGrantsInput2githubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋadapterᚋgqlᚐRevokeUserProductGrantsInput(ctx context.Context, v interface{}) (RevokeUserProductGrantsInput, error) {
@@ -12128,6 +12578,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUser(ctx context.Context, sel ast.SelectionSet, v *entity.User) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOUserActivityType2ᚕgithubᚗcomᚋkonstellationᚑioᚋkaiᚋengineᚋadminᚑapiᚋdomainᚋentityᚐUserActivityTypeᚄ(ctx context.Context, v interface{}) ([]entity.UserActivityType, error) {

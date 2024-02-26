@@ -35,6 +35,20 @@ func (m *MockUserRegistry) EXPECT() *MockUserRegistryMockRecorder {
 	return m.recorder
 }
 
+// AddUserProductGrants mocks base method.
+func (m *MockUserRegistry) AddProductGrants(ctx context.Context, userEmail, product string, grants []auth.Action) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddProductGrants", ctx, userEmail, product, grants)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddUserProductGrants indicates an expected call of AddUserProductGrants.
+func (mr *MockUserRegistryMockRecorder) AddUserProductGrants(ctx, userEmail, product, grants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).AddProductGrants), ctx, userEmail, product, grants)
+}
+
 // CreateGroupWithPolicy mocks base method.
 func (m *MockUserRegistry) CreateGroupWithPolicy(ctx context.Context, name, policy string) error {
 	m.ctrl.T.Helper()
@@ -91,16 +105,30 @@ func (mr *MockUserRegistryMockRecorder) DeleteUser(ctx, name interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockUserRegistry)(nil).DeleteUser), ctx, name)
 }
 
-// UpdateUserProductGrants mocks base method.
-func (m *MockUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []auth.Action) error {
+// RevokeUserProductGrants mocks base method.
+func (m *MockUserRegistry) RevokeProductGrants(ctx context.Context, userEmail, product string, grants []auth.Action) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUserProductGrants", ctx, userID, product, grants)
+	ret := m.ctrl.Call(m, "RevokeProductGrants", ctx, userEmail, product, grants)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RevokeUserProductGrants indicates an expected call of RevokeUserProductGrants.
+func (mr *MockUserRegistryMockRecorder) RevokeUserProductGrants(ctx, userEmail, product, grants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RevokeProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).RevokeProductGrants), ctx, userEmail, product, grants)
+}
+
+// UpdateUserProductGrants mocks base method.
+func (m *MockUserRegistry) UpdateUserProductGrants(ctx context.Context, userEmail, product string, grants []auth.Action) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserProductGrants", ctx, userEmail, product, grants)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateUserProductGrants indicates an expected call of UpdateUserProductGrants.
-func (mr *MockUserRegistryMockRecorder) UpdateUserProductGrants(ctx, userID, product, grants interface{}) *gomock.Call {
+func (mr *MockUserRegistryMockRecorder) UpdateUserProductGrants(ctx, userEmail, product, grants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).UpdateUserProductGrants), ctx, userID, product, grants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).UpdateUserProductGrants), ctx, userEmail, product, grants)
 }

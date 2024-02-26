@@ -144,7 +144,7 @@ func (s *productSuite) TestCreateProduct() {
 		CreateUser(ctx, productID, expectedProduct.ServiceAccount.Username, expectedProduct.ServiceAccount.Password).
 		Return(nil).Times(1)
 	s.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
-	s.userRegistry.EXPECT().UpdateUserProductGrants(ctx, user.ID, productID, auth.GetFullAccessToProductGrants()).Return(nil)
+	s.userRegistry.EXPECT().UpdateUserProductGrants(ctx, user.ID, productID, auth.GetProductMantainerGrants()).Return(nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 

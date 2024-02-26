@@ -6,6 +6,11 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+type AddUserToProductInput struct {
+	Email   string `json:"email"`
+	Product string `json:"product"`
+}
+
 type CreateProductInput struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
@@ -54,6 +59,11 @@ type RegisterPublicProcessInput struct {
 	Version     string         `json:"version"`
 	ProcessID   string         `json:"processID"`
 	ProcessType string         `json:"processType"`
+}
+
+type RemoveUserFromProductInput struct {
+	Email   string `json:"email"`
+	Product string `json:"product"`
 }
 
 type RevokeUserProductGrantsInput struct {

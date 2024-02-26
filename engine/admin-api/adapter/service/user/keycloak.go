@@ -47,16 +47,26 @@ func NewKeycloakUserRegistry(client *gocloak.GoCloak) (*KeycloakUserRegistry, er
 	}, nil
 }
 
-func (ur *KeycloakUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []auth.Action) error {
+func (ur *KeycloakUserRegistry) UpdateUserProductGrants(ctx context.Context, userEmail string, product string, grants []auth.Action) error {
 	err := ur.refreshToken(ctx)
 	if err != nil {
 		return err
 	}
 
-	user, err := ur.client.GetUserByID(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), userID)
+	users, err := ur.client.GetUsers(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), gocloak.GetUsersParams{Email: gocloak.StringP(userEmail)})
 	if err != nil {
-		return fmt.Errorf("getting user: %w", err)
+		return err
 	}
+
+	if len(users) == 0 {
+		return ErrUserNotFound
+	}
+
+	user := users[0]
+	//user, err := ur.client.GetUserByID(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), userID)
+	//if err != nil {
+	//	return fmt.Errorf("getting user: %w", err)
+	//}
 
 	if user.Attributes == nil {
 		user.Attributes = &map[string][]string{}
@@ -148,4 +158,19 @@ func (ur *KeycloakUserRegistry) refreshToken(ctx context.Context) error {
 	ur.refreshTokenExpiresAt = now.Add(time.Duration(token.RefreshExpiresIn) * time.Second)
 
 	return nil
+}
+
+func mergeGrants(actualGrants, newGrants []auth.Action) []auth.Action {
+	grantsSet := map[auth.Action]bool{}
+
+	for _, grant := range append(actualGrants, newGrants...) {
+		grantsSet[grant] = true
+	}
+
+	mergedGrants := make([]auth.Action, 0, len(actualGrants)+len(newGrants))
+	for key := range grantsSet {
+		mergedGrants = append(mergedGrants, key)
+	}
+
+	return mergedGrants
 }

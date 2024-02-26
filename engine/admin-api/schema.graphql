@@ -36,6 +36,10 @@ type Mutation {
   unpublishVersion(input: UnpublishVersionInput!): Version!
   updateUserProductGrants(input: UpdateUserProductGrantsInput!): User!
   revokeUserProductGrants(input: RevokeUserProductGrantsInput!): User!
+  addUserToProduct(input: AddUserToProductInput!): User
+  removeUserFromProduct(input: RemoveUserFromProductInput!): User
+  addMaintainerToProduct(input: AddUserToProductInput!): User
+  removeMaintainerFromProduct(input: RemoveUserFromProductInput!): User
   registerProcess(input: RegisterProcessInput!): RegisteredProcess!
   registerPublicProcess(input: RegisterPublicProcessInput!): RegisteredProcess!
   deleteProcess(input: DeleteProcessInput!): ID!
@@ -136,6 +140,16 @@ input RevokeUserProductGrantsInput {
   targetID: ID!
   product: String!
   comment: String
+}
+
+input AddUserToProductInput {
+  email: String!
+  product: String!
+}
+
+input RemoveUserFromProductInput {
+  email: String!
+  product: String!
 }
 
 type ConfigurationVariable {

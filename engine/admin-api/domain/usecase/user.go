@@ -108,3 +108,83 @@ func (ui *UserInteractor) RevokeUserProductGrants(
 
 	return nil
 }
+
+func (ui *UserInteractor) AddUserToProduct(
+	ctx context.Context,
+	user *entity.User,
+	product,
+	targetUserEmail string,
+) error {
+	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUser); err != nil {
+		return err
+	}
+
+	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserEmail, product, auth.GetProductUserGrants())
+	if err != nil {
+		return fmt.Errorf("updating grants in user's registry: %w", err)
+	}
+
+	ui.logger.Info("User added to product", "user", targetUserEmail, "product", product)
+
+	return nil
+}
+
+func (ui *UserInteractor) RemoveUserFromProduct(
+	ctx context.Context,
+	user *entity.User,
+	product,
+	targetUserEmail string,
+) error {
+	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUser); err != nil {
+		return err
+	}
+
+	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserEmail, product, []auth.Action{})
+	if err != nil {
+		return fmt.Errorf("updating grants in user's registry: %w", err)
+	}
+
+	ui.logger.Info("User deleted from product", "user", targetUserEmail, "product", product)
+
+	return nil
+}
+
+func (ui *UserInteractor) AddMaintainerToProduct(
+	ctx context.Context,
+	user *entity.User,
+	product,
+	targetUserEmail string,
+) error {
+	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUser); err != nil {
+		return err
+	}
+
+	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserEmail, product, auth.GetProductMantainerGrants())
+	if err != nil {
+		return fmt.Errorf("updating grants in user's registry: %w", err)
+	}
+
+	ui.logger.Info("Maintainer added to product", "user", targetUserEmail, "product", product)
+
+	return nil
+}
+
+func (ui *UserInteractor) RemoveMaintainerFromProduct(
+	ctx context.Context,
+	user *entity.User,
+	product,
+	targetUserEmail string,
+) error {
+	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUser); err != nil {
+		return err
+	}
+
+	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserEmail, product, []auth.Action{})
+	if err != nil {
+		return fmt.Errorf("updating grants in user's registry: %w", err)
+	}
+
+	ui.logger.Info("User deleted from product", "user", targetUserEmail, "product", product)
+
+	return nil
+}
