@@ -1,7 +1,7 @@
 package testhelpers
 
 import (
-	"github.com/bxcodec/faker/v3"
+	"github.com/go-faker/faker/v4"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 )
 
@@ -36,6 +36,11 @@ func (pb *ProductBuilder) WithID(id string) *ProductBuilder {
 	pb.product.ServiceAccount.Username = id
 	pb.product.ServiceAccount.Group = id
 
+	return pb
+}
+
+func (pb *ProductBuilder) WithName(name string) *ProductBuilder {
+	pb.product.Name = name
 	return pb
 }
 

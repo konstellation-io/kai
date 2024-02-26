@@ -134,7 +134,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Logs                func(childComplexity int, filters entity.LogFilters) int
 		Product             func(childComplexity int, id string) int
-		Products            func(childComplexity int) int
+		Products            func(childComplexity int, productName *string) int
 		RegisteredProcesses func(childComplexity int, productID string, processName *string, version *string, processType *string) int
 		ServerInfo          func(childComplexity int) int
 		UserActivityList    func(childComplexity int, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) int
@@ -222,7 +222,7 @@ type ProductResolver interface {
 }
 type QueryResolver interface {
 	Product(ctx context.Context, id string) (*entity.Product, error)
-	Products(ctx context.Context) ([]*entity.Product, error)
+	Products(ctx context.Context, productName *string) ([]*entity.Product, error)
 	Version(ctx context.Context, productID string, tag *string) (*entity.Version, error)
 	Versions(ctx context.Context, productID string) ([]*entity.Version, error)
 	RegisteredProcesses(ctx context.Context, productID string, processName *string, version *string, processType *string) ([]*entity.RegisteredProcess, error)
@@ -688,7 +688,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.Products(childComplexity), true
+		args, err := ec.field_Query_products_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Products(childComplexity, args["productName"].(*string)), true
 
 	case "Query.registeredProcesses":
 		if e.complexity.Query.RegisteredProcesses == nil {
@@ -1112,7 +1117,7 @@ var sources = []*ast.Source{
 
 type Query {
   product(id: ID!): Product!
-  products: [Product!]!
+  products(productName: String): [Product!]!
   version(productID: ID!, tag: String): Version!
   versions(productID: ID!): [Version!]!
   registeredProcesses(productID: ID!, processName: String, version: String, processType: String): [RegisteredProcess]!
@@ -1641,6 +1646,21 @@ func (ec *executionContext) field_Query_product_args(ctx context.Context, rawArg
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_products_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["productName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productName"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["productName"] = arg0
 	return args, nil
 }
 
@@ -4296,7 +4316,7 @@ func (ec *executionContext) _Query_products(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Products(rctx)
+		return ec.resolvers.Query().Products(rctx, fc.Args["productName"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4336,6 +4356,17 @@ func (ec *executionContext) fieldContext_Query_products(ctx context.Context, fie
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_products_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
