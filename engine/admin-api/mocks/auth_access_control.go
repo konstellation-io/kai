@@ -63,18 +63,18 @@ func (mr *MockAccessControlMockRecorder) CheckRoleGrants(user, action interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckRoleGrants", reflect.TypeOf((*MockAccessControl)(nil).CheckRoleGrants), user, action)
 }
 
-// GetUserProducts mocks base method.
-func (m *MockAccessControl) GetUserProducts(user *entity.User) []string {
+// GetUserProductsWithViewAccess mocks base method.
+func (m *MockAccessControl) GetUserProductsWithViewAccess(user *entity.User) []string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserProducts", user)
+	ret := m.ctrl.Call(m, "GetUserProductsWithViewAccess", user)
 	ret0, _ := ret[0].([]string)
 	return ret0
 }
 
-// GetUserProducts indicates an expected call of GetUserProducts.
-func (mr *MockAccessControlMockRecorder) GetUserProducts(user interface{}) *gomock.Call {
+// GetUserProductsWithViewAccess indicates an expected call of GetUserProductsWithViewAccess.
+func (mr *MockAccessControlMockRecorder) GetUserProductsWithViewAccess(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserProducts", reflect.TypeOf((*MockAccessControl)(nil).GetUserProducts), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserProductsWithViewAccess", reflect.TypeOf((*MockAccessControl)(nil).GetUserProductsWithViewAccess), user)
 }
 
 // IsAdmin mocks base method.

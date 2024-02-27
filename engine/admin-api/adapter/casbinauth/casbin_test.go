@@ -43,7 +43,7 @@ func TestGetUserProducts(t *testing.T) {
 		},
 	}
 
-	userProducts := authorizer.GetUserProducts(user)
+	userProducts := authorizer.GetUserProductsWithViewAccess(user)
 	for _, p := range expectedProducts {
 		assert.Contains(t, userProducts, p)
 	}
@@ -64,7 +64,7 @@ func TestGetUserProducts_AdminUser(t *testing.T) {
 		},
 	}
 
-	userProducts := authorizer.GetUserProducts(user)
+	userProducts := authorizer.GetUserProductsWithViewAccess(user)
 	assert.Nil(t, userProducts)
 }
 

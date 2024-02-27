@@ -248,9 +248,15 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*entity.Product
 	return r.productInteractor.GetByID(ctx, loggedUser, id)
 }
 
-func (r *queryResolver) Products(ctx context.Context) ([]*entity.Product, error) {
+func (r *queryResolver) Products(ctx context.Context, productName *string) ([]*entity.Product, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
-	return r.productInteractor.FindAll(ctx, loggedUser)
+
+	var filter repository.FindAllFilter
+	if productName != nil {
+		filter.ProductName = *productName
+	}
+
+	return r.productInteractor.FindAll(ctx, loggedUser, &filter)
 }
 
 func (r *queryResolver) Version(ctx context.Context, productID string, tag *string) (*entity.Version, error) {

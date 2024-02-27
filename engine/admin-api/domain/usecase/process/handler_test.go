@@ -52,6 +52,7 @@ type ProcessHandlerTestSuite struct {
 	objectStorage   *mocks.MockObjectStorage
 	processHandler  *process.Handler
 	accessControl   *mocks.MockAccessControl
+	productRepo     *mocks.MockProductRepo
 	processRegistry *mocks.MockProcessRegistry
 
 	registryHost string
@@ -59,23 +60,23 @@ type ProcessHandlerTestSuite struct {
 
 const (
 	_publicRegistry = "kai"
-	userID          = "userID"
-	userEmail       = "test@email.com"
-	productID       = "productID"
-	version         = "v1.0.0"
-	processName     = "test-process"
-	processType     = entity.ProcessTypeTrigger
-	testFileAddr    = "testdata/fake_compressed_process.txt"
+	_userID         = "userID"
+	_userEmail      = "test@email.com"
+	_productID      = "productID"
+	_version        = "v1.0.0"
+	_processName    = "test-process"
+	_processType    = entity.ProcessTypeTrigger
+	_testFilePath   = "testdata/fake_compressed_process.txt"
 )
 
 var (
 	user = &entity.User{
-		ID:    userID,
+		ID:    _userID,
 		Roles: []string{"admin"},
 		ProductGrants: entity.ProductGrants{
-			productID: {"admin"},
+			_productID: {"admin"},
 		},
-		Email: userEmail,
+		Email: _userEmail,
 	}
 )
 
@@ -91,6 +92,7 @@ func (s *ProcessHandlerTestSuite) SetupSuite() {
 	s.objectStorage = mocks.NewMockObjectStorage(s.T())
 	s.accessControl = mocks.NewMockAccessControl(s.ctrl)
 	s.processRegistry = mocks.NewMockProcessRegistry(s.ctrl)
+	s.productRepo = mocks.NewMockProductRepo(s.ctrl)
 
 	s.processHandler = process.NewHandler(
 		&process.HandlerParams{
@@ -100,6 +102,7 @@ func (s *ProcessHandlerTestSuite) SetupSuite() {
 			ObjectStorage:     s.objectStorage,
 			AccessControl:     s.accessControl,
 			ProcessRegistry:   s.processRegistry,
+			ProductRepository: s.productRepo,
 		},
 	)
 
@@ -129,9 +132,9 @@ func (s *ProcessHandlerTestSuite) getTestProcess(registry, status string, isPubl
 	}
 
 	return testhelpers.NewRegisteredProcessBuilder(registry).
-		WithName(processName).
-		WithVersion(version).
-		WithType(processType).
+		WithName(_processName).
+		WithVersion(_version).
+		WithType(_processType).
 		WithOwner(user.Email).
 		WithStatus(status).
 		WithIsPublic(isPublic).

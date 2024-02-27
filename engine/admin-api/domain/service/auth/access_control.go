@@ -49,7 +49,7 @@ type AccessControl interface {
 	CheckRoleGrants(user *entity.User, action Action) error
 	CheckProductGrants(user *entity.User, product string, action Action) error
 	IsAdmin(user *entity.User) bool
-	GetUserProducts(user *entity.User) []string
+	GetUserProductsWithViewAccess(user *entity.User) []string
 }
 
 func GetProductMaintainerGrants() []Action {

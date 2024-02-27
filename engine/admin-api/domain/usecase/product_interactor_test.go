@@ -13,6 +13,7 @@ import (
 	"github.com/go-logr/logr/testr"
 	"github.com/golang/mock/gomock"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/mocks"
@@ -86,24 +87,6 @@ func (s *productSuite) SetupSuite() {
 		PredictionRepository: s.predictionRepo,
 	}
 	s.productInteractor = usecase.NewProductInteractor(&productInteractorOpts)
-}
-
-func (s *productSuite) TestGet() {
-	productID := "product1"
-	expectedProduct := &entity.Product{
-		ID: productID,
-	}
-
-	user := testhelpers.NewUserBuilder().Build()
-
-	ctx := context.Background()
-
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct)
-	s.productRepo.EXPECT().Get(ctx).Return(expectedProduct, nil)
-
-	product, err := s.productInteractor.Get(ctx, user, productID)
-	s.Require().Nil(err)
-	s.Require().Equal(expectedProduct, product)
 }
 
 func (s *productSuite) TestCreateProduct() {
@@ -486,13 +469,17 @@ func (s *productSuite) TestFindAll() {
 		},
 	}
 
+	filter := &repository.FindAllFilter{
+		ProductName: productName,
+	}
+
 	userProducts := []string{productID}
 
 	s.accessControl.EXPECT().IsAdmin(user).Return(false)
-	s.accessControl.EXPECT().GetUserProducts(user).Return(userProducts)
-	s.productRepo.EXPECT().FindByIDs(ctx, userProducts).Return(expected, nil)
+	s.accessControl.EXPECT().GetUserProductsWithViewAccess(user).Return(userProducts)
+	s.productRepo.EXPECT().FindByIDs(ctx, userProducts, filter).Return(expected, nil)
 
-	actual, err := s.productInteractor.FindAll(ctx, user)
+	actual, err := s.productInteractor.FindAll(ctx, user, filter)
 
 	s.Require().Nil(err)
 	s.Require().Equal(expected, actual)
@@ -515,10 +502,14 @@ func (s *productSuite) TestFindAll_AdminUser() {
 		},
 	}
 
-	s.accessControl.EXPECT().IsAdmin(user).Return(true)
-	s.productRepo.EXPECT().FindAll(ctx).Return(expected, nil)
+	filter := &repository.FindAllFilter{
+		ProductName: productName,
+	}
 
-	actual, err := s.productInteractor.FindAll(ctx, user)
+	s.accessControl.EXPECT().IsAdmin(user).Return(true)
+	s.productRepo.EXPECT().FindAll(ctx, filter).Return(expected, nil)
+
+	actual, err := s.productInteractor.FindAll(ctx, user, filter)
 
 	s.Require().Nil(err)
 	s.Require().Equal(expected, actual)

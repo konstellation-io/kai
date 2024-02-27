@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	repository "github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 )
 
 // MockProductRepo is a mock of ProductRepo interface.
@@ -79,48 +80,33 @@ func (mr *MockProductRepoMockRecorder) DeleteDatabase(ctx, productID interface{}
 }
 
 // FindAll mocks base method.
-func (m *MockProductRepo) FindAll(ctx context.Context) ([]*entity.Product, error) {
+func (m *MockProductRepo) FindAll(ctx context.Context, filter *repository.FindAllFilter) ([]*entity.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ctx)
+	ret := m.ctrl.Call(m, "FindAll", ctx, filter)
 	ret0, _ := ret[0].([]*entity.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockProductRepoMockRecorder) FindAll(ctx interface{}) *gomock.Call {
+func (mr *MockProductRepoMockRecorder) FindAll(ctx, filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockProductRepo)(nil).FindAll), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockProductRepo)(nil).FindAll), ctx, filter)
 }
 
 // FindByIDs mocks base method.
-func (m *MockProductRepo) FindByIDs(ctx context.Context, productIDs []string) ([]*entity.Product, error) {
+func (m *MockProductRepo) FindByIDs(ctx context.Context, productIDs []string, filter *repository.FindAllFilter) ([]*entity.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByIDs", ctx, productIDs)
+	ret := m.ctrl.Call(m, "FindByIDs", ctx, productIDs, filter)
 	ret0, _ := ret[0].([]*entity.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByIDs indicates an expected call of FindByIDs.
-func (mr *MockProductRepoMockRecorder) FindByIDs(ctx, productIDs interface{}) *gomock.Call {
+func (mr *MockProductRepoMockRecorder) FindByIDs(ctx, productIDs, filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByIDs", reflect.TypeOf((*MockProductRepo)(nil).FindByIDs), ctx, productIDs)
-}
-
-// Get mocks base method.
-func (m *MockProductRepo) Get(ctx context.Context) (*entity.Product, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", ctx)
-	ret0, _ := ret[0].(*entity.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Get indicates an expected call of Get.
-func (mr *MockProductRepoMockRecorder) Get(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockProductRepo)(nil).Get), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByIDs", reflect.TypeOf((*MockProductRepo)(nil).FindByIDs), ctx, productIDs, filter)
 }
 
 // GetByID mocks base method.

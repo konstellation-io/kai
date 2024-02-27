@@ -93,7 +93,7 @@ func (a *CasbinAccessControl) IsAdmin(user *entity.User) bool {
 	return false
 }
 
-func (a *CasbinAccessControl) GetUserProducts(user *entity.User) []string {
+func (a *CasbinAccessControl) GetUserProductsWithViewAccess(user *entity.User) []string {
 	if a.IsAdmin(user) {
 		return nil
 	}

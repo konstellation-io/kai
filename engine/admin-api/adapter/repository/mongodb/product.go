@@ -13,6 +13,7 @@ import (
 
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 )
 
@@ -66,17 +67,6 @@ func (r *ProductRepoMongoDB) Create(ctx context.Context, product *entity.Product
 	return product, nil
 }
 
-func (r *ProductRepoMongoDB) Get(ctx context.Context) (*entity.Product, error) {
-	product := &entity.Product{}
-
-	err := r.collection.FindOne(ctx, bson.M{}).Decode(product)
-	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, usecase.ErrProductNotFound
-	}
-
-	return product, err
-}
-
 func (r *ProductRepoMongoDB) GetByID(ctx context.Context, productID string) (*entity.Product, error) {
 	product := &entity.Product{}
 	filter := bson.M{"_id": productID}
@@ -101,10 +91,12 @@ func (r *ProductRepoMongoDB) GetByName(ctx context.Context, name string) (*entit
 	return product, err
 }
 
-func (r *ProductRepoMongoDB) FindAll(ctx context.Context) ([]*entity.Product, error) {
+func (r *ProductRepoMongoDB) FindAll(ctx context.Context, filter *repository.FindAllFilter) ([]*entity.Product, error) {
 	var products []*entity.Product
 
-	cursor, err := r.collection.Find(ctx, bson.M{})
+	queryFilter := r.getFindAllMongoFilter(filter)
+
+	cursor, err := r.collection.Find(ctx, queryFilter)
 	if err != nil {
 		return products, err
 	}
@@ -117,11 +109,16 @@ func (r *ProductRepoMongoDB) FindAll(ctx context.Context) ([]*entity.Product, er
 	return products, nil
 }
 
-func (r *ProductRepoMongoDB) FindByIDs(ctx context.Context, ids []string) ([]*entity.Product, error) {
+func (r *ProductRepoMongoDB) FindByIDs(ctx context.Context, ids []string, filter *repository.FindAllFilter) ([]*entity.Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, _productRepoTimeout)
 	defer cancel()
 
-	cursor, err := r.collection.Find(ctx, bson.M{"_id": bson.M{"$in": ids}})
+	queryFilter := bson.M{"_id": bson.M{"$in": ids}}
+	if filter != nil && filter.ProductName != "" {
+		queryFilter["name"] = filter.ProductName
+	}
+
+	cursor, err := r.collection.Find(ctx, queryFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -172,4 +169,19 @@ func (r *ProductRepoMongoDB) Delete(ctx context.Context, productID string) error
 	}
 
 	return err
+}
+
+
+func (r *ProductRepoMongoDB) getFindAllMongoFilter(findAllFilter *repository.FindAllFilter) bson.M {
+	filter := make(bson.M, 0)
+
+	if findAllFilter == nil {
+		return filter
+	}
+
+	if findAllFilter.ProductName != "" {
+		filter["name"] = findAllFilter.ProductName
+	}
+
+	return filter
 }
