@@ -273,7 +273,7 @@ func (r *queryResolver) Versions(ctx context.Context, productID string, status *
 		filter.Status = entity.VersionStatus(*status)
 	}
 
-	return r.versionInteractor.ListVersionsByProduct(ctx, loggedUser, productID, &filter)
+	return r.versionInteractor.SearchByProduct(ctx, loggedUser, productID, &filter)
 }
 
 func (r *queryResolver) RegisteredProcesses(

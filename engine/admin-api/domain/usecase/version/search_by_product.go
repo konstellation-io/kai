@@ -7,8 +7,8 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 )
 
-// ListVersionsByProduct returns all Versions of the given Product.
-func (h *Handler) ListVersionsByProduct(
+// SearchByProduct returns all Versions of the given Product, can optionally use a filter.
+func (h *Handler) SearchByProduct(
 	ctx context.Context,
 	user *entity.User,
 	productID string,
@@ -19,7 +19,7 @@ func (h *Handler) ListVersionsByProduct(
 		return nil, err
 	}
 
-	versions, err := h.versionRepo.ListVersionsByProduct(ctx, productID, filter)
+	versions, err := h.versionRepo.SearchByProduct(ctx, productID, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +32,9 @@ func (h *Handler) validateFilter(filter *repository.ListVersionsFilter) error {
 		return nil
 	}
 
-	if filter.Status != "" && !filter.Status.Validate() {
-		return entity.ErrInvalidVersionStatus
+	err := filter.Status.Validate()
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -13,7 +13,7 @@ type VersionRepo interface {
 	CreateIndexes(ctx context.Context, productID string) error
 	GetByTag(ctx context.Context, productID, tag string) (*entity.Version, error)
 	GetLatest(ctx context.Context, productID string) (*entity.Version, error)
-	ListVersionsByProduct(ctx context.Context, productID string, filter *ListVersionsFilter) ([]*entity.Version, error)
+	SearchByProduct(ctx context.Context, productID string, filter *ListVersionsFilter) ([]*entity.Version, error)
 	Update(productID string, version *entity.Version) error
 	// SetStatus updates the status and deletes the error message of the version.
 	SetStatus(ctx context.Context, productID, versionTag string, status entity.VersionStatus) error

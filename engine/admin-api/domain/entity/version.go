@@ -54,13 +54,13 @@ func (vs VersionStatus) String() string {
 	return string(vs)
 }
 
-func (vs VersionStatus) Validate() bool {
+func (vs VersionStatus) Validate() error {
 	switch vs {
 	case VersionStatusCreated, VersionStatusStarting, VersionStatusStarted, VersionStatusPublished,
 		VersionStatusStopping, VersionStatusStopped, VersionStatusError, VersionStatusCritical:
-		return true
+		return nil
 	default:
-		return false
+		return ErrInvalidVersionStatus
 	}
 }
 

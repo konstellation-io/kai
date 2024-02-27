@@ -95,19 +95,19 @@ func (mr *MockVersionRepoMockRecorder) GetLatest(ctx, productID interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatest", reflect.TypeOf((*MockVersionRepo)(nil).GetLatest), ctx, productID)
 }
 
-// ListVersionsByProduct mocks base method.
-func (m *MockVersionRepo) ListVersionsByProduct(ctx context.Context, productID string, filter *repository.ListVersionsFilter) ([]*entity.Version, error) {
+// SearchByProduct mocks base method.
+func (m *MockVersionRepo) SearchByProduct(ctx context.Context, productID string, filter *repository.ListVersionsFilter) ([]*entity.Version, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListVersionsByProduct", ctx, productID, filter)
+	ret := m.ctrl.Call(m, "SearchByProduct", ctx, productID, filter)
 	ret0, _ := ret[0].([]*entity.Version)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListVersionsByProduct indicates an expected call of ListVersionsByProduct.
-func (mr *MockVersionRepoMockRecorder) ListVersionsByProduct(ctx, productID, filter interface{}) *gomock.Call {
+// SearchByProduct indicates an expected call of SearchByProduct.
+func (mr *MockVersionRepoMockRecorder) SearchByProduct(ctx, productID, filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVersionsByProduct", reflect.TypeOf((*MockVersionRepo)(nil).ListVersionsByProduct), ctx, productID, filter)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchByProduct", reflect.TypeOf((*MockVersionRepo)(nil).SearchByProduct), ctx, productID, filter)
 }
 
 // SetCriticalStatusWithError mocks base method.

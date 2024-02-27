@@ -116,7 +116,7 @@ func (r *VersionRepoMongoDB) Update(productID string, updatedVersion *entity.Ver
 	return err
 }
 
-func (r *VersionRepoMongoDB) ListVersionsByProduct(
+func (r *VersionRepoMongoDB) SearchByProduct(
 	ctx context.Context,
 	productID string,
 	filter *repository.ListVersionsFilter,
@@ -150,7 +150,7 @@ func (r *VersionRepoMongoDB) ListVersionsByProduct(
 }
 
 func (r *VersionRepoMongoDB) getListVersionsFilter(filter *repository.ListVersionsFilter) bson.M {
-	queryFilter := make(bson.M, 0)
+	queryFilter := make(bson.M, 1)
 
 	if filter == nil {
 		return queryFilter

@@ -162,7 +162,7 @@ func (r *MongoDBProcessRepository) searchInDatabaseWithFilter(
 }
 
 func (r *MongoDBProcessRepository) getSearchMongoFilter(searchFilter *repository.SearchFilter) bson.M {
-	filter := make(bson.M, 0)
+	filter := make(bson.M, 3)
 
 	if searchFilter == nil {
 		return filter

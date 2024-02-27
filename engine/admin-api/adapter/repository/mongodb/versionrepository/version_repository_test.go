@@ -215,7 +215,7 @@ func (s *VersionRepositoryTestSuite) TestUpdateNotFound() {
 	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
 
-func (s *VersionRepositoryTestSuite) TestListVersionsByProduct_NoFilter() {
+func (s *VersionRepositoryTestSuite) TestSearchByProduct_NoFilter() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
 	}
@@ -229,7 +229,7 @@ func (s *VersionRepositoryTestSuite) TestListVersionsByProduct_NoFilter() {
 	_, err = s.versionRepo.Create(creatorID, productID, testVersion2)
 	s.Require().NoError(err)
 
-	versions, err := s.versionRepo.ListVersionsByProduct(context.Background(), productID, nil)
+	versions, err := s.versionRepo.SearchByProduct(context.Background(), productID, nil)
 	s.Require().NoError(err)
 
 	s.Require().Len(versions, 2)
@@ -237,7 +237,7 @@ func (s *VersionRepositoryTestSuite) TestListVersionsByProduct_NoFilter() {
 	s.Equal(testVersion2.Tag, versions[1].Tag)
 }
 
-func (s *VersionRepositoryTestSuite) TestListVersionsByProduct_WithFilter() {
+func (s *VersionRepositoryTestSuite) TestSearchByProduct_WithFilter() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
 	}
@@ -258,7 +258,7 @@ func (s *VersionRepositoryTestSuite) TestListVersionsByProduct_WithFilter() {
 	err = s.versionRepo.SetStatus(context.Background(), productID, testVersion.Tag, entity.VersionStatusStarted)
 	s.Require().NoError(err)
 
-	versions, err := s.versionRepo.ListVersionsByProduct(context.Background(), productID, filter)
+	versions, err := s.versionRepo.SearchByProduct(context.Background(), productID, filter)
 	s.Require().NoError(err)
 
 	s.Require().Len(versions, 1)

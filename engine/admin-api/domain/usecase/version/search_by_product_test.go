@@ -11,35 +11,23 @@ import (
 	"github.com/konstellation-io/kai/engine/admin-api/testhelpers"
 )
 
-func (s *versionSuite) TestListByProduct_NoFilter_OK() {
-	// GIVEN a valid user and published version
-	ctx := context.Background()
-	user := testhelpers.NewUserBuilder().Build()
-	product := testhelpers.NewProductBuilder().Build()
-
-	s.versionRepo.EXPECT().ListVersionsByProduct(ctx, product.ID, nil).Return(nil, nil)
-
-	_, err := s.handler.ListVersionsByProduct(ctx, user, product.ID, nil)
-	s.NoError(err)
-}
-
-func (s *versionSuite) TestListByProduct_WithFilter_OK() {
+func (s *versionSuite) TestSearchByProduct_WithFilter_OK() {
 	// GIVEN a valid user and published version
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
 	product := testhelpers.NewProductBuilder().Build()
 
 	filter := &repository.ListVersionsFilter{
-		Status: "CREATED",
+		Status: entity.VersionStatusCreated,
 	}
 
-	s.versionRepo.EXPECT().ListVersionsByProduct(ctx, product.ID, filter).Return(nil, nil)
+	s.versionRepo.EXPECT().SearchByProduct(ctx, product.ID, filter).Return(nil, nil)
 
-	_, err := s.handler.ListVersionsByProduct(ctx, user, product.ID, filter)
+	_, err := s.handler.SearchByProduct(ctx, user, product.ID, filter)
 	s.NoError(err)
 }
 
-func (s *versionSuite) TestListByProduct_InvalidFilter_Error() {
+func (s *versionSuite) TestSearchByProduct_InvalidFilter_Error() {
 	// GIVEN a valid user and published version
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
@@ -49,11 +37,11 @@ func (s *versionSuite) TestListByProduct_InvalidFilter_Error() {
 		Status: "INVALID",
 	}
 
-	_, err := s.handler.ListVersionsByProduct(ctx, user, product.ID, filter)
+	_, err := s.handler.SearchByProduct(ctx, user, product.ID, filter)
 	s.ErrorIs(err, entity.ErrInvalidVersionStatus)
 }
 
-func (s *versionSuite) TestListByProduct_Error() {
+func (s *versionSuite) TestSearchByProduct_Error() {
 	// GIVEN a valid user and published version
 	ctx := context.Background()
 	user := testhelpers.NewUserBuilder().Build()
@@ -61,8 +49,8 @@ func (s *versionSuite) TestListByProduct_Error() {
 
 	testError := errors.New("error")
 
-	s.versionRepo.EXPECT().ListVersionsByProduct(ctx, product.ID, nil).Return(nil, testError)
+	s.versionRepo.EXPECT().SearchByProduct(ctx, product.ID, nil).Return(nil, testError)
 
-	_, err := s.handler.ListVersionsByProduct(ctx, user, product.ID, nil)
+	_, err := s.handler.SearchByProduct(ctx, user, product.ID, nil)
 	s.ErrorIs(err, testError)
 }
