@@ -33,7 +33,6 @@ type Resolver struct {
 	userInteractor         *usecase.UserInteractor
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
-	serverInfoGetter       *usecase.ServerInfoGetter
 	processHandler         *process.Handler
 	logsService            logs.LogsUsecase
 }
@@ -47,7 +46,6 @@ func NewGraphQLResolver(params Params) *Resolver {
 		params.UserInteractor,
 		params.UserActivityInteractor,
 		params.VersionInteractor,
-		params.ServerInfoGetter,
 		params.ProcessHandler,
 		params.LogsUsecase,
 	}
@@ -317,11 +315,6 @@ func (r *queryResolver) Logs(
 	filters entity.LogFilters,
 ) ([]*entity.Log, error) {
 	return r.logsService.GetLogs(filters)
-}
-
-func (r *queryResolver) ServerInfo(ctx context.Context) (*entity.ServerInfo, error) {
-	user, _ := ctx.Value("user").(*entity.User)
-	return r.serverInfoGetter.GetKAIServerInfo(ctx, user)
 }
 
 func (r *productResolver) CreationAuthor(_ context.Context, product *entity.Product) (string, error) {

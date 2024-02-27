@@ -40,26 +40,6 @@ func TestCheckAdminGrants(t *testing.T) {
 				Action: auth.ActUpdateUserGrants,
 			},
 		},
-		{
-			name:          "user with ADMIN role can view server info",
-			user:          testhelpers.NewUserBuilder().WithRoles([]string{"ADMIN"}).Build(),
-			act:           auth.ActViewServerInfo,
-			expectedError: nil,
-		},
-		{
-			name:          "user with MLE role can view server info",
-			user:          testhelpers.NewUserBuilder().WithRoles([]string{"MLE"}).Build(),
-			act:           auth.ActViewServerInfo,
-			expectedError: nil,
-		},
-		{
-			name: "an user who is neither ADMIN or MLE can't view server info",
-			user: testhelpers.NewUserBuilder().WithRoles([]string{"USER"}).Build(),
-			act:  auth.ActViewServerInfo,
-			expectedError: auth.UnauthorizedError{
-				Action: auth.ActViewServerInfo,
-			},
-		},
 	}
 
 	for _, tc := range testCases {

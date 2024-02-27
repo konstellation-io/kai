@@ -21,8 +21,7 @@ const (
 	ActEditVersion          Action = "edit_version"
 	ActViewVersion          Action = "view_version"
 
-	ActViewMetrics    Action = "view_metrics"
-	ActViewServerInfo Action = "view_server_info"
+	ActViewMetrics Action = "view_metrics"
 
 	ActViewUserActivities Action = "view_user_activities"
 	ActUpdateUserGrants   Action = "update_user_grants"
@@ -40,7 +39,7 @@ func (e Action) IsValid() bool {
 	case ActCreateProduct, ActStartVersion, ActStopVersion, ActUpdateUserGrants,
 		ActPublishVersion, ActUnpublishVersion, ActEditVersion, ActViewMetrics,
 		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion,
-		ActViewServerInfo, ActStartCriticalVersion, ActRegisterProcess, ActRegisterPublicProcess,
+		ActStartCriticalVersion, ActRegisterProcess, ActRegisterPublicProcess,
 		ActDeleteProcess, ActDeletePublicProcess, ActViewRegisteredProcesses:
 		return true
 	}

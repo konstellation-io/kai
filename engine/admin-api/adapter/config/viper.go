@@ -9,8 +9,6 @@ import (
 )
 
 const (
-	ComponentsKey = "components"
-
 	CfgFilePathKey          = "CONFIG_FILE_PATH"
 	LogLevelKey             = "application.logLevel"
 	VersionStatusTimeoutKey = "application.versionStatusTimeout"

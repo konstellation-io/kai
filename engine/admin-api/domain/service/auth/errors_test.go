@@ -25,7 +25,7 @@ func TestUnauthorizedError_Error(t *testing.T) {
 
 func TestUnauthorizedError_Error_WithoutProduct(t *testing.T) {
 	err := auth.UnauthorizedError{
-		Action: auth.ActViewServerInfo,
+		Action: auth.ActViewProduct,
 	}
 
 	stringFormat := "you don't have authorization to %s"
@@ -36,7 +36,7 @@ func TestUnauthorizedError_Error_WithoutProduct(t *testing.T) {
 
 func TestUnauthorizedError_Error_WithError(t *testing.T) {
 	err := auth.UnauthorizedError{
-		Action: auth.ActViewServerInfo,
+		Action: auth.ActViewProduct,
 		Err:    errors.New("wrapped error"),
 	}
 
