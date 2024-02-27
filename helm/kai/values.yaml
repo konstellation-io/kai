@@ -143,6 +143,8 @@ adminApi:
     # -- Ingress annotations
     # @default -- See `adminApi.ingress.annotations` in [values.yaml](./values.yaml)
     annotations: {}
+  # -- Container resources
+  resources: {}
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
@@ -190,6 +192,8 @@ k8sManager:
     name: ""
     # -- The Service Account annotations
     annotations: {}
+  # -- Container resources
+  resources: {}
   imageBuilder:
     # -- Log level for image builder's jobs
     logLevel: info
@@ -457,6 +461,8 @@ nats:
     annotations: {}
     # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
     name: ""
+  # -- Container resources
+  resources: {}
   client:
     # -- Port for client connections
     port: 4222
@@ -556,6 +562,33 @@ natsManager:
     annotations: {}
     # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
     name: ""
+  # -- Container resources
+  resources: {}
+  # -- Define which Nodes the Pods are scheduled on.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+  # -- Assign custom affinity rules to the NATS pods
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/e2e-az-name
+  #         operator: In
+  #         values:
+  #         - e2e-az1
+  #         - e2e-az2
+  # -- Tolerations for use with node taints
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
 registry:
   image:
     # -- Image repository

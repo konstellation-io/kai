@@ -54,6 +54,8 @@ spec:
             - "nats-server"
             - "--config"
             - "/etc/nats-config/nats.conf"
+          resources:
+            {{- toYaml .Values.nats.resources | nindent 12 }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/nats-config

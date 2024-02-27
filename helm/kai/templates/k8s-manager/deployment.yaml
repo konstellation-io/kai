@@ -70,3 +70,5 @@ spec:
             - containerPort: 50051
               protocol: TCP
               name: grpc
+          resources:
+            {{- toYaml .Values.k8sManager.resources | nindent 12 }}
