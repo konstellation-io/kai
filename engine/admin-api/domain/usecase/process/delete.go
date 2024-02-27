@@ -74,5 +74,5 @@ func (ps *Handler) checkDeleteGrants(user *entity.User, opts DeleteProcessOpts) 
 		return ps.accessControl.CheckRoleGrants(user, auth.ActDeletePublicProcess)
 	}
 
-	return ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActDeleteProcess)
+	return ps.accessControl.CheckProductGrants(user, opts.Product, auth.ActDeleteRegisteredProcess)
 }

@@ -18,7 +18,7 @@ func (h *Handler) Stop(
 	versionTag,
 	comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStopVersion); err != nil {
+	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActManageVersion); err != nil {
 		v := &entity.Version{Tag: versionTag}
 		h.registerStopActionFailed(user.Email, productID, v, ErrUserNotAuthorized)
 

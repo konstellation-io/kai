@@ -30,7 +30,7 @@ func initialize() {
 type Resolver struct {
 	logger                 logr.Logger
 	productInteractor      *usecase.ProductInteractor
-	userInteractor         *usecase.UserInteractor
+	userInteractor         *usecase.UserHandler
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
 	processHandler         *process.Handler
@@ -201,39 +201,44 @@ func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVers
 	return publishedTriggers, nil
 }
 
-func (r *mutationResolver) UpdateUserProductGrants(
-	ctx context.Context,
-	input UpdateUserProductGrantsInput,
-) (*entity.User, error) {
-	user := ctx.Value("user").(*entity.User)
-
-	err := r.userInteractor.UpdateUserProductGrants(
-		ctx,
-		user,
-		input.TargetID,
-		input.Product,
-		input.Grants,
-		*input.Comment,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return &entity.User{ID: input.TargetID}, nil
-}
-
-func (r *mutationResolver) RevokeUserProductGrants(
-	ctx context.Context,
-	input RevokeUserProductGrantsInput,
-) (*entity.User, error) {
+func (r *mutationResolver) AddUserToProduct(ctx context.Context, input AddUserToProductInput) (*entity.User, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	err := r.userInteractor.RevokeUserProductGrants(ctx, loggedUser, input.TargetID, input.Product, *input.Comment)
-	if err != nil {
+	if err := r.userInteractor.AddUserToProduct(ctx, loggedUser, input.Email, input.Product); err != nil {
 		return nil, err
 	}
 
-	return &entity.User{ID: input.TargetID}, nil
+	return nil, nil
+}
+
+func (r *mutationResolver) RemoveUserFromProduct(ctx context.Context, input RemoveUserFromProductInput) (*entity.User, error) {
+	loggerUser := ctx.Value("user").(*entity.User)
+
+	if err := r.userInteractor.RemoveUserFromProduct(ctx, loggerUser, input.Email, input.Product); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (r *mutationResolver) AddMaintainerToProduct(ctx context.Context, input AddUserToProductInput) (*entity.User, error) {
+	loggedUser := ctx.Value("user").(*entity.User)
+
+	if err := r.userInteractor.AddMaintainerToProduct(ctx, loggedUser, input.Email, input.Product); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (r *mutationResolver) RemoveMaintainerFromProduct(ctx context.Context, input RemoveUserFromProductInput) (*entity.User, error) {
+	loggerUser := ctx.Value("user").(*entity.User)
+
+	if err := r.userInteractor.RemoveMaintainerFromProduct(ctx, loggerUser, input.Email, input.Product); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func (r *queryResolver) Product(ctx context.Context, id string) (*entity.Product, error) {

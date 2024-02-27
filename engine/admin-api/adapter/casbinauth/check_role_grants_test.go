@@ -29,15 +29,15 @@ func TestCheckAdminGrants(t *testing.T) {
 		{
 			name:          "user with ADMIN role can update user roles",
 			user:          testhelpers.NewUserBuilder().WithRoles([]string{auth.DefaultAdminRole}).Build(),
-			act:           auth.ActUpdateUserGrants,
+			act:           auth.ActManageVersion,
 			expectedError: nil,
 		},
 		{
 			name: "user without ADMIN role can't update user roles",
 			user: testhelpers.NewUserBuilder().WithRoles([]string{}).Build(),
-			act:  auth.ActUpdateUserGrants,
+			act:  auth.ActManageProductUsers,
 			expectedError: auth.UnauthorizedError{
-				Action: auth.ActUpdateUserGrants,
+				Action: auth.ActManageProductUsers,
 			},
 		},
 	}

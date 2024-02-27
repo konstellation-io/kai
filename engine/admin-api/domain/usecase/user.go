@@ -10,23 +10,23 @@ import (
 	"golang.org/x/net/context"
 )
 
-type UserInteractor struct {
+type UserHandler struct {
 	logger                 logr.Logger
 	accessControl          auth.AccessControl
 	userActivityInteractor UserActivityInteracter
 	userRegistry           service.UserRegistry
 }
 
-// NewUserInteractor creates a new UserInteractor.
+// NewUserHandler creates a new UserHandler.
 //
-// UserInteractor is the usecase to manage users.
-func NewUserInteractor(
+// UserHandler is the usecase to manage users.
+func NewUserHandler(
 	logger logr.Logger,
 	accessControl auth.AccessControl,
 	userActivityInteractor UserActivityInteracter,
 	userRegistry service.UserRegistry,
-) *UserInteractor {
-	return &UserInteractor{
+) *UserHandler {
+	return &UserHandler{
 		logger,
 		accessControl,
 		userActivityInteractor,
@@ -34,77 +34,67 @@ func NewUserInteractor(
 	}
 }
 
-func (ui *UserInteractor) UpdateUserProductGrants(
-	ctx context.Context,
-	user *entity.User,
-	targetUserID,
-	product string,
-	grants []string,
-	comment ...string,
-) error {
-	if err := ui.accessControl.CheckRoleGrants(user, auth.ActUpdateUserGrants); err != nil {
-		return fmt.Errorf("checking role grants: %w", err)
+func (ui *UserHandler) AddUserToProduct(ctx context.Context, user *entity.User, targetUserEmail, product string) error {
+	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUsers); err != nil {
+		return err
 	}
 
-	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserID, product, grants)
+	err := ui.userRegistry.AddProductGrants(ctx, targetUserEmail, product, auth.GetDefaultUserGrants())
 	if err != nil {
 		return fmt.Errorf("updating grants in user's registry: %w", err)
 	}
 
-	var givenComment string
-	if len(comment) > 0 {
-		givenComment = comment[0]
-	}
-
-	err = ui.userActivityInteractor.RegisterUpdateProductGrants(
-		user.ID,
-		targetUserID,
-		product,
-		grants,
-		givenComment,
-	)
-	if err != nil {
-		return fmt.Errorf("registering user activity: %w", err)
-	}
-
-	ui.logger.Info("Updated user grants for product", "user", targetUserID, "product", product, "grants", grants)
+	ui.logger.Info("User added to product", "user", targetUserEmail, "product", product)
 
 	return nil
 }
 
-func (ui *UserInteractor) RevokeUserProductGrants(
-	ctx context.Context,
-	user *entity.User,
-	targetUserID,
-	product string,
-	comment ...string,
-) error {
-	if err := ui.accessControl.CheckRoleGrants(user, auth.ActUpdateUserGrants); err != nil {
-		return fmt.Errorf("checking role grants: %w", err)
+func (ui *UserHandler) RemoveUserFromProduct(ctx context.Context, user *entity.User, targetUserEmail, product string) error {
+	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUsers); err != nil {
+		return err
 	}
 
-	err := ui.userRegistry.UpdateUserProductGrants(ctx, targetUserID, product, []string{})
+	err := ui.userRegistry.RevokeProductGrants(ctx, targetUserEmail, product, auth.GetDefaultUserGrants())
 	if err != nil {
 		return fmt.Errorf("updating grants in user's registry: %w", err)
 	}
 
-	var givenComment string
-	if len(comment) > 0 {
-		givenComment = comment[0]
+	ui.logger.Info("User deleted from product", "user", targetUserEmail, "product", product)
+
+	return nil
+}
+
+func (ui *UserHandler) AddMaintainerToProduct(ctx context.Context, user *entity.User, targetUserEmail, product string) error {
+	if err := ui.accessControl.CheckRoleGrants(user, auth.ActManageProductMaintainers); err != nil {
+		return err
 	}
 
-	err = ui.userActivityInteractor.RegisterUpdateProductGrants(
-		user.ID,
-		targetUserID,
-		product,
-		[]string{},
-		givenComment,
-	)
+	err := ui.userRegistry.AddProductGrants(ctx, targetUserEmail, product, auth.GetDefaultMaintainerGrants())
 	if err != nil {
-		return fmt.Errorf("registering user activity: %w", err)
+		return fmt.Errorf("adding product grants in user's registry: %w", err)
 	}
 
-	ui.logger.Info("Revoked user grants for product", "user", targetUserID, "product", product)
+	ui.logger.Info("Maintainer added to product", "user", targetUserEmail, "product", product)
+
+	return nil
+}
+
+func (ui *UserHandler) RemoveMaintainerFromProduct(
+	ctx context.Context,
+	user *entity.User,
+	targetUserEmail,
+	product string,
+) error {
+	if err := ui.accessControl.CheckRoleGrants(user, auth.ActManageProductMaintainers); err != nil {
+		return err
+	}
+
+	err := ui.userRegistry.RevokeProductGrants(ctx, targetUserEmail, product, auth.GetDefaultMaintainerGrants())
+	if err != nil {
+		return fmt.Errorf("revoking product grants in user's registry: %w", err)
+	}
+
+	ui.logger.Info("User deleted from product", "user", targetUserEmail, "product", product)
 
 	return nil
 }

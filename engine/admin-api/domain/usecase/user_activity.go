@@ -25,7 +25,7 @@ type UserActivityInteracter interface {
 	RegisterStopAction(userID, productID string, version *entity.Version, comment string) error
 	RegisterPublishAction(userID, productID string, version *entity.Version, comment string) error
 	RegisterUnpublishAction(userID, productID string, version *entity.Version, comment string) error
-	RegisterUpdateProductGrants(userID string, targetUserID string, product string, productGrants []string, comment string) error
+	RegisterUpdateProductGrants(userID string, targetUserID string, product string, productGrants []auth.Action, comment string) error
 }
 
 // UserActivityInteractor  contains app logic about UserActivity entities.
@@ -166,9 +166,15 @@ func (i *UserActivityInteractor) RegisterUpdateProductGrants(
 	userID string,
 	targetUserID string,
 	product string,
-	productGrants []string,
+	productGrants []auth.Action,
 	comment string,
 ) error {
+	grants := make([]string, 0, len(productGrants))
+
+	for _, grant := range productGrants {
+		grants = append(grants, grant.String())
+	}
+
 	return i.create(
 		userID,
 		entity.UserActivityTypeUpdateProductGrants,
@@ -176,7 +182,7 @@ func (i *UserActivityInteractor) RegisterUpdateProductGrants(
 			{Key: "USER_ID", Value: userID},
 			{Key: "TARGET_USER_ID", Value: targetUserID},
 			{Key: "PRODUCT", Value: product},
-			{Key: "NEW_PRODUCT_GRANTS", Value: strings.Join(productGrants, ",")},
+			{Key: "NEW_PRODUCT_GRANTS", Value: strings.Join(grants, ",")},
 			{Key: "COMMENT", Value: comment},
 		})
 }

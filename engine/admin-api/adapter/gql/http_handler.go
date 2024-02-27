@@ -24,7 +24,7 @@ import (
 type Params struct {
 	Logger                 logr.Logger
 	ProductInteractor      *usecase.ProductInteractor
-	UserInteractor         *usecase.UserInteractor
+	UserInteractor         *usecase.UserHandler
 	UserActivityInteractor usecase.UserActivityInteracter
 	VersionInteractor      *version.Handler
 	ProcessHandler         *process.Handler

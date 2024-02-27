@@ -26,7 +26,7 @@ type GraphQL interface {
 type GraphQLController struct {
 	logger                 logr.Logger
 	productInteractor      *usecase.ProductInteractor
-	userInteractor         *usecase.UserInteractor
+	userInteractor         *usecase.UserHandler
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
 	processHandler         *process.Handler
@@ -36,7 +36,7 @@ type GraphQLController struct {
 type Params struct {
 	Logger                 logr.Logger
 	ProductInteractor      *usecase.ProductInteractor
-	UserInteractor         *usecase.UserInteractor
+	UserInteractor         *usecase.UserHandler
 	UserActivityInteractor usecase.UserActivityInteracter
 	VersionInteractor      *version.Handler
 	ProcessHandler         *process.Handler

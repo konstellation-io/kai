@@ -254,3 +254,26 @@ func (s *ProductRepositorySuite) TestFindByIDs_Empty() {
 
 	s.Len(products, 0)
 }
+
+func (s *ProductRepositorySuite) TestDelete_OK() {
+	ctx := context.Background()
+	product := testhelpers.NewProductBuilder().WithPublishedVersion(testhelpers.StrPointer("test")).Build()
+
+	_, err := s.productsCollection.InsertOne(ctx, product)
+	s.Require().NoError(err)
+
+	err = s.productRepo.Delete(ctx, product.ID)
+	s.Require().NoError(err)
+
+	prod, err := s.productRepo.GetByID(ctx, product.ID)
+	s.ErrorIs(err, usecase.ErrProductNotFound)
+	s.Nil(prod)
+}
+
+func (s *ProductRepositorySuite) TestDelete_ProductNotFound() {
+	ctx := context.Background()
+	product := testhelpers.NewProductBuilder().WithPublishedVersion(testhelpers.StrPointer("test")).Build()
+
+	err := s.productRepo.Delete(ctx, product.ID)
+	s.ErrorIs(err, usecase.ErrProductNotFound)
+}

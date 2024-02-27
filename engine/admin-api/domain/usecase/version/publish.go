@@ -24,7 +24,7 @@ type PublishOpts struct {
 
 // Publish set a Version as published on DB and K8s.
 func (h *Handler) Publish(ctx context.Context, user *entity.User, opts PublishOpts) (map[string]string, error) {
-	if err := h.accessControl.CheckProductGrants(user, opts.ProductID, auth.ActPublishVersion); err != nil {
+	if err := h.accessControl.CheckProductGrants(user, opts.ProductID, auth.ActManageVersion); err != nil {
 		return nil, err
 	}
 

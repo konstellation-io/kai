@@ -23,7 +23,7 @@ func (s *versionSuite) TestStop_OK() {
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(nil)
@@ -56,7 +56,7 @@ func (s *versionSuite) TestStop_ErrorUserNotAuthorized() {
 	expectedVer := &entity.Version{Tag: _versionTag}
 	versionMatcher := newVersionMatcher(expectedVer)
 
-	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActStopVersion).Return(
+	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActManageVersion).Return(
 		fmt.Errorf("git good"),
 	)
 	s.userActivityInteractor.EXPECT().RegisterStopAction(badUser.Email, _productID, versionMatcher, version.ErrUserNotAuthorized.Error()).Return(nil)
@@ -75,7 +75,7 @@ func (s *versionSuite) TestStop_ErrorVersionNotFound() {
 	expectedVer := &entity.Version{Tag: _versionTag}
 	versionMatcher := newVersionMatcher(expectedVer)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, expectedVer.Tag).Return(nil, fmt.Errorf("no version found"))
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, _productID, versionMatcher, version.ErrVersionNotFound.Error()).Return(nil)
 
@@ -96,7 +96,7 @@ func (s *versionSuite) TestStop_ErrorInvalidVersionStatus() {
 		Build()
 	versionMatcher := newVersionMatcher(vers)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
 	s.userActivityInteractor.EXPECT().RegisterStopAction(user.Email, _productID, versionMatcher, version.ErrVersionCannotBeStopped.Error()).Return(nil)
@@ -119,7 +119,7 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingStreams() {
 		Build()
 	versionMatcher := newVersionMatcher(vers)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(fmt.Errorf("error deleting streams"))
@@ -142,7 +142,7 @@ func (s *versionSuite) TestDeleteNatsResources_ErrorDeletingObjectStores() {
 		Build()
 	versionMatcher := newVersionMatcher(vers)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(nil)
@@ -169,7 +169,7 @@ func (s *versionSuite) TestStop_CheckNonBlockingErrorLogging() {
 	setStatusErrStarted := errors.New("not again")
 	registerActionErr := errors.New("this is the end")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(nil)
@@ -222,7 +222,7 @@ func (s *versionSuite) TestStop_ErrorUserNotAuthorized_ErrorRegisterAction() {
 	customErr := errors.New("oh no")
 	registerActionErr := errors.New("a bad day")
 
-	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActStopVersion).Return(
+	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActManageVersion).Return(
 		customErr,
 	)
 	// Given error registering action
@@ -253,7 +253,7 @@ func (s *versionSuite) TestStopAndNotify_ErrorVersionServiceStop() {
 	errStoppingVersion := "error stopping version"
 	setErrorErr := errors.New("error setting error")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStopVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
 	s.natsManagerService.EXPECT().DeleteStreams(ctx, _productID, _versionTag).Return(nil)
