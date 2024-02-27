@@ -209,7 +209,7 @@ func (i *ProductInteractor) createProductResources(
 		return i.productRepo.Delete(context.Background(), newProduct.ID)
 	})
 
-	if err := i.userRegistry.UpdateUserProductGrants(ctx, user.ID, newProduct.ID, auth.GetProductMantainerGrants()); err != nil {
+	if err := i.userRegistry.AddProductGrants(ctx, user.Email, newProduct.ID, auth.GetProductMaintainerGrants()); err != nil {
 		return nil, err
 	}
 

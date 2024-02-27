@@ -2,13 +2,11 @@ package user
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/spf13/viper"
 )
 
@@ -45,75 +43,6 @@ func NewKeycloakUserRegistry(client *gocloak.GoCloak) (*KeycloakUserRegistry, er
 		tokenExpiresAt:        now.Add(time.Duration(token.ExpiresIn) * time.Second),
 		refreshTokenExpiresAt: now.Add(time.Duration(token.RefreshExpiresIn) * time.Second),
 	}, nil
-}
-
-func (ur *KeycloakUserRegistry) UpdateUserProductGrants(ctx context.Context, userEmail string, product string, grants []auth.Action) error {
-	err := ur.refreshToken(ctx)
-	if err != nil {
-		return err
-	}
-
-	users, err := ur.client.GetUsers(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), gocloak.GetUsersParams{Email: gocloak.StringP(userEmail)})
-	if err != nil {
-		return err
-	}
-
-	if len(users) == 0 {
-		return ErrUserNotFound
-	}
-
-	user := users[0]
-	//user, err := ur.client.GetUserByID(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), userID)
-	//if err != nil {
-	//	return fmt.Errorf("getting user: %w", err)
-	//}
-
-	if user.Attributes == nil {
-		user.Attributes = &map[string][]string{}
-	}
-
-	rolesAttribute, ok := (*user.Attributes)["product_roles"]
-	if !ok {
-		rolesAttribute = make([]string, 1)
-	}
-
-	userProductGrants := rolesAttribute[0]
-	userGrantsByProduct := make(map[string]interface{})
-
-	if userProductGrants == "" {
-		userProductGrants = "{}"
-	}
-
-	if err = json.Unmarshal([]byte(userProductGrants), &userGrantsByProduct); err != nil {
-		return fmt.Errorf("unmarshalling user's product grants: %w", err)
-	}
-
-	if len(grants) == 0 {
-		delete(userGrantsByProduct, product)
-	} else {
-		userGrantsByProduct[product] = grants
-	}
-
-	marshalledRoles, err := json.Marshal(userGrantsByProduct)
-	if err != nil {
-		return fmt.Errorf("marshaling user's product grants: %w", err)
-	}
-
-	rolesAttribute[0] = string(marshalledRoles)
-
-	(*user.Attributes)["product_roles"] = rolesAttribute
-
-	err = ur.refreshToken(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = ur.client.UpdateUser(ctx, ur.token.AccessToken, viper.GetString(config.KeycloakRealmKey), *user)
-	if err != nil {
-		return fmt.Errorf("updating user: %w", err)
-	}
-
-	return nil
 }
 
 func (ur *KeycloakUserRegistry) refreshToken(ctx context.Context) error {
@@ -158,19 +87,4 @@ func (ur *KeycloakUserRegistry) refreshToken(ctx context.Context) error {
 	ur.refreshTokenExpiresAt = now.Add(time.Duration(token.RefreshExpiresIn) * time.Second)
 
 	return nil
-}
-
-func mergeGrants(actualGrants, newGrants []auth.Action) []auth.Action {
-	grantsSet := map[auth.Action]bool{}
-
-	for _, grant := range append(actualGrants, newGrants...) {
-		grantsSet[grant] = true
-	}
-
-	mergedGrants := make([]auth.Action, 0, len(actualGrants)+len(newGrants))
-	for key := range grantsSet {
-		mergedGrants = append(mergedGrants, key)
-	}
-
-	return mergedGrants
 }

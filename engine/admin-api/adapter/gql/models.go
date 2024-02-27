@@ -66,12 +66,6 @@ type RemoveUserFromProductInput struct {
 	Product string `json:"product"`
 }
 
-type RevokeUserProductGrantsInput struct {
-	TargetID string  `json:"targetID"`
-	Product  string  `json:"product"`
-	Comment  *string `json:"comment,omitempty"`
-}
-
 type StartVersionInput struct {
 	VersionTag string `json:"versionTag"`
 	Comment    string `json:"comment"`
@@ -88,11 +82,4 @@ type UnpublishVersionInput struct {
 	VersionTag string `json:"versionTag"`
 	Comment    string `json:"comment"`
 	ProductID  string `json:"productID"`
-}
-
-type UpdateUserProductGrantsInput struct {
-	TargetID string   `json:"targetID"`
-	Product  string   `json:"product"`
-	Grants   []string `json:"grants"`
-	Comment  *string  `json:"comment,omitempty"`
 }

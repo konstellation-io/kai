@@ -10,7 +10,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/entity"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/logs"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/process"
@@ -204,51 +203,10 @@ func (r *mutationResolver) PublishVersion(ctx context.Context, input PublishVers
 	return publishedTriggers, nil
 }
 
-func (r *mutationResolver) UpdateUserProductGrants(
-	ctx context.Context,
-	input UpdateUserProductGrantsInput,
-) (*entity.User, error) {
-	user := ctx.Value("user").(*entity.User)
-
-	grants := make([]auth.Action, 0, len(input.Grants))
-
-	for _, grant := range input.Grants {
-		grants = append(grants, auth.Action(grant))
-	}
-
-	err := r.userInteractor.UpdateUserProductGrants(
-		ctx,
-		user,
-		input.TargetID,
-		input.Product,
-		grants,
-		*input.Comment,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return &entity.User{ID: input.TargetID}, nil
-}
-
-func (r *mutationResolver) RevokeUserProductGrants(
-	ctx context.Context,
-	input RevokeUserProductGrantsInput,
-) (*entity.User, error) {
-	loggedUser := ctx.Value("user").(*entity.User)
-
-	err := r.userInteractor.RevokeUserProductGrants(ctx, loggedUser, input.TargetID, input.Product, *input.Comment)
-	if err != nil {
-		return nil, err
-	}
-
-	return &entity.User{ID: input.TargetID}, nil
-}
-
 func (r *mutationResolver) AddUserToProduct(ctx context.Context, input AddUserToProductInput) (*entity.User, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	if err := r.userInteractor.AddUserToProduct(ctx, loggedUser, input.Product, input.Email); err != nil {
+	if err := r.userInteractor.AddUserToProduct(ctx, loggedUser, input.Email, input.Product); err != nil {
 		return nil, err
 	}
 
@@ -258,7 +216,7 @@ func (r *mutationResolver) AddUserToProduct(ctx context.Context, input AddUserTo
 func (r *mutationResolver) RemoveUserFromProduct(ctx context.Context, input RemoveUserFromProductInput) (*entity.User, error) {
 	loggerUser := ctx.Value("user").(*entity.User)
 
-	if err := r.userInteractor.RemoveUserFromProduct(ctx, loggerUser, input.Product, input.Email); err != nil {
+	if err := r.userInteractor.RemoveUserFromProduct(ctx, loggerUser, input.Email, input.Product); err != nil {
 		return nil, err
 	}
 
@@ -268,7 +226,7 @@ func (r *mutationResolver) RemoveUserFromProduct(ctx context.Context, input Remo
 func (r *mutationResolver) AddMaintainerToProduct(ctx context.Context, input AddUserToProductInput) (*entity.User, error) {
 	loggedUser := ctx.Value("user").(*entity.User)
 
-	if err := r.userInteractor.AddUserToProduct(ctx, loggedUser, input.Product, input.Email); err != nil {
+	if err := r.userInteractor.AddMaintainerToProduct(ctx, loggedUser, input.Email, input.Product); err != nil {
 		return nil, err
 	}
 
@@ -278,7 +236,7 @@ func (r *mutationResolver) AddMaintainerToProduct(ctx context.Context, input Add
 func (r *mutationResolver) RemoveMaintainerFromProduct(ctx context.Context, input RemoveUserFromProductInput) (*entity.User, error) {
 	loggerUser := ctx.Value("user").(*entity.User)
 
-	if err := r.userInteractor.RemoveUserFromProduct(ctx, loggerUser, input.Product, input.Email); err != nil {
+	if err := r.userInteractor.RemoveMaintainerFromProduct(ctx, loggerUser, input.Email, input.Product); err != nil {
 		return nil, err
 	}
 

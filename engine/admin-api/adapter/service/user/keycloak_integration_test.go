@@ -4,14 +4,12 @@ package user
 
 import (
 	"context"
-	"encoding/json"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/konstellation-io/kai/engine/admin-api/adapter/config"
-	"github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -163,217 +161,7 @@ func (s *KeycloakSuite) getTestUser() *gocloak.User {
 	return users[0]
 }
 
-func (s *KeycloakSuite) TestUpdateUserProductGrants_NoPreviousExisting() {
-	// GIVEN a user with no previous existing grants and a product
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-
-	// WHEN updating grants for a product for the first time
-	err := s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants for the product are added
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{
-		product: []interface{}{auth.ActViewProduct.String(), auth.ActManageVersion.String()},
-	}
-
-	s.Equal(expectedResult, obtainedResult)
-}
-
-func (s *KeycloakSuite) TestUpdateUserProductGrants_WithPreviousExisting() {
-	// GIVEN a user with no previous existing grants and a product
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-
-	// GIVEN previous existing grants
-	err := s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	// WHEN updating grants for a product already existing
-	err = s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActRegisterProcess},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants for the product are updated
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{
-		product: []interface{}{auth.ActRegisterProcess.String()},
-	}
-
-	s.Equal(expectedResult, obtainedResult)
-}
-
-func (s *KeycloakSuite) TestUpdateUserProductGrants_ForOtherProduct() {
-	// GIVEN a user with no previous existing grants and two products
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-	product2 := "test-product-2"
-
-	// GIVEN previous existing grants
-	err := s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	// WHEN adding grants for other product
-	err = s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product2,
-		[]auth.Action{auth.ActRegisterProcess, auth.ActDeleteRegisteredProcess},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants for the other product are added
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{
-		product:  []interface{}{auth.ActViewProduct.String(), auth.ActManageVersion.String()},
-		product2: []interface{}{auth.ActRegisterProcess.String(), auth.ActDeleteRegisteredProcess.String()},
-	}
-
-	s.Equal(expectedResult, obtainedResult)
-}
-
-func (s *KeycloakSuite) TestUpdateUserProductGrants_RevokeAllGrants() {
-	// GIVEN a user with no previous existing grants and a product
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-
-	// GIVEN previous existing grants
-	err := s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	// WHEN revoking grants
-	err = s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants are revoked
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{}
-
-	s.Equal(expectedResult, obtainedResult)
-}
-
-func (s *KeycloakSuite) TestRevokeUserProductGrantsForOtherProduct() {
-	// GIVEN a user with no previous existing grants and two products
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-	product2 := "test-product-2"
-
-	// GIVEN previous existing grants
-	err := s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	err = s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product2,
-		[]auth.Action{auth.ActRegisterProcess, auth.ActDeleteRegisteredProcess},
-	)
-	s.Require().NoError(err)
-
-	// WHEN revoking grants for one product
-	err = s.keycloakUserRegistry.UpdateUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants for the other product are not revoked
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{
-		product2: []interface{}{auth.ActRegisterProcess.String(), auth.ActDeleteRegisteredProcess.String()},
-	}
-
-	s.Equal(expectedResult, obtainedResult)
-}
-
-func (s *KeycloakSuite) TestRefreshNotExpiredToken() {
+func (s *KeycloakSuite) TestRefreshToken_NotExpiredToken() {
 	// GIVEN the recently obtained token through setup test
 	ctx := context.Background()
 	expiredTimeCopy := s.keycloakUserRegistry.tokenExpiresAt
@@ -386,7 +174,7 @@ func (s *KeycloakSuite) TestRefreshNotExpiredToken() {
 	s.True(expiredTimeCopy.Equal(s.keycloakUserRegistry.tokenExpiresAt))
 }
 
-func (s *KeycloakSuite) TestRefreshExpiredToken() {
+func (s *KeycloakSuite) TestRefreshToken_ExpiredToken() {
 	// GIVEN an expired token
 	ctx := context.Background()
 	s.keycloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
@@ -400,7 +188,7 @@ func (s *KeycloakSuite) TestRefreshExpiredToken() {
 	s.True(now.Before(s.keycloakUserRegistry.tokenExpiresAt))
 }
 
-func (s *KeycloakSuite) TestRefreshExpiredRefreshToken() {
+func (s *KeycloakSuite) TestRefreshToken_ExpiredRefreshToken() {
 	// GIVEN both an expired token and its refresh token expired as well
 	ctx := context.Background()
 	s.keycloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
@@ -416,7 +204,7 @@ func (s *KeycloakSuite) TestRefreshExpiredRefreshToken() {
 	s.True(now.Before(s.keycloakUserRegistry.refreshTokenExpiresAt))
 }
 
-func (s *KeycloakSuite) TestRefreshExpiredTokenWithError() {
+func (s *KeycloakSuite) TestRefreshToken_ExpiredTokenWithError() {
 	// GIVEN an expired token
 	ctx := context.Background()
 	s.keycloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
@@ -429,7 +217,7 @@ func (s *KeycloakSuite) TestRefreshExpiredTokenWithError() {
 	s.Require().Error(err)
 }
 
-func (s *KeycloakSuite) TestRefreshExpiredRefreshTokenWithError() {
+func (s *KeycloakSuite) TestRefreshToken_ExpiredRefreshTokenWithError() {
 	// GIVEN both an expired token and its refresh token expired as well
 	ctx := context.Background()
 	s.keycloakUserRegistry.tokenExpiresAt = time.Now().Add(-time.Hour)
@@ -443,209 +231,4 @@ func (s *KeycloakSuite) TestRefreshExpiredRefreshTokenWithError() {
 	s.Require().Error(err)
 
 	viper.Set(config.KeycloakAdminPasswordKey, _adminPassword)
-}
-
-func (s *KeycloakSuite) TestAddUserProductGrants_NoPreviousExisting() {
-	// GIVEN a user with no previous existing grants and a product
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-
-	// WHEN updating grants for a product for the first time
-	err := s.keycloakUserRegistry.AddProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants for the product are added
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{
-		product: []interface{}{auth.ActViewProduct.String(), auth.ActManageVersion.String()},
-	}
-
-	s.ElementsMatch(expectedResult[product], obtainedResult[product])
-}
-
-func (s *KeycloakSuite) TestAddUserProductGrants_MergeNewGrants_NoDups() {
-	// GIVEN a user with no previous existing grants and a product
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-
-	err := s.keycloakUserRegistry.AddProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	// WHEN
-	err = s.keycloakUserRegistry.AddProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActCreateVersion},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants for the product are added
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{
-		product: []interface{}{
-			auth.ActViewProduct.String(),
-			auth.ActManageVersion.String(),
-			auth.ActCreateVersion.String(),
-		},
-	}
-
-	s.ElementsMatch(expectedResult[product], obtainedResult[product])
-}
-
-func (s *KeycloakSuite) TestAddUserProductGrants_MergeNewGrants_WithDups() {
-	// GIVEN a user with no previous existing grants and a product
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-
-	err := s.keycloakUserRegistry.AddProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	// WHEN
-	err = s.keycloakUserRegistry.AddProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion, auth.ActCreateVersion},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants for the product are added
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{
-		product: []interface{}{
-			auth.ActViewProduct.String(),
-			auth.ActManageVersion.String(),
-			auth.ActCreateVersion.String(),
-		},
-	}
-
-	s.ElementsMatch(expectedResult[product], obtainedResult[product])
-}
-
-func (s *KeycloakSuite) TestRevokeUserProductGrants() {
-	// GIVEN a user with no previous existing grants and a product
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-
-	// WHEN updating grants for a product for the first time
-	err := s.keycloakUserRegistry.AddProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	err = s.keycloakUserRegistry.RevokeUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants for the product are added
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{
-		product: []interface{}{auth.ActViewProduct.String()},
-	}
-
-	s.ElementsMatch(expectedResult[product], obtainedResult[product])
-}
-
-func (s *KeycloakSuite) TestRevokeUserProductGrants_UserWithoutGrants() {
-	// GIVEN a user with no previous existing grants and a product
-	ctx := context.Background()
-	user := s.getTestUser()
-	product := "test-product"
-
-	// WHEN updating grants for a product for the first time
-	err := s.keycloakUserRegistry.AddProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	err = s.keycloakUserRegistry.RevokeUserProductGrants(
-		ctx,
-		*user.Email,
-		product,
-		[]auth.Action{auth.ActManageVersion},
-	)
-	s.Require().NoError(err)
-
-	// THEN grants for the product are added
-	updatedUser := s.getTestUser()
-	marshalledAttributes := (*updatedUser.Attributes)["product_roles"]
-
-	s.Require().NotNil(marshalledAttributes)
-	s.Require().Len(marshalledAttributes, 1)
-
-	obtainedResult := make(map[string]interface{})
-	err = json.Unmarshal([]byte(marshalledAttributes[0]), &obtainedResult)
-	s.Require().NoError(err)
-
-	expectedResult := map[string]interface{}{
-		product: []interface{}{auth.ActViewProduct.String()},
-	}
-
-	s.ElementsMatch(expectedResult[product], obtainedResult[product])
 }

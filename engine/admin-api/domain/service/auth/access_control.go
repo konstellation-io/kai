@@ -23,7 +23,7 @@ const (
 
 	ActManageCriticalVersion Action = "manage_critical_version"
 	ActUpdateUserGrants      Action = "update_user_grants"
-	ActManageProductUser     Action = "manage_product_user"
+	ActManageProductUsers    Action = "manage_product_user"
 
 	ActViewServerInfo     Action = "view_server_info"     // To be deprecated
 	ActViewUserActivities Action = "view_user_activities" // To be deprecated
@@ -34,7 +34,7 @@ func (e Action) IsValid() bool {
 	case ActViewProduct, ActCreateProduct, ActCreateVersion, ActManageVersion,
 		ActRegisterProcess, ActDeleteRegisteredProcess, ActRegisterPublicProcess,
 		ActDeletePublicProcess, ActManageCriticalVersion, ActUpdateUserGrants,
-		ActViewUserActivities, ActViewServerInfo, ActManageProductUser:
+		ActViewUserActivities, ActViewServerInfo, ActManageProductUsers:
 		return true
 	}
 
@@ -52,14 +52,14 @@ type AccessControl interface {
 	GetUserProducts(user *entity.User) []string
 }
 
-func GetProductMantainerGrants() []Action {
+func GetProductMaintainerGrants() []Action {
 	return []Action{
 		ActViewProduct,
 		ActCreateVersion,
 		ActManageVersion,
 		ActRegisterProcess,
 		ActDeleteRegisteredProcess,
-		ActManageProductUser,
+		ActManageProductUsers,
 	}
 }
 
