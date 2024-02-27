@@ -22,7 +22,6 @@ const (
 	ActDeletePublicProcess   Action = "delete_public_process"
 
 	ActManageCriticalVersion Action = "manage_critical_version"
-	ActUpdateUserGrants      Action = "update_user_grants"
 	ActManageProductUsers    Action = "manage_product_user"
 
 	ActViewServerInfo     Action = "view_server_info"     // To be deprecated
