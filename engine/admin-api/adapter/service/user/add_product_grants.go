@@ -14,12 +14,12 @@ import (
 func (ur *KeycloakUserRegistry) AddProductGrants(ctx context.Context, userEmail, product string, grants []auth.Action) error {
 	user, err := ur.getUserByEmail(ctx, userEmail)
 	if err != nil {
-		return err
+		return fmt.Errorf("getting user by email: %w", err)
 	}
 
 	userGrantsByProduct, err := ur.getUserProductGrants(user)
 	if err != nil {
-		return err
+		return fmt.Errorf("getting user's product grants: %w", err)
 	}
 
 	userGrantsByProduct[product] = mergeGrants(userGrantsByProduct[product], grants)

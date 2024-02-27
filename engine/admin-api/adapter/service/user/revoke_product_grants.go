@@ -12,19 +12,14 @@ import (
 )
 
 func (ur *KeycloakUserRegistry) RevokeProductGrants(ctx context.Context, userEmail, product string, grants []auth.Action) error {
-	err := ur.refreshToken(ctx)
-	if err != nil {
-		return err
-	}
-
 	user, err := ur.getUserByEmail(ctx, userEmail)
 	if err != nil {
-		return err
+		return fmt.Errorf("getting user by email: %w", err)
 	}
 
 	userGrantsByProduct, err := ur.getUserProductGrants(user)
 	if err != nil {
-		return err
+		return fmt.Errorf("getting user's product grants: %w", err)
 	}
 
 	userGrantsByProduct[product] = slices.DeleteFunc(userGrantsByProduct[product], func(e auth.Action) bool {
