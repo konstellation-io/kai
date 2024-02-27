@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -115,15 +116,20 @@ func (r *VersionRepoMongoDB) Update(productID string, updatedVersion *entity.Ver
 	return err
 }
 
-func (r *VersionRepoMongoDB) ListVersionsByProduct(ctx context.Context, productID string) ([]*entity.Version, error) {
-	collection := r.client.Database(productID).Collection(versionsCollectionName)
-
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
-
+func (r *VersionRepoMongoDB) SearchByProduct(
+	ctx context.Context,
+	productID string,
+	filter *repository.ListVersionsFilter,
+) ([]*entity.Version, error) {
 	var versions []*entity.Version
 
-	cur, err := collection.Find(ctxWithTimeout, bson.M{})
+	queryFilter := r.getListVersionsFilter(filter)
+	collection := r.client.Database(productID).Collection(versionsCollectionName)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 60*time.Second)
+
+	defer cancel()
+
+	cur, err := collection.Find(ctxWithTimeout, queryFilter)
 	if err != nil {
 		return versions, err
 	}
@@ -141,6 +147,20 @@ func (r *VersionRepoMongoDB) ListVersionsByProduct(ctx context.Context, productI
 	}
 
 	return versions, nil
+}
+
+func (r *VersionRepoMongoDB) getListVersionsFilter(filter *repository.ListVersionsFilter) bson.M {
+	queryFilter := make(bson.M, 1)
+
+	if filter == nil {
+		return queryFilter
+	}
+
+	if filter.Status != "" {
+		queryFilter["status"] = filter.Status.String()
+	}
+
+	return queryFilter
 }
 
 func (r *VersionRepoMongoDB) SetStatus(
