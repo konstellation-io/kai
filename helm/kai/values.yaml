@@ -115,7 +115,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.3.0-develop.10
+    tag: 0.3.0-develop.11
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
@@ -174,7 +174,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.3.0-develop.10
+    tag: 0.3.0-develop.11
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
@@ -541,7 +541,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.3.0-develop.10
+    tag: 0.3.0-develop.11
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
@@ -561,7 +561,7 @@ registry:
     # -- Image repository
     repository: registry
     # -- Image tag
-    tag: 2.8.2
+    tag: 2.8.3
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
@@ -611,8 +611,35 @@ registry:
     # -- Registry password
     # @default -- password
     password: ""
+  storageDriver:
+    filesystem:
+      # -- Whether to enable the filesystem storage driver
+      enabled: true
+      config:
+        rootDirectory: /var/lib/registry
+    s3:
+      # -- Whether to enable the S3 storage driver
+      enabled: false
+      # -- S3 Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/s3/
+      config: {}
+      # config:
+      #   region: us-east-1
+      #   bucket: docker.myregistry.com
+    azure:
+      # -- Whether to enable the Azure storage driver
+      enabled: false
+      # -- Azure Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/azure/
+      config: {}
+    gcs:
+      # -- Whether to enable the GCS storage driver
+      enabled: false
+      # -- GCS Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/gcs/
+      config: {}
+    inmemory:
+      # -- Whether to enable the in-memory storage driver. Development only
+      enabled: false
   storage:
-    # -- Whether to enable persistence
+    # -- Whether to enable persistence. This only is used when storageDriver is set to "filesystem"
     enabled: true
     # -- Storage class name
     storageClass: ""

@@ -19,7 +19,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.3.0-develop.10"` | Image tag |
+| adminApi.image.tag | string | `"0.3.0-develop.11"` | Image tag |
 | adminApi.imagePullSecrets | list | `[]` | Image pull secrets |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
@@ -93,7 +93,7 @@
 | k8sManager.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.3.0-develop.10"` | Image tag |
+| k8sManager.image.tag | string | `"0.3.0-develop.11"` | Image tag |
 | k8sManager.imageBuilder.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for image builder's jobs |
 | k8sManager.imageBuilder.image.repository | string | `"gcr.io/kaniko-project/executor"` | Image repository for image builder's jobs |
 | k8sManager.imageBuilder.image.tag | string | `"v1.18.0"` | Image tag for image builder's jobs |
@@ -257,7 +257,7 @@
 | natsManager.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.3.0-develop.10"` | Image tag |
+| natsManager.image.tag | string | `"0.3.0-develop.11"` | Image tag |
 | natsManager.imagePullSecrets | list | `[]` | Image pull secrets |
 | natsManager.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | natsManager.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
@@ -339,7 +339,7 @@
 | registry.host | string | `"registry.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | registry.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | registry.image.repository | string | `"registry"` | Image repository |
-| registry.image.tag | string | `"2.8.2"` | Image tag |
+| registry.image.tag | string | `"2.8.3"` | Image tag |
 | registry.imagePullSecrets | list | `[]` | Image pull secrets |
 | registry.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | registry.ingress.className | string | `"kong"` | The name of the ingress class to use |
@@ -354,8 +354,17 @@
 | registry.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | registry.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | registry.storage.accessMode | string | `"ReadWriteOnce"` | Access mode for the volume |
-| registry.storage.enabled | bool | `true` | Whether to enable persistence |
+| registry.storage.enabled | bool | `true` | Whether to enable persistence. This only is used when storageDriver is set to "filesystem" |
 | registry.storage.path | string | `"/var/lib/registry"` | Persistent volume mount point. This will define Registry app workdir too. |
 | registry.storage.size | string | `"10Gi"` | Storage size |
 | registry.storage.storageClass | string | `""` | Storage class name |
+| registry.storageDriver.azure.config | object | `{}` | Azure Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/azure/ |
+| registry.storageDriver.azure.enabled | bool | `false` | Whether to enable the Azure storage driver |
+| registry.storageDriver.filesystem.config.rootDirectory | string | `"/var/lib/registry"` |  |
+| registry.storageDriver.filesystem.enabled | bool | `true` | Whether to enable the filesystem storage driver |
+| registry.storageDriver.gcs.config | object | `{}` | GCS Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/gcs/ |
+| registry.storageDriver.gcs.enabled | bool | `false` | Whether to enable the GCS storage driver |
+| registry.storageDriver.inmemory.enabled | bool | `false` | Whether to enable the in-memory storage driver. Development only |
+| registry.storageDriver.s3.config | object | `{}` | S3 Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/s3/ |
+| registry.storageDriver.s3.enabled | bool | `false` | Whether to enable the S3 storage driver |
 | registry.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
