@@ -64,14 +64,9 @@ func (ps *Handler) RegisterProcess(
 ) (*entity.RegisteredProcess, error) {
 	ps.logger.Info("Registering new process")
 
-	if err := opts.Validate(); err != nil {
+	err := ps.validateOpts(ctx, opts)
+	if err != nil {
 		return nil, err
-	}
-
-	if opts.Product != "" {
-		if _, err := ps.productRepository.GetByID(ctx, opts.Product); err != nil {
-			return nil, err
-		}
 	}
 
 	if err := ps.checkRegisterGrants(user, opts); err != nil {
@@ -109,6 +104,20 @@ func (ps *Handler) RegisterProcess(
 	go ps.uploadProcessToRegistry(scope, processToRegister, opts.Sources)
 
 	return processToRegister, nil
+}
+
+func (ps *Handler) validateOpts(ctx context.Context, opts RegisterProcessOpts) error {
+	if err := opts.Validate(); err != nil {
+		return err
+	}
+
+	if opts.Product != "" {
+		if _, err := ps.productRepository.GetByID(ctx, opts.Product); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (ps *Handler) checkRegisterGrants(user *entity.User, opts RegisterProcessOpts) error {
