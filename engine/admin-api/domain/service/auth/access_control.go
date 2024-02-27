@@ -69,6 +69,6 @@ func GetProductUserGrants() []Action {
 		ActCreateVersion,
 		ActManageVersion,
 		ActRegisterProcess,
-		ActDeleteRegisteredProcess, // TODO: should a regular user be able to do this?
+		ActDeleteRegisteredProcess,
 	}
 }

@@ -23,6 +23,9 @@ func (ur *KeycloakUserRegistry) RevokeProductGrants(ctx context.Context, userEma
 	}
 
 	userGrantsByProduct, err := ur.getUserProductGrants(user)
+	if err != nil {
+		return err
+	}
 
 	userGrantsByProduct[product] = slices.DeleteFunc(userGrantsByProduct[product], func(e auth.Action) bool {
 		return slices.Contains(grants, e)
