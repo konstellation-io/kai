@@ -39,8 +39,21 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-
           ports:
             - containerPort: 50051
               protocol: TCP
               name: grpc
+          resources:
+            {{- toYaml .Values.natsManager.resources | nindent 12 }}
+      {{- with .Values.natsManager.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.natsManager.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.natsManager.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

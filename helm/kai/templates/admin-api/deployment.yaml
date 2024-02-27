@@ -93,3 +93,5 @@ spec:
             - containerPort: 8080
               protocol: TCP
               name: grpc
+          resources:
+            {{- toYaml .Values.adminApi.resources | nindent 12 }}
