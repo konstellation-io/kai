@@ -611,8 +611,20 @@ registry:
     # -- Registry password
     # @default -- password
     password: ""
+  storageDriver:
+    filesystem:
+      # -- Whether to enable the filesystem storage driver
+      enabled: false
+    s3:
+      # -- Whether to enable the S3 storage driver
+      enabled: true
+      # -- S3 Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/s3/
+      config: {}
+      # config:
+      #   region: us-east-1
+      #   bucket: docker.myregistry.com
   storage:
-    # -- Whether to enable persistence
+    # -- Whether to enable persistence. This only is used when storageDriver is set to "filesystem"
     enabled: true
     # -- Storage class name
     storageClass: ""
