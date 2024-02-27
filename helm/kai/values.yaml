@@ -115,7 +115,7 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.3.0-develop.12
+    tag: 0.3.0-develop.13
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
@@ -176,7 +176,7 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.3.0-develop.12
+    tag: 0.3.0-develop.13
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
@@ -547,7 +547,7 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.3.0-develop.12
+    tag: 0.3.0-develop.13
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
