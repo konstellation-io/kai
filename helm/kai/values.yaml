@@ -441,101 +441,33 @@ keycloak:
   # -- Extra volume mounts
   extraVolumeMounts: []
 nats:
-  image:
-    # -- Image repository
-    repository: nats
-    # -- Image tag
-    tag: 2.8.4
-    # -- Image pull policy
-    pullPolicy: IfNotPresent
-  # -- Image pull secrets
-  imagePullSecrets: []
+  config:
+    cluster:
+      enabled: true
+      port: 6222
+      replicas: 3
+    jetstream:
+      enabled: false
+      fileStore:
+        enabled: true
+        dir: /data
+        pvc:
+          enabled: true
+          size: 10Gi
+      memoryStore:
+        enabled: true
+        size: 1Gi
   serviceAccount:
-    # -- Specifies whether a service account should be created
-    create: true
-    # -- Annotations to add to the service account
-    annotations: {}
-    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
-    name: ""
-  client:
-    # -- Port for client connections
-    port: 4222
-  jetstream:
-    storage:
-      # -- Whether to enable a PersistentVolumeClaim for Jetstream
-      enabled: true
-      # -- Storage class name for the Jetstream PersistentVolumeClaim
-      storageClassName: standard
-      # -- Storage size for the Jetstream PersistentVolumeClaim. Notice this is also used for the Jetstream storage limit configuration even if PVC creation is disabled
-      size: 5Gi
-      # -- Directory to use for JetStream storage when using a PersistentVolumeClaim
-      storageDirectory: /data
-    memStorage:
-      # -- Whether to enable memory storage for Jetstream
-      enabled: true
-      # -- Memory storage max size for JetStream
-      size: 2Gi
-  logging:
-    # -- Whether to enable logging debug mode
-    debug: false
-    # -- Whether to enable logging trace mode
-    trace: false
-    # -- Timestamp log entries
-    logtime: true
-  limits:
-    # -- Maximum number of active client connections.
-    # @default -- 64K
-    maxConnections:
-    # -- Maximum numbers of subscriptions per client and leafnode accounts connection.
-    # @default -- 0 (unlimited)
-    maxSubscriptions:
-    # -- Maximum length of a protocol line (including combined length of subject and queue group). Increasing this value may require cliet changes. Applies to all traffic
-    # @default -- 4KB
-    maxControlLine:
-    # -- Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be equal or smaller to the `max_pending` value.
-    # @default -- 1MB
-    maxPayload:
-    # -- Maximum number of seconds the server will block when writing. Once this threshold is exceeded the connection will be closed.
-    # @default -- 10s
-    writeDeadline:
-    # -- Maximum number of bytes buffered for a connection Applies to client connections. Note that applications can also set 'PendingLimits' (number of messages and total size) for their subscriptions.
-    # @default -- 64MB
-    maxPending:
-    # -- After how many unanswered pings the server will allow before closing the connection.
-    # @default -- 2
-    maxPings:
-    # How many seconds should pass before sending a PING
-    # to a client that has no activity.
-    pingInterval:
-    # -- Grace period after pod begins shutdown before starting to close client connections
-    lameDuckGracePeriod: "10s"
-    # -- Duration over which to slowly close close client connections after lameDuckGracePeriod has passed
-    lameDuckDuration: "30s"
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-  # -- Assign custom affinity rules to the NATS pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-  # nodeAffinity:
-  #   requiredDuringSchedulingIgnoredDuringExecution:
-  #     nodeSelectorTerms:
-  #     - matchExpressions:
-  #       - key: kubernetes.io/e2e-az-name
-  #         operator: In
-  #         values:
-  #         - e2e-az1
-  #         - e2e-az2
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
+    enabled: true
+  monitor:
+    enabled: true
+    port: 8222
+  promExporter:
+    enabled: false
+    image:
+      repository: natsio/prometheus-nats-exporter
+      tag: 0.14.0
+    port: 7777
 natsManager:
   image:
     # -- Image repository
