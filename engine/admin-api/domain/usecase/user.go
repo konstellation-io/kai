@@ -71,7 +71,7 @@ func (ui *UserInteractor) AddMaintainerToProduct(ctx context.Context, user *enti
 
 	err := ui.userRegistry.AddProductGrants(ctx, targetUserEmail, product, auth.GetProductMaintainerGrants())
 	if err != nil {
-		return fmt.Errorf("updating grants in user's registry: %w", err)
+		return fmt.Errorf("adding product grants in user's registry: %w", err)
 	}
 
 	ui.logger.Info("Maintainer added to product", "user", targetUserEmail, "product", product)
@@ -91,7 +91,7 @@ func (ui *UserInteractor) RemoveMaintainerFromProduct(
 
 	err := ui.userRegistry.RevokeProductGrants(ctx, targetUserEmail, product, auth.GetProductMaintainerGrants())
 	if err != nil {
-		return fmt.Errorf("updating grants in user's registry: %w", err)
+		return fmt.Errorf("revoking product grants in user's registry: %w", err)
 	}
 
 	ui.logger.Info("User deleted from product", "user", targetUserEmail, "product", product)
