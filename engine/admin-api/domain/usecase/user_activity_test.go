@@ -305,7 +305,8 @@ func (s *userActivitySuite) TestRegisterUpdateProductGrants() {
 		comment      = "This is a test comment"
 	)
 
-	productGrants := []string{"test", "view"}
+	productGrants := []auth.Action{"test", "view"}
+	productGrantsStr := []string{"test", "view"}
 
 	expectedUserActivity := entity.UserActivity{
 		UserID: userID,
@@ -314,7 +315,7 @@ func (s *userActivitySuite) TestRegisterUpdateProductGrants() {
 			{Key: "USER_ID", Value: userID},
 			{Key: "TARGET_USER_ID", Value: targetUserID},
 			{Key: "PRODUCT", Value: productID},
-			{Key: "NEW_PRODUCT_GRANTS", Value: strings.Join(productGrants, ",")},
+			{Key: "NEW_PRODUCT_GRANTS", Value: strings.Join(productGrantsStr, ",")},
 			{Key: "COMMENT", Value: comment},
 		},
 	}

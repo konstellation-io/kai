@@ -43,7 +43,7 @@ func (s *versionSuite) TestStart_OK() {
 		configurationsToUpdate = s.getTestKeyValueConfigurations(keyValueStoreResources, vers, workflow, workflow.Processes[0])
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStartVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Times(1).Return(prod, nil)
 
@@ -79,7 +79,7 @@ func (s *versionSuite) TestStart_ErrorUserNotAuthorized() {
 
 	expectedError := errors.New("unauthorized")
 
-	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActStartVersion).Return(expectedError)
+	s.accessControl.EXPECT().CheckProductGrants(badUser, _productID, auth.ActManageVersion).Return(expectedError)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, badUser, _productID, expectedVer.Tag, "testing")
@@ -98,10 +98,10 @@ func (s *versionSuite) TestStart_ErrorCriticalVersionUnauthorized() {
 
 	expectedError := errors.New("unauthorized")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, prod.ID, auth.ActStartVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, prod.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, prod.ID).Return(prod, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, prod.ID, vers.Tag).Return(vers, nil)
-	s.accessControl.EXPECT().CheckProductGrants(user, prod.ID, auth.ActStartCriticalVersion).Return(expectedError)
+	s.accessControl.EXPECT().CheckProductGrants(user, prod.ID, auth.ActManageCriticalVersion).Return(expectedError)
 
 	// WHEN starting the version
 	_, _, err := s.handler.Start(ctx, user, _productID, vers.Tag, "testing")
@@ -118,7 +118,7 @@ func (s *versionSuite) TestStart_ErrorNonExistingVersion() {
 
 	expectedError := errors.New("version repo error")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStartVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(prod, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(nil, expectedError)
 
@@ -137,7 +137,7 @@ func (s *versionSuite) TestStart_ErrorInvalidVersionStatus() {
 		WithStatus(entity.VersionStatusStarted).
 		Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStartVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(prod, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 
@@ -162,7 +162,7 @@ func (s *versionSuite) TestStart_ErrorCreatingStreams() {
 		errStrMatcher = newStringContainsMatcher(expectedError.Error())
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStartVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Times(1).Return(prod, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, _productID, _versionTag, entity.VersionStatusStarting).Return(nil)
@@ -194,7 +194,7 @@ func (s *versionSuite) TestStart_ErrorCreatingObjectStore() {
 
 	errStrMatcher := newStringContainsMatcher(expectedError.Error())
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStartVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Times(1).Return(prod, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, _productID, _versionTag, entity.VersionStatusStarting).Return(nil)
@@ -228,7 +228,7 @@ func (s *versionSuite) TestStart_ErrorCreatingKeyValueStores() {
 
 	errStrMatcher := newStringContainsMatcher(expectedError.Error())
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStartVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Times(1).Return(prod, nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, _productID, _versionTag, entity.VersionStatusStarting).Return(nil)
@@ -265,7 +265,7 @@ func (s *versionSuite) TestStart_ErrorVersionServiceStart() {
 		streamResources = s.getVersionStreamingResources(vers)
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStartVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Times(1).Return(prod, nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, _productID, vers.Tag, entity.VersionStatusStarting).Return(nil)
@@ -315,7 +315,7 @@ func (s *versionSuite) TestStart_ErrorRegisteringUserActivity() {
 
 	streamResources := s.getVersionStreamingResources(vers)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActStartVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, _productID, _versionTag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Times(1).Return(prod, nil)
 	s.versionRepo.EXPECT().SetStatus(ctx, _productID, vers.Tag, entity.VersionStatusStarting).Return(nil)

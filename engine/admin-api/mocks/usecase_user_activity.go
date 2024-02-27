@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/konstellation-io/kai/engine/admin-api/domain/entity"
+	auth "github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
 // MockUserActivityInteracter is a mock of UserActivityInteracter interface.
@@ -135,7 +136,7 @@ func (mr *MockUserActivityInteracterMockRecorder) RegisterUnpublishAction(userID
 }
 
 // RegisterUpdateProductGrants mocks base method.
-func (m *MockUserActivityInteracter) RegisterUpdateProductGrants(userID, targetUserID, product string, productGrants []string, comment string) error {
+func (m *MockUserActivityInteracter) RegisterUpdateProductGrants(userID, targetUserID, product string, productGrants []auth.Action, comment string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterUpdateProductGrants", userID, targetUserID, product, productGrants, comment)
 	ret0, _ := ret[0].(error)

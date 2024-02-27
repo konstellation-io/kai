@@ -51,6 +51,20 @@ func (mr *MockProductRepoMockRecorder) Create(ctx, product interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProductRepo)(nil).Create), ctx, product)
 }
 
+// Delete mocks base method.
+func (m *MockProductRepo) Delete(ctx context.Context, productID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, productID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockProductRepoMockRecorder) Delete(ctx, productID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductRepo)(nil).Delete), ctx, productID)
+}
+
 // DeleteDatabase mocks base method.
 func (m *MockProductRepo) DeleteDatabase(ctx context.Context, productID string) error {
 	m.ctrl.T.Helper()

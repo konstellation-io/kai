@@ -12,36 +12,28 @@ const (
 	ActViewProduct   Action = "view_product"
 	ActCreateProduct Action = "create_product"
 
-	ActCreateVersion        Action = "create_version"
-	ActStartVersion         Action = "start_version"
-	ActStartCriticalVersion Action = "start_critical_version"
-	ActStopVersion          Action = "stop_version"
-	ActPublishVersion       Action = "publish_version"
-	ActUnpublishVersion     Action = "unpublish_version"
-	ActEditVersion          Action = "edit_version"
-	ActViewVersion          Action = "view_version"
+	ActManageVersion Action = "manage_version"
 
-	ActViewMetrics    Action = "view_metrics"
-	ActViewServerInfo Action = "view_server_info"
-
-	ActViewUserActivities Action = "view_user_activities"
-	ActUpdateUserGrants   Action = "update_user_grants"
-
-	ActViewRegisteredProcesses Action = "view_registered_processes"
 	ActRegisterProcess         Action = "register_process"
-	ActRegisterPublicProcess   Action = "register_public_process"
+	ActDeleteRegisteredProcess Action = "delete_registered_process"
 
-	ActDeleteProcess       Action = "delete_process"
-	ActDeletePublicProcess Action = "delete_public_process"
+	ActRegisterPublicProcess Action = "register_public_process"
+	ActDeletePublicProcess   Action = "delete_public_process"
+
+	ActManageCriticalVersion    Action = "manage_critical_version"
+	ActManageProductUsers       Action = "manage_product_user"
+	ActManageProductMaintainers Action = "manage_product_maintainers"
+
+	ActViewServerInfo     Action = "view_server_info"     // To be deprecated
+	ActViewUserActivities Action = "view_user_activities" // To be deprecated
 )
 
 func (e Action) IsValid() bool {
 	switch e {
-	case ActCreateProduct, ActStartVersion, ActStopVersion, ActUpdateUserGrants,
-		ActPublishVersion, ActUnpublishVersion, ActEditVersion, ActViewMetrics,
-		ActViewUserActivities, ActViewProduct, ActCreateVersion, ActViewVersion,
-		ActViewServerInfo, ActStartCriticalVersion, ActRegisterProcess, ActRegisterPublicProcess,
-		ActDeleteProcess, ActDeletePublicProcess, ActViewRegisteredProcesses:
+	case ActViewProduct, ActCreateProduct, ActManageVersion,
+		ActRegisterProcess, ActDeleteRegisteredProcess, ActRegisterPublicProcess,
+		ActDeletePublicProcess, ActManageCriticalVersion, ActViewUserActivities,
+		ActViewServerInfo, ActManageProductUsers:
 		return true
 	}
 
@@ -57,4 +49,21 @@ type AccessControl interface {
 	CheckProductGrants(user *entity.User, product string, action Action) error
 	IsAdmin(user *entity.User) bool
 	GetUserProductsWithViewAccess(user *entity.User) []string
+}
+
+func GetDefaultUserGrants() []Action {
+	return []Action{
+		ActViewProduct,
+		ActManageVersion,
+		ActRegisterProcess,
+	}
+}
+
+func GetDefaultMaintainerGrants() []Action {
+	return append(
+		GetDefaultUserGrants(),
+		ActDeleteRegisteredProcess,
+		ActManageCriticalVersion,
+		ActManageProductUsers,
+	)
 }

@@ -23,7 +23,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_WithProduct() {
 	imageName := "test-product_process-name"
 	processID := "test-product_process-name:v1.0.0"
 
-	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteRegisteredProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, nil)
 	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(nil)
 	s.processRepo.EXPECT().Delete(ctx, opts.Product, processID).Return(nil)
@@ -114,7 +114,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_NoProductGrants() {
 	}
 	expectedErr := errors.New("auth error")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(expectedErr)
+	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteRegisteredProcess).Return(expectedErr)
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
 	s.ErrorIs(err, expectedErr)
@@ -148,7 +148,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_GetByIDError() {
 
 	processID := "test-product_process-name:v1.0.0"
 
-	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteRegisteredProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, process.ErrRegisteredProcessNotFound)
 
 	_, err := s.processHandler.DeleteProcess(ctx, user, opts)
@@ -169,7 +169,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_DeleteProcessError() {
 	imageName := "test-product_process-name"
 	processID := "test-product_process-name:v1.0.0"
 
-	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteRegisteredProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, nil)
 	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(expectedErr)
 
@@ -191,7 +191,7 @@ func (s *ProcessHandlerTestSuite) TestDeleteProcess_DeleteProcessRepoError() {
 	imageName := "test-product_process-name"
 	processID := "test-product_process-name:v1.0.0"
 
-	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteProcess).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, opts.Product, auth.ActDeleteRegisteredProcess).Return(nil)
 	s.processRepo.EXPECT().GetByID(ctx, opts.Product, processID).Return(nil, nil)
 	s.processRegistry.EXPECT().DeleteProcess(ctx, imageName, opts.Version).Return(nil)
 	s.processRepo.EXPECT().Delete(ctx, opts.Product, processID).Return(expectedErr)
