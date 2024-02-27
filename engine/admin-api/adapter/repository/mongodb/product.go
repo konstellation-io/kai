@@ -172,7 +172,7 @@ func (r *ProductRepoMongoDB) Delete(ctx context.Context, productID string) error
 }
 
 func (r *ProductRepoMongoDB) getFindAllMongoFilter(findAllFilter *repository.FindAllFilter) bson.M {
-	filter := make(bson.M, 0)
+	filter := make(bson.M, 1)
 
 	if findAllFilter == nil {
 		return filter

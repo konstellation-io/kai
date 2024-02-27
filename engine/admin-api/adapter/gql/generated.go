@@ -141,7 +141,7 @@ type ComplexityRoot struct {
 		ServerInfo          func(childComplexity int) int
 		UserActivityList    func(childComplexity int, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) int
 		Version             func(childComplexity int, productID string, tag *string) int
-		Versions            func(childComplexity int, productID string) int
+		Versions            func(childComplexity int, productID string, status *string) int
 	}
 
 	RegisteredProcess struct {
@@ -228,7 +228,7 @@ type QueryResolver interface {
 	Product(ctx context.Context, id string) (*entity.Product, error)
 	Products(ctx context.Context, productName *string) ([]*entity.Product, error)
 	Version(ctx context.Context, productID string, tag *string) (*entity.Version, error)
-	Versions(ctx context.Context, productID string) ([]*entity.Version, error)
+	Versions(ctx context.Context, productID string, status *string) ([]*entity.Version, error)
 	RegisteredProcesses(ctx context.Context, productID string, processName *string, version *string, processType *string) ([]*entity.RegisteredProcess, error)
 	UserActivityList(ctx context.Context, userEmail *string, types []entity.UserActivityType, versionIds []string, fromDate *string, toDate *string, lastID *string) ([]*entity.UserActivity, error)
 	Logs(ctx context.Context, filters entity.LogFilters) ([]*entity.Log, error)
@@ -776,7 +776,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Versions(childComplexity, args["productID"].(string)), true
+		return e.complexity.Query.Versions(childComplexity, args["productID"].(string), args["status"].(*string)), true
 
 	case "RegisteredProcess.id":
 		if e.complexity.RegisteredProcess.ID == nil {
@@ -1147,7 +1147,7 @@ type Query {
   product(id: ID!): Product!
   products(productName: String): [Product!]!
   version(productID: ID!, tag: String): Version!
-  versions(productID: ID!): [Version!]!
+  versions(productID: ID!, status: String): [Version!]!
   registeredProcesses(productID: ID!, processName: String, version: String, processType: String): [RegisteredProcess]!
   userActivityList(
     userEmail: String
@@ -1859,6 +1859,15 @@ func (ec *executionContext) field_Query_versions_args(ctx context.Context, rawAr
 		}
 	}
 	args["productID"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["status"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg1
 	return args, nil
 }
 
@@ -4627,7 +4636,7 @@ func (ec *executionContext) _Query_versions(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Versions(rctx, fc.Args["productID"].(string))
+		return ec.resolvers.Query().Versions(rctx, fc.Args["productID"].(string), fc.Args["status"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
