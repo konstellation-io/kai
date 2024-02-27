@@ -23,7 +23,7 @@ func (s *ProcessHandlerTestSuite) TestSearch_WithTypeFilter() {
 		expectedProcesses = append(productProcesses, kaiProcesses...)
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewRegisteredProcesses).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(nil, nil)
 	s.processRepo.EXPECT().SearchByProduct(ctx, _productID, &filter).Return(productProcesses, nil)
 	s.processRepo.EXPECT().GlobalSearch(ctx, &filter).Return(kaiProcesses, nil)
@@ -49,7 +49,7 @@ func (s *ProcessHandlerTestSuite) TestSearch_NoTypeFilter() {
 		},
 	}
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewRegisteredProcesses).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(nil, nil)
 	s.processRepo.EXPECT().SearchByProduct(ctx, _productID, nil).Return(expectedRegisteredProcess, nil)
 	s.processRepo.EXPECT().GlobalSearch(ctx, nil).Return(nil, nil)
@@ -67,7 +67,7 @@ func (s *ProcessHandlerTestSuite) TestSearch_InvalidTypeFilterFilter() {
 		ProcessType: "invalid",
 	}
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewRegisteredProcesses).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(nil, nil)
 
 	_, err := s.processHandler.Search(ctx, user, _productID, filter)
@@ -81,7 +81,7 @@ func (s *ProcessHandlerTestSuite) TestSearch_ProductDoesNotExist() {
 		ProcessType: "invalid",
 	}
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewRegisteredProcesses).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewProduct).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, _productID).Return(nil, usecase.ErrProductNotFound)
 
 	_, err := s.processHandler.Search(ctx, user, _productID, &filter)
@@ -92,7 +92,7 @@ func (s *ProcessHandlerTestSuite) TestSearch_Unauthorized() {
 	ctx := context.Background()
 	expectedError := errors.New("unauthorized")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewRegisteredProcesses).Return(expectedError)
+	s.accessControl.EXPECT().CheckProductGrants(user, _productID, auth.ActViewProduct).Return(expectedError)
 
 	_, err := s.processHandler.Search(ctx, user, _productID, &repository.SearchFilter{})
 	s.Require().ErrorIs(err, expectedError)

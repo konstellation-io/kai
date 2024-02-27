@@ -20,7 +20,7 @@ func (s *versionSuite) TestGetByTag() {
 		testVersion = testhelpers.NewVersionBuilder().WithTag("test-tag").Build()
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, testVersion.Tag).Return(testVersion, nil)
 
 	// WHEN
@@ -41,7 +41,7 @@ func (s *versionSuite) TestGetByTag_Unauthorized() {
 		expectedErr = errors.New("unauthorized")
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewVersion).Return(expectedErr)
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct).Return(expectedErr)
 
 	// WHEN
 	_, err := s.handler.GetByTag(ctx, user, productID, testVersion.Tag)
@@ -65,7 +65,7 @@ func (s *versionSuite) TestGetByTag_PublishedVersion_PublishedTriggers() {
 		}
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, productID, auth.ActViewProduct).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, productID, testVersion.Tag).Return(testVersion, nil)
 	s.versionService.EXPECT().GetPublishedTriggers(ctx, productID).Return(expectedPublishedTriggers, nil)
 

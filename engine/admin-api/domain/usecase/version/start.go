@@ -17,7 +17,7 @@ func (h *Handler) Start(
 	user *entity.User,
 	productID, versionTag, comment string,
 ) (*entity.Version, chan *entity.Version, error) {
-	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartVersion); err != nil {
+	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActManageVersion); err != nil {
 		return nil, nil, err
 	}
 
@@ -40,7 +40,7 @@ func (h *Handler) Start(
 	}
 
 	if version.Status == entity.VersionStatusCritical {
-		if err := h.accessControl.CheckProductGrants(user, productID, auth.ActStartCriticalVersion); err != nil {
+		if err := h.accessControl.CheckProductGrants(user, productID, auth.ActManageCriticalVersion); err != nil {
 			return nil, nil, err
 		}
 	}

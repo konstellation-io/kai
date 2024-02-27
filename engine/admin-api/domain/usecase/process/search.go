@@ -14,7 +14,7 @@ func (ps *Handler) Search(
 	productID string,
 	filter *repository.SearchFilter,
 ) ([]*entity.RegisteredProcess, error) {
-	if err := ps.accessControl.CheckProductGrants(user, productID, auth.ActViewRegisteredProcesses); err != nil {
+	if err := ps.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct); err != nil {
 		return nil, err
 	}
 

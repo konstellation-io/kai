@@ -28,7 +28,7 @@ func (s *versionSuite) TestPublish_OK() {
 		"test-trigger": "test-url",
 	}
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
@@ -61,7 +61,7 @@ func (s *versionSuite) TestPublishing_ErrorUserNotAuthorized() {
 
 	expectedError := errors.New("unauthorized")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(expectedError)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(expectedError)
 
 	// WHEN publishing the version
 	_, err := s.handler.Publish(ctx, user, version.PublishOpts{
@@ -83,7 +83,7 @@ func (s *versionSuite) TestPublish_ErrorVersionNotFound() {
 
 	expectedError := errors.New("version not found")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, expectedVer.Tag).Return(nil, expectedError)
 
@@ -108,7 +108,7 @@ func (s *versionSuite) TestPublish_ErrorVersionNotStarted_NoForce() {
 		Build()
 	product := testhelpers.NewProductBuilder().Build()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
@@ -137,7 +137,7 @@ func (s *versionSuite) TestPublish_ProductWithVersionAlreadyPublished_NoForce() 
 			Build()
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
 
@@ -166,7 +166,7 @@ func (s *versionSuite) TestPublish_ErrorPublishingVersion() {
 		expectedError = errors.New("publish error in k8s service")
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 
@@ -199,7 +199,7 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction() {
 
 	expectedError := errors.New("error registering user activity")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
 
@@ -258,7 +258,7 @@ func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced() {
 		}
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
@@ -312,7 +312,7 @@ func (s *versionSuite) TestPublish_AnotherVersionPublished_Forced_RegisterAction
 
 	expecterError := errors.New("register action error")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
@@ -358,7 +358,7 @@ func (s *versionSuite) TestPublish_FailsIfTheVersionIsAlreadyPublished() {
 			Build()
 	)
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, _versionTag).Return(vers, nil)
 
@@ -390,7 +390,7 @@ func (s *versionSuite) TestPublish_ErrorInStatusAndRegisteringAction_Compensatio
 
 	expectedError := errors.New("error registering user activity")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActPublishVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, vers.Tag).Return(vers, nil)
 

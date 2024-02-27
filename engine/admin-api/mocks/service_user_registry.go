@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	auth "github.com/konstellation-io/kai/engine/admin-api/domain/service/auth"
 )
 
 // MockUserRegistry is a mock of UserRegistry interface.
@@ -32,6 +33,20 @@ func NewMockUserRegistry(ctrl *gomock.Controller) *MockUserRegistry {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockUserRegistry) EXPECT() *MockUserRegistryMockRecorder {
 	return m.recorder
+}
+
+// AddProductGrants mocks base method.
+func (m *MockUserRegistry) AddProductGrants(ctx context.Context, userEmail, product string, grants []auth.Action) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddProductGrants", ctx, userEmail, product, grants)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddProductGrants indicates an expected call of AddProductGrants.
+func (mr *MockUserRegistryMockRecorder) AddProductGrants(ctx, userEmail, product, grants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).AddProductGrants), ctx, userEmail, product, grants)
 }
 
 // CreateGroupWithPolicy mocks base method.
@@ -90,16 +105,16 @@ func (mr *MockUserRegistryMockRecorder) DeleteUser(ctx, name interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockUserRegistry)(nil).DeleteUser), ctx, name)
 }
 
-// UpdateUserProductGrants mocks base method.
-func (m *MockUserRegistry) UpdateUserProductGrants(ctx context.Context, userID, product string, grants []string) error {
+// RevokeProductGrants mocks base method.
+func (m *MockUserRegistry) RevokeProductGrants(ctx context.Context, userEmail, product string, grants []auth.Action) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUserProductGrants", ctx, userID, product, grants)
+	ret := m.ctrl.Call(m, "RevokeProductGrants", ctx, userEmail, product, grants)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UpdateUserProductGrants indicates an expected call of UpdateUserProductGrants.
-func (mr *MockUserRegistryMockRecorder) UpdateUserProductGrants(ctx, userID, product, grants interface{}) *gomock.Call {
+// RevokeProductGrants indicates an expected call of RevokeProductGrants.
+func (mr *MockUserRegistryMockRecorder) RevokeProductGrants(ctx, userEmail, product, grants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).UpdateUserProductGrants), ctx, userID, product, grants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RevokeProductGrants", reflect.TypeOf((*MockUserRegistry)(nil).RevokeProductGrants), ctx, userEmail, product, grants)
 }

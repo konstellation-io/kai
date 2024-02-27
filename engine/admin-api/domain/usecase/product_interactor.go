@@ -100,7 +100,7 @@ func (i *ProductInteractor) CreateProduct(
 	// Create resources
 	compensations := compensator.New()
 
-	createdProduct, err := i.createProductResources(ctx, compensations, newProduct)
+	createdProduct, err := i.createProductResources(ctx, user, compensations, newProduct)
 	if err != nil {
 		go i.executeCompensations(compensations)
 		return nil, err
@@ -113,6 +113,7 @@ func (i *ProductInteractor) CreateProduct(
 
 func (i *ProductInteractor) createProductResources(
 	ctx context.Context,
+	user *entity.User,
 	compensations *compensator.Compensator,
 	newProduct *entity.Product,
 ) (*entity.Product, error) {
@@ -201,6 +202,14 @@ func (i *ProductInteractor) createProductResources(
 
 	createdProduct, err := i.productRepo.Create(ctx, newProduct)
 	if err != nil {
+		return nil, err
+	}
+
+	compensations.AddCompensation(func() error {
+		return i.productRepo.Delete(context.Background(), newProduct.ID)
+	})
+
+	if err := i.userRegistry.AddProductGrants(ctx, user.Email, newProduct.ID, auth.GetDefaultMaintainerGrants()); err != nil {
 		return nil, err
 	}
 

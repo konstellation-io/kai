@@ -127,6 +127,7 @@ func (s *productSuite) TestCreateProduct() {
 		CreateUser(ctx, productID, expectedProduct.ServiceAccount.Username, expectedProduct.ServiceAccount.Password).
 		Return(nil).Times(1)
 	s.productRepo.EXPECT().Create(ctx, expectedProduct).Return(expectedProduct, nil)
+	s.userRegistry.EXPECT().AddProductGrants(ctx, user.Email, productID, auth.GetDefaultMaintainerGrants()).Return(nil)
 
 	product, err := s.productInteractor.CreateProduct(ctx, user, productName, productDescription)
 
@@ -267,7 +268,7 @@ func (s *productSuite) TestCreateProduct_ErrorCreatingVersionRepoIndexes() {
 
 		wg = sync.WaitGroup{}
 	)
-
+	// manage product users
 	wg.Add(1)
 
 	s.accessControl.EXPECT().CheckRoleGrants(user, auth.ActCreateProduct).Return(nil)

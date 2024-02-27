@@ -161,7 +161,7 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 		PredictionRepository: predictionRepo,
 	})
 
-	userInteractor := usecase.NewUserInteractor(
+	userHandler := usecase.NewUserHandler(
 		logger,
 		accessControl,
 		userActivityInteractor,
@@ -200,7 +200,7 @@ func initGraphqlController(logger logr.Logger, mongodbClient *mongo.Client) *con
 		controller.Params{
 			Logger:                 logger,
 			ProductInteractor:      productInteractor,
-			UserInteractor:         userInteractor,
+			UserInteractor:         userHandler,
 			UserActivityInteractor: userActivityInteractor,
 			VersionInteractor:      versionInteractor,
 			ServerInfoGetter:       serverInfoGetter,
