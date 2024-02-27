@@ -561,7 +561,7 @@ registry:
     # -- Image repository
     repository: registry
     # -- Image tag
-    tag: 2.8.2
+    tag: 2.8.3
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
@@ -614,15 +614,30 @@ registry:
   storageDriver:
     filesystem:
       # -- Whether to enable the filesystem storage driver
-      enabled: false
+      enabled: true
+      config:
+        rootDirectory: /var/lib/registry
     s3:
       # -- Whether to enable the S3 storage driver
-      enabled: true
+      enabled: false
       # -- S3 Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/s3/
       config: {}
       # config:
       #   region: us-east-1
       #   bucket: docker.myregistry.com
+    azure:
+      # -- Whether to enable the Azure storage driver
+      enabled: false
+      # -- Azure Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/azure/
+      config: {}
+    gcs:
+      # -- Whether to enable the GCS storage driver
+      enabled: false
+      # -- GCS Storage driver config block as defined at https://distribution.github.io/distribution/storage-drivers/gcs/
+      config: {}
+    inmemory:
+      # -- Whether to enable the in-memory storage driver. Development only
+      enabled: false
   storage:
     # -- Whether to enable persistence. This only is used when storageDriver is set to "filesystem"
     enabled: true
