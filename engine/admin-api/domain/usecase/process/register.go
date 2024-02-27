@@ -68,6 +68,12 @@ func (ps *Handler) RegisterProcess(
 		return nil, err
 	}
 
+	if opts.Product != "" {
+		if _, err := ps.productRepository.GetByID(ctx, opts.Product); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := ps.checkRegisterGrants(user, opts); err != nil {
 		return nil, err
 	}
