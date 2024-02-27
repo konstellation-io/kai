@@ -19,7 +19,7 @@ func (h *Handler) Create(
 	productID string,
 	krtFile io.Reader,
 ) (*entity.Version, error) {
-	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActCreateVersion); err != nil {
+	if err := h.accessControl.CheckProductGrants(user, productID, auth.ActManageVersion); err != nil {
 		return nil, err
 	}
 

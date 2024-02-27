@@ -30,7 +30,7 @@ type userHandlerSuite struct {
 	mockAccessControl          *mocks.MockAccessControl
 	logger                     logr.Logger
 	mockUserActivityInteractor *mocks.MockUserActivityInteracter
-	userManager                *usecase.UserInteractor
+	userHandler                *usecase.UserHandler
 }
 
 func TestUserHandlerSuite(t *testing.T) {
@@ -43,7 +43,7 @@ func (s *userHandlerSuite) SetupSuite() {
 	s.mockAccessControl = mocks.NewMockAccessControl(mockController)
 	s.logger = testr.NewWithOptions(s.T(), testr.Options{Verbosity: -1})
 	s.mockUserActivityInteractor = mocks.NewMockUserActivityInteracter(mockController)
-	s.userManager = usecase.NewUserInteractor(s.logger, s.mockAccessControl, s.mockUserActivityInteractor, s.mockUserRegistry)
+	s.userHandler = usecase.NewUserHandler(s.logger, s.mockAccessControl, s.mockUserActivityInteractor, s.mockUserRegistry)
 }
 
 func (s *userHandlerSuite) getTestUser() *entity.User {
@@ -54,14 +54,14 @@ func (s *userHandlerSuite) TestAddUserToProduct() {
 	var (
 		ctx        = context.Background()
 		loggedUser = s.getTestUser()
-		grants     = auth.GetProductUserGrants()
+		grants     = auth.GetDefaultUserGrants()
 	)
 
 	s.T().Run("OK", func(t *testing.T) {
 		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(nil)
 		s.mockUserRegistry.EXPECT().AddProductGrants(ctx, _targetUserEmail, _testProduct, grants).Times(1).Return(nil)
 
-		err := s.userManager.AddUserToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.AddUserToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.NoError(err)
 	})
 
@@ -70,7 +70,7 @@ func (s *userHandlerSuite) TestAddUserToProduct() {
 
 		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(expectedError)
 
-		err := s.userManager.AddUserToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.AddUserToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.ErrorIs(err, expectedError)
 	})
 
@@ -80,7 +80,7 @@ func (s *userHandlerSuite) TestAddUserToProduct() {
 		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(nil)
 		s.mockUserRegistry.EXPECT().AddProductGrants(ctx, _targetUserEmail, _testProduct, grants).Times(1).Return(expectedError)
 
-		err := s.userManager.AddUserToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.AddUserToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.ErrorIs(err, expectedError)
 	})
 }
@@ -89,14 +89,14 @@ func (s *userHandlerSuite) TestRemoveUserFromProduct() {
 	var (
 		ctx        = context.Background()
 		loggedUser = s.getTestUser()
-		grants     = auth.GetProductUserGrants()
+		grants     = auth.GetDefaultUserGrants()
 	)
 
 	s.T().Run("OK", func(t *testing.T) {
 		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(nil)
 		s.mockUserRegistry.EXPECT().RevokeProductGrants(ctx, _targetUserEmail, _testProduct, grants).Times(1).Return(nil)
 
-		err := s.userManager.RemoveUserFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.RemoveUserFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.NoError(err)
 	})
 
@@ -105,7 +105,7 @@ func (s *userHandlerSuite) TestRemoveUserFromProduct() {
 
 		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(expectedError)
 
-		err := s.userManager.RemoveUserFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.RemoveUserFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.ErrorIs(err, expectedError)
 	})
 
@@ -115,7 +115,7 @@ func (s *userHandlerSuite) TestRemoveUserFromProduct() {
 		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(nil)
 		s.mockUserRegistry.EXPECT().RevokeProductGrants(ctx, _targetUserEmail, _testProduct, grants).Times(1).Return(expectedError)
 
-		err := s.userManager.RemoveUserFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.RemoveUserFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.ErrorIs(err, expectedError)
 	})
 }
@@ -124,33 +124,34 @@ func (s *userHandlerSuite) TestAddMaintainerToProduct() {
 	var (
 		ctx        = context.Background()
 		loggedUser = s.getTestUser()
-		grants     = auth.GetProductMaintainerGrants()
+		grants     = auth.GetDefaultMaintainerGrants()
 	)
 
 	s.T().Run("OK", func(t *testing.T) {
-		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(nil)
+		s.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActManageProductMaintainers).Return(nil)
 		s.mockUserRegistry.EXPECT().AddProductGrants(ctx, _targetUserEmail, _testProduct, grants).Times(1).Return(nil)
 
-		err := s.userManager.AddMaintainerToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.AddMaintainerToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.NoError(err)
 	})
 
 	s.T().Run("Unauthorized", func(t *testing.T) {
 		expectedError := errors.New("unauthorized")
 
-		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(expectedError)
+		s.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActManageProductMaintainers).Return(expectedError)
 
-		err := s.userManager.AddMaintainerToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.AddMaintainerToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.ErrorIs(err, expectedError)
 	})
 
 	s.T().Run("UserRegistryFails", func(t *testing.T) {
 		expectedError := errors.New("user registry error")
 
-		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(nil)
+		s.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActManageProductMaintainers).Return(nil)
+
 		s.mockUserRegistry.EXPECT().AddProductGrants(ctx, _targetUserEmail, _testProduct, grants).Times(1).Return(expectedError)
 
-		err := s.userManager.AddMaintainerToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.AddMaintainerToProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.ErrorIs(err, expectedError)
 	})
 }
@@ -159,33 +160,33 @@ func (s *userHandlerSuite) TestRemoveMaintainerFromProduct() {
 	var (
 		ctx        = context.Background()
 		loggedUser = s.getTestUser()
-		grants     = auth.GetProductMaintainerGrants()
+		grants     = auth.GetDefaultMaintainerGrants()
 	)
 
 	s.T().Run("OK", func(t *testing.T) {
-		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(nil)
+		s.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActManageProductMaintainers).Return(nil)
 		s.mockUserRegistry.EXPECT().RevokeProductGrants(ctx, _targetUserEmail, _testProduct, grants).Times(1).Return(nil)
 
-		err := s.userManager.RemoveMaintainerFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.RemoveMaintainerFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.NoError(err)
 	})
 
 	s.T().Run("Unauthorized", func(t *testing.T) {
 		expectedError := errors.New("unauthorized")
 
-		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(expectedError)
+		s.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActManageProductMaintainers).Return(expectedError)
 
-		err := s.userManager.RemoveMaintainerFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.RemoveMaintainerFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.ErrorIs(err, expectedError)
 	})
 
 	s.T().Run("UserRegistryFails", func(t *testing.T) {
 		expectedError := errors.New("user registry error")
 
-		s.mockAccessControl.EXPECT().CheckProductGrants(loggedUser, _testProduct, auth.ActManageProductUsers).Return(nil)
+		s.mockAccessControl.EXPECT().CheckRoleGrants(loggedUser, auth.ActManageProductMaintainers).Return(nil)
 		s.mockUserRegistry.EXPECT().RevokeProductGrants(ctx, _targetUserEmail, _testProduct, grants).Times(1).Return(expectedError)
 
-		err := s.userManager.RemoveMaintainerFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
+		err := s.userHandler.RemoveMaintainerFromProduct(ctx, loggedUser, _targetUserEmail, _testProduct)
 		s.ErrorIs(err, expectedError)
 	})
 }

@@ -30,7 +30,7 @@ func initialize() {
 type Resolver struct {
 	logger                 logr.Logger
 	productInteractor      *usecase.ProductInteractor
-	userInteractor         *usecase.UserInteractor
+	userInteractor         *usecase.UserHandler
 	userActivityInteractor usecase.UserActivityInteracter
 	versionInteractor      *version.Handler
 	serverInfoGetter       *usecase.ServerInfoGetter

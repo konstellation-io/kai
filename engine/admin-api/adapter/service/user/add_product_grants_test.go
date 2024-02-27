@@ -61,7 +61,7 @@ func (s *KeycloakSuite) TestAddUserProductGrants_MergeNewGrants_NoDups() {
 		ctx,
 		*user.Email,
 		product,
-		[]auth.Action{auth.ActCreateVersion},
+		[]auth.Action{auth.ActManageVersion},
 	)
 	s.Require().NoError(err)
 
@@ -80,7 +80,6 @@ func (s *KeycloakSuite) TestAddUserProductGrants_MergeNewGrants_NoDups() {
 		product: []interface{}{
 			auth.ActViewProduct.String(),
 			auth.ActManageVersion.String(),
-			auth.ActCreateVersion.String(),
 		},
 	}
 
@@ -106,7 +105,7 @@ func (s *KeycloakSuite) TestAddUserProductGrants_MergeNewGrants_WithDups() {
 		ctx,
 		*user.Email,
 		product,
-		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion, auth.ActCreateVersion},
+		[]auth.Action{auth.ActViewProduct, auth.ActManageVersion, auth.ActManageVersion},
 	)
 	s.Require().NoError(err)
 
@@ -125,7 +124,6 @@ func (s *KeycloakSuite) TestAddUserProductGrants_MergeNewGrants_WithDups() {
 		product: []interface{}{
 			auth.ActViewProduct.String(),
 			auth.ActManageVersion.String(),
-			auth.ActCreateVersion.String(),
 		},
 	}
 

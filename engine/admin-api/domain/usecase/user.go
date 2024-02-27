@@ -10,23 +10,23 @@ import (
 	"golang.org/x/net/context"
 )
 
-type UserInteractor struct {
+type UserHandler struct {
 	logger                 logr.Logger
 	accessControl          auth.AccessControl
 	userActivityInteractor UserActivityInteracter
 	userRegistry           service.UserRegistry
 }
 
-// NewUserInteractor creates a new UserInteractor.
+// NewUserHandler creates a new UserHandler.
 //
-// UserInteractor is the usecase to manage users.
-func NewUserInteractor(
+// UserHandler is the usecase to manage users.
+func NewUserHandler(
 	logger logr.Logger,
 	accessControl auth.AccessControl,
 	userActivityInteractor UserActivityInteracter,
 	userRegistry service.UserRegistry,
-) *UserInteractor {
-	return &UserInteractor{
+) *UserHandler {
+	return &UserHandler{
 		logger,
 		accessControl,
 		userActivityInteractor,
@@ -34,12 +34,12 @@ func NewUserInteractor(
 	}
 }
 
-func (ui *UserInteractor) AddUserToProduct(ctx context.Context, user *entity.User, targetUserEmail, product string) error {
+func (ui *UserHandler) AddUserToProduct(ctx context.Context, user *entity.User, targetUserEmail, product string) error {
 	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUsers); err != nil {
 		return err
 	}
 
-	err := ui.userRegistry.AddProductGrants(ctx, targetUserEmail, product, auth.GetProductUserGrants())
+	err := ui.userRegistry.AddProductGrants(ctx, targetUserEmail, product, auth.GetDefaultUserGrants())
 	if err != nil {
 		return fmt.Errorf("updating grants in user's registry: %w", err)
 	}
@@ -49,12 +49,12 @@ func (ui *UserInteractor) AddUserToProduct(ctx context.Context, user *entity.Use
 	return nil
 }
 
-func (ui *UserInteractor) RemoveUserFromProduct(ctx context.Context, user *entity.User, targetUserEmail, product string) error {
+func (ui *UserHandler) RemoveUserFromProduct(ctx context.Context, user *entity.User, targetUserEmail, product string) error {
 	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUsers); err != nil {
 		return err
 	}
 
-	err := ui.userRegistry.RevokeProductGrants(ctx, targetUserEmail, product, auth.GetProductUserGrants())
+	err := ui.userRegistry.RevokeProductGrants(ctx, targetUserEmail, product, auth.GetDefaultUserGrants())
 	if err != nil {
 		return fmt.Errorf("updating grants in user's registry: %w", err)
 	}
@@ -64,12 +64,12 @@ func (ui *UserInteractor) RemoveUserFromProduct(ctx context.Context, user *entit
 	return nil
 }
 
-func (ui *UserInteractor) AddMaintainerToProduct(ctx context.Context, user *entity.User, targetUserEmail, product string) error {
-	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUsers); err != nil {
+func (ui *UserHandler) AddMaintainerToProduct(ctx context.Context, user *entity.User, targetUserEmail, product string) error {
+	if err := ui.accessControl.CheckRoleGrants(user, auth.ActManageProductMaintainers); err != nil {
 		return err
 	}
 
-	err := ui.userRegistry.AddProductGrants(ctx, targetUserEmail, product, auth.GetProductMaintainerGrants())
+	err := ui.userRegistry.AddProductGrants(ctx, targetUserEmail, product, auth.GetDefaultMaintainerGrants())
 	if err != nil {
 		return fmt.Errorf("adding product grants in user's registry: %w", err)
 	}
@@ -79,17 +79,17 @@ func (ui *UserInteractor) AddMaintainerToProduct(ctx context.Context, user *enti
 	return nil
 }
 
-func (ui *UserInteractor) RemoveMaintainerFromProduct(
+func (ui *UserHandler) RemoveMaintainerFromProduct(
 	ctx context.Context,
 	user *entity.User,
 	targetUserEmail,
 	product string,
 ) error {
-	if err := ui.accessControl.CheckProductGrants(user, product, auth.ActManageProductUsers); err != nil {
+	if err := ui.accessControl.CheckRoleGrants(user, auth.ActManageProductMaintainers); err != nil {
 		return err
 	}
 
-	err := ui.userRegistry.RevokeProductGrants(ctx, targetUserEmail, product, auth.GetProductMaintainerGrants())
+	err := ui.userRegistry.RevokeProductGrants(ctx, targetUserEmail, product, auth.GetDefaultMaintainerGrants())
 	if err != nil {
 		return fmt.Errorf("revoking product grants in user's registry: %w", err)
 	}

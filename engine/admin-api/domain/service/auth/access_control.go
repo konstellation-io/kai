@@ -12,7 +12,6 @@ const (
 	ActViewProduct   Action = "view_product"
 	ActCreateProduct Action = "create_product"
 
-	ActCreateVersion Action = "create_version"
 	ActManageVersion Action = "manage_version"
 
 	ActRegisterProcess         Action = "register_process"
@@ -21,8 +20,9 @@ const (
 	ActRegisterPublicProcess Action = "register_public_process"
 	ActDeletePublicProcess   Action = "delete_public_process"
 
-	ActManageCriticalVersion Action = "manage_critical_version"
-	ActManageProductUsers    Action = "manage_product_user"
+	ActManageCriticalVersion    Action = "manage_critical_version"
+	ActManageProductUsers       Action = "manage_product_user"
+	ActManageProductMaintainers Action = "manage_product_maintainers"
 
 	ActViewServerInfo     Action = "view_server_info"     // To be deprecated
 	ActViewUserActivities Action = "view_user_activities" // To be deprecated
@@ -30,10 +30,10 @@ const (
 
 func (e Action) IsValid() bool {
 	switch e {
-	case ActViewProduct, ActCreateProduct, ActCreateVersion, ActManageVersion,
+	case ActViewProduct, ActCreateProduct, ActManageVersion,
 		ActRegisterProcess, ActDeleteRegisteredProcess, ActRegisterPublicProcess,
-		ActDeletePublicProcess, ActManageCriticalVersion, ActUpdateUserGrants,
-		ActViewUserActivities, ActViewServerInfo, ActManageProductUsers:
+		ActDeletePublicProcess, ActManageCriticalVersion, ActViewUserActivities,
+		ActViewServerInfo, ActManageProductUsers:
 		return true
 	}
 
@@ -51,23 +51,19 @@ type AccessControl interface {
 	GetUserProductsWithViewAccess(user *entity.User) []string
 }
 
-func GetProductMaintainerGrants() []Action {
+func GetDefaultUserGrants() []Action {
 	return []Action{
 		ActViewProduct,
-		ActCreateVersion,
 		ActManageVersion,
 		ActRegisterProcess,
-		ActDeleteRegisteredProcess,
-		ActManageProductUsers,
 	}
 }
 
-func GetProductUserGrants() []Action {
-	return []Action{
-		ActViewProduct,
-		ActCreateVersion,
-		ActManageVersion,
-		ActRegisterProcess,
+func GetDefaultMaintainerGrants() []Action {
+	return append(
+		GetDefaultUserGrants(),
 		ActDeleteRegisteredProcess,
-	}
+		ActManageCriticalVersion,
+		ActManageProductUsers,
+	)
 }

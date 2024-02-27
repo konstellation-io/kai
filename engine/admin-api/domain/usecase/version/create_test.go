@@ -26,7 +26,7 @@ func (s *versionSuite) TestCreateVersion() {
 
 	defer file.Close()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, expectedVersion.Tag).Return(nil, version.ErrVersionNotFound)
 	s.versionRepo.EXPECT().Create(user.Email, product.ID, expectedVersion).Return(expectedVersion, nil)
@@ -54,7 +54,7 @@ func (s *versionSuite) TestCreateVersion_FailsIfUserIsNotAuthorized() {
 
 	expectedError := errors.New("unauthorized")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(expectedError)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(expectedError)
 
 	_, err = s.handler.Create(ctx, user, product.ID, file)
 	s.Require().ErrorIs(err, expectedError)
@@ -76,7 +76,7 @@ func (s *versionSuite) TestCreateVersion_FailsIfProductNotFound() {
 
 	expectedError := errors.New("product not found")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(nil, expectedError)
 
 	_, err = s.handler.Create(ctx, user, product.ID, file)
@@ -100,7 +100,7 @@ func (s *versionSuite) TestCreateVersion_FailsIfThereIsAnErrorCreatingInRepo() {
 
 	expectedError := errors.New("error creating version")
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, newVersion.Tag).Return(nil, version.ErrVersionNotFound)
 	s.versionRepo.EXPECT().Create(user.Email, product.ID, newVersion).Return(nil, expectedError)
@@ -124,7 +124,7 @@ func (s *versionSuite) TestCreateVersion_FailsIfVersionTagIsDuplicated() {
 
 	defer file.Close()
 
-	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActCreateVersion).Return(nil)
+	s.accessControl.EXPECT().CheckProductGrants(user, product.ID, auth.ActManageVersion).Return(nil)
 	s.productRepo.EXPECT().GetByID(ctx, product.ID).Return(product, nil)
 	s.versionRepo.EXPECT().GetByTag(ctx, product.ID, newVersion.Tag).Return(newVersion, nil)
 

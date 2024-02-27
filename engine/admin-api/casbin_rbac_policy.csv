@@ -3,6 +3,8 @@ p, USER, view_product
 p, USER, create_version
 p, USER, manage_version
 
+p, USER, manage_critical_version
+
 p, USER, register_process
 p, USER, delete_registered_process
 
@@ -11,7 +13,6 @@ p, USER, view_user_activities
 p, MLE, view_server_info
 
 p, ADMIN, create_product
-p, ADMIN, update_user_grants
-p, ADMIN, manage_critical_version
 p, ADMIN, register_public_process
 p, ADMIN, delete_public_process
+p, ADMIN, manage_product_maintainers
