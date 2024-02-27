@@ -9,6 +9,10 @@ spec:
   selector:
     matchLabels:
       {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  {{- with .Values.keycloak.deploymentStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       annotations:

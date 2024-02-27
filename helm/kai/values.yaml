@@ -115,11 +115,14 @@ adminApi:
     # -- Image repository
     repository: konstellation/kai-admin-api
     # -- Image tag
-    tag: 0.3.0-develop.5
+    tag: 0.3.0-develop.9
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # Specifies whether a service account should be created
     create: true
@@ -140,13 +143,6 @@ adminApi:
     # -- Ingress annotations
     # @default -- See `adminApi.ingress.annotations` in [values.yaml](./values.yaml)
     annotations: {}
-  storage:
-    # -- Storage class name
-    class: standard
-    # -- Storage class size
-    size: 1Gi
-    # -- Persistent volume mount point. This will define Admin API app workdir too.
-    path: /admin-api-files
   # -- Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
@@ -178,11 +174,14 @@ k8sManager:
     # -- Image repository
     repository: konstellation/kai-k8s-manager
     # -- Image tag
-    tag: 0.3.0-develop.5
+    tag: 0.3.0-develop.9
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # -- Whether to create the Service Account
     create: true
@@ -366,6 +365,9 @@ keycloak:
     tag: "21.1.1"
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # Specifies whether a service account should be created
     create: true
@@ -539,11 +541,14 @@ natsManager:
     # -- Image repository
     repository: konstellation/kai-nats-manager
     # -- Image tag
-    tag: 0.3.0-develop.5
+    tag: 0.3.0-develop.9
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
+  deploymentStrategy:
+    type: Recreate
   serviceAccount:
     # -- Specifies whether a service account should be created
     create: true
@@ -561,8 +566,8 @@ registry:
     pullPolicy: IfNotPresent
   # -- Image pull secrets
   imagePullSecrets: []
+  # -- Deployment Strategy
   deploymentStrategy:
-    # Deployment Strategy
     type: Recreate
   serviceAccount:
     # -- Specifies whether a service account should be created
