@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr/testr"
+	"github.com/konstellation-io/kai/engine/admin-api/domain/repository"
 	"github.com/konstellation-io/kai/engine/admin-api/domain/usecase/version"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -214,7 +215,7 @@ func (s *VersionRepositoryTestSuite) TestUpdateNotFound() {
 	s.True(errors.Is(err, version.ErrVersionNotFound))
 }
 
-func (s *VersionRepositoryTestSuite) TestListVersionsByProduct() {
+func (s *VersionRepositoryTestSuite) TestSearchByProduct_NoFilter() {
 	testVersion := &entity.Version{
 		Tag: versionTag,
 	}
@@ -228,12 +229,40 @@ func (s *VersionRepositoryTestSuite) TestListVersionsByProduct() {
 	_, err = s.versionRepo.Create(creatorID, productID, testVersion2)
 	s.Require().NoError(err)
 
-	versions, err := s.versionRepo.ListVersionsByProduct(context.Background(), productID)
+	versions, err := s.versionRepo.SearchByProduct(context.Background(), productID, nil)
 	s.Require().NoError(err)
 
 	s.Require().Len(versions, 2)
 	s.Equal(testVersion.Tag, versions[0].Tag)
 	s.Equal(testVersion2.Tag, versions[1].Tag)
+}
+
+func (s *VersionRepositoryTestSuite) TestSearchByProduct_WithFilter() {
+	testVersion := &entity.Version{
+		Tag: versionTag,
+	}
+
+	testVersion2 := &entity.Version{
+		Tag: "v2.0.0",
+	}
+
+	filter := &repository.ListVersionsFilter{
+		Status: entity.VersionStatusStarted,
+	}
+
+	_, err := s.versionRepo.Create(creatorID, productID, testVersion)
+	s.Require().NoError(err)
+	_, err = s.versionRepo.Create(creatorID, productID, testVersion2)
+	s.Require().NoError(err)
+
+	err = s.versionRepo.SetStatus(context.Background(), productID, testVersion.Tag, entity.VersionStatusStarted)
+	s.Require().NoError(err)
+
+	versions, err := s.versionRepo.SearchByProduct(context.Background(), productID, filter)
+	s.Require().NoError(err)
+
+	s.Require().Len(versions, 1)
+	s.Equal(testVersion.Tag, versions[0].Tag)
 }
 
 func (s *VersionRepositoryTestSuite) TestSetStatus() {
