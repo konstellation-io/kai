@@ -17,6 +17,7 @@ const (
 var (
 	ErrParsingKRTFile             = errors.New("error parsing KRT file")
 	ErrVersionNotFound            = errors.New("error version not found")
+	ErrProductExistsNoVersions    = errors.New("error product exists but has no versions")
 	ErrVersionDuplicated          = errors.New("error version duplicated")
 	ErrUserNotAuthorized          = errors.New("error user not authorized")
 	ErrVersionCannotBeStarted     = errors.New("error version cannot be started, status must be 'created', 'stopped', 'publishing' or 'error'")

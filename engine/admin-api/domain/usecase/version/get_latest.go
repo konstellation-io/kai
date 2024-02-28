@@ -8,5 +8,15 @@ import (
 
 // GetLatest returns a the latest created version of a product.
 func (h *Handler) GetLatest(ctx context.Context, user *entity.User, productID string) (*entity.Version, error) {
-	return h.versionRepo.GetLatest(ctx, productID)
+	_, err := h.productRepo.GetByID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	ver, err := h.versionRepo.GetLatest(ctx, productID)
+	if err != nil {
+		return nil, ErrProductExistsNoVersions
+	}
+
+	return ver, nil
 }
