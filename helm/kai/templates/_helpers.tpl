@@ -286,7 +286,7 @@ nats host
 nats url
 */}}
 {{- define "nats.url" -}}
-{{- printf "%s:%d" (include "nats.host" .) (.Values.nats.config.cluster.port | int) -}}
+{{- printf "%s:%d" (include "nats.host" .) (.Values.nats.config.nats.port | int) -}}
 {{- end -}}
 
 {{/* Fullname suffixed with nats-manager */}}
