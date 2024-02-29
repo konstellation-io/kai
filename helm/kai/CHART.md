@@ -19,7 +19,7 @@
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | adminApi.image.repository | string | `"konstellation/kai-admin-api"` | Image repository |
-| adminApi.image.tag | string | `"0.3.0-develop.13"` | Image tag |
+| adminApi.image.tag | string | `"0.3.0-develop.14"` | Image tag |
 | adminApi.imagePullSecrets | list | `[]` | Image pull secrets |
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
@@ -94,7 +94,7 @@
 | k8sManager.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
-| k8sManager.image.tag | string | `"0.3.0-develop.13"` | Image tag |
+| k8sManager.image.tag | string | `"0.3.0-develop.14"` | Image tag |
 | k8sManager.imageBuilder.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for image builder's jobs |
 | k8sManager.imageBuilder.image.repository | string | `"gcr.io/kaniko-project/executor"` | Image repository for image builder's jobs |
 | k8sManager.imageBuilder.image.tag | string | `"v1.18.0"` | Image tag for image builder's jobs |
@@ -261,7 +261,7 @@
 | natsManager.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
-| natsManager.image.tag | string | `"0.3.0-develop.13"` | Image tag |
+| natsManager.image.tag | string | `"0.3.0-develop.14"` | Image tag |
 | natsManager.imagePullSecrets | list | `[]` | Image pull secrets |
 | natsManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
 | natsManager.resources | object | `{}` | Container resources |
