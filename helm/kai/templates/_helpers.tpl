@@ -279,7 +279,7 @@ minio-config default buckets region
 nats host
 */}}
 {{- define "nats.host" -}}
-{{ include "nats.fullname" .Subcharts.nats -}}
+{{ default (include "nats.fullname" .Subcharts.nats) .Values.nats.service.name -}}
 {{- end -}}
 
 {{/*

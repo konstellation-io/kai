@@ -440,29 +440,48 @@ keycloak:
   extraVolumes: []
   # -- Extra volume mounts
   extraVolumeMounts: []
+
+## The following values are only a small set of options. For a full list see
+## https://github.com/nats-io/k8s/tree/main/helm/charts/nats#nats-server
+##
 nats:
+  # -- The NATS config as described at https://github.com/nats-io/k8s/tree/main/helm/charts/nats#nats-server
   config:
+    cluster:
+      enabled: false
+      replicas: 3
     jetstream:
       enabled: true
       fileStore:
         enabled: true
-        dir: /data
         pvc:
           enabled: true
           size: 10Gi
+          storageClassName:
       memoryStore:
         enabled: true
-        size: 1Gi
+        maxSize: 2Gi
+    merge:
+      debug: false
+      trace: false
+      logtime: true
+    nats:
+      port: 4222
+  service:
+    # -- nats service name
+    name:
   serviceAccount:
+    # Whether to enable the service account
     enabled: true
   monitor:
-    enabled: true
+    # -- Whether to enable monitoring
+    enabled: false
+    # -- Monitoring service port
     port: 8222
   promExporter:
+    # -- Whether to enable the Prometheus Exporter
     enabled: false
-    image:
-      repository: natsio/prometheus-nats-exporter
-      tag: 0.14.0
+    # -- Prometheus Exporter service port
     port: 7777
 natsManager:
   image:

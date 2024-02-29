@@ -8,13 +8,14 @@
 | https://charts.min.io/ | minio | 5.0.14 |
 | https://grafana.github.io/helm-charts | grafana | 7.0.3 |
 | https://grafana.github.io/helm-charts | loki | 5.36.3 |
+| https://nats-io.github.io/k8s/helm/charts | nats | 1.1.9 |
 | https://prometheus-community.github.io/helm-charts | prometheus | 25.4.0 |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| adminApi.affinity | object | `{}` | Assign custom affinity rules to the Admin API pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
+| adminApi.affinity | object | `{}` | Assign custom affinity rules to the Admin API pods |
 | adminApi.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
 | adminApi.host | string | `"api.kai.local"` | Hostname. This will be used to create the ingress rule and must be a subdomain of `.config.baseDomainName` |
 | adminApi.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
@@ -24,11 +25,11 @@
 | adminApi.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | adminApi.ingress.className | string | `"kong"` | The name of the ingress class to use |
 | adminApi.logLevel | string | `"INFO"` | Default application log level |
-| adminApi.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| adminApi.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | adminApi.serviceAccount.annotations | object | `{}` |  |
 | adminApi.serviceAccount.create | bool | `true` |  |
 | adminApi.serviceAccount.name | string | `""` |  |
-| adminApi.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| adminApi.tolerations | list | `[]` | Tolerations for use with node taints |
 | config.admin.corsEnabled | bool | `true` | Whether to enable CORS on Admin API |
 | config.baseDomainName | string | `"kai.local"` | Base domain name for Admin API and K8S Manager apps |
 | config.loki.datasource | object | `{"jsonData":"{}","uid":""}` | Only when `loki.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config. |
@@ -89,7 +90,7 @@
 | grafana.service.port | int | `80` | Internal port number for Grafana service |
 | grafana.service.type | string | `"ClusterIP"` | Service type |
 | grafana.sidecar | object | `{"datasources":{"enabled":true,"label":"grafana_datasource","labelValue":"1","maxLines":1000}}` | sidecar config (required for datasource config section in loki and prometheus) |
-| k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
+| k8sManager.affinity | object | `{}` | Assign custom affinity rules to the K8S Manager pods |
 | k8sManager.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
 | k8sManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | k8sManager.image.repository | string | `"konstellation/kai-k8s-manager"` | Image repository |
@@ -101,7 +102,7 @@
 | k8sManager.imageBuilder.netrc.content | string | `""` | .netrc file content. Ref: https://everything.curl.dev/usingcurl/netrc |
 | k8sManager.imageBuilder.netrc.enabled | bool | `false` | Whether to create .netrc file for authentication for private dependency repositories |
 | k8sManager.imagePullSecrets | list | `[]` | Image pull secrets |
-| k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| k8sManager.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | k8sManager.processes.sidecars.fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for Fuent Bit sidecar |
 | k8sManager.processes.sidecars.fluentbit.image.repository | string | `"fluent/fluent-bit"` | Image repository for Fuent Bit sidecar |
 | k8sManager.processes.sidecars.fluentbit.image.tag | string | `"2.2.0"` | Image tag for Fuent Bit sidecar |
@@ -113,7 +114,7 @@
 | k8sManager.serviceAccount.annotations | object | `{}` | The Service Account annotations |
 | k8sManager.serviceAccount.create | bool | `true` | Whether to create the Service Account |
 | k8sManager.serviceAccount.name | string | `""` | The name of the service account. @default: A pre-generated name based on the chart relase fullname sufixed by `-k8s-manager` |
-| k8sManager.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| k8sManager.tolerations | list | `[]` | Tolerations for use with node taints |
 | keycloak.adminApi.oidcClient.clientId | string | `"admin-cli"` | The name of the OIDC client in Keycloak for the master realm admin |
 | keycloak.affinity | object | `{}` | Assign custom affinity rules to the Keycloak pods |
 | keycloak.argsOverride | object | `{}` | Args to pass to the Keycloak startup command. This takes precedence over options passed through env variables |
@@ -224,36 +225,13 @@
 | minio.service.port | string | `"9000"` | Internal port number for MinIO S3 API service |
 | minio.service.type | string | `"ClusterIP"` | Service type |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
-| nats.affinity | object | `{}` | Assign custom affinity rules to the NATS pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
-| nats.client.port | int | `4222` | Port for client connections |
-| nats.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
-| nats.image.repository | string | `"nats"` | Image repository |
-| nats.image.tag | string | `"2.8.4"` | Image tag |
-| nats.imagePullSecrets | list | `[]` | Image pull secrets |
-| nats.jetstream.memStorage.enabled | bool | `true` | Whether to enable memory storage for Jetstream |
-| nats.jetstream.memStorage.size | string | `"2Gi"` | Memory storage max size for JetStream |
-| nats.jetstream.storage.enabled | bool | `true` | Whether to enable a PersistentVolumeClaim for Jetstream |
-| nats.jetstream.storage.size | string | `"5Gi"` | Storage size for the Jetstream PersistentVolumeClaim. Notice this is also used for the Jetstream storage limit configuration even if PVC creation is disabled |
-| nats.jetstream.storage.storageClassName | string | `"standard"` | Storage class name for the Jetstream PersistentVolumeClaim |
-| nats.jetstream.storage.storageDirectory | string | `"/data"` | Directory to use for JetStream storage when using a PersistentVolumeClaim |
-| nats.limits.lameDuckDuration | string | `"30s"` | Duration over which to slowly close close client connections after lameDuckGracePeriod has passed |
-| nats.limits.lameDuckGracePeriod | string | `"10s"` | Grace period after pod begins shutdown before starting to close client connections |
-| nats.limits.maxConnections | string | 64K | Maximum number of active client connections. |
-| nats.limits.maxControlLine | string | 4KB | Maximum length of a protocol line (including combined length of subject and queue group). Increasing this value may require cliet changes. Applies to all traffic |
-| nats.limits.maxPayload | string | 1MB | Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be equal or smaller to the `max_pending` value. |
-| nats.limits.maxPending | string | 64MB | Maximum number of bytes buffered for a connection Applies to client connections. Note that applications can also set 'PendingLimits' (number of messages and total size) for their subscriptions. |
-| nats.limits.maxPings | string | 2 | After how many unanswered pings the server will allow before closing the connection. |
-| nats.limits.maxSubscriptions | string | 0 (unlimited) | Maximum numbers of subscriptions per client and leafnode accounts connection. |
-| nats.limits.pingInterval | string | `nil` |  |
-| nats.limits.writeDeadline | string | 10s | Maximum number of seconds the server will block when writing. Once this threshold is exceeded the connection will be closed. |
-| nats.logging.debug | bool | `false` | Whether to enable logging debug mode |
-| nats.logging.logtime | bool | `true` | Timestamp log entries |
-| nats.logging.trace | bool | `false` | Whether to enable logging trace mode |
-| nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
-| nats.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| nats.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
-| nats.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| nats.config | object | `{"cluster":{"enabled":false,"replicas":3},"jetstream":{"enabled":true,"fileStore":{"enabled":true,"pvc":{"enabled":true,"size":"10Gi","storageClassName":null}},"memoryStore":{"enabled":true,"maxSize":"2Gi"}},"merge":{"debug":false,"logtime":true,"trace":false},"nats":{"port":4222}}` | The NATS config as described at https://github.com/nats-io/k8s/tree/main/helm/charts/nats#nats-server |
+| nats.monitor.enabled | bool | `false` | Whether to enable monitoring |
+| nats.monitor.port | int | `8222` | Monitoring service port |
+| nats.promExporter.enabled | bool | `false` | Whether to enable the Prometheus Exporter |
+| nats.promExporter.port | int | `7777` | Prometheus Exporter service port |
+| nats.service.name | string | `nil` | nats service name |
+| nats.serviceAccount.enabled | bool | `true` |  |
 | natsManager.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | natsManager.image.repository | string | `"konstellation/kai-nats-manager"` | Image repository |
@@ -326,7 +304,7 @@
 | redis.tls.autoGenerated | bool | `false` | Enable autogenerated certificates |
 | redis.tls.enabled | bool | `false` | Enabled Enable TLS traffic |
 | redis.tls.existingSecret | string | `""` | The name of the existing secret that contains the TLS certificates |
-| registry.affinity | object | `{}` | Assign custom affinity rules to the pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
+| registry.affinity | object | `{}` | Assign custom affinity rules to the pods |
 | registry.auth.password | string | password | Registry password |
 | registry.auth.user | string | user | Registry username |
 | registry.config | string | `""` | A string contaning the config for Docker Registry. Ref: https://docs.docker.com/registry/configuration/. |
@@ -343,7 +321,7 @@
 | registry.imagePullSecrets | list | `[]` | Image pull secrets |
 | registry.ingress.annotations | object | See `adminApi.ingress.annotations` in [values.yaml](./values.yaml) | Ingress annotations |
 | registry.ingress.className | string | `"kong"` | The name of the ingress class to use |
-| registry.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
+| registry.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
 | registry.podAnnotations | object | `{}` | Pod annotations |
 | registry.podSecurityContext | object | `{}` | Pod security context |
 | registry.resources | object | `{}` | Container resources |
@@ -358,4 +336,4 @@
 | registry.storage.path | string | `"/var/lib/registry"` | Persistent volume mount point. This will define Registry app workdir too. |
 | registry.storage.size | string | `"10Gi"` | Storage size |
 | registry.storage.storageClass | string | `""` | Storage class name |
-| registry.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| registry.tolerations | list | `[]` | Tolerations for use with node taints |
