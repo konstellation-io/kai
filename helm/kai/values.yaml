@@ -444,104 +444,61 @@ keycloak:
   extraVolumes: []
   # -- Extra volume mounts
   extraVolumeMounts: []
+
+## The following values are only a small set of options. For a full list see
+## https://github.com/nats-io/k8s/tree/main/helm/charts/nats#nats-server
+##
 nats:
-  image:
-    # -- Image repository
-    repository: nats
-    # -- Image tag
-    tag: 2.8.4
-    # -- Image pull policy
-    pullPolicy: IfNotPresent
-  # -- Image pull secrets
-  imagePullSecrets: []
+  # -- The NATS config as described at https://github.com/nats-io/k8s/tree/main/helm/charts/nats#nats-server
+  config:
+    cluster:
+      enabled: false
+      replicas: 3
+    jetstream:
+      enabled: true
+      fileStore:
+        enabled: true
+        pvc:
+          enabled: true
+          size: 10Gi
+          storageClassName:
+      memoryStore:
+        enabled: true
+        maxSize: 2Gi
+    merge:
+      debug: false
+      trace: false
+      logtime: true
+    nats:
+      port: 4222
+  service:
+    # -- nats service name
+    name:
   serviceAccount:
-    # -- Specifies whether a service account should be created
-    create: true
-    # -- Annotations to add to the service account
-    annotations: {}
-    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
-    name: ""
-  # -- Container resources
-  resources: {}
-  client:
-    # -- Port for client connections
-    port: 4222
-  jetstream:
-    storage:
-      # -- Whether to enable a PersistentVolumeClaim for Jetstream
-      enabled: true
-      # -- Storage class name for the Jetstream PersistentVolumeClaim
-      storageClassName: standard
-      # -- Storage size for the Jetstream PersistentVolumeClaim. Notice this is also used for the Jetstream storage limit configuration even if PVC creation is disabled
-      size: 5Gi
-      # -- Directory to use for JetStream storage when using a PersistentVolumeClaim
-      storageDirectory: /data
-    memStorage:
-      # -- Whether to enable memory storage for Jetstream
-      enabled: true
-      # -- Memory storage max size for JetStream
-      size: 2Gi
-  logging:
-    # -- Whether to enable logging debug mode
-    debug: false
-    # -- Whether to enable logging trace mode
-    trace: false
-    # -- Timestamp log entries
-    logtime: true
-  limits:
-    # -- Maximum number of active client connections.
-    # @default -- 64K
-    maxConnections:
-    # -- Maximum numbers of subscriptions per client and leafnode accounts connection.
-    # @default -- 0 (unlimited)
-    maxSubscriptions:
-    # -- Maximum length of a protocol line (including combined length of subject and queue group). Increasing this value may require cliet changes. Applies to all traffic
-    # @default -- 4KB
-    maxControlLine:
-    # -- Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be equal or smaller to the `max_pending` value.
-    # @default -- 1MB
-    maxPayload:
-    # -- Maximum number of seconds the server will block when writing. Once this threshold is exceeded the connection will be closed.
-    # @default -- 10s
-    writeDeadline:
-    # -- Maximum number of bytes buffered for a connection Applies to client connections. Note that applications can also set 'PendingLimits' (number of messages and total size) for their subscriptions.
-    # @default -- 64MB
-    maxPending:
-    # -- After how many unanswered pings the server will allow before closing the connection.
-    # @default -- 2
-    maxPings:
-    # How many seconds should pass before sending a PING
-    # to a client that has no activity.
-    pingInterval:
-    # -- Grace period after pod begins shutdown before starting to close client connections
-    lameDuckGracePeriod: "10s"
-    # -- Duration over which to slowly close close client connections after lameDuckGracePeriod has passed
-    lameDuckDuration: "30s"
-  # -- Define which Nodes the Pods are scheduled on.
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-  # -- Assign custom affinity rules to the NATS pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  ##
-  affinity: {}
-  # nodeAffinity:
-  #   requiredDuringSchedulingIgnoredDuringExecution:
-  #     nodeSelectorTerms:
-  #     - matchExpressions:
-  #       - key: kubernetes.io/e2e-az-name
-  #         operator: In
-  #         values:
-  #         - e2e-az1
-  #         - e2e-az2
-  # -- Tolerations for use with node taints
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
+    # Whether to enable the service account
+    enabled: true
+  monitor:
+    # -- Whether to enable monitoring
+    enabled: false
+    # -- Monitoring service port
+    port: 8222
+  promExporter:
+    # -- Whether to enable the Prometheus Exporter
+    enabled: false
+    # -- Prometheus Exporter service port
+    port: 7777
+  # stateful set -> pod template
+  podTemplate:
+    # merge the pod template
+    # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#pod-v1-core
+    merge:
+      spec:
+        # -- Define which Nodes the Pods are scheduled on.
+        nodeSelector: {}
+        # -- Assign custom tolerations to the NATS pods
+        tolerations: []
+        # -- Assign custom affinity rules to the NATS pods
+        affinity: {}
 natsManager:
   image:
     # -- Image repository

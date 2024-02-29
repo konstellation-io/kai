@@ -275,50 +275,18 @@ minio-config default buckets region
 {{- default "us-east-1" .Values.config.minio.defaultRegion -}}
 {{- end }}
 
-{{/* Fullname suffixed with nats */}}
-{{- define "nats.fullname" -}}
-{{- printf "%s-nats" (include "kai.fullname" .) -}}
-{{- end }}
-
-{{/*
-nats labels
-*/}}
-{{- define "nats.labels" -}}
-{{ include "kai.labels" . }}
-{{ include "nats.selectorLabels" . }}
-{{- end }}
-
-{{/*
-nats selector labels
-*/}}
-{{- define "nats.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kai.name" . }}-nats
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-nats serviceaccount name
-*/}}
-{{- define "nats.serviceAccountName" -}}
-{{- if .Values.nats.serviceAccount.create -}}
-    {{ default (include "nats.fullname" .) .Values.nats.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.nats.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
 {{/*
 nats host
 */}}
 {{- define "nats.host" -}}
-{{- include "nats.fullname" . -}}
-{{- end }}
+{{ default (include "nats.fullname" .Subcharts.nats) .Values.nats.service.name -}}
+{{- end -}}
 
 {{/*
 nats url
 */}}
 {{- define "nats.url" -}}
-{{- printf "%s:%d" (include "nats.host" .) (.Values.nats.client.port | int) -}}
+{{- printf "%s:%d" (include "nats.host" .) (.Values.nats.config.nats.port | int) -}}
 {{- end -}}
 
 {{/* Fullname suffixed with nats-manager */}}
