@@ -69,7 +69,7 @@ config:
     # -- Loki host. Change this to your own URL when `loki.enabled: false`
     host: '{{ include "loki.singleBinaryFullname" .Subcharts.loki }}'
     # -- Loki port. Change this to your own URL when `loki.enabled: false`
-    port: '{{ .Values.loki.loki.server.http_listen_port }}'
+    port: "{{ .Values.loki.loki.server.http_listen_port }}"
     # -- Only when `loki.enabled: true` and `grafana.enabled: true`. Grafana datasource json data config.
     datasource:
       jsonData: "{}"
@@ -483,6 +483,18 @@ nats:
     enabled: false
     # -- Prometheus Exporter service port
     port: 7777
+  # stateful set -> pod template
+  podTemplate:
+    # merge the pod template
+    # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#pod-v1-core
+    merge:
+      spec:
+        # -- Define which Nodes the Pods are scheduled on.
+        nodeSelector: {}
+        # -- Assign custom tolerations to the NATS pods
+        tolerations: []
+        # -- Assign custom affinity rules to the NATS pods
+        affinity: {}
 natsManager:
   image:
     # -- Image repository
@@ -790,7 +802,7 @@ loki:
     commonConfig:
       replication_factor: 1
     storage:
-      type: 'filesystem'
+      type: "filesystem"
     persistence:
       # -- Enables persistent storage using PVC
       enabled: false
