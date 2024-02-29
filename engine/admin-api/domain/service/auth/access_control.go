@@ -24,7 +24,6 @@ const (
 	ActManageProductUsers       Action = "manage_product_user"
 	ActManageProductMaintainers Action = "manage_product_maintainers"
 
-	ActViewServerInfo     Action = "view_server_info"     // To be deprecated
 	ActViewUserActivities Action = "view_user_activities" // To be deprecated
 )
 
@@ -33,7 +32,7 @@ func (e Action) IsValid() bool {
 	case ActViewProduct, ActCreateProduct, ActManageVersion,
 		ActRegisterProcess, ActDeleteRegisteredProcess, ActRegisterPublicProcess,
 		ActDeletePublicProcess, ActManageCriticalVersion, ActViewUserActivities,
-		ActViewServerInfo, ActManageProductUsers:
+		ActManageProductUsers:
 		return true
 	}
 
