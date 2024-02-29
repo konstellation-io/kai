@@ -9,7 +9,12 @@ import (
 
 // GetByTag returns a Version by its unique tag.
 func (h *Handler) GetByTag(ctx context.Context, user *entity.User, productID, tag string) (*entity.Version, error) {
-	err := h.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct)
+	_, err := h.productRepo.GetByID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.accessControl.CheckProductGrants(user, productID, auth.ActViewProduct)
 	if err != nil {
 		return nil, err
 	}
