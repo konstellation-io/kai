@@ -32,9 +32,11 @@ func (h *Handler) validateFilter(filter *repository.ListVersionsFilter) error {
 		return nil
 	}
 
-	err := filter.Status.Validate()
-	if err != nil {
-		return err
+	if filter.Status != "" {
+		err := filter.Status.Validate()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
