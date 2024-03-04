@@ -8,6 +8,7 @@
 | https://charts.min.io/ | minio | 5.0.14 |
 | https://grafana.github.io/helm-charts | grafana | 7.0.3 |
 | https://grafana.github.io/helm-charts | loki | 5.36.3 |
+| https://nats-io.github.io/k8s/helm/charts | nats | 1.1.9 |
 | https://prometheus-community.github.io/helm-charts | prometheus | 25.4.0 |
 
 ## Values
@@ -226,37 +227,23 @@
 | minio.service.port | string | `"9000"` | Internal port number for MinIO S3 API service |
 | minio.service.type | string | `"ClusterIP"` | Service type |
 | nameOverride | string | `""` | Provide a name in place of kai for `app.kubernetes.io/name` labels |
-| nats.affinity | object | `{}` | Assign custom affinity rules to the NATS pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
-| nats.client.port | int | `4222` | Port for client connections |
-| nats.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
-| nats.image.repository | string | `"nats"` | Image repository |
-| nats.image.tag | string | `"2.8.4"` | Image tag |
-| nats.imagePullSecrets | list | `[]` | Image pull secrets |
-| nats.jetstream.memStorage.enabled | bool | `true` | Whether to enable memory storage for Jetstream |
-| nats.jetstream.memStorage.size | string | `"2Gi"` | Memory storage max size for JetStream |
-| nats.jetstream.storage.enabled | bool | `true` | Whether to enable a PersistentVolumeClaim for Jetstream |
-| nats.jetstream.storage.size | string | `"5Gi"` | Storage size for the Jetstream PersistentVolumeClaim. Notice this is also used for the Jetstream storage limit configuration even if PVC creation is disabled |
-| nats.jetstream.storage.storageClassName | string | `"standard"` | Storage class name for the Jetstream PersistentVolumeClaim |
-| nats.jetstream.storage.storageDirectory | string | `"/data"` | Directory to use for JetStream storage when using a PersistentVolumeClaim |
-| nats.limits.lameDuckDuration | string | `"30s"` | Duration over which to slowly close close client connections after lameDuckGracePeriod has passed |
-| nats.limits.lameDuckGracePeriod | string | `"10s"` | Grace period after pod begins shutdown before starting to close client connections |
-| nats.limits.maxConnections | string | 64K | Maximum number of active client connections. |
-| nats.limits.maxControlLine | string | 4KB | Maximum length of a protocol line (including combined length of subject and queue group). Increasing this value may require cliet changes. Applies to all traffic |
-| nats.limits.maxPayload | string | 1MB | Maximum number of bytes in a message payload. Reducing this size may force you to implement chunking in your clients. Applies to client and leafnode payloads. It is not recommended to use values over 8MB but `max_payload` can be set up to 64MB. The max payload must be equal or smaller to the `max_pending` value. |
-| nats.limits.maxPending | string | 64MB | Maximum number of bytes buffered for a connection Applies to client connections. Note that applications can also set 'PendingLimits' (number of messages and total size) for their subscriptions. |
-| nats.limits.maxPings | string | 2 | After how many unanswered pings the server will allow before closing the connection. |
-| nats.limits.maxSubscriptions | string | 0 (unlimited) | Maximum numbers of subscriptions per client and leafnode accounts connection. |
-| nats.limits.pingInterval | string | `nil` |  |
-| nats.limits.writeDeadline | string | 10s | Maximum number of seconds the server will block when writing. Once this threshold is exceeded the connection will be closed. |
-| nats.logging.debug | bool | `false` | Whether to enable logging debug mode |
-| nats.logging.logtime | bool | `true` | Timestamp log entries |
-| nats.logging.trace | bool | `false` | Whether to enable logging trace mode |
-| nats.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. # ref: https://kubernetes.io/docs/user-guide/node-selection/ # |
-| nats.resources | object | `{}` | Container resources |
-| nats.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| nats.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
-| nats.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| nats.tolerations | list | `[]` | Tolerations for use with node taints # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ # |
+| nats.config | object | `{"cluster":{"enabled":false,"replicas":3},"jetstream":{"enabled":true,"fileStore":{"enabled":true,"pvc":{"enabled":true,"size":"10Gi","storageClassName":null}},"memoryStore":{"enabled":true,"maxSize":"2Gi"}},"merge":{"debug":false,"logtime":true,"trace":false},"nats":{"port":4222}}` | The NATS config as described at https://github.com/nats-io/k8s/tree/main/helm/charts/nats#nats-server |
+| nats.config.cluster | object | `{"enabled":false,"replicas":3}` | The NATS server configuration |
+| nats.config.jetstream | object | `{"enabled":true,"fileStore":{"enabled":true,"pvc":{"enabled":true,"size":"10Gi","storageClassName":null}},"memoryStore":{"enabled":true,"maxSize":"2Gi"}}` | The NATS JetStream configuration |
+| nats.config.jetstream.fileStore | object | `{"enabled":true,"pvc":{"enabled":true,"size":"10Gi","storageClassName":null}}` | The NATS JetStream storage configuration |
+| nats.config.jetstream.memoryStore | object | `{"enabled":true,"maxSize":"2Gi"}` | The NATS JetStream memory storage configuration |
+| nats.config.merge | object | `{"debug":false,"logtime":true,"trace":false}` | Merge the NATS server configuration |
+| nats.monitor.enabled | bool | `false` | Whether to enable monitoring |
+| nats.monitor.port | int | `8222` | Monitoring service port |
+| nats.natsBox.enabled | bool | `false` | Whether to enable the NATS Box |
+| nats.podTemplate.merge | object | `{"spec":{"affinity":{},"nodeSelector":{},"tolerations":[]}}` | Merge the pod template: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#pod-v1-core |
+| nats.podTemplate.merge.spec.affinity | object | `{}` | Assign custom affinity rules to the NATS pods |
+| nats.podTemplate.merge.spec.nodeSelector | object | `{}` | Define which Nodes the Pods are scheduled on. |
+| nats.podTemplate.merge.spec.tolerations | list | `[]` | Assign custom tolerations to the NATS pods |
+| nats.promExporter.enabled | bool | `false` | Whether to enable the Prometheus Exporter |
+| nats.promExporter.port | int | `7777` | Prometheus Exporter service port |
+| nats.service.name | string | `nil` | nats service name |
+| nats.serviceAccount.enabled | bool | `true` | Whether to enable the service account |
 | natsManager.affinity | object | `{}` | Assign custom affinity rules to the NATS pods # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ # |
 | natsManager.deploymentStrategy | object | `{"type":"Recreate"}` | Deployment Strategy |
 | natsManager.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
