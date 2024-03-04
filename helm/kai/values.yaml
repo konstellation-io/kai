@@ -451,20 +451,25 @@ keycloak:
 nats:
   # -- The NATS config as described at https://github.com/nats-io/k8s/tree/main/helm/charts/nats#nats-server
   config:
+    # -- The NATS server configuration
     cluster:
       enabled: false
       replicas: 3
+    # -- The NATS JetStream configuration
     jetstream:
       enabled: true
+      # -- The NATS JetStream storage configuration
       fileStore:
         enabled: true
         pvc:
           enabled: true
           size: 10Gi
           storageClassName:
+      # -- The NATS JetStream memory storage configuration
       memoryStore:
         enabled: true
         maxSize: 2Gi
+    # -- Merge the NATS server configuration
     merge:
       debug: false
       trace: false
@@ -475,22 +480,23 @@ nats:
     # -- nats service name
     name:
   serviceAccount:
-    # Whether to enable the service account
+    # -- Whether to enable the service account
     enabled: true
   monitor:
     # -- Whether to enable monitoring
     enabled: false
     # -- Monitoring service port
     port: 8222
+  natsBox:
+    # -- Whether to enable the NATS Box
+    enabled: false
   promExporter:
     # -- Whether to enable the Prometheus Exporter
     enabled: false
     # -- Prometheus Exporter service port
     port: 7777
-  # stateful set -> pod template
   podTemplate:
-    # merge the pod template
-    # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#pod-v1-core
+    # -- Merge the pod template: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#pod-v1-core
     merge:
       spec:
         # -- Define which Nodes the Pods are scheduled on.
