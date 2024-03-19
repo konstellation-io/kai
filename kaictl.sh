@@ -12,10 +12,15 @@ if [ "$DEBUG" = "1" ]; then
 fi
 
 # Dynamic values
-if [ "$(uname)" = "Linux" ]; then
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   MINIKUBE_DRIVER=docker
-elif [ "$(uname)" = "Darwin" ]; then
-  MINIKUBE_DRIVER=hyperkit
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  MACHINE_TYPE=$(uname -m)
+  if [[ "$MACHINE_TYPE" == "x86_64" ]]; then
+    MINIKUBE_DRIVER=hyperkit
+  else
+    MINIKUBE_DRIVER=docker
+  fi
 else
   echo "The operating system could not be determined. Using default minikube behavior"
 fi

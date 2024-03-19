@@ -183,10 +183,18 @@ pre-commit install --hook-type commit-msg
 ### Requirements
 
 * [Minikube](https://minikube.sigs.k8s.io/docs/start/) >= 1.26
-* [Docker](https://docs.docker.com/get-docker/) (for Linux) >= 18.9, default driver for Minikube.
-* [Hyperkit](https://minikube.sigs.k8s.io/docs/drivers/hyperkit/) (for MacOS) default driver for Minikube.
 
-  **NOTE**: *You can use a different driver updating `.kaictl.conf`; Check [this](https://minikube.sigs.k8s.io/docs/drivers/) for a complete list of drivers for Minikube*
+*  Drivers:
+
+    * For Linux: [Docker](https://docs.docker.com/get-docker/) >= 18.9 (Default driver for Minikube).
+
+    * For Macs with ARM64*: [Docker Desktop](https://docs.docker.com/desktop/release-notes/#4261) <= 4.26.1
+
+    * For Macs with AMD64: [Hyperkit](https://minikube.sigs.k8s.io/docs/drivers/hyperkit/)
+
+    **NOTE**: *You can use a different driver updating `.kaictl.conf`; Check [this](https://minikube.sigs.k8s.io/docs/drivers/) for a complete list of drivers for Minikube*
+
+    > \* An identified [issue](https://github.com/kubernetes/minikube/issues/18250) is preventing `kaictl.sh` from running correctly on MAcs with ARM64 processors. While a fix has been merged into the codebase, it hasn't been released in a Minikube version yet. As a workaround, you can install Docker Desktop version 4.26.1 or earlier.
 
 ### Basic usage
 
